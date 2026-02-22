@@ -6441,53 +6441,53 @@ window.resetToMenu = () => {
 };
 
 
-
+// 3. Funcția Resume (Fixată pentru erori de date)
 window.resumeGame = async () => {
-    const snap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
-    const save = snap.data().jigsawSave;
-    
-    if(save) {
-        // 1. Încărcăm piesele
-        jigState = { ...save };
-        jigState.isPlaying = true;
-
-        // 2. Încărcăm Timer-ul (cu fallbacks pentru salvări vechi)
-        timerState.timeLeft = save.timeLeft || 0;
-        timerState.totalTime = save.totalTime || 120;
+    try {
+        const snap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+        const save = snap.data().jigsawSave;
         
-        // REPARAȚIE: Dacă milestones nu există în save, le luăm din setările default ale dificultății
-        if (!save.milestones) {
-            const config = MODE_CONFIG[jigState.rows] || MODE_CONFIG[5];
-            timerState.milestones = JSON.parse(JSON.stringify(config.rewards || []));
-        } else {
-            timerState.milestones = save.milestones;
+        if(save) {
+            // Încărcăm piesele
+            jigState = { ...save };
+            jigState.isPlaying = true;
+
+            // Încărcăm datele de timp (cu fallbacks dacă save-ul e vechi)
+            timerState.timeLeft = save.timeLeft || 120;
+            timerState.totalTime = save.totalTime || 240;
+            
+            // Reparăm milestones dacă lipsesc din save
+            if (!save.milestones) {
+                const config = MODE_CONFIG[jigState.rows] || MODE_CONFIG[5];
+                timerState.milestones = JSON.parse(JSON.stringify(config.rewards || []));
+            } else {
+                timerState.milestones = save.milestones;
+            }
+
+            setupBoardUI(true);
+            initCyberTimer(jigState.rows, true); // Pornim timer-ul în mod Resume
+            
+            console.log("Resume reușit.");
         }
-
-        // 3. Resetăm UI-ul
-        setupBoardUI(true);
-
-        // 4. Desenăm bară și recompensele
-        renderLootMarkers(); 
-        
-        // Pornim intervalul și actualizăm vizual imediat
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(updateTimerLoop, 1000);
-        updateTimerVisuals();
-        
-        console.log("Resume complet cu autovindecare milestones.");
+    } catch (e) {
+        console.error("Eroare la Resume:", e);
+        resetToMenu();
     }
 }
-// --- JIGSAW ENGINE v2.0 -
-
 
  
+// 1. Funcția de desenare a markerelor (Loot)
 function renderLootMarkers() {
     const lootZone = document.getElementById('lootZone');
     if (!lootZone) return;
     
     lootZone.innerHTML = '';
     
-    if (!timerState.milestones || !Array.isArray(timerState.milestones)) return;
+    // Verificăm dacă obiectul și array-ul există pentru a preveni eroarea "undefined"
+    if (!timerState || !timerState.milestones || !Array.isArray(timerState.milestones)) {
+        console.warn("Milestones nu au putut fi încărcate pentru randare.");
+        return;
+    }
 
     timerState.milestones.forEach((m, index) => {
         const marker = document.createElement('div');
@@ -6495,10 +6495,11 @@ function renderLootMarkers() {
         if (m.lost) marker.classList.add('lost');
         marker.id = `ms-${index}`;
         
+        // Calculăm poziția pe bară
         const pct = (m.at / timerState.totalTime) * 100;
         marker.style.left = `${pct}%`;
 
-        // Asset Selection Logic
+        // Selectăm imaginea corectă (Inclusiv Mystery Box)
         let imgUrl = "";
         if(m.type === 'ksda') imgUrl = 'https://iili.io/fhc1SKQ.png';
         else if(m.type === 'diamond') imgUrl = 'https://iili.io/fv5bmtj.png';
@@ -6508,6 +6509,7 @@ function renderLootMarkers() {
         lootZone.appendChild(marker);
     });
 }
+
 
 
 
@@ -6678,13 +6680,17 @@ async function doWin() {
 
     document.getElementById('questRewardModal').classList.add('active');
 
-    // Change the button behavior on the Reward Modal
-    const collectBtn = document.querySelector('#questRewardModal .super-btn');
-    collectBtn.onclick = () => {
-        if(wonBoxes > 0) openMysteryOverlay();
-        else resetToMenu();
-    };
-
+// În interiorul funcției doWin:
+const collectBtn = document.querySelector('#questRewardModal .super-btn');
+collectBtn.onclick = () => {
+    if(wonBoxes > 0) {
+        document.getElementById('questRewardModal').classList.remove('active');
+        document.getElementById('mysteryOverlay').style.display = 'flex';
+        document.getElementById('mysteryStatus').innerText = `AI CÂȘTIGAT ${wonBoxes} CUTII!`;
+    } else {
+        resetToMenu();
+    }
+};
     // Firebase Write (Save coins/diamonds only, items come from Roulette)
     if (auth.currentUser) {
         try {
