@@ -3769,6 +3769,78 @@
     .puzzle-menu { padding: 30px 20px; }
     .btn-hyper { height: 60px; font-size: 13px; }
 }
+
+
+/* --- 1. FLYING COIN ANIMATION --- */
+.fly-coin-visual {
+    position: fixed;
+    width: 50px;
+    height: 50px;
+    background-image: url('https://iili.io/fhc1SKQ.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 999999;
+    pointer-events: none;
+    filter: drop-shadow(0 0 15px #ffd700);
+    transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.coin-popup-text {
+    position: fixed;
+    color: #ffd700;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 20px;
+    z-index: 999999;
+    text-shadow: 2px 2px 0px #000;
+    pointer-events: none;
+    animation: floatUpFade 0.8s forwards;
+}
+
+@keyframes floatUpFade {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-80px) scale(1.5); opacity: 0; }
+}
+
+/* --- 2. MENU BUTTON ENTRANCE ANIMATIONS --- */
+/* This makes them slide in nicely */
+.puzzle-menu .btn-hyper {
+    opacity: 0;
+    animation: btnSlideIn 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Stagger the delay so they load 1-by-1 */
+.puzzle-menu .btn-hyper:nth-child(1) { animation-delay: 0.1s; }
+.puzzle-menu .btn-hyper:nth-child(2) { animation-delay: 0.2s; }
+.puzzle-menu .btn-hyper:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes btnSlideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+
+
+/* Add this to your CSS */
+
+/* Initial state: Hidden and shifted left */
+.puzzle-menu .btn-hyper {
+    opacity: 0;
+    transform: translateX(-30px);
+    animation: cyberSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Stagger the animations so they load one by one */
+.puzzle-menu .btn-hyper:nth-child(1) { animation-delay: 0.1s; }
+.puzzle-menu .btn-hyper:nth-child(2) { animation-delay: 0.2s; }
+.puzzle-menu .btn-hyper:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes cyberSlideIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
   </style>
 </head>
 <body>
@@ -4410,6 +4482,49 @@ window.copyRefLinkV2 = () => {
     }).catch(err => {
         console.error('Copy failed', err);
     });
+};
+
+
+// Add this helper function inside your main module script
+window.spawnCoinReward = (x, y) => {
+    // 1. VISUALS
+    const coin = document.createElement('div');
+    coin.className = 'fly-coin-visual';
+    coin.style.left = x + 'px';
+    coin.style.top = y + 'px';
+    
+    const text = document.createElement('div');
+    text.className = 'coin-popup-text';
+    text.innerText = "+25";
+    text.style.left = (x + 20) + 'px';
+    text.style.top = (y - 40) + 'px';
+
+    document.body.appendChild(coin);
+    document.body.appendChild(text);
+
+    // Target the user profile button
+    const target = document.getElementById('headerLoginBtn') || document.body;
+    const rect = target.getBoundingClientRect();
+
+    // Animate
+    setTimeout(() => {
+        coin.style.left = (rect.left + 20) + 'px';
+        coin.style.top = (rect.top + 20) + 'px';
+        coin.style.opacity = '0';
+        coin.style.transform = 'scale(0.5)';
+    }, 50);
+
+    // Cleanup
+    setTimeout(() => { coin.remove(); text.remove(); }, 800);
+
+    // 2. FIREBASE UPDATE (The Important Part)
+    if (auth.currentUser) {
+        const userRef = doc(db, "accounts", auth.currentUser.uid);
+        // We use the 'increment' that is already imported at the top of your script
+        updateDoc(userRef, {
+            coins: increment(25)
+        }).catch(err => console.error("Coin Error:", err));
+    }
 };
 
 
@@ -5807,7 +5922,7 @@ function enablePointerDrag(el, id) {
 
                 // --- NEW: TRIGGER COIN REWARD (25 Coins) ---
                 // We pass the mouse coordinates so the coin spawns exactly where you clicked
-                spawnCoinReward(upEvent.clientX, upEvent.clientY);
+                if(window.spawnCoinReward) window.spawnCoinReward(upEvent.clientX, upEvent.clientY);
 
                 // 5. Update Game State
                 pState.isLocked = true;
@@ -5870,49 +5985,7 @@ window.saveAndExit = async () => {
 import { deleteField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
-// --- NEW: COIN ANIMATION & REWARD LOGIC ---
-function spawnCoinReward(x, y) {
-    // 1. Create the visual elements
-    const coin = document.createElement('div');
-    coin.className = 'fly-coin-visual';
-    coin.style.left = x + 'px';
-    coin.style.top = y + 'px';
-    
-    const text = document.createElement('div');
-    text.className = 'coin-popup-text';
-    text.innerText = "+25";
-    text.style.left = (x + 20) + 'px';
-    text.style.top = (y - 20) + 'px';
 
-    document.body.appendChild(coin);
-    document.body.appendChild(text);
-
-    // 2. Find the target (The Account Button in Header or Menu)
-    const targetBtn = document.getElementById('headerLoginBtn') || document.getElementById('menuBtn');
-    const rect = targetBtn.getBoundingClientRect();
-
-    // 3. Trigger Animation (Wait 50ms for DOM to render)
-    setTimeout(() => {
-        coin.style.left = (rect.left + rect.width / 2) + 'px';
-        coin.style.top = (rect.top + rect.height / 2) + 'px';
-        coin.style.transform = 'scale(0.5) rotate(720deg)'; // Spin and shrink
-        coin.style.opacity = '0';
-    }, 50);
-
-    // 4. Cleanup DOM
-    setTimeout(() => {
-        coin.remove();
-        text.remove();
-    }, 1100);
-
-    // 5. Update Firebase (Real Money!)
-    if (auth.currentUser) {
-        // We use the imported 'increment' from your firebase imports
-        updateDoc(doc(db, "accounts", auth.currentUser.uid), {
-            coins: increment(25)
-        }).catch(err => console.error("Coin error:", err));
-    }
-}
 
   </script>
 </body>
