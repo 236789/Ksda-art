@@ -3617,6 +3617,135 @@
         margin: 0;
     }
 }
+
+
+/* --- CYBER MENU REDESIGN v2 --- */
+
+/* 1. THE CONTAINER (Glass Card) */
+.puzzle-menu {
+    width: 100%;
+    max-width: 450px;
+    background: rgba(5, 11, 20, 0.85); /* Deep dark blue */
+    backdrop-filter: blur(12px);       /* Glass effect */
+    border: 1px solid rgba(41, 243, 255, 0.3);
+    border-radius: 20px;
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: relative;
+    box-shadow: 
+        0 0 40px rgba(0, 0, 0, 0.8),
+        inset 0 0 60px rgba(41, 243, 255, 0.05);
+    overflow: hidden;
+    animation: menuFadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Decor: Top Scanner Line */
+.puzzle-menu::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    animation: scanLine 3s infinite linear;
+}
+
+@keyframes scanLine { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+@keyframes menuFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* 2. THE BUTTONS (Cyber Plates) */
+.puzzle-menu-btn {
+    position: relative;
+    width: 100%;
+    padding: 22px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    
+    /* ANGLED CORNERS (Sci-Fi Look) */
+    clip-path: polygon(
+        15px 0, 100% 0, 
+        100% calc(100% - 15px), calc(100% - 15px) 100%, 
+        0 100%, 0 15px
+    );
+    
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    overflow: hidden;
+    text-decoration: none; /* Just in case */
+}
+
+/* Button Icons */
+.puzzle-menu-btn i {
+    font-size: 18px;
+    transition: 0.3s;
+}
+
+/* HOVER EFFECT: Slide & Glow */
+.puzzle-menu-btn::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 0%; height: 100%;
+    background: var(--primary); /* Cyan fill */
+    z-index: -1;
+    transition: 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+    opacity: 0.1;
+}
+
+.puzzle-menu-btn:hover {
+    border-color: var(--primary);
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.2);
+    transform: translateX(5px); /* Slight movement */
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+.puzzle-menu-btn:hover::after { width: 100%; }
+.puzzle-menu-btn:hover i { transform: scale(1.2); }
+
+/* --- BUTTON VARIANTS --- */
+
+/* 1. RESUME (Pink/Magical) */
+.btn-cyber-pink {
+    border-color: rgba(214, 51, 132, 0.5) !important;
+    background: linear-gradient(90deg, rgba(214, 51, 132, 0.1), transparent) !important;
+}
+.btn-cyber-pink:hover {
+    border-color: #ff00ff !important;
+    box-shadow: 0 0 25px rgba(255, 0, 255, 0.4) !important;
+    color: #ffccff !important;
+}
+.btn-cyber-pink::after { background: #ff00ff !important; }
+
+/* 2. RANDOM (Cyan/Primary) */
+.btn-cyber-cyan {
+    border-color: rgba(41, 243, 255, 0.5) !important;
+}
+
+/* 3. UPLOAD (Green/Data) */
+.btn-cyber-green {
+    border-color: rgba(0, 255, 136, 0.5) !important;
+}
+.btn-cyber-green:hover {
+    border-color: #00ff88 !important;
+    box-shadow: 0 0 25px rgba(0, 255, 136, 0.4) !important;
+    color: #ccffdd !important;
+}
+.btn-cyber-green::after { background: #00ff88 !important; }
+
+/* MOBILE FIX */
+@media (max-width: 768px) {
+    .puzzle-menu { width: 95%; padding: 30px 20px; }
+    .puzzle-menu-btn { font-size: 12px; padding: 18px; }
+}
   </style>
 </head>
 <body>
@@ -4053,18 +4182,29 @@
     <div id="puzzleMenuContainer" style="display: none; width: 100%; flex-direction: column; align-items: center;">
         
         <!-- MAIN MENU -->
+<!-- MAIN MENU -->
         <div id="puzzleMainMenu" class="puzzle-menu">
+            
+            <!-- Resume Button (Pink) -->
             <div id="resumeBtnContainer" style="display:none; width: 100%;">
-                <button class="puzzle-menu-btn" style="border-color:#d63384; color:#ff85c2;" onclick="resumeGame()">
-                    <i class="fas fa-play"></i> CONTINUĂ JOCUL
+                <button class="puzzle-menu-btn btn-cyber-pink" onclick="resumeGame()">
+                    <i class="fas fa-play"></i>
+                    <span>CONTINUĂ JOCUL</span>
                 </button>
             </div>
-            <button class="puzzle-menu-btn" onclick="showDifficulty('random')">
-                <i class="fas fa-random"></i> IMAGINE RANDOM
+
+            <!-- Random Button (Cyan) -->
+            <button class="puzzle-menu-btn btn-cyber-cyan" onclick="showDifficulty('random')">
+                <i class="fas fa-random"></i>
+                <span>IMAGINE RANDOM</span>
             </button>
-            <button class="puzzle-menu-btn" onclick="document.getElementById('customImgInput').click()">
-                <i class="fas fa-upload"></i> UPLOAD IMAGE
+
+            <!-- Upload Button (Green) -->
+            <button class="puzzle-menu-btn btn-cyber-green" onclick="document.getElementById('customImgInput').click()">
+                <i class="fas fa-microchip"></i> <!-- Changed Icon to Chip -->
+                <span>UPLOAD IMAGE</span>
             </button>
+            
             <input type="file" id="customImgInput" accept="image/*" onchange="handleCustomImage(this)">
         </div>
 
