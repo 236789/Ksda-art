@@ -6203,43 +6203,57 @@ import { deleteField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-
 
 function initCyberTimer(gridSize) {
     const config = MODE_CONFIG[gridSize] || MODE_CONFIG[5]; // Default to 5
+    
+    // Reset timer state variables
     timerState.totalTime = config.time;
     timerState.timeLeft = config.time;
     
-    // Deep copy rewards so we don't modify the config
-    timerState.milestones = JSON.parse(JSON.stringify(config.rewards));
+    // FIX: Check if rewards exist to prevent the JSON crash
+    if (config.rewards) {
+        timerState.milestones = JSON.parse(JSON.stringify(config.rewards));
+    } else {
+        timerState.milestones = [];
+    }
 
-    // Render Milestones on the bar
+    // Render Milestones (Only if container exists)
     const container = document.getElementById('cyberTimerContainer');
-    const layer = document.getElementById('milestonesLayer') || document.createElement('div');
-    layer.id = 'milestonesLayer';
-    layer.innerHTML = '';
     
-    // Create DOM elements for milestones
-    timerState.milestones.forEach((m, index) => {
-        const el = document.createElement('div');
-        el.className = 'timer-milestone';
-        el.id = `ms-${index}`;
-        
-        // Calculate Position % (Left 0 = Start Time, Right 100 = 0 Time?? 
-        // Request: Bar goes max to 0. Usually Left is 0% progress. 
-        // Let's say Left is Time 0, Right is Max Time. Bar shrinks from Right to Left.
-        // So a milestone at 1:30 (90s) of 3:00 (180s) is at 50%.
-        const pct = (m.at / timerState.totalTime) * 100;
-        el.style.left = `${pct}%`;
-        
-        if(m.type === 'coin') {
-            el.innerHTML = `<img src="https://iili.io/fhc1SKQ.png" width="25"> <span style="font-size:10px; color:#fff; font-weight:bold;">${m.val}</span>`;
-        } else {
-            el.innerHTML = `<img src="https://iili.io/fv5bmtj.png" width="20">`;
+    if (container) {
+        // Create or clear the layer
+        let layer = document.getElementById('milestonesLayer');
+        if (!layer) {
+            layer = document.createElement('div');
+            layer.id = 'milestonesLayer';
+            container.appendChild(layer);
         }
+        layer.innerHTML = '';
         
-        container.appendChild(el);
-    });
+        // Create DOM elements for milestones
+        timerState.milestones.forEach((m, index) => {
+            const el = document.createElement('div');
+            el.className = 'timer-milestone';
+            el.id = `ms-${index}`;
+            
+            // Calculate Position %
+            const pct = (m.at / timerState.totalTime) * 100;
+            el.style.left = `${pct}%`;
+            
+            if(m.type === 'coin') {
+                el.innerHTML = `<img src="https://iili.io/fhc1SKQ.png" width="25"> <span style="font-size:10px; color:#fff; font-weight:bold;">${m.val}</span>`;
+            } else {
+                el.innerHTML = `<img src="https://iili.io/fv5bmtj.png" width="20">`;
+            }
+            
+            layer.appendChild(el);
+        });
+    }
 
     // Start Loop
-    clearInterval(timerInterval);
+    if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(updateTimerLoop, 1000);
+    
+    // Force immediate visual update
+    if (typeof updateTimerVisuals === 'function') updateTimerVisuals();
 }
 
 function updateTimerLoop() {
