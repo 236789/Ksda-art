@@ -3180,6 +3180,44 @@
     z-index: 5;
     position: relative;
 }
+
+
+/* Updated Tray Styles */
+.zone-pieces { 
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important; /* 3 Pieces per row */
+    gap: 10px; 
+    padding: 15px;
+    overflow-y: auto !important; 
+    align-content: flex-start;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* PC Specific */
+@media (min-width: 900px) {
+    .jigsaw-arena { 
+        grid-template-columns: 250px 1fr 320px; /* Wider tray area */
+    }
+}
+
+/* Mobile Specific */
+@media (max-width: 899px) {
+    .zone-pieces {
+        height: 200px !important; /* Taller tray for mobile to see rows */
+        grid-template-columns: repeat(3, 1fr) !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+}
+
+.jig-piece.in-tray {
+    width: 100% !important; /* Fill the grid cell */
+    height: auto;
+    aspect-ratio: 1/1;
+    position: relative !important;
+    transform: scale(1);
+    margin: 0;
+}
   </style>
 </head>
 <body>
@@ -4889,7 +4927,7 @@ window.resetToMenu = () => {
     document.getElementById('jigsawArena').style.display = 'none';
 };
 
-// 3. Initialize Game State
+// 1. Modified Start Game to ensure randomization
 window.startGame = (gridSize) => {
     jigState.rows = gridSize;
     jigState.cols = gridSize;
@@ -4906,10 +4944,16 @@ window.startGame = (gridSize) => {
             currentY: 0
         });
     }
-    // Randomize
-    jigState.pieces.sort(() => Math.random() - 0.5);
+    
+    // Shuffle the array
+    for (let i = jigState.pieces.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [jigState.pieces[i], jigState.pieces[j]] = [jigState.pieces[j], jigState.pieces[i]];
+    }
+    
     setupBoardUI();
 };
+
 
 window.resumeGame = async () => {
     const snap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
@@ -4920,19 +4964,15 @@ window.resumeGame = async () => {
     }
 }
 
-/* --- FIXED INIT LOGIC (REPLACE setupBoardUI) --- */
+// 2. Modified setupBoardUI to STOP re-sorting pieces
 function setupBoardUI(isLoad = false) {
     document.getElementById('puzzleMenuContainer').style.display = 'none';
     const arena = document.getElementById('jigsawArena');
-    
-    // FORCE VISIBLE to allow calculations
     arena.style.display = (window.innerWidth >= 900) ? 'grid' : 'flex';
     
-    // Set Preview
     const previewImg = document.getElementById('gamePreviewImg');
     if (jigState.imgUrl) previewImg.src = jigState.imgUrl;
 
-    // Small delay to let browser render CSS
     setTimeout(() => {
         const boardContainer = document.getElementById('boardContainer');
         const tray = document.getElementById('pieceTray');
@@ -4941,48 +4981,32 @@ function setupBoardUI(isLoad = false) {
         tray.innerHTML = '';
         gridBox.innerHTML = '';
 
-        // Get Dimensions
         let w = boardContainer.clientWidth || 300;
         let h = boardContainer.clientHeight || 300;
-        
-        // Calculate Piece Size (Square pieces)
-        // We ensure piece size fits within the smaller dimension of the board
         const baseSize = Math.floor(Math.min((w - 20) / jigState.cols, (h - 20) / jigState.rows));
         
         jigState.pieceSize = baseSize;
         jigState.totalW = baseSize * jigState.cols;
         jigState.totalH = baseSize * jigState.rows;
 
-        // Apply to Grid
         gridBox.style.width = `${jigState.totalW}px`;
         gridBox.style.height = `${jigState.totalH}px`;
         gridBox.style.gridTemplateColumns = `repeat(${jigState.cols}, 1fr)`;
         gridBox.style.gridTemplateRows = `repeat(${jigState.rows}, 1fr)`;
-        
-        gridBox.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url(${jigState.imgUrl})`;
-        gridBox.style.backgroundSize = `${jigState.totalW}px ${jigState.totalH}px`;
 
-        // Render Pieces
-        const sortedPieces = [...jigState.pieces].sort((a,b) => a.id - b.id);
-
-        sortedPieces.forEach((pData) => {
+        // REMOVED THE SORT HERE - Now respects randomized order
+        jigState.pieces.forEach((runtimePiece) => {
             const piece = document.createElement('div');
             piece.className = 'jig-piece';
-            
-            // Set Size & Image
             piece.style.width = `${baseSize}px`;
             piece.style.height = `${baseSize}px`;
             piece.style.backgroundImage = `url(${jigState.imgUrl})`;
             piece.style.backgroundSize = `${jigState.totalW}px ${jigState.totalH}px`;
             
-            // Calculate Sprite Position (The part of image this piece shows)
-            const row = Math.floor(pData.id / jigState.cols);
-            const col = pData.id % jigState.cols;
+            const row = Math.floor(runtimePiece.id / jigState.cols);
+            const col = runtimePiece.id % jigState.cols;
             piece.style.backgroundPosition = `-${col * baseSize}px -${row * baseSize}px`;
 
-            const runtimePiece = jigState.pieces.find(p => p.id === pData.id);
-
-            // Positioning
             if (runtimePiece.isLocked) {
                 piece.classList.add('locked');
                 piece.style.left = `${col * baseSize}px`;
@@ -4997,13 +5021,65 @@ function setupBoardUI(isLoad = false) {
                 gridBox.appendChild(piece);
             }
 
-            if (!runtimePiece.isLocked) enablePointerDrag(piece, pData.id);
+            if (!runtimePiece.isLocked) enablePointerDrag(piece, runtimePiece.id);
         });
 
         updateCount();
-        if(!isLoad) saveProgress();
-        
     }, 100);
+}
+
+
+
+// 3. Update Random Button to include community images from Firebase
+window.showDifficulty = async (type) => {
+    if(type === 'random') {
+        let pool = [...RANDOM_CYBER_IMGS];
+        
+        try {
+            // Fetch community uploaded images from Firebase
+            const poolDoc = await getDoc(doc(db, "site_metadata", "puzzle_pool"));
+            if(poolDoc.exists()) {
+                const communityImages = poolDoc.data().images || [];
+                pool = [...pool, ...communityImages];
+            }
+        } catch(e) { console.log("Pool fetch failed", e); }
+
+        jigState.imgUrl = pool[Math.floor(Math.random() * pool.length)];
+        jigState.isCustom = false;
+    }
+    toDifficultyMenu();
+};
+
+// 4. Update Win logic to save custom images to the global pool
+async function doWin() {
+    jigState.isPlaying = false;
+    let coins = (jigState.rows === 3) ? 200 : (jigState.rows === 4) ? 400 : 700;
+
+    // If it was a custom image, save it to the global pool for others to see
+    if (jigState.isCustom && jigState.imgUrl.startsWith('data:image')) {
+        try {
+            await updateDoc(doc(db, "site_metadata", "puzzle_pool"), {
+                images: arrayUnion(jigState.imgUrl)
+            });
+        } catch(e) {
+            // If document doesn't exist, create it
+            await setDoc(doc(db, "site_metadata", "puzzle_pool"), {
+                images: [jigState.imgUrl]
+            }, {merge: true});
+        }
+    }
+
+    await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
+        coins: increment(coins),
+        jigsawSave: deleteField()
+    });
+
+    // Show reward modal...
+    const qModal = document.getElementById('questRewardModal');
+    qModal.querySelector('.reward-coins-box span').innerText = coins;
+    qModal.classList.add('active');
+
+    resetToMenu();
 }
 
 /* --- PASTE THIS IN YOUR SCRIPT SECTION, REPLACING THE OLD enablePointerDrag --- */
@@ -5165,26 +5241,6 @@ window.saveAndExit = async () => {
 
 import { deleteField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-async function doWin() {
-    jigState.isPlaying = false;
-    let coins = (jigState.rows === 3) ? 200 : (jigState.rows === 4) ? 400 : 700;
-    let diamonds = (jigState.rows === 5) ? 1 : 0;
-
-    await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
-        coins: increment(coins),
-        diamonds: increment(diamonds),
-        jigsawSave: deleteField()
-    });
-
-    const qModal = document.getElementById('questRewardModal');
-    qModal.querySelector('h2').innerText = "PUZZLE COMPLET!";
-    qModal.querySelector('p').innerText = "Ai asamblat imaginea cu succes.";
-    qModal.querySelector('.reward-coins-box span').innerText = coins;
-    qModal.classList.add('active');
-
-    resetToMenu();
-    document.getElementById('resumeBtnContainer').style.display = 'none';
-}
   </script>
 </body>
 </html>
