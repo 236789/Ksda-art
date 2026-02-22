@@ -5112,8 +5112,10 @@
 import { 
     getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, 
     increment, arrayUnion, serverTimestamp, deleteField,
-    collection, addDoc // <--- MAKE SURE THESE TWO ARE HERE
+    collection, query, orderBy, limit, getDocs, addDoc // <--- ADAUGĂ-LE PE ACESTEA
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+
     const firebaseConfig = {
       apiKey: "AIzaSyDoH80kffNrzFAcyRqsTVdifs-whUhwH9A",
       authDomain: "ksda-7546f.firebaseapp.com",
@@ -6882,11 +6884,13 @@ async function doWin() {
 window.openGallery = async () => {
     const container = document.getElementById('galleryContainer');
     const title = document.querySelector('#galleryModal .cosmo-title');
+    
     title.innerText = "HALL OF FAME";
-    container.innerHTML = '<div style="color:var(--primary); font-family:Orbitron; width:100%; text-align:center; padding:20px;">ACCESSING DATABASE...</div>';
+    container.innerHTML = '<div style="color:var(--primary); font-family:Orbitron; width:100%; text-align:center; padding:20px;">ACCESSING ARCHIVES...</div>';
     document.getElementById('galleryModal').classList.add('active');
 
     try {
+        // Acum 'query', 'collection' și 'orderBy' vor funcționa pentru că sunt importate sus
         const q = query(collection(db, "puzzle_hall_of_fame"), orderBy("timestamp", "desc"));
         const snap = await getDocs(q);
         
@@ -6896,7 +6900,7 @@ window.openGallery = async () => {
             if(!userGroups[data.userId]) {
                 userGroups[data.userId] = {
                     username: data.username,
-                    pfp: data.userPfp || "https://iili.io/fXvBEiB.png", // Fallback dacă nu are poză
+                    pfp: data.userPfp,
                     lastImg: data.imgUrl,
                     puzzles: []
                 };
@@ -6910,31 +6914,27 @@ window.openGallery = async () => {
             const user = userGroups[uid];
             const card = document.createElement('div');
             card.className = 'gallery-card';
-            card.style.height = '180px'; // Puțin mai înalt pentru a încăpea tot
+            card.style.height = '180px';
             
             card.innerHTML = `
-                <!-- Fundal: Ultimul puzzle rezolvat cu blur -->
                 <img src="${user.lastImg}" class="gallery-img" style="filter: blur(2px) brightness(0.4); height: 100%; object-fit: cover;">
-                
                 <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:15px;">
-                    <!-- POZA DE PROFIL (PFP) -->
                     <div style="position: relative; width: 65px; height: 65px;">
-                        <img src="${user.pfp}" style="width:100%; height:100%; border-radius:50%; border:3px solid var(--primary); object-fit:cover; box-shadow: 0 0 15px var(--primary);">
-                        <div style="position: absolute; bottom: -5px; right: -5px; background: #00ff88; color: #000; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 5px; font-family: 'Orbitron';">LVL ${user.puzzles.length}</div>
+                        <img src="${user.pfp}" style="width:100%; height:100%; border-radius:50%; border:3px solid var(--primary); object-fit:cover;">
+                        <div style="position: absolute; bottom: -5px; right: -5px; background: #00ff88; color: #000; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 5px;">LVL ${user.puzzles.length}</div>
                     </div>
-
                     <div style="text-align: center;">
-                        <span class="gallery-user" style="font-size:14px; color:#fff; text-shadow:0 2px 5px #000; display: block;">${user.username}</span>
-                        <span style="font-family:Orbitron; font-size:9px; color:var(--primary); letter-spacing: 1px;">${user.puzzles.length} ARCHIVES</span>
+                        <span class="gallery-user" style="font-size:14px; color:#fff;">${user.username}</span>
                     </div>
-                    
-                    <button class="btn-equip-v6 do-equip" style="font-size: 8px; padding: 5px 15px;">VIEW COLLECTION</button>
                 </div>
             `;
             card.onclick = () => showUserPuzzles(user);
             container.appendChild(card);
         });
-    } catch(e) { console.error(e); }
+    } catch(e) { 
+        console.error("Eroare Galerie:", e); 
+        container.innerHTML = `<div style="color:red;">Eroare la încărcare: ${e.message}</div>`;
+    }
 };
 
 
