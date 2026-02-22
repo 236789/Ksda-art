@@ -4314,11 +4314,72 @@
 
 .gallery-user { font-size: 11px; font-weight: 800; color: var(--primary); display: block; }
 .gallery-time { font-size: 10px; opacity: 0.6; font-family: 'Orbitron'; }
+
+
+
+/* --- MYSTERY BOX & ROULETTE STYLES --- */
+#mysteryOverlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 20000; backdrop-filter: blur(15px);
+}
+
+.box-shaker {
+    width: 250px; cursor: pointer; transition: 0.3s;
+    animation: boxIdleShake 2s infinite ease-in-out;
+}
+@keyframes boxIdleShake {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(-5deg) scale(1.05); }
+    75% { transform: rotate(5deg) scale(1.05); }
+}
+.box-opening { animation: boxBurst 0.5s forwards; }
+@keyframes boxBurst { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.4); filter: brightness(3); } 100% { transform: scale(0); opacity: 0; } }
+
+/* The Straight Line Roulette */
+.roulette-wrapper {
+    width: 100%; max-width: 500px; height: 120px;
+    background: #02050a; border: 2px solid var(--primary);
+    border-radius: 15px; position: relative; overflow: hidden;
+    display: none; margin-top: 30px; box-shadow: 0 0 30px rgba(41,243,255,0.2);
+}
+.roulette-needle {
+    position: absolute; left: 50%; top: 0; bottom: 0; width: 4px;
+    background: #fff; z-index: 100; transform: translateX(-50%);
+    box-shadow: 0 0 15px #fff;
+}
+.roulette-strip {
+    display: flex; position: absolute; left: 0; top: 0; height: 100%;
+    transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1);
+    will-change: transform;
+}
+.roulette-item {
+    min-width: 120px; height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 5px;
+    border-right: 1px solid rgba(255,255,255,0.1); font-family: 'Orbitron';
+}
+.r-badge { background: linear-gradient(180deg, #1a1a1a, #d6338422); }
+.r-frame { background: linear-gradient(180deg, #1a1a1a, #bf55ec22); }
+.r-coin { background: linear-gradient(180deg, #1a1a1a, #ffd70022); }
   </style>
 </head>
 <body>
 
+<div id="mysteryOverlay">
+    <h2 id="mysteryStatus" style="font-family:'Orbitron'; color:#fff; margin-bottom:40px; letter-spacing:3px;">BOX DETECTED... CLICK TO OPEN</h2>
+    <img id="mysteryBoxImg" src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%201.png?alt=media&token=29742b82-3e51-408c-948e-c3bae712e2ca" class="box-shaker" onclick="startOpeningSequence()">
+    
+    <div id="rouletteUI" class="roulette-wrapper">
+        <div class="roulette-needle"></div>
+        <div id="rouletteStrip" class="roulette-strip"></div>
+    </div>
 
+    <div id="prizeReveal" style="display:none; margin-top:30px; text-align:center; animation: jumpIn 0.5s forwards;">
+        <h3 style="font-family:'Orbitron'; color:var(--primary);">NEW ITEM UNLOCKED!</h3>
+        <div id="prizeDisplay" style="margin:15px 0;"></div>
+        <button class="super-btn" onclick="closeMysterySystem()">COLLECT</button>
+    </div>
+</div>
 <!-- GALLERY MODAL -->
 <div id="galleryModal" class="account-modal-overlay">
     <div class="cosmetics-card-v6" style="border-color: #bf55ec;">
@@ -6097,35 +6158,149 @@ let timerState = {
     milestones: [] 
 };
 
-// --- CONFIGURARE DIFICULTATE ȘI RECOMPENSE ---
 const MODE_CONFIG = {
-    5: { // EASY (4 minute) - 3 Milestones
+    5: { // EASY - 3 Milestones
         time: 240,
         rewards: [
             { at: 180, type: 'ksda', val: 50 },
-            { at: 120, type: 'diamond', val: 1 },
-            { at: 60, type: 'ksda', val: 100 }
+            { at: 120, type: 'mystery', val: 1 }, // Mystery box in the middle
+            { at: 60, type: 'diamond', val: 2 }
         ]
     },
-    7: { // MEDIUM (8 minute) - 4 Milestones
+    7: { // MEDIUM - 4 Milestones
         time: 480,
         rewards: [
-            { at: 360, type: 'ksda', val: 100 },
-            { at: 240, type: 'diamond', val: 2 },
-            { at: 120, type: 'ksda', val: 200 },
-            { at: 60, type: 'diamond', val: 3 }
+            { at: 384, type: 'ksda', val: 100 },
+            { at: 288, type: 'diamond', val: 2 },
+            { at: 192, type: 'mystery', val: 1 },
+            { at: 96, type: 'ksda', val: 200 }
         ]
     },
-    9: { // HARD (10 minute) - 6 Milestones
+    9: { // HARD - 6 Milestones
         time: 600,
         rewards: [
-            { at: 500, type: 'ksda', val: 150 },
-            { at: 400, type: 'diamond', val: 3 },
-            { at: 300, type: 'ksda', val: 300 },
-            { at: 200, type: 'diamond', val: 5 },
-            { at: 100, type: 'ksda', val: 500 },
-            { at: 50, type: 'diamond', val: 10 }
+            { at: 515, type: 'ksda', val: 150 },
+            { at: 430, type: 'diamond', val: 3 },
+            { at: 345, type: 'mystery', val: 1 },
+            { at: 260, type: 'ksda', val: 300 },
+            { at: 175, type: 'diamond', val: 5 },
+            { at: 90, type: 'mystery', val: 1 } // Hard has two boxes!
         ]
+    }
+};
+
+
+
+let wonBoxes = 0;
+let rouletteActive = false;
+
+// 1. Update doWin to count boxes
+// (Inside your doWin function, add this to the milestone loop)
+// if (!m.lost && m.type === 'mystery') wonBoxes++;
+
+// 2. Modify your win modal 'Super' button to check for boxes
+// Example: document.getElementById('collectWinBtn').onclick = () => { if(wonBoxes > 0) openMysteryOverlay(); else resetToMenu(); }
+
+function openMysteryOverlay() {
+    document.getElementById('questRewardModal').classList.remove('active');
+    document.getElementById('mysteryOverlay').style.display = 'flex';
+    document.getElementById('mysteryStatus').innerText = `YOU WON ${wonBoxes} BOXES!`;
+}
+
+window.startOpeningSequence = async () => {
+    const boxImg = document.getElementById('mysteryBoxImg');
+    const status = document.getElementById('mysteryStatus');
+    
+    // Disable click during animation
+    boxImg.onclick = null;
+    status.innerText = "OPENING...";
+
+    const sequence = [
+        "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%201.png?alt=media&token=29742b82-3e51-408c-948e-c3bae712e2ca",
+        "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%203.png?alt=media&token=42bc41b6-700d-45bd-a004-3562b6dbe97a",
+        "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%204.png?alt=media&token=ce7c62fc-4671-4db8-88f2-d91d148c03a7",
+        "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%205.png?alt=media&token=11e08784-9115-4bf4-bb94-51aa42d4a297"
+    ];
+
+    for(let i=0; i<sequence.length; i++) {
+        boxImg.src = sequence[i];
+        await new Promise(r => setTimeout(r, 400));
+    }
+
+    boxImg.classList.add('box-opening');
+    setTimeout(initRoulette, 600);
+};
+
+function initRoulette() {
+    document.getElementById('mysteryBoxImg').style.display = 'none';
+    document.getElementById('rouletteUI').style.display = 'block';
+    
+    const strip = document.getElementById('rouletteStrip');
+    strip.innerHTML = '';
+    
+    // Create 40 items for the slide
+    const pool = [];
+    for(let i=0; i<40; i++) {
+        const rnd = Math.random();
+        let item;
+        if(rnd < 0.4) item = { name: '500 Coins', type: 'ksda', icon: 'https://iili.io/fhc1SKQ.png', class: 'r-coin' };
+        else if(rnd < 0.6) item = { name: '5 Diamonds', type: 'diamond', icon: 'https://iili.io/fv5bmtj.png', class: 'r-coin' };
+        else if(rnd < 0.8) {
+            const b = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
+            item = { name: b.text, type: 'badge', id: b.id, class: 'r-badge' };
+        } else {
+            const f = FRAMES_DB[Math.floor(Math.random() * FRAMES_DB.length)];
+            item = { name: f.name, type: 'frame', id: f.id, icon: f.img, class: 'r-frame' };
+        }
+        pool.push(item);
+        
+        const el = document.createElement('div');
+        el.className = `roulette-item ${item.class}`;
+        el.innerHTML = item.icon ? `<img src="${item.icon}" width="30">` : `<span style="font-size:8px;">${item.name}</span>`;
+        strip.appendChild(el);
+    }
+
+    // The Winner is usually the 35th item
+    const winnerIndex = 35;
+    const winner = pool[winnerIndex];
+    
+    // Animate
+    setTimeout(() => {
+        const offset = (winnerIndex * 120) - 190; // Center needle math
+        strip.style.transform = `translateX(-${offset}px)`;
+    }, 100);
+
+    setTimeout(() => revealPrize(winner), 5500);
+}
+
+async function revealPrize(item) {
+    document.getElementById('prizeReveal').style.display = 'block';
+    const display = document.getElementById('prizeDisplay');
+    display.innerHTML = `<h2 style="color:#ffd700;">${item.name}</h2>`;
+    
+    // Firebase Write
+    if(auth.currentUser) {
+        const userRef = doc(db, "accounts", auth.currentUser.uid);
+        if(item.type === 'ksda') await updateDoc(userRef, { coins: increment(500) });
+        if(item.type === 'diamond') await updateDoc(userRef, { diamonds: increment(5) });
+        if(item.type === 'badge') await updateDoc(userRef, { ownedBadges: arrayUnion(item.id) });
+        if(item.type === 'frame') await updateDoc(userRef, { ownedFrames: arrayUnion(item.id) });
+    }
+}
+
+window.closeMysterySystem = () => {
+    wonBoxes--;
+    if(wonBoxes > 0) {
+        // Reset for next box
+        document.getElementById('prizeReveal').style.display = 'none';
+        document.getElementById('rouletteUI').style.display = 'none';
+        document.getElementById('mysteryBoxImg').style.display = 'block';
+        document.getElementById('mysteryBoxImg').classList.remove('box-opening');
+        document.getElementById('mysteryBoxImg').onclick = startOpeningSequence;
+        document.getElementById('mysteryStatus').innerText = `YOU HAVE ${wonBoxes} BOXES LEFT!`;
+    } else {
+        document.getElementById('mysteryOverlay').style.display = 'none';
+        resetToMenu();
     }
 };
 
