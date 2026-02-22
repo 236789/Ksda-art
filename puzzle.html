@@ -4461,6 +4461,91 @@
     text-shadow: 0 0 10px #000;
     font-weight: 900;
 }
+
+
+/* --- MOBILE-FIRST REPAIR --- */
+.jigsaw-arena {
+    display: none; 
+    width: 100%;
+    height: auto; /* Allow height to grow with content */
+    min-height: 600px;
+    background: #050b14;
+    border: 2px solid var(--primary);
+    border-radius: 20px;
+    position: relative;
+    overflow: visible; /* CRITICAL: Allow scrolling */
+    user-select: none;
+    touch-action: pan-y; /* ALLOW vertical page scrolling */
+}
+
+/* PC GRID LAYOUT */
+@media (min-width: 900px) {
+    .jigsaw-arena.active-grid {
+        display: grid !important;
+        grid-template-columns: 220px 1fr 280px !important;
+        height: 650px;
+    }
+}
+
+/* MOBILE FLEX LAYOUT */
+@media (max-width: 899px) {
+    .jigsaw-arena.active-grid { 
+        display: flex !important;
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+        border: none; /* Look cleaner on small screens */
+    }
+    
+    .zone-board {
+        width: 100%;
+        order: 2; /* Board in middle */
+        min-height: 350px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .zone-pieces {
+        order: 3; /* Tray at bottom */
+        height: 250px !important; /* Fixed height for the tray */
+        overflow-y: auto !important; /* Scroll pieces inside tray */
+        background: rgba(0, 0, 0, 0.4);
+        padding: 15px;
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important; /* 4 pieces per row on mobile */
+        touch-action: auto !important; /* Allow internal tray scrolling */
+    }
+}
+
+/* PIECE STYLING FIX */
+.jig-piece {
+    position: absolute; 
+    z-index: 10;
+    background-repeat: no-repeat;
+    box-sizing: border-box;
+    border: 0.5px solid rgba(255,255,255,0.2);
+    /* Remove global touch-action from here */
+}
+
+/* While Dragging: Lock the page so it doesn't wobble */
+.jig-piece.is-dragging {
+    z-index: 99999 !important;
+    touch-action: none !important; 
+    transform: scale(1.1);
+    box-shadow: 0 0 25px var(--primary);
+    border: 2px solid #fff;
+}
+
+.jig-piece.in-tray {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1/1;
+    transform: scale(0.9);
+    top: auto !important;
+    left: auto !important;
+}
   </style>
 </head>
 <body>
@@ -6772,14 +6857,10 @@ window.startGame = (gridSize) => {
     setupBoardUI();
 };
 
-// 3. Setup Board (Strict Visibility Control)
 function setupBoardUI(isLoad = false) {
-    // 1. Strictly hide the menu
     document.getElementById('puzzleMenuContainer').style.display = 'none';
-    
-    // 2. Strictly show the arena
     const arena = document.getElementById('jigsawArena');
-    arena.style.display = "grid"; // Fallback
+    arena.style.display = "flex"; 
     arena.classList.add('active-grid'); 
 
     const tray = document.getElementById('pieceTray');
@@ -6789,25 +6870,33 @@ function setupBoardUI(isLoad = false) {
     tray.innerHTML = '';
     gridBox.innerHTML = '';
 
+    // Let the browser paint so we get accurate widths
     setTimeout(() => {
         const boardContainer = document.getElementById('boardContainer');
-        let w = boardContainer.clientWidth || 300;
-        let h = boardContainer.clientHeight || 300;
         
-        const baseSize = Math.floor(Math.min((w - 20) / jigState.cols, (h - 20) / jigState.rows));
+        // SMART SCALING: Check screen width
+        const screenWidth = window.innerWidth;
+        let availableW = boardContainer.clientWidth || 300;
+        
+        // On mobile, force the board to be max 90% of screen width
+        if(screenWidth < 800) {
+            availableW = Math.min(availableW, screenWidth * 0.9);
+        }
+
+        const baseSize = Math.floor(availableW / jigState.cols);
         jigState.pieceSize = baseSize;
         jigState.totalW = baseSize * jigState.cols;
         jigState.totalH = baseSize * jigState.rows;
 
-        // Board Image with Dark Overlay
+        // Apply sizes
         gridBox.style.width = `${jigState.totalW}px`;
         gridBox.style.height = `${jigState.totalH}px`;
         gridBox.style.gridTemplateColumns = `repeat(${jigState.cols}, 1fr)`;
         gridBox.style.gridTemplateRows = `repeat(${jigState.rows}, 1fr)`;
-        gridBox.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url(${jigState.imgUrl})`;
+        gridBox.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${jigState.imgUrl})`;
         gridBox.style.backgroundSize = "cover";
 
-        // Render Pieces in Shuffled Order
+        // Draw Pieces
         jigState.pieces.forEach((pData) => {
             const piece = document.createElement('div');
             piece.className = 'jig-piece';
@@ -6839,7 +6928,7 @@ function setupBoardUI(isLoad = false) {
 
         updateCount();
         if(!isLoad) saveProgress();
-    }, 150);
+    }, 100);
 }
 
 // 4. Reset/Exit Logic
