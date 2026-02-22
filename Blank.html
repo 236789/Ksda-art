@@ -4146,6 +4146,123 @@
     letter-spacing: 3px;
     text-shadow: 0 0 10px rgba(41, 243, 255, 0.8);
 }
+
+
+
+/* --- NEW CYBER HUD V2 --- */
+.timer-hud-v2 {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: 650px;
+    margin: 40px auto 10px auto; /* Lowered it down */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 100;
+}
+
+/* The Outer Glass Tube */
+.glass-track {
+    width: 100%;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 2px solid rgba(41, 243, 255, 0.3); /* Cyber Outline */
+    border-radius: 50px;
+    position: relative;
+    padding: 4px; /* Space for the liquid */
+    box-shadow: 
+        0 0 20px rgba(0, 0, 0, 0.5),
+        inset 0 0 15px rgba(41, 243, 255, 0.1);
+    overflow: visible;
+}
+
+/* The Liquid Energy */
+.liquid-fill {
+    height: 100%;
+    width: 100%; /* Default */
+    border-radius: 50px;
+    position: relative;
+    transition: width 1s linear, background 0.5s ease; /* Smooth color change */
+    
+    /* Dynamic Background - Default Blue */
+    background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+    box-shadow: 0 0 15px currentColor;
+}
+
+/* Shimmer overlay for liquid look */
+.liquid-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(
+        90deg, 
+        transparent 0%, 
+        rgba(255,255,255,0.3) 50%, 
+        transparent 100%
+    );
+    border-radius: 50px;
+    animation: flowShimmer 2s infinite;
+}
+
+@keyframes flowShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Loot Markers inside the track */
+.loot-zone {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.loot-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Vertical Outlined Bars for Loot */
+.loot-marker::before {
+    content: '';
+    width: 2px;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.2);
+    border-left: 1px solid rgba(0,0,0,0.5);
+}
+
+.loot-marker img {
+    width: 26px;
+    height: 26px;
+    position: absolute;
+    top: -35px; /* Floats icon above the bar */
+    filter: drop-shadow(0 0 8px rgba(0,0,0,0.8));
+}
+
+.loot-marker.lost {
+    opacity: 0.1;
+    filter: grayscale(1) blur(1px);
+    transform: translate(-50%, -50%) scale(0.8);
+}
+
+/* Timer Text */
+.cyber-clock {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: #fff;
+    margin-top: 15px;
+    letter-spacing: 4px;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
   </style>
 </head>
 <body>
@@ -4668,13 +4785,13 @@
             </button>
         </div>
 
-        <!-- NEW TIMER HUD -->
-        <div class="timer-hud-container">
-            <div class="cyber-bar-track">
-                <div id="cyberTimerFill" class="cyber-bar-fill"></div>
-            </div>
-            <div id="cyberTimerText" class="cyber-timer-digits">00:00</div>
-        </div>
+<div class="timer-hud-v2">
+    <div class="glass-track">
+        <div id="liquidFill" class="liquid-fill"></div>
+        <div id="lootZone" class="loot-zone"></div>
+    </div>
+    <div id="cyberClock" class="cyber-clock">00:00</div>
+</div>
         
         <!-- LEFT: Preview & Controls -->
         <div class="zone-left">
@@ -6447,31 +6564,23 @@ function initCyberTimer(gridSize) {
     timerState.timeLeft = config.time;
     timerState.milestones = JSON.parse(JSON.stringify(config.rewards || []));
 
-    // Ensure the Milestones Container exists
-    const track = document.querySelector('.cyber-bar-track');
-    let msContainer = document.getElementById('milestonesLayer');
-    if (!msContainer) {
-        msContainer = document.createElement('div');
-        msContainer.id = 'milestonesLayer';
-        msContainer.className = 'milestones-container';
-        track.appendChild(msContainer);
-    }
-    msContainer.innerHTML = '';
+    // Render Loot Markers
+    const lootZone = document.getElementById('lootZone');
+    lootZone.innerHTML = '';
 
-    // Render Milestone Icons
     timerState.milestones.forEach((m, index) => {
-        const el = document.createElement('div');
-        el.className = 'timer-milestone';
-        el.id = `ms-${index}`;
+        const marker = document.createElement('div');
+        marker.className = 'loot-marker';
+        marker.id = `ms-${index}`;
         
-        // Position relative to time (e.g. 90s left in a 120s game = 75% across)
+        // Calculate position based on time remaining
         const pct = (m.at / timerState.totalTime) * 100;
-        el.style.left = `${pct}%`;
+        marker.style.left = `${pct}%`;
 
         const imgUrl = (m.type === 'ksda') ? 'https://iili.io/fhc1SKQ.png' : 'https://iili.io/fv5bmtj.png';
-        el.innerHTML = `<img src="${imgUrl}">`;
+        marker.innerHTML = `<img src="${imgUrl}">`;
         
-        msContainer.appendChild(el);
+        lootZone.appendChild(marker);
     });
 
     if (timerInterval) clearInterval(timerInterval);
@@ -6479,58 +6588,38 @@ function initCyberTimer(gridSize) {
     updateTimerVisuals();
 }
 
+
+
 function updateTimerLoop() {
-    // 1. Safety Check: If game is paused, won, or stopped, kill interval
-    if (!jigState.isPlaying) {
-        clearInterval(timerInterval);
-        return;
-    }
+    if (!jigState.isPlaying) return;
 
-    // 2. Decrement Time
     timerState.timeLeft--;
-
-    // 3. Update Visuals (Width, Shimmer, and Timer Text)
     updateTimerVisuals();
 
-    // 4. Handle Milestone Logic
+    // 3. LOOT DEPLETION LOGIC
     timerState.milestones.forEach((m, index) => {
-        // If the remaining time drops below the milestone threshold
         if (!m.lost && timerState.timeLeft < m.at) {
             m.lost = true;
-            
             const el = document.getElementById(`ms-${index}`);
-            if (el) {
-                // Add the grey/blurred CSS class
-                el.classList.add('milestone-lost');
-                
-                // IMPACT EFFECT: Flash the bar border red briefly to warn the player
-                const track = document.querySelector('.cyber-bar-track');
-                track.style.borderColor = "#ff4757";
-                track.style.boxShadow = "0 0 20px rgba(255, 71, 87, 0.4)";
-                
-                setTimeout(() => {
-                    track.style.borderColor = "rgba(41, 243, 255, 0.2)";
-                    track.style.boxShadow = "inset 0 0 20px rgba(0,0,0,0.4)";
-                }, 400);
-            }
+            if (el) el.classList.add('lost');
+            
+            // Visual feedback: Flash the track outline red briefly
+            const track = document.querySelector('.glass-track');
+            track.style.borderColor = "#ff4757";
+            setTimeout(() => track.style.borderColor = "rgba(41, 243, 255, 0.3)", 300);
         }
     });
 
-    // 5. Time's Up Logic
-    if (timerState.timeLeft <= 0) {
+    if (timerState.timeLeft <= 0) { 
         timerState.timeLeft = 0;
         jigState.isPlaying = false;
         clearInterval(timerInterval);
-        
-        // Ensure visual bar is completely empty
         updateTimerVisuals();
-        
-        // Short delay so the player sees the "0:00" before the Game Over screen pops
-        setTimeout(() => {
-            triggerGameOver();
-        }, 500);
+        setTimeout(triggerGameOver, 500);
     }
 }
+
+
 
 
   </script>
