@@ -4761,17 +4761,45 @@
     <!-- 2. MENU WRAPPER -->
     <div id="puzzleMenuContainer" style="display: none; width: 100%; flex-direction: column; align-items: center;">
         
+<!-- MAIN MENU -->
 <div id="puzzleMainMenu" class="puzzle-menu">
-    <!-- ... Resume, Random, Upload buttons here ... -->
     
-    <!-- ADD THIS BUTTON -->
+    <!-- 1. Resume Button (Pink) -->
+    <div id="resumeBtnContainer" style="display:none; width: 100%;">
+        <button class="btn-hyper hyper-pink" onclick="resumeGame()">
+            <div class="btn-content">
+                <i class="fas fa-play" style="color: #ff00ff;"></i>
+                <span>CONTINUĂ</span>
+            </div>
+            <span class="tech-tag">SAVE_FOUND</span>
+        </button>
+    </div>
+
+    <!-- 2. Random Button (Cyan) -->
+    <button class="btn-hyper hyper-cyan" onclick="showDifficulty('random')">
+        <div class="btn-content">
+            <i class="fas fa-random" style="color: #00ffff;"></i>
+            <span>RANDOM</span>
+        </div>
+    </button>
+
+    <!-- 3. Upload Button (Green) -->
+    <button class="btn-hyper hyper-green" onclick="document.getElementById('customImgInput').click()">
+        <div class="btn-content">
+            <i class="fas fa-upload" style="color: #00ff88;"></i>
+            <span>UPLOAD</span>
+        </div>
+    </button>
+
+    <!-- 4. Gallery Button (Purple) -->
     <button class="btn-hyper hyper-purple" onclick="openGallery()">
         <div class="btn-content">
-            <i class="fas fa-images" style="color: #bf55ec;"></i>
-            <span>Galeria_legendelor</span>
+            <i class="fas fa-trophy" style="color: #bf55ec;"></i>
+            <span>LEGENDS GALLERY</span>
         </div>
-        <span class="tech-tag">HALL_OF_FAME</span>
     </button>
+    
+    <input type="file" id="customImgInput" accept="image/*" onchange="handleCustomImage(this)" style="display:none;">
 </div>
 
 <!-- DIFFICULTY SELECT -->
@@ -6369,7 +6397,7 @@ window.resetToMenu = () => {
 };
 
 
-// 2. SAVE TO HALL OF FAME ON WIN
+// --- UPDATED WIN LOGIC ---
 async function doWin() {
     jigState.isPlaying = false;
     if (timerInterval) clearInterval(timerInterval);
@@ -6377,87 +6405,93 @@ async function doWin() {
     let totalEarnedCoins = pendingCoins + 100;
     let totalEarnedDiamonds = 0;
 
-    timerState.milestones.forEach(m => {
-        if (!m.lost) {
-            if (m.type === 'ksda') totalEarnedCoins += m.val;
-            if (m.type === 'diamond') totalEarnedDiamonds += m.val;
-        }
-    });
+    // Only count milestones that weren't lost
+    if(timerState.milestones) {
+        timerState.milestones.forEach(m => {
+            if (!m.lost) {
+                if (m.type === 'ksda') totalEarnedCoins += m.val;
+                if (m.type === 'diamond') totalEarnedDiamonds += m.val;
+            }
+        });
+    }
 
-    // Calculate time taken
     const timeTakenSecs = timerState.totalTime - timerState.timeLeft;
     const mins = Math.floor(timeTakenSecs / 60);
     const secs = timeTakenSecs % 60;
     const timeFormatted = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 
-    // --- SAVE TO GALLERY (Firestore) ---
     if (auth.currentUser) {
         try {
             const userRef = doc(db, "accounts", auth.currentUser.uid);
             const userSnap = await getDoc(userRef);
-            const userData = userSnap.data();
-
-            // Save the completion record
+            
+            // Save completion to Public Gallery
             await setDoc(doc(db, "puzzle_hall_of_fame", `${auth.currentUser.uid}_${Date.now()}`), {
-                username: userData.username || "Anonymous",
+                username: userSnap.data()?.username || "Player",
                 imgUrl: jigState.imgUrl,
                 timeFormatted: timeFormatted,
                 gridSize: `${jigState.rows}x${jigState.cols}`,
                 timestamp: serverTimestamp()
             });
 
+            // Update user wallet
             await updateDoc(userRef, {
                 coins: increment(totalEarnedCoins),
                 diamonds: increment(totalEarnedDiamonds),
                 jigsawSave: deleteField() 
             });
-        } catch (e) { console.error("Win Save Error:", e); }
+        } catch (e) { console.warn("Note: Gallery save failed - Check Firestore Rules", e); }
     }
 
     const qModal = document.getElementById('questRewardModal');
     qModal.querySelector('h2').innerHTML = '🏆 PUZZLE COMPLET!';
-    qModal.querySelector('p').innerText = `Timp: ${timeFormatted}. Recompense salvate!`;
+    qModal.querySelector('p').innerText = `Timp: ${timeFormatted}. Bonus adăugat!`;
     qModal.querySelector('.reward-coins-box span').innerText = totalEarnedCoins;
     qModal.classList.add('active');
 
-    setTimeout(resetToMenu, 3000);
+    setTimeout(resetToMenu, 3500);
 }
 
-// 3. GALLERY LOGIC
-import { collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
+// --- UPDATED GALLERY FETCH ---
 window.openGallery = async () => {
     const container = document.getElementById('galleryContainer');
-    container.innerHTML = '<p style="color:white; text-align:center; width:100%;">Loading Hall of Fame...</p>';
+    container.innerHTML = '<div style="color:cyan; font-family:Orbitron; width:100%; text-align:center;">CONNECTING TO DATASTREAM...</div>';
     document.getElementById('galleryModal').classList.add('active');
 
     try {
-        const q = query(collection(db, "puzzle_hall_of_fame"), orderBy("timestamp", "desc"), limit(20));
+        const q = query(collection(db, "puzzle_hall_of_fame"), orderBy("timestamp", "desc"), limit(24));
         const snap = await getDocs(q);
         
         container.innerHTML = '';
-        if(snap.empty) { container.innerHTML = '<p style="color:#555; width:100%; text-align:center;">No completions yet!</p>'; return; }
+        if(snap.empty) {
+            container.innerHTML = '<p style="color:#555; text-align:center; width:100%;">No legends found yet. Be the first!</p>';
+            return;
+        }
 
-        snap.forEach(doc => {
-            const item = doc.data();
+        snap.forEach(docSnap => {
+            const item = docSnap.data();
             const card = document.createElement('div');
             card.className = 'gallery-card';
             card.innerHTML = `
                 <img src="${item.imgUrl}" class="gallery-img">
                 <span class="gallery-user">${item.username}</span>
-                <span class="gallery-time">${item.gridSize} in ${item.timeFormatted}</span>
+                <span class="gallery-time">${item.gridSize} | ${item.timeFormatted}</span>
             `;
             card.onclick = () => {
                 jigState.imgUrl = item.imgUrl;
-                jigState.isCustom = true; // Handle as custom so it doesn't try to find it in pool
+                jigState.isCustom = true; 
                 document.getElementById('galleryModal').classList.remove('active');
                 toDifficultyMenu();
             };
             container.appendChild(card);
         });
-    } catch(e) { console.error("Gallery Error:", e); }
+    } catch(e) { 
+        container.innerHTML = `<div style="color:#ff4757; font-size:10px;">DATA ACCESS DENIED.<br>Check Firebase Security Rules.</div>`;
+        console.error("Gallery Logic Error:", e); 
+    }
 };
-
+// 3. GALLERY LOGIC
+import { collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 function enablePointerDrag(el, id) {
     el.onpointerdown = function(e) {
         // Prevent default browser dragging behavior (ghost images)
