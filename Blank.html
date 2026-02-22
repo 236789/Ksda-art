@@ -3329,6 +3329,294 @@
     border: 1px solid #333;
     border-radius: 8px;
 }
+
+
+
+
+
+/* --- CYBER JIGSAW ENGINE v2.0 (HOLOGRAPHIC THEME) --- */
+
+/* 1. THE ARENA CONTAINER */
+.jigsaw-arena {
+    display: none; /* Toggled by JS */
+    width: 100%;
+    height: 650px; /* Slightly taller for UI breathing room */
+    
+    /* Dark Sci-Fi Background with Grid */
+    background-color: #02050a;
+    background-image: 
+        linear-gradient(rgba(41, 243, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(41, 243, 255, 0.05) 1px, transparent 1px),
+        radial-gradient(circle at center, rgba(41, 243, 255, 0.1) 0%, transparent 70%);
+    background-size: 40px 40px, 40px 40px, 100% 100%;
+    
+    border: 1px solid var(--primary);
+    box-shadow: 
+        0 0 20px rgba(41, 243, 255, 0.1),
+        inset 0 0 50px rgba(0, 0, 0, 0.8);
+    
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    touch-action: none;
+    font-family: 'Orbitron', sans-serif;
+}
+
+/* PC LAYOUT */
+@media (min-width: 900px) {
+    .jigsaw-arena { 
+        display: none; 
+        grid-template-columns: 240px 1fr 280px; 
+        gap: 20px; 
+        padding: 25px; 
+    }
+}
+
+/* 2. LEFT PANEL (Preview & Stats) */
+.zone-left {
+    background: rgba(13, 25, 41, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    backdrop-filter: blur(5px);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.mini-preview {
+    width: 100%;
+    height: auto;
+    max-height: 160px;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 15px rgba(41, 243, 255, 0.2);
+    margin-bottom: 15px;
+    background: #000;
+}
+
+.jigsaw-stat {
+    font-size: 14px;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    text-shadow: 0 0 5px var(--primary);
+}
+
+/* Save & Exit Button Styling */
+.btn-puzzle-exit {
+    background: rgba(255, 71, 87, 0.1);
+    border: 1px solid #ff4757;
+    color: #ff4757;
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'Orbitron';
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+.btn-puzzle-exit:hover {
+    background: #ff4757;
+    color: #fff;
+    box-shadow: 0 0 15px #ff4757;
+}
+
+/* 3. MIDDLE PANEL (The Board) */
+.zone-board {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 16px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    overflow: visible !important; /* Allow pieces to fly over */
+}
+
+/* The Grid Guide */
+.drop-target-grid {
+    position: relative;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    background-color: rgba(0, 0, 0, 0.8); /* Dark background behind pieces */
+    transition: box-shadow 0.5s;
+}
+
+/* Winning Glow Animation */
+.win-glow {
+    animation: successPulse 2s infinite;
+    border-color: #00ff88 !important;
+}
+@keyframes successPulse {
+    0% { box-shadow: 0 0 20px #00ff88; }
+    50% { box-shadow: 0 0 60px #00ff88, 0 0 10px #fff; }
+    100% { box-shadow: 0 0 20px #00ff88; }
+}
+
+/* 4. RIGHT PANEL (The Tray) */
+.zone-pieces {
+    background: rgba(13, 25, 41, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 15px;
+    overflow-y: auto;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* 2 Columns is cleaner */
+    grid-auto-rows: max-content;
+    gap: 12px;
+    align-content: flex-start;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+/* Custom Scrollbar for Tray */
+.zone-pieces::-webkit-scrollbar { width: 6px; }
+.zone-pieces::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+.zone-pieces::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+
+/* 5. THE PIECES */
+.jig-piece {
+    position: absolute;
+    cursor: grab;
+    z-index: 100;
+    
+    /* Visuals */
+    background-repeat: no-repeat;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Thin light border */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+    
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-radius: 4px; /* Slight rounded corners for digital chip look */
+}
+
+/* Piece Inside Tray */
+.jig-piece.in-tray {
+    position: relative !important;
+    width: 100% !important;
+    height: auto;
+    aspect-ratio: 1/1;
+    top: auto !important;
+    left: auto !important;
+    margin: 0;
+    transform: scale(0.95);
+    border-color: rgba(41, 243, 255, 0.4);
+}
+.jig-piece.in-tray:hover {
+    border-color: #fff;
+    transform: scale(1.0);
+    box-shadow: 0 0 15px var(--primary);
+}
+
+/* Dragging State - The "Hologram" Pickup Effect */
+.jig-piece.is-dragging {
+    z-index: 99999 !important;
+    cursor: grabbing;
+    transition: none !important; /* Zero lag */
+    
+    transform: scale(1.15) rotate(2deg); /* Slight tilt */
+    border: 2px solid #fff;
+    box-shadow: 
+        0 15px 30px rgba(0,0,0,0.5),
+        0 0 20px var(--primary); /* Neon Glow */
+    opacity: 0.95;
+}
+
+/* Locked State (Snapped) */
+.jig-piece.locked {
+    z-index: 5;
+    cursor: default;
+    pointer-events: none;
+    border: none; /* Seamless join */
+    border-right: 1px solid rgba(255,255,255,0.05); /* Very subtle grid lines */
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-radius: 0;
+    box-shadow: none;
+    filter: brightness(1.1); /* Make completed parts slightly brighter */
+    transition: all 0.3s;
+}
+
+/* Snap Flash Animation */
+@keyframes cyberSnap {
+    0% { filter: brightness(3) drop-shadow(0 0 15px #fff); z-index: 20; transform: scale(1.1); }
+    100% { filter: brightness(1.1); z-index: 5; transform: scale(1); }
+}
+.snap-anim { animation: cyberSnap 0.4s ease-out forwards; }
+
+
+/* 6. MOBILE RESPONSIVENESS */
+@media (max-width: 899px) {
+    .jigsaw-arena {
+        height: 85vh !important;
+        display: none; /* Toggled to flex */
+        flex-direction: column;
+        border: none;
+        background: #000;
+        padding: 0;
+    }
+    
+    .zone-left {
+        flex-direction: row;
+        height: 70px;
+        width: 100%;
+        padding: 5px 15px;
+        justify-content: space-between;
+        background: #08101b;
+        border-radius: 0;
+        border-bottom: 1px solid var(--primary);
+    }
+    
+    .mini-preview {
+        width: 60px;
+        height: 60px;
+        margin: 0;
+    }
+    
+    .btn-puzzle-exit {
+        width: auto;
+        padding: 5px 15px;
+    }
+
+    .zone-board {
+        flex: 1;
+        width: 100%;
+        border-radius: 0;
+        border: none;
+        background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
+    }
+
+    .zone-pieces {
+        height: 130px !important;
+        width: 100%;
+        border-radius: 0;
+        border-top: 2px solid var(--primary);
+        
+        display: flex !important; /* Horizontal Scroll */
+        grid-template-columns: none !important;
+        
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+        padding: 10px;
+        background: #050b14;
+    }
+    
+    .jig-piece.in-tray {
+        min-width: 80px; /* Fixed size in mobile tray */
+        height: 80px;
+        margin: 0;
+    }
+}
   </style>
 </head>
 <body>
@@ -3800,9 +4088,9 @@
             <img id="gamePreviewImg" class="mini-preview" src="">
             <div style="display: flex; flex-direction: column; gap: 5px;">
                 <div class="jigsaw-stat" id="piecesCount">Pieces: 0/0</div>
-                <button onclick="saveAndExit()" style="background:transparent; border:1px solid #ff4757; color:#ff4757; border-radius:5px; font-size:9px; padding:5px; cursor:pointer;">
-                    SAVE & EXIT
-                </button>
+<button onclick="saveAndExit()" class="btn-puzzle-exit">
+    <i class="fas fa-sign-out-alt"></i> SAVE & EXIT
+</button>
             </div>
         </div>
 
@@ -5294,19 +5582,25 @@ function enablePointerDrag(el, id) {
             const dist = Math.sqrt(Math.pow(targetX - currentX, 2) + Math.pow(targetY - currentY, 2));
 
             // SNAP TOLERANCE (Increased to 50% of piece size for easier mobile use)
+// SNAP TOLERANCE
             if (dist < (pSize * 0.5)) {
-                // Snap to grid
+                // 1. Snap to grid visually
                 el.style.left = `${targetX}px`;
                 el.style.top = `${targetY}px`;
+                
+                // 2. Apply the "Locked" state (removes borders, blends in)
                 el.classList.add('locked');
                 
-                // Visual Flash Effect
-                el.style.filter = "brightness(2) drop-shadow(0 0 10px #00ff88)";
-                el.style.zIndex = "1"; // Send to back layer so active pieces float over it
+                // 3. Trigger the Cyber Flash Animation (defined in the new CSS)
+                // This replaces the manual 'filter' and 'zIndex' lines you had
+                el.classList.add('snap-anim');
+                
+                // 4. Clean up the animation class after 400ms (matches CSS duration)
                 setTimeout(() => {
-                    el.style.filter = "brightness(1)";
-                }, 300);
+                    el.classList.remove('snap-anim');
+                }, 400);
 
+                // 5. Update Game State
                 pState.isLocked = true;
                 updateCount(); // Check win condition
             } else {
