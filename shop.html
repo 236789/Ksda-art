@@ -4461,6 +4461,20 @@
     text-shadow: 0 0 10px #000;
     font-weight: 900;
 }
+
+
+#galleryContainer {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 coloane pe mobil/mic */
+    gap: 12px;
+    padding: 10px;
+}
+
+@media (min-width: 600px) {
+    #galleryContainer {
+        grid-template-columns: repeat(3, 1fr); /* 3 coloane pe PC */
+    }
+}
   </style>
 </head>
 <body>
@@ -6829,38 +6843,33 @@ async function doWin() {
         });
     }
 
-    if (auth.currentUser) {
-        try {
-            const userRef = doc(db, "accounts", auth.currentUser.uid);
-            
-            // EXTRAGEM DATELE DIN FIRESTORE PENTRU A VEDEA POZA ACTUALA
-            const userSnap = await getDoc(userRef);
-            const userData = userSnap.data() || {};
+// Găsește partea de salvare în puzzle_hall_of_fame din doWin și înlocuiește-o cu asta:
+if (auth.currentUser) {
+    try {
+        const userRef = doc(db, "accounts", auth.currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        const userData = userSnap.data() || {};
+        const finalPfp = userData.image || auth.currentUser.photoURL || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
 
-            // LOGICA DE POZA DIN SHOP.HTML:
-            // 1. Imagine custom (image) | 2. Imagine Google (photoURL) | 3. Placeholder
-            const finalPfpForGallery = userData.image || auth.currentUser.photoURL || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
+        // FOLOSIM addDoc pentru a crea o intrare NOUĂ mereu, fără să le ștergem pe cele vechi
+        await addDoc(collection(db, "puzzle_hall_of_fame"), {
+            imgUrl: jigState.imgUrl,
+            userId: auth.currentUser.uid,
+            username: userData.username || auth.currentUser.displayName || "Cyber Solver",
+            userPfp: finalPfp,
+            timestamp: serverTimestamp(),
+            gridSize: `${jigState.rows}x${jigState.cols}`
+        });
 
-            const imgHash = btoa(jigState.imgUrl).substring(0, 15);
-            const puzzleId = `${auth.currentUser.uid}_${imgHash}`;
-            
-            await setDoc(doc(db, "puzzle_hall_of_fame", puzzleId), {
-                imgUrl: jigState.imgUrl,
-                userId: auth.currentUser.uid,
-                username: userData.username || auth.currentUser.displayName || "Cyber Solver",
-                userPfp: finalPfpForGallery, // <--- ACUM SALVEAZA POZA CORECTA
-                timestamp: serverTimestamp(),
-                gridSize: `${jigState.rows}x${jigState.cols}`
-            });
-
-            await updateDoc(userRef, {
-                coins: increment(totalEarnedCoins),
-                diamonds: increment(totalEarnedDiamonds),
-                puzzlesSolved: increment(1),
-                jigsawSave: deleteField() 
-            });
-        } catch (e) { console.error("Win Save Error:", e); }
-    }
+        // Actualizăm numărul total în profilul utilizatorului
+        await updateDoc(userRef, {
+            coins: increment(totalEarnedCoins),
+            diamonds: increment(totalEarnedDiamonds),
+            puzzlesSolved: increment(1),
+            jigsawSave: deleteField() 
+        });
+    } catch (e) { console.error("Win Save Error:", e); }
+}
 
     // --- LOGICA UI (RAMANE NESCHIMBATA) ---
     document.getElementById('earnedCoinsText').innerText = totalEarnedCoins;
@@ -6893,30 +6902,38 @@ async function doWin() {
 
 window.openGallery = async () => {
     const container = document.getElementById('galleryContainer');
-    const title = document.querySelector('#galleryModal .cosmo-title');
-    title.innerText = "HALL OF FAME";
-    container.innerHTML = '<div style="color:var(--primary); font-family:Orbitron; width:100%; text-align:center; padding:20px;">ACCESSING ARCHIVES...</div>';
     document.getElementById('galleryModal').classList.add('active');
+    container.innerHTML = '<div style="color:cyan; text-align:center; width:100%; padding:20px;">SYNCING DATA...</div>';
 
     try {
         const q = query(collection(db, "puzzle_hall_of_fame"), orderBy("timestamp", "desc"));
         const snap = await getDocs(q);
         
         const userGroups = {};
+
         snap.forEach(docSnap => {
             const data = docSnap.data();
-            if(!userGroups[data.userId]) {
-                userGroups[data.userId] = {
+            const uid = data.userId;
+
+            if(!userGroups[uid]) {
+                userGroups[uid] = {
                     username: data.username,
-                    pfp: data.userPfp, // Folosește poza salvată la momentul victoriei
+                    pfp: data.userPfp,
                     lastImg: data.imgUrl,
-                    puzzles: []
+                    puzzles: [] // Array-ul unde strângem TOATE puzzle-urile
                 };
             }
-            userGroups[data.userId].puzzles.push(data);
+            // Adăugăm puzzle-ul curent în lista utilizatorului
+            userGroups[uid].puzzles.push(data);
         });
 
         container.innerHTML = '';
+        
+        // Dacă nu e nimic în DB
+        if(Object.keys(userGroups).length === 0) {
+            container.innerHTML = '<p style="color:#555; text-align:center; width:100%;">No archives found.</p>';
+            return;
+        }
 
         Object.keys(userGroups).forEach(uid => {
             const user = userGroups[uid];
@@ -6925,21 +6942,20 @@ window.openGallery = async () => {
             card.style.height = '180px';
             
             card.innerHTML = `
-                <img src="${user.lastImg}" class="gallery-img" style="filter: blur(2px) brightness(0.4); height: 100%; object-fit: cover;">
-                
+                <img src="${user.lastImg}" class="gallery-img" style="filter: blur(2px) brightness(0.3); height: 100%; object-fit: cover;">
                 <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:15px;">
-                    <div style="position: relative; width: 65px; height: 65px;">
-                        <!-- AFISARE PFP -->
-                        <img src="${user.pfp}" style="width:100%; height:100%; border-radius:50%; border:3px solid var(--primary); object-fit:cover; box-shadow: 0 0 15px var(--primary);">
-                        <div style="position: absolute; bottom: -5px; right: -5px; background: #00ff88; color: #000; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 5px; font-family: 'Orbitron';">LVL ${user.puzzles.length}</div>
+                    <div style="position: relative; width: 60px; height: 60px;">
+                        <img src="${user.pfp}" style="width:100%; height:100%; border-radius:50%; border:3px solid var(--primary); object-fit:cover;">
+                        <div style="position: absolute; bottom: -5px; right: -5px; background: #00ff88; color: #000; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 5px;">LVL ${user.puzzles.length}</div>
                     </div>
-
                     <div style="text-align: center;">
-                        <span class="gallery-user" style="font-size:14px; color:#fff; text-shadow:0 2px 5px #000; display: block;">${user.username}</span>
+                        <span class="gallery-user" style="font-size:13px; color:#fff; display: block;">${user.username}</span>
                         <span style="font-family:Orbitron; font-size:9px; color:var(--primary);">${user.puzzles.length} ARCHIVES</span>
                     </div>
+                    <button class="btn-equip-v6 do-equip" style="font-size: 8px; padding: 5px 12px;">VIEW COLLECTION</button>
                 </div>
             `;
+            // Când dai click, trimiți tot obiectul user care conține array-ul puzzles
             card.onclick = () => showUserPuzzles(user);
             container.appendChild(card);
         });
