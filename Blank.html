@@ -3157,6 +3157,29 @@
     box-shadow: 0 0 25px #00ff88;
     border: 2px solid #fff;
 }
+
+
+
+/* ADD THIS TO YOUR CSS */
+.jig-piece.is-dragging {
+    z-index: 999999 !important; /* Ensure it is above EVERYTHING */
+    pointer-events: none; /* Allows the mouse to "see through" the piece to the grid below */
+    cursor: grabbing;
+    transform: scale(1.1);
+    box-shadow: 0 0 25px #00ff88;
+    border: 2px solid #fff;
+    will-change: left, top; /* Performance optimization */
+}
+
+/* Ensure the grid doesn't hide pieces */
+.zone-board {
+    overflow: visible !important; 
+    z-index: 1;
+}
+.drop-target-grid {
+    z-index: 5;
+    position: relative;
+}
   </style>
 </head>
 <body>
@@ -4983,107 +5006,117 @@ function setupBoardUI(isLoad = false) {
     }, 100);
 }
 
-/* --- ULTIMATE DRAG FIX v3 --- */
-function enablePointerDrag(el, id) {
-    let isDragging = false;
-    let dragOffsetX = 0;
-    let dragOffsetY = 0;
-    const pSize = jigState.pieceSize;
+/* --- PASTE THIS IN YOUR SCRIPT SECTION, REPLACING THE OLD enablePointerDrag --- */
 
-    el.addEventListener('pointerdown', (e) => {
-        if (el.classList.contains('locked')) return;
-        
-        e.preventDefault(); 
+function enablePointerDrag(el, id) {
+    el.onpointerdown = function(e) {
+        // Prevent default browser dragging behavior (ghost images)
+        e.preventDefault();
         e.stopPropagation();
-        
-        isDragging = true;
-        el.setPointerCapture(e.pointerId); 
-        el.classList.add('is-dragging');
+
+        if (el.classList.contains('locked')) return;
 
         const gridBox = document.getElementById('dropGrid');
-        const gridRect = gridBox.getBoundingClientRect();
+        
+        // 1. SNAPSHOT COORDINATES
+        // We get the rectangles BEFORE we move the element in the DOM
         const pieceRect = el.getBoundingClientRect();
+        const gridRect = gridBox.getBoundingClientRect();
 
-        // 1. Calculate where the mouse is INSIDE the piece (The Grip Offset)
-        dragOffsetX = e.clientX - pieceRect.left;
-        dragOffsetY = e.clientY - pieceRect.top;
+        // Calculate where the mouse is INSIDE the piece (The Grip Offset)
+        const offsetX = e.clientX - pieceRect.left;
+        const offsetY = e.clientY - pieceRect.top;
 
-        // 2. If in tray, transfer to board immediately at exact screen position
+        // 2. HANDLE TRAY TO BOARD TRANSFER
         if (el.classList.contains('in-tray')) {
+            // Calculate exact position relative to the grid
+            const startLeft = pieceRect.left - gridRect.left;
+            const startTop = pieceRect.top - gridRect.top;
+
+            // Apply coordinates IMMEDIATELY so it doesn't jump to 0,0
+            el.style.left = startLeft + 'px';
+            el.style.top = startTop + 'px';
+            
+            // Now safe to move in DOM
             el.classList.remove('in-tray');
             gridBox.appendChild(el);
             
-            // Calculate Position relative to Board using Screen Coordinates
-            // Formula: (PieceScreenX - BoardScreenX)
-            const startX = pieceRect.left - gridRect.left;
-            const startY = pieceRect.top - gridRect.top;
-
-            el.style.left = `${startX}px`;
-            el.style.top = `${startY}px`;
-            
-            // Update State
+            // Update state
             const pState = jigState.pieces.find(p => p.id === id);
             if(pState) pState.inTray = false;
         }
-    });
 
-    el.addEventListener('pointermove', (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-
-        const gridBox = document.getElementById('dropGrid');
-        const gridRect = gridBox.getBoundingClientRect();
-
-        // 3. Move Logic: (MouseGlobal - BoardGlobal - GripOffset)
-        // This keeps the piece pinned exactly where you grabbed it
-        const newX = e.clientX - gridRect.left - dragOffsetX;
-        const newY = e.clientY - gridRect.top - dragOffsetY;
-
-        el.style.left = `${newX}px`;
-        el.style.top = `${newY}px`;
-    });
-
-    el.addEventListener('pointerup', (e) => {
-        if (!isDragging) return;
-        isDragging = false;
-        el.releasePointerCapture(e.pointerId);
-        el.classList.remove('is-dragging');
-
-        // 4. Snap Logic
-        const pState = jigState.pieces.find(p => p.id === id);
-        if(!pState) return;
-
-        const targetCol = id % jigState.cols;
-        const targetRow = Math.floor(id / jigState.cols);
-        const targetX = targetCol * pSize;
-        const targetY = targetRow * pSize;
-
-        const currentX = parseFloat(el.style.left);
-        const currentY = parseFloat(el.style.top);
-
-        // Calculate distance to correct spot
-        const dist = Math.sqrt(Math.pow(targetX - currentX, 2) + Math.pow(targetY - currentY, 2));
-
-        // SNAP (Tolerance: 40% of piece size)
-        if (dist < (pSize * 0.4)) {
-            el.style.left = `${targetX}px`;
-            el.style.top = `${targetY}px`;
-            el.classList.add('locked');
-            
-            // Visual Flash
-            el.style.filter = "brightness(1.5)";
-            setTimeout(() => el.style.filter = "brightness(1)", 300);
-
-            pState.isLocked = true;
-            updateCount(); 
-        } else {
-            // Update stored position
-            pState.currentX = currentX;
-            pState.currentY = currentY;
-        }
+        // 3. START DRAG VISUALS
+        el.classList.add('is-dragging');
         
-        saveProgress();
-    });
+        // IMPORTANT: We attach move/up listeners to WINDOW, not the element.
+        // This fixes the "can't drag" issue if you move mouse too fast.
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+
+        // --- MOVE FUNCTION ---
+        function onPointerMove(moveEvent) {
+            // Recalculate grid rect in case of page scroll
+            const currentGridRect = gridBox.getBoundingClientRect();
+
+            // Math: Mouse Global X - Grid Global X - Mouse Offset inside piece
+            let newX = moveEvent.clientX - currentGridRect.left - offsetX;
+            let newY = moveEvent.clientY - currentGridRect.top - offsetY;
+
+            el.style.left = newX + 'px';
+            el.style.top = newY + 'px';
+        }
+
+        // --- RELEASE FUNCTION ---
+        function onPointerUp(upEvent) {
+            // Cleanup listeners immediately
+            window.removeEventListener('pointermove', onPointerMove);
+            window.removeEventListener('pointerup', onPointerUp);
+            
+            el.classList.remove('is-dragging');
+
+            // 4. SNAP LOGIC
+            const pState = jigState.pieces.find(p => p.id === id);
+            if(!pState) return;
+
+            const pSize = jigState.pieceSize;
+            const targetCol = id % jigState.cols;
+            const targetRow = Math.floor(id / jigState.cols);
+            
+            const targetX = targetCol * pSize;
+            const targetY = targetRow * pSize;
+
+            const currentX = parseFloat(el.style.left);
+            const currentY = parseFloat(el.style.top);
+
+            // Calculate distance to correct spot
+            const dist = Math.sqrt(Math.pow(targetX - currentX, 2) + Math.pow(targetY - currentY, 2));
+
+            // SNAP TOLERANCE (Increased to 50% of piece size for easier mobile use)
+            if (dist < (pSize * 0.5)) {
+                // Snap to grid
+                el.style.left = `${targetX}px`;
+                el.style.top = `${targetY}px`;
+                el.classList.add('locked');
+                
+                // Visual Flash Effect
+                el.style.filter = "brightness(2) drop-shadow(0 0 10px #00ff88)";
+                el.style.zIndex = "1"; // Send to back layer so active pieces float over it
+                setTimeout(() => {
+                    el.style.filter = "brightness(1)";
+                }, 300);
+
+                pState.isLocked = true;
+                updateCount(); // Check win condition
+            } else {
+                // Just save the new loose position
+                pState.currentX = currentX;
+                pState.currentY = currentY;
+            }
+            
+            saveProgress();
+        }
+    };
 }
 
 function checkMagnetHint(el, id, currX, currY) {
