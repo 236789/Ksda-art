@@ -4263,9 +4263,72 @@
     letter-spacing: 4px;
     text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
 }
+
+
+
+/* Gallery Button Variant */
+.hyper-purple { border-left: 4px solid #bf55ec; }
+.hyper-purple:hover { 
+    box-shadow: inset 20px 0 40px rgba(191, 85, 236, 0.2); 
+    text-shadow: 0 0 15px #bf55ec;
+}
+.hyper-purple:hover::before { background: #bf55ec; height: 100%; opacity: 0.1; }
+.hyper-purple .tech-tag { color: #bf55ec; }
+
+/* Hall of Fame Modal */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+    padding: 10px;
+}
+
+.gallery-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 15px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.gallery-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+    background: rgba(41, 243, 255, 0.05);
+}
+
+.gallery-img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+
+.gallery-user { font-size: 11px; font-weight: 800; color: var(--primary); display: block; }
+.gallery-time { font-size: 10px; opacity: 0.6; font-family: 'Orbitron'; }
   </style>
 </head>
 <body>
+
+
+<!-- GALLERY MODAL -->
+<div id="galleryModal" class="account-modal-overlay">
+    <div class="cosmetics-card-v6" style="border-color: #bf55ec;">
+        <button class="close-pop" onclick="document.getElementById('galleryModal').classList.remove('active')">✕</button>
+        <div class="cosmo-content-v6">
+            <div class="cosmo-header">
+                <div class="cosmo-title" style="background: linear-gradient(90deg, #fff, #bf55ec, #fff); -webkit-background-clip: text;">HALL OF FAME</div>
+                <p style="font-size: 10px; color: #aaa;">Click on a puzzle to use that image!</p>
+            </div>
+            <div id="galleryContainer" class="inventory-scroll-area gallery-grid">
+                <!-- Data loads here -->
+            </div>
+        </div>
+    </div>
+</div>
 <!-- BANNED OVERLAY -->
 <div id="bannedOverlay">
     <i class="fas fa-ban ban-icon"></i>
@@ -4698,40 +4761,18 @@
     <!-- 2. MENU WRAPPER -->
     <div id="puzzleMenuContainer" style="display: none; width: 100%; flex-direction: column; align-items: center;">
         
-<!-- MAIN MENU -->
-        <div id="puzzleMainMenu" class="puzzle-menu">
-            
-            <!-- Resume Button (Pink) -->
-            <div id="resumeBtnContainer" style="display:none; width: 100%;">
-                <button class="btn-hyper hyper-pink" onclick="resumeGame()">
-                    <div class="btn-content">
-                        <i class="fas fa-play" style="color: #ff00ff;"></i>
-                        <span>CONTINUĂ</span>
-                    </div>
-                    <span class="tech-tag">SAVE_FOUND</span>
-                </button>
-            </div>
-
-            <!-- Random Button (Cyan) -->
-            <button class="btn-hyper hyper-cyan" onclick="showDifficulty('random')">
-                <div class="btn-content">
-                    <i class="fas fa-random" style="color: #00ffff;"></i>
-                    <span>RANDOM</span>
-                </div>
-                <span class="tech-tag">RND_IMG</span>
-            </button>
-
-            <!-- Upload Button (Green) -->
-            <button class="btn-hyper hyper-green" onclick="document.getElementById('customImgInput').click()">
-                <div class="btn-content">
-                    <i class="fas fa-upload" style="color: #00ff88;"></i>
-                    <span>UPLOAD</span>
-                </div>
-                <span class="tech-tag">LOCAL_DRV</span>
-            </button>
-            
-            <input type="file" id="customImgInput" accept="image/*" onchange="handleCustomImage(this)">
+<div id="puzzleMainMenu" class="puzzle-menu">
+    <!-- ... Resume, Random, Upload buttons here ... -->
+    
+    <!-- ADD THIS BUTTON -->
+    <button class="btn-hyper hyper-purple" onclick="openGallery()">
+        <div class="btn-content">
+            <i class="fas fa-images" style="color: #bf55ec;"></i>
+            <span>Galeria_legendelor</span>
         </div>
+        <span class="tech-tag">HALL_OF_FAME</span>
+    </button>
+</div>
 
 <!-- DIFFICULTY SELECT -->
         <div id="puzzleDiffMenu" class="puzzle-menu" style="display: none;">
@@ -6016,36 +6057,21 @@ let timerState = {
     milestones: [] 
 };
 
+// 1. UPDATED TIMES (4m, 8m, 10m)
 const MODE_CONFIG = {
     5: { 
-        time: 120, // 2 Minutes
-        rewards: [
-            { at: 90, type: 'ksda', val: 50 },
-            { at: 60, type: 'diamond', val: 1 },
-            { at: 30, type: 'ksda', val: 100 }
-        ]
+        time: 240, // 4 Minutes
+        rewards: [{ at: 180, type: 'ksda', val: 50 }, { at: 120, type: 'diamond', val: 1 }, { at: 60, type: 'ksda', val: 100 }]
     },
     7: { 
-        time: 240, // 4 Minutes
-        rewards: [
-            { at: 180, type: 'ksda', val: 100 },
-            { at: 120, type: 'diamond', val: 2 },
-            { at: 60, type: 'ksda', val: 200 }
-        ]
+        time: 480, // 8 Minutes
+        rewards: [{ at: 360, type: 'ksda', val: 100 }, { at: 240, type: 'diamond', val: 2 }, { at: 120, type: 'ksda', val: 200 }]
     },
     9: { 
-        time: 300, // 5 Minutes
-        rewards: [
-            { at: 240, type: 'ksda', val: 150 },
-            { at: 180, type: 'diamond', val: 3 },
-            { at: 120, type: 'ksda', val: 300 },
-            { at: 60, type: 'diamond', val: 5 }
-        ]
+        time: 600, // 10 Minutes
+        rewards: [{ at: 450, type: 'ksda', val: 150 }, { at: 300, type: 'diamond', val: 3 }, { at: 150, type: 'ksda', val: 300 }]
     }
 };
-
-
- 
 
 
 
@@ -6342,16 +6368,15 @@ window.resetToMenu = () => {
     arena.classList.remove('active-grid');
 };
 
-// 5. Win Logic (Community Pool Integration)
+
+// 2. SAVE TO HALL OF FAME ON WIN
 async function doWin() {
-    // 1. Stop everything immediately so UI doesn't get "stuck"
     jigState.isPlaying = false;
     if (timerInterval) clearInterval(timerInterval);
     
-    let totalEarnedCoins = pendingCoins + 100; // Base win bonus + pieces snapped
+    let totalEarnedCoins = pendingCoins + 100;
     let totalEarnedDiamonds = 0;
 
-    // 2. Check milestones that are NOT lost
     timerState.milestones.forEach(m => {
         if (!m.lost) {
             if (m.type === 'ksda') totalEarnedCoins += m.val;
@@ -6359,34 +6384,79 @@ async function doWin() {
         }
     });
 
-    // 3. Show Completion Modal
-    const qModal = document.getElementById('questRewardModal');
-    qModal.querySelector('h2').innerHTML = '<span style="font-size: 24px;">🏆</span> PUZZLE COMPLET!';
-    qModal.querySelector('p').innerText = `Bravo! Ai terminat la timp și ai salvat recompensele de pe bară!`;
-    qModal.querySelector('.reward-coins-box span').innerText = totalEarnedCoins;
-    qModal.classList.add('active');
+    // Calculate time taken
+    const timeTakenSecs = timerState.totalTime - timerState.timeLeft;
+    const mins = Math.floor(timeTakenSecs / 60);
+    const secs = timeTakenSecs % 60;
+    const timeFormatted = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 
-    // 4. One single Database Write for everything (Avoids 400 error)
+    // --- SAVE TO GALLERY (Firestore) ---
     if (auth.currentUser) {
         try {
             const userRef = doc(db, "accounts", auth.currentUser.uid);
+            const userSnap = await getDoc(userRef);
+            const userData = userSnap.data();
+
+            // Save the completion record
+            await setDoc(doc(db, "puzzle_hall_of_fame", `${auth.currentUser.uid}_${Date.now()}`), {
+                username: userData.username || "Anonymous",
+                imgUrl: jigState.imgUrl,
+                timeFormatted: timeFormatted,
+                gridSize: `${jigState.rows}x${jigState.cols}`,
+                timestamp: serverTimestamp()
+            });
+
             await updateDoc(userRef, {
                 coins: increment(totalEarnedCoins),
                 diamonds: increment(totalEarnedDiamonds),
                 jigsawSave: deleteField() 
             });
-            pendingCoins = 0; // Reset counter
-        } catch (e) {
-            console.error("Final reward error:", e);
-        }
+        } catch (e) { console.error("Win Save Error:", e); }
     }
 
-    // 5. Cleanup UI
-    setTimeout(() => {
-        resetToMenu();
-    }, 2000);
+    const qModal = document.getElementById('questRewardModal');
+    qModal.querySelector('h2').innerHTML = '🏆 PUZZLE COMPLET!';
+    qModal.querySelector('p').innerText = `Timp: ${timeFormatted}. Recompense salvate!`;
+    qModal.querySelector('.reward-coins-box span').innerText = totalEarnedCoins;
+    qModal.classList.add('active');
+
+    setTimeout(resetToMenu, 3000);
 }
-/* --- PASTE THIS IN YOUR SCRIPT SECTION, REPLACING THE OLD enablePointerDrag --- */
+
+// 3. GALLERY LOGIC
+import { collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+window.openGallery = async () => {
+    const container = document.getElementById('galleryContainer');
+    container.innerHTML = '<p style="color:white; text-align:center; width:100%;">Loading Hall of Fame...</p>';
+    document.getElementById('galleryModal').classList.add('active');
+
+    try {
+        const q = query(collection(db, "puzzle_hall_of_fame"), orderBy("timestamp", "desc"), limit(20));
+        const snap = await getDocs(q);
+        
+        container.innerHTML = '';
+        if(snap.empty) { container.innerHTML = '<p style="color:#555; width:100%; text-align:center;">No completions yet!</p>'; return; }
+
+        snap.forEach(doc => {
+            const item = doc.data();
+            const card = document.createElement('div');
+            card.className = 'gallery-card';
+            card.innerHTML = `
+                <img src="${item.imgUrl}" class="gallery-img">
+                <span class="gallery-user">${item.username}</span>
+                <span class="gallery-time">${item.gridSize} in ${item.timeFormatted}</span>
+            `;
+            card.onclick = () => {
+                jigState.imgUrl = item.imgUrl;
+                jigState.isCustom = true; // Handle as custom so it doesn't try to find it in pool
+                document.getElementById('galleryModal').classList.remove('active');
+                toDifficultyMenu();
+            };
+            container.appendChild(card);
+        });
+    } catch(e) { console.error("Gallery Error:", e); }
+};
 
 function enablePointerDrag(el, id) {
     el.onpointerdown = function(e) {
