@@ -2583,6 +2583,44 @@
     filter: brightness(1.2);
 }
 
+
+
+/* --- SICK PUZZLE BUILDING ANIMATION --- */
+.puzzle-anim-container {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.p-piece {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border: 2px solid var(--primary);
+    background: rgba(41, 243, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* Positioning & Animations */
+.p1 { top: 0; left: 0; animation: buildP1 2.5s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.p2 { top: 0; right: 0; animation: buildP2 2.5s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.p3 { bottom: 0; left: 0; animation: buildP3 2.5s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.p4 { bottom: 0; right: 0; animation: buildP4 2.5s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+@keyframes buildP1 { 0%, 20% { transform: translate(-30px, -30px) rotate(-45deg); opacity: 0; } 40%, 80% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { opacity: 0; } }
+@keyframes buildP2 { 0%, 25% { transform: translate(30px, -30px) rotate(45deg); opacity: 0; } 45%, 80% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { opacity: 0; } }
+@keyframes buildP3 { 0%, 30% { transform: translate(-30px, 30px) rotate(45deg); opacity: 0; } 50%, 80% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { opacity: 0; } }
+@keyframes buildP4 { 0%, 35% { transform: translate(30px, 30px) rotate(-45deg); opacity: 0; } 55%, 80% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { opacity: 0; } }
+
+/* Hover scale for the puzzle card */
+.hub-card:hover .p-piece {
+    border-color: #fff;
+    box-shadow: 0 0 15px var(--primary);
+}
+
   </style>
 </head>
 <body>
@@ -2945,86 +2983,80 @@
         Bun venit în hub-ul de distracție KSDA! Joacă-te, doboară recorduri și câștigă KSDA Coins pentru a-ți personaliza profilul.
     </p>
 
-    <div class="games-hub-grid">
-        
-       <!-- 1. TRIVIA (FREE - NO LOCK) -->
-<a href="Trivia.html" class="hub-card">
-    <i class="fas fa-brain"></i>
-    <span style="font-family:'Orbitron'; font-weight:800; font-size:12px;">TRIVIA KSDA</span>
-</a>
+<div class="games-hub-grid">
+    <!-- 1. TRIVIA (FREE) -->
+    <a href="Trivia.html" class="hub-card">
+        <i class="fas fa-brain"></i>
+        <span style="font-family:'Orbitron'; font-weight:800; font-size:12px;">TRIVIA KSDA</span>
+    </a>
 
-<!-- 2. KEVINUTA (FREE - NO LOCK) -->
-<a href="joc.html" class="hub-card">
-    <img src="https://iili.io/fSyldu4.png" class="hub-img" alt="Kevinuta">
-    <span style="font-family:'Orbitron'; font-weight:800; font-size:11px; text-align:center;">PRINDE-L PE KEVINUȚĂ</span>
-</a>
+    <!-- 2. KEVINUTA (FREE) -->
+    <a href="joc.html" class="hub-card">
+        <img src="https://iili.io/fSyldu4.png" class="hub-img" alt="Kevinuta">
+        <span style="font-family:'Orbitron'; font-weight:800; font-size:11px; text-align:center;">PRINDE-L PE KEVINUȚĂ</span>
+    </a>
 
-<!-- 3. SPIN WHEEL (LOCKED - 500 COINS) -->
-<div id="game_spin" class="hub-card locked-game" onclick="handleGameClick('spin', 'SpinWeel.html', 500)">
-    <div class="neon-wheel-wrapper">
-        <div class="neon-wheel-inner"></div>
-        <div class="neon-wheel-hub"></div>
-        <div class="neon-wheel-ticker"></div>
+    <!-- 3. SPIN WHEEL (LOCKED - 500 COINS) -->
+    <div id="game_spin" class="hub-card locked-game" onclick="handleGameClick('spin', 'SpinWeel.html', 500)">
+        <div class="neon-wheel-wrapper">
+            <div class="neon-wheel-inner"></div>
+            <div class="neon-wheel-hub"></div>
+            <div class="neon-wheel-ticker"></div>
+        </div>
+        <span style="font-family:'Orbitron'; font-weight:800; font-size:12px; text-align:center; color:#fff;">ROATA NOROCULUI</span>
     </div>
-    <span style="font-family:'Orbitron'; font-weight:800; font-size:12px; text-align:center; color:#fff; text-shadow: 0 0 10px var(--primary);">
-        ROATA NOROCULUI
-    </span>
-</div>
-<!-- 4. KSDA JUMPER (LOCKED - 2000 COINS) -->
-<div id="game_jumper" class="hub-card locked-game full-bg-card" onclick="handleGameClick('jumper', 'jump.html', 2000)">
-    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/doodle%20jump%2Fbufs%2Fbackrounds%2Fe%2F3%2Faa121184-a341-4917-828e-3bc8a34f4fbc.png?alt=media&token=df623721-90a9-4675-b0f3-fa266e79be84" 
-         class="hub-img-bg" alt="Jumper">
-    <div class="hub-card-overlay"></div>
-    <span style="font-family:'Orbitron'; font-weight:800; font-size:12px; text-align:center; color:#fff; text-shadow: 0 0 15px rgba(0,0,0,1); position: relative; z-index: 2;">
-    </span>
-</div>
-        <!-- BLOCAT 3 -->
-        <div class="hub-card locked">
-            <i class="fas fa-lock"></i>
-            <span style="font-family:'Orbitron'; font-weight:800; font-size:10px;">COMING SOON</span>
-            <i class="fas fa-link lock-badge" style="opacity:0.5;"></i>
+
+    <!-- 4. CYBER JIGSAW (LOCKED - 750 COINS) -->
+    <div id="game_puzzle" class="hub-card locked-game" onclick="handleGameClick('puzzle', 'puzzle.html', 750)">
+        <div class="puzzle-anim-container">
+            <div class="p-piece p1"></div>
+            <div class="p-piece p2"></div>
+            <div class="p-piece p3"></div>
+            <div class="p-piece p4"></div>
         </div>
-
-        <!-- BLOCAT 4 --> 
-        <div class="hub-card locked">
-            <i class="fas fa-lock"></i>
-            <span style="font-family:'Orbitron'; font-weight:800; font-size:10px;">COMING SOON</span>
-            <i class="fas fa-link lock-badge" style="opacity:0.5;"></i>
-        </div>
-
-        <!-- BLOCAT 5 -->
-        <div class="hub-card locked">
-            <i class="fas fa-lock"></i>
-            <span style="font-family:'Orbitron'; font-weight:800; font-size:10px;">COMING SOON</span>
-            <i class="fas fa-link lock-badge" style="opacity:0.5;"></i>
-        </div>
-
-
-        <!-- BLOCAT 6 -->
-        <div class="hub-card locked">
-            <i class="fas fa-lock"></i>
-            <span style="font-family:'Orbitron'; font-weight:800; font-size:10px;">COMING SOON</span>
-            <i class="fas fa-link lock-badge" style="opacity:0.5;"></i>
-        </div>
-
-
-        <!-- BLOCAT 7 -->
-        <div class="hub-card locked">
-            <i class="fas fa-lock"></i>
-            <span style="font-family:'Orbitron'; font-weight:800; font-size:10px;">COMING SOON</span>
-            <i class="fas fa-link lock-badge" style="opacity:0.5;"></i>
-        </div>
-
-
-        <!-- BLOCAT 8 -->
-        <div class="hub-card locked">
-            <i class="fas fa-lock"></i>
-            <span style="font-family:'Orbitron'; font-weight:800; font-size:10px;">COMING SOON</span>
-            <i class="fas fa-link lock-badge" style="opacity:0.5;"></i>
-        </div>
-
-
+        <span style="font-family:'Orbitron'; font-weight:800; font-size:12px; text-align:center; color:#fff;">Puzzle Ksda</span>
     </div>
+
+    <!-- 5. KSDA JUMPER (LOCKED - FIXED TO 500 COINS) -->
+    <div id="game_jumper" class="hub-card locked-game full-bg-card" onclick="handleGameClick('jumper', 'jump.html', 500)">
+        <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/doodle%20jump%2Fbufs%2Fbackrounds%2Fe%2F3%2Faa121184-a341-4917-828e-3bc8a34f4fbc.png?alt=media&token=df623721-90a9-4675-b0f3-fa266e79be84" class="hub-img-bg" alt="Jumper">
+        <div class="hub-card-overlay"></div>
+        <span style="font-family:'Orbitron'; font-weight:800; font-size:12px; text-align:center; color:#fff; position: relative; z-index: 2;">KSDA JUMPER</span>
+    </div>
+
+    <!-- COMING SOON -->
+    <div class="hub-card locked">
+        <i class="fas fa-lock"></i>
+        <span style="font-family:'Orbitron'; font-weight:800; font-size:10px;">COMING SOON</span>
+    </div>
+
+    <!-- COMING SOON -->
+    <div class="hub-card locked">
+        <i class="fas fa-lock"></i>
+        <span style="font-family:'Orbitron'; font-weight:800; font-size:10px;">COMING SOON</span>
+    </div>
+
+
+    <!-- COMING SOON -->
+    <div class="hub-card locked">
+        <i class="fas fa-lock"></i>
+        <span style="font-family:'Orbitron'; font-weight:800; font-size:10px;">COMING SOON</span>
+    </div>
+
+
+    <!-- COMING SOON -->
+    <div class="hub-card locked">
+        <i class="fas fa-lock"></i>
+        <span style="font-family:'Orbitron'; font-weight:800; font-size:10px;">COMING SOON</span>
+    </div>
+
+
+    <!-- COMING SOON -->
+    <div class="hub-card locked">
+        <i class="fas fa-lock"></i>
+        <span style="font-family:'Orbitron'; font-weight:800; font-size:10px;">COMING SOON</span>
+    </div>
+</div>
 
 </main>
 <!-- MAIN CONTENT AREA END -->
@@ -3913,9 +3945,11 @@ onAuthStateChanged(auth, user => {
 const unlockedGames = data.unlockedGames || [];
 
 // Listă cu jocurile care pot fi deblocate
+// Listă cu jocurile care pot fi deblocate (Added Puzzle here)
 const lockableGames = [
     { id: 'spin', cardId: 'game_spin', url: 'SpinWeel.html' },
-    { id: 'jumper', cardId: 'game_jumper', url: 'jump.html' }
+    { id: 'jumper', cardId: 'game_jumper', url: 'jump.html' },
+    { id: 'puzzle', cardId: 'game_puzzle', url: 'puzzle.html' }
 ];
 
 lockableGames.forEach(game => {
