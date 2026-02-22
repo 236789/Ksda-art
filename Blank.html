@@ -5715,6 +5715,7 @@ document.getElementById('claimStreakBtn').onclick = window.flyDiamond;
 
 
 
+let timerInterval = null;
 let timerState = {
     totalTime: 0, // seconds
     timeLeft: 0,
@@ -5737,47 +5738,9 @@ const MODE_CONFIG = {
     }
 };
 
-let timerInterval = null;
-let timerState = {
-    totalTime: 0,
-    timeLeft: 0
-};
 
-// --- 2. INIT TIMER ---
-function initCyberTimer(gridSize) {
-    // Hide Game Over Screen if it was open
-    document.getElementById('gameOverScreen').style.display = 'none';
-    
-    // Remove Panic styling
-    const hud = document.querySelector('.timer-hud-container');
-    if(hud) hud.classList.remove('panic-mode');
 
-    // Set Time based on difficulty
-    const config = MODE_CONFIG[gridSize] || MODE_CONFIG[5]; 
-    timerState.totalTime = config.time;
-    timerState.timeLeft = config.time;
-    
-    // Initial Render
-    updateTimerVisuals();
-
-    // Start Loop
-    if(timerInterval) clearInterval(timerInterval);
-    timerInterval = setInterval(updateTimerLoop, 1000);
-}
-
-// --- 3. THE LOOP (Handles Time, Panic, and Loss) ---
-function updateTimerLoop() {
-    if(!jigState.isPlaying) return;
-
-    timerState.timeLeft--;
-    
-    updateTimerVisuals();
-
-    // Check Loss Condition
-    if(timerState.timeLeft <= 0) {
-        triggerGameOver();
-    }
-}
+ 
 
 // --- 4. VISUAL UPDATE FUNCTION ---
 function updateTimerVisuals() {
