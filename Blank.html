@@ -4450,6 +4450,13 @@
                 <span id="earnedDiamondsText">0</span>
                 <small style="font-size: 10px; color: #00ff88;">DIAMONDS</small>
             </div>
+
+
+<div id="mysteryWinBox" class="reward-coins-box" style="flex-direction: column; font-size: 30px; display: none;">
+    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%201.png?alt=media&token=29742b82-3e51-408c-948e-c3bae712e2ca" style="width: 45px;">
+    <span id="earnedMysteryText">0</span>
+    <small style="font-size: 10px; color: #fff;">MYSTERY BOX</small>
+</div>
         </div>
         
         <button class="super-btn" onclick="document.getElementById('questRewardModal').classList.remove('active')">COLECTEAZĂ</button>
@@ -6159,15 +6166,15 @@ let timerState = {
 };
 
 const MODE_CONFIG = {
-    5: { // EASY - 3 Milestones
+    5: { // EASY - 240s. 3 items = every 60s
         time: 240,
         rewards: [
             { at: 180, type: 'ksda', val: 50 },
-            { at: 120, type: 'mystery', val: 1 }, // Mystery box in the middle
+            { at: 120, type: 'mystery', val: 1 },
             { at: 60, type: 'diamond', val: 2 }
         ]
     },
-    7: { // MEDIUM - 4 Milestones
+    7: { // MEDIUM - 480s. 4 items = every 96s
         time: 480,
         rewards: [
             { at: 384, type: 'ksda', val: 100 },
@@ -6176,7 +6183,7 @@ const MODE_CONFIG = {
             { at: 96, type: 'ksda', val: 200 }
         ]
     },
-    9: { // HARD - 6 Milestones
+    9: { // HARD - 600s. 6 items = every 85s (starting at 515)
         time: 600,
         rewards: [
             { at: 515, type: 'ksda', val: 150 },
@@ -6184,7 +6191,7 @@ const MODE_CONFIG = {
             { at: 345, type: 'mystery', val: 1 },
             { at: 260, type: 'ksda', val: 300 },
             { at: 175, type: 'diamond', val: 5 },
-            { at: 90, type: 'mystery', val: 1 } // Hard has two boxes!
+            { at: 90, type: 'mystery', val: 1 }
         ]
     }
 };
@@ -6274,17 +6281,56 @@ function initRoulette() {
 }
 
 async function revealPrize(item) {
-    document.getElementById('prizeReveal').style.display = 'block';
+    const prizeReveal = document.getElementById('prizeReveal');
     const display = document.getElementById('prizeDisplay');
-    display.innerHTML = `<h2 style="color:#ffd700;">${item.name}</h2>`;
+    const status = document.getElementById('mysteryStatus');
     
-    // Firebase Write
-    if(auth.currentUser) {
-        const userRef = doc(db, "accounts", auth.currentUser.uid);
-        if(item.type === 'ksda') await updateDoc(userRef, { coins: increment(500) });
-        if(item.type === 'diamond') await updateDoc(userRef, { diamonds: increment(5) });
-        if(item.type === 'badge') await updateDoc(userRef, { ownedBadges: arrayUnion(item.id) });
-        if(item.type === 'frame') await updateDoc(userRef, { ownedFrames: arrayUnion(item.id) });
+    // 1. Actualizăm starea vizuală
+    prizeReveal.style.display = 'block';
+    status.innerText = "ACCESS GRANTED";
+    status.style.color = "#00ff88";
+
+    // 2. Construim UI-ul recompensei (Imagine + Nume)
+    display.innerHTML = `
+        <div style="padding: 25px; background: rgba(255,255,255,0.03); border: 2px solid ${item.type === 'ksda' ? '#ffd700' : 'var(--primary)'}; border-radius: 20px; box-shadow: 0 0 30px rgba(0,0,0,0.5);">
+            <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 15px;">
+                ${item.icon ? `<img src="${item.icon}" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 10px currentColor);">` : `<i class="fas fa-gift" style="font-size: 50px; color: var(--primary);"></i>`}
+            </div>
+            <h2 style="font-family: 'Orbitron'; font-size: 22px; color: #fff; margin: 0; text-transform: uppercase;">${item.name}</h2>
+            <p style="font-family: 'Poppins'; font-size: 11px; color: var(--text-muted); margin-top: 5px; letter-spacing: 1px;">OBIECT ADĂUGAT ÎN INVENTAR</p>
+        </div>
+    `;
+
+    // 3. Logica de scriere în Firebase pentru toate tipurile
+    if (auth.currentUser) {
+        try {
+            const userRef = doc(db, "accounts", auth.currentUser.uid);
+            
+            switch(item.type) {
+                case 'ksda':
+                    await updateDoc(userRef, { coins: increment(500) });
+                    break;
+                case 'diamond':
+                    await updateDoc(userRef, { diamonds: increment(5) });
+                    break;
+                case 'badge':
+                    await updateDoc(userRef, { ownedBadges: arrayUnion(item.id) });
+                    break;
+                case 'frame':
+                    await updateDoc(userRef, { ownedFrames: arrayUnion(item.id) });
+                    break;
+                case 'banner':
+                    await updateDoc(userRef, { ownedBanners: arrayUnion(item.id) });
+                    break;
+                case 'text':
+                    await updateDoc(userRef, { ownedTexts: arrayUnion(item.id) });
+                    break;
+            }
+            console.log(`Recompensă salvată: ${item.name} (${item.type})`);
+        } catch (e) {
+            console.error("Eroare la salvarea recompensei Mystery Box:", e);
+            status.innerText = "DATABASE SYNC ERROR";
+        }
     }
 }
 
@@ -6435,34 +6481,30 @@ window.resumeGame = async () => {
 
 
  
-// Helper to draw the icons on the bar
-// Helper sigur pentru desenarea recompenselor pe bară
 function renderLootMarkers() {
     const lootZone = document.getElementById('lootZone');
     if (!lootZone) return;
     
     lootZone.innerHTML = '';
     
-    // Verificăm dacă milestones există și este array (previne eroarea forEach)
-    if (!timerState.milestones || !Array.isArray(timerState.milestones)) {
-        console.warn("Milestones lipsă. Încercăm recuperarea din setările modului.");
-        return; 
-    }
+    if (!timerState.milestones || !Array.isArray(timerState.milestones)) return;
 
     timerState.milestones.forEach((m, index) => {
         const marker = document.createElement('div');
         marker.className = 'loot-marker';
         if (m.lost) marker.classList.add('lost');
-        
         marker.id = `ms-${index}`;
         
-        // Calcul poziție bazat pe timpul total
         const pct = (m.at / timerState.totalTime) * 100;
         marker.style.left = `${pct}%`;
 
-        const imgUrl = (m.type === 'ksda') ? 'https://iili.io/fhc1SKQ.png' : 'https://iili.io/fv5bmtj.png';
+        // Asset Selection Logic
+        let imgUrl = "";
+        if(m.type === 'ksda') imgUrl = 'https://iili.io/fhc1SKQ.png';
+        else if(m.type === 'diamond') imgUrl = 'https://iili.io/fv5bmtj.png';
+        else if(m.type === 'mystery') imgUrl = 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%201.png?alt=media&token=29742b82-3e51-408c-948e-c3bae712e2ca';
+
         marker.innerHTML = `<img src="${imgUrl}">`;
-        
         lootZone.appendChild(marker);
     });
 }
@@ -6603,69 +6645,58 @@ async function doWin() {
     jigState.isPlaying = false;
     if (timerInterval) clearInterval(timerInterval);
     
-    // 1. Calculăm Recompensele
-    let totalEarnedCoins = pendingCoins + 100; // 100 bonus fix + punctele pe piese
+    let totalEarnedCoins = pendingCoins + 100;
     let totalEarnedDiamonds = 0;
+    wonBoxes = 0; // Reset global counter
 
-    // Verificăm ce milestones NU au fost pierdute
     if (timerState.milestones) {
         timerState.milestones.forEach(m => {
             if (!m.lost) {
                 if (m.type === 'ksda') totalEarnedCoins += m.val;
                 if (m.type === 'diamond') totalEarnedDiamonds += m.val;
+                if (m.type === 'mystery') wonBoxes += m.val;
             }
         });
     }
 
-    // 2. Calculăm timpul pentru Hall of Fame
-    const timeTakenSecs = timerState.totalTime - timerState.timeLeft;
-    const mins = Math.floor(timeTakenSecs / 60);
-    const secs = timeTakenSecs % 60;
-    const timeFormatted = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-
-    // 3. Actualizăm UI-ul Modalului
+    // Update UI
     document.getElementById('earnedCoinsText').innerText = totalEarnedCoins;
     
+    // Diamonds Box
     const dBox = document.getElementById('diamondWinBox');
     if (totalEarnedDiamonds > 0) {
         document.getElementById('earnedDiamondsText').innerText = totalEarnedDiamonds;
-        dBox.style.display = 'flex'; // Arătăm diamantele
-    } else {
-        dBox.style.display = 'none'; // Ascundem dacă e 0
-    }
+        dBox.style.display = 'flex';
+    } else { dBox.style.display = 'none'; }
 
-    document.getElementById('winMessage').innerText = `Timp final: ${timeFormatted}. Recompensele au fost adăugate în contul tău!`;
+    // Mystery Box Box
+    const mBox = document.getElementById('mysteryWinBox');
+    if (wonBoxes > 0) {
+        document.getElementById('earnedMysteryText').innerText = wonBoxes;
+        mBox.style.display = 'flex';
+    } else { mBox.style.display = 'none'; }
+
     document.getElementById('questRewardModal').classList.add('active');
 
-    // 4. Salvare în Firebase
+    // Change the button behavior on the Reward Modal
+    const collectBtn = document.querySelector('#questRewardModal .super-btn');
+    collectBtn.onclick = () => {
+        if(wonBoxes > 0) openMysteryOverlay();
+        else resetToMenu();
+    };
+
+    // Firebase Write (Save coins/diamonds only, items come from Roulette)
     if (auth.currentUser) {
         try {
             const userRef = doc(db, "accounts", auth.currentUser.uid);
-            
-            // Postăm în Hall of Fame
-            await setDoc(doc(db, "puzzle_hall_of_fame", `${auth.currentUser.uid}_${Date.now()}`), {
-                username: (await getDoc(userRef)).data()?.username || "Player",
-                imgUrl: jigState.imgUrl,
-                timeFormatted: timeFormatted,
-                gridSize: `${jigState.rows}x${jigState.cols}`,
-                timestamp: serverTimestamp()
-            });
-
-            // Adăugăm banii și diamantele
             await updateDoc(userRef, {
                 coins: increment(totalEarnedCoins),
                 diamonds: increment(totalEarnedDiamonds),
-                jigsawSave: deleteField() // Ștergem salvarea pentru că a câștigat
+                jigsawSave: deleteField() 
             });
-
-            // Resetăm contoarele locale
             pendingCoins = 0;
-
-        } catch (e) { console.warn("Eroare la salvarea rezultatelor:", e); }
+        } catch (e) { console.error(e); }
     }
-
-    // Revenire la meniu după 4 secunde
-    setTimeout(resetToMenu, 4000);
 }
 
 // --- UPDATED GALLERY FETCH ---
