@@ -3867,39 +3867,92 @@
     border: 1px solid rgba(255,255,255,0.2);
 }
 
-/* --- NEW CYBER TIMER HUD --- */
+/* --- UPDATED CYBER TIMER HUD --- */
 .timer-hud-container {
-    grid-column: 1 / -1; /* Spans full width on PC */
+    grid-column: 1 / -1;
     width: 100%;
-    max-width: 600px;
-    margin: 0 auto 15px auto;
+    max-width: 700px;
+    margin: 0 auto 20px auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     position: relative;
-    z-index: 20;
+    z-index: 100;
 }
 
-/* The Bar Background */
 .cyber-bar-track {
     width: 100%;
-    height: 12px;
-    background: rgba(0, 0, 0, 0.6);
-    border: 1px solid #333;
-    border-radius: 6px;
-    overflow: hidden;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    height: 35px; /* Taller to fit icons */
+    background: rgba(255, 255, 255, 0.05); /* Glassy Transparent */
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(41, 243, 255, 0.2);
+    border-radius: 50px;
+    position: relative;
+    overflow: visible; /* Let icons stick out slightly */
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+}
+
+.cyber-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+    border-radius: 50px;
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.6);
+    transition: width 1s linear;
     position: relative;
 }
 
-/* The Moving Fill */
-.cyber-bar-fill {
-    height: 100%;
-    width: 100%; /* Starts full */
-    background: linear-gradient(90deg, #00ff88, #00ffff);
-    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
-    transition: width 1s linear, background 0.3s;
-    border-radius: 6px;
+/* The "Liquid" Shimmer Effect */
+.cyber-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: liquidShimmer 2s infinite linear;
+}
+
+@keyframes liquidShimmer {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+}
+
+/* REWARD ICONS ON THE BAR */
+.milestones-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.timer-milestone {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 10;
+    transition: 0.3s;
+}
+
+.timer-milestone img {
+    width: 24px;
+    height: 24px;
+    filter: drop-shadow(0 0 5px rgba(0,0,0,0.8));
+}
+
+/* Vertical tick marks */
+.timer-milestone::before {
+    content: '';
+    width: 2px;
+    height: 15px;
+    background: rgba(255,255,255,0.5);
+    margin-bottom: 2px;
+}
+
+.milestone-lost {
+    opacity: 0.2;
+    filter: grayscale(1);
+    transform: translate(-50%, -50%) scale(0.8);
 }
 
 /* The Digital Timer Text */
@@ -5723,43 +5776,55 @@ let timerState = {
     milestones: [] 
 };
 
-// --- FIX: CONFIGURARE MODURI (Adăugare timp) ---
-// Asigură-te că MODE_CONFIG arată așa (suprascrie dacă există deja):
 const MODE_CONFIG = {
-    3: { time: 300 },  // 5 Minute (Easy)
-    5: { time: 480 },  // 8 Minute (Standard)
-    7: { time: 900 },  // 15 Minute (Medium)
-    9: { time: 1200 }  // 20 Minute (Hard)
+    5: { 
+        time: 120, // 2 Minutes
+        rewards: [
+            { at: 90, type: 'ksda', val: 50 },
+            { at: 60, type: 'diamond', val: 1 },
+            { at: 30, type: 'ksda', val: 100 }
+        ]
+    },
+    7: { 
+        time: 240, // 4 Minutes
+        rewards: [
+            { at: 180, type: 'ksda', val: 100 },
+            { at: 120, type: 'diamond', val: 2 },
+            { at: 60, type: 'ksda', val: 200 }
+        ]
+    },
+    9: { 
+        time: 300, // 5 Minutes
+        rewards: [
+            { at: 240, type: 'ksda', val: 150 },
+            { at: 180, type: 'diamond', val: 3 },
+            { at: 120, type: 'ksda', val: 300 },
+            { at: 60, type: 'diamond', val: 5 }
+        ]
+    }
 };
-
-
 
 
  
 
-// --- 4. VISUAL UPDATE FUNCTION ---
 function updateTimerVisuals() {
     const fillBar = document.getElementById('cyberTimerFill');
     const textDisplay = document.getElementById('cyberTimerText');
-    const hudContainer = document.querySelector('.timer-hud-container');
+    
+    if(!fillBar || !textDisplay) return;
 
-    // 1. Calculate Width Percentage
     const pct = (timerState.timeLeft / timerState.totalTime) * 100;
     fillBar.style.width = `${pct}%`;
 
-    // 2. Format Time (MM:SS)
-    const minutes = Math.floor(timerState.timeLeft / 60);
-    const seconds = timerState.timeLeft % 60;
-    // Adds leading zero if seconds < 10
-    textDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-    // 3. Panic Mode (Shake & Red Glow) if under 30 seconds
-    if (timerState.timeLeft <= 30) {
-        if (!hudContainer.classList.contains('panic-mode')) {
-            hudContainer.classList.add('panic-mode');
-        }
+    const mins = Math.floor(timerState.timeLeft / 60);
+    const secs = timerState.timeLeft % 60;
+    textDisplay.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    
+    // Panic color if under 20%
+    if (pct < 20) {
+        fillBar.style.background = "linear-gradient(90deg, #ff416c 0%, #ff4b2b 100%)";
     } else {
-        hudContainer.classList.remove('panic-mode');
+        fillBar.style.background = "linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%)";
     }
 }
 
@@ -6202,89 +6267,70 @@ import { deleteField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-
 
 
 function initCyberTimer(gridSize) {
-    const config = MODE_CONFIG[gridSize] || MODE_CONFIG[5]; // Default to 5
+    const config = MODE_CONFIG[gridSize] || MODE_CONFIG[5];
     
-    // Reset timer state variables
     timerState.totalTime = config.time;
     timerState.timeLeft = config.time;
-    
-    // FIX: Check if rewards exist to prevent the JSON crash
-    if (config.rewards) {
-        timerState.milestones = JSON.parse(JSON.stringify(config.rewards));
-    } else {
-        timerState.milestones = [];
-    }
+    timerState.milestones = JSON.parse(JSON.stringify(config.rewards || []));
 
-    // Render Milestones (Only if container exists)
-    const container = document.getElementById('cyberTimerContainer');
+    // Clear old UI
+    const track = document.querySelector('.cyber-bar-track');
+    let milestonesLayer = document.getElementById('milestonesLayer');
+    if (!milestonesLayer) {
+        milestonesLayer = document.createElement('div');
+        milestonesLayer.id = 'milestonesLayer';
+        milestonesLayer.className = 'milestones-container';
+        track.appendChild(milestonesLayer);
+    }
+    milestonesLayer.innerHTML = '';
     
-    if (container) {
-        // Create or clear the layer
-        let layer = document.getElementById('milestonesLayer');
-        if (!layer) {
-            layer = document.createElement('div');
-            layer.id = 'milestonesLayer';
-            container.appendChild(layer);
-        }
-        layer.innerHTML = '';
+    // Create Milestone Icons
+    timerState.milestones.forEach((m, index) => {
+        const el = document.createElement('div');
+        el.className = 'timer-milestone';
+        el.id = `ms-${index}`;
         
-        // Create DOM elements for milestones
-        timerState.milestones.forEach((m, index) => {
-            const el = document.createElement('div');
-            el.className = 'timer-milestone';
-            el.id = `ms-${index}`;
-            
-            // Calculate Position %
-            const pct = (m.at / timerState.totalTime) * 100;
-            el.style.left = `${pct}%`;
-            
-            if(m.type === 'coin') {
-                el.innerHTML = `<img src="https://iili.io/fhc1SKQ.png" width="25"> <span style="font-size:10px; color:#fff; font-weight:bold;">${m.val}</span>`;
-            } else {
-                el.innerHTML = `<img src="https://iili.io/fv5bmtj.png" width="20">`;
-            }
-            
-            layer.appendChild(el);
-        });
-    }
+        // Position on bar based on time
+        const pct = (m.at / timerState.totalTime) * 100;
+        el.style.left = `${pct}%`;
+        
+        const imgUrl = (m.type === 'ksda') ? 'https://iili.io/fhc1SKQ.png' : 'https://iili.io/fv5bmtj.png';
+        el.innerHTML = `<img src="${imgUrl}">`;
+        
+        milestonesLayer.appendChild(el);
+    });
 
-    // Start Loop
+    // Start Timer
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(updateTimerLoop, 1000);
-    
-    // Force immediate visual update
-    if (typeof updateTimerVisuals === 'function') updateTimerVisuals();
+    updateTimerVisuals(); // Immediate update
 }
 
 function updateTimerLoop() {
-    if(!jigState.isPlaying) return;
+    if (!jigState.isPlaying) return;
 
     timerState.timeLeft--;
-    
-    // Update Bar Width
-    const pct = (timerState.timeLeft / timerState.totalTime) * 100;
-    document.getElementById('cyberTimerFill').style.width = `${pct}%`;
 
-    // Check Milestones (If bar passes them, they are lost)
+    // 1. Update Bar Width
+    updateTimerVisuals();
+
+    // 2. Check Milestones
     timerState.milestones.forEach((m, index) => {
         if (!m.lost && timerState.timeLeft < m.at) {
-            // Milestone Lost!
             m.lost = true;
             const el = document.getElementById(`ms-${index}`);
-            if(el) {
-                el.classList.add('milestone-lost');
-                // Optional: Play a fail sound here
-            }
+            if (el) el.classList.add('milestone-lost');
         }
     });
 
-    // Game Over if time hits 0? Or just no bonus?
-    // Let's just keep playing but bar is empty.
-    if(timerState.timeLeft <= 0) {
-        document.getElementById('cyberTimerFill').style.width = `0%`;
+    // 3. Time Up
+    if (timerState.timeLeft <= 0) {
         clearInterval(timerInterval);
+        triggerGameOver();
     }
 }
+
+
   </script>
 </body>
 </html>
