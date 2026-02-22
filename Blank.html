@@ -6047,26 +6047,7 @@ const MODE_CONFIG = {
 
  
 
-function updateTimerVisuals() {
-    const fillBar = document.getElementById('cyberTimerFill');
-    const textDisplay = document.getElementById('cyberTimerText');
-    
-    if(!fillBar || !textDisplay) return;
 
-    const pct = (timerState.timeLeft / timerState.totalTime) * 100;
-    fillBar.style.width = `${pct}%`;
-
-    const mins = Math.floor(timerState.timeLeft / 60);
-    const secs = timerState.timeLeft % 60;
-    textDisplay.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    
-    // Panic color if under 20%
-    if (pct < 20) {
-        fillBar.style.background = "linear-gradient(90deg, #ff416c 0%, #ff4b2b 100%)";
-    } else {
-        fillBar.style.background = "linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%)";
-    }
-}
 
 function triggerGameOver() {
     jigState.isPlaying = false;
@@ -6558,59 +6539,93 @@ import { deleteField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-
 
 
 
+// --- JIGSAW TIMER ENGINE ---
+
 function initCyberTimer(gridSize) {
     const config = MODE_CONFIG[gridSize] || MODE_CONFIG[5];
     timerState.totalTime = config.time;
     timerState.timeLeft = config.time;
+    
+    // Reset milestones
     timerState.milestones = JSON.parse(JSON.stringify(config.rewards || []));
 
-    // Render Loot Markers
     const lootZone = document.getElementById('lootZone');
-    lootZone.innerHTML = '';
+    if (lootZone) {
+        lootZone.innerHTML = '';
+        timerState.milestones.forEach((m, index) => {
+            const marker = document.createElement('div');
+            marker.className = 'loot-marker';
+            marker.id = `ms-${index}`;
+            
+            // Calculate Position
+            const pct = (m.at / timerState.totalTime) * 100;
+            marker.style.left = `${pct}%`;
 
-    timerState.milestones.forEach((m, index) => {
-        const marker = document.createElement('div');
-        marker.className = 'loot-marker';
-        marker.id = `ms-${index}`;
-        
-        // Calculate position based on time remaining
-        const pct = (m.at / timerState.totalTime) * 100;
-        marker.style.left = `${pct}%`;
-
-        const imgUrl = (m.type === 'ksda') ? 'https://iili.io/fhc1SKQ.png' : 'https://iili.io/fv5bmtj.png';
-        marker.innerHTML = `<img src="${imgUrl}">`;
-        
-        lootZone.appendChild(marker);
-    });
+            const imgUrl = (m.type === 'ksda') ? 'https://iili.io/fhc1SKQ.png' : 'https://iili.io/fv5bmtj.png';
+            marker.innerHTML = `<img src="${imgUrl}">`;
+            lootZone.appendChild(marker);
+        });
+    }
 
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(updateTimerLoop, 1000);
+    
+    // Immediate visual sync
     updateTimerVisuals();
 }
 
+function updateTimerVisuals() {
+    const fill = document.getElementById('liquidFill');
+    const clock = document.getElementById('cyberClock');
+    if (!fill || !clock) return;
 
+    const pct = (timerState.timeLeft / timerState.totalTime) * 100;
+    fill.style.width = `${pct}%`;
+
+    // DYNAMIC COLOR SHIFTING
+    if (pct > 60) {
+        // Healthy: Cyan
+        fill.style.background = 'linear-gradient(90deg, #00f2fe 0%, #4facfe 100%)';
+        fill.style.boxShadow = '0 0 15px rgba(41, 243, 255, 0.5)';
+    } else if (pct > 25) {
+        // Warning: Yellow/Gold
+        fill.style.background = 'linear-gradient(90deg, #fcebad 0%, #f9d423 100%)';
+        fill.style.boxShadow = '0 0 15px rgba(249, 212, 35, 0.4)';
+    } else {
+        // Danger: Red/Pink
+        fill.style.background = 'linear-gradient(90deg, #f093fb 0%, #f5576c 100%)';
+        fill.style.boxShadow = '0 0 20px rgba(245, 87, 108, 0.6)';
+    }
+
+    const mins = Math.floor(timerState.timeLeft / 60);
+    const secs = timerState.timeLeft % 60;
+    clock.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
 
 function updateTimerLoop() {
-    if (!jigState.isPlaying) return;
+    if (!jigState.isPlaying) {
+        clearInterval(timerInterval);
+        return;
+    }
 
     timerState.timeLeft--;
     updateTimerVisuals();
 
-    // 3. LOOT DEPLETION LOGIC
+    // Milestone Check
     timerState.milestones.forEach((m, index) => {
         if (!m.lost && timerState.timeLeft < m.at) {
             m.lost = true;
             const el = document.getElementById(`ms-${index}`);
             if (el) el.classList.add('lost');
             
-            // Visual feedback: Flash the track outline red briefly
+            // Flash track border on loss
             const track = document.querySelector('.glass-track');
             track.style.borderColor = "#ff4757";
-            setTimeout(() => track.style.borderColor = "rgba(41, 243, 255, 0.3)", 300);
+            setTimeout(() => track.style.borderColor = "rgba(41, 243, 255, 0.2)", 300);
         }
     });
 
-    if (timerState.timeLeft <= 0) { 
+    if (timerState.timeLeft <= 0) {
         timerState.timeLeft = 0;
         jigState.isPlaying = false;
         clearInterval(timerInterval);
@@ -6620,6 +6635,10 @@ function updateTimerLoop() {
 }
 
 
+
+
+
+ 
 
 
   </script>
