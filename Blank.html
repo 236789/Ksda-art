@@ -3746,6 +3746,39 @@
     .puzzle-menu { width: 95%; padding: 30px 20px; }
     .puzzle-menu-btn { font-size: 12px; padding: 18px; }
 }
+
+
+/* --- FLYING COIN ANIMATION --- */
+.fly-coin-visual {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    background-image: url('https://iili.io/fhc1SKQ.png'); /* KSDA Coin */
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 100000;
+    pointer-events: none;
+    filter: drop-shadow(0 0 10px #ffd700);
+    transition: all 1s cubic-bezier(0.19, 1, 0.22, 1); /* Smooth snap effect */
+}
+
+/* Optional: Number popup (+25) */
+.coin-popup-text {
+    position: fixed;
+    color: #ffd700;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 18px;
+    z-index: 100001;
+    text-shadow: 0 0 5px #000;
+    pointer-events: none;
+    animation: floatUpFade 1s forwards;
+}
+
+@keyframes floatUpFade {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+}
   </style>
 </head>
 <body>
@@ -4208,15 +4241,36 @@
             <input type="file" id="customImgInput" accept="image/*" onchange="handleCustomImage(this)">
         </div>
 
-        <!-- DIFFICULTY SELECT -->
-        <div id="puzzleDiffMenu" class="puzzle-menu" style="display: none;">
-            <h3 style="text-align: center; color: #fff;">SELECT DIFFICULTY</h3>
-            <!-- Reduced sizes slightly for dragging sanity on mobile -->
-            <button class="puzzle-menu-btn" onclick="startGame(3)">EASY (3x3)</button>
-            <button class="puzzle-menu-btn" onclick="startGame(4)">MEDIUM (4x4)</button>
-            <button class="puzzle-menu-btn" onclick="startGame(5)">HARD (5x5)</button>
-            <button class="btn-nav-v6 btn-nav-back" style="margin-top:10px;" onclick="resetToMenu()">ÎNAPOI</button>
-        </div>
+<!-- DIFFICULTY SELECT (Cyber Style) -->
+<div id="puzzleDiffMenu" class="puzzle-menu" style="display: none;">
+    <h3 style="text-align: center; color: #fff; font-family: 'Orbitron'; margin-bottom: 10px; text-shadow: 0 0 10px var(--primary);">
+        SELECT DIFFICULTY
+    </h3>
+    
+    <!-- EASY: 5x5 = 25 Pieces -->
+    <button class="puzzle-menu-btn btn-cyber-green" onclick="startGame(5)">
+        <i class="fas fa-seedling"></i>
+        <span>EASY (25 PIESE)</span>
+    </button>
+    
+    <!-- MEDIUM: 7x7 = 49 Pieces -->
+    <button class="puzzle-menu-btn btn-cyber-cyan" onclick="startGame(7)">
+        <i class="fas fa-cube"></i>
+        <span>MEDIUM (49 PIESE)</span>
+    </button>
+    
+    <!-- HARD: 9x9 = 81 Pieces -->
+    <button class="puzzle-menu-btn btn-cyber-pink" onclick="startGame(9)">
+        <i class="fas fa-skull"></i>
+        <span>HARD (81 PIESE)</span>
+    </button>
+
+    <div style="width: 100%; height: 1px; background: rgba(255,255,255,0.1); margin: 5px 0;"></div>
+
+    <button class="btn-nav-v6 btn-nav-back" style="width: 100%; padding: 15px;" onclick="resetToMenu()">
+        <i class="fas fa-arrow-left"></i> ÎNAPOI
+    </button>
+</div>
 
     </div>
 
@@ -5611,27 +5665,34 @@ window.resetToMenu = () => {
 // 5. Win Logic (Community Pool Integration)
 async function doWin() {
     jigState.isPlaying = false;
-    let coins = (jigState.rows === 3) ? 250 : (jigState.rows === 4) ? 500 : 1000;
+    
+    // Bonus for finishing the whole puzzle
+    let bonusCoins = 100; 
 
-    // SAVE IMAGE TO GLOBAL POOL IF CUSTOM
+    // Show Completion Modal
+    const qModal = document.getElementById('questRewardModal');
+    // Update text to say "Bonus Completion"
+    qModal.querySelector('h2').innerHTML = '<span style="font-size: 24px;">🏆</span> PUZZLE COMPLET!';
+    qModal.querySelector('p').innerText = "Ai primit un bonus pentru finalizare!";
+    qModal.querySelector('.reward-coins-box span').innerText = bonusCoins;
+    qModal.classList.add('active');
+
+    // Give Bonus
+    if (auth.currentUser) {
+        await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
+            coins: increment(bonusCoins),
+            jigsawSave: deleteField() // Clear save
+        });
+    }
+
+    // Save image to pool if custom (Existing logic)
     if (jigState.isCustom && jigState.imgUrl.startsWith('data:image')) {
         try {
             await updateDoc(doc(db, "site_metadata", "puzzle_pool"), {
                 images: arrayUnion(jigState.imgUrl)
             });
-        } catch(e) {
-            await setDoc(doc(db, "site_metadata", "puzzle_pool"), { images: [jigState.imgUrl] }, {merge: true});
-        }
+        } catch(e) {}
     }
-
-    await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
-        coins: increment(coins),
-        jigsawSave: deleteField()
-    });
-
-    const qModal = document.getElementById('questRewardModal');
-    qModal.querySelector('.reward-coins-box span').innerText = coins;
-    qModal.classList.add('active');
 
     resetToMenu();
 }
@@ -5723,22 +5784,24 @@ function enablePointerDrag(el, id) {
 
             // SNAP TOLERANCE (Increased to 50% of piece size for easier mobile use)
 // SNAP TOLERANCE
+// SNAP TOLERANCE
             if (dist < (pSize * 0.5)) {
                 // 1. Snap to grid visually
                 el.style.left = `${targetX}px`;
                 el.style.top = `${targetY}px`;
                 
-                // 2. Apply the "Locked" state (removes borders, blends in)
+                // 2. Apply the "Locked" state
                 el.classList.add('locked');
                 
-                // 3. Trigger the Cyber Flash Animation (defined in the new CSS)
-                // This replaces the manual 'filter' and 'zIndex' lines you had
+                // 3. Trigger the Cyber Flash Animation
                 el.classList.add('snap-anim');
-                
-                // 4. Clean up the animation class after 400ms (matches CSS duration)
                 setTimeout(() => {
                     el.classList.remove('snap-anim');
                 }, 400);
+
+                // --- NEW: TRIGGER COIN REWARD (25 Coins) ---
+                // We pass the mouse coordinates so the coin spawns exactly where you clicked
+                spawnCoinReward(upEvent.clientX, upEvent.clientY);
 
                 // 5. Update Game State
                 pState.isLocked = true;
@@ -5799,6 +5862,51 @@ window.saveAndExit = async () => {
 }
 
 import { deleteField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+
+// --- NEW: COIN ANIMATION & REWARD LOGIC ---
+function spawnCoinReward(x, y) {
+    // 1. Create the visual elements
+    const coin = document.createElement('div');
+    coin.className = 'fly-coin-visual';
+    coin.style.left = x + 'px';
+    coin.style.top = y + 'px';
+    
+    const text = document.createElement('div');
+    text.className = 'coin-popup-text';
+    text.innerText = "+25";
+    text.style.left = (x + 20) + 'px';
+    text.style.top = (y - 20) + 'px';
+
+    document.body.appendChild(coin);
+    document.body.appendChild(text);
+
+    // 2. Find the target (The Account Button in Header or Menu)
+    const targetBtn = document.getElementById('headerLoginBtn') || document.getElementById('menuBtn');
+    const rect = targetBtn.getBoundingClientRect();
+
+    // 3. Trigger Animation (Wait 50ms for DOM to render)
+    setTimeout(() => {
+        coin.style.left = (rect.left + rect.width / 2) + 'px';
+        coin.style.top = (rect.top + rect.height / 2) + 'px';
+        coin.style.transform = 'scale(0.5) rotate(720deg)'; // Spin and shrink
+        coin.style.opacity = '0';
+    }, 50);
+
+    // 4. Cleanup DOM
+    setTimeout(() => {
+        coin.remove();
+        text.remove();
+    }, 1100);
+
+    // 5. Update Firebase (Real Money!)
+    if (auth.currentUser) {
+        // We use the imported 'increment' from your firebase imports
+        updateDoc(doc(db, "accounts", auth.currentUser.uid), {
+            coins: increment(25)
+        }).catch(err => console.error("Coin error:", err));
+    }
+}
 
   </script>
 </body>
