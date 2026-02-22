@@ -3218,6 +3218,51 @@
     transform: scale(1);
     margin: 0;
 }
+
+
+
+/* --- FIXED LAYOUT --- */
+@media (min-width: 900px) {
+    .jigsaw-arena { 
+        display: grid !important;
+        /* Restored to original 3-column proportions to remove the huge gap */
+        grid-template-columns: 200px 1fr 280px !important; 
+        gap: 15px; 
+        padding: 20px; 
+    }
+}
+
+/* --- TRAY PIECE GIVER (3 per row) --- */
+.zone-pieces { 
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important; 
+    gap: 8px; 
+    padding: 10px;
+    overflow-y: auto !important; 
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    align-content: flex-start;
+}
+
+/* Piece appearance in tray */
+.jig-piece.in-tray {
+    width: 100% !important;
+    height: auto;
+    aspect-ratio: 1/1;
+    position: relative !important;
+    transform: scale(1);
+    margin: 0;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* --- BOARD FIX --- */
+.drop-target-grid {
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.2);
+    /* This ensures the background image stays centered */
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
   </style>
 </head>
 <body>
@@ -4964,10 +5009,11 @@ window.resumeGame = async () => {
     }
 }
 
-// 2. Modified setupBoardUI to STOP re-sorting pieces
 function setupBoardUI(isLoad = false) {
     document.getElementById('puzzleMenuContainer').style.display = 'none';
     const arena = document.getElementById('jigsawArena');
+    
+    // Set display mode based on screen width
     arena.style.display = (window.innerWidth >= 900) ? 'grid' : 'flex';
     
     const previewImg = document.getElementById('gamePreviewImg');
@@ -4981,6 +5027,7 @@ function setupBoardUI(isLoad = false) {
         tray.innerHTML = '';
         gridBox.innerHTML = '';
 
+        // Calculate dimensions
         let w = boardContainer.clientWidth || 300;
         let h = boardContainer.clientHeight || 300;
         const baseSize = Math.floor(Math.min((w - 20) / jigState.cols, (h - 20) / jigState.rows));
@@ -4989,12 +5036,17 @@ function setupBoardUI(isLoad = false) {
         jigState.totalW = baseSize * jigState.cols;
         jigState.totalH = baseSize * jigState.rows;
 
+        // Apply size to the board
         gridBox.style.width = `${jigState.totalW}px`;
         gridBox.style.height = `${jigState.totalH}px`;
         gridBox.style.gridTemplateColumns = `repeat(${jigState.cols}, 1fr)`;
         gridBox.style.gridTemplateRows = `repeat(${jigState.rows}, 1fr)`;
+        
+        // FIX: Re-apply the background image with dark overlay
+        gridBox.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${jigState.imgUrl})`;
+        gridBox.style.backgroundSize = "cover";
 
-        // REMOVED THE SORT HERE - Now respects randomized order
+        // Draw the pieces (Shuffle remains active from startGame)
         jigState.pieces.forEach((runtimePiece) => {
             const piece = document.createElement('div');
             piece.className = 'jig-piece';
@@ -5003,6 +5055,7 @@ function setupBoardUI(isLoad = false) {
             piece.style.backgroundImage = `url(${jigState.imgUrl})`;
             piece.style.backgroundSize = `${jigState.totalW}px ${jigState.totalH}px`;
             
+            // Image slicing logic
             const row = Math.floor(runtimePiece.id / jigState.cols);
             const col = runtimePiece.id % jigState.cols;
             piece.style.backgroundPosition = `-${col * baseSize}px -${row * baseSize}px`;
@@ -5016,15 +5069,19 @@ function setupBoardUI(isLoad = false) {
                 piece.classList.add('in-tray');
                 tray.appendChild(piece);
             } else {
+                // If it's loose on the board
                 piece.style.left = `${runtimePiece.currentX}px`;
                 piece.style.top = `${runtimePiece.currentY}px`;
                 gridBox.appendChild(piece);
             }
 
+            // Re-enable dragging
             if (!runtimePiece.isLocked) enablePointerDrag(piece, runtimePiece.id);
         });
 
         updateCount();
+        if(!isLoad) saveProgress();
+        
     }, 100);
 }
 
