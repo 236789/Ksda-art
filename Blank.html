@@ -4238,19 +4238,24 @@
     background: rgba(255, 255, 255, 0.2);
     border-left: 1px solid rgba(0,0,0,0.5);
 }
-
+/* Micșorăm puțin iconițele pentru a încăpea 6 pe Hard */
 .loot-marker img {
-    width: 26px;
-    height: 26px;
+    width: 22px; /* Redus de la 26px */
+    height: 22px;
     position: absolute;
-    top: -35px; /* Floats icon above the bar */
+    top: -30px; 
     filter: drop-shadow(0 0 8px rgba(0,0,0,0.8));
+    transition: 0.3s ease;
 }
 
-.loot-marker.lost {
-    opacity: 0.1;
-    filter: grayscale(1) blur(1px);
-    transform: translate(-50%, -50%) scale(0.8);
+/* Efect de strălucire când bară e aproape de ele */
+.loot-marker:not(.lost) img {
+    animation: rewardGlow 2s infinite alternate;
+}
+
+@keyframes rewardGlow {
+    from { filter: drop-shadow(0 0 2px rgba(255,215,0,0.4)); }
+    to { filter: drop-shadow(0 0 10px rgba(255,215,0,0.8)); transform: scale(1.1); }
 }
 
 /* Timer Text */
@@ -6092,22 +6097,37 @@ let timerState = {
     milestones: [] 
 };
 
-// 1. UPDATED TIMES (4m, 8m, 10m)
+// --- CONFIGURARE DIFICULTATE ȘI RECOMPENSE ---
 const MODE_CONFIG = {
-    5: { 
-        time: 240, // 4 Minutes
-        rewards: [{ at: 180, type: 'ksda', val: 50 }, { at: 120, type: 'diamond', val: 1 }, { at: 60, type: 'ksda', val: 100 }]
+    5: { // EASY (4 minute) - 3 Milestones
+        time: 240,
+        rewards: [
+            { at: 180, type: 'ksda', val: 50 },
+            { at: 120, type: 'diamond', val: 1 },
+            { at: 60, type: 'ksda', val: 100 }
+        ]
     },
-    7: { 
-        time: 480, // 8 Minutes
-        rewards: [{ at: 360, type: 'ksda', val: 100 }, { at: 240, type: 'diamond', val: 2 }, { at: 120, type: 'ksda', val: 200 }]
+    7: { // MEDIUM (8 minute) - 4 Milestones
+        time: 480,
+        rewards: [
+            { at: 360, type: 'ksda', val: 100 },
+            { at: 240, type: 'diamond', val: 2 },
+            { at: 120, type: 'ksda', val: 200 },
+            { at: 60, type: 'diamond', val: 3 }
+        ]
     },
-    9: { 
-        time: 600, // 10 Minutes
-        rewards: [{ at: 450, type: 'ksda', val: 150 }, { at: 300, type: 'diamond', val: 3 }, { at: 150, type: 'ksda', val: 300 }]
+    9: { // HARD (10 minute) - 6 Milestones
+        time: 600,
+        rewards: [
+            { at: 500, type: 'ksda', val: 150 },
+            { at: 400, type: 'diamond', val: 3 },
+            { at: 300, type: 'ksda', val: 300 },
+            { at: 200, type: 'diamond', val: 5 },
+            { at: 100, type: 'ksda', val: 500 },
+            { at: 50, type: 'diamond', val: 10 }
+        ]
     }
 };
-
 
 
 function triggerGameOver() {
