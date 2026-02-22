@@ -4364,22 +4364,29 @@
     </div>
 </div>
 
-<!-- QUEST REWARD MODAL (FOR KEVIN BOT 15 MESSAGES) -->
-<!-- QUEST REWARD MODAL (Reused for all quests) -->
+<!-- QUEST REWARD MODAL (Actualizat pentru monede + diamante) -->
 <div id="questRewardModal" class="reward-modal">
     <div class="reward-card">
-        <!-- The JS changes this text dynamically -->
-        <h2><span style="font-size: 24px;">🎯</span> QUEST COMPLET!</h2>
-        <p>Felicitări! Ai completat un task.</p>
+        <h2 id="winTitle">🏆 PUZZLE COMPLET!</h2>
+        <p id="winMessage">Felicitări! Ai salvat următoarele recompense:</p>
         
-        <div class="reward-coins-box">
-            <img src="https://iili.io/fhc1SKQ.png" alt="Coin" style="width: 50px;">
-            <span>0</span> <!-- The JS updates this number -->
+        <div style="display: flex; justify-content: center; gap: 20px; margin: 20px 0;">
+            <!-- Box Monede -->
+            <div class="reward-coins-box" style="flex-direction: column; font-size: 30px;">
+                <img src="https://iili.io/fhc1SKQ.png" alt="Coin" style="width: 40px;">
+                <span id="earnedCoinsText">0</span>
+                <small style="font-size: 10px; color: #ffd700;">KSDA COINS</small>
+            </div>
+
+            <!-- Box Diamante (Se va afișa doar dacă câștigi > 0) -->
+            <div id="diamondWinBox" class="reward-coins-box" style="flex-direction: column; font-size: 30px; color: #00ff88; display: none;">
+                <img src="https://iili.io/fv5bmtj.png" alt="Diamond" style="width: 40px;">
+                <span id="earnedDiamondsText">0</span>
+                <small style="font-size: 10px; color: #00ff88;">DIAMONDS</small>
+            </div>
         </div>
         
-        <p style="color: #ffd700; font-weight: 800; font-family: 'Orbitron'; font-size: 12px; letter-spacing: 2px;">KSDA COINS</p>
-        
-        <button class="super-btn" onclick="document.getElementById('questRewardModal').classList.remove('active')">SUPER!</button>
+        <button class="super-btn" onclick="document.getElementById('questRewardModal').classList.remove('active')">COLECTEAZĂ</button>
     </div>
 </div>
 
@@ -6397,16 +6404,16 @@ window.resetToMenu = () => {
 };
 
 
-// --- UPDATED WIN LOGIC ---
 async function doWin() {
     jigState.isPlaying = false;
     if (timerInterval) clearInterval(timerInterval);
     
-    let totalEarnedCoins = pendingCoins + 100;
+    // 1. Calculăm Recompensele
+    let totalEarnedCoins = pendingCoins + 100; // 100 bonus fix + punctele pe piese
     let totalEarnedDiamonds = 0;
 
-    // Only count milestones that weren't lost
-    if(timerState.milestones) {
+    // Verificăm ce milestones NU au fost pierdute
+    if (timerState.milestones) {
         timerState.milestones.forEach(m => {
             if (!m.lost) {
                 if (m.type === 'ksda') totalEarnedCoins += m.val;
@@ -6415,41 +6422,55 @@ async function doWin() {
         });
     }
 
+    // 2. Calculăm timpul pentru Hall of Fame
     const timeTakenSecs = timerState.totalTime - timerState.timeLeft;
     const mins = Math.floor(timeTakenSecs / 60);
     const secs = timeTakenSecs % 60;
     const timeFormatted = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 
+    // 3. Actualizăm UI-ul Modalului
+    document.getElementById('earnedCoinsText').innerText = totalEarnedCoins;
+    
+    const dBox = document.getElementById('diamondWinBox');
+    if (totalEarnedDiamonds > 0) {
+        document.getElementById('earnedDiamondsText').innerText = totalEarnedDiamonds;
+        dBox.style.display = 'flex'; // Arătăm diamantele
+    } else {
+        dBox.style.display = 'none'; // Ascundem dacă e 0
+    }
+
+    document.getElementById('winMessage').innerText = `Timp final: ${timeFormatted}. Recompensele au fost adăugate în contul tău!`;
+    document.getElementById('questRewardModal').classList.add('active');
+
+    // 4. Salvare în Firebase
     if (auth.currentUser) {
         try {
             const userRef = doc(db, "accounts", auth.currentUser.uid);
-            const userSnap = await getDoc(userRef);
             
-            // Save completion to Public Gallery
+            // Postăm în Hall of Fame
             await setDoc(doc(db, "puzzle_hall_of_fame", `${auth.currentUser.uid}_${Date.now()}`), {
-                username: userSnap.data()?.username || "Player",
+                username: (await getDoc(userRef)).data()?.username || "Player",
                 imgUrl: jigState.imgUrl,
                 timeFormatted: timeFormatted,
                 gridSize: `${jigState.rows}x${jigState.cols}`,
                 timestamp: serverTimestamp()
             });
 
-            // Update user wallet
+            // Adăugăm banii și diamantele
             await updateDoc(userRef, {
                 coins: increment(totalEarnedCoins),
                 diamonds: increment(totalEarnedDiamonds),
-                jigsawSave: deleteField() 
+                jigsawSave: deleteField() // Ștergem salvarea pentru că a câștigat
             });
-        } catch (e) { console.warn("Note: Gallery save failed - Check Firestore Rules", e); }
+
+            // Resetăm contoarele locale
+            pendingCoins = 0;
+
+        } catch (e) { console.warn("Eroare la salvarea rezultatelor:", e); }
     }
 
-    const qModal = document.getElementById('questRewardModal');
-    qModal.querySelector('h2').innerHTML = '🏆 PUZZLE COMPLET!';
-    qModal.querySelector('p').innerText = `Timp: ${timeFormatted}. Bonus adăugat!`;
-    qModal.querySelector('.reward-coins-box span').innerText = totalEarnedCoins;
-    qModal.classList.add('active');
-
-    setTimeout(resetToMenu, 3500);
+    // Revenire la meniu după 4 secunde
+    setTimeout(resetToMenu, 4000);
 }
 
 // --- UPDATED GALLERY FETCH ---
