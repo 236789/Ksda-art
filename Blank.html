@@ -3062,30 +3062,68 @@
 
 
 
-/* --- FIXED JIGSAW CSS (Paste at bottom of Style) --- */
+/* --- JIGSAW ENGINE REPAIR --- */
 .jigsaw-arena {
     display: none; 
     width: 100%;
-    height: 600px; /* PC Height */
+    height: 600px;
     background: #050b14;
     border: 2px solid var(--primary);
     border-radius: 20px;
     position: relative;
     overflow: hidden;
     user-select: none;
-    touch-action: none; /* CRITICAL: Prevents screen scrolling while dragging */
+    touch-action: none !important; /* Forces drag to work on mobile */
+}
+
+/* PC GRID */
+@media (min-width: 900px) {
+    .jigsaw-arena { 
+        display: none; /* JS toggles this to grid */
+        grid-template-columns: 200px 1fr 200px; 
+        gap: 10px; 
+        padding: 20px; 
+    }
+}
+
+/* MOBILE FLEX */
+@media (max-width: 899px) {
+    .jigsaw-arena { 
+        height: 85vh !important; 
+        flex-direction: column; 
+    }
+    .zone-left {
+        flex-direction: row !important;
+        height: 100px !important;
+        padding: 5px !important;
+        justify-content: space-between !important;
+    }
+    .zone-board {
+        flex: 1;
+        width: 100%;
+        overflow: hidden; 
+    }
+    .zone-pieces {
+        height: 120px !important;
+        width: 100%;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        flex-wrap: nowrap !important;
+        display: flex !important;
+        align-items: center;
+        justify-content: flex-start;
+    }
 }
 
 /* FIX PREVIEW IMAGE */
 .mini-preview {
     width: 100%;
-    height: auto;
-    max-height: 150px; /* Limits height so it doesn't overflow */
-    object-fit: contain; /* Prevents stretching */
+    height: 100%;
+    max-height: 140px; 
+    object-fit: contain !important; /* Fixes the bugged stretching */
     background: #000;
     border: 1px solid #333;
     border-radius: 8px;
-    margin-bottom: 10px;
 }
 
 /* PIECE LOGIC */
@@ -3095,7 +3133,7 @@
     z-index: 100;
     background-repeat: no-repeat;
     box-sizing: border-box;
-    touch-action: none; /* REQUIRED: Tells browser "This is a game object, not a scrollable page" */
+    touch-action: none !important; /* MANDATORY FOR DRAG */
 }
 
 /* TRAY STATE */
@@ -3107,37 +3145,17 @@
     transform: scale(0.9);
     border: 1px solid rgba(255,255,255,0.2);
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
-    float: left; 
+    flex-shrink: 0; /* Prevents squishing in tray */
 }
 
 /* DRAGGING STATE */
 .jig-piece.is-dragging {
-    z-index: 9999 !important; /* Always on top */
+    z-index: 99999 !important; /* Ultra high to never vanish behind things */
     cursor: grabbing;
-    transition: none !important; /* NO LAG while moving */
+    transition: none !important; /* ZERO LAG */
     transform: scale(1.1);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-    border: 2px solid var(--primary);
-}
-
-/* MOBILE ADJUSTMENTS */
-@media (max-width: 899px) {
-    .jigsaw-arena { 
-        height: 85vh; 
-        display: none; 
-        flex-direction: column; 
-    }
-    .zone-left {
-        flex-direction: row;
-        justify-content: space-between;
-        height: auto;
-        padding: 5px;
-    }
-    .mini-preview {
-        width: 80px; 
-        height: 80px;
-        margin-bottom: 0;
-    }
+    box-shadow: 0 0 25px #00ff88;
+    border: 2px solid #fff;
 }
   </style>
 </head>
@@ -4879,22 +4897,19 @@ window.resumeGame = async () => {
     }
 }
 
-/* --- FIXED BOARD SETUP --- */
+/* --- FIXED INIT LOGIC (REPLACE setupBoardUI) --- */
 function setupBoardUI(isLoad = false) {
     document.getElementById('puzzleMenuContainer').style.display = 'none';
     const arena = document.getElementById('jigsawArena');
     
-    // 1. Force Display Block BEFORE calculations to ensure dimensions exist
+    // FORCE VISIBLE to allow calculations
     arena.style.display = (window.innerWidth >= 900) ? 'grid' : 'flex';
     
-    // 2. Set Preview Image immediately
+    // Set Preview
     const previewImg = document.getElementById('gamePreviewImg');
-    if (jigState.imgUrl) {
-        previewImg.src = jigState.imgUrl;
-        previewImg.onload = () => { /* Image loaded */ };
-    }
+    if (jigState.imgUrl) previewImg.src = jigState.imgUrl;
 
-    // 3. Small delay to allow CSS grid to render
+    // Small delay to let browser render CSS
     setTimeout(() => {
         const boardContainer = document.getElementById('boardContainer');
         const tray = document.getElementById('pieceTray');
@@ -4903,63 +4918,48 @@ function setupBoardUI(isLoad = false) {
         tray.innerHTML = '';
         gridBox.innerHTML = '';
 
-        // Robust Dimension Calculation
-        let containerW = boardContainer.clientWidth;
-        let containerH = boardContainer.clientHeight;
+        // Get Dimensions
+        let w = boardContainer.clientWidth || 300;
+        let h = boardContainer.clientHeight || 300;
         
-        // Fallback if dimensions are 0 (hidden)
-        if (containerW < 50) containerW = 300; 
-        if (containerH < 50) containerH = 300;
-
-        const maxW = containerW - 10; 
-        const maxH = containerH - 10;
-        
-        // Calculate Piece Size
-        const baseSize = Math.floor(Math.min(maxW / jigState.cols, maxH / jigState.rows));
+        // Calculate Piece Size (Square pieces)
+        // We ensure piece size fits within the smaller dimension of the board
+        const baseSize = Math.floor(Math.min((w - 20) / jigState.cols, (h - 20) / jigState.rows));
         
         jigState.pieceSize = baseSize;
         jigState.totalW = baseSize * jigState.cols;
         jigState.totalH = baseSize * jigState.rows;
 
-        // Apply Styles to Grid
+        // Apply to Grid
         gridBox.style.width = `${jigState.totalW}px`;
         gridBox.style.height = `${jigState.totalH}px`;
         gridBox.style.gridTemplateColumns = `repeat(${jigState.cols}, 1fr)`;
         gridBox.style.gridTemplateRows = `repeat(${jigState.rows}, 1fr)`;
         
-        // Ghost Background (Guide)
-        gridBox.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url(${jigState.imgUrl})`;
+        gridBox.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url(${jigState.imgUrl})`;
         gridBox.style.backgroundSize = `${jigState.totalW}px ${jigState.totalH}px`;
 
-        // Create Guide Lines
-        for(let i=0; i<(jigState.rows * jigState.cols); i++) {
-            let guide = document.createElement('div');
-            guide.className = 'grid-guide-cell';
-            gridBox.appendChild(guide);
-        }
-
-        // --- SPAWN PIECES ---
+        // Render Pieces
         const sortedPieces = [...jigState.pieces].sort((a,b) => a.id - b.id);
 
         sortedPieces.forEach((pData) => {
             const piece = document.createElement('div');
             piece.className = 'jig-piece';
-            piece.id = `p-${pData.id}`;
             
-            // Dimensions & Image
+            // Set Size & Image
             piece.style.width = `${baseSize}px`;
             piece.style.height = `${baseSize}px`;
             piece.style.backgroundImage = `url(${jigState.imgUrl})`;
             piece.style.backgroundSize = `${jigState.totalW}px ${jigState.totalH}px`;
             
-            // Sprite Position
+            // Calculate Sprite Position (The part of image this piece shows)
             const row = Math.floor(pData.id / jigState.cols);
             const col = pData.id % jigState.cols;
             piece.style.backgroundPosition = `-${col * baseSize}px -${row * baseSize}px`;
 
             const runtimePiece = jigState.pieces.find(p => p.id === pData.id);
 
-            // Placement Logic
+            // Positioning
             if (runtimePiece.isLocked) {
                 piece.classList.add('locked');
                 piece.style.left = `${col * baseSize}px`;
@@ -4974,124 +4974,110 @@ function setupBoardUI(isLoad = false) {
                 gridBox.appendChild(piece);
             }
 
-            // Enable Dragging (Only if not locked)
-            if (!runtimePiece.isLocked) {
-                enablePointerDrag(piece, pData.id);
-            }
+            if (!runtimePiece.isLocked) enablePointerDrag(piece, pData.id);
         });
 
         updateCount();
         if(!isLoad) saveProgress();
         
-    }, 150); // Increased delay slightly for safety
+    }, 100);
 }
-/* --- FIXED DRAG LOGIC (REPLACE enablePointerDrag WITH THIS) --- */
+
+/* --- ULTIMATE DRAG FIX v3 --- */
 function enablePointerDrag(el, id) {
     let isDragging = false;
-    let startMouseX, startMouseY;
-    let startElLeft, startElTop;
-    
-    // Safety check for piece size
-    const pSize = jigState.pieceSize || 100; 
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+    const pSize = jigState.pieceSize;
 
-    // 1. START DRAG
     el.addEventListener('pointerdown', (e) => {
         if (el.classList.contains('locked')) return;
         
-        e.preventDefault(); // Stop default browser selection
-        e.stopPropagation(); // Stop event bubbling
+        e.preventDefault(); 
+        e.stopPropagation();
         
         isDragging = true;
-        el.setPointerCapture(e.pointerId); // Locks drag to this element
+        el.setPointerCapture(e.pointerId); 
         el.classList.add('is-dragging');
 
         const gridBox = document.getElementById('dropGrid');
         const gridRect = gridBox.getBoundingClientRect();
+        const pieceRect = el.getBoundingClientRect();
 
-        // --- FIX FOR VANISHING ---
-        // If piece is in tray, we move it to the board DOM and center it on mouse
+        // 1. Calculate where the mouse is INSIDE the piece (The Grip Offset)
+        dragOffsetX = e.clientX - pieceRect.left;
+        dragOffsetY = e.clientY - pieceRect.top;
+
+        // 2. If in tray, transfer to board immediately at exact screen position
         if (el.classList.contains('in-tray')) {
             el.classList.remove('in-tray');
-            gridBox.appendChild(el); 
+            gridBox.appendChild(el);
             
-            // Calculate mouse position relative to the board
-            const mouseXInBoard = e.clientX - gridRect.left;
-            const mouseYInBoard = e.clientY - gridRect.top;
+            // Calculate Position relative to Board using Screen Coordinates
+            // Formula: (PieceScreenX - BoardScreenX)
+            const startX = pieceRect.left - gridRect.left;
+            const startY = pieceRect.top - gridRect.top;
 
-            // Center piece on mouse
-            const centeredLeft = mouseXInBoard - (pSize / 2);
-            const centeredTop = mouseYInBoard - (pSize / 2);
-
-            el.style.left = `${centeredLeft}px`;
-            el.style.top = `${centeredTop}px`;
+            el.style.left = `${startX}px`;
+            el.style.top = `${startY}px`;
             
-            // Update internal state
+            // Update State
             const pState = jigState.pieces.find(p => p.id === id);
             if(pState) pState.inTray = false;
         }
-
-        // Initialize drag coordinates based on current position
-        startMouseX = e.clientX;
-        startMouseY = e.clientY;
-        
-        // Ensure we have valid numbers (fallback to 0 if NaN)
-        startElLeft = parseFloat(el.style.left) || 0;
-        startElTop = parseFloat(el.style.top) || 0;
     });
 
-    // 2. MOVE DRAG
     el.addEventListener('pointermove', (e) => {
         if (!isDragging) return;
         e.preventDefault();
 
-        const dx = e.clientX - startMouseX;
-        const dy = e.clientY - startMouseY;
+        const gridBox = document.getElementById('dropGrid');
+        const gridRect = gridBox.getBoundingClientRect();
 
-        el.style.left = `${startElLeft + dx}px`;
-        el.style.top = `${startElTop + dy}px`;
+        // 3. Move Logic: (MouseGlobal - BoardGlobal - GripOffset)
+        // This keeps the piece pinned exactly where you grabbed it
+        const newX = e.clientX - gridRect.left - dragOffsetX;
+        const newY = e.clientY - gridRect.top - dragOffsetY;
+
+        el.style.left = `${newX}px`;
+        el.style.top = `${newY}px`;
     });
 
-    // 3. END DRAG
     el.addEventListener('pointerup', (e) => {
         if (!isDragging) return;
         isDragging = false;
         el.releasePointerCapture(e.pointerId);
         el.classList.remove('is-dragging');
 
-        // SNAP LOGIC
+        // 4. Snap Logic
         const pState = jigState.pieces.find(p => p.id === id);
-        if (!pState) return;
+        if(!pState) return;
 
         const targetCol = id % jigState.cols;
         const targetRow = Math.floor(id / jigState.cols);
         const targetX = targetCol * pSize;
         const targetY = targetRow * pSize;
 
-        const currentX = parseFloat(el.style.left) || 0;
-        const currentY = parseFloat(el.style.top) || 0;
+        const currentX = parseFloat(el.style.left);
+        const currentY = parseFloat(el.style.top);
 
-        // Distance Check
+        // Calculate distance to correct spot
         const dist = Math.sqrt(Math.pow(targetX - currentX, 2) + Math.pow(targetY - currentY, 2));
 
-        // Snap if close (40% of piece size tolerance)
+        // SNAP (Tolerance: 40% of piece size)
         if (dist < (pSize * 0.4)) {
             el.style.left = `${targetX}px`;
             el.style.top = `${targetY}px`;
             el.classList.add('locked');
             
-            // Flash Effect
-            const flash = document.createElement('div');
-            flash.className = 'snap-anim';
-            flash.style.position = 'absolute';
-            flash.style.inset = '0';
-            flash.style.background = '#fff';
-            el.appendChild(flash);
-            setTimeout(() => flash.remove(), 500);
+            // Visual Flash
+            el.style.filter = "brightness(1.5)";
+            setTimeout(() => el.style.filter = "brightness(1)", 300);
 
             pState.isLocked = true;
             updateCount(); 
         } else {
-            // Save position if not snapped
+            // Update stored position
             pState.currentX = currentX;
             pState.currentY = currentY;
         }
@@ -5099,6 +5085,7 @@ function enablePointerDrag(el, id) {
         saveProgress();
     });
 }
+
 function checkMagnetHint(el, id, currX, currY) {
     const pSize = jigState.pieceSize;
     const targetCol = id % jigState.cols;
