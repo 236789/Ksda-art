@@ -6829,33 +6829,40 @@ async function doWin() {
         });
     }
 
-    // --- SALVARE ÎN HALL OF FAME (LOGICA NOUĂ) ---
     if (auth.currentUser) {
         try {
-            // Generăm un ID bazat pe UID și un hash al imaginii pentru a evita duplicatele identice
+            const userRef = doc(db, "accounts", auth.currentUser.uid);
+            
+            // EXTRAGEM DATELE DIN FIRESTORE PENTRU A VEDEA POZA ACTUALA
+            const userSnap = await getDoc(userRef);
+            const userData = userSnap.data() || {};
+
+            // LOGICA DE POZA DIN SHOP.HTML:
+            // 1. Imagine custom (image) | 2. Imagine Google (photoURL) | 3. Placeholder
+            const finalPfpForGallery = userData.image || auth.currentUser.photoURL || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
+
             const imgHash = btoa(jigState.imgUrl).substring(0, 15);
             const puzzleId = `${auth.currentUser.uid}_${imgHash}`;
             
             await setDoc(doc(db, "puzzle_hall_of_fame", puzzleId), {
                 imgUrl: jigState.imgUrl,
                 userId: auth.currentUser.uid,
-                username: auth.currentUser.displayName || "Cyber Solver",
-                userPfp: auth.currentUser.photoURL,
+                username: userData.username || auth.currentUser.displayName || "Cyber Solver",
+                userPfp: finalPfpForGallery, // <--- ACUM SALVEAZA POZA CORECTA
                 timestamp: serverTimestamp(),
                 gridSize: `${jigState.rows}x${jigState.cols}`
             });
 
-            const userRef = doc(db, "accounts", auth.currentUser.uid);
             await updateDoc(userRef, {
                 coins: increment(totalEarnedCoins),
                 diamonds: increment(totalEarnedDiamonds),
-                puzzlesSolved: increment(1), // Contorizăm rezolvările
+                puzzlesSolved: increment(1),
                 jigsawSave: deleteField() 
             });
         } catch (e) { console.error("Win Save Error:", e); }
     }
 
-    // Update UI
+    // --- LOGICA UI (RAMANE NESCHIMBATA) ---
     document.getElementById('earnedCoinsText').innerText = totalEarnedCoins;
     const dBox = document.getElementById('diamondWinBox');
     if (totalEarnedDiamonds > 0) {
@@ -6888,7 +6895,7 @@ window.openGallery = async () => {
     const container = document.getElementById('galleryContainer');
     const title = document.querySelector('#galleryModal .cosmo-title');
     title.innerText = "HALL OF FAME";
-    container.innerHTML = '<div style="color:var(--primary); font-family:Orbitron; width:100%; text-align:center; padding:20px;">ACCESSING DATABASE...</div>';
+    container.innerHTML = '<div style="color:var(--primary); font-family:Orbitron; width:100%; text-align:center; padding:20px;">ACCESSING ARCHIVES...</div>';
     document.getElementById('galleryModal').classList.add('active');
 
     try {
@@ -6901,7 +6908,7 @@ window.openGallery = async () => {
             if(!userGroups[data.userId]) {
                 userGroups[data.userId] = {
                     username: data.username,
-                    pfp: data.userPfp || "https://iili.io/fXvBEiB.png", // Fallback dacă nu are poză
+                    pfp: data.userPfp, // Folosește poza salvată la momentul victoriei
                     lastImg: data.imgUrl,
                     puzzles: []
                 };
@@ -6915,25 +6922,22 @@ window.openGallery = async () => {
             const user = userGroups[uid];
             const card = document.createElement('div');
             card.className = 'gallery-card';
-            card.style.height = '180px'; // Puțin mai înalt pentru a încăpea tot
+            card.style.height = '180px';
             
             card.innerHTML = `
-                <!-- Fundal: Ultimul puzzle rezolvat cu blur -->
                 <img src="${user.lastImg}" class="gallery-img" style="filter: blur(2px) brightness(0.4); height: 100%; object-fit: cover;">
                 
                 <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:15px;">
-                    <!-- POZA DE PROFIL (PFP) -->
                     <div style="position: relative; width: 65px; height: 65px;">
+                        <!-- AFISARE PFP -->
                         <img src="${user.pfp}" style="width:100%; height:100%; border-radius:50%; border:3px solid var(--primary); object-fit:cover; box-shadow: 0 0 15px var(--primary);">
                         <div style="position: absolute; bottom: -5px; right: -5px; background: #00ff88; color: #000; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 5px; font-family: 'Orbitron';">LVL ${user.puzzles.length}</div>
                     </div>
 
                     <div style="text-align: center;">
                         <span class="gallery-user" style="font-size:14px; color:#fff; text-shadow:0 2px 5px #000; display: block;">${user.username}</span>
-                        <span style="font-family:Orbitron; font-size:9px; color:var(--primary); letter-spacing: 1px;">${user.puzzles.length} ARCHIVES</span>
+                        <span style="font-family:Orbitron; font-size:9px; color:var(--primary);">${user.puzzles.length} ARCHIVES</span>
                     </div>
-                    
-                    <button class="btn-equip-v6 do-equip" style="font-size: 8px; padding: 5px 15px;">VIEW COLLECTION</button>
                 </div>
             `;
             card.onclick = () => showUserPuzzles(user);
@@ -6941,7 +6945,6 @@ window.openGallery = async () => {
         });
     } catch(e) { console.error(e); }
 };
-
 
 
 
