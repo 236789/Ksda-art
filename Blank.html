@@ -6143,13 +6143,58 @@ window.resetToMenu = () => {
 window.resumeGame = async () => {
     const snap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
     const save = snap.data().jigsawSave;
+    
     if(save) {
-        jigState = save;
+        // 1. Load Piece State
+        jigState = { ...save };
+        jigState.isPlaying = true; // Set playing to true immediately
+
+        // 2. Load Timer State
+        timerState.timeLeft = save.timeLeft;
+        timerState.totalTime = save.totalTime;
+        timerState.milestones = save.milestones;
+
+        // 3. Render the Pieces
         setupBoardUI(true);
+
+        // 4. Re-initialize the Timer UI (Render markers & start loop)
+        renderLootMarkers(); 
+        
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(updateTimerLoop, 1000);
+        updateTimerVisuals();
     }
 }
+// --- JIGSAW ENGINE v2.0 -
 
-// --- JIGSAW ENGINE v2.0 ---
+
+ 
+// Helper to draw the icons on the bar
+function renderLootMarkers() {
+    const lootZone = document.getElementById('lootZone');
+    if (!lootZone) return;
+    
+    lootZone.innerHTML = '';
+    timerState.milestones.forEach((m, index) => {
+        const marker = document.createElement('div');
+        marker.className = 'loot-marker';
+        // If we are resuming, check if this milestone was already lost
+        if (m.lost) marker.classList.add('lost');
+        
+        marker.id = `ms-${index}`;
+        
+        // Correct scaling math
+        const pct = (m.at / timerState.totalTime) * 100;
+        marker.style.left = `${pct}%`;
+
+        const imgUrl = (m.type === 'ksda') ? 'https://iili.io/fhc1SKQ.png' : 'https://iili.io/fv5bmtj.png';
+        marker.innerHTML = `<img src="${imgUrl}">`;
+        
+        lootZone.appendChild(marker);
+    });
+}
+
+
 
 // --- JIGSAW LOGIC v3.0 ---
 
@@ -6478,24 +6523,31 @@ function updateCount() {
 let lastSaveTime = 0;
 let pendingCoins = 0;
 
-// Update this function to stop crashing Firestore
 async function saveProgress(force = false) {
     if (!auth.currentUser || !jigState.isPlaying) return;
     
     const now = Date.now();
-    // Only save once every 5 seconds UNLESS it's a forced save (like Win/Exit)
+    // Only auto-save once every 5 seconds, unless user clicked "Save & Exit" (force)
     if (!force && (now - lastSaveTime < 5000)) return; 
 
     lastSaveTime = now;
     try {
         const userRef = doc(db, "accounts", auth.currentUser.uid);
-        const saveObj = { ...jigState };
+        
+        // --- NEW: Create a Complete Save Object ---
+        const saveObj = { 
+            ...jigState, 
+            timeLeft: timerState.timeLeft,      // Save remaining seconds
+            totalTime: timerState.totalTime,    // Save original total time for scaling
+            milestones: timerState.milestones   // Save status of loot markers
+        };
+        
         if(!jigState.isCustom) saveObj.imgUrl = jigState.imgUrl; 
         
         await updateDoc(userRef, {
             jigsawSave: saveObj
         });
-    } catch(e) { console.error("Throttled Save Error:", e); }
+    } catch(e) { console.error("Save Error:", e); }
 }
 
 // Update this to stop hitting the DB for every single piece
@@ -6529,7 +6581,13 @@ window.spawnCoinReward = (x, y) => {
 };
 
 window.saveAndExit = async () => {
-    await saveProgress();
+    // PASS 'true' to bypass the 5-second cooldown
+    await saveProgress(true); 
+    
+    // Stop the timer so it doesn't keep running in the background
+    clearInterval(timerInterval);
+    jigState.isPlaying = false;
+
     resetToMenu();
     checkSavedJigsaw(auth.currentUser.uid);
 }
@@ -6541,23 +6599,30 @@ import { deleteField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-
 
 // --- JIGSAW TIMER ENGINE ---
 
-function initCyberTimer(gridSize) {
+function initCyberTimer(gridSize, isResume = false) {
     const config = MODE_CONFIG[gridSize] || MODE_CONFIG[5];
-    timerState.totalTime = config.time;
-    timerState.timeLeft = config.time;
-    
-    // Reset milestones
-    timerState.milestones = JSON.parse(JSON.stringify(config.rewards || []));
 
+    // Dacă NU este resume, setăm valorile de start (maxime)
+    if (!isResume) {
+        timerState.totalTime = config.time;
+        timerState.timeLeft = config.time;
+        timerState.milestones = JSON.parse(JSON.stringify(config.rewards || []));
+    }
+    
+    // De aici în jos codul tău rămâne identic, doar am adăugat verificarea de "lost" 
     const lootZone = document.getElementById('lootZone');
     if (lootZone) {
         lootZone.innerHTML = '';
         timerState.milestones.forEach((m, index) => {
             const marker = document.createElement('div');
             marker.className = 'loot-marker';
+            
+            // Adăugăm clasa 'lost' dacă recompensa era deja pierdută în salvare
+            if (m.lost) marker.classList.add('lost');
+            
             marker.id = `ms-${index}`;
             
-            // Calculate Position
+            // Math-ul tău original
             const pct = (m.at / timerState.totalTime) * 100;
             marker.style.left = `${pct}%`;
 
@@ -6570,7 +6635,7 @@ function initCyberTimer(gridSize) {
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(updateTimerLoop, 1000);
     
-    // Immediate visual sync
+    // Actualizăm vizual bară imediat
     updateTimerVisuals();
 }
 
