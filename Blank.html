@@ -4441,6 +4441,26 @@
     transform: translateX(-50%);
     filter: drop-shadow(0 0 10px #fbc02d);
 }
+
+
+
+.gallery-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.gallery-card:hover {
+    transform: scale(1.05) translateY(-5px);
+    border-color: var(--primary);
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.3);
+}
+
+.gallery-user {
+    text-shadow: 0 0 10px #000;
+    font-weight: 900;
+}
   </style>
 </head>
 <body>
@@ -6797,7 +6817,7 @@ async function doWin() {
     
     let totalEarnedCoins = pendingCoins + 100;
     let totalEarnedDiamonds = 0;
-    wonBoxes = 0; // Reset global counter
+    wonBoxes = 0; 
 
     if (timerState.milestones) {
         timerState.milestones.forEach(m => {
@@ -6809,17 +6829,40 @@ async function doWin() {
         });
     }
 
+    // --- SALVARE ÎN HALL OF FAME (LOGICA NOUĂ) ---
+    if (auth.currentUser) {
+        try {
+            // Generăm un ID bazat pe UID și un hash al imaginii pentru a evita duplicatele identice
+            const imgHash = btoa(jigState.imgUrl).substring(0, 15);
+            const puzzleId = `${auth.currentUser.uid}_${imgHash}`;
+            
+            await setDoc(doc(db, "puzzle_hall_of_fame", puzzleId), {
+                imgUrl: jigState.imgUrl,
+                userId: auth.currentUser.uid,
+                username: auth.currentUser.displayName || "Cyber Solver",
+                userPfp: auth.currentUser.photoURL,
+                timestamp: serverTimestamp(),
+                gridSize: `${jigState.rows}x${jigState.cols}`
+            });
+
+            const userRef = doc(db, "accounts", auth.currentUser.uid);
+            await updateDoc(userRef, {
+                coins: increment(totalEarnedCoins),
+                diamonds: increment(totalEarnedDiamonds),
+                puzzlesSolved: increment(1), // Contorizăm rezolvările
+                jigsawSave: deleteField() 
+            });
+        } catch (e) { console.error("Win Save Error:", e); }
+    }
+
     // Update UI
     document.getElementById('earnedCoinsText').innerText = totalEarnedCoins;
-    
-    // Diamonds Box
     const dBox = document.getElementById('diamondWinBox');
     if (totalEarnedDiamonds > 0) {
         document.getElementById('earnedDiamondsText').innerText = totalEarnedDiamonds;
         dBox.style.display = 'flex';
     } else { dBox.style.display = 'none'; }
 
-    // Mystery Box Box
     const mBox = document.getElementById('mysteryWinBox');
     if (wonBoxes > 0) {
         document.getElementById('earnedMysteryText').innerText = wonBoxes;
@@ -6828,68 +6871,103 @@ async function doWin() {
 
     document.getElementById('questRewardModal').classList.add('active');
 
-// În interiorul funcției doWin:
-const collectBtn = document.querySelector('#questRewardModal .super-btn');
-collectBtn.onclick = () => {
-    if(wonBoxes > 0) {
-        document.getElementById('questRewardModal').classList.remove('active');
-        document.getElementById('mysteryOverlay').style.display = 'flex';
-        document.getElementById('mysteryStatus').innerText = `AI CÂȘTIGAT ${wonBoxes} CUTII!`;
-    } else {
-        resetToMenu();
-    }
-};
-    // Firebase Write (Save coins/diamonds only, items come from Roulette)
-    if (auth.currentUser) {
-        try {
-            const userRef = doc(db, "accounts", auth.currentUser.uid);
-            await updateDoc(userRef, {
-                coins: increment(totalEarnedCoins),
-                diamonds: increment(totalEarnedDiamonds),
-                jigsawSave: deleteField() 
-            });
-            pendingCoins = 0;
-        } catch (e) { console.error(e); }
-    }
+    const collectBtn = document.querySelector('#questRewardModal .super-btn');
+    collectBtn.onclick = () => {
+        if(wonBoxes > 0) {
+            document.getElementById('questRewardModal').classList.remove('active');
+            document.getElementById('mysteryOverlay').style.display = 'flex';
+            document.getElementById('mysteryStatus').innerText = `AI CÂȘTIGAT ${wonBoxes} CUTII!`;
+        } else {
+            resetToMenu();
+        }
+    };
+    pendingCoins = 0;
 }
 
-// --- UPDATED GALLERY FETCH ---
 window.openGallery = async () => {
     const container = document.getElementById('galleryContainer');
-    container.innerHTML = '<div style="color:cyan; font-family:Orbitron; width:100%; text-align:center;">CONNECTING TO DATASTREAM...</div>';
+    const title = document.querySelector('#galleryModal .cosmo-title');
+    title.innerText = "HALL OF FAME";
+    container.innerHTML = '<div style="color:cyan; font-family:Orbitron; width:100%; text-align:center;">SCANNING USER ARCHIVES...</div>';
     document.getElementById('galleryModal').classList.add('active');
 
     try {
-        const q = query(collection(db, "puzzle_hall_of_fame"), orderBy("timestamp", "desc"), limit(24));
+        const q = query(collection(db, "puzzle_hall_of_fame"), orderBy("timestamp", "desc"));
         const snap = await getDocs(q);
         
-        container.innerHTML = '';
-        if(snap.empty) {
-            container.innerHTML = '<p style="color:#555; text-align:center; width:100%;">No legends found yet. Be the first!</p>';
-            return;
-        }
-
+        // Grouping logic: Create an object where keys are UserIDs
+        const userGroups = {};
         snap.forEach(docSnap => {
-            const item = docSnap.data();
+            const data = docSnap.data();
+            if(!userGroups[data.userId]) {
+                userGroups[data.userId] = {
+                    username: data.username,
+                    puzzles: [],
+                    lastImg: data.imgUrl
+                };
+            }
+            userGroups[data.userId].puzzles.push(data);
+        });
+
+        container.innerHTML = '';
+        
+        Object.keys(userGroups).forEach(uid => {
+            const user = userGroups[uid];
             const card = document.createElement('div');
             card.className = 'gallery-card';
+            card.style.borderColor = 'var(--primary)';
             card.innerHTML = `
-                <img src="${item.imgUrl}" class="gallery-img">
-                <span class="gallery-user">${item.username}</span>
-                <span class="gallery-time">${item.gridSize} | ${item.timeFormatted}</span>
+                <div style="position:relative;">
+                    <img src="${user.lastImg}" class="gallery-img" style="filter: brightness(0.6);">
+                    <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                        <span class="gallery-user" style="font-size:14px; color:#fff;">${user.username}</span>
+                        <span style="font-family:Orbitron; font-size:9px; color:var(--primary); background:rgba(0,0,0,0.7); padding:2px 8px; border-radius:10px;">
+                            ${user.puzzles.length} PUZZLES
+                        </span>
+                    </div>
+                </div>
             `;
-            card.onclick = () => {
-                jigState.imgUrl = item.imgUrl;
-                jigState.isCustom = true; 
-                document.getElementById('galleryModal').classList.remove('active');
-                toDifficultyMenu();
-            };
+            // Click to see this specific user's puzzles
+            card.onclick = () => showUserPuzzles(user);
             container.appendChild(card);
         });
-    } catch(e) { 
-        container.innerHTML = `<div style="color:#ff4757; font-size:10px;">DATA ACCESS DENIED.<br>Check Firebase Security Rules.</div>`;
-        console.error("Gallery Logic Error:", e); 
-    }
+    } catch(e) { console.error(e); }
+};
+
+
+
+
+window.showUserPuzzles = (userData) => {
+    const container = document.getElementById('galleryContainer');
+    const title = document.querySelector('#galleryModal .cosmo-title');
+    
+    title.innerText = `${userData.username.toUpperCase()}'S ARCHIVE`;
+    container.innerHTML = '';
+
+    // Add a Back Button
+    const backBtn = document.createElement('div');
+    backBtn.className = 'added-social-pill';
+    backBtn.style.width = '100%';
+    backBtn.style.marginBottom = '15px';
+    backBtn.innerHTML = `<i class="fas fa-arrow-left"></i> BACK TO USERS`;
+    backBtn.onclick = openGallery;
+    container.appendChild(backBtn);
+
+    userData.puzzles.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'gallery-card';
+        card.innerHTML = `
+            <img src="${p.imgUrl}" class="gallery-img">
+            <span class="gallery-time">${p.gridSize} SOLVE</span>
+        `;
+        card.onclick = () => {
+            jigState.imgUrl = p.imgUrl;
+            jigState.isCustom = true; 
+            document.getElementById('galleryModal').classList.remove('active');
+            toDifficultyMenu();
+        };
+        container.appendChild(card);
+    });
 };
 // 3. GALLERY LOGIC
 import { collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
