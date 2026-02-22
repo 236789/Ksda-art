@@ -3867,71 +3867,108 @@
     border: 1px solid rgba(255,255,255,0.2);
 }
 
-/* --- 2. CYBER TIMER BAR --- */
-.cyber-timer-wrapper {
+/* --- NEW CYBER TIMER HUD --- */
+.timer-hud-container {
+    grid-column: 1 / -1; /* Spans full width on PC */
     width: 100%;
-    height: 40px;
-    background: #000;
-    border: 1px solid var(--primary);
-    border-radius: 4px;
-    margin-bottom: 10px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 0 15px rgba(41, 243, 255, 0.2);
-}
-
-/* The Moving Bar */
-.cyber-timer-fill {
-    height: 100%;
-    width: 100%;
-    background: linear-gradient(90deg, #ff0055, #ffd700, #00ff88, #29f3ff);
-    background-size: 300% 100%;
-    animation: gradientShift 5s infinite linear;
-    transition: width 1s linear;
-    position: relative;
-    z-index: 1;
-}
-
-@keyframes gradientShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
-
-/* The Milestones (Rewards on the bar) */
-.timer-milestone {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    width: 40px; /* Size of icon area */
-    transform: translateX(-50%); /* Center on the time point */
+    max-width: 600px;
+    margin: 0 auto 15px auto;
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 20;
+}
+
+/* The Bar Background */
+.cyber-bar-track {
+    width: 100%;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #333;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    position: relative;
+}
+
+/* The Moving Fill */
+.cyber-bar-fill {
+    height: 100%;
+    width: 100%; /* Starts full */
+    background: linear-gradient(90deg, #00ff88, #00ffff);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+    transition: width 1s linear, background 0.3s;
+    border-radius: 6px;
+}
+
+/* The Digital Timer Text */
+.cyber-timer-digits {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    color: #fff;
+    margin-top: 5px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px rgba(41, 243, 255, 0.5);
+    transition: all 0.3s;
+}
+
+/* --- PANIC MODE (Low Time) --- */
+.panic-mode .cyber-bar-fill {
+    background: #ff0000 !important;
+    box-shadow: 0 0 20px #ff0000 !important;
+}
+
+.panic-mode .cyber-timer-digits {
+    color: #ff0000 !important;
+    text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000 !important;
+    animation: panicShake 0.5s infinite;
+}
+
+.panic-mode .cyber-bar-track {
+    border-color: #ff0000;
+    animation: borderFlash 0.5s infinite alternate;
+}
+
+@keyframes panicShake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+@keyframes borderFlash {
+    from { box-shadow: 0 0 5px #ff0000; }
+    to { box-shadow: 0 0 25px #ff0000; }
+}
+
+/* --- GAME OVER OVERLAY --- */
+.game-over-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 100000;
+    display: none; /* Flex when active */
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 10;
-    font-size: 14px;
-    border-left: 2px solid rgba(255,255,255,0.5);
+    text-align: center;
 }
-
-.timer-milestone img, .timer-milestone i {
-    filter: drop-shadow(0 0 5px #fff);
-    transition: 0.3s;
-}
-
-/* --- LOST REWARD STATE (Red X) --- */
-.milestone-lost {
-    filter: grayscale(100%) opacity(0.5);
-}
-
-.milestone-lost::after {
-    content: '✕';
-    position: absolute;
+.go-title {
+    font-family: 'Orbitron';
+    font-size: 40px;
     color: #ff4757;
-    font-size: 30px;
     font-weight: 900;
-    text-shadow: 0 0 10px #ff4757;
-    animation: stampX 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-@keyframes stampX {
-    0% { transform: scale(5); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+    margin-bottom: 10px;
+    text-shadow: 0 0 20px #ff4757;
 }
   </style>
 </head>
@@ -4444,37 +4481,44 @@
 
     </div>
 
-    <div id="jigsawArena" class="jigsaw-arena">
+<div id="jigsawArena" class="jigsaw-arena">
         
-        <!-- NEW: PROGRESS TIMER BAR -->
-        <div id="cyberTimerContainer" class="cyber-timer-wrapper" style="grid-column: 1 / -1;">
-            <div id="cyberTimerFill" class="cyber-timer-fill"></div>
-            <!-- Milestones injected by JS -->
-            <div id="milestonesLayer"></div> 
+        <!-- GAME OVER SCREEN (Hidden by default) -->
+        <div id="gameOverScreen" class="game-over-overlay">
+            <div class="go-title">TIMP EXPIRAT!</div>
+            <p style="color:#aaa; margin-bottom: 20px;">Ai rămas fără timp.</p>
+            <button class="btn-ksda-fire" onclick="resetToMenu()">
+                <span>ÎNCEARCĂ DIN NOU</span>
+            </button>
+        </div>
+
+        <!-- NEW TIMER HUD -->
+        <div class="timer-hud-container">
+            <div class="cyber-bar-track">
+                <div id="cyberTimerFill" class="cyber-bar-fill"></div>
+            </div>
+            <div id="cyberTimerText" class="cyber-timer-digits">00:00</div>
         </div>
         
         <!-- LEFT: Preview & Controls -->
         <div class="zone-left">
+            <!-- ... (Keep your existing left panel code) ... -->
             <img id="gamePreviewImg" class="mini-preview" src="">
             <div style="display: flex; flex-direction: column; gap: 5px;">
                 <div class="jigsaw-stat" id="piecesCount">Pieces: 0/0</div>
-<button onclick="saveAndExit()" class="btn-puzzle-exit">
-    <i class="fas fa-sign-out-alt"></i> SAVE & EXIT
-</button>
+                <button onclick="saveAndExit()" class="btn-puzzle-exit">
+                    <i class="fas fa-sign-out-alt"></i> SAVE & EXIT
+                </button>
             </div>
         </div>
 
         <!-- MIDDLE: The Board -->
         <div class="zone-board" id="boardContainer">
-            <!-- Grid is generated here -->
             <div id="dropGrid" class="drop-target-grid"></div>
-            <!-- Pieces that are snapped go here or overlay -->
         </div>
 
-        <!-- RIGHT: The Tray (Pieces) -->
-        <div class="zone-pieces" id="pieceTray">
-            <!-- Loose pieces spawn here -->
-        </div>
+        <!-- RIGHT: The Tray -->
+        <div class="zone-pieces" id="pieceTray"></div>
 
     </div>
 
@@ -5678,42 +5722,100 @@ let timerState = {
     milestones: [] // { at: seconds, type: 'coin'|'diamond', val: 100, claimed: false, lost: false }
 };
 
-// Configuration for Difficulty
+// --- 1. EASIER DIFFICULTY CONFIGURATION ---
 const MODE_CONFIG = {
-    3: { // EASY (3x3) -> ~9 pieces (User wanted 25, we'll map 5x5 later)
-       time: 180, // 3 Minutes
-       rewards: [
-           { at: 120, type: 'diamond', val: 1 }, // Reward at 2:00
-           { at: 60, type: 'coin', val: 150 },   // Reward at 1:00
-           { at: 30, type: 'coin', val: 50 }     // Reward at 0:30
-       ]
+    3: { // EASY (User sees "EASY" button which calls startGame(5), but keeping 3 for safety)
+       time: 300 // 5 Minutes (Was 3)
     },
-    5: { // "EASY" in menu (5x5 = 25 pieces)
-       time: 180, 
-       rewards: [
-           { at: 130, type: 'diamond', val: 1 },
-           { at: 90, type: 'coin', val: 200 },
-           { at: 45, type: 'coin', val: 100 }
-       ]
+    5: { // ACTUAL EASY (5x5)
+       time: 480 // 8 Minutes (Was 3)
     },
-    7: { // MEDIUM (7x7 = 49 pieces)
-       time: 150, // 2m 30s
-       rewards: [
-           { at: 100, type: 'diamond', val: 2 },
-           { at: 60, type: 'coin', val: 300 },
-           { at: 20, type: 'coin', val: 150 }
-       ]
+    7: { // MEDIUM (7x7)
+       time: 900 // 15 Minutes (Was 2.5)
     },
-    9: { // HARD (9x9 = 81 pieces)
-       time: 120, // 2 Minutes
-       rewards: [
-           { at: 90, type: 'diamond', val: 3 },
-           { at: 60, type: 'coin', val: 500 },
-           { at: 30, type: 'coin', val: 250 },
-           { at: 10, type: 'coin', val: 100 }
-       ]
+    9: { // HARD (9x9)
+       time: 1200 // 20 Minutes (Was 2)
     }
 };
+
+let timerInterval = null;
+let timerState = {
+    totalTime: 0,
+    timeLeft: 0
+};
+
+// --- 2. INIT TIMER ---
+function initCyberTimer(gridSize) {
+    // Hide Game Over Screen if it was open
+    document.getElementById('gameOverScreen').style.display = 'none';
+    
+    // Remove Panic styling
+    const hud = document.querySelector('.timer-hud-container');
+    if(hud) hud.classList.remove('panic-mode');
+
+    // Set Time based on difficulty
+    const config = MODE_CONFIG[gridSize] || MODE_CONFIG[5]; 
+    timerState.totalTime = config.time;
+    timerState.timeLeft = config.time;
+    
+    // Initial Render
+    updateTimerVisuals();
+
+    // Start Loop
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimerLoop, 1000);
+}
+
+// --- 3. THE LOOP (Handles Time, Panic, and Loss) ---
+function updateTimerLoop() {
+    if(!jigState.isPlaying) return;
+
+    timerState.timeLeft--;
+    
+    updateTimerVisuals();
+
+    // Check Loss Condition
+    if(timerState.timeLeft <= 0) {
+        triggerGameOver();
+    }
+}
+
+// --- 4. VISUAL UPDATE FUNCTION ---
+function updateTimerVisuals() {
+    const fillBar = document.getElementById('cyberTimerFill');
+    const textDisplay = document.getElementById('cyberTimerText');
+    const hudContainer = document.querySelector('.timer-hud-container');
+
+    // 1. Calculate Width Percentage
+    const pct = (timerState.timeLeft / timerState.totalTime) * 100;
+    fillBar.style.width = `${pct}%`;
+
+    // 2. Format Time (MM:SS)
+    const minutes = Math.floor(timerState.timeLeft / 60);
+    const seconds = timerState.timeLeft % 60;
+    // Adds leading zero if seconds < 10
+    textDisplay.innerText = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+    // 3. Panic Mode (Shake & Red Glow) if under 30 seconds
+    if (timerState.timeLeft <= 30) {
+        if (!hudContainer.classList.contains('panic-mode')) {
+            hudContainer.classList.add('panic-mode');
+        }
+    } else {
+        hudContainer.classList.remove('panic-mode');
+    }
+}
+
+// --- 5. GAME OVER LOGIC ---
+function triggerGameOver() {
+    jigState.isPlaying = false;
+    clearInterval(timerInterval);
+    
+    // Show Overlay
+    document.getElementById('gameOverScreen').style.display = 'flex';
+    
+    // Optional: Play sound effect here
+}
 
 
 
@@ -5783,11 +5885,18 @@ function toDifficultyMenu() {
 }
 
 window.resetToMenu = () => {
+    // Stop the timer
+    if(timerInterval) clearInterval(timerInterval);
+    
+    // Hide Game Over screen
+    document.getElementById('gameOverScreen').style.display = 'none';
+
     document.getElementById('puzzleMainMenu').style.display = 'flex';
     document.getElementById('puzzleDiffMenu').style.display = 'none';
-    document.getElementById('jigsawArena').style.display = 'none';
+    const arena = document.getElementById('jigsawArena');
+    arena.style.display = 'none';
+    arena.classList.remove('active-grid');
 };
-
 
 
 
