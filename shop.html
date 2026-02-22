@@ -6902,11 +6902,14 @@ if (auth.currentUser) {
 
 window.openGallery = async () => {
     const container = document.getElementById('galleryContainer');
+    const title = document.querySelector('#galleryModal .cosmo-title');
+    title.innerText = "HALL OF FAME";
     document.getElementById('galleryModal').classList.add('active');
     container.innerHTML = '<div style="color:cyan; text-align:center; width:100%; padding:20px;">SYNCING DATA...</div>';
 
     try {
-        const q = query(collection(db, "puzzle_hall_of_fame"), orderBy("timestamp", "desc"));
+        // Luăm toate puzzle-urile. Sortăm manual în cod dacă timestamp-ul lipsește
+        const q = query(collection(db, "puzzle_hall_of_fame")); 
         const snap = await getDocs(q);
         
         const userGroups = {};
@@ -6915,27 +6918,35 @@ window.openGallery = async () => {
             const data = docSnap.data();
             const uid = data.userId;
 
+            if(!uid) return; // Skip dacă e eroare de date
+
             if(!userGroups[uid]) {
                 userGroups[uid] = {
-                    username: data.username,
-                    pfp: data.userPfp,
+                    username: data.username || "Unknown",
+                    pfp: data.userPfp || "https://i.ibb.co/4pGm9S2/user-placeholder.png",
                     lastImg: data.imgUrl,
-                    puzzles: [] // Array-ul unde strângem TOATE puzzle-urile
+                    puzzles: []
                 };
             }
-            // Adăugăm puzzle-ul curent în lista utilizatorului
+            // Adăugăm puzzle-ul
             userGroups[uid].puzzles.push(data);
+            
+            // Ne asigurăm că 'lastImg' este cel mai recent (bazat pe timestamp dacă există)
+            if (data.timestamp && (!userGroups[uid].maxTime || data.timestamp.toMillis() > userGroups[uid].maxTime)) {
+                userGroups[uid].maxTime = data.timestamp.toMillis();
+                userGroups[uid].lastImg = data.imgUrl;
+            }
         });
 
         container.innerHTML = '';
         
-        // Dacă nu e nimic în DB
-        if(Object.keys(userGroups).length === 0) {
+        const users = Object.keys(userGroups);
+        if(users.length === 0) {
             container.innerHTML = '<p style="color:#555; text-align:center; width:100%;">No archives found.</p>';
             return;
         }
 
-        Object.keys(userGroups).forEach(uid => {
+        users.forEach(uid => {
             const user = userGroups[uid];
             const card = document.createElement('div');
             card.className = 'gallery-card';
@@ -6949,17 +6960,19 @@ window.openGallery = async () => {
                         <div style="position: absolute; bottom: -5px; right: -5px; background: #00ff88; color: #000; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 5px;">LVL ${user.puzzles.length}</div>
                     </div>
                     <div style="text-align: center;">
-                        <span class="gallery-user" style="font-size:13px; color:#fff; display: block;">${user.username}</span>
+                        <span class="gallery-user" style="font-size:13px; color:#fff; display: block; font-family:Orbitron;">${user.username}</span>
                         <span style="font-family:Orbitron; font-size:9px; color:var(--primary);">${user.puzzles.length} ARCHIVES</span>
                     </div>
-                    <button class="btn-equip-v6 do-equip" style="font-size: 8px; padding: 5px 12px;">VIEW COLLECTION</button>
+                    <button class="btn-ksda-fire" style="padding: 5px 10px; font-size: 8px; margin-top:5px;"><span>VIEW COLLECTION</span></button>
                 </div>
             `;
-            // Când dai click, trimiți tot obiectul user care conține array-ul puzzles
             card.onclick = () => showUserPuzzles(user);
             container.appendChild(card);
         });
-    } catch(e) { console.error(e); }
+    } catch(e) { 
+        console.error("Gallery Error:", e);
+        container.innerHTML = '<p style="color:red;">Error loading gallery.</p>';
+    }
 };
 
 
@@ -6970,8 +6983,13 @@ window.showUserPuzzles = (userData) => {
     
     title.innerText = "USER ARCHIVE";
     container.innerHTML = '';
+    
+    // Forțăm containerul să fie grid cu 2 coloane pe mobil
+    container.style.display = "grid";
+    container.style.gridTemplateColumns = "repeat(2, 1fr)";
+    container.style.gap = "10px";
 
-    // HEADER UTILIZATOR (PFP + NUME)
+    // HEADER (PFP + NUME)
     const userHeader = document.createElement('div');
     userHeader.style.cssText = `
         grid-column: 1 / -1;
@@ -6982,13 +7000,13 @@ window.showUserPuzzles = (userData) => {
         padding: 15px;
         border-radius: 15px;
         border: 1px solid var(--primary);
-        margin-bottom: 20px;
+        margin-bottom: 10px;
     `;
     userHeader.innerHTML = `
-        <img src="${userData.pfp}" style="width:50px; height:50px; border-radius:50%; border:2px solid var(--primary);">
+        <img src="${userData.pfp}" style="width:45px; height:45px; border-radius:50%; border:2px solid var(--primary); object-fit:cover;">
         <div>
-            <div style="font-family:'Orbitron'; color:#fff; font-size:14px;">${userData.username}</div>
-            <div style="font-size:10px; color:var(--primary);">${userData.puzzles.length} Puzzles Completed</div>
+            <div style="font-family:'Orbitron'; color:#fff; font-size:12px;">${userData.username}</div>
+            <div style="font-size:10px; color:var(--primary);">${userData.puzzles.length} Puzzles Found</div>
         </div>
     `;
     container.appendChild(userHeader);
@@ -6996,19 +7014,26 @@ window.showUserPuzzles = (userData) => {
     // Buton Back
     const backBtn = document.createElement('button');
     backBtn.className = 'btn-nav-v6 btn-nav-back';
-    backBtn.style.gridColumn = '1 / -1';
-    backBtn.style.marginBottom = '15px';
+    backBtn.style.gridColumn = "1 / -1";
+    backBtn.style.marginBottom = "15px";
+    backBtn.style.width = "100%";
     backBtn.innerHTML = '<i class="fas fa-arrow-left"></i> BACK TO LEGENDS';
-    backBtn.onclick = openGallery;
+    backBtn.onclick = (e) => {
+        e.stopPropagation();
+        openGallery();
+    };
     container.appendChild(backBtn);
 
-    // Puzzle-urile lui
+    // Generăm fiecare puzzle din array-ul 'puzzles'
     userData.puzzles.forEach(p => {
         const card = document.createElement('div');
         card.className = 'gallery-card';
+        card.style.height = '140px';
         card.innerHTML = `
-            <img src="${p.imgUrl}" class="gallery-img">
-            <span class="gallery-time" style="font-size:8px;">GRID: ${p.gridSize}</span>
+            <img src="${p.imgUrl}" class="gallery-img" style="height: 100%; object-fit: cover;">
+            <div style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.7); padding:5px; text-align:center;">
+                <span style="font-family:Orbitron; font-size:8px; color:#fff;">GRID: ${p.gridSize}</span>
+            </div>
         `;
         card.onclick = () => {
             jigState.imgUrl = p.imgUrl;
