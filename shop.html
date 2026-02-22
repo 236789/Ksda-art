@@ -6830,108 +6830,56 @@ window.resetToMenu = () => {
 };
 
 
-async function doWin() {
-    jigState.isPlaying = false;
-    clearInterval(timerInterval);
-
-    // 1. Calculate Rewards (KSDA, Diamonds, Boxes)
-    let bonusCoins = 100; 
-    let bonusDiamonds = 0;
-    let bonusMystery = 0;
-
-    timerState.milestones.forEach(m => {
-        if (!m.lost) {
-            if (m.type === 'ksda') bonusCoins += m.val;
-            if (m.type === 'diamond') bonusDiamonds += m.val;
-            if (m.type === 'mystery') bonusMystery += m.val;
-        }
-    });
-
-    // 2. Prepare the data for the Hall of Fame
-    // NOTE: Using the collection name your Gallery actually reads: "puzzle_hall_of_fame"
-    const puzzleResult = {
-        userId: auth.currentUser.uid,
-        username: auth.currentUser.displayName || "Anonim",
-        userPfp: auth.currentUser.photoURL,
-        imgUrl: jigState.imgUrl, 
-        gridSize: `${jigState.rows}x${jigState.cols}`,
-        timestamp: serverTimestamp() // This keeps them in order
-    };
-
-    try {
-        // 3. SAVE TO HALL OF FAME (This creates a SEPARATE entry every time)
-        await addDoc(collection(db, "puzzle_hall_of_fame"), puzzleResult);
-
-        // 4. Update User Balances
-        const userRef = doc(db, "accounts", auth.currentUser.uid);
-        await updateDoc(userRef, {
-            coins: increment(bonusCoins),
-            diamonds: increment(bonusDiamonds),
-            mysteryBoxes: increment(bonusMystery),
-            jigsawSave: deleteField() // Only delete the "in-progress" save
-        });
-
-        // 5. Show the Win UI
-        document.getElementById('earnedCoinsText').innerText = bonusCoins;
-        if(bonusDiamonds > 0) {
-            document.getElementById('diamondWinBox').style.display = 'flex';
-            document.getElementById('earnedDiamondsText').innerText = bonusDiamonds;
-        }
-        if(bonusMystery > 0) {
-            wonBoxes = bonusMystery; 
-            document.getElementById('mysteryWinBox').style.display = 'flex';
-            document.getElementById('earnedMysteryText').innerText = bonusMystery;
-        }
-
-        document.getElementById('questRewardModal').classList.add('active');
-
-    } catch (e) {
-        console.error("Error saving win:", e);
-    }
-
-    resetToMenu();
-}
-
 window.openGallery = async () => {
     const container = document.getElementById('galleryContainer');
     const title = document.querySelector('#galleryModal .cosmo-title');
     title.innerText = "HALL OF FAME";
     document.getElementById('galleryModal').classList.add('active');
-    container.innerHTML = '<div style="color:cyan; text-align:center; width:100%; padding:20px;">LOADING ALL ARCHIVES...</div>';
+    
+    // Clear and show loading
+    container.innerHTML = '<div style="color:cyan; text-align:center; width:100%; padding:20px;">SYNCING ARCHIVES...</div>';
 
     try {
-        // Get all puzzles, newest first
-        const { query, orderBy, getDocs } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+        // 1. Get every single puzzle document from the collection
+        // We order by timestamp DESC so the newest completions are at the top
+        const { query, orderBy, getDocs, collection } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
         const q = query(collection(db, "puzzle_hall_of_fame"), orderBy("timestamp", "desc"));
         const snap = await getDocs(q);
         
         container.innerHTML = '';
         
         if(snap.empty) {
-            container.innerHTML = '<p style="color:#555; text-align:center; width:100%;">No puzzles found yet. Be the first!</p>';
+            container.innerHTML = '<p style="color:#555; text-align:center; width:100%;">No archives found yet.</p>';
             return;
         }
 
+        // 2. Loop through EVERY entry. 
+        // If Emmanuel finished 10 puzzles, we create 10 separate cards here.
         snap.forEach(docSnap => {
             const data = docSnap.data();
             const card = document.createElement('div');
             card.className = 'gallery-card';
-            card.style.height = '200px';
+            card.style.height = '180px';
+            card.style.position = 'relative';
             
-            // Format date
+            // Format the date nicely
             const date = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleDateString() : "Recent";
 
             card.innerHTML = `
-                <img src="${data.imgUrl}" class="gallery-img" style="height: 100%; width: 100%; object-fit: cover;">
-                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.9), transparent); display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:10px;">
-                    <img src="${data.userPfp || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" style="width:30px; height:30px; border-radius:50%; border:2px solid var(--primary); margin-bottom:5px;">
-                    <span class="gallery-user" style="font-size:11px; color:#fff; font-family:Orbitron;">${data.username}</span>
-                    <span style="font-size:9px; color:var(--primary); font-family:Orbitron;">GRID: ${data.gridSize}</span>
-                    <span style="font-size:8px; color:#666;">${date}</span>
+                <img src="${data.imgUrl}" class="gallery-img" style="height: 100%; width: 100%; object-fit: cover; border-radius: 12px;">
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 80%); border-radius: 12px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:10px;">
+                    <div style="display:flex; align-items:center; gap:5px; margin-bottom:3px; width:100%;">
+                        <img src="${data.userPfp || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" style="width:20px; height:20px; border-radius:50%; border:1px solid var(--primary);">
+                        <span style="font-size:10px; color:#fff; font-family:Orbitron; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${data.username}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; width:100%; align-items:center; opacity:0.7;">
+                        <span style="font-family:Orbitron; font-size:8px; color:var(--primary);">${data.gridSize}</span>
+                        <span style="font-size:8px; color:#fff;">${date}</span>
+                    </div>
                 </div>
             `;
 
-            // If you click it, you can play it again
+            // Clicking the card lets anyone play that image
             card.onclick = () => {
                 jigState.imgUrl = data.imgUrl;
                 jigState.isCustom = true; 
@@ -6943,7 +6891,70 @@ window.openGallery = async () => {
         });
     } catch(e) { 
         console.error("Gallery Error:", e);
-        container.innerHTML = '<p style="color:red; text-align:center; width:100%;">Error loading gallery. Check console.</p>';
+        container.innerHTML = '<p style="color:red; text-align:center; width:100%;">Error loading gallery.</p>';
+    }
+};
+
+window.openGallery = async () => {
+    const container = document.getElementById('galleryContainer');
+    const title = document.querySelector('#galleryModal .cosmo-title');
+    title.innerText = "HALL OF FAME";
+    document.getElementById('galleryModal').classList.add('active');
+    container.innerHTML = '<div style="color:cyan; text-align:center; width:100%; padding:20px;">SYNCING ALL ARCHIVES...</div>';
+
+    try {
+        // 1. Get every single puzzle document from the collection
+        // We order by timestamp DESC so the newest ones are at the top
+        const { query, orderBy, getDocs, collection } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+        const q = query(collection(db, "puzzle_hall_of_fame"), orderBy("timestamp", "desc"));
+        const snap = await getDocs(q);
+        
+        container.innerHTML = '';
+        
+        if(snap.empty) {
+            container.innerHTML = '<p style="color:#555; text-align:center; width:100%;">No archives found yet.</p>';
+            return;
+        }
+
+        // 2. Loop through EVERY document found (Don't group them by user!)
+        snap.forEach(docSnap => {
+            const data = docSnap.data();
+            
+            const card = document.createElement('div');
+            card.className = 'gallery-card';
+            card.style.height = '220px'; // Made slightly taller for info
+            
+            // Format the date nicely
+            const date = data.timestamp ? new Date(data.timestamp.seconds * 1000).toLocaleDateString() : "Recent";
+
+            card.innerHTML = `
+                <img src="${data.imgUrl}" class="gallery-img" style="height: 100%; width: 100%; object-fit: cover;">
+                <div style="position:absolute; inset:0; background:linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 70%); display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:15px;">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px; width:100%;">
+                        <img src="${data.userPfp || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" style="width:25px; height:25px; border-radius:50%; border:1px solid var(--primary);">
+                        <span class="gallery-user" style="font-size:11px; color:#fff; font-family:Orbitron; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${data.username}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                        <span style="font-family:Orbitron; font-size:9px; color:var(--primary);">GRID: ${data.gridSize}</span>
+                        <span style="font-size:8px; color:#666;">${date}</span>
+                    </div>
+                    <button class="btn-ksda-fire" style="width:100%; padding:4px; font-size:8px; margin-top:8px;"><span>PLAY THIS IMAGE</span></button>
+                </div>
+            `;
+
+            // Clicking the card lets you play that specific image
+            card.onclick = () => {
+                jigState.imgUrl = data.imgUrl;
+                jigState.isCustom = true; 
+                document.getElementById('galleryModal').classList.remove('active');
+                toDifficultyMenu();
+            };
+
+            container.appendChild(card);
+        });
+    } catch(e) { 
+        console.error("Gallery Error:", e);
+        container.innerHTML = '<p style="color:red; text-align:center; width:100%;">Error loading gallery.</p>';
     }
 };
 
