@@ -6145,24 +6145,34 @@ window.resumeGame = async () => {
     const save = snap.data().jigsawSave;
     
     if(save) {
-        // 1. Load Piece State
+        // 1. Încărcăm piesele
         jigState = { ...save };
-        jigState.isPlaying = true; // Set playing to true immediately
+        jigState.isPlaying = true;
 
-        // 2. Load Timer State
-        timerState.timeLeft = save.timeLeft;
-        timerState.totalTime = save.totalTime;
-        timerState.milestones = save.milestones;
+        // 2. Încărcăm Timer-ul (cu fallbacks pentru salvări vechi)
+        timerState.timeLeft = save.timeLeft || 0;
+        timerState.totalTime = save.totalTime || 120;
+        
+        // REPARAȚIE: Dacă milestones nu există în save, le luăm din setările default ale dificultății
+        if (!save.milestones) {
+            const config = MODE_CONFIG[jigState.rows] || MODE_CONFIG[5];
+            timerState.milestones = JSON.parse(JSON.stringify(config.rewards || []));
+        } else {
+            timerState.milestones = save.milestones;
+        }
 
-        // 3. Render the Pieces
+        // 3. Resetăm UI-ul
         setupBoardUI(true);
 
-        // 4. Re-initialize the Timer UI (Render markers & start loop)
+        // 4. Desenăm bară și recompensele
         renderLootMarkers(); 
         
+        // Pornim intervalul și actualizăm vizual imediat
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(updateTimerLoop, 1000);
         updateTimerVisuals();
+        
+        console.log("Resume complet cu autovindecare milestones.");
     }
 }
 // --- JIGSAW ENGINE v2.0 -
@@ -6170,20 +6180,27 @@ window.resumeGame = async () => {
 
  
 // Helper to draw the icons on the bar
+// Helper sigur pentru desenarea recompenselor pe bară
 function renderLootMarkers() {
     const lootZone = document.getElementById('lootZone');
     if (!lootZone) return;
     
     lootZone.innerHTML = '';
+    
+    // Verificăm dacă milestones există și este array (previne eroarea forEach)
+    if (!timerState.milestones || !Array.isArray(timerState.milestones)) {
+        console.warn("Milestones lipsă. Încercăm recuperarea din setările modului.");
+        return; 
+    }
+
     timerState.milestones.forEach((m, index) => {
         const marker = document.createElement('div');
         marker.className = 'loot-marker';
-        // If we are resuming, check if this milestone was already lost
         if (m.lost) marker.classList.add('lost');
         
         marker.id = `ms-${index}`;
         
-        // Correct scaling math
+        // Calcul poziție bazat pe timpul total
         const pct = (m.at / timerState.totalTime) * 100;
         marker.style.left = `${pct}%`;
 
