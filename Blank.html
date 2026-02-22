@@ -4361,6 +4361,53 @@
 .r-badge { background: linear-gradient(180deg, #1a1a1a, #d6338422); }
 .r-frame { background: linear-gradient(180deg, #1a1a1a, #bf55ec22); }
 .r-coin { background: linear-gradient(180deg, #1a1a1a, #ffd70022); }
+
+
+
+/* THE NEW ROULETTE LOOK */
+.roulette-wrapper {
+    width: 100%;
+    max-width: 600px;
+    height: 140px; /* Slightly taller */
+    background: #111;
+    border: 4px solid #333;
+    border-radius: 0; /* Square look like the pic */
+    position: relative;
+    overflow: hidden;
+    margin-top: 30px;
+}
+
+.roulette-item {
+    min-width: 100px; /* Matches the square aspect */
+    height: 100px;
+    margin: 20px 5px; /* Spacing between blocks */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 8px solid #000; /* The thick outer colored border */
+    background: #fff; /* The white inner background */
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.roulette-item img {
+    width: 60%;
+    height: 60%;
+    object-fit: contain;
+}
+
+/* Needle Update to stand out on the new colors */
+.roulette-needle {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: #ff4757;
+    z-index: 100;
+    transform: translateX(-50%);
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
   </style>
 </head>
 <body>
@@ -6245,39 +6292,49 @@ function initRoulette() {
     const strip = document.getElementById('rouletteStrip');
     strip.innerHTML = '';
     
-    // Create 40 items for the slide
+    // Colors from your screenshot
+    const boxColors = ['#2ecc71', '#00bfff', '#ffffff', '#ff4757', '#ffff00', '#3f51b5', '#e91e63'];
+
     const pool = [];
-    for(let i=0; i<40; i++) {
+    for(let i=0; i<50; i++) {
         const rnd = Math.random();
         let item;
-        if(rnd < 0.4) item = { name: '500 Coins', type: 'ksda', icon: 'https://iili.io/fhc1SKQ.png', class: 'r-coin' };
-        else if(rnd < 0.6) item = { name: '5 Diamonds', type: 'diamond', icon: 'https://iili.io/fv5bmtj.png', class: 'r-coin' };
-        else if(rnd < 0.8) {
+        
+        // Define prize pool
+        if(rnd < 0.4) item = { name: '500 Coins', type: 'ksda', icon: 'https://iili.io/fhc1SKQ.png' };
+        else if(rnd < 0.7) item = { name: '5 Diamonds', type: 'diamond', icon: 'https://iili.io/fv5bmtj.png' };
+        else {
             const b = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
-            item = { name: b.text, type: 'badge', id: b.id, class: 'r-badge' };
-        } else {
-            const f = FRAMES_DB[Math.floor(Math.random() * FRAMES_DB.length)];
-            item = { name: f.name, type: 'frame', id: f.id, icon: f.img, class: 'r-frame' };
+            item = { name: b.text, type: 'badge', id: b.id, icon: 'https://iili.io/fXvBEiB.png' }; // Use a generic badge icon or logo
         }
         pool.push(item);
         
         const el = document.createElement('div');
-        el.className = `roulette-item ${item.class}`;
-        el.innerHTML = item.icon ? `<img src="${item.icon}" width="30">` : `<span style="font-size:8px;">${item.name}</span>`;
+        el.className = `roulette-item`;
+        
+        // Assign a random thick border from the color list
+        const randomColor = boxColors[Math.floor(Math.random() * boxColors.length)];
+        el.style.borderColor = randomColor;
+
+        // Add the icon
+        el.innerHTML = `<img src="${item.icon}">`;
         strip.appendChild(el);
     }
 
-    // The Winner is usually the 35th item
-    const winnerIndex = 35;
+    const winnerIndex = 40;
     const winner = pool[winnerIndex];
     
-    // Animate
+    // The width is 110px (100px width + 5px margin each side)
     setTimeout(() => {
-        const offset = (winnerIndex * 120) - 190; // Center needle math
-        strip.style.transform = `translateX(-${offset}px)`;
+        const itemWidth = 110; 
+        const centerOffset = 300 - (itemWidth / 2); // 300 is half of 600px max-width
+        const stopAt = (winnerIndex * itemWidth) - centerOffset;
+        
+        strip.style.transition = "transform 6s cubic-bezier(0.15, 0, 0.15, 1)";
+        strip.style.transform = `translateX(-${stopAt}px)`;
     }, 100);
 
-    setTimeout(() => revealPrize(winner), 5500);
+    setTimeout(() => revealPrize(winner), 6500);
 }
 
 async function revealPrize(item) {
@@ -6987,23 +7044,29 @@ function initCyberTimer(gridSize, isResume = false) {
     const lootZone = document.getElementById('lootZone');
     if (lootZone) {
         lootZone.innerHTML = '';
-        timerState.milestones.forEach((m, index) => {
-            const marker = document.createElement('div');
-            marker.className = 'loot-marker';
-            
-            // Adăugăm clasa 'lost' dacă recompensa era deja pierdută în salvare
-            if (m.lost) marker.classList.add('lost');
-            
-            marker.id = `ms-${index}`;
-            
-            // Math-ul tău original
-            const pct = (m.at / timerState.totalTime) * 100;
-            marker.style.left = `${pct}%`;
+// Inside initCyberTimer or renderLootMarkers, update the icon loop:
+timerState.milestones.forEach((m, index) => {
+    const marker = document.createElement('div');
+    marker.className = 'loot-marker';
+    if (m.lost) marker.classList.add('lost');
+    marker.id = `ms-${index}`;
+    
+    const pct = (m.at / timerState.totalTime) * 100;
+    marker.style.left = `${pct}%`;
 
-            const imgUrl = (m.type === 'ksda') ? 'https://iili.io/fhc1SKQ.png' : 'https://iili.io/fv5bmtj.png';
-            marker.innerHTML = `<img src="${imgUrl}">`;
-            lootZone.appendChild(marker);
-        });
+    // FIXED ICON LOGIC HERE:
+    let imgUrl = "";
+    if (m.type === 'ksda') {
+        imgUrl = 'https://iili.io/fhc1SKQ.png';
+    } else if (m.type === 'diamond') {
+        imgUrl = 'https://iili.io/fv5bmtj.png';
+    } else if (m.type === 'mystery') {
+        imgUrl = 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%201.png?alt=media&token=29742b82-3e51-408c-948e-c3bae712e2ca';
+    }
+
+    marker.innerHTML = `<img src="${imgUrl}">`;
+    lootZone.appendChild(marker);
+});
     }
 
     if (timerInterval) clearInterval(timerInterval);
