@@ -5123,7 +5123,12 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, increment, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { 
+    getFirestore, doc, getDoc, setDoc, onSnapshot, 
+    updateDoc, increment, arrayUnion, serverTimestamp,
+    collection, addDoc,  // Add these three
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
 
     const firebaseConfig = {
       apiKey: "AIzaSyDoH80kffNrzFAcyRqsTVdifs-whUhwH9A",
@@ -6827,77 +6832,46 @@ window.resetToMenu = () => {
 
 async function doWin() {
     jigState.isPlaying = false;
-    if (timerInterval) clearInterval(timerInterval);
     
-    let totalEarnedCoins = pendingCoins + 100;
-    let totalEarnedDiamonds = 0;
-    wonBoxes = 0; 
+    // 1. Calculate Rewards
+    let bonusCoins = 100; 
 
-    if (timerState.milestones) {
-        timerState.milestones.forEach(m => {
-            if (!m.lost) {
-                if (m.type === 'ksda') totalEarnedCoins += m.val;
-                if (m.type === 'diamond') totalEarnedDiamonds += m.val;
-                if (m.type === 'mystery') wonBoxes += m.val;
-            }
+    // 2. Prepare the data for the Hall of Fame / Gallery
+    const puzzleResult = {
+        uid: auth.currentUser.uid,
+        username: auth.currentUser.displayName || "Anonim",
+        userImage: auth.currentUser.photoURL,
+        imgUrl: jigState.imgUrl, // The image of the puzzle
+        difficulty: `${jigState.rows}x${jigState.cols}`,
+        completedAt: new Date(), // Timestamp for sorting
+        isCustom: jigState.isCustom,
+        timeSpent: timerState.totalTime - timerState.timeLeft // Optional: save how fast they were
+    };
+
+    try {
+        // 3. IMPORTANT: Save as a NEW document so it doesn't overwrite
+        // We import 'collection' and 'addDoc' for this
+        const { collection, addDoc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+        await addDoc(collection(db, "completed_puzzles"), puzzleResult);
+
+        // 4. Update User Profile (Coins and clear the current "Active" save)
+        await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
+            coins: increment(bonusCoins),
+            jigsawSave: deleteField() // This only clears the "In-Progress" puzzle
         });
+
+        // 5. Show Success UI
+        const qModal = document.getElementById('questRewardModal');
+        qModal.querySelector('h2').innerHTML = '<span style="font-size: 24px;">🏆</span> PUZZLE COMPLET!';
+        qModal.querySelector('p').innerText = "Puzzle-ul a fost salvat în Galeria Ta!";
+        qModal.querySelector('.reward-coins-box span').innerText = bonusCoins;
+        qModal.classList.add('active');
+
+    } catch (e) {
+        console.error("Error saving puzzle win:", e);
     }
 
-// Găsește partea de salvare în puzzle_hall_of_fame din doWin și înlocuiește-o cu asta:
-if (auth.currentUser) {
-    try {
-        const userRef = doc(db, "accounts", auth.currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        const userData = userSnap.data() || {};
-        const finalPfp = userData.image || auth.currentUser.photoURL || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
-
-        // FOLOSIM addDoc pentru a crea o intrare NOUĂ mereu, fără să le ștergem pe cele vechi
-        await addDoc(collection(db, "puzzle_hall_of_fame"), {
-            imgUrl: jigState.imgUrl,
-            userId: auth.currentUser.uid,
-            username: userData.username || auth.currentUser.displayName || "Cyber Solver",
-            userPfp: finalPfp,
-            timestamp: serverTimestamp(),
-            gridSize: `${jigState.rows}x${jigState.cols}`
-        });
-
-        // Actualizăm numărul total în profilul utilizatorului
-        await updateDoc(userRef, {
-            coins: increment(totalEarnedCoins),
-            diamonds: increment(totalEarnedDiamonds),
-            puzzlesSolved: increment(1),
-            jigsawSave: deleteField() 
-        });
-    } catch (e) { console.error("Win Save Error:", e); }
-}
-
-    // --- LOGICA UI (RAMANE NESCHIMBATA) ---
-    document.getElementById('earnedCoinsText').innerText = totalEarnedCoins;
-    const dBox = document.getElementById('diamondWinBox');
-    if (totalEarnedDiamonds > 0) {
-        document.getElementById('earnedDiamondsText').innerText = totalEarnedDiamonds;
-        dBox.style.display = 'flex';
-    } else { dBox.style.display = 'none'; }
-
-    const mBox = document.getElementById('mysteryWinBox');
-    if (wonBoxes > 0) {
-        document.getElementById('earnedMysteryText').innerText = wonBoxes;
-        mBox.style.display = 'flex';
-    } else { mBox.style.display = 'none'; }
-
-    document.getElementById('questRewardModal').classList.add('active');
-
-    const collectBtn = document.querySelector('#questRewardModal .super-btn');
-    collectBtn.onclick = () => {
-        if(wonBoxes > 0) {
-            document.getElementById('questRewardModal').classList.remove('active');
-            document.getElementById('mysteryOverlay').style.display = 'flex';
-            document.getElementById('mysteryStatus').innerText = `AI CÂȘTIGAT ${wonBoxes} CUTII!`;
-        } else {
-            resetToMenu();
-        }
-    };
-    pendingCoins = 0;
+    resetToMenu();
 }
 
 window.openGallery = async () => {
@@ -7045,7 +7019,6 @@ window.showUserPuzzles = (userData) => {
     });
 };
 // 3. GALLERY LOGIC
-import { collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 function enablePointerDrag(el, id) {
     el.onpointerdown = function(e) {
         // Prevent default browser dragging behavior (ghost images)
@@ -7385,7 +7358,19 @@ function updateTimerLoop() {
 
 
  
-
+// Example: How you would fetch the Hall of Fame
+async function loadHallOfFame() {
+    const { getDocs, query, orderBy, collection } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+    
+    const q = query(collection(db, "completed_puzzles"), orderBy("completedAt", "desc"));
+    const querySnapshot = await getDocs(q);
+    
+    querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        // Now you can render 'data.imgUrl' and 'data.username'
+        // Each finish will appear as its own card!
+    });
+}
 
   </script>
 </body>
