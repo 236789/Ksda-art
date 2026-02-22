@@ -3841,6 +3841,98 @@
         transform: translateX(0);
     }
 }
+
+
+
+/* --- 1. TRAY PIECES FIX (Square & Smaller) --- */
+.zone-pieces {
+    /* Use auto-fill to pack them tight */
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)) !important;
+    grid-auto-rows: min-content; /* Prevent stretching */
+    gap: 8px;
+    padding: 15px;
+    align-content: start;
+}
+
+.jig-piece.in-tray {
+    position: relative !important;
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important; /* FORCES SQUARE SHAPE */
+    height: auto !important;
+    margin: 0;
+    top: auto !important; left: auto !important;
+    transform: scale(1);
+    box-shadow: 0 0 5px #000;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* --- 2. CYBER TIMER BAR --- */
+.cyber-timer-wrapper {
+    width: 100%;
+    height: 40px;
+    background: #000;
+    border: 1px solid var(--primary);
+    border-radius: 4px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(41, 243, 255, 0.2);
+}
+
+/* The Moving Bar */
+.cyber-timer-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #ff0055, #ffd700, #00ff88, #29f3ff);
+    background-size: 300% 100%;
+    animation: gradientShift 5s infinite linear;
+    transition: width 1s linear;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes gradientShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+
+/* The Milestones (Rewards on the bar) */
+.timer-milestone {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 40px; /* Size of icon area */
+    transform: translateX(-50%); /* Center on the time point */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    font-size: 14px;
+    border-left: 2px solid rgba(255,255,255,0.5);
+}
+
+.timer-milestone img, .timer-milestone i {
+    filter: drop-shadow(0 0 5px #fff);
+    transition: 0.3s;
+}
+
+/* --- LOST REWARD STATE (Red X) --- */
+.milestone-lost {
+    filter: grayscale(100%) opacity(0.5);
+}
+
+.milestone-lost::after {
+    content: '✕';
+    position: absolute;
+    color: #ff4757;
+    font-size: 30px;
+    font-weight: 900;
+    text-shadow: 0 0 10px #ff4757;
+    animation: stampX 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes stampX {
+    0% { transform: scale(5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
   </style>
 </head>
 <body>
@@ -4352,8 +4444,14 @@
 
     </div>
 
-    <!-- 3. THE GAME ARENA (3-Panel Layout) -->
     <div id="jigsawArena" class="jigsaw-arena">
+        
+        <!-- NEW: PROGRESS TIMER BAR -->
+        <div id="cyberTimerContainer" class="cyber-timer-wrapper" style="grid-column: 1 / -1;">
+            <div id="cyberTimerFill" class="cyber-timer-fill"></div>
+            <!-- Milestones injected by JS -->
+            <div id="milestonesLayer"></div> 
+        </div>
         
         <!-- LEFT: Preview & Controls -->
         <div class="zone-left">
@@ -5570,6 +5668,55 @@ document.getElementById('claimStreakBtn').onclick = window.flyDiamond;
 /* --- UPGRADED JIGSAW PUZZLE LOGIC (POINTER EVENTS) --- */
 /* --- FIXED JIGSAW PUZZLE LOGIC (SAFETY DELAY ADDED) --- */
 
+
+
+
+let timerInterval = null;
+let timerState = {
+    totalTime: 0, // seconds
+    timeLeft: 0,
+    milestones: [] // { at: seconds, type: 'coin'|'diamond', val: 100, claimed: false, lost: false }
+};
+
+// Configuration for Difficulty
+const MODE_CONFIG = {
+    3: { // EASY (3x3) -> ~9 pieces (User wanted 25, we'll map 5x5 later)
+       time: 180, // 3 Minutes
+       rewards: [
+           { at: 120, type: 'diamond', val: 1 }, // Reward at 2:00
+           { at: 60, type: 'coin', val: 150 },   // Reward at 1:00
+           { at: 30, type: 'coin', val: 50 }     // Reward at 0:30
+       ]
+    },
+    5: { // "EASY" in menu (5x5 = 25 pieces)
+       time: 180, 
+       rewards: [
+           { at: 130, type: 'diamond', val: 1 },
+           { at: 90, type: 'coin', val: 200 },
+           { at: 45, type: 'coin', val: 100 }
+       ]
+    },
+    7: { // MEDIUM (7x7 = 49 pieces)
+       time: 150, // 2m 30s
+       rewards: [
+           { at: 100, type: 'diamond', val: 2 },
+           { at: 60, type: 'coin', val: 300 },
+           { at: 20, type: 'coin', val: 150 }
+       ]
+    },
+    9: { // HARD (9x9 = 81 pieces)
+       time: 120, // 2 Minutes
+       rewards: [
+           { at: 90, type: 'diamond', val: 3 },
+           { at: 60, type: 'coin', val: 500 },
+           { at: 30, type: 'coin', val: 250 },
+           { at: 10, type: 'coin', val: 100 }
+       ]
+    }
+};
+
+
+
 let jigState = {
     isPlaying: false,
     rows: 3,
@@ -5676,8 +5823,6 @@ window.showDifficulty = async (type) => {
     document.getElementById('puzzleMainMenu').style.display = 'none';
     document.getElementById('puzzleDiffMenu').style.display = 'flex';
 };
-
-// 2. Start Game with Shuffle
 window.startGame = (gridSize) => {
     jigState.rows = gridSize;
     jigState.cols = gridSize;
@@ -5700,6 +5845,9 @@ window.startGame = (gridSize) => {
         const j = Math.floor(Math.random() * (i + 1));
         [jigState.pieces[i], jigState.pieces[j]] = [jigState.pieces[j], jigState.pieces[i]];
     }
+
+    // --- NEW: START THE TIMER ---
+    initCyberTimer(gridSize);
 
     setupBoardUI();
 };
@@ -5987,6 +6135,76 @@ import { deleteField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-
 
 
 
+function initCyberTimer(gridSize) {
+    const config = MODE_CONFIG[gridSize] || MODE_CONFIG[5]; // Default to 5
+    timerState.totalTime = config.time;
+    timerState.timeLeft = config.time;
+    
+    // Deep copy rewards so we don't modify the config
+    timerState.milestones = JSON.parse(JSON.stringify(config.rewards));
+
+    // Render Milestones on the bar
+    const container = document.getElementById('cyberTimerContainer');
+    const layer = document.getElementById('milestonesLayer') || document.createElement('div');
+    layer.id = 'milestonesLayer';
+    layer.innerHTML = '';
+    
+    // Create DOM elements for milestones
+    timerState.milestones.forEach((m, index) => {
+        const el = document.createElement('div');
+        el.className = 'timer-milestone';
+        el.id = `ms-${index}`;
+        
+        // Calculate Position % (Left 0 = Start Time, Right 100 = 0 Time?? 
+        // Request: Bar goes max to 0. Usually Left is 0% progress. 
+        // Let's say Left is Time 0, Right is Max Time. Bar shrinks from Right to Left.
+        // So a milestone at 1:30 (90s) of 3:00 (180s) is at 50%.
+        const pct = (m.at / timerState.totalTime) * 100;
+        el.style.left = `${pct}%`;
+        
+        if(m.type === 'coin') {
+            el.innerHTML = `<img src="https://iili.io/fhc1SKQ.png" width="25"> <span style="font-size:10px; color:#fff; font-weight:bold;">${m.val}</span>`;
+        } else {
+            el.innerHTML = `<img src="https://iili.io/fv5bmtj.png" width="20">`;
+        }
+        
+        container.appendChild(el);
+    });
+
+    // Start Loop
+    clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimerLoop, 1000);
+}
+
+function updateTimerLoop() {
+    if(!jigState.isPlaying) return;
+
+    timerState.timeLeft--;
+    
+    // Update Bar Width
+    const pct = (timerState.timeLeft / timerState.totalTime) * 100;
+    document.getElementById('cyberTimerFill').style.width = `${pct}%`;
+
+    // Check Milestones (If bar passes them, they are lost)
+    timerState.milestones.forEach((m, index) => {
+        if (!m.lost && timerState.timeLeft < m.at) {
+            // Milestone Lost!
+            m.lost = true;
+            const el = document.getElementById(`ms-${index}`);
+            if(el) {
+                el.classList.add('milestone-lost');
+                // Optional: Play a fail sound here
+            }
+        }
+    });
+
+    // Game Over if time hits 0? Or just no bonus?
+    // Let's just keep playing but bar is empty.
+    if(timerState.timeLeft <= 0) {
+        document.getElementById('cyberTimerFill').style.width = `0%`;
+        clearInterval(timerInterval);
+    }
+}
   </script>
 </body>
 </html>
