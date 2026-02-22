@@ -3970,6 +3970,112 @@
     margin-bottom: 10px;
     text-shadow: 0 0 20px #ff4757;
 }
+
+
+
+/* --- NEW CYBER TIMER HUD --- */
+.timer-hud-container {
+    grid-column: 1 / -1; /* Spans full width on PC */
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 15px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 20;
+}
+
+/* The Bar Background */
+.cyber-bar-track {
+    width: 100%;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #333;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    position: relative;
+}
+
+/* The Moving Fill */
+.cyber-bar-fill {
+    height: 100%;
+    width: 100%; /* Starts full */
+    background: linear-gradient(90deg, #00ff88, #00ffff);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+    transition: width 1s linear, background 0.3s;
+    border-radius: 6px;
+}
+
+/* The Digital Timer Text */
+.cyber-timer-digits {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    color: #fff;
+    margin-top: 5px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px rgba(41, 243, 255, 0.5);
+    transition: all 0.3s;
+}
+
+/* --- PANIC MODE (Low Time) --- */
+.panic-mode .cyber-bar-fill {
+    background: #ff0000 !important;
+    box-shadow: 0 0 20px #ff0000 !important;
+}
+
+.panic-mode .cyber-timer-digits {
+    color: #ff0000 !important;
+    text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000 !important;
+    animation: panicShake 0.5s infinite;
+}
+
+.panic-mode .cyber-bar-track {
+    border-color: #ff0000;
+    animation: borderFlash 0.5s infinite alternate;
+}
+
+@keyframes panicShake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+@keyframes borderFlash {
+    from { box-shadow: 0 0 5px #ff0000; }
+    to { box-shadow: 0 0 25px #ff0000; }
+}
+
+/* --- GAME OVER OVERLAY --- */
+.game-over-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 100000;
+    display: none; /* Flex when active */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.go-title {
+    font-family: 'Orbitron';
+    font-size: 40px;
+    color: #ff4757;
+    font-weight: 900;
+    margin-bottom: 10px;
+    text-shadow: 0 0 20px #ff4757;
+}
   </style>
 </head>
 <body>
@@ -4502,7 +4608,6 @@
         
         <!-- LEFT: Preview & Controls -->
         <div class="zone-left">
-            <!-- ... (Keep your existing left panel code) ... -->
             <img id="gamePreviewImg" class="mini-preview" src="">
             <div style="display: flex; flex-direction: column; gap: 5px;">
                 <div class="jigsaw-stat" id="piecesCount">Pieces: 0/0</div>
@@ -4521,7 +4626,6 @@
         <div class="zone-pieces" id="pieceTray"></div>
 
     </div>
-
 </main>
 
 <!-- Footer -->
@@ -5715,32 +5819,63 @@ document.getElementById('claimStreakBtn').onclick = window.flyDiamond;
 
 
 
-let timerInterval = null;
-let timerState = {
-    totalTime: 0, // seconds
-    timeLeft: 0,
-    milestones: [] // { at: seconds, type: 'coin'|'diamond', val: 100, claimed: false, lost: false }
-};
-
 // --- 1. EASIER DIFFICULTY CONFIGURATION ---
 const MODE_CONFIG = {
-    3: { // EASY (User sees "EASY" button which calls startGame(5), but keeping 3 for safety)
-       time: 300 // 5 Minutes (Was 3)
+    3: { // EASY (3x3)
+       time: 300 // 5 Minutes (Increased from 3)
     },
     5: { // ACTUAL EASY (5x5)
-       time: 480 // 8 Minutes (Was 3)
+       time: 480 // 8 Minutes (Increased from 3)
     },
     7: { // MEDIUM (7x7)
-       time: 900 // 15 Minutes (Was 2.5)
+       time: 900 // 15 Minutes (Increased from 2.5)
     },
     9: { // HARD (9x9)
-       time: 1200 // 20 Minutes (Was 2)
+       time: 1200 // 20 Minutes (Increased from 2)
     }
 };
 
+let timerInterval = null;
+let timerState = {
+    totalTime: 0,
+    timeLeft: 0
+};
 
+// --- 2. INIT TIMER ---
+function initCyberTimer(gridSize) {
+    // Hide Game Over Screen if it was open
+    document.getElementById('gameOverScreen').style.display = 'none';
+    
+    // Remove Panic styling
+    const hud = document.querySelector('.timer-hud-container');
+    if(hud) hud.classList.remove('panic-mode');
 
- 
+    // Set Time based on difficulty
+    const config = MODE_CONFIG[gridSize] || MODE_CONFIG[5]; 
+    timerState.totalTime = config.time;
+    timerState.timeLeft = config.time;
+    
+    // Initial Render
+    updateTimerVisuals();
+
+    // Start Loop
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(updateTimerLoop, 1000);
+}
+
+// --- 3. THE LOOP (Handles Time, Panic, and Loss) ---
+function updateTimerLoop() {
+    if(!jigState.isPlaying) return;
+
+    timerState.timeLeft--;
+    
+    updateTimerVisuals();
+
+    // Check Loss Condition
+    if(timerState.timeLeft <= 0) {
+        triggerGameOver();
+    }
+}
 
 // --- 4. VISUAL UPDATE FUNCTION ---
 function updateTimerVisuals() {
@@ -5775,10 +5910,22 @@ function triggerGameOver() {
     
     // Show Overlay
     document.getElementById('gameOverScreen').style.display = 'flex';
-    
-    // Optional: Play sound effect here
 }
 
+// --- 6. UPDATE RESET FUNCTION ---
+window.resetToMenu = () => {
+    // Stop the timer
+    if(timerInterval) clearInterval(timerInterval);
+    
+    // Hide Game Over screen
+    document.getElementById('gameOverScreen').style.display = 'none';
+
+    document.getElementById('puzzleMainMenu').style.display = 'flex';
+    document.getElementById('puzzleDiffMenu').style.display = 'none';
+    const arena = document.getElementById('jigsawArena');
+    arena.style.display = 'none';
+    arena.classList.remove('active-grid');
+};
 
 
 let jigState = {
@@ -6206,76 +6353,9 @@ import { deleteField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-
 
 
 
-function initCyberTimer(gridSize) {
-    const config = MODE_CONFIG[gridSize] || MODE_CONFIG[5]; // Default to 5
-    timerState.totalTime = config.time;
-    timerState.timeLeft = config.time;
-    
-    // Deep copy rewards so we don't modify the config
-    timerState.milestones = JSON.parse(JSON.stringify(config.rewards));
 
-    // Render Milestones on the bar
-    const container = document.getElementById('cyberTimerContainer');
-    const layer = document.getElementById('milestonesLayer') || document.createElement('div');
-    layer.id = 'milestonesLayer';
-    layer.innerHTML = '';
-    
-    // Create DOM elements for milestones
-    timerState.milestones.forEach((m, index) => {
-        const el = document.createElement('div');
-        el.className = 'timer-milestone';
-        el.id = `ms-${index}`;
-        
-        // Calculate Position % (Left 0 = Start Time, Right 100 = 0 Time?? 
-        // Request: Bar goes max to 0. Usually Left is 0% progress. 
-        // Let's say Left is Time 0, Right is Max Time. Bar shrinks from Right to Left.
-        // So a milestone at 1:30 (90s) of 3:00 (180s) is at 50%.
-        const pct = (m.at / timerState.totalTime) * 100;
-        el.style.left = `${pct}%`;
-        
-        if(m.type === 'coin') {
-            el.innerHTML = `<img src="https://iili.io/fhc1SKQ.png" width="25"> <span style="font-size:10px; color:#fff; font-weight:bold;">${m.val}</span>`;
-        } else {
-            el.innerHTML = `<img src="https://iili.io/fv5bmtj.png" width="20">`;
-        }
-        
-        container.appendChild(el);
-    });
 
-    // Start Loop
-    clearInterval(timerInterval);
-    timerInterval = setInterval(updateTimerLoop, 1000);
-}
 
-function updateTimerLoop() {
-    if(!jigState.isPlaying) return;
-
-    timerState.timeLeft--;
-    
-    // Update Bar Width
-    const pct = (timerState.timeLeft / timerState.totalTime) * 100;
-    document.getElementById('cyberTimerFill').style.width = `${pct}%`;
-
-    // Check Milestones (If bar passes them, they are lost)
-    timerState.milestones.forEach((m, index) => {
-        if (!m.lost && timerState.timeLeft < m.at) {
-            // Milestone Lost!
-            m.lost = true;
-            const el = document.getElementById(`ms-${index}`);
-            if(el) {
-                el.classList.add('milestone-lost');
-                // Optional: Play a fail sound here
-            }
-        }
-    });
-
-    // Game Over if time hits 0? Or just no bonus?
-    // Let's just keep playing but bar is empty.
-    if(timerState.timeLeft <= 0) {
-        document.getElementById('cyberTimerFill').style.width = `0%`;
-        clearInterval(timerInterval);
-    }
-}
   </script>
 </body>
 </html>
