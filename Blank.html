@@ -5828,15 +5828,12 @@ function updateTimerVisuals() {
     }
 }
 
-// --- 5. GAME OVER LOGIC ---
 function triggerGameOver() {
     jigState.isPlaying = false;
     clearInterval(timerInterval);
+    pendingCoins = 0; // Reset points earned this round
     
-    // Show Overlay
     document.getElementById('gameOverScreen').style.display = 'flex';
-    
-    // Optional: Play sound effect here
 }
 
 
@@ -6064,37 +6061,47 @@ window.resetToMenu = () => {
 
 // 5. Win Logic (Community Pool Integration)
 async function doWin() {
+    // 1. Stop everything immediately so UI doesn't get "stuck"
     jigState.isPlaying = false;
+    if (timerInterval) clearInterval(timerInterval);
     
-    // Bonus for finishing the whole puzzle
-    let bonusCoins = 100; 
+    let totalEarnedCoins = pendingCoins + 100; // Base win bonus + pieces snapped
+    let totalEarnedDiamonds = 0;
 
-    // Show Completion Modal
+    // 2. Check milestones that are NOT lost
+    timerState.milestones.forEach(m => {
+        if (!m.lost) {
+            if (m.type === 'ksda') totalEarnedCoins += m.val;
+            if (m.type === 'diamond') totalEarnedDiamonds += m.val;
+        }
+    });
+
+    // 3. Show Completion Modal
     const qModal = document.getElementById('questRewardModal');
-    // Update text to say "Bonus Completion"
     qModal.querySelector('h2').innerHTML = '<span style="font-size: 24px;">🏆</span> PUZZLE COMPLET!';
-    qModal.querySelector('p').innerText = "Ai primit un bonus pentru finalizare!";
-    qModal.querySelector('.reward-coins-box span').innerText = bonusCoins;
+    qModal.querySelector('p').innerText = `Bravo! Ai terminat la timp și ai salvat recompensele de pe bară!`;
+    qModal.querySelector('.reward-coins-box span').innerText = totalEarnedCoins;
     qModal.classList.add('active');
 
-    // Give Bonus
+    // 4. One single Database Write for everything (Avoids 400 error)
     if (auth.currentUser) {
-        await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
-            coins: increment(bonusCoins),
-            jigsawSave: deleteField() // Clear save
-        });
-    }
-
-    // Save image to pool if custom (Existing logic)
-    if (jigState.isCustom && jigState.imgUrl.startsWith('data:image')) {
         try {
-            await updateDoc(doc(db, "site_metadata", "puzzle_pool"), {
-                images: arrayUnion(jigState.imgUrl)
+            const userRef = doc(db, "accounts", auth.currentUser.uid);
+            await updateDoc(userRef, {
+                coins: increment(totalEarnedCoins),
+                diamonds: increment(totalEarnedDiamonds),
+                jigsawSave: deleteField() 
             });
-        } catch(e) {}
+            pendingCoins = 0; // Reset counter
+        } catch (e) {
+            console.error("Final reward error:", e);
+        }
     }
 
-    resetToMenu();
+    // 5. Cleanup UI
+    setTimeout(() => {
+        resetToMenu();
+    }, 2000);
 }
 /* --- PASTE THIS IN YOUR SCRIPT SECTION, REPLACING THE OLD enablePointerDrag --- */
 
@@ -6246,14 +6253,59 @@ function updateCount() {
     }
 }
 
-async function saveProgress() {
-    if (!auth.currentUser) return;
-    const saveObj = { ...jigState };
-    if(!jigState.isCustom) saveObj.imgUrl = jigState.imgUrl; 
-    await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
-        jigsawSave: saveObj
-    });
+// Add this variable at the very top of your script area
+let lastSaveTime = 0;
+let pendingCoins = 0;
+
+// Update this function to stop crashing Firestore
+async function saveProgress(force = false) {
+    if (!auth.currentUser || !jigState.isPlaying) return;
+    
+    const now = Date.now();
+    // Only save once every 5 seconds UNLESS it's a forced save (like Win/Exit)
+    if (!force && (now - lastSaveTime < 5000)) return; 
+
+    lastSaveTime = now;
+    try {
+        const userRef = doc(db, "accounts", auth.currentUser.uid);
+        const saveObj = { ...jigState };
+        if(!jigState.isCustom) saveObj.imgUrl = jigState.imgUrl; 
+        
+        await updateDoc(userRef, {
+            jigsawSave: saveObj
+        });
+    } catch(e) { console.error("Throttled Save Error:", e); }
 }
+
+// Update this to stop hitting the DB for every single piece
+window.spawnCoinReward = (x, y) => {
+    // 1. VISUALS ONLY
+    const coin = document.createElement('div');
+    coin.className = 'fly-coin-visual';
+    coin.style.left = x + 'px';
+    coin.style.top = y + 'px';
+    const text = document.createElement('div');
+    text.className = 'coin-popup-text';
+    text.innerText = "+25";
+    text.style.left = (x + 20) + 'px';
+    text.style.top = (y - 40) + 'px';
+    document.body.appendChild(coin);
+    document.body.appendChild(text);
+
+    const target = document.getElementById('headerLoginBtn') || document.body;
+    const rect = target.getBoundingClientRect();
+
+    setTimeout(() => {
+        coin.style.left = (rect.left + 20) + 'px';
+        coin.style.top = (rect.top + 20) + 'px';
+        coin.style.opacity = '0';
+        coin.style.transform = 'scale(0.5)';
+    }, 50);
+    setTimeout(() => { coin.remove(); text.remove(); }, 800);
+
+    // 2. Add to a local counter, do NOT update Firestore yet
+    pendingCoins += 25;
+};
 
 window.saveAndExit = async () => {
     await saveProgress();
@@ -6307,15 +6359,19 @@ function initCyberTimer(gridSize) {
 }
 
 function updateTimerLoop() {
-    if (!jigState.isPlaying) return;
+    // If the game ended but the interval fired one last time, kill it
+    if (!jigState.isPlaying) {
+        clearInterval(timerInterval);
+        return;
+    }
 
     timerState.timeLeft--;
 
-    // 1. Update Bar Width
     updateTimerVisuals();
 
-    // 2. Check Milestones
+    // Check Milestones
     timerState.milestones.forEach((m, index) => {
+        // If time goes below the milestone requirement, it's lost
         if (!m.lost && timerState.timeLeft < m.at) {
             m.lost = true;
             const el = document.getElementById(`ms-${index}`);
@@ -6323,8 +6379,9 @@ function updateTimerLoop() {
         }
     });
 
-    // 3. Time Up
     if (timerState.timeLeft <= 0) {
+        timerState.timeLeft = 0;
+        jigState.isPlaying = false;
         clearInterval(timerInterval);
         triggerGameOver();
     }
