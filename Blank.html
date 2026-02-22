@@ -3867,12 +3867,12 @@
     border: 1px solid rgba(255,255,255,0.2);
 }
 
-/* --- NEW CYBER TIMER HUD --- */
+/* --- COMPACT CYBER HUD --- */
 .timer-hud-container {
-    grid-column: 1 / -1; /* Spans full width on PC */
+    grid-column: 1 / -1;
     width: 100%;
-    max-width: 600px;
-    margin: 0 auto 15px auto;
+    max-width: 500px; /* Reduced width */
+    margin: 0 auto 10px auto;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -3880,56 +3880,63 @@
     z-index: 20;
 }
 
-/* The Bar Background */
 .cyber-bar-track {
     width: 100%;
-    height: 12px;
-    background: rgba(0, 0, 0, 0.6);
+    height: 8px; /* Thinner */
+    background: rgba(0, 0, 0, 0.8);
     border: 1px solid #333;
-    border-radius: 6px;
-    overflow: hidden;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    position: relative;
+    border-radius: 4px;
+    position: relative; /* Anchor for milestones */
 }
 
-/* The Moving Fill */
 .cyber-bar-fill {
     height: 100%;
-    width: 100%; /* Starts full */
+    width: 100%;
     background: linear-gradient(90deg, #00ff88, #00ffff);
-    box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
-    transition: width 1s linear, background 0.3s;
-    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+    transition: width 1s linear;
+    border-radius: 4px;
 }
 
-/* The Digital Timer Text */
 .cyber-timer-digits {
     font-family: 'Orbitron', sans-serif;
-    font-size: 24px;
-    font-weight: 900;
+    font-size: 18px; /* Smaller text */
+    font-weight: 700;
     color: #fff;
-    margin-top: 5px;
-    letter-spacing: 2px;
-    text-shadow: 0 0 5px rgba(41, 243, 255, 0.5);
-    transition: all 0.3s;
+    margin-top: 4px;
+    letter-spacing: 1px;
 }
 
-/* --- PANIC MODE (Low Time) --- */
-.panic-mode .cyber-bar-fill {
-    background: #ff0000 !important;
-    box-shadow: 0 0 20px #ff0000 !important;
+/* --- REWARD MARKERS ON BAR --- */
+.hud-milestone {
+    position: absolute;
+    top: -6px; /* Floating slightly above bar */
+    width: 20px;
+    height: 20px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    transition: 0.3s;
 }
 
-.panic-mode .cyber-timer-digits {
-    color: #ff0000 !important;
-    text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000 !important;
-    animation: panicShake 0.5s infinite;
+.hud-milestone img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 5px #fff);
 }
 
-.panic-mode .cyber-bar-track {
-    border-color: #ff0000;
-    animation: borderFlash 0.5s infinite alternate;
+.hud-milestone.lost {
+    opacity: 0.3;
+    filter: grayscale(100%);
+    transform: translateX(-50%) scale(0.8);
 }
+
+/* Panic Mode */
+.panic-mode .cyber-bar-fill { background: #ff4757; box-shadow: 0 0 15px #ff4757; }
+.panic-mode .cyber-timer-digits { color: #ff4757; animation: panicShake 0.5s infinite; }
 
 @keyframes panicShake {
     0% { transform: translate(1px, 1px) rotate(0deg); }
