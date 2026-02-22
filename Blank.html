@@ -5715,22 +5715,23 @@ document.getElementById('claimStreakBtn').onclick = window.flyDiamond;
 
 
 
-
-// --- 1. EASIER DIFFICULTY CONFIGURATION ---
-const MODE_CONFIG = {
-    3: { // EASY (User sees "EASY" button which calls startGame(5), but keeping 3 for safety)
-       time: 300 // 5 Minutes (Was 3)
-    },
-    5: { // ACTUAL EASY (5x5)
-       time: 480 // 8 Minutes (Was 3)
-    },
-    7: { // MEDIUM (7x7)
-       time: 900 // 15 Minutes (Was 2.5)
-    },
-    9: { // HARD (9x9)
-       time: 1200 // 20 Minutes (Was 2)
-    }
+// --- FIX: DEFINIREA VARIABILELOR LIPSĂ PENTRU TIMER ---
+let timerInterval = null;
+let timerState = {
+    timeLeft: 0,
+    totalTime: 0,
+    milestones: [] 
 };
+
+// --- FIX: CONFIGURARE MODURI (Adăugare timp) ---
+// Asigură-te că MODE_CONFIG arată așa (suprascrie dacă există deja):
+const MODE_CONFIG = {
+    3: { time: 300 },  // 5 Minute (Easy)
+    5: { time: 480 },  // 8 Minute (Standard)
+    7: { time: 900 },  // 15 Minute (Medium)
+    9: { time: 1200 }  // 20 Minute (Hard)
+};
+
 
 
 
