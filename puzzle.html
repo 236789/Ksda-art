@@ -4461,150 +4461,6 @@
     text-shadow: 0 0 10px #000;
     font-weight: 900;
 }
-
-
-/* --- MOBILE-FIRST REPAIR --- */
-.jigsaw-arena {
-    display: none; 
-    width: 100%;
-    height: auto; /* Allow height to grow with content */
-    min-height: 600px;
-    background: #050b14;
-    border: 2px solid var(--primary);
-    border-radius: 20px;
-    position: relative;
-    overflow: visible; /* CRITICAL: Allow scrolling */
-    user-select: none;
-    touch-action: pan-y; /* ALLOW vertical page scrolling */
-}
-
-/* PC GRID LAYOUT */
-@media (min-width: 900px) {
-    .jigsaw-arena.active-grid {
-        display: grid !important;
-        grid-template-columns: 220px 1fr 280px !important;
-        height: 650px;
-    }
-}
-
-/* MOBILE FLEX LAYOUT */
-@media (max-width: 899px) {
-    .jigsaw-arena.active-grid { 
-        display: flex !important;
-        flex-direction: column;
-        gap: 10px;
-        padding: 10px;
-        border: none; /* Look cleaner on small screens */
-    }
-    
-    .zone-board {
-        width: 100%;
-        order: 2; /* Board in middle */
-        min-height: 350px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .zone-pieces {
-        order: 3; /* Tray at bottom */
-        height: 250px !important; /* Fixed height for the tray */
-        overflow-y: auto !important; /* Scroll pieces inside tray */
-        background: rgba(0, 0, 0, 0.4);
-        padding: 15px;
-        display: grid !important;
-        grid-template-columns: repeat(4, 1fr) !important; /* 4 pieces per row on mobile */
-        touch-action: auto !important; /* Allow internal tray scrolling */
-    }
-}
-
-/* PIECE STYLING FIX */
-.jig-piece {
-    position: absolute; 
-    z-index: 10;
-    background-repeat: no-repeat;
-    box-sizing: border-box;
-    border: 0.5px solid rgba(255,255,255,0.2);
-    /* Remove global touch-action from here */
-}
-
-/* While Dragging: Lock the page so it doesn't wobble */
-.jig-piece.is-dragging {
-    z-index: 99999 !important;
-    touch-action: none !important; 
-    transform: scale(1.1);
-    box-shadow: 0 0 25px var(--primary);
-    border: 2px solid #fff;
-}
-
-.jig-piece.in-tray {
-    position: relative !important;
-    width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 1/1;
-    transform: scale(0.9);
-    top: auto !important;
-    left: auto !important;
-}
-
-
-/* --- SCROLL & SNAPPING REPAIR --- */
-html, body {
-    overflow-x: hidden; /* Prevent horizontal wobbling */
-    height: auto;
-    -webkit-overflow-scrolling: touch; /* Smooth scroll for iOS */
-}
-
-.jigsaw-arena {
-    display: none; 
-    width: 100%;
-    background: #050b14;
-    border: 2px solid var(--primary);
-    border-radius: 20px;
-    position: relative;
-    /* REMOVE touch-action: none/pan-y from here */
-    touch-action: auto !important; 
-    overflow: visible;
-}
-
-/* THE TRAY: Needs to be a solid scrollable block */
-.zone-pieces {
-    background: rgba(0, 0, 0, 0.5) !important;
-    border-top: 2px solid var(--primary);
-    min-height: 250px;
-    max-height: 400px;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 10px;
-    padding: 20px;
-    /* This allows you to scroll the tray without moving the piece */
-    touch-action: pan-y !important; 
-    -webkit-overflow-scrolling: touch;
-}
-
-/* THE PIECE: Standard state */
-.jig-piece {
-    touch-action: none; /* Pieces themselves don't scroll */
-    user-select: none;
-    -webkit-user-drag: none;
-}
-
-/* While dragging: This is where we ensure it stays above everything */
-.jig-piece.is-dragging {
-    z-index: 999999 !important;
-    position: fixed !important; /* Fixed prevents the "scroll jump" while holding a piece */
-    pointer-events: none; 
-}
-
-.jig-piece.in-tray {
-    position: relative !important;
-    width: 100% !important;
-    aspect-ratio: 1/1;
-    transform: scale(0.95);
-    touch-action: auto; /* Let the finger scroll the tray even if touching a piece */
-}
   </style>
 </head>
 <body>
@@ -6475,6 +6331,7 @@ function openMysteryOverlay() {
     status.innerText = `YOU WON ${wonBoxes} MYSTERY BOXES!`;
     status.style.color = "#fff";
 }
+
 window.startOpeningSequence = async () => {
     const boxImg = document.getElementById('mysteryBoxImg');
     const status = document.getElementById('mysteryStatus');
@@ -6617,7 +6474,7 @@ async function revealPrize(item) {
     // --- DUPLICATE CHECK LOGIC ---
     if (item.type === 'badge' && userData.ownedBadges?.includes(item.id)) isDuplicate = true;
     if (item.type === 'frame' && userData.ownedFrames?.includes(item.id)) isDuplicate = true;
-    if (item.type === 'banner' && userData.ownedBanners?.includes(item.id)) isDuplicate = true;
+if (item.type === 'banner' && userData.ownedBanners?.includes(item.id)) isDuplicate = true;
     if (item.type === 'text' && userData.ownedTexts?.includes(item.id)) isDuplicate = true;
 
     if (isDuplicate) {
@@ -6928,10 +6785,14 @@ window.startGame = (gridSize) => {
     setupBoardUI();
 };
 
+// 3. Setup Board (Strict Visibility Control)
 function setupBoardUI(isLoad = false) {
+    // 1. Strictly hide the menu
     document.getElementById('puzzleMenuContainer').style.display = 'none';
+    
+    // 2. Strictly show the arena
     const arena = document.getElementById('jigsawArena');
-    arena.style.display = "flex"; 
+    arena.style.display = "grid"; // Fallback
     arena.classList.add('active-grid'); 
 
     const tray = document.getElementById('pieceTray');
@@ -6941,33 +6802,25 @@ function setupBoardUI(isLoad = false) {
     tray.innerHTML = '';
     gridBox.innerHTML = '';
 
-    // Let the browser paint so we get accurate widths
     setTimeout(() => {
         const boardContainer = document.getElementById('boardContainer');
+        let w = boardContainer.clientWidth || 300;
+        let h = boardContainer.clientHeight || 300;
         
-        // SMART SCALING: Check screen width
-        const screenWidth = window.innerWidth;
-        let availableW = boardContainer.clientWidth || 300;
-        
-        // On mobile, force the board to be max 90% of screen width
-        if(screenWidth < 800) {
-            availableW = Math.min(availableW, screenWidth * 0.9);
-        }
-
-        const baseSize = Math.floor(availableW / jigState.cols);
+        const baseSize = Math.floor(Math.min((w - 20) / jigState.cols, (h - 20) / jigState.rows));
         jigState.pieceSize = baseSize;
         jigState.totalW = baseSize * jigState.cols;
         jigState.totalH = baseSize * jigState.rows;
 
-        // Apply sizes
+        // Board Image with Dark Overlay
         gridBox.style.width = `${jigState.totalW}px`;
         gridBox.style.height = `${jigState.totalH}px`;
         gridBox.style.gridTemplateColumns = `repeat(${jigState.cols}, 1fr)`;
         gridBox.style.gridTemplateRows = `repeat(${jigState.rows}, 1fr)`;
-        gridBox.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${jigState.imgUrl})`;
+        gridBox.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url(${jigState.imgUrl})`;
         gridBox.style.backgroundSize = "cover";
 
-        // Draw Pieces
+        // Render Pieces in Shuffled Order
         jigState.pieces.forEach((pData) => {
             const piece = document.createElement('div');
             piece.className = 'jig-piece';
@@ -6999,7 +6852,7 @@ function setupBoardUI(isLoad = false) {
 
         updateCount();
         if(!isLoad) saveProgress();
-    }, 100);
+    }, 150);
 }
 
 // 4. Reset/Exit Logic
@@ -7205,94 +7058,120 @@ window.showUserPuzzles = (userData) => {
 // 3. GALLERY LOGIC
 function enablePointerDrag(el, id) {
     el.onpointerdown = function(e) {
-        // Don't trigger if already locked
+        // Prevent default browser dragging behavior (ghost images)
+        e.preventDefault();
+        e.stopPropagation();
+
         if (el.classList.contains('locked')) return;
 
-        // 1. PIN THE PIECE TO THE FINGER
-        el.setPointerCapture(e.pointerId);
-        
         const gridBox = document.getElementById('dropGrid');
-        const tray = document.getElementById('pieceTray');
         
-        // 2. COORDINATE MATH
-        let pieceRect = el.getBoundingClientRect();
-        let offsetX = e.clientX - pieceRect.left;
-        let offsetY = e.clientY - pieceRect.top;
+        // 1. SNAPSHOT COORDINATES
+        // We get the rectangles BEFORE we move the element in the DOM
+        const pieceRect = el.getBoundingClientRect(); 
+        const gridRect = gridBox.getBoundingClientRect();
 
-        // 3. PREPARE FOR FIXED DRAGGING (Stops scroll interference)
-        el.classList.add('is-dragging');
-        el.style.width = jigState.pieceSize + 'px';
-        el.style.height = jigState.pieceSize + 'px';
-        
-        // Move to body so it's not clipped by tray scroll
+        // Calculate where the mouse is INSIDE the piece (The Grip Offset)
+        const offsetX = e.clientX - pieceRect.left;
+        const offsetY = e.clientY - pieceRect.top;
+
+        // 2. HANDLE TRAY TO BOARD TRANSFER
         if (el.classList.contains('in-tray')) {
+            // Calculate exact position relative to the grid
+            const startLeft = pieceRect.left - gridRect.left;
+            const startTop = pieceRect.top - gridRect.top;
+
+            // Apply coordinates IMMEDIATELY so it doesn't jump to 0,0
+            el.style.left = startLeft + 'px';
+            el.style.top = startTop + 'px';
+            
+            // Now safe to move in DOM
             el.classList.remove('in-tray');
+            gridBox.appendChild(el);
+            
+            // Update state
             const pState = jigState.pieces.find(p => p.id === id);
             if(pState) pState.inTray = false;
         }
-        document.body.appendChild(el);
 
-        // Initial position
-        moveAt(e.clientX, e.clientY);
+        // 3. START DRAG VISUALS
+        el.classList.add('is-dragging');
+        
+        // IMPORTANT: We attach move/up listeners to WINDOW, not the element.
+        // This fixes the "can't drag" issue if you move mouse too fast.
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
 
-        function moveAt(clientX, clientY) {
-            el.style.left = (clientX - offsetX) + 'px';
-            el.style.top = (clientY - offsetY) + 'px';
+        // --- MOVE FUNCTION ---
+        function onPointerMove(moveEvent) {
+            // Recalculate grid rect in case of page scroll
+            const currentGridRect = gridBox.getBoundingClientRect();
+
+            // Math: Mouse Global X - Grid Global X - Mouse Offset inside piece
+            let newX = moveEvent.clientX - currentGridRect.left - offsetX;
+            let newY = moveEvent.clientY - currentGridRect.top - offsetY;
+
+            el.style.left = newX + 'px';
+            el.style.top = newY + 'px';
         }
 
-        function onPointerMove(ev) {
-            moveAt(ev.clientX, ev.clientY);
-        }
-
-        // 4. THE DROP
-        el.onpointerup = function(upEvent) {
-            el.releasePointerCapture(upEvent.pointerId);
+        // --- RELEASE FUNCTION ---
+        function onPointerUp(upEvent) {
+            // Cleanup listeners immediately
             window.removeEventListener('pointermove', onPointerMove);
+            window.removeEventListener('pointerup', onPointerUp);
+            
             el.classList.remove('is-dragging');
 
-            const gridRect = gridBox.getBoundingClientRect();
-            const pSize = jigState.pieceSize;
-            
-            // Calculate position relative to grid
-            const currentX = upEvent.clientX - gridRect.left - offsetX;
-            const currentY = upEvent.clientY - gridRect.top - offsetY;
+            // 4. SNAP LOGIC
+            const pState = jigState.pieces.find(p => p.id === id);
+            if(!pState) return;
 
+            const pSize = jigState.pieceSize;
             const targetCol = id % jigState.cols;
             const targetRow = Math.floor(id / jigState.cols);
+            
             const targetX = targetCol * pSize;
             const targetY = targetRow * pSize;
 
+            const currentX = parseFloat(el.style.left);
+            const currentY = parseFloat(el.style.top);
+
+            // Calculate distance to correct spot
             const dist = Math.sqrt(Math.pow(targetX - currentX, 2) + Math.pow(targetY - currentY, 2));
 
-            // Move piece from Body back to Grid Container
-            gridBox.appendChild(el);
-
+            // SNAP TOLERANCE (Increased to 50% of piece size for easier mobile use)
+// SNAP TOLERANCE
+// SNAP TOLERANCE
             if (dist < (pSize * 0.5)) {
-                el.style.left = targetX + 'px';
-                el.style.top = targetY + 'px';
-                el.classList.add('locked');
-                el.classList.add('snap-anim');
-                if(window.spawnCoinReward) window.spawnCoinReward(upEvent.clientX, upEvent.clientY);
+                // 1. Snap to grid visually
+                el.style.left = `${targetX}px`;
+                el.style.top = `${targetY}px`;
                 
-                const pState = jigState.pieces.find(p => p.id === id);
-                if(pState) pState.isLocked = true;
-                updateCount();
-            } else {
-                // Return to tray if drop failed or stay on board at dropped spot
-                el.style.left = currentX + 'px';
-                el.style.top = currentY + 'px';
-                const pState = jigState.pieces.find(p => p.id === id);
-                if(pState) {
-                    pState.currentX = currentX;
-                    pState.currentY = currentY;
-                }
-            }
-            saveProgress();
-            el.onpointermove = null;
-            el.onpointerup = null;
-        };
+                // 2. Apply the "Locked" state
+                el.classList.add('locked');
+                
+                // 3. Trigger the Cyber Flash Animation
+                el.classList.add('snap-anim');
+                setTimeout(() => {
+                    el.classList.remove('snap-anim');
+                }, 400);
 
-        window.addEventListener('pointermove', onPointerMove);
+                // --- NEW: TRIGGER COIN REWARD (25 Coins) ---
+                // We pass the mouse coordinates so the coin spawns exactly where you clicked
+                if(window.spawnCoinReward) window.spawnCoinReward(upEvent.clientX, upEvent.clientY);
+
+                // 5. Update Game State
+                pState.isLocked = true;
+                updateCount(); // Check win condition
+            } else {
+                // Just save the new loose position
+                pState.currentX = currentX;
+                pState.currentY = currentY;
+            }
+            
+            saveProgress();
+        }
     };
 }
 
