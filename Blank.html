@@ -4972,32 +4972,7 @@ window.resetToMenu = () => {
     document.getElementById('jigsawArena').style.display = 'none';
 };
 
-// 1. Modified Start Game to ensure randomization
-window.startGame = (gridSize) => {
-    jigState.rows = gridSize;
-    jigState.cols = gridSize;
-    jigState.pieces = [];
-    jigState.isPlaying = true;
 
-    const total = jigState.rows * jigState.cols;
-    for(let i=0; i<total; i++) {
-        jigState.pieces.push({
-            id: i,
-            isLocked: false,
-            inTray: true,
-            currentX: 0,
-            currentY: 0
-        });
-    }
-    
-    // Shuffle the array
-    for (let i = jigState.pieces.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [jigState.pieces[i], jigState.pieces[j]] = [jigState.pieces[j], jigState.pieces[i]];
-    }
-    
-    setupBoardUI();
-};
 
 
 window.resumeGame = async () => {
@@ -5009,45 +4984,99 @@ window.resumeGame = async () => {
     }
 }
 
+// --- JIGSAW ENGINE v2.0 ---
+
+// 1. Random Image with Community Pool
+window.showDifficulty = async (type) => {
+    // Show loading state or directly go to diff
+    if(type === 'random') {
+        let pool = [...RANDOM_CYBER_IMGS];
+        try {
+            // Get community images from Firebase site_metadata/puzzle_pool
+            const poolDoc = await getDoc(doc(db, "site_metadata", "puzzle_pool"));
+            if(poolDoc.exists()) {
+                const communityImgs = poolDoc.data().images || [];
+                pool = [...pool, ...communityImgs];
+            }
+        } catch(e) { console.log("Pool fetch error:", e); }
+
+        jigState.imgUrl = pool[Math.floor(Math.random() * pool.length)];
+        jigState.isCustom = false;
+    }
+    document.getElementById('puzzleMainMenu').style.display = 'none';
+    document.getElementById('puzzleDiffMenu').style.display = 'flex';
+};
+
+// 2. Start Game (Fixed Randomization)
+window.startGame = (gridSize) => {
+    jigState.rows = gridSize;
+    jigState.cols = gridSize;
+    jigState.pieces = [];
+    jigState.isPlaying = true;
+
+    // Generate pieces
+    const total = jigState.rows * jigState.cols;
+    for(let i=0; i<total; i++) {
+        jigState.pieces.push({
+            id: i,
+            isLocked: false,
+            inTray: true,
+            currentX: 0,
+            currentY: 0
+        });
+    }
+
+    // SHUFFLE pieces so they aren't in order
+    for (let i = jigState.pieces.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [jigState.pieces[i], jigState.pieces[j]] = [jigState.pieces[j], jigState.pieces[i]];
+    }
+
+    setupBoardUI();
+};
+
+// 3. Setup UI (Fixed Board Image & Tray Grid)
 function setupBoardUI(isLoad = false) {
+    // Hide all menus
     document.getElementById('puzzleMenuContainer').style.display = 'none';
-    const arena = document.getElementById('jigsawArena');
     
-    // Set display mode based on screen width
+    const arena = document.getElementById('jigsawArena');
+    const boardContainer = document.getElementById('boardContainer');
+    const tray = document.getElementById('pieceTray');
+    const gridBox = document.getElementById('dropGrid');
+    
+    // Show Arena
     arena.style.display = (window.innerWidth >= 900) ? 'grid' : 'flex';
     
-    const previewImg = document.getElementById('gamePreviewImg');
-    if (jigState.imgUrl) previewImg.src = jigState.imgUrl;
+    // Fix Preview
+    document.getElementById('gamePreviewImg').src = jigState.imgUrl;
 
+    // Reset containers
+    tray.innerHTML = '';
+    gridBox.innerHTML = '';
+
+    // Wait for display to calculate sizes
     setTimeout(() => {
-        const boardContainer = document.getElementById('boardContainer');
-        const tray = document.getElementById('pieceTray');
-        const gridBox = document.getElementById('dropGrid');
+        let w = boardContainer.clientWidth || 400;
+        let h = boardContainer.clientHeight || 400;
         
-        tray.innerHTML = '';
-        gridBox.innerHTML = '';
-
-        // Calculate dimensions
-        let w = boardContainer.clientWidth || 300;
-        let h = boardContainer.clientHeight || 300;
-        const baseSize = Math.floor(Math.min((w - 20) / jigState.cols, (h - 20) / jigState.rows));
-        
+        // Piece sizing
+        const baseSize = Math.floor(Math.min((w - 40) / jigState.cols, (h - 40) / jigState.rows));
         jigState.pieceSize = baseSize;
         jigState.totalW = baseSize * jigState.cols;
         jigState.totalH = baseSize * jigState.rows;
 
-        // Apply size to the board
+        // Apply background to Board with Dark Overlay
         gridBox.style.width = `${jigState.totalW}px`;
         gridBox.style.height = `${jigState.totalH}px`;
         gridBox.style.gridTemplateColumns = `repeat(${jigState.cols}, 1fr)`;
         gridBox.style.gridTemplateRows = `repeat(${jigState.rows}, 1fr)`;
-        
-        // FIX: Re-apply the background image with dark overlay
-        gridBox.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${jigState.imgUrl})`;
+        gridBox.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url(${jigState.imgUrl})`;
         gridBox.style.backgroundSize = "cover";
+        gridBox.style.backgroundPosition = "center";
 
-        // Draw the pieces (Shuffle remains active from startGame)
-        jigState.pieces.forEach((runtimePiece) => {
+        // Render Pieces in Shuffled Order
+        jigState.pieces.forEach((pData) => {
             const piece = document.createElement('div');
             piece.className = 'jig-piece';
             piece.style.width = `${baseSize}px`;
@@ -5055,71 +5084,46 @@ function setupBoardUI(isLoad = false) {
             piece.style.backgroundImage = `url(${jigState.imgUrl})`;
             piece.style.backgroundSize = `${jigState.totalW}px ${jigState.totalH}px`;
             
-            // Image slicing logic
-            const row = Math.floor(runtimePiece.id / jigState.cols);
-            const col = runtimePiece.id % jigState.cols;
+            // Texture slicing
+            const row = Math.floor(pData.id / jigState.cols);
+            const col = pData.id % jigState.cols;
             piece.style.backgroundPosition = `-${col * baseSize}px -${row * baseSize}px`;
 
-            if (runtimePiece.isLocked) {
+            if (pData.isLocked) {
                 piece.classList.add('locked');
                 piece.style.left = `${col * baseSize}px`;
                 piece.style.top = `${row * baseSize}px`;
                 gridBox.appendChild(piece);
-            } else if (runtimePiece.inTray) {
+            } else if (pData.inTray) {
                 piece.classList.add('in-tray');
                 tray.appendChild(piece);
             } else {
-                // If it's loose on the board
-                piece.style.left = `${runtimePiece.currentX}px`;
-                piece.style.top = `${runtimePiece.currentY}px`;
+                piece.style.left = `${pData.currentX}px`;
+                piece.style.top = `${pData.currentY}px`;
                 gridBox.appendChild(piece);
             }
 
-            // Re-enable dragging
-            if (!runtimePiece.isLocked) enablePointerDrag(piece, runtimePiece.id);
+            if (!pData.isLocked) enablePointerDrag(piece, pData.id);
         });
 
         updateCount();
         if(!isLoad) saveProgress();
-        
-    }, 100);
+    }, 150);
 }
 
-
-
-// 3. Update Random Button to include community images from Firebase
-window.showDifficulty = async (type) => {
-    if(type === 'random') {
-        let pool = [...RANDOM_CYBER_IMGS];
-        
-        try {
-            // Fetch community uploaded images from Firebase
-            const poolDoc = await getDoc(doc(db, "site_metadata", "puzzle_pool"));
-            if(poolDoc.exists()) {
-                const communityImages = poolDoc.data().images || [];
-                pool = [...pool, ...communityImages];
-            }
-        } catch(e) { console.log("Pool fetch failed", e); }
-
-        jigState.imgUrl = pool[Math.floor(Math.random() * pool.length)];
-        jigState.isCustom = false;
-    }
-    toDifficultyMenu();
-};
-
-// 4. Update Win logic to save custom images to the global pool
+// 4. Win Logic (Save Custom to Firebase Pool)
 async function doWin() {
     jigState.isPlaying = false;
-    let coins = (jigState.rows === 3) ? 200 : (jigState.rows === 4) ? 400 : 700;
+    let coins = (jigState.rows === 3) ? 250 : (jigState.rows === 4) ? 500 : 1000;
 
-    // If it was a custom image, save it to the global pool for others to see
-    if (jigState.isCustom && jigState.imgUrl.startsWith('data:image')) {
+    // SAVE CUSTOM IMAGE TO GLOBAL POOL
+    if (jigState.isCustom && jigState.imgUrl.length < 500000) { // Limit size to avoid Firebase 1MB cap
         try {
             await updateDoc(doc(db, "site_metadata", "puzzle_pool"), {
                 images: arrayUnion(jigState.imgUrl)
             });
         } catch(e) {
-            // If document doesn't exist, create it
+            // Create doc if it doesn't exist
             await setDoc(doc(db, "site_metadata", "puzzle_pool"), {
                 images: [jigState.imgUrl]
             }, {merge: true});
@@ -5131,8 +5135,9 @@ async function doWin() {
         jigsawSave: deleteField()
     });
 
-    // Show reward modal...
+    // Notify User
     const qModal = document.getElementById('questRewardModal');
+    qModal.querySelector('h2').innerText = "PUZZLE TERMINAT!";
     qModal.querySelector('.reward-coins-box span').innerText = coins;
     qModal.classList.add('active');
 
