@@ -4023,6 +4023,129 @@
     margin-bottom: 10px;
     text-shadow: 0 0 20px #ff4757;
 }
+
+
+
+/* --- THE CYBER-LIQUID HUD --- */
+.timer-hud-container {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: 650px;
+    margin: 0 auto 25px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 100;
+}
+
+/* The Glassy Tube */
+.cyber-bar-track {
+    width: 100%;
+    height: 40px; 
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px); /* Glass effect */
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(41, 243, 255, 0.2);
+    border-radius: 100px;
+    position: relative;
+    overflow: hidden; /* Clips the liquid */
+    box-shadow: 
+        inset 0 0 20px rgba(0,0,0,0.4),
+        0 0 15px rgba(41, 243, 255, 0.1);
+}
+
+/* The Liquid Fill */
+.cyber-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #0055ff, #29f3ff, #00ff88);
+    background-size: 200% 100%;
+    border-radius: 100px;
+    transition: width 1s linear;
+    position: relative;
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.5);
+    animation: liquidFlow 3s linear infinite;
+}
+
+/* Moving shimmer on top of the liquid */
+.cyber-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(
+        90deg, 
+        transparent 0%, 
+        rgba(255,255,255,0.2) 50%, 
+        transparent 100%
+    );
+    animation: shimmerSweep 2s infinite;
+}
+
+@keyframes liquidFlow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+@keyframes shimmerSweep {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Milestone Markers */
+.milestones-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.timer-milestone {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.timer-milestone img {
+    width: 28px;
+    height: 28px;
+    filter: drop-shadow(0 0 8px rgba(0,0,0,0.8));
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* When the bar passes the icon and you "lose" it */
+.milestone-lost {
+    opacity: 0.15;
+    filter: grayscale(1) blur(1px);
+    transform: scale(0.7);
+}
+
+.timer-milestone.active-reward img {
+    filter: drop-shadow(0 0 12px #ffd700);
+    animation: pulseReward 1.5s infinite alternate;
+}
+
+@keyframes pulseReward {
+    from { transform: scale(1); }
+    to { transform: scale(1.2); }
+}
+
+/* The Clock */
+.cyber-timer-digits {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: #fff;
+    margin-top: 8px;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(41, 243, 255, 0.8);
+}
   </style>
 </head>
 <body>
@@ -6320,70 +6443,92 @@ import { deleteField } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-
 
 function initCyberTimer(gridSize) {
     const config = MODE_CONFIG[gridSize] || MODE_CONFIG[5];
-    
     timerState.totalTime = config.time;
     timerState.timeLeft = config.time;
     timerState.milestones = JSON.parse(JSON.stringify(config.rewards || []));
 
-    // Clear old UI
+    // Ensure the Milestones Container exists
     const track = document.querySelector('.cyber-bar-track');
-    let milestonesLayer = document.getElementById('milestonesLayer');
-    if (!milestonesLayer) {
-        milestonesLayer = document.createElement('div');
-        milestonesLayer.id = 'milestonesLayer';
-        milestonesLayer.className = 'milestones-container';
-        track.appendChild(milestonesLayer);
+    let msContainer = document.getElementById('milestonesLayer');
+    if (!msContainer) {
+        msContainer = document.createElement('div');
+        msContainer.id = 'milestonesLayer';
+        msContainer.className = 'milestones-container';
+        track.appendChild(msContainer);
     }
-    milestonesLayer.innerHTML = '';
-    
-    // Create Milestone Icons
+    msContainer.innerHTML = '';
+
+    // Render Milestone Icons
     timerState.milestones.forEach((m, index) => {
         const el = document.createElement('div');
         el.className = 'timer-milestone';
         el.id = `ms-${index}`;
         
-        // Position on bar based on time
+        // Position relative to time (e.g. 90s left in a 120s game = 75% across)
         const pct = (m.at / timerState.totalTime) * 100;
         el.style.left = `${pct}%`;
-        
+
         const imgUrl = (m.type === 'ksda') ? 'https://iili.io/fhc1SKQ.png' : 'https://iili.io/fv5bmtj.png';
         el.innerHTML = `<img src="${imgUrl}">`;
         
-        milestonesLayer.appendChild(el);
+        msContainer.appendChild(el);
     });
 
-    // Start Timer
     if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(updateTimerLoop, 1000);
-    updateTimerVisuals(); // Immediate update
+    updateTimerVisuals();
 }
 
 function updateTimerLoop() {
-    // If the game ended but the interval fired one last time, kill it
+    // 1. Safety Check: If game is paused, won, or stopped, kill interval
     if (!jigState.isPlaying) {
         clearInterval(timerInterval);
         return;
     }
 
+    // 2. Decrement Time
     timerState.timeLeft--;
 
+    // 3. Update Visuals (Width, Shimmer, and Timer Text)
     updateTimerVisuals();
 
-    // Check Milestones
+    // 4. Handle Milestone Logic
     timerState.milestones.forEach((m, index) => {
-        // If time goes below the milestone requirement, it's lost
+        // If the remaining time drops below the milestone threshold
         if (!m.lost && timerState.timeLeft < m.at) {
             m.lost = true;
+            
             const el = document.getElementById(`ms-${index}`);
-            if (el) el.classList.add('milestone-lost');
+            if (el) {
+                // Add the grey/blurred CSS class
+                el.classList.add('milestone-lost');
+                
+                // IMPACT EFFECT: Flash the bar border red briefly to warn the player
+                const track = document.querySelector('.cyber-bar-track');
+                track.style.borderColor = "#ff4757";
+                track.style.boxShadow = "0 0 20px rgba(255, 71, 87, 0.4)";
+                
+                setTimeout(() => {
+                    track.style.borderColor = "rgba(41, 243, 255, 0.2)";
+                    track.style.boxShadow = "inset 0 0 20px rgba(0,0,0,0.4)";
+                }, 400);
+            }
         }
     });
 
+    // 5. Time's Up Logic
     if (timerState.timeLeft <= 0) {
         timerState.timeLeft = 0;
         jigState.isPlaying = false;
         clearInterval(timerInterval);
-        triggerGameOver();
+        
+        // Ensure visual bar is completely empty
+        updateTimerVisuals();
+        
+        // Short delay so the player sees the "0:00" before the Game Over screen pops
+        setTimeout(() => {
+            triggerGameOver();
+        }, 500);
     }
 }
 
