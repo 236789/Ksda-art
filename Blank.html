@@ -6351,62 +6351,92 @@ window.initRoulette = () => {
     strip.innerHTML = '';
     
     const wheelColors = ['r-teal', 'r-red', 'r-purple', 'r-gold', 'r-green', 'r-blue', 'r-dark'];
-    
-    // Function to grab random cosmetic items for the roulette strip
+
+    // --- 1. DEFINE THE CHANCES (%) ---
+    const CHANCES = {
+        COINS: 50,    // 50% chance
+        DIAMONDS: 8, // 25% chance
+        BANNER: 10,   // 10% chance
+        BADGE: 7,     // 7% chance
+        FRAME: 5,     // 5% chance
+        TEXT: 3       // 3% chance (Super Rare)
+    };
+
     const getRandomItem = (db) => db[Math.floor(Math.random() * db.length)];
 
-    const pool = [];
-    for(let i=0; i<60; i++) {
-        const rnd = Math.random();
-        let item = {};
-        
-        if(rnd < 0.35) {
-            item = { name: '500 Coins', type: 'ksda', icon: 'https://iili.io/fhc1SKQ.png' };
-        } else if(rnd < 0.55) {
-            item = { name: '10 Diamonds', type: 'diamond', icon: 'https://iili.io/fv5bmtj.png' };
-        } else if(rnd < 0.70) {
+    // --- 2. THE WEIGHTED PICKER ENGINE ---
+    function pickWinner() {
+        const rand = Math.random() * 100;
+        if (rand < CHANCES.TEXT) return generateReward('text');
+        if (rand < CHANCES.TEXT + CHANCES.FRAME) return generateReward('frame');
+        if (rand < CHANCES.TEXT + CHANCES.FRAME + CHANCES.BADGE) return generateReward('badge');
+        if (rand < CHANCES.TEXT + CHANCES.FRAME + CHANCES.BADGE + CHANCES.BANNER) return generateReward('banner');
+        if (rand < CHANCES.TEXT + CHANCES.FRAME + CHANCES.BADGE + CHANCES.BANNER + CHANCES.DIAMONDS) return generateReward('diamond');
+        return generateReward('ksda'); // Default to Coins
+    }
+
+    function generateReward(type) {
+        if (type === 'ksda') return { name: '500 Coins', type: 'ksda', icon: 'https://iili.io/fhc1SKQ.png' };
+        if (type === 'diamond') return { name: '10 Diamonds', type: 'diamond', icon: 'https://iili.io/fv5bmtj.png' };
+        if (type === 'badge') {
             const b = getRandomItem(BADGES_DB);
-            item = { name: b.text, type: 'badge', id: b.id, icon: 'https://iili.io/fXvBEiB.png' }; // Use logo for badges
-        } else if(rnd < 0.85) {
+            return { name: b.text, type: 'badge', id: b.id, icon: 'https://iili.io/fXvBEiB.png' };
+        }
+        if (type === 'frame') {
             const f = getRandomItem(FRAMES_DB);
-            item = { name: f.name, type: 'frame', id: f.id, icon: f.img };
-        } else {
+            return { name: f.name, type: 'frame', id: f.id, icon: f.img };
+        }
+        if (type === 'banner') {
+            const bn = getRandomItem(BANNERS_DB);
+            return { name: bn.name, type: 'banner', id: bn.id, css: bn.cssClass };
+        }
+        if (type === 'text') {
             const t = getRandomItem(TEXTS_DB);
-            item = { name: t.name, type: 'text', id: t.id, icon: 'https://iili.io/fXvBEiB.png', css: t.cssClass };
+            return { name: t.name, type: 'text', id: t.id, css: t.cssClass };
+        }
+    }
+
+    // --- 3. POPULATE THE STRIP ---
+    const pool = [];
+    const winnerIndex = 45; // The fixed landing spot
+
+    for (let i = 0; i < 60; i++) {
+        let item;
+        if (i === winnerIndex) {
+            item = pickWinner(); // Only determine the REAL winner for the target index
+        } else {
+            // Fill the rest with random visual fluff (mostly coins/diamonds)
+            item = Math.random() > 0.3 ? generateReward('ksda') : generateReward('diamond');
         }
 
         pool.push(item);
         
         const el = document.createElement('div');
-        const colorClass = wheelColors[i % wheelColors.length];
-        el.className = `roulette-item ${colorClass}`;
+        el.className = `roulette-item ${wheelColors[i % wheelColors.length]}`;
         
-        // Render item - if it's text, we show the styled name
-        if(item.type === 'text') {
+        if (item.type === 'text') {
             el.innerHTML = `<span class="${item.css}" style="font-size:12px;">ABC</span><span>${item.name}</span>`;
+        } else if (item.type === 'banner') {
+            el.innerHTML = `<div class="${item.css}" style="width:80%; height:20px; font-size:8px;"></div><span>${item.name}</span>`;
         } else {
             el.innerHTML = `<img src="${item.icon}"><span>${item.name}</span>`;
         }
         strip.appendChild(el);
     }
 
-    // Winner is at index 45
-    const winnerIndex = 45;
-    const winner = pool[winnerIndex];
-    
+    // --- 4. ANIMATE SPIN ---
     setTimeout(() => {
-        const itemWidth = 130; // 120px min-width + 10px margin
-        const centerOffset = 300 - (itemWidth / 2); // Center needle
+        const itemWidth = 130; 
+        const centerOffset = 300 - (itemWidth / 2); 
         const landPos = (winnerIndex * itemWidth) - centerOffset;
+        const randomShift = Math.floor(Math.random() * 80) - 40; // More variation
         
-        // Randomize landing slightly so it's not always perfect center
-        const randomShift = Math.floor(Math.random() * 60) - 30;
-        
-        strip.style.transition = "transform 6s cubic-bezier(0.15, 0, 0.1, 1)";
+        strip.style.transition = "transform 7s cubic-bezier(0.15, 0, 0.1, 1)";
         strip.style.transform = `translateX(-${landPos + randomShift}px)`;
     }, 100);
 
-    setTimeout(() => revealPrize(winner), 6500);
+    // Reveal result after animation
+    setTimeout(() => revealPrize(pool[winnerIndex]), 7500);
 };
 
 async function revealPrize(item) {
@@ -6454,7 +6484,13 @@ async function revealPrize(item) {
             await updateDoc(userRef, { diamonds: increment(10) });
         } else {
             // Add actual cosmetic to owned list
-            const fieldMap = { 'badge': 'ownedBadges', 'frame': 'ownedFrames', 'banner': 'ownedBanners', 'text': 'ownedTexts' };
+const fieldMap = { 
+    'badge': 'ownedBadges', 
+    'frame': 'ownedFrames', 
+    'banner': 'ownedBanners', // <--- Make sure this is here
+    'text': 'ownedTexts' 
+};
+
             await updateDoc(userRef, { [fieldMap[finalReward.type]]: arrayUnion(finalReward.id) });
         }
     } catch (e) { console.error("Sync Error:", e); }
