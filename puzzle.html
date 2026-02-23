@@ -4722,6 +4722,51 @@
     display: flex;
     flex-direction: column;
 }
+
+
+/* Gallery Layout Fix */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr) !important; /* Two columns for better visibility */
+    gap: 15px;
+    padding: 10px;
+}
+
+.gallery-card {
+    background: rgba(13, 25, 41, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 140px; /* Uniform height */
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.gallery-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.gallery-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* This prevents the image from looking "cut" or stretched */
+    display: block;
+}
+
+.gallery-user {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    padding: 10px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #fff;
+    text-align: center;
+}
   </style>
 </head>
 <body>
@@ -6826,11 +6871,10 @@ window.closeMysterySystem = () => {
         document.getElementById('mysteryBoxImg').onclick = startOpeningSequence;
         document.getElementById('mysteryStatus').innerText = `YOU HAVE ${wonBoxes} BOXES LEFT!`;
     } else {
-        document.getElementById('mysteryOverlay').style.display = 'none';
-        resetToMenu();
+        // REFRESH THE PAGE HERE
+        location.reload(); 
     }
 };
-
 
 
 
@@ -7260,7 +7304,7 @@ async function doWin() {
                 // Trigger the Mystery Overlay instead of going to menu
                 openMysteryOverlay(); 
             } else {
-                resetToMenu();
+        location.reload(); // REFRESH THE PAGE HERE
             }
         };
 
@@ -7368,21 +7412,27 @@ window.showUserPuzzles = (userData) => {
     container.appendChild(backBtn);
 
     // Puzzle-urile lui
-    userData.puzzles.forEach(p => {
-        const card = document.createElement('div');
-        card.className = 'gallery-card';
-        card.innerHTML = `
-            <img src="${p.imgUrl}" class="gallery-img">
-            <span class="gallery-time" style="font-size:8px;">GRID: ${p.gridSize}</span>
-        `;
-        card.onclick = () => {
-            jigState.imgUrl = p.imgUrl;
-            jigState.isCustom = true; 
-            document.getElementById('galleryModal').classList.remove('active');
-            toDifficultyMenu();
-        };
-        container.appendChild(card);
-    });
+// Inside showUserPuzzles loop:
+userData.puzzles.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'gallery-card';
+    card.style.height = '130px'; // Set a consistent height
+    card.style.position = 'relative';
+
+    card.innerHTML = `
+        <img src="${p.imgUrl}" class="gallery-img">
+        <div class="gallery-user">
+            <span style="font-size:9px; color:var(--primary); font-family:'Orbitron';">GRID: ${p.gridSize}</span>
+        </div>
+    `;
+    card.onclick = () => {
+        jigState.imgUrl = p.imgUrl;
+        jigState.isCustom = true; 
+        document.getElementById('galleryModal').classList.remove('active');
+        toDifficultyMenu();
+    };
+    container.appendChild(card);
+});
 };
 // 3. GALLERY LOGIC
 function enablePointerDrag(el, id) {
@@ -7613,10 +7663,10 @@ window.saveAndExit = async () => {
     
     // Stop the timer
     clearInterval(timerInterval);
-    jigState.isPlaying = false;
+    jigState.isPlaying = false; 
 
     // Call the FIXED reset function
-    resetToMenu(); 
+    location.reload(); 
     
     // Play sound
     if(window.audioManager) window.audioManager.playSFX('click');
