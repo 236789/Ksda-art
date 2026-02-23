@@ -8022,7 +8022,7 @@ window.toggleAudioModal = function() {
 };
 
 
-/* --- KEVIN CYBER TUTORIAL ENGINE v5.0 (FIXED) --- */
+/* --- KEVIN CYBER TUTORIAL ENGINE v6.0 (FULLY INTERACTIVE) --- */
 (function() {
     const assets = {
         puzzle_mad: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2FMaking%20puzle%20frustrated%20.png?alt=media&token=8b646382-96e0-4abc-b063-9f14de6b97ee",
@@ -8034,22 +8034,19 @@ window.toggleAudioModal = function() {
         explaining: "https://iili.io/q2p0NwX.png"
     };
 
-    // UI Creation
+    // 1. Setup UI
     const overlay = document.getElementById('botTutorialOverlay') || document.createElement('div');
     overlay.id = "botTutorialOverlay";
     overlay.style.cssText = "position:fixed; inset:0; background: rgba(5, 11, 20, 0.9); z-index:20000000; display:none; flex-direction:column; align-items:center; justify-content:center; pointer-events:none;";
     
-    // Bubble
     const bubble = document.createElement('div');
     bubble.id = "botTextBubble";
     bubble.style.cssText = "background: rgba(8, 16, 27, 0.98); border: 2px solid #29f3ff; color: #fff; padding: 20px; border-radius: 24px; max-width: 320px; width: 85%; font-family: 'Poppins', sans-serif; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); z-index: 20000001; display: flex; flex-direction: column; gap: 15px; pointer-events: auto; margin-bottom: 20px;";
 
     const textPart = document.createElement('div');
-    textPart.id = "tutText";
     textPart.style.cssText = "font-size: 14px; line-height: 1.5; font-weight: 500;";
     
     const btnPart = document.createElement('div');
-    btnPart.id = "tutBtnArea";
     btnPart.style.cssText = "display: flex; flex-direction: column; gap: 8px; width: 100%;";
     
     bubble.appendChild(textPart);
@@ -8059,7 +8056,7 @@ window.toggleAudioModal = function() {
     botImg.id = "mainBotVisual";
     botImg.style.cssText = "height: 300px; width: auto; filter: drop-shadow(0 0 25px rgba(41, 243, 255, 0.5)); transition: 0.5s; z-index: 20000001; pointer-events: none;";
 
-    overlay.innerHTML = ''; // Clear previous
+    overlay.innerHTML = '';
     overlay.appendChild(bubble);
     overlay.appendChild(botImg);
     if(!document.getElementById('botTutorialOverlay')) document.body.appendChild(overlay);
@@ -8089,11 +8086,7 @@ window.toggleAudioModal = function() {
         const b = document.createElement('button');
         b.className = "tut-choice-btn";
         b.innerText = label;
-        b.onclick = (e) => { 
-            e.stopPropagation(); 
-            if(window.audioManager) window.audioManager.playSFX('click');
-            onClick(); 
-        };
+        b.onclick = (e) => { e.stopPropagation(); onClick(); };
         btnPart.appendChild(b);
     };
 
@@ -8103,7 +8096,7 @@ window.toggleAudioModal = function() {
         document.querySelectorAll('.tut-focus').forEach(el => el.classList.remove('tut-focus'));
     };
 
-    // --- TUTORIAL STEPS ---
+    // --- STEPS ---
 
     window.startPuzzleTutorial = () => {
         overlay.classList.remove('bot-corner-mode');
@@ -8113,14 +8106,14 @@ window.toggleAudioModal = function() {
 
         botImg.src = assets.puzzle_mad;
         const line1 = "BAGĂ-MI-AȘ PICIORUL ÎN EA DE PIESĂ! De ce nu se potrivește nicăieri?! O arunc pe geam imediat!";
-        
         write(line1, () => {
+            // WE ADD A BUTTON HERE SO THE USER CAN FINISH READING BEFORE THE NEXT TEXT
             addBtn("CONTINUĂ", () => {
                 clearUI();
                 botImg.src = assets.happy;
-                const line2 = "Opa! Salutare. Nu te-am văzut acolo... Eu sunt Kevin. Vrei să te învăț cum funcționează Cyber Jigsaw?";
+                const line2 = "Opa! Salutare. Eu sunt Kevin. Vrei să te învăț cum funcționează Cyber Jigsaw?";
                 write(line2, () => {
-                    addBtn("DA, AJUTĂ-MĂ", () => stepAudio());
+                    addBtn("DA, TE ROG", () => stepAudio());
                     addBtn("NU, DISPARI", () => {
                         clearUI();
                         botImg.src = assets.puzzle_sit;
@@ -8142,82 +8135,88 @@ window.toggleAudioModal = function() {
         overlay.classList.add('bot-corner-mode');
         overlay.style.background = "transparent";
         botImg.src = assets.pointing;
-        const msg = "Uite, în stânga jos ai sistemul de muzică. Poți schimba piesa sau opri sunetul dacă te stresează!";
+        const msg = "În stânga jos ai sistemul de muzică. Schimbă piesa dacă te stresează ambientul ăsta.";
         write(msg, () => {
             document.getElementById('audioFab').classList.add('tut-focus');
-            addBtn("ÎNȚELES", () => stepMenu());
+            addBtn("ÎNȚELES", () => stepMenuWait());
         });
         speak(msg);
     };
 
-    const stepMenu = () => {
+    // STEP: WAIT FOR MENU ACTION
+    const stepMenuWait = () => {
         clearUI();
         botImg.src = assets.idea;
-        const msg = "Aici alegi modul: Random, Upload sau pick o legendă din Gallery.";
-        write(msg, () => {
-            document.getElementById('puzzleMainMenu').classList.add('tut-focus');
-            addBtn("OK, ȘI APOI?", () => stepDifficulty());
+        const msg = "Acum, alege un mod de joc: Random, Upload sau pick o legendă din Gallery. Aștept să alegi...";
+        write(msg); speak(msg);
+        
+        // Highlight the menu
+        document.getElementById('puzzleMainMenu').classList.add('tut-focus');
+
+        // ADD LISTENERS TO ALL BUTTONS IN THE MAIN MENU
+        document.querySelectorAll('#puzzleMainMenu .btn-hyper').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // When any button is clicked, we move to the next step
+                document.getElementById('puzzleMainMenu').classList.remove('tut-focus');
+                setTimeout(stepDiffWait, 500);
+            }, { once: true });
         });
-        speak(msg);
     };
 
-    const stepDifficulty = () => {
+    // STEP: WAIT FOR DIFFICULTY ACTION
+    const stepDiffWait = () => {
         clearUI();
         botImg.src = assets.explaining;
-        const msg = "Alege dificultatea. Hard îți dă cele mai multe monede și Mystery Box-uri!";
-        write(msg, () => {
-            addBtn("SĂ ÎNCEPEM!", () => {
-                overlay.style.display = "none";
+        const msg = "Perfect! Acum alege dificultatea. Dacă alegi Hard, primești recompense de boier. Dă click pe una!";
+        write(msg); speak(msg);
+        
+        document.getElementById('puzzleDiffMenu').classList.add('tut-focus');
+
+        // ADD LISTENERS TO ALL BUTTONS IN THE DIFFICULTY MENU
+        document.querySelectorAll('#puzzleDiffMenu .btn-hyper').forEach(btn => {
+            btn.addEventListener('click', () => {
                 clearUI();
-            });
+                document.getElementById('puzzleDiffMenu').classList.remove('tut-focus');
+                overlay.style.display = "none"; // Hide Kevin so they can play
+            }, { once: true });
         });
-        speak(msg);
     };
 
-    // --- GAME EVENT HOOKS ---
+    // --- GLOBAL HOOKS (reactions to win/lose) ---
 
-    // 1. Hook for Game Win
-    const oldDoWin = window.doWin;
+    // 1. Hook into the Win Function
+    const originalDoWin = window.doWin;
     window.doWin = async function() {
-        await oldDoWin(); // Run original game logic first
+        await originalDoWin(); 
         overlay.style.display = "flex";
         overlay.classList.add('bot-corner-mode');
-        overlay.style.background = "transparent";
         botImg.src = assets.happy;
-        const msg = "FORȚĂ! Ai terminat puzzle-ul. Uită-te ce premii ai salvat acolo!";
+        const msg = "FORȚĂ! Ai terminat puzzle-ul. Colectează-ți premiile!";
         write(msg); speak(msg);
-        // Hide bot when they click collect (handled by standard modal buttons)
     };
 
-    // 2. Hook for Mystery Box
-    const oldOpenMystery = window.openMysteryOverlay;
+    // 2. Hook into Mystery Box
+    const originalOpenMystery = window.openMysteryOverlay;
     window.openMysteryOverlay = function() {
-        oldOpenMystery();
+        originalOpenMystery();
         overlay.style.display = "flex";
         overlay.classList.add('bot-corner-mode');
-        overlay.style.background = "transparent";
         botImg.src = assets.pointing;
-        const msg = "CINEVA ARE NOROC! Ai câștigat cutii Mystery! Deschide-le!";
+        const msg = "CINEVA ARE NOROC! Ai câștigat cutii Mystery! Deschide-le rapid!";
         write(msg); speak(msg);
     };
 
-    // 3. Hook for Prize Reveal
-    const oldRevealPrize = window.revealPrize;
+    // 3. Hook into Prize Reveal
+    const originalRevealPrize = window.revealPrize;
     window.revealPrize = async function(item) {
-        await oldRevealPrize(item);
+        await originalRevealPrize(item);
         overlay.style.display = "flex";
         overlay.classList.add('bot-corner-mode');
         botImg.src = assets.puzzle_finish;
-        const msg = "BOMBASTIC! Un item nou de colecție. Ești tot mai aproape de un profil legendar!";
+        const msg = "BOMBASTIC! Ai deblocat ceva nou. Profilul tău o să arate mult mai bine acum!";
         write(msg); speak(msg);
         setTimeout(() => { overlay.style.display = "none"; }, 5000);
     };
-
-    // Add help button to screen
-    const helpBtn = document.createElement('div');
-    helpBtn.style.cssText = "position:fixed; bottom:85px; left:20px; width:50px; height:50px; border-radius:50%; border:2px solid #29f3ff; background: rgba(0,0,0,0.8) url('"+assets.puzzle_sit+"') center/cover; cursor:pointer; z-index:15000; box-shadow:0 0 15px #29f3ff;";
-    helpBtn.onclick = () => window.startPuzzleTutorial();
-    document.body.appendChild(helpBtn);
 
 })();
   </script>
