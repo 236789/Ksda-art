@@ -8189,62 +8189,47 @@ window.toggleAudioModal = function() {
         speak(msg);
     };
 
-    const stepDragging = () => {
+const stepDragging = () => {
         clearUI();
         botImg.src = assets.explaining;
         const msg = "Trage piesele din inventar pe tablă. Când ești aproape de locul corect, se vor lipi singure. Succes!";
         write(msg, () => {
-// Find this inside stepDragging and REPLACE the button click:
-addBtn("SĂ ÎNCEPEM!", () => {
-    // DO NOT set overlay to "none"
-    document.getElementById('botTextBubble').style.display = "none"; 
-    overlay.classList.add('bot-corner-mode');
-    overlay.style.background = "transparent";
-    botImg.src = assets.puzzle_sit; // He stays in the corner sitting
-    if(window.audioManager) window.audioManager.bgm.play();
-});
+            // Wait 3 seconds then automatically move to corner
+            setTimeout(() => {
+                document.getElementById('botTextBubble').style.display = "none"; 
+                overlay.style.background = "transparent";
+                overlay.classList.add('bot-corner-mode');
+                overlay.style.display = "flex"; // Keep him visible!
+                botImg.src = assets.puzzle_sit;
+                if(window.audioManager) window.audioManager.bgm.play();
+            }, 3000);
         });
         speak(msg);
     };
 
-/* --- KEVIN EVENT LISTENERS (Reliable Version) --- */
+/* --- KEVIN PERMANENT MASCOT LISTENERS --- */
 
-    // 1. React to winning
+    // Re-show bubble helper
+    const showKevin = (img, msg) => {
+        overlay.style.display = "flex";
+        overlay.style.background = "transparent";
+        overlay.classList.add('bot-corner-mode');
+        document.getElementById('botTextBubble').style.display = "flex";
+        botImg.src = img;
+        write(msg); speak(msg);
+    };
+
     window.addEventListener('kevin_react_win', () => {
-        overlay.style.display = "flex";
-        overlay.style.background = "transparent";
-        overlay.classList.add('bot-corner-mode');
-        document.getElementById('botTextBubble').style.display = "flex";
-        
-        botImg.src = assets.happy;
-        const msg = "FORȚĂ! Ai terminat puzzle-ul. Colectează-ți recompensele, merită!";
-        write(msg); speak(msg);
+        showKevin(assets.happy, "FORȚĂ! Ai terminat puzzle-ul. Colectează-ți recompensele, merită!");
     });
 
-    // 2. React to Mystery Box appearing
     window.addEventListener('kevin_react_mystery', () => {
-        overlay.style.display = "flex";
-        overlay.style.background = "transparent";
-        overlay.classList.add('bot-corner-mode');
-        document.getElementById('botTextBubble').style.display = "flex";
-        
-        botImg.src = assets.pointing;
-        const msg = "CINEVA ARE NOROC! Ai câștigat cutii Mystery! Deschide-le rapid!";
-        write(msg); speak(msg);
+        showKevin(assets.pointing, "CINEVA ARE NOROC! Ai câștigat cutii Mystery! Deschide-le rapid!");
     });
 
-    // 3. React to Prize Reveal
     window.addEventListener('kevin_react_prize', () => {
-        overlay.style.display = "flex";
-        overlay.style.background = "transparent";
-        overlay.classList.add('bot-corner-mode');
-        document.getElementById('botTextBubble').style.display = "flex";
-        
-        botImg.src = assets.puzzle_finish;
-        const msg = "BOMBASTIC! Ai deblocat ceva nou. Arată super bine!";
-        write(msg); speak(msg);
-        
-        // Hide bubble after 6 seconds so user can see the prize clearly
+        showKevin(assets.puzzle_finish, "BOMBASTIC! Ai deblocat ceva nou. Arată super bine!");
+        // Auto-hide only the bubble after 6 seconds
         setTimeout(() => { 
             document.getElementById('botTextBubble').style.display = "none"; 
         }, 6000);
