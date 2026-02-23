@@ -6711,6 +6711,7 @@ window.initRoulette = () => {
 };
 
 async function revealPrize(item) {
+    window.audioManager.playSFX('reward'); // <--- ADD THIS LINE
     const prizeReveal = document.getElementById('prizeReveal');
     const display = document.getElementById('prizeDisplay');
     const status = document.getElementById('mysteryStatus');
@@ -7325,6 +7326,7 @@ window.showUserPuzzles = (userData) => {
 // 3. GALLERY LOGIC
 function enablePointerDrag(el, id) {
     el.onpointerdown = function(e) {
+    window.audioManager.playSFX('pickup'); // <--- ADD THIS LINE
         // Prevent default browser dragging behavior (ghost images)
         e.preventDefault();
         e.stopPropagation();
@@ -7426,6 +7428,9 @@ function enablePointerDrag(el, id) {
                 
                 // 2. Apply the "Locked" state
                 el.classList.add('locked');
+
+    window.audioManager.playSFX('snap'); // <--- ADD THIS LINE
+
                 
                 // 3. Trigger the Cyber Flash Animation
                 el.classList.add('snap-anim');
@@ -7645,7 +7650,10 @@ function updateTimerLoop() {
     // Milestone Check
     timerState.milestones.forEach((m, index) => {
         if (!m.lost && timerState.timeLeft < m.at) {
-            m.lost = true;
+            m.lost = true
+
+        window.audioManager.playSFX('loss'); // <--- ADD THIS LINE
+
             const el = document.getElementById(`ms-${index}`);
             if (el) el.classList.add('lost');
             
@@ -7676,11 +7684,24 @@ const BGM_PLAYLIST = [
 ];
 
 const SFX_LIBRARY = {
-    click: "", // Add URL here
-    pop: "",   // Add URL here
-    snap: "",  // Add URL here
-    pickup: "",// Add URL here
-    win: ""    // Add URL here
+    // 1. Piece Correctly Placed
+    snap: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Funiversfield-bubble-pop-04-323580.mp3?alt=media&token=6ce608c8-5c9c-46d5-afbe-76dd8c24bd4e",
+    
+    // 2. Milestone Lost (Time ran out for an item)
+    loss: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Funiversfield-error-08-206492.mp3?alt=media&token=cc6191c6-4d3a-42c2-afb9-efea9c140cdb",
+    
+    // 3. Pickup Piece / Click UI
+    pickup: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fcreatorshome-sharp-pop-328170.mp3?alt=media&token=a45f335c-d697-4923-8310-a4ef3050e698",
+    
+    // 4. Game Win
+    win: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Ffloraphonic-you-win-sequence-2-183949.mp3?alt=media&token=0e2c637c-d370-4405-b4b9-3a2a0c939c7d",
+    
+    // 5. Mystery Reward Reveal
+    reward: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fdragon-studio-correct-472358.mp3?alt=media&token=1acb7f77-b4db-4e33-8b0e-725df03644bd",
+
+    // Aliases (Reusing your sounds for UI interactions)
+    click: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fcreatorshome-sharp-pop-328170.mp3?alt=media&token=a45f335c-d697-4923-8310-a4ef3050e698",
+    pop: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fcreatorshome-sharp-pop-328170.mp3?alt=media&token=a45f335c-d697-4923-8310-a4ef3050e698"
 };
 
 class AudioSystem {
