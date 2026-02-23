@@ -4517,9 +4517,215 @@
     z-index: 999999 !important;
     touch-action: none !important;
 }
+
+
+
+/* --- AUDIO FLOATING BUTTON --- */
+.audio-fab {
+    position: fixed;
+    bottom: 20px;
+    left: 20px; /* Bottom Left corner */
+    width: 60px;
+    height: 60px;
+    background: rgba(5, 11, 20, 0.8);
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 9999;
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.3);
+    transition: 0.3s;
+    overflow: hidden;
+}
+
+.audio-fab:hover {
+    transform: scale(1.1) rotate(10deg);
+    box-shadow: 0 0 30px var(--primary);
+    background: var(--primary);
+}
+
+.audio-fab:hover i { color: #000; }
+
+.audio-fab i {
+    font-size: 24px;
+    color: var(--primary);
+    transition: 0.3s;
+}
+
+/* Pulse animation when music is playing */
+.audio-fab.playing {
+    animation: boomboxPulse 1.5s infinite;
+}
+
+@keyframes boomboxPulse {
+    0% { box-shadow: 0 0 10px var(--primary); transform: scale(1); }
+    50% { box-shadow: 0 0 30px var(--primary), 0 0 50px var(--secondary); transform: scale(1.05); }
+    100% { box-shadow: 0 0 10px var(--primary); transform: scale(1); }
+}
+
+/* --- AUDIO SETTINGS MODAL --- */
+.audio-modal-card {
+    background: #08101b;
+    border: 2px solid var(--primary);
+    width: 320px;
+    border-radius: 20px;
+    padding: 25px;
+    position: relative;
+    box-shadow: 0 0 50px rgba(41, 243, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Visualizer (Fake Bars) */
+.visualizer-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 50px;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.viz-bar {
+    width: 6px;
+    background: var(--primary);
+    border-radius: 4px;
+    animation: wave 1s ease-in-out infinite;
+}
+
+/* Stagger animations for wave effect */
+.viz-bar:nth-child(1) { height: 20%; animation-duration: 0.8s; }
+.viz-bar:nth-child(2) { height: 40%; animation-duration: 1.2s; }
+.viz-bar:nth-child(3) { height: 80%; animation-duration: 0.5s; }
+.viz-bar:nth-child(4) { height: 50%; animation-duration: 1.0s; }
+.viz-bar:nth-child(5) { height: 90%; animation-duration: 0.7s; }
+.viz-bar:nth-child(6) { height: 30%; animation-duration: 1.1s; }
+.viz-bar:nth-child(7) { height: 60%; animation-duration: 0.9s; }
+
+.visualizer-container.paused .viz-bar {
+    animation: none;
+    height: 5px !important;
+    transition: 0.3s;
+}
+
+@keyframes wave {
+    0%, 100% { height: 10%; background: var(--secondary); }
+    50% { height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); }
+}
+
+/* Controls */
+.track-info {
+    text-align: center;
+    font-family: 'Orbitron';
+    font-size: 11px;
+    color: #fff;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.player-controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.ctrl-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex; align-items: center; justify-content: center;
+}
+.ctrl-btn:hover { background: var(--primary); color: #000; }
+
+/* Sliders */
+.volume-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: #aaa;
+    font-family: 'Orbitron';
+}
+
+.volume-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 5px;
+    outline: none;
+}
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--primary);
+}
   </style>
 </head>
 <body>
+
+
+<!-- AUDIO BUTTON -->
+<div id="audioFab" class="audio-fab" onclick="toggleAudioModal()">
+    <i class="fas fa-music"></i>
+</div>
+
+<!-- AUDIO SETTINGS MODAL -->
+<div id="audioSettingsModal" class="account-modal-overlay">
+    <div class="audio-modal-card">
+        <button class="close-pop" onclick="toggleAudioModal()">✕</button>
+        
+        <h3 style="font-family:'Orbitron'; color:#fff; text-align:center; margin:0;">CYBER RADIO</h3>
+        
+        <!-- VISUALIZER -->
+        <div id="visualizer" class="visualizer-container paused">
+            <div class="viz-bar"></div><div class="viz-bar"></div><div class="viz-bar"></div>
+            <div class="viz-bar"></div><div class="viz-bar"></div><div class="viz-bar"></div>
+            <div class="viz-bar"></div>
+        </div>
+
+        <!-- TRACK INFO -->
+        <div id="currentTrackName" class="track-info">Waiting for input...</div>
+
+        <!-- PLAYER CONTROLS -->
+        <div class="player-controls">
+            <button class="ctrl-btn" onclick="audioManager.prevTrack()"><i class="fas fa-step-backward"></i></button>
+            <button class="ctrl-btn" id="playPauseBtn" onclick="audioManager.togglePlay()"><i class="fas fa-play"></i></button>
+            <button class="ctrl-btn" onclick="audioManager.nextTrack()"><i class="fas fa-step-forward"></i></button>
+        </div>
+
+        <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); width:100%; margin: 10px 0;">
+
+        <!-- VOLUME CONTROLS (This was cut off before) -->
+        <div class="volume-row">
+            <i class="fas fa-music" style="width:20px; text-align:center;"></i>
+            <span style="width: 50px;">MUSIC</span>
+             <input type="range" class="volume-slider" id="bgmSlider" min="0" max="1" step="0.1" value="0.3" oninput="audioManager.setBgmVolume(this.value)">
+        </div>
+
+        <div class="volume-row">
+            <i class="fas fa-volume-up" style="width:20px; text-align:center;"></i>
+            <span style="width: 50px;">SFX</span>
+            <input type="range" class="volume-slider" id="sfxSlider" min="0" max="1" step="0.1" value="0.6" oninput="audioManager.setSfxVolume(this.value)">
+        </div>
+
+    </div>
+</div> 
 
 <div id="mysteryOverlay">
     <h2 id="mysteryStatus" style="font-family:'Orbitron'; color:#fff; margin-bottom:40px; letter-spacing:3px;">BOX DETECTED... CLICK TO OPEN</h2>
@@ -6809,6 +7015,7 @@ window.showDifficulty = async (type) => {
     document.getElementById('puzzleDiffMenu').style.display = 'flex';
 };
 window.startGame = (gridSize) => {
+    audioManager.playSFX('pop'); // Play Start Sound
     jigState.rows = gridSize;
     jigState.cols = gridSize;
     jigState.pieces = [];
@@ -6925,6 +7132,7 @@ window.resetToMenu = () => {
 
 
 async function doWin() {
+    audioManager.playSFX('win'); // Play Win Sound
     jigState.isPlaying = false;
     if (timerInterval) clearInterval(timerInterval);
 
@@ -7458,12 +7666,133 @@ function updateTimerLoop() {
 }
 
 
+const BGM_PLAYLIST = [
+    { title: "Emotional Ambient", url: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Faudiodollar-ambient-emotional-ambient-451321.mp3?alt=media&token=4fe0acaa-88a5-45f0-a823-1aae9b87dcd2" },
+    { title: "Dark Dreamscape", url: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fmondamusic-dark-ambient-soundscape-dreamscape-2-487315.mp3?alt=media&token=3bc50b7b-2a85-412c-b709-3e2ae96169e0" },
+    { title: "Deep Space", url: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fmondamusic-dark-ambient-soundscape-dreamscape-487320.mp3?alt=media&token=c3f40c58-48fb-4629-b7a8-705f1c519e41" },
+    { title: "Quiet Meditation", url: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fquietphase-ambient-meditation-485723.mp3?alt=media&token=f5ceafe6-d52a-421d-8a43-e2819bdaab3b" },
+    { title: "Mountain Air", url: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fthe_mountain-ambient-487008.mp3?alt=media&token=4ec71562-6a6b-4c5f-8e8f-8e8b18793265" },
+    { title: "Tunetank", url: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Ftunetank-ambient-background-347405.mp3?alt=media&token=872b6634-adc4-487c-80fc-1ff5db8940a6" }
+];
 
+const SFX_LIBRARY = {
+    click: "", // Add URL here
+    pop: "",   // Add URL here
+    snap: "",  // Add URL here
+    pickup: "",// Add URL here
+    win: ""    // Add URL here
+};
 
+class AudioSystem {
+    constructor() {
+        this.bgm = new Audio();
+        this.bgm.loop = false;
+        this.currentTrackIdx = 0;
+        this.isPlaying = false;
+        this.hasInitialized = false;
+        
+        // Settings
+        this.bgmVolume = parseFloat(localStorage.getItem('bgmVol')) || 0.3;
+        this.sfxVolume = parseFloat(localStorage.getItem('sfxVol')) || 0.6;
+        this.bgm.volume = this.bgmVolume;
+        
+        this.bgm.addEventListener('ended', () => this.nextTrack());
+        
+        // Attempt auto-start on first click
+        document.addEventListener('click', () => {
+            if (!this.hasInitialized) {
+                this.playTrack(0);
+                this.hasInitialized = true;
+            }
+        }, { once: true });
+    }
 
- 
+    playTrack(index) {
+        if (index >= BGM_PLAYLIST.length) index = 0;
+        if (index < 0) index = BGM_PLAYLIST.length - 1;
+        
+        this.currentTrackIdx = index;
+        this.bgm.src = BGM_PLAYLIST[index].url;
+        this.bgm.volume = this.bgmVolume;
+        
+        const nameEl = document.getElementById('currentTrackName');
+        if(nameEl) nameEl.innerText = BGM_PLAYLIST[index].title;
+        
+        const playPromise = this.bgm.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                this.isPlaying = true;
+                this.updateUIState(true);
+            }).catch(() => console.log("Waiting for user interaction..."));
+        }
+    }
 
+    togglePlay() {
+        if (this.isPlaying) {
+            this.bgm.pause();
+            this.isPlaying = false;
+        } else {
+            this.bgm.play();
+            this.isPlaying = true;
+        }
+        this.updateUIState(this.isPlaying);
+    }
 
+    nextTrack() { this.playTrack(this.currentTrackIdx + 1); }
+    prevTrack() { this.playTrack(this.currentTrackIdx - 1); }
+
+    setBgmVolume(val) {
+        this.bgmVolume = parseFloat(val);
+        this.bgm.volume = this.bgmVolume;
+        localStorage.setItem('bgmVol', this.bgmVolume);
+    }
+
+    setSfxVolume(val) {
+        this.sfxVolume = parseFloat(val);
+        localStorage.setItem('sfxVol', this.sfxVolume);
+    }
+
+    playSFX(key) {
+        // Only play if volume is up AND url exists
+        if (this.sfxVolume <= 0 || !SFX_LIBRARY[key]) return;
+        try {
+            const sfx = new Audio(SFX_LIBRARY[key]);
+            sfx.volume = this.sfxVolume;
+            sfx.play();
+        } catch(e) {}
+    }
+
+    updateUIState(playing) {
+        const fab = document.getElementById('audioFab');
+        const viz = document.getElementById('visualizer');
+        const btn = document.getElementById('playPauseBtn');
+
+        if (playing) {
+            if(fab) fab.classList.add('playing');
+            if(viz) viz.classList.remove('paused');
+            if(btn) btn.innerHTML = '<i class="fas fa-pause"></i>';
+        } else {
+            if(fab) fab.classList.remove('playing');
+            if(viz) viz.classList.add('paused');
+            if(btn) btn.innerHTML = '<i class="fas fa-play"></i>';
+        }
+    }
+}
+
+window.audioManager = new AudioSystem();
+
+window.toggleAudioModal = function() { 
+    const modal = document.getElementById('audioSettingsModal');
+    if (!modal) return;
+    
+    if (modal.classList.contains('active')) {
+        modal.classList.remove('active');
+        window.audioManager.playSFX('click');
+    } else {
+        modal.classList.add('active');
+        window.audioManager.playSFX('pop');
+    }
+};
   </script>
 </body>
 </html>
