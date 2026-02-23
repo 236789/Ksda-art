@@ -6955,24 +6955,31 @@ function toDifficultyMenu() {
 }
 
 window.resetToMenu = () => {
-    // 1. Stop Game Logic
+    // 1. Stop the game logic
     jigState.isPlaying = false;
     if(timerInterval) clearInterval(timerInterval);
     
-    // 2. Hide Game Screens
-    document.getElementById('jigsawArena').style.display = 'none';
-    document.getElementById('jigsawArena').classList.remove('active-grid');
-    document.getElementById('gameOverScreen').style.display = 'none';
-    document.getElementById('questRewardModal').classList.remove('active'); // Close win modal if open
-
-    // 3. SHOW MENU CONTAINER (This was missing)
-    document.getElementById('puzzleMenuContainer').style.display = 'flex';
+    // 2. Hide all GAME UI elements
+    const arena = document.getElementById('jigsawArena');
+    arena.style.display = 'none';
+    arena.classList.remove('active-grid');
     
-    // 4. Reset Menu State
+    document.getElementById('gameOverScreen').style.display = 'none';
+    document.getElementById('questRewardModal').classList.remove('active');
+    document.getElementById('mysteryOverlay').style.display = 'none';
+
+    // 3. SHOW THE MENU CONTAINER (This is the fix)
+    // The wrapper that holds the main menu buttons
+    const menuContainer = document.getElementById('puzzleMenuContainer');
+    if (menuContainer) {
+        menuContainer.style.display = 'flex';
+    }
+    
+    // 4. Reset specific menu states
     document.getElementById('puzzleMainMenu').style.display = 'flex';
     document.getElementById('puzzleDiffMenu').style.display = 'none';
     
-    // 5. Check if we can resume (updates the Resume button visibility)
+    // 5. Re-check save status (for the "Resume" button)
     if(auth.currentUser) checkSavedJigsaw(auth.currentUser.uid);
 };
 
@@ -7604,12 +7611,15 @@ window.saveAndExit = async () => {
     // PASS 'true' to bypass the 5-second cooldown
     await saveProgress(true); 
     
-    // Stop the timer so it doesn't keep running in the background
+    // Stop the timer
     clearInterval(timerInterval);
     jigState.isPlaying = false;
 
-    resetToMenu();
-    checkSavedJigsaw(auth.currentUser.uid);
+    // Call the FIXED reset function
+    resetToMenu(); 
+    
+    // Play sound
+    if(window.audioManager) window.audioManager.playSFX('click');
 }
 
 
