@@ -7314,6 +7314,7 @@ window.showDifficulty = async (type) => {
     document.getElementById('puzzleDiffMenu').style.display = 'flex';
 };
 window.startGame = (gridSize) => {
+    jigState.winTriggered = false; // Resetăm starea de victorie la începutul jocului
     // START MUSIC HERE
     if (window.audioManager) {
         window.audioManager.playTrack(0);
@@ -7786,11 +7787,14 @@ function checkMagnetHint(el, id, currX, currY) {
 }
 
 function updateCount() {
+    if (!jigState.isPlaying || jigState.winTriggered) return; // FIX: Nu mai verifica dacă deja am câștigat
+
     const locked = jigState.pieces.filter(p => p.isLocked).length;
     const total = jigState.pieces.length;
     document.getElementById('piecesCount').innerText = `Solved: ${locked}/${total}`;
     
     if(locked === total) {
+        jigState.winTriggered = true; // FIX: Marcăm că am declanșat victoria
         document.getElementById('dropGrid').classList.add('win-glow');
         document.getElementById('dropGrid').style.backgroundImage = `url(${jigState.imgUrl})`;
         document.querySelectorAll('.grid-guide-cell').forEach(c => c.style.borderColor = 'transparent');
@@ -8321,14 +8325,24 @@ const stepDragging = () => {
         speak(msg);
     };
 
-/* --- RESTORED MASCOT REACTIONS --- */
+/* --- RESTORED MASCOT REACTIONS (WITH DOUBLE-TALK FIX) --- */
+    let isTalking = false; // Internal flag to prevent overlaps
+
     const showKevin = (img, msg) => {
+        if (isTalking) return; // If he's already starting to speak, ignore the second call
+        isTalking = true;
+
         overlay.style.display = "flex";
         overlay.style.background = "transparent";
         overlay.classList.add('bot-corner-mode');
         document.getElementById('botTextBubble').style.display = "flex";
         botImg.src = img;
-        write(msg); speak(msg);
+        
+        write(msg, () => {
+            // Wait 5 seconds after text finishes before allowing another reaction
+            setTimeout(() => { isTalking = false; }, 5000);
+        }); 
+        speak(msg);
     };
 
     window.addEventListener('kevin_react_win', () => {
@@ -8347,7 +8361,6 @@ const stepDragging = () => {
             }
         }, 6000);
     });
-
 
 
     // --- FLOATING BUTTON ---
