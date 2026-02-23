@@ -2536,7 +2536,7 @@
     position: relative;
     overflow: hidden;
     user-select: none; /* Prevents text highlighting */
-    touch-action: none; /* CRITICAL: Prevents scrolling while dragging on mobile */
+    touch-action: auto !important; 
 }
 
 /* PC LAYOUT (Grid) */
@@ -2576,6 +2576,8 @@
     background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
     overflow: hidden; 
     border-radius: 12px;
+    touch-action: auto !important; 
+
 }
 
 /* THE GRID (Visual Anchor) */
@@ -3200,16 +3202,18 @@
     }
 }
 
-/* Mobile Specific */
 @media (max-width: 899px) {
     .zone-pieces {
-        height: 200px !important; /* Taller tray for mobile to see rows */
+        height: 180px !important; /* Adjust height so it's not taking over the whole screen */
+        width: 100%;
+        display: grid !important;
         grid-template-columns: repeat(3, 1fr) !important;
-        overflow-x: hidden !important;
         overflow-y: auto !important;
+        /* This allows the page to scroll once the tray hits top/bottom */
+        overscroll-behavior: contain; 
+        touch-action: pan-y !important; 
     }
 }
-
 .jig-piece.in-tray {
     width: 100% !important; /* Fill the grid cell */
     height: auto;
