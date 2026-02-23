@@ -6868,7 +6868,7 @@ let rouletteActive = false;
 // Example: document.getElementById('collectWinBtn').onclick = () => { if(wonBoxes > 0) openMysteryOverlay(); else resetToMenu(); }
 
 function openMysteryOverlay() {
-window.dispatchEvent(new CustomEvent('kevin_react_mystery'));
+window.dispatchEvent(new CustomEvent('kevin_react_win'));
     const overlay = document.getElementById('mysteryOverlay');
     const boxImg = document.getElementById('mysteryBoxImg');
     const status = document.getElementById('mysteryStatus');
@@ -6993,9 +6993,10 @@ window.initRoulette = () => {
 };
 
 async function revealPrize(item) {
-    // 1. Initial UI Setup
-window.dispatchEvent(new CustomEvent('kevin_react_prize'));
+    // 1. Restore Talking Trigger
+    window.dispatchEvent(new CustomEvent('kevin_react_prize'));
     window.audioManager.playSFX('reward');
+
     const prizeReveal = document.getElementById('prizeReveal');
     const display = document.getElementById('prizeDisplay');
     const status = document.getElementById('mysteryStatus');
@@ -7007,75 +7008,48 @@ window.dispatchEvent(new CustomEvent('kevin_react_prize'));
 
     if (!auth.currentUser) return;
 
-    // 2. Database check for duplicates
     const userRef = doc(db, "accounts", auth.currentUser.uid);
     const userSnap = await getDoc(userRef);
     const userData = userSnap.data();
 
     let isDuplicate = false;
-    
-    // ONLY check duplicates for cosmetic items (which have IDs)
-    if (item.type !== 'ksda' && item.type !== 'diamond') {
-        const ownedBadges = userData.ownedBadges || [];
-        const ownedFrames = userData.ownedFrames || [];
-        const ownedBanners = userData.ownedBanners || [];
-        const ownedTexts = userData.ownedTexts || [];
+    let finalReward = item;
 
-        if (item.type === 'badge' && ownedBadges.includes(item.id)) isDuplicate = true;
-        if (item.type === 'frame' && ownedFrames.includes(item.id)) isDuplicate = true;
-        if (item.type === 'banner' && ownedBanners.includes(item.id)) isDuplicate = true;
-        if (item.type === 'text' && ownedTexts.includes(item.id)) isDuplicate = true;
+    // --- FIX: Only check duplicates for items that have an ID (not coins/diamonds) ---
+    if (item.id) {
+        if (item.type === 'badge' && userData.ownedBadges?.includes(item.id)) isDuplicate = true;
+        if (item.type === 'frame' && userData.ownedFrames?.includes(item.id)) isDuplicate = true;
+        if (item.type === 'banner' && userData.ownedBanners?.includes(item.id)) isDuplicate = true;
+        if (item.type === 'text' && userData.ownedTexts?.includes(item.id)) isDuplicate = true;
     }
 
-    // 3. Define the Final Reward
-    let finalReward = item;
     if (isDuplicate) {
-        // Change reward to compensation if already owned
-        finalReward = { 
-            name: "2500 Coins", 
-            type: 'ksda', 
-            icon: 'https://iili.io/fhc1SKQ.png', 
-            isComp: true,
-            val: 2500 
-        };
         title.innerText = "DUPLICATE DETECTED!";
         title.style.color = "#ff4757";
+        finalReward = { name: "2500 Coins", type: 'ksda', icon: 'https://iili.io/fhc1SKQ.png', isComp: true };
     } else {
         title.innerText = "NEW ITEM UNLOCKED!";
-        title.style.color = "#29f3ff";
+        title.style.color = "var(--primary)";
     }
 
-    // 4. Render Visuals
+    // Render the box
     display.innerHTML = renderPrizeVisual(finalReward);
 
-    // 5. SAVE TO DATABASE (THE FIX)
+    // --- FIREBASE SAVE ---
     try {
         if (finalReward.isComp) {
-            // Give 2500 for duplicate
             await updateDoc(userRef, { coins: increment(2500) });
-            console.log("Compensation added: 2500");
         } else if (finalReward.type === 'ksda') {
-            // Give normal coins (500)
             await updateDoc(userRef, { coins: increment(500) });
         } else if (finalReward.type === 'diamond') {
-            // Give normal diamonds (10)
             await updateDoc(userRef, { diamonds: increment(10) });
         } else {
-            // Save new cosmetic item
-            const fieldMap = { 
-                'badge': 'ownedBadges', 
-                'frame': 'ownedFrames', 
-                'banner': 'ownedBanners', 
-                'text': 'ownedTexts' 
-            };
-            const field = fieldMap[finalReward.type];
-            await updateDoc(userRef, { [field]: arrayUnion(finalReward.id) });
-            console.log("Cosmetic added:", finalReward.id);
+            const fieldMap = { 'badge': 'ownedBadges', 'frame': 'ownedFrames', 'banner': 'ownedBanners', 'text': 'ownedTexts' };
+            await updateDoc(userRef, { [fieldMap[finalReward.type]]: arrayUnion(finalReward.id) });
         }
-        window.showToast("Account Synced! ✅");
     } catch (e) { 
-        console.error("Database Error:", e);
-        alert("Sync Error! Please screenshot this.");
+        console.error("Sync Error Details:", e);
+        alert("Sync Error! Please screenshot: " + e.message); 
     }
 }
 
@@ -8347,9 +8321,7 @@ const stepDragging = () => {
         speak(msg);
     };
 
-/* --- KEVIN PERMANENT MASCOT LISTENERS --- */
-
-    // Re-show bubble helper
+/* --- RESTORED MASCOT REACTIONS --- */
     const showKevin = (img, msg) => {
         overlay.style.display = "flex";
         overlay.style.background = "transparent";
@@ -8358,6 +8330,23 @@ const stepDragging = () => {
         botImg.src = img;
         write(msg); speak(msg);
     };
+
+    window.addEventListener('kevin_react_win', () => {
+        showKevin(assets.happy, "FORȚĂ! Ai terminat puzzle-ul. Colectează-ți recompensele, merită!");
+    });
+
+    window.addEventListener('kevin_react_mystery', () => {
+        showKevin(assets.pointing, "CINEVA ARE NOROC! Ai câștigat cutii Mystery! Deschide-le rapid!");
+    });
+
+    window.addEventListener('kevin_react_prize', () => {
+        showKevin(assets.puzzle_finish, "BOMBASTIC! Ai deblocat ceva nou. Arată super bine!");
+        setTimeout(() => { 
+            if(overlay.classList.contains('bot-corner-mode')) {
+                document.getElementById('botTextBubble').style.display = "none"; 
+            }
+        }, 6000);
+    });
 
 
 
