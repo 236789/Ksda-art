@@ -6872,35 +6872,42 @@ function setupBoardUI(isLoad = false) {
         gridBox.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url(${jigState.imgUrl})`;
         gridBox.style.backgroundSize = "cover";
 
-        // Render Pieces in Shuffled Order
-        jigState.pieces.forEach((pData) => {
-            const piece = document.createElement('div');
-            piece.className = 'jig-piece';
-            piece.style.width = `${baseSize}px`;
-            piece.style.height = `${baseSize}px`;
-            piece.style.backgroundImage = `url(${jigState.imgUrl})`;
-            piece.style.backgroundSize = `${jigState.totalW}px ${jigState.totalH}px`;
-            
-            const row = Math.floor(pData.id / jigState.cols);
-            const col = pData.id % jigState.cols;
-            piece.style.backgroundPosition = `-${col * baseSize}px -${row * baseSize}px`;
+// Inside setupBoardUI loop:
+jigState.pieces.forEach((pData) => {
+    const piece = document.createElement('div');
+    piece.className = 'jig-piece';
+    piece.style.width = `${baseSize}px`;
+    piece.style.height = `${baseSize}px`;
+    piece.style.backgroundImage = `url(${jigState.imgUrl})`;
+    
+    // --- NEW PERCENTAGE LOGIC ---
+    const row = Math.floor(pData.id / jigState.cols);
+    const col = pData.id % jigState.cols;
+// Ensure this is how you set the position in setupBoardUI:
+const xPct = (col / (jigState.cols - 1)) * 100;
+const yPct = (row / (jigState.rows - 1)) * 100;
+piece.style.backgroundPosition = `${xPct}% ${yPct}%`;
+    
+    // Background size must be based on how many columns/rows we have
+    piece.style.backgroundSize = `${jigState.cols * 100}% ${jigState.rows * 100}%`;
+    // ----------------------------
 
-            if (pData.isLocked) {
-                piece.classList.add('locked');
-                piece.style.left = `${col * baseSize}px`;
-                piece.style.top = `${row * baseSize}px`;
-                gridBox.appendChild(piece);
-            } else if (pData.inTray) {
-                piece.classList.add('in-tray');
-                tray.appendChild(piece);
-            } else {
-                piece.style.left = `${pData.currentX}px`;
-                piece.style.top = `${pData.currentY}px`;
-                gridBox.appendChild(piece);
-            }
+    if (pData.isLocked) {
+        piece.classList.add('locked');
+        piece.style.left = `${col * baseSize}px`;
+        piece.style.top = `${row * baseSize}px`;
+        gridBox.appendChild(piece);
+    } else if (pData.inTray) {
+        piece.classList.add('in-tray');
+        tray.appendChild(piece);
+    } else {
+        piece.style.left = `${pData.currentX}px`;
+        piece.style.top = `${pData.currentY}px`;
+        gridBox.appendChild(piece);
+    }
 
-            if (!pData.isLocked) enablePointerDrag(piece, pData.id);
-        });
+    if (!pData.isLocked) enablePointerDrag(piece, pData.id);
+});
 
         updateCount();
         if(!isLoad) saveProgress();
@@ -7127,7 +7134,7 @@ function enablePointerDrag(el, id) {
         const offsetX = e.clientX - pieceRect.left;
         const offsetY = e.clientY - pieceRect.top;
 
-        // 2. HANDLE TRAY TO BOARD TRANSFER
+// 2. HANDLE TRAY TO BOARD TRANSFER
         if (el.classList.contains('in-tray')) {
             // Calculate exact position relative to the grid
             const startLeft = pieceRect.left - gridRect.left;
@@ -7136,6 +7143,15 @@ function enablePointerDrag(el, id) {
             // Apply coordinates IMMEDIATELY so it doesn't jump to 0,0
             el.style.left = startLeft + 'px';
             el.style.top = startTop + 'px';
+
+            // --- FIX: RESET SIZE AND BACKGROUND WHEN LEAVING TRAY ---
+            // This makes the piece its "real" size so the math matches the image
+            el.style.width = `${jigState.pieceSize}px`;
+            el.style.height = `${jigState.pieceSize}px`;
+            
+            // Ensure background size is scaled to the full board dimensions
+            el.style.backgroundSize = `${jigState.cols * 100}% ${jigState.rows * 100}%`;
+            // -------------------------------------------------------
             
             // Now safe to move in DOM
             el.classList.remove('in-tray');
