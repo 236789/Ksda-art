@@ -8022,6 +8022,7 @@ window.toggleAudioModal = function() {
 };
 
 
+/* --- KEVIN CYBER TUTORIAL ENGINE v4.0 --- */
 (function() {
     const assets = {
         puzzle_mad: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2FMaking%20puzle%20frustrated%20.png?alt=media&token=8b646382-96e0-4abc-b063-9f14de6b97ee",
@@ -8033,31 +8034,71 @@ window.toggleAudioModal = function() {
         explaining: "https://iili.io/q2p0NwX.png"
     };
 
-    // 1. Create Overlay & Use Styled Bubble
+    // 1. Inject Bubble Styles
+    const style = document.createElement('style');
+    style.innerHTML = `
+        #botTutorialOverlay #botTextBubble {
+            background: rgba(8, 16, 27, 0.98);
+            border: 2px solid var(--primary);
+            color: #fff;
+            padding: 20px;
+            border-radius: 24px;
+            max-width: 320px;
+            width: 85%;
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 20px rgba(41, 243, 255, 0.2);
+            z-index: 10000001;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            pointer-events: auto !important;
+        }
+        .tut-choice-btn {
+            background: rgba(41, 243, 255, 0.1);
+            border: 2px solid var(--primary);
+            color: #fff;
+            padding: 12px;
+            border-radius: 12px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            font-weight: 900;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+        .tut-choice-btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
+        .tut-focus { box-shadow: 0 0 30px var(--primary), 0 0 0 9999px rgba(0,0,0,0.7) !important; z-index: 10000001 !important; position: relative !important; }
+        .bot-corner-mode { justify-content: flex-end !important; align-items: flex-end !important; padding: 20px !important; pointer-events: none !important; }
+    `;
+    document.head.appendChild(style);
+
+    // 2. Create UI
     const overlay = document.createElement('div');
     overlay.id = "botTutorialOverlay";
     overlay.style.cssText = "position:fixed; inset:0; background: rgba(5, 11, 20, 0.9); z-index:10000000; display:none; flex-direction:column; align-items:center; justify-content:center;";
 
     const bubble = document.createElement('div');
-    bubble.id = "botTextBubble"; // Using your CSS ID
+    bubble.id = "botTextBubble";
 
     const textPart = document.createElement('div');
-    textPart.id = "tutText";
+    textPart.style.cssText = "font-size: 14px; line-height: 1.5; font-weight: 500;";
+    
     const btnPart = document.createElement('div');
-    btnPart.id = "tutBtnArea";
+    btnPart.style.cssText = "display: flex; flex-direction: column; gap: 8px; width: 100%;";
     
     bubble.appendChild(textPart);
     bubble.appendChild(btnPart);
 
     const botImg = document.createElement('img');
     botImg.id = "mainBotVisual";
-    botImg.style.cssText = "height: 300px; width: auto; filter: drop-shadow(0 0 25px rgba(41, 243, 255, 0.5)); transition: 0.5s;";
+    botImg.style.cssText = "height: 300px; width: auto; filter: drop-shadow(0 0 25px rgba(41, 243, 255, 0.5)); transition: 0.5s; z-index: 10000001; pointer-events: auto;";
 
     overlay.appendChild(bubble);
     overlay.appendChild(botImg);
     document.body.appendChild(overlay);
 
-    // 2. Typewriter & TTS Logic
+    // 3. Logic Engines
     const speak = (msg, callback) => {
         window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(msg);
@@ -8076,7 +8117,7 @@ window.toggleAudioModal = function() {
                 clearInterval(interval);
                 if (callback) callback();
             }
-        }, 30); // Speed of typewriter
+        }, 25);
     };
 
     const addBtn = (label, onClick) => {
@@ -8139,7 +8180,7 @@ window.toggleAudioModal = function() {
 
     const stepInGame = () => {
         clearUI();
-        botImg.src = assets.explaining;
+        botImg.src = assets.pointing;
         const msg = "Fii atent la bara de energie! Dacă ajunge la zero, pierzi bunătățile de pe ea. Termină puzzle-ul rapid ca să fii boss!";
         write(msg, () => {
             document.querySelector('.timer-hud-v2').classList.add('tut-focus');
@@ -8192,13 +8233,11 @@ window.toggleAudioModal = function() {
         speak(line1);
     };
 
-    // --- GAME EVENT HOOKS ---
-    
+    // --- GAME HOOKS ---
     const originalDoWin = window.doWin;
     window.doWin = async function() {
         await originalDoWin();
-        overlay.style.display = "flex";
-        overlay.classList.add('bot-corner-mode');
+        overlay.style.display = "flex"; overlay.classList.add('bot-corner-mode');
         botImg.src = assets.happy;
         const msg = "FORȚĂ! Ai terminat puzzle-ul. Uită-te ce premii ai salvat acolo și apasă colectează!";
         write(msg); speak(msg);
@@ -8207,32 +8246,29 @@ window.toggleAudioModal = function() {
     const originalOpenMystery = window.openMysteryOverlay;
     window.openMysteryOverlay = function() {
         if(originalOpenMystery) originalOpenMystery();
-        overlay.style.display = "flex";
-        overlay.classList.add('bot-corner-mode');
+        overlay.style.display = "flex"; overlay.classList.add('bot-corner-mode');
         botImg.src = assets.pointing;
         const msg = "CINEVA ARE NOROC! Ai câștigat cutii Mystery! Dă click pe ele să vedem ce iteme legendare ai primit!";
         write(msg); speak(msg);
-        setTimeout(() => overlay.style.display="none", 5000);
     };
 
     const originalRevealPrize = window.revealPrize;
     window.revealPrize = function(item) {
         if(originalRevealPrize) originalRevealPrize(item);
-        overlay.style.display = "flex";
+        overlay.style.display = "flex"; overlay.classList.add('bot-corner-mode');
         botImg.src = assets.puzzle_finish;
         const msg = "BOMBASTIC! Un item nou de colecție. Ești tot mai aproape de un profil legendar. Ne auzim pe chat!";
         write(msg); speak(msg);
         setTimeout(() => overlay.style.display = "none", 5000);
     };
 
-    // Trigger Button
+    // Help Button
     const puzzleTutorialBtn = document.createElement('div');
     puzzleTutorialBtn.style.cssText = `position:fixed; bottom:85px; left:20px; width:50px; height:50px; border-radius:50%; border:2px solid #29f3ff; background-image:url('${assets.puzzle_sit}'); background-size:cover; cursor:pointer; z-index:9999; box-shadow:0 0 15px var(--primary); transition: 0.3s;`;
     puzzleTutorialBtn.onmouseover = () => puzzleTutorialBtn.style.transform = "scale(1.1)";
     puzzleTutorialBtn.onmouseout = () => puzzleTutorialBtn.style.transform = "scale(1.0)";
     puzzleTutorialBtn.onclick = () => window.startPuzzleTutorial();
     document.body.appendChild(puzzleTutorialBtn);
-
 })();
   </script>
 </body>
