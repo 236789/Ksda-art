@@ -7787,21 +7787,24 @@ function checkMagnetHint(el, id, currX, currY) {
 }
 
 function updateCount() {
-    if (!jigState.isPlaying || jigState.winTriggered) return; // FIX: Nu mai verifica dacă deja am câștigat
+    // FIX: Prevents multiple triggers while pieces are still "snapping"
+    if (!jigState.isPlaying || jigState.winTriggered) return;
 
     const locked = jigState.pieces.filter(p => p.isLocked).length;
     const total = jigState.pieces.length;
     document.getElementById('piecesCount').innerText = `Solved: ${locked}/${total}`;
     
-    if(locked === total) {
-        jigState.winTriggered = true; // FIX: Marcăm că am declanșat victoria
+    if (locked === total) {
+        jigState.winTriggered = true; // LOCK THE GATE
+        
         document.getElementById('dropGrid').classList.add('win-glow');
         document.getElementById('dropGrid').style.backgroundImage = `url(${jigState.imgUrl})`;
         document.querySelectorAll('.grid-guide-cell').forEach(c => c.style.borderColor = 'transparent');
+        
+        // Only call doWin once
         setTimeout(doWin, 1500);
     }
 }
-
 // Add this variable at the very top of your script area
 let lastSaveTime = 0;
 let pendingCoins = 0;
@@ -8338,11 +8341,11 @@ let mascotVoice = new Audio();
         });
     };
 
-/* --- RESTORED MASCOT REACTIONS (WITH DOUBLE-TALK FIX) --- */
-    let isTalking = false; // Internal flag to prevent overlaps
+/* --- FIXED MASCOT REACTIONS (Correct Argument Order) --- */
+    let isTalking = false;
 
-    const showKevin = (img, msg) => {
-        if (isTalking) return; // If he's already starting to speak, ignore the second call
+    const showKevin = (img, audioUrl, text) => {
+        if (isTalking) return; 
         isTalking = true;
 
         overlay.style.display = "flex";
@@ -8351,12 +8354,33 @@ let mascotVoice = new Audio();
         document.getElementById('botTextBubble').style.display = "flex";
         botImg.src = img;
         
-        write(msg, () => {
-            // Wait 5 seconds after text finishes before allowing another reaction
+        // This helper cleans the [tags] and plays the actual MP3
+        kevinSpeak(audioUrl, text, () => {
+            // Allows Kevin to talk again 5 seconds after finishing
             setTimeout(() => { isTalking = false; }, 5000);
         }); 
-        speak(msg);
     };
+
+    window.addEventListener('kevin_react_win', () => {
+        const txt = "[CELEBRATORY] FORȚĂ! Ai terminat puzzle-ul! [ENTHUSIASTIC] Colectează-ți recompensele… merită din plin! [CONFIDENT] Grozavă treabă, ai reușit.";
+        showKevin(assets.happy, assets.audio_win, txt);
+    });
+
+    window.addEventListener('kevin_react_mystery', () => {
+        const txt = "[ENTHUSIASTIC] CINEVA ARE NOROC! Ai câștigat cutii Mystery! Deschide-le rapid!";
+        // Using audio_menu as a fallback sound for mystery
+        showKevin(assets.pointing, assets.audio_menu, txt);
+    });
+
+    window.addEventListener('kevin_react_prize', () => {
+        const txt = "[CELEBRATORY] BOMBĂ ! Ai deblocat ceva nou! [ENTHUSIASTIC] Arată super bine! [CONFIDENT] Abia aștept să vezi ce urmează.";
+        showKevin(assets.puzzle_finish, assets.audio_prize, txt);
+        setTimeout(() => { 
+            if(overlay.classList.contains('bot-corner-mode')) {
+                document.getElementById('botTextBubble').style.display = "none"; 
+            }
+        }, 8000);
+    });
 
 window.addEventListener('kevin_react_win', () => {
         const txt = "[CELEBRATORY] FORȚĂ! Ai terminat puzzle-ul! [ENTHUSIASTIC] Colectează-ți recompensele… merită din plin! [CONFIDENT] Grozavă treabă, ai reușit.";
