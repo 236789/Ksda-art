@@ -6921,74 +6921,83 @@ window.initRoulette = () => {
     
     const wheelColors = ['r-teal', 'r-red', 'r-purple', 'r-gold', 'r-green', 'r-blue', 'r-dark'];
 
-    const CHANCES = { COINS: 25, DIAMONDS: 15, BANNER: 20, BADGE: 10, FRAME: 10, TEXT: 10 };
+    // --- LOGICA DE PROBABILITATE (Total 100%) ---
+    const CHANCES = { 
+        TEXT: 5,     // 5%
+        FRAME: 5,    // 5%
+        BADGE: 5,    // 5%
+        BANNER: 5,   // 5%
+        DIAMONDS: 25, // 25%
+        COINS: 55     // Restul de 55%
+    };
+
     const getRandomItem = (db) => db[Math.floor(Math.random() * db.length)];
 
-    function generateReward(type) {
-        if (type === 'ksda') return { name: '500 Coins', type: 'ksda', icon: 'https://iili.io/fhc1SKQ.png' };
-        if (type === 'diamond') return { name: '10 Diamonds', type: 'diamond', icon: 'https://iili.io/fv5bmtj.png' };
-        if (type === 'badge') {
-            const b = getRandomItem(BADGES_DB);
-            return { name: b.text, type: 'badge', id: b.id, icon: 'https://iili.io/fXvBEiB.png' };
-        }
-        if (type === 'frame') {
+    function generateReward() {
+        const rand = Math.random() * 100;
+        
+        if (rand < CHANCES.TEXT) {
+            const t = getRandomItem(TEXTS_DB);
+            return { name: t.name, type: 'text', id: t.id, css: t.cssClass };
+        } 
+        if (rand < CHANCES.TEXT + CHANCES.FRAME) {
             const f = getRandomItem(FRAMES_DB);
             return { name: f.name, type: 'frame', id: f.id, icon: f.img };
         }
-        if (type === 'banner') {
+        if (rand < CHANCES.TEXT + CHANCES.FRAME + CHANCES.BADGE) {
+            const b = getRandomItem(BADGES_DB);
+            return { name: b.text, type: 'badge', id: b.id, icon: 'https://iili.io/fXvBEiB.png' };
+        }
+        if (rand < CHANCES.TEXT + CHANCES.FRAME + CHANCES.BADGE + CHANCES.BANNER) {
             const bn = getRandomItem(BANNERS_DB);
             return { name: bn.name, type: 'banner', id: bn.id, css: bn.cssClass };
         }
-        if (type === 'text') {
-            const t = getRandomItem(TEXTS_DB);
-            return { name: t.name, type: 'text', id: t.id, css: t.cssClass };
+        if (rand < CHANCES.TEXT + CHANCES.FRAME + CHANCES.BADGE + CHANCES.BANNER + CHANCES.DIAMONDS) {
+            return { name: '10 Diamonds', type: 'diamond', icon: 'https://iili.io/fv5bmtj.png' };
         }
-    }
-
-    function pickWinner() {
-        const rand = Math.random() * 100;
-        if (rand < CHANCES.TEXT) return generateReward('text');
-        if (rand < CHANCES.TEXT + CHANCES.FRAME) return generateReward('frame');
-        if (rand < CHANCES.TEXT + CHANCES.FRAME + CHANCES.BADGE) return generateReward('badge');
-        if (rand < CHANCES.TEXT + CHANCES.FRAME + CHANCES.BADGE + CHANCES.BANNER) return generateReward('banner');
-        if (rand < CHANCES.TEXT + CHANCES.FRAME + CHANCES.BADGE + CHANCES.BANNER + CHANCES.DIAMONDS) return generateReward('diamond');
-        return generateReward('ksda');
+        
+        return { name: '500 Coins', type: 'ksda', icon: 'https://iili.io/fhc1SKQ.png' };
     }
 
     const pool = [];
-    const winnerIndex = 45; 
+    const winnerIndex = 45; // Indexul pe care se va opri acul
 
-    for (let i = 0; i < 60; i++) {
-        let item = (i === winnerIndex) ? pickWinner() : (Math.random() > 0.5 ? generateReward('ksda') : generateReward('diamond'));
+    // --- POPULĂM TOATĂ BANDA CU RECOMPENSE RANDOM BAZATE PE ȘANSE ---
+    for (let i = 0; i < 65; i++) {
+        let item = generateReward();
         pool.push(item);
         
         const el = document.createElement('div');
         el.className = `roulette-item ${wheelColors[i % wheelColors.length]}`;
-        // Force width in JS to match CSS precisely
         el.style.minWidth = "120px";
         el.style.margin = "0 5px"; 
         
         if (item.type === 'text') {
             el.innerHTML = `<span class="${item.css}" style="font-size:12px;">ABC</span><span>${item.name}</span>`;
         } else if (item.type === 'banner') {
-            el.innerHTML = `<div class="${item.css}" style="width:80%; height:20px; font-size:8px;"></div><span>${item.name}</span>`;
+            el.innerHTML = `<div class="${item.css}" style="width:80%; height:20px; font-size:8px; display:flex; align-items:center; justify-content:center;">BANNER</div><span>${item.name}</span>`;
         } else {
             el.innerHTML = `<img src="${item.icon}"><span>${item.name}</span>`;
         }
         strip.appendChild(el);
     }
 
+    // --- CALCULEAZĂ POZIȚIA DE OPRIRE ---
     setTimeout(() => {
-        const itemFullWidth = 130; // 120px + 10px total margins
+        const itemFullWidth = 130; // 120px (width) + 10px (margin total)
         const containerWidth = rouletteUI.offsetWidth;
-        // Calculation: (item position) - (half of screen) + (half of item) = PERFECT CENTER
+        
+        // Centrare perfectă a item-ului câștigător sub ac
         const landPos = (winnerIndex * itemFullWidth) - (containerWidth / 2) + (itemFullWidth / 2);
-        const randomShift = Math.floor(Math.random() * 60) - 30; // Add some visual realism
+        
+        // Adăugăm un "shiver" (deplasare mică) pentru a nu se opri mereu fix la mijlocul pixelului
+        const randomShift = Math.floor(Math.random() * 80) - 40; 
         
         strip.style.transition = "transform 7s cubic-bezier(0.1, 0, 0.1, 1)";
         strip.style.transform = `translateX(-${landPos + randomShift}px)`;
     }, 100);
 
+    // Declanșează premiul după terminarea animației (7.5 secunde)
     setTimeout(() => revealPrize(pool[winnerIndex]), 7500);
 };
 
@@ -8366,7 +8375,7 @@ let mascotVoice = new Audio();
         showKevin(assets.happy, assets.audio_win, txt);
     });
 
-    window.addEventListener('kevin_react_mystery', () => {
+    window.addEventListener('kevin_react_mystery', () => { 
         const txt = "[ENTHUSIASTIC] CINEVA ARE NOROC! Ai câștigat cutii Mystery! Deschide-le rapid!";
         // Using audio_menu as a fallback sound for mystery
         showKevin(assets.pointing, assets.audio_menu, txt);
