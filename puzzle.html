@@ -7121,11 +7121,19 @@ window.showDifficulty = async (type) => {
     document.getElementById('puzzleDiffMenu').style.display = 'flex';
 };
 window.startGame = (gridSize) => {
-    audioManager.playSFX('pop'); // Play Start Sound
+    // START MUSIC HERE
+    if (window.audioManager) {
+        window.audioManager.playTrack(0);
+        window.audioManager.setBgmVolume(0.15); // Explicit low volume (0.15)
+        document.getElementById('bgmSlider').value = 0.15; // Update slider UI
+    }
+
+    audioManager.playSFX('pop'); 
     jigState.rows = gridSize;
     jigState.cols = gridSize;
     jigState.pieces = [];
     jigState.isPlaying = true;
+    // ... rest of the function
 
     const total = jigState.rows * jigState.cols;
     for(let i=0; i<total; i++) {
@@ -7825,20 +7833,21 @@ const SFX_LIBRARY = {
 };
 
 class AudioSystem {
-    constructor() {
+    constructor() { 
         this.bgm = new Audio();
         this.bgm.loop = false;
         this.currentTrackIdx = 0;
         this.isPlaying = false;
-        this.hasInitialized = false;
+        this.hasInitialized = false; // We will set this to true only when the game starts
         
         // Settings
-        this.bgmVolume = parseFloat(localStorage.getItem('bgmVol')) || 0.3;
+        this.bgmVolume = parseFloat(localStorage.getItem('bgmVol')) || 0.15; // Set default lower
         this.sfxVolume = parseFloat(localStorage.getItem('sfxVol')) || 0.6;
         this.bgm.volume = this.bgmVolume;
         
         this.bgm.addEventListener('ended', () => this.nextTrack());
-        
+        // REMOVED the document.addEventListener('click') auto-play logic from here
+    
         // Attempt auto-start on first click
         document.addEventListener('click', () => {
             if (!this.hasInitialized) {
@@ -7934,6 +7943,222 @@ window.toggleAudioModal = function() {
         window.audioManager.playSFX('pop');
     }
 };
+
+
+
+(function() {
+    const assets = {
+        // New Puzzle Images
+        puzzle_mad: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2FMaking%20puzle%20frustrated%20.png?alt=media&token=8b646382-96e0-4abc-b063-9f14de6b97ee",
+        puzzle_sit: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2FPuzzle%20idle%20sit%20.png?alt=media&token=62f8cb9d-5bb1-4917-b3bb-9d23abd5b63f",
+        puzzle_finish: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2FPuzle%20idle%20finish.png?alt=media&token=970de9fe-3e7c-4c59-9b7f-db2c9bbbc6d8",
+        
+        // Original Assets
+        celebrating: "https://iili.io/q2p0wut.png",
+        explaining: "https://iili.io/q2p0NwX.png",
+        happy: "https://iili.io/q2p0j9I.png",
+        idea: "https://iili.io/q2p0X8N.png",
+        pointing: "https://iili.io/q2p0bKx.png",
+        thinking: "https://iili.io/q2p0pSV.png",
+        waving: "https://iili.io/q2p19HB.png",
+        idle: "https://iili.io/q2p0PA7.png",
+        mad: "https://iili.io/q2p0mcQ.png"
+    };
+
+    // UI Creation
+    const overlay = document.createElement('div');
+    overlay.id = "puzzleBotOverlay";
+    overlay.style.cssText = "position:fixed; inset:0; background: rgba(5, 11, 20, 0.85); z-index:999999; display:none; flex-direction:column; align-items:center; justify-content:center; transition: all 0.6s ease;";
+
+    const bubble = document.createElement('div');
+    bubble.style.cssText = "background: rgba(8, 16, 27, 0.98); border: 2px solid var(--primary); color:#fff; padding:20px; border-radius:24px; max-width:320px; width:85%; font-family:Poppins, sans-serif; text-align:center; box-shadow: 0 10px 40px rgba(0,0,0,0.8); font-size:13px; margin-bottom: 15px; transition: all 0.4s; line-height:1.5; display: flex; flex-direction: column; align-items: center;";
+
+    const botImg = document.createElement('img');
+    botImg.style.cssText = "height: 320px; width: auto; object-fit: contain; filter: drop-shadow(0 0 25px rgba(41, 243, 255, 0.5)); transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);";
+
+    overlay.appendChild(bubble);
+    overlay.appendChild(botImg);
+    document.body.appendChild(overlay);
+
+    // TTS Engine
+    const speak = (msg, callback) => {
+        const utterance = new SpeechSynthesisUtterance(msg);
+        utterance.lang = 'ro-RO'; // Setting to Romanian
+        utterance.rate = 1.0;
+        utterance.onend = () => { if (callback) callback(); };
+        window.speechSynthesis.speak(utterance);
+    };
+
+    const write = (txt, callback) => {
+        bubble.innerHTML = "";
+        let i = 0;
+        const interval = setInterval(() => {
+            bubble.innerHTML += txt.charAt(i);
+            i++;
+            if (i >= txt.length) {
+                clearInterval(interval);
+                if (callback) callback();
+            }
+        }, 25);
+    };
+
+    const setFocus = (selector) => {
+        document.querySelectorAll('.tutorial-focus').forEach(el => el.classList.remove('tutorial-focus'));
+        const target = document.querySelector(selector);
+        if (target) {
+            target.classList.add('tutorial-focus');
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            target.style.zIndex = "1000000";
+        }
+    };
+
+    let stepIdx = 0;
+    const tutorialSteps = [
+        { 
+            element: "#puzzleMenuContainer", 
+            text: "Totul începe aici. Poți alege un puzzle random, poți încărca propria imagine, sau poți alege o capodoperă din Legends Gallery.", 
+            img: assets.pointing 
+        },
+        { 
+            element: "#puzzleDiffMenu", 
+            text: "Dificultatea schimbă numărul de piese. Cu cât sunt mai multe, cu atât provocarea e mai mare, dar și recompensele sunt mai grase!", 
+            img: assets.idea 
+        },
+        { 
+            element: ".timer-hud-v2", 
+            text: "Fii atent la bara de energie! Pe măsură ce timpul trece, pierzi bonusurile. Dacă bara ajunge la zero, pierzi jocul.", 
+            img: assets.explaining 
+        },
+        { 
+            element: "#pieceTray", 
+            text: "Piesele tale stau aici în tavă. Trage-le pe tablă și încearcă să găsești locul potrivit. Când o piesă se apropie de locul ei, se va fixa singură.", 
+            img: assets.happy 
+        },
+        { 
+            element: ".btn-puzzle-exit", 
+            text: "Dacă trebuie să pleci, nu te panica. Apasă Save & Exit și îți voi păstra progresul exact așa cum l-ai lăsat.", 
+            img: assets.puzzle_finish 
+        }
+    ];
+
+    const runTutorialSteps = () => {
+        if (stepIdx >= tutorialSteps.length) {
+            botImg.src = assets.puzzle_finish;
+            const endMsg = "Gata! Acum ești pregătit să devii un maestru al puzzle-urilor. Baftă, sper să nu te enervezi ca mine!";
+            write(endMsg);
+            speak(endMsg, () => {
+                setTimeout(() => { 
+                    overlay.style.opacity = "0"; 
+                    setTimeout(() => {
+                        overlay.style.display = "none";
+                        document.querySelectorAll('.tutorial-focus').forEach(el => el.style.zIndex = "");
+                    }, 600); 
+                }, 3000);
+            });
+            return;
+        }
+
+        const s = tutorialSteps[stepIdx];
+        botImg.src = s.img;
+        if (s.element) setFocus(s.element);
+        write(s.text);
+        speak(s.text, () => {
+            const next = document.createElement('button');
+            next.innerText = "AM ÎNȚELES";
+            next.style.cssText = "width:100%; padding:12px; margin-top:15px; background:var(--primary); border:none; border-radius:12px; font-family:Orbitron; font-weight:900; cursor:pointer; color:#000;";
+            next.onclick = () => { stepIdx++; runTutorialSteps(); };
+            bubble.appendChild(next);
+        });
+    };
+
+    window.startPuzzleTutorial = () => {
+        overlay.style.display = "flex";
+        overlay.style.opacity = "1";
+        
+        // Start with the Frustrated Scene
+        botImg.src = assets.puzzle_mad;
+        const firstLine = "BAGĂ-MI-AȘ PICIORUL ÎN EA DE PIESĂ! De ce nu se potrivește nicăieri?! Arunc monitorul pe geam imediat!";
+        
+        write(firstLine);
+        speak(firstLine, () => {
+            setTimeout(() => {
+                botImg.src = assets.happy;
+                const secondLine = "Opa! Salutare. Nu te-am văzut acolo, eram... ocupat cu o problemă tehnică de logică avansată. Eu sunt Kevin-Bot.";
+                write(secondLine);
+                speak(secondLine, () => {
+                    const thirdLine = "Vrei să-ți explic cum funcționează Cyber Jigsaw ca să nu ajungi să urli la piese ca mine?";
+                    write(thirdLine);
+                    speak(thirdLine, () => {
+                        const container = document.createElement('div');
+                        container.style.cssText = "margin-top:15px; display:flex; flex-direction:column; gap:8px; width:100%;";
+                        
+                        const okBtn = document.createElement('button');
+                        okBtn.innerText = "DA, ÎNVAȚĂ-MĂ";
+                        okBtn.style.cssText = "width:100%; padding:12px; border:none; border-radius:12px; font-family:Orbitron; font-weight:900; background:var(--primary); cursor:pointer;";
+                        okBtn.onclick = () => { container.remove(); runTutorialSteps(); };
+
+                        const noBtn = document.createElement('button');
+                        noBtn.innerText = "NU, MĂ DESCURC";
+                        noBtn.style.cssText = "width:100%; padding:12px; border:none; border-radius:12px; font-family:Orbitron; font-weight:900; background:rgba(255,255,255,0.1); color:#fff; cursor:pointer;";
+                        noBtn.onclick = () => {
+                            botImg.src = assets.puzzle_sit;
+                            const ignoreMsg = "Ok, cum vrei tu. Nu mă bag. Eu oricum sunt ocupat acum cu puzzle-ul meu, deci descurcă-te!";
+                            write(ignoreMsg);
+                            speak(ignoreMsg, () => {
+                                setTimeout(() => { 
+                                    overlay.style.opacity = "0"; 
+                                    setTimeout(() => overlay.style.display = "none", 600); 
+                                }, 3000);
+                            });
+                        };
+
+                        container.appendChild(okBtn);
+                        container.appendChild(noBtn);
+                        bubble.appendChild(container);
+                    });
+                });
+            }, 1000);
+        });
+    };
+
+    // Auto-trigger for new users or via a button
+    // window.startPuzzleTutorial(); 
+
+const puzzleTutorialBtn = document.createElement('div');
+puzzleTutorialBtn.id = "puzzleTutorialBtn";
+puzzleTutorialBtn.style.cssText = `
+    position: fixed; bottom: 85px; left: 20px; width: 50px; height: 50px;
+    border-radius: 50%; background-size: cover; background-position: center;
+    background-repeat: no-repeat; border: 2px solid #29f3ff;
+    box-shadow: 0 0 15px rgba(41, 243, 255, 0.3); z-index: 9999; cursor: pointer;
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2FPuzzle%20idle%20sit%20.png?alt=media&token=62f8cb9d-5bb1-4917-b3bb-9d23abd5b63f');
+`;
+
+puzzleTutorialBtn.onclick = () => {
+    // PAUSE MUSIC during talk
+    if (window.audioManager && window.audioManager.isPlaying) {
+        window.audioManager.bgm.pause();
+        window.audioManager.updateUIState(false);
+    }
+    
+    if (typeof window.startPuzzleTutorial === 'function') {
+        window.startPuzzleTutorial();
+    }
+};
+
+
+// At the end of the tutorial or in the NO button logic:
+if (window.audioManager && jigState.isPlaying) { 
+    // ONLY resume music if the puzzle game is actually being played
+    window.audioManager.bgm.play();
+    window.audioManager.updateUIState(true);
+}
+document.body.appendChild(puzzleTutorialBtn);
+
+})();
+
+ 
+
   </script>
 </body>
 </html>
