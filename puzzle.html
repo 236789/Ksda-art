@@ -8200,38 +8200,61 @@ window.toggleAudioModal = function() {
         speak(msg);
     };
 
-    // --- GAME EVENT HOOKS ---
+// --- IMPROVED GAME EVENT HOOKS ---
+    
+    // Hook for Winning the Puzzle
     const oldDoWin = window.doWin;
     window.doWin = async function() {
+        // Run original game logic
         if(oldDoWin) await oldDoWin();
+        
+        // Bot reaction
         overlay.style.display = "flex";
+        overlay.style.pointerEvents = "none"; // Let user click the "Collect" button
         overlay.classList.add('bot-corner-mode');
         botImg.src = assets.happy;
-        const msg = "FORȚĂ! Ai terminat puzzle-ul. Colectează-ți premiile!";
-        write(msg); speak(msg);
+        write("FORȚĂ! Ai terminat puzzle-ul. Colectează-ți recompensele, merită!", () => {
+             speak("Forță! Ai terminat puzzle-ul. Colectează-ți recompensele, merită!");
+        });
     };
 
+    // Hook for Opening Mystery Boxes
     const oldOpenMystery = window.openMysteryOverlay;
     window.openMysteryOverlay = function() {
+        // Run original game logic
         if(oldOpenMystery) oldOpenMystery();
+        
+        // Bot reaction
         overlay.style.display = "flex";
+        overlay.style.pointerEvents = "none";
         overlay.classList.add('bot-corner-mode');
         botImg.src = assets.pointing;
-        const msg = "CINEVA ARE NOROC! Ai câștigat cutii Mystery! Deschide-le rapid!";
-        write(msg); speak(msg);
+        write("CINEVA ARE NOROC! Ai câștigat cutii Mystery! Deschide-le rapid, sunt curios ce pică!", () => {
+            speak("Cineva are noroc! Ai câștigat cutii mistery! Deschide-le rapid!");
+        });
     };
 
+    // Hook for the Final Prize Reveal
     const oldRevealPrize = window.revealPrize;
     window.revealPrize = async function(item) {
+        // Run original game logic
         if(oldRevealPrize) await oldRevealPrize(item);
+        
+        // Bot reaction
         overlay.style.display = "flex";
+        overlay.style.pointerEvents = "none";
         overlay.classList.add('bot-corner-mode');
         botImg.src = assets.puzzle_finish;
-        const msg = "BOMBASTIC! Ai deblocat ceva nou. Profilul tău o să arate mult mai bine acum!";
-        write(msg); speak(msg);
-        setTimeout(() => { if(!wonBoxes > 0) overlay.style.display = "none"; }, 5000);
+        
+        const prizeMsg = "BOMBASTIC! Ai deblocat ceva nou. Profilul tău o să arate mult mai bine acum!";
+        write(prizeMsg, () => {
+            speak(prizeMsg);
+            // Auto-hide bot after 6 seconds so it doesn't stay forever
+            setTimeout(() => { 
+                if(wonBoxes <= 0) overlay.style.display = "none"; 
+            }, 6000);
+        });
     };
-
     // --- FLOATING BUTTON ---
     const fBtn = document.createElement('div');
     fBtn.id = "kevinHelpBtn";
