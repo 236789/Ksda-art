@@ -4675,6 +4675,53 @@
     cursor: pointer;
     box-shadow: 0 0 10px var(--primary);
 }
+
+
+
+/* --- FIX 1: MISSED MILESTONE VISUALS --- */
+.loot-marker.lost img {
+    filter: grayscale(100%) brightness(0.3); /* Grey and dark */
+    opacity: 0.5;
+}
+
+/* The Animated Red X */
+.loot-marker.lost::after {
+    content: '✕'; /* Unicode X */
+    position: absolute;
+    top: -35px; /* Position over the icon */
+    left: 50%;
+    transform: translateX(-50%) scale(0); /* Start hidden */
+    color: #ff4757;
+    font-size: 24px;
+    font-weight: 900;
+    text-shadow: 0 0 10px #ff4757;
+    animation: stompX 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes stompX {
+    0% { transform: translateX(-50%) scale(5); opacity: 0; }
+    70% { transform: translateX(-50%) scale(1); opacity: 1; }
+    80% { transform: translateX(-50%) scale(1.2); }
+    100% { transform: translateX(-50%) scale(1); }
+}
+
+/* --- FIX 3: GALLERY SCROLL BUG --- */
+/* This forces the list to scroll INSIDE the modal instead of cutting off */
+.inventory-scroll-area {
+    flex: 1;
+    min-height: 0; /* Critical for Flexbox scrolling */
+    overflow-y: auto !important;
+    padding-bottom: 20px;
+    width: 100%;
+}
+
+/* Ensure the modal content wrapper fills height but doesn't overflow parent */
+.cosmo-content-v6 {
+    height: 100%;
+    max-height: 80vh; 
+    display: flex;
+    flex-direction: column;
+}
   </style>
 </head>
 <body>
@@ -6908,19 +6955,26 @@ function toDifficultyMenu() {
 }
 
 window.resetToMenu = () => {
-    // Stop the timer
+    // 1. Stop Game Logic
+    jigState.isPlaying = false;
     if(timerInterval) clearInterval(timerInterval);
     
-    // Hide Game Over screen
+    // 2. Hide Game Screens
+    document.getElementById('jigsawArena').style.display = 'none';
+    document.getElementById('jigsawArena').classList.remove('active-grid');
     document.getElementById('gameOverScreen').style.display = 'none';
+    document.getElementById('questRewardModal').classList.remove('active'); // Close win modal if open
 
+    // 3. SHOW MENU CONTAINER (This was missing)
+    document.getElementById('puzzleMenuContainer').style.display = 'flex';
+    
+    // 4. Reset Menu State
     document.getElementById('puzzleMainMenu').style.display = 'flex';
     document.getElementById('puzzleDiffMenu').style.display = 'none';
-    const arena = document.getElementById('jigsawArena');
-    arena.style.display = 'none';
-    arena.classList.remove('active-grid');
+    
+    // 5. Check if we can resume (updates the Resume button visibility)
+    if(auth.currentUser) checkSavedJigsaw(auth.currentUser.uid);
 };
-
 
 // 3. Funcția Resume (Fixată pentru erori de date)
 window.resumeGame = async () => {
@@ -7649,26 +7703,33 @@ function updateTimerLoop() {
 
     // Milestone Check
     timerState.milestones.forEach((m, index) => {
+        // If time is UP and we haven't marked it as lost yet
         if (!m.lost && timerState.timeLeft < m.at) {
-            m.lost = true
-
-        window.audioManager.playSFX('loss'); // <--- ADD THIS LINE
-
-            const el = document.getElementById(`ms-${index}`);
-            if (el) el.classList.add('lost');
+            m.lost = true;
             
-            // Flash track border on loss
+            // 1. ADD CLASS TO HTML ELEMENT
+            const el = document.getElementById(`ms-${index}`);
+            if (el) {
+                el.classList.add('lost'); // Triggers CSS Animation
+            }
+            
+            // 2. Play Fail Sound
+            window.audioManager.playSFX('loss');
+            
+            // 3. Visual Feedback on Bar
             const track = document.querySelector('.glass-track');
-            track.style.borderColor = "#ff4757";
-            setTimeout(() => track.style.borderColor = "rgba(41, 243, 255, 0.2)", 300);
+            if(track) {
+                track.style.borderColor = "#ff4757";
+                setTimeout(() => track.style.borderColor = "rgba(41, 243, 255, 0.3)", 300);
+            }
         }
     });
 
     if (timerState.timeLeft <= 0) {
         timerState.timeLeft = 0;
+        updateTimerVisuals();
         jigState.isPlaying = false;
         clearInterval(timerInterval);
-        updateTimerVisuals();
         setTimeout(triggerGameOver, 500);
     }
 }
