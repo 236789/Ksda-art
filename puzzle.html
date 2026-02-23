@@ -8191,27 +8191,32 @@ window.toggleAudioModal = function() {
         botImg.src = assets.explaining;
         const msg = "Trage piesele din inventar pe tablă. Când ești aproape de locul corect, se vor lipi singure. Succes!";
         write(msg, () => {
-            addBtn("SĂ ÎNCEPEM!", () => {
-                overlay.style.display = "none";
-                clearUI();
-                if(window.audioManager) window.audioManager.bgm.play();
-            });
+// Find this inside stepDragging and REPLACE the button click:
+addBtn("SĂ ÎNCEPEM!", () => {
+    // DO NOT set overlay to "none"
+    document.getElementById('botTextBubble').style.display = "none"; 
+    overlay.classList.add('bot-corner-mode');
+    overlay.style.background = "transparent";
+    botImg.src = assets.puzzle_sit; // He stays in the corner sitting
+    if(window.audioManager) window.audioManager.bgm.play();
+});
         });
         speak(msg);
     };
 
 // --- IMPROVED GAME EVENT HOOKS ---
-    
-    // Hook for Winning the Puzzle
+// Hook for Winning the Puzzle
     const oldDoWin = window.doWin;
     window.doWin = async function() {
-        // Run original game logic
         if(oldDoWin) await oldDoWin();
         
-        // Bot reaction
-        overlay.style.display = "flex";
-        overlay.style.pointerEvents = "none"; // Let user click the "Collect" button
+        // --- FIXES ---
+        overlay.style.display = "flex"; 
+        overlay.style.background = "transparent"; // Keep game visible
+        document.getElementById('botTextBubble').style.display = "flex"; // Show bubble
+        overlay.style.pointerEvents = "none"; 
         overlay.classList.add('bot-corner-mode');
+        
         botImg.src = assets.happy;
         write("FORȚĂ! Ai terminat puzzle-ul. Colectează-ți recompensele, merită!", () => {
              speak("Forță! Ai terminat puzzle-ul. Colectează-ți recompensele, merită!");
@@ -8221,15 +8226,17 @@ window.toggleAudioModal = function() {
     // Hook for Opening Mystery Boxes
     const oldOpenMystery = window.openMysteryOverlay;
     window.openMysteryOverlay = function() {
-        // Run original game logic
         if(oldOpenMystery) oldOpenMystery();
         
-        // Bot reaction
+        // --- FIXES ---
         overlay.style.display = "flex";
+        overlay.style.background = "transparent"; 
+        document.getElementById('botTextBubble').style.display = "flex"; // Show bubble
         overlay.style.pointerEvents = "none";
         overlay.classList.add('bot-corner-mode');
+        
         botImg.src = assets.pointing;
-        write("CINEVA ARE NOROC! Ai câștigat cutii Mystery! Deschide-le rapid, sunt curios ce pică!", () => {
+        write("CINEVA ARE NOROC! Ai câștigat cutii Mystery! Deschide-le rapid!", () => {
             speak("Cineva are noroc! Ai câștigat cutii mistery! Deschide-le rapid!");
         });
     };
@@ -8237,21 +8244,22 @@ window.toggleAudioModal = function() {
     // Hook for the Final Prize Reveal
     const oldRevealPrize = window.revealPrize;
     window.revealPrize = async function(item) {
-        // Run original game logic
         if(oldRevealPrize) await oldRevealPrize(item);
         
-        // Bot reaction
+        // --- FIXES ---
         overlay.style.display = "flex";
+        overlay.style.background = "transparent";
+        document.getElementById('botTextBubble').style.display = "flex"; // Show bubble
         overlay.style.pointerEvents = "none";
         overlay.classList.add('bot-corner-mode');
-        botImg.src = assets.puzzle_finish;
         
-        const prizeMsg = "BOMBASTIC! Ai deblocat ceva nou. Profilul tău o să arate mult mai bine acum!";
+        botImg.src = assets.puzzle_finish;
+        const prizeMsg = "BOMBASTIC! Ai deblocat ceva nou. Arată super bine!";
         write(prizeMsg, () => {
             speak(prizeMsg);
-            // Auto-hide bot after 6 seconds so it doesn't stay forever
+            // Hide ONLY the bubble after 6 seconds, Kevin stays in corner
             setTimeout(() => { 
-                if(wonBoxes <= 0) overlay.style.display = "none"; 
+                document.getElementById('botTextBubble').style.display = "none"; 
             }, 6000);
         });
     };
@@ -8264,7 +8272,16 @@ window.toggleAudioModal = function() {
     fBtn.onmouseout = () => fBtn.style.transform = "scale(1.0)";
     document.body.appendChild(fBtn);
 
+
+
 })();
+
+
+// AT THE END OF YOUR MODULE SCRIPT
+window.doWin = doWin;
+window.openMysteryOverlay = openMysteryOverlay;
+window.revealPrize = revealPrize;
+
   </script>
 </body>
 </html>
