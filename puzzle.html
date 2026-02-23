@@ -4844,6 +4844,46 @@
     gap: 8px;
 }
 
+
+/* FIXED MOBILE HUD */
+@media (max-width: 768px) {
+    /* Kevin robot size on mobile */
+    #mainBotVisual {
+        height: 150px !important; 
+    }
+    
+    /* Move text bubble higher so it doesn't block the Collect button */
+    #botTextBubble {
+        font-size: 11px !important;
+        padding: 12px !important;
+        max-width: 180px !important;
+        position: relative;
+        bottom: 20px;
+    }
+
+    /* Make roulette container fit mobile screens */
+    .roulette-wrapper {
+        height: 110px !important;
+        max-width: 95vw !important;
+    }
+    .roulette-item {
+        min-width: 100px !important;
+        height: 100px !important;
+    }
+    .roulette-item img {
+        width: 45px !important;
+        height: 45px !important;
+    }
+}
+
+/* Ensure Kevin is NEVER blocking clicks to buttons behind him */
+#botTutorialOverlay {
+    pointer-events: none !important;
+}
+#botTextBubble, #mainBotVisual, .tut-choice-btn, #kevinHelpBtn {
+    pointer-events: auto !important; /* Only these parts are clickable */
+}
+
   </style>
 </head>
 <body>
@@ -6786,35 +6826,16 @@ window.startOpeningSequence = async () => {
 
 window.initRoulette = () => {
     document.getElementById('mysteryBoxImg').style.display = 'none';
-    document.getElementById('rouletteUI').style.display = 'block';
+    const rouletteUI = document.getElementById('rouletteUI');
+    rouletteUI.style.display = 'block';
     
     const strip = document.getElementById('rouletteStrip');
     strip.innerHTML = '';
     
     const wheelColors = ['r-teal', 'r-red', 'r-purple', 'r-gold', 'r-green', 'r-blue', 'r-dark'];
 
-    // --- 1. DEFINE THE CHANCES (%) ---
-    const CHANCES = {
-        COINS: 25,    // 50% chance
-        DIAMONDS: 15, // 25% chance
-        BANNER: 20,   // 10% chance
-        BADGE: 10,     // 7% chance
-        FRAME: 10,     // 5% chance
-        TEXT:   10,     // 3% chance (Super Rare)
-    };
-
+    const CHANCES = { COINS: 25, DIAMONDS: 15, BANNER: 20, BADGE: 10, FRAME: 10, TEXT: 10 };
     const getRandomItem = (db) => db[Math.floor(Math.random() * db.length)];
-
-    // --- 2. THE WEIGHTED PICKER ENGINE ---
-    function pickWinner() {
-        const rand = Math.random() * 100;
-        if (rand < CHANCES.TEXT) return generateReward('text');
-        if (rand < CHANCES.TEXT + CHANCES.FRAME) return generateReward('frame');
-        if (rand < CHANCES.TEXT + CHANCES.FRAME + CHANCES.BADGE) return generateReward('badge');
-        if (rand < CHANCES.TEXT + CHANCES.FRAME + CHANCES.BADGE + CHANCES.BANNER) return generateReward('banner');
-        if (rand < CHANCES.TEXT + CHANCES.FRAME + CHANCES.BADGE + CHANCES.BANNER + CHANCES.DIAMONDS) return generateReward('diamond');
-        return generateReward('ksda'); // Default to Coins
-    }
 
     function generateReward(type) {
         if (type === 'ksda') return { name: '500 Coins', type: 'ksda', icon: 'https://iili.io/fhc1SKQ.png' };
@@ -6837,23 +6858,28 @@ window.initRoulette = () => {
         }
     }
 
-    // --- 3. POPULATE THE STRIP ---
+    function pickWinner() {
+        const rand = Math.random() * 100;
+        if (rand < CHANCES.TEXT) return generateReward('text');
+        if (rand < CHANCES.TEXT + CHANCES.FRAME) return generateReward('frame');
+        if (rand < CHANCES.TEXT + CHANCES.FRAME + CHANCES.BADGE) return generateReward('badge');
+        if (rand < CHANCES.TEXT + CHANCES.FRAME + CHANCES.BADGE + CHANCES.BANNER) return generateReward('banner');
+        if (rand < CHANCES.TEXT + CHANCES.FRAME + CHANCES.BADGE + CHANCES.BANNER + CHANCES.DIAMONDS) return generateReward('diamond');
+        return generateReward('ksda');
+    }
+
     const pool = [];
-    const winnerIndex = 45; // The fixed landing spot
+    const winnerIndex = 45; 
 
     for (let i = 0; i < 60; i++) {
-        let item;
-        if (i === winnerIndex) {
-            item = pickWinner(); // Only determine the REAL winner for the target index
-        } else {
-            // Fill the rest with random visual fluff (mostly coins/diamonds)
-            item = Math.random() > 0.3 ? generateReward('ksda') : generateReward('diamond');
-        }
-
+        let item = (i === winnerIndex) ? pickWinner() : (Math.random() > 0.5 ? generateReward('ksda') : generateReward('diamond'));
         pool.push(item);
         
         const el = document.createElement('div');
         el.className = `roulette-item ${wheelColors[i % wheelColors.length]}`;
+        // Force width in JS to match CSS precisely
+        el.style.minWidth = "120px";
+        el.style.margin = "0 5px"; 
         
         if (item.type === 'text') {
             el.innerHTML = `<span class="${item.css}" style="font-size:12px;">ABC</span><span>${item.name}</span>`;
@@ -6865,18 +6891,17 @@ window.initRoulette = () => {
         strip.appendChild(el);
     }
 
-    // --- 4. ANIMATE SPIN ---
     setTimeout(() => {
-        const itemWidth = 130; 
-        const centerOffset = 300 - (itemWidth / 2); 
-        const landPos = (winnerIndex * itemWidth) - centerOffset;
-        const randomShift = Math.floor(Math.random() * 80) - 40; // More variation
+        const itemFullWidth = 130; // 120px + 10px total margins
+        const containerWidth = rouletteUI.offsetWidth;
+        // Calculation: (item position) - (half of screen) + (half of item) = PERFECT CENTER
+        const landPos = (winnerIndex * itemFullWidth) - (containerWidth / 2) + (itemFullWidth / 2);
+        const randomShift = Math.floor(Math.random() * 60) - 30; // Add some visual realism
         
-        strip.style.transition = "transform 7s cubic-bezier(0.15, 0, 0.1, 1)";
+        strip.style.transition = "transform 7s cubic-bezier(0.1, 0, 0.1, 1)";
         strip.style.transform = `translateX(-${landPos + randomShift}px)`;
     }, 100);
 
-    // Reveal result after animation
     setTimeout(() => revealPrize(pool[winnerIndex]), 7500);
 };
 
@@ -6920,23 +6945,22 @@ if (item.type === 'banner' && userData.ownedBanners?.includes(item.id)) isDuplic
     display.innerHTML = renderPrizeVisual(finalReward);
 
     // --- FIREBASE SAVE LOGIC ---
-    try {
-        if (finalReward.isComp || finalReward.type === 'ksda') {
-            await updateDoc(userRef, { coins: increment(finalReward.isComp ? 2500 : 500) });
-        } else if (finalReward.type === 'diamond') {
-            await updateDoc(userRef, { diamonds: increment(10) });
-        } else {
-            // Add actual cosmetic to owned list
-const fieldMap = { 
-    'badge': 'ownedBadges', 
-    'frame': 'ownedFrames', 
-    'banner': 'ownedBanners', // <--- Make sure this is here
-    'text': 'ownedTexts' 
-};
-
-            await updateDoc(userRef, { [fieldMap[finalReward.type]]: arrayUnion(finalReward.id) });
-        }
-    } catch (e) { console.error("Sync Error:", e); }
+// Locate this section inside revealPrize(item)
+try {
+    if (finalReward.isComp === true) {
+        // DUPLICATE REWARD (2500)
+        await updateDoc(userRef, { coins: increment(2500) });
+    } else if (finalReward.type === 'ksda') {
+        // NORMAL COIN LAND (500)
+        await updateDoc(userRef, { coins: increment(500) });
+    } else if (finalReward.type === 'diamond') {
+        await updateDoc(userRef, { diamonds: increment(10) });
+    } else {
+        // NORMAL COSMETIC
+        const fieldMap = { 'badge': 'ownedBadges', 'frame': 'ownedFrames', 'banner': 'ownedBanners', 'text': 'ownedTexts' };
+        await updateDoc(userRef, { [fieldMap[finalReward.type]]: arrayUnion(finalReward.id) });
+    }
+} catch (e) { console.error("Sync Error:", e); }
 }
 
 window.closeMysterySystem = () => {
@@ -8118,9 +8142,9 @@ window.toggleAudioModal = function() {
                     addBtn("NU, DISPARI", () => {
                         clearUI();
                         botImg.src = assets.puzzle_sit;
-                        const lineNo = "ok i dont care im tryna finish my puzzle here good luck";
+                        const lineNo = "ok? Nu-mi pasă, încerc să-mi termin puzzle-ul aici. Mult noroc.";
                         write(lineNo, () => {
-                            setTimeout(() => { overlay.style.display = "none"; }, 2500);
+                            setTimeout(() => { overlay.style.display = "none"; }, 4000);
                         });
                         speak(lineNo);
                     });
