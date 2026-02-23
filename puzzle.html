@@ -8145,14 +8145,26 @@ window.toggleAudioModal = function() {
 
 /* --- KEVIN CYBER TUTORIAL ENGINE v8.0 (TOTAL RESTORATION) --- */
 (function() {
-    const assets = {
+const assets = {
         puzzle_mad: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2FMaking%20puzle%20frustrated%20.png?alt=media&token=8b646382-96e0-4abc-b063-9f14de6b97ee",
         puzzle_sit: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2FPuzzle%20idle%20sit%20.png?alt=media&token=62f8cb9d-5bb1-4917-b3bb-9d23abd5b63f",
         puzzle_finish: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2FPuzle%20idle%20finish.png?alt=media&token=970de9fe-3e7c-4c59-9b7f-db2c9bbbc6d8",
         happy: "https://iili.io/q2p0j9I.png",
         pointing: "https://iili.io/q2p0bKx.png",
         idea: "https://iili.io/q2p0X8N.png",
-        explaining: "https://iili.io/q2p0NwX.png"
+        explaining: "https://iili.io/q2p0NwX.png",
+        
+        // YOUR NEW AUDIO LINKS
+        audio_intro_angry: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fpuzzle%20audio%2F%5BSCREAMING%5D%20BAG%C4%82-MI-A%C8%98%20PICIORUL!%20%5BMAD%5D%20%C3%8EN%20EA%20DE%20PIES%C4%82!%20%5BHYSTERIC%5D%20%5BFRUSTRATED%5D%20De%20ce%20nu%20se%20potrive%C8%99te%20nic%C4%83ieri!%20%5BIRRITATED%5D%20%5BGRUMPY%5D%20Jur%20c%C4%83%20o%20arunc%20pe%20geam%20imediat.mp3?alt=media&token=f6a2e78f-fb95-4a83-98a7-f46b33c2d531",
+        audio_greeting: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fpuzzle%20audio%2F%5BNERVOUS%5D%20O%E2%80%A6%20Opa!%20Salutare.%20%5BEMBARRASSED%5D%20Eu%E2%80%A6%20eu%20sunt%20Kevin.%20%5BSHY%5D%20Vrei%20s%C4%83%20vezi%E2%80%A6%20cum%20func%C8%9Bioneaz%C4%83%20Acest%20Joc%20%20%5BFLUSTERED%5D%20Heh%E2%80%A6%20era%E2%80%A6%20era%20ceva%20foarte%20complicat%20ce%20lucram%E2%80%A6%20%5BNERVOUS%5D%20Da%2C.mp3?alt=media&token=43675cb7-599a-45de-9993-ee85cccfaf21",
+        audio_refusal: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fpuzzle%20audio%2F%5BDISMISSIVE%5D%20Ok%E2%80%A6%20%5BNERVOUS%5D%20Nu-mi%20pas%C4%83%20prea%20mult%E2%80%A6%20%5BFLUSTERED%5D%20%C3%AEncerc%20s%C4%83-mi%20termin%20puzzle-ul%20aici.%20%5BSHY%5D%20Mult%E2%80%A6%20mult%20noroc.mp3?alt=media&token=435dec3b-d435-4735-8f6b-715b0ceead9b",
+        audio_radio: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fpuzzle%20audio%2F%5BCONFIDENT%5D%20%C3%8En%20st%C3%A2nga%20jos%20ai%20sistemul%20de%20muzic%C4%83!%20%5BENTHUSIASTIC%5D%20Schimb%C4%83%20piesa%20dac%C4%83%20sim%C8%9Bi%20c%C4%83%20ambientul%20%C4%83sta%20nu%20te%20ajut%C4%83%20s%C4%83%20te%20concentrezi.%20%5BHELPFUL%5D%20Hai%20s%C4%83%20facem%20asta%20distractiv.mp3?alt=media&token=cf2fcbb8-63c6-41a3-8b40-dc97605e6764",
+        audio_menu: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fpuzzle%20audio%2F%5BCONFIDENT%5D%20Alege%20un%20mod%20de%20joc%20Random%2C%20Upload%20sau%20pick%20o%20legend%C4%83%20din%20Gallery!%20%5BENTHUSIASTIC%5D%20Abia%20a%C8%99tept%20s%C4%83%20v%C4%83d%20ce%20alegi%E2%80%A6%20%5BHELPFUL%5D%20Hai%20s%C4%83%20%C3%AEncepem%20aventura.mp3?alt=media&token=a92c44c8-8e64-4b10-9881-8b03d64bbd5f",
+        audio_diff: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fpuzzle%20audio%2F%5BCONFIDENT%5D%20Acum%20alege%20dificultatea!%20%5BENTHUSIASTIC%5D%20Hard%20%C3%AE%C8%9Bi%20ofer%C4%83%20cele%20mai%20mari%20premii!%20%5BHELPFUL%5D%20D%C4%83%20click%20pe%20una%20%C8%99i%20hai%20s%C4%83%20vedem%20ce%20po%C8%9Bi%20realiza.mp3?alt=media&token=1d9f740f-9c53-4a0e-b490-e5a453271ea8",
+        audio_energy: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fpuzzle%20audio%2F%5Bconfident%5D%20Fii%20atent%20la%20bara%20de%20energie!%20%5Benthusiastic%5D%20Dac%C4%83%20scade%20prea%20mult%2C%20pierzi%20itemele%20%C8%99i%20monedele%20de%20pe%20ea!%20%5Bhelpful%5D%20Mi%C8%99c%C4%83-te%20repede%20%C8%99i%20fii%20cu%20ochii%20%C3%AEn%20patru.mp3?alt=media&token=bfa71b08-edba-4749-a323-1e08d1ae882b",
+        audio_drag: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fpuzzle%20audio%2F%5BCONFIDENT%5D%20Trage%20piesele%20din%20inventar%20pe%20tabl%C4%83.%20%5BENTHUSIASTIC%5D%20C%C3%A2nd%20e%C8%99ti%20aproape%20de%20locul%20corect%E2%80%A6%20se%20vor%20lipi%20singure!%20%5BHELPFUL%5D%20Succes%20%C8%99i%20distrac%C8%9Bie%20pl%C4%83cut%C4%83.mp3?alt=media&token=d975a6df-9cf1-4779-bbec-90ae7394d794",
+        audio_win: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fpuzzle%20audio%2F%5BCELEBRATORY%5D%20FOR%C8%9A%C4%82!%20Ai%20terminat%20puzzle-ul!%20%5BENTHUSIASTIC%5D%20Colecteaz%C4%83-%C8%9Bi%20recompensele%E2%80%A6%20merit%C4%83%20din%20plin!%20%5BCONFIDENT%5D%20Grozav%C4%83%20treab%C4%83%2C%20ai%20reu%C8%99it.mp3?alt=media&token=6ed370b8-5501-47fd-92da-049a6593e5d4",
+        audio_prize: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/SFX%2Fpuzzle%20audio%2F%5BCELEBRATORY%5D%20BOMB%C4%83%20!%20Ai%20deblocat%20ceva%20nou!%20%5BENTHUSIASTIC%5D%20Arat%C4%83%20super%20bine!%20%5BCONFIDENT%5D%20Abia%20a%C8%99tept%20s%C4%83%20vezi%20ce%20urmeaz%C4%83.mp3?alt=media&token=fc0793d3-42cd-4c0c-9894-0267b426a8d0"
     };
 
     // 1. Setup UI Elements
@@ -8190,13 +8202,23 @@ window.toggleAudioModal = function() {
         }, 30);
     };
 
-    const speak = (msg) => {
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(msg);
-        u.lang = 'ro-RO';
-        u.pitch = 1;
-        u.rate = 1;
-        window.speechSynthesis.speak(u);
+let mascotVoice = new Audio();
+
+    const kevinSpeak = (audioUrl, rawText, callback) => {
+        mascotVoice.pause();
+        mascotVoice.currentTime = 0;
+        
+        // Remove [TAGS] and ElevenLabs markers
+        const cleanText = rawText.replace(/\[.*?\]/g, "").trim();
+        
+        // Run your existing typewriter function
+        write(cleanText, callback);
+
+        if (audioUrl) {
+            mascotVoice.src = audioUrl;
+            mascotVoice.volume = window.audioManager.sfxVolume || 0.6;
+            mascotVoice.play().catch(e => console.warn("Audio blocked"));
+        }
     };
 
     const addBtn = (label, onClick) => {
@@ -8217,36 +8239,35 @@ window.toggleAudioModal = function() {
     };
 
     // --- TUTORIAL FLOW ---
-
+// --- UPDATED TUTORIAL FLOW WITH REAL AUDIO ---
     window.startPuzzleTutorial = () => {
         overlay.classList.remove('bot-corner-mode');
         overlay.style.background = "rgba(5, 11, 20, 0.9)";
         overlay.style.display = "flex";
+        document.getElementById('botTextBubble').style.display = "flex";
         clearUI();
 
         botImg.src = assets.puzzle_mad;
-        const line1 = "BAGĂ-MI-AȘ PICIORUL ÎN EA DE PIESĂ! De ce nu se potrivește nicăieri?! O arunc pe geam imediat!";
-        write(line1, () => {
+        const text1 = "[SCREAMING] BAGĂ-MI-AȘ PICIORUL! [MAD] ÎN EA DE PIESĂ! [HYSTERIC] [FRUSTRATED] De ce nu se potrivește nicăieri! [IRRITATED] [GRUMPY] Jur că o arunc pe geam imediat.";
+        
+        kevinSpeak(assets.audio_intro_angry, text1, () => {
             addBtn("CONTINUĂ", () => {
                 clearUI();
                 botImg.src = assets.happy;
-                const line2 = "Opa! Salutare. Eu sunt Kevin. Vrei să te învăț cum funcționează Cyber Jigsaw?";
-                write(line2, () => {
+                const text2 = "[NERVOUS] O… Opa! Salutare. [EMBARRASSED] Eu… eu sunt Kevin. [SHY] Vrei să vezi… cum funcționează Acest Joc? [FLUSTERED] Heh… era… era ceva foarte complicat ce lucram… [NERVOUS] Da.";
+                kevinSpeak(assets.audio_greeting, text2, () => {
                     addBtn("DA, TE ROG", () => stepAudio());
                     addBtn("NU, DISPARI", () => {
                         clearUI();
                         botImg.src = assets.puzzle_sit;
-                        const lineNo = "ok? Nu-mi pasă, încerc să-mi termin puzzle-ul aici. Mult noroc.";
-                        write(lineNo, () => {
+                        const textNo = "[DISMISSIVE] Ok… [NERVOUS] Nu-mi pasă prea mult… [FLUSTERED] încerc să-mi termin puzzle-ul aici. [SHY] Mult… mult noroc.";
+                        kevinSpeak(assets.audio_refusal, textNo, () => {
                             setTimeout(() => { overlay.style.display = "none"; }, 4000);
                         });
-                        speak(lineNo);
                     });
                 });
-                speak(line2);
             });
         });
-        speak(line1);
     };
 
     const stepAudio = () => {
@@ -8254,22 +8275,20 @@ window.toggleAudioModal = function() {
         overlay.classList.add('bot-corner-mode');
         overlay.style.background = "transparent";
         botImg.src = assets.pointing;
-        const msg = "În stânga jos ai sistemul de muzică. Schimbă piesa dacă te stresează ambientul ăsta.";
-        write(msg, () => {
+        const text = "[CONFIDENT] În stânga jos ai sistemul de muzică! [ENTHUSIASTIC] Schimbă piesa dacă simți că ambientul ăsta nu te ajută să te concentrezi. [HELPFUL] Hai să facem asta distractiv.";
+        kevinSpeak(assets.audio_radio, text, () => {
             document.getElementById('audioFab').classList.add('tut-focus');
             addBtn("AM ÎNȚELES", () => stepMenuWait());
         });
-        speak(msg);
     };
 
     const stepMenuWait = () => {
         clearUI();
         botImg.src = assets.idea;
-        const msg = "Alege un mod de joc: Random, Upload sau pick o legendă din Gallery. Aștept să alegi...";
-        write(msg); speak(msg);
+        const text = "[CONFIDENT] Alege un mod de joc Random, Upload sau pick o legendă din Gallery! [ENTHUSIASTIC] Abia aștept să văd ce alegi… [HELPFUL] Hai să începem aventura.";
+        kevinSpeak(assets.audio_menu, text);
         document.getElementById('puzzleMainMenu').classList.add('tut-focus');
 
-        // Wait for actual interaction
         document.querySelectorAll('#puzzleMainMenu .btn-hyper').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.getElementById('puzzleMainMenu').classList.remove('tut-focus');
@@ -8281,14 +8300,13 @@ window.toggleAudioModal = function() {
     const stepDiffWait = () => {
         clearUI();
         botImg.src = assets.explaining;
-        const msg = "Acum alege dificultatea. Hard îți dă cele mai mari premii. Dă click pe una!";
-        write(msg); speak(msg);
+        const text = "[CONFIDENT] Acum alege dificultatea! [ENTHUSIASTIC] Hard îți oferă cele mai mari premii! [HELPFUL] Dă click pe una și hai să vedem ce poți realiza.";
+        kevinSpeak(assets.audio_diff, text);
         document.getElementById('puzzleDiffMenu').classList.add('tut-focus');
 
         document.querySelectorAll('#puzzleDiffMenu .btn-hyper').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.getElementById('puzzleDiffMenu').classList.remove('tut-focus');
-                // Don't close overlay, explain game mechanics next
                 setTimeout(stepEnergy, 1500);
             }, { once: true });
         });
@@ -8296,33 +8314,28 @@ window.toggleAudioModal = function() {
 
     const stepEnergy = () => {
         clearUI();
-        overlay.style.display = "flex";
+        overlay.style.display = "flex"; // Re-show overlay to explain UI
         botImg.src = assets.pointing;
-        const msg = "Fii atent la bara de energie! Dacă scade prea mult, pierzi itemele și monedele de pe ea. Mișcă-te repede!";
-        write(msg, () => {
+        const text = "[confident] Fii atent la bara de energie! [enthusiastic] Dacă scade prea mult, pierzi itemele și monedele de pe ea! [helpful] Mișcă-te repede și fii cu ochii în patru.";
+        kevinSpeak(assets.audio_energy, text, () => {
             const hud = document.querySelector('.timer-hud-v2');
             if(hud) hud.classList.add('tut-focus');
             addBtn("CONTINUĂ", () => stepDragging());
         });
-        speak(msg);
     };
 
-const stepDragging = () => {
+    const stepDragging = () => {
         clearUI();
         botImg.src = assets.explaining;
-        const msg = "Trage piesele din inventar pe tablă. Când ești aproape de locul corect, se vor lipi singure. Succes!";
-        write(msg, () => {
-            // Wait 3 seconds then automatically move to corner
+        const text = "[CONFIDENT] Trage piesele din inventar pe tablă. [ENTHUSIASTIC] Când ești aproape de locul corect… se vor lipi singure! [HELPFUL] Succes și distracție plăcută.";
+        kevinSpeak(assets.audio_drag, text, () => {
             setTimeout(() => {
                 document.getElementById('botTextBubble').style.display = "none"; 
                 overlay.style.background = "transparent";
                 overlay.classList.add('bot-corner-mode');
-                overlay.style.display = "flex"; // Keep him visible!
                 botImg.src = assets.puzzle_sit;
-                if(window.audioManager) window.audioManager.bgm.play();
             }, 3000);
         });
-        speak(msg);
     };
 
 /* --- RESTORED MASCOT REACTIONS (WITH DOUBLE-TALK FIX) --- */
@@ -8345,21 +8358,19 @@ const stepDragging = () => {
         speak(msg);
     };
 
-    window.addEventListener('kevin_react_win', () => {
-        showKevin(assets.happy, "FORȚĂ! Ai terminat puzzle-ul. Colectează-ți recompensele, merită!");
-    });
-
-    window.addEventListener('kevin_react_mystery', () => {
-        showKevin(assets.pointing, "CINEVA ARE NOROC! Ai câștigat cutii Mystery! Deschide-le rapid!");
+window.addEventListener('kevin_react_win', () => {
+        const txt = "[CELEBRATORY] FORȚĂ! Ai terminat puzzle-ul! [ENTHUSIASTIC] Colectează-ți recompensele… merită din plin! [CONFIDENT] Grozavă treabă, ai reușit.";
+        showKevin(assets.happy, assets.audio_win, txt);
     });
 
     window.addEventListener('kevin_react_prize', () => {
-        showKevin(assets.puzzle_finish, "BOMBASTIC! Ai deblocat ceva nou. Arată super bine!");
+        const txt = "[CELEBRATORY] BOMBĂ ! Ai deblocat ceva nou! [ENTHUSIASTIC] Arată super bine! [CONFIDENT] Abia aștept să vezi ce urmează.";
+        showKevin(assets.puzzle_finish, assets.audio_prize, txt);
         setTimeout(() => { 
             if(overlay.classList.contains('bot-corner-mode')) {
                 document.getElementById('botTextBubble').style.display = "none"; 
             }
-        }, 6000);
+        }, 8000);
     });
 
 
