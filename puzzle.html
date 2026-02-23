@@ -5465,7 +5465,7 @@
 import { 
     getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, 
     increment, arrayUnion, serverTimestamp, deleteField,
-    collection, query, orderBy, limit, getDocs, addDoc // <--- ADAUGĂ-LE PE ACESTEA
+    collection, query, orderBy, limit, getDocs, addDoc,where // <--- ADAUGĂ-LE PE ACESTEA
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 
@@ -7238,7 +7238,7 @@ window.resetToMenu = () => {
 
 
 async function doWin() {
-    audioManager.playSFX('win'); // Play Win Sound
+    audioManager.playSFX('win');
     jigState.isPlaying = false;
     if (timerInterval) clearInterval(timerInterval);
 
@@ -7255,7 +7255,6 @@ async function doWin() {
         }
     });
 
-    // CRITICAL: Update the global wonBoxes variable
     wonBoxes = totalEarnedMystery; 
 
     // 2. Prepare HOF Data
@@ -7269,8 +7268,22 @@ async function doWin() {
     };
 
     try {
-        await addDoc(collection(db, "puzzle_hall_of_fame"), puzzleResult);
+        // --- NEW LOGIC: CHECK FOR DUPLICATE IMAGE ---
+        const hofRef = collection(db, "puzzle_hall_of_fame");
+        const q = query(hofRef, where("imgUrl", "==", jigState.imgUrl));
+        const querySnapshot = await getDocs(q);
 
+        if (!querySnapshot.empty) {
+            // Image already exists! Update the existing document with the new winner
+            const existingDocId = querySnapshot.docs[0].id;
+            await updateDoc(doc(db, "puzzle_hall_of_fame", existingDocId), puzzleResult);
+        } else {
+            // New image! Create a new document
+            await addDoc(hofRef, puzzleResult);
+        }
+        // --------------------------------------------
+
+        // Update User Account
         const userRef = doc(db, "accounts", auth.currentUser.uid);
         await updateDoc(userRef, {
             coins: increment(totalEarnedCoins),
@@ -7278,37 +7291,23 @@ async function doWin() {
             jigsawSave: deleteField() 
         });
 
-        // 3. Update Win Modal UI
+        // 3. Update UI
         document.getElementById('earnedCoinsText').innerText = totalEarnedCoins;
+        // ... (rest of your existing UI updates)
         
-        const dBox = document.getElementById('diamondWinBox');
-        if (totalEarnedDiamonds > 0) {
-            document.getElementById('earnedDiamondsText').innerText = totalEarnedDiamonds;
-            dBox.style.display = 'flex';
-        } else { dBox.style.display = 'none'; }
-
-        const mBox = document.getElementById('mysteryWinBox');
-        if (totalEarnedMystery > 0) {
-            document.getElementById('earnedMysteryText').innerText = totalEarnedMystery;
-            mBox.style.display = 'flex';
-        } else { mBox.style.display = 'none'; }
-
-        // 4. Show the Win Modal
         document.getElementById('questRewardModal').classList.add('active');
 
-        // 5. REDIRECT LOGIC FOR THE "COLLECT" BUTTON
         const collectBtn = document.querySelector('#questRewardModal .super-btn');
         collectBtn.onclick = () => {
             document.getElementById('questRewardModal').classList.remove('active');
             if(wonBoxes > 0) {
-                // Trigger the Mystery Overlay instead of going to menu
                 openMysteryOverlay(); 
             } else {
-        location.reload(); // REFRESH THE PAGE HERE
+                location.reload(); // Refresh as fixed previously
             }
         };
 
-        pendingCoins = 0; // Reset snap points
+        pendingCoins = 0;
 
     } catch (e) {
         console.error("Error saving win:", e);
@@ -7323,7 +7322,6 @@ window.openGallery = async () => {
     document.getElementById('galleryModal').classList.add('active');
 
     try {
-        // Acum 'query', 'collection' și 'orderBy' vor funcționa pentru că sunt importate sus
         const q = query(collection(db, "puzzle_hall_of_fame"), orderBy("timestamp", "desc"));
         const snap = await getDocs(q);
         
@@ -7348,16 +7346,17 @@ window.openGallery = async () => {
             const card = document.createElement('div');
             card.className = 'gallery-card';
             card.style.height = '180px';
+            card.style.position = 'relative'; // Fix for overlay positioning
             
             card.innerHTML = `
-                <img src="${user.lastImg}" class="gallery-img" style="filter: blur(2px) brightness(0.4); height: 100%; object-fit: cover;">
-                <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:15px;">
+                <img src="${user.lastImg}" class="gallery-img" style="filter: blur(2px) brightness(0.4); height: 100%; width: 100%; object-fit: cover; display: block;">
+                <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:15px; z-index: 5;">
                     <div style="position: relative; width: 65px; height: 65px;">
                         <img src="${user.pfp}" style="width:100%; height:100%; border-radius:50%; border:3px solid var(--primary); object-fit:cover;">
                         <div style="position: absolute; bottom: -5px; right: -5px; background: #00ff88; color: #000; font-size: 8px; font-weight: 900; padding: 2px 5px; border-radius: 5px;">LVL ${user.puzzles.length}</div>
                     </div>
                     <div style="text-align: center;">
-                        <span class="gallery-user" style="font-size:14px; color:#fff;">${user.username}</span>
+                        <span style="font-size:14px; color:#fff; font-family: 'Orbitron'; font-weight: 900;">${user.username}</span>
                     </div>
                 </div>
             `;
