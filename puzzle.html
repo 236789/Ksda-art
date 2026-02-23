@@ -6741,6 +6741,7 @@ let rouletteActive = false;
 // Example: document.getElementById('collectWinBtn').onclick = () => { if(wonBoxes > 0) openMysteryOverlay(); else resetToMenu(); }
 
 function openMysteryOverlay() {
+    window.dispatchEvent(new CustomEvent('kevin_react_mystery')); // ADD THIS
     const overlay = document.getElementById('mysteryOverlay');
     const boxImg = document.getElementById('mysteryBoxImg');
     const status = document.getElementById('mysteryStatus');
@@ -6880,6 +6881,7 @@ window.initRoulette = () => {
 };
 
 async function revealPrize(item) {
+    window.dispatchEvent(new CustomEvent('kevin_react_prize')); // ADD THIS
     window.audioManager.playSFX('reward'); // <--- ADD THIS LINE
     const prizeReveal = document.getElementById('prizeReveal');
     const display = document.getElementById('prizeDisplay');
@@ -7323,6 +7325,7 @@ window.resetToMenu = () => {
 
 
 async function doWin() {
+    window.dispatchEvent(new CustomEvent('kevin_react_win')); // ADD THIS
     audioManager.playSFX('win'); // Play Win Sound
     jigState.isPlaying = false;
     if (timerInterval) clearInterval(timerInterval);
@@ -8204,65 +8207,48 @@ addBtn("SĂ ÎNCEPEM!", () => {
         speak(msg);
     };
 
-// --- IMPROVED GAME EVENT HOOKS ---
-// Hook for Winning the Puzzle
-    const oldDoWin = window.doWin;
-    window.doWin = async function() {
-        if(oldDoWin) await oldDoWin();
-        
-        // --- FIXES ---
-        overlay.style.display = "flex"; 
-        overlay.style.background = "transparent"; // Keep game visible
-        document.getElementById('botTextBubble').style.display = "flex"; // Show bubble
-        overlay.style.pointerEvents = "none"; 
-        overlay.classList.add('bot-corner-mode');
-        
-        botImg.src = assets.happy;
-        write("FORȚĂ! Ai terminat puzzle-ul. Colectează-ți recompensele, merită!", () => {
-             speak("Forță! Ai terminat puzzle-ul. Colectează-ți recompensele, merită!");
-        });
-    };
+/* --- KEVIN EVENT LISTENERS (Reliable Version) --- */
 
-    // Hook for Opening Mystery Boxes
-    const oldOpenMystery = window.openMysteryOverlay;
-    window.openMysteryOverlay = function() {
-        if(oldOpenMystery) oldOpenMystery();
-        
-        // --- FIXES ---
-        overlay.style.display = "flex";
-        overlay.style.background = "transparent"; 
-        document.getElementById('botTextBubble').style.display = "flex"; // Show bubble
-        overlay.style.pointerEvents = "none";
-        overlay.classList.add('bot-corner-mode');
-        
-        botImg.src = assets.pointing;
-        write("CINEVA ARE NOROC! Ai câștigat cutii Mystery! Deschide-le rapid!", () => {
-            speak("Cineva are noroc! Ai câștigat cutii mistery! Deschide-le rapid!");
-        });
-    };
-
-    // Hook for the Final Prize Reveal
-    const oldRevealPrize = window.revealPrize;
-    window.revealPrize = async function(item) {
-        if(oldRevealPrize) await oldRevealPrize(item);
-        
-        // --- FIXES ---
+    // 1. React to winning
+    window.addEventListener('kevin_react_win', () => {
         overlay.style.display = "flex";
         overlay.style.background = "transparent";
-        document.getElementById('botTextBubble').style.display = "flex"; // Show bubble
-        overlay.style.pointerEvents = "none";
         overlay.classList.add('bot-corner-mode');
+        document.getElementById('botTextBubble').style.display = "flex";
+        
+        botImg.src = assets.happy;
+        const msg = "FORȚĂ! Ai terminat puzzle-ul. Colectează-ți recompensele, merită!";
+        write(msg); speak(msg);
+    });
+
+    // 2. React to Mystery Box appearing
+    window.addEventListener('kevin_react_mystery', () => {
+        overlay.style.display = "flex";
+        overlay.style.background = "transparent";
+        overlay.classList.add('bot-corner-mode');
+        document.getElementById('botTextBubble').style.display = "flex";
+        
+        botImg.src = assets.pointing;
+        const msg = "CINEVA ARE NOROC! Ai câștigat cutii Mystery! Deschide-le rapid!";
+        write(msg); speak(msg);
+    });
+
+    // 3. React to Prize Reveal
+    window.addEventListener('kevin_react_prize', () => {
+        overlay.style.display = "flex";
+        overlay.style.background = "transparent";
+        overlay.classList.add('bot-corner-mode');
+        document.getElementById('botTextBubble').style.display = "flex";
         
         botImg.src = assets.puzzle_finish;
-        const prizeMsg = "BOMBASTIC! Ai deblocat ceva nou. Arată super bine!";
-        write(prizeMsg, () => {
-            speak(prizeMsg);
-            // Hide ONLY the bubble after 6 seconds, Kevin stays in corner
-            setTimeout(() => { 
-                document.getElementById('botTextBubble').style.display = "none"; 
-            }, 6000);
-        });
-    };
+        const msg = "BOMBASTIC! Ai deblocat ceva nou. Arată super bine!";
+        write(msg); speak(msg);
+        
+        // Hide bubble after 6 seconds so user can see the prize clearly
+        setTimeout(() => { 
+            document.getElementById('botTextBubble').style.display = "none"; 
+        }, 6000);
+    });
     // --- FLOATING BUTTON ---
     const fBtn = document.createElement('div');
     fBtn.id = "kevinHelpBtn";
