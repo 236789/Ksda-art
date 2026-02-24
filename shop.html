@@ -7,22 +7,6 @@
 <head> 
 
 
-  <!-- OneSignal Engine -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(function(OneSignal) {
-    OneSignal.init({
-      appId: "66b82a40-8d9f-40d6-b2d4-725b2c32cd4a",
-      safari_web_id: "web.onesignal.auto.62a04992-e924-4258-8064-560c4d6dc347",
-      notifyButton: {
-        enable: true,
-      },
-      // This prevents the automatic prompt from conflicting with your logic
-      allowLocalhostAsSecureOrigin: true, 
-    });
-  });
-</script>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6DWPJ4T2C"></script>
   <script>
@@ -5098,10 +5082,130 @@ body {
     .holo-id-card { flex-direction: column; text-align: center; padding: 25px; }
     .holo-currency-row { justify-content: center; }
 }
+
+
+/* --- ULTIMATE CYBER COMMAND DOCK --- */
+.quick-nav-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 20000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 15px;
+}
+/* --- COMPACT MINI-HUD LEFT --- */
+.quick-nav-dock {
+    position: fixed;
+    bottom: 30px;
+    left: 30px; /* Mutat pe stânga */
+    z-index: 25000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Aliniere pe stânga */
+    gap: 12px;
+}
+
+/* REACTOR TRIGGER MAI MIC */
+.nav-trigger-reactor {
+    width: 55px; /* Redus de la 65px */
+    height: 55px;
+    background: #050b14;
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px var(--primary);
+    position: relative;
+    transition: 0.3s;
+}
+.nav-trigger-reactor i { font-size: 20px; color: var(--primary); }
+
+/* FEREASTRA HUD COMPACTĂ */
+.nav-hud-window {
+    background: rgba(5, 11, 20, 0.98);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(41, 243, 255, 0.2);
+    padding: 15px; /* Redus de la 25px */
+    display: none;
+    flex-direction: column;
+    gap: 8px; /* Spațiu mai mic între butoane */
+    width: 220px; /* Redus de la 300px */
+    box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+    animation: navJumpLeft 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    /* Colț tăiat inversat pentru partea stângă */
+    clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+}
+.nav-hud-window.active { display: flex; }
+
+/* BUTOANE COMPACTE */
+.btn-nav-terminal, .btn-nav-vault, .btn-nav-atelier, .btn-nav-toxic {
+    padding: 10px 12px; /* Mai scunde */
+    font-size: 9px; /* Text mai mic */
+    letter-spacing: 1px;
+    border-radius: 4px;
+}
+
+/* Ajustare Hover: acum butoanele se mișcă spre DREAPTA */
+.btn-nav-terminal:hover, .btn-nav-vault:hover, .btn-nav-atelier:hover, .btn-nav-toxic:hover {
+    transform: translateX(8px); 
+}
+
+/* Animație specifică pentru stânga */
+@keyframes navJumpLeft {
+    0% { opacity: 0; transform: scale(0.7) translateY(30px) translateX(-20px); }
+    100% { opacity: 1; transform: scale(1) translateY(0) translateX(0); }
+}
+
+/* Păstrăm scanarea laser și culorile tale din codul anterior */
+.btn-nav-terminal { background: rgba(41, 243, 255, 0.05); border: 1px solid #29f3ff; color: #29f3ff; font-family:'Orbitron'; font-weight:900; text-transform:uppercase; position:relative; overflow:hidden; display:flex; align-items:center; gap:10px; transition:0.3s; }
+.btn-nav-vault { background: rgba(255, 215, 0, 0.05); border: 1px solid #ffd700; color: #ffd700; font-family:'Orbitron'; font-weight:900; text-transform:uppercase; position:relative; overflow:hidden; display:flex; align-items:center; gap:10px; transition:0.3s; }
+.btn-nav-atelier { background: rgba(214, 51, 132, 0.05); border: 1px solid #d63384; color: #d63384; font-family:'Orbitron'; font-weight:900; text-transform:uppercase; position:relative; overflow:hidden; display:flex; align-items:center; gap:10px; transition:0.3s; }
+.btn-nav-toxic { background: rgba(0, 20, 10, 0.8); border: 1px solid #00ff88; color: #00ff88; font-family:'Orbitron'; font-weight:900; text-transform:uppercase; position:relative; overflow:hidden; display:flex; align-items:center; gap:10px; transition:0.3s; box-shadow: 0 0 10px rgba(0, 255, 136, 0.2); }
+
+.btn-nav-terminal::before, .btn-nav-vault::before, .btn-nav-atelier::before, .btn-nav-toxic::before {
+    content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: btnScan 3s infinite linear;
+}
   </style>
 </head>
 <body>
+<!-- ULTIMATE QUICK-NAV HUD -->
+<div class="quick-nav-dock">
+    <div id="navHud" class="nav-hud-window">
+        <div style="font-family:'Courier New'; color:var(--primary); font-size:9px; margin-bottom:10px; opacity:0.6;">> LINKING TO SYSTEM SECTORS...</div>
+        
+        <!-- TERMINAL -->
+        <button class="btn-nav-terminal" onclick="scrollToZone('zone-hero')">
+            <i class="fas fa-terminal"></i> Terminal principal
+        </button>
 
+        <!-- VAULT -->
+        <button class="btn-nav-vault" onclick="scrollToZone('zone-vault')">
+            <i class="fas fa-vault"></i> The Vault
+        </button>
+
+        <!-- ATELIER --> 
+        <button class="btn-nav-atelier" onclick="scrollToZone('zone-atelier')">
+            <i class="fas fa-paint-brush"></i> Atelier
+
+        </button>
+
+        <!-- BLACK MARKET -->
+        <button class="btn-nav-toxic" onclick="scrollToZone('zone-terminal')">
+            <i class="fas fa-user-secret"></i> Black Market
+        </button>
+    </div>
+
+    <!-- REACTOR TRIGGER -->
+    <div class="nav-trigger-reactor" onclick="toggleNavHud()">
+        <i class="fas fa-compass"></i>
+    </div>
+</div>
 
 
 <!-- BLACK MARKET MODAL (REMASTERED) -->
@@ -9046,8 +9150,33 @@ setInterval(() => {
     termLight.style.height = `${lightSize}px`;
 }, 50);
 
+// --- LOGICA HUD NAVIGARE ---
+window.toggleNavHud = () => {
+    document.getElementById('navHud').classList.toggle('active');
+};
 
+window.scrollToZone = (id) => {
+    const section = document.getElementById(id);
+    if(section) {
+        const offset = 100; // Ajustare pentru a nu fi acoperit de header
+        const pos = section.getBoundingClientRect().top + window.pageYOffset - offset;
+        
+        window.scrollTo({
+            top: pos,
+            behavior: 'smooth'
+        });
+        
+        document.getElementById('navHud').classList.remove('active');
+    }
+};
 
+// Închide la click în exterior
+document.addEventListener('mousedown', (e) => {
+    const dock = document.querySelector('.quick-nav-dock');
+    if (!dock.contains(e.target)) {
+        document.getElementById('navHud').classList.remove('active');
+    }
+});
 </script>
 </body>
 </html>
