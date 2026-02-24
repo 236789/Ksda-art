@@ -5951,9 +5951,6 @@ body {
     position: relative;
     z-index: 5;
 }
-
-
-
   </style>
 </head>
 <body>
@@ -10661,16 +10658,6 @@ function showRewardModal(amount, boxName) {
     });
     
     logTransaction(amount, "COINS", "Gamble", `Câștig din ${boxName}`);
-}
-
-function showRewardModal(amount) {
-    const modal = document.getElementById('rewardModal');
-    modal.querySelector('h2').innerText = "🎰 REZULTAT GAMBLE";
-    modal.querySelector('p').innerText = `Ai deschis cutia și ai găsit:`;
-    modal.querySelector('.reward-coins-box span').innerText = amount.toLocaleString();
-    modal.classList.add('active');
-    updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(amount) });
-    logTransaction(amount, "COINS", "Gamble", `Won from ${selectedBox.name}`);
 }
 
 initMysteryStockSync();
