@@ -5877,6 +5877,83 @@ body {
     will-change: transform, opacity; /* Pregătește placa video pentru animație */
     image-rendering: -webkit-optimize-contrast; /* Claritate maximă */
 }
+
+
+
+/* --- ANIMATED GAMBLING ZONE --- */
+#zone-mystery {
+    background: #050b14;
+    position: relative;
+    overflow: hidden;
+    padding: 100px 20px;
+    border-bottom: 2px solid #ff6a0033;
+}
+
+/* Layer 1: Shifting Liquid Orange Mesh */
+.mystery-liquid-bg {
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(255, 106, 0, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(255, 69, 0, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(20, 10, 0, 1) 0%, #050b14 100%);
+    animation: meshMove 15s ease-in-out infinite alternate;
+    z-index: 0;
+}
+
+@keyframes meshMove {
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.2) translate(-5%, -5%); }
+}
+
+/* Layer 2: Animated Floating Embers */
+.mystery-embers {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0; left: 0;
+    background-image: 
+        radial-gradient(circle at 2px 2px, rgba(255, 106, 0, 0.4) 1px, transparent 0);
+    background-size: 40px 40px;
+    z-index: 1;
+    mask-image: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0));
+    animation: embersUp 20s linear infinite;
+}
+
+@keyframes embersUp {
+    from { background-position: 0 0; }
+    to { background-position: 0 -1000px; }
+}
+
+/* Layer 3: Tech Grid Pulse */
+#zone-mystery::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(rgba(255, 106, 0, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 106, 0, 0.05) 1px, transparent 1px);
+    background-size: 60px 60px;
+    z-index: 1;
+    pointer-events: none;
+    animation: gridPulse 4s ease-in-out infinite;
+}
+
+@keyframes gridPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+}
+
+/* Ensure content stays on top of animations */
+#zone-mystery .metallic-title, 
+#zone-mystery .shop-desc, 
+#zone-mystery .bm-terminal-container {
+    position: relative;
+    z-index: 5;
+}
+
+
+
   </style>
 </head>
 <body>
@@ -6467,29 +6544,34 @@ body {
             <span>ALTE</span>
         </div>
     </div>
+
+
 </section>
 
 
+<section id="zone-mystery" class="shop-zone">
 
-<!-- Separator: Atelier -> Mystery -->
+
 <div class="hr-conduit sep-vault-atelier" id="sep-atelier-mystery" style="--start-color: #d63384; --end-color: #ff6a00;">
     <div class="conduit-line"></div>
+    
+    <!-- ADD TWO PARTICLES FOR A BETTER EFFECT -->
     <div class="conduit-particle"></div>
+    <div class="conduit-particle" style="animation-delay: 2s;"></div>
+
     <div class="conduit-node" style="border-color: #ff6a00; box-shadow: 0 0 20px #ff6a00;">
         <i class="fas fa-dice" style="color: #ff6a00;"></i>
     </div>
 </div>
+    <!-- NEW BACKGROUND LAYERS -->
+    <div class="mystery-liquid-bg"></div>
+    <div class="mystery-embers"></div>
 
-<section id="zone-mystery" class="shop-zone">
     <h1 class="metallic-title" style="background: linear-gradient(180deg, #fff 0%, #ff6a00 100%); -webkit-background-clip: text;">Gambling Zone</h1>
     <p class="shop-desc">Testează-ți norocul cu cutiile noastre misterioase.</p>
 
     <div class="bm-terminal-container" style="border-color: #ff6a00; box-shadow: 0 0 40px rgba(255, 106, 0, 0.1);">
-        <div class="bm-terminal-header">
-            <div class="bm-glitch-text" style="color: #ff6a00; text-shadow: 0 0 15px #ff6a00;">LOOT_BOXES</div>
-            <p style="font-family: 'Courier New'; color: #ff6a00; font-size: 12px; margin-top: 10px;">PROBABILITY_MATRIX: CALIBRATED</p>
-        </div>
-        
+        <!-- ... existing content ... -->
         <div style="text-align: center;">
             <button class="btn-terminal-toxic" style="border-color: #ff6a00; color: #ff6a00; background: rgba(255, 106, 0, 0.05);" onclick="openMysteryShop()">
                 <i class="fas fa-box-open"></i>
