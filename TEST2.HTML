@@ -6126,119 +6126,125 @@ body {
 }
 
 
-
-/* --- AAA PRIZE VIEW HUD --- */
+/* --- CS:GO STYLE INSANE PRIZE HUD --- */
 .prize-view-container {
-    width: 95%;
-    max-width: 1100px;
-    background: rgba(5, 11, 20, 0.95);
-    backdrop-filter: blur(25px);
+    width: min(1200px, 98vw);
+    background: rgba(2, 5, 10, 0.96);
+    backdrop-filter: blur(30px);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 30px;
-    padding: 40px;
+    border-radius: 20px;
+    padding: 30px;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 0 100px rgba(0,0,0,0.9);
+    box-shadow: 0 0 100px rgba(0,0,0,1);
 }
 
-/* THE 5 CARD LAYOUT */
+/* THE TRAY (Horizontal on Mobile, Grid on PC) */
 .aaa-loot-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    display: flex;
     gap: 15px;
     margin-top: 30px;
+    overflow-x: auto;
+    padding: 20px 10px 40px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none; /* Hide scrollbar Firefox */
 }
+.aaa-loot-grid::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome */
 
-/* VERTICAL CARD BASE */
+/* VERTICAL SLAB BASE */
 .aaa-card {
-    height: 400px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    flex: 0 0 200px; /* PC Width */
+    height: 420px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.4) 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    padding: 30px 15px;
-    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 25px 15px;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
     position: relative;
     overflow: hidden;
+    scroll-snap-align: center;
+}
+
+/* RARITY ENGINES (CS:GO Pallette) */
+.tier-common    { --r-color: #4b69ff; --r-glow: rgba(75, 105, 255, 0.3); } 
+.tier-uncommon  { --r-color: #8847ff; --r-glow: rgba(136, 71, 255, 0.3); }
+.tier-rare      { --r-color: #d32ce6; --r-glow: rgba(211, 44, 230, 0.3); }
+.tier-epic      { --r-color: #eb4b4b; --r-glow: rgba(235, 75, 75, 0.3); }
+.tier-legendary { --r-color: #ffd700; --r-glow: rgba(255, 215, 0, 0.5); }
+
+/* THE "SICK" BOTTOM GLOW BAR */
+.aaa-card::after {
+    content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 6px;
+    background: var(--r-color);
+    box-shadow: 0 -10px 30px var(--r-color);
+}
+
+/* THE "GOD-RAY" BEHIND ICON */
+.aaa-card-glow-base {
+    position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+    width: 150px; height: 150px;
+    background: radial-gradient(circle, var(--r-glow) 0%, transparent 70%);
+    z-index: 1; pointer-events: none;
 }
 
 .aaa-card:hover {
-    transform: scale(1.05) translateY(-10px);
-    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-15px) scale(1.02);
+    border-color: var(--r-color);
+    background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.02) 100%);
 }
 
-/* RARITY ENGINES */
-.tier-common    { --r-color: #8b8b8b; --r-glow: rgba(139,139,139,0.3); }
-.tier-uncommon  { --r-color: #00ff88; --r-glow: rgba(0, 255, 136, 0.4); }
-.tier-rare      { --r-color: #00d2ff; --r-glow: rgba(0, 210, 255, 0.4); }
-.tier-epic      { --r-color: #f093fb; --r-glow: rgba(240, 147, 251, 0.5); }
-.tier-legendary { --r-color: #ffd700; --r-glow: rgba(255, 215, 0, 0.7); }
-
-/* GLOWING BORDERS */
-.aaa-card::after {
-    content: ''; position: absolute; inset: 0;
-    border-radius: 20px; padding: 2px;
-    background: linear-gradient(180deg, transparent, var(--r-color), transparent);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    opacity: 0.3; transition: 0.3s;
-}
-.aaa-card:hover::after { opacity: 1; }
-
-/* LEGENDARY RADIANT AURA */
-.tier-legendary::before {
-    content: ''; position: absolute; inset: -50%;
-    background: conic-gradient(from 0deg, transparent, #ffd700, transparent 30%);
-    animation: rotateAura 3s linear infinite;
-    opacity: 0.2; z-index: 0;
-}
-
-/* CARD INNER ELEMENTS */
 .aaa-card-title {
-    font-family: 'Orbitron'; font-size: 10px; font-weight: 900;
-    letter-spacing: 3px; color: var(--r-color); text-transform: uppercase;
-    text-shadow: 0 0 10px var(--r-color);
+    font-family: 'Orbitron'; font-size: 11px; font-weight: 900;
+    letter-spacing: 2px; color: var(--r-color); text-transform: uppercase;
+    text-shadow: 0 0 10px var(--r-color); z-index: 2;
 }
 
 .aaa-card-img {
-    width: 70px; height: 70px; object-fit: contain;
-    filter: drop-shadow(0 0 15px var(--r-color));
-    transition: 0.4s; z-index: 2;
+    width: 100px; height: 100px; object-fit: contain;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+    transition: 0.4s; z-index: 3;
 }
-
-.aaa-card:hover .aaa-card-img { transform: scale(1.15) rotate(5deg); }
+.aaa-card:hover .aaa-card-img { transform: scale(1.2) rotate(5deg); }
 
 .aaa-card-value {
-    background: rgba(0,0,0,0.6);
-    border: 1px solid var(--r-color);
-    width: 100%; padding: 10px; text-align: center;
+    background: #000;
+    border: 1px solid rgba(255,255,255,0.1);
+    width: 100%; padding: 12px; text-align: center;
     font-family: 'Montserrat'; font-weight: 900; color: #fff;
-    font-size: 14px; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+    font-size: 15px; z-index: 3;
+    border-radius: 4px;
 }
 
 .aaa-card-chance {
-    font-family: 'Courier New'; font-size: 9px; color: #666;
-    margin-top: 10px; letter-spacing: 1px;
+    font-family: 'Courier New'; font-size: 10px; color: #555;
+    margin-top: 10px; text-transform: uppercase; font-weight: bold;
 }
 
-/* FOOTER LOGO DECORATION */
-.modal-deco-line {
-    width: 100%; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--primary), transparent);
-    margin-top: 30px; opacity: 0.3;
+/* SPECIAL ANIMATION FOR LEGENDARY SUNBURST */
+.tier-legendary .aaa-card-glow-base {
+    animation: pulseGlow 2s infinite alternate;
+}
+@keyframes pulseGlow { from { opacity: 0.4; transform: translate(-50%, -50%) scale(1); } to { opacity: 0.8; transform: translate(-50%, -50%) scale(1.3); } }
+
+/* MOBILE FIX: TRASH NO MORE */
+@media (max-width: 768px) {
+    .aaa-card { flex: 0 0 220px; height: 380px; }
+    .prize-view-container { padding: 20px 10px; border-radius: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+    .aaa-loot-grid { padding-left: 20px; padding-right: 20px; }
+    .prize-view-container h2 { font-size: 18px; text-align: center; }
 }
 
-@keyframes rotateAura { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-/* Mobile Optimization */
-@media (max-width: 850px) {
-    .aaa-loot-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .tier-legendary { grid-column: span 2; }
-    .aaa-card { height: 320px; }
+/* ADDING A "SCAN" SHIMMER ACROSS ALL CARDS */
+.aaa-card::before {
+    content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    transform: skewX(-20deg); animation: lootShimmer 5s infinite;
 }
+@keyframes lootShimmer { 0% { left: -100%; } 20% { left: 200%; } 100% { left: 200%; } }
   </style>
 </head>
 <body>
@@ -10811,9 +10817,8 @@ window.openPrizeView = () => {
     if(!selectedBox || !selectedBox.rewards) return;
     
     const container = document.getElementById('prizeTableBody');
-    container.innerHTML = ""; // Clear old content
+    container.innerHTML = ""; 
 
-    // Mapping current logic to the new AAA styles
     const tierClasses = [
         'tier-common',
         'tier-uncommon',
@@ -10828,9 +10833,10 @@ window.openPrizeView = () => {
         card.className = `aaa-card ${cardClass}`;
         
         card.innerHTML = `
+            <div class="aaa-card-glow-base"></div> <!-- THE BLOOM LAYER -->
             <div class="aaa-card-title">${r.tier}</div>
             <img src="${r.icon}" class="aaa-card-img">
-            <div style="width: 100%;">
+            <div style="width: 100%; position:relative; z-index:4;">
                 <div class="aaa-card-value">${r.label}</div>
                 <div class="aaa-card-chance">${r.chance}% CHANCE</div>
             </div>
