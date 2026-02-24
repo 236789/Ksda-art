@@ -10606,69 +10606,67 @@ function startUnboxingSequence() {
 window.revealReward = async () => {
     const boxImg = document.getElementById('unboxingBoxImg');
     
-    // 1. Capture the values IMMEDIATELY to prevent "Async Jumping"
-    // We use the price and qty at the exact moment the button was clicked
-    const qtyAtOpening = parseInt(selectedQty) || 1; 
-    const boxAtOpening = JSON.parse(JSON.stringify(selectedBox));
+    // --- THE FIX: LOCK THE DATA IMMEDIATELY ---
+    // We create local copies that won't change even if the global variables do
+    const lockedQty = parseInt(selectedQty) || 1; 
+    const lockedBox = JSON.parse(JSON.stringify(selectedBox)); // Clones the object
+    const boxPrice = lockedBox.price;
 
-    if(!boxAtOpening || isNaN(qtyAtOpening)) {
+    if(!lockedBox || isNaN(lockedQty)) {
         document.getElementById('unboxingOverlay').style.display = 'none';
-        return showCustomAlert("Eroare la procesarea cutiei!", "EROARE");
+        return showCustomAlert("Sistemul a pierdut legătura cu pachetul!", "EROARE");
     }
 
     // Start Animation
     boxImg.classList.remove('box-shake');
-    boxImg.src = boxAtOpening.imgOpen;
+    boxImg.src = lockedBox.imgOpen;
     boxImg.classList.add('open');
 
-    setTimeout(() => {
+    // Wait for the animation
+    setTimeout(async () => {
         document.getElementById('unboxingOverlay').style.display = 'none';
         
         let totalWin = 0;
-        const boxPrice = boxAtOpening.price;
 
-        // 2. NEW LOGIC: Calculate based on "Weights"
-        for (let i = 0; i < qtyAtOpening; i++) {
-            const roll = Math.random() * 100; // 0 to 100
-            let multiplier = 0;
+        // --- BALANCED MATH ENGINE ---
+        for (let i = 0; i < lockedQty; i++) {
+            const roll = Math.random() * 100;
+            let m = 0;
 
-            if (roll <= 1) { 
-                // 1% Chance: JACKPOT (5x to 10x)
-                multiplier = (Math.random() * 5) + 5; 
-            } else if (roll <= 10) { 
-                // 9% Chance: BIG WIN (2x to 4x)
-                multiplier = (Math.random() * 2) + 2; 
-            } else if (roll <= 40) { 
-                // 30% Chance: PROFIT (1.1x to 1.5x)
-                multiplier = (Math.random() * 0.4) + 1.1; 
-            } else if (roll <= 80) { 
-                // 40% Chance: SMALL LOSS (0.7x to 0.9x)
-                multiplier = (Math.random() * 0.2) + 0.7; 
-            } else { 
-                // 20% Chance: BIG LOSS (0.1x to 0.5x)
-                multiplier = (Math.random() * 0.4) + 0.1; 
-            }
+            if (roll <= 1) m = (Math.random() * 5) + 5;      // 1% Jackpot (5x - 10x)
+            else if (roll <= 12) m = (Math.random() * 1) + 2; // 11% Big Win (2x - 3x)
+            else if (roll <= 45) m = (Math.random() * 0.4) + 1.1; // 33% Profit (1.1x - 1.5x)
+            else if (roll <= 80) m = (Math.random() * 0.2) + 0.7; // 35% Small Loss (0.7x - 0.9x)
+            else m = (Math.random() * 0.3) + 0.2;            // 20% Big Loss (0.2x - 0.5x)
             
-            totalWin += (boxPrice * multiplier);
+            totalWin += (boxPrice * m);
         }
 
-        totalWin = Math.floor(totalWin);
+        const finalAmount = Math.floor(totalWin);
 
-        // 3. SAFETY CHECK
-        // Ensure that even with terrible luck, they don't get 0
-        const minGuaranteed = Math.floor(boxPrice * 0.1 * qtyAtOpening);
-        if (totalWin < minGuaranteed) totalWin = minGuaranteed;
+        // --- DATABASE UPDATE ---
+        // We do this BEFORE the modal to ensure the money is safe
+        try {
+            const userRef = doc(db, "accounts", auth.currentUser.uid);
+            await updateDoc(userRef, { 
+                coins: increment(finalAmount) 
+            });
+            await logTransaction(finalAmount, "COINS", "Gamble", `Câștig ${lockedQty}x ${lockedBox.name}`);
+        } catch (e) {
+            console.error("Database save failed:", e);
+        }
 
-        // Show result
-        showRewardModal(totalWin, boxAtOpening.name);
+        // Show the UI result
+        showRewardModal(finalAmount, lockedBox.name, lockedQty);
         
     }, 1200);
 };
-function showRewardModal(amount, boxName) {
+
+// Update the modal to show the quantity so the user knows it worked
+function showRewardModal(amount, boxName, qty) {
     const modal = document.getElementById('rewardModal');
-    // Update text to be clear
     modal.querySelector('h2').innerText = "🎰 REZULTAT GAMBLE";
-    modal.querySelector('p').innerText = `Ai deschis cutiile și ai găsit:`;
+    modal.querySelector('p').innerText = `Ai deschis ${qty}x ${boxName} și ai găsit:`;
     
     const amountSpan = modal.querySelector('.reward-coins-box span');
     if (amountSpan) {
@@ -10676,15 +10674,7 @@ function showRewardModal(amount, boxName) {
     }
     
     modal.classList.add('active');
-
-    // Update Database
-    updateDoc(doc(db, "accounts", auth.currentUser.uid), { 
-        coins: increment(amount) 
-    });
-    
-    logTransaction(amount, "COINS", "Gamble", `Câștig din ${boxName}`);
 }
-
 initMysteryStockSync();
 </script>
 </body>
