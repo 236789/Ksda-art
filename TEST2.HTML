@@ -5951,6 +5951,84 @@ body {
     position: relative;
     z-index: 5;
 }
+
+
+
+/* --- LOOT TIER CARDS --- */
+.tier-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+    padding: 10px;
+}
+
+.tier-card {
+    position: relative;
+    border-radius: 15px;
+    padding: 20px 10px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: 0.3s;
+    overflow: hidden;
+}
+
+.tier-name {
+    font-family: 'Orbitron';
+    font-size: 10px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.tier-reward {
+    font-family: 'Montserrat';
+    font-weight: 900;
+    font-size: 14px;
+    color: #fff;
+    display: block;
+}
+
+.tier-chance {
+    font-size: 9px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 10px;
+    display: block;
+}
+
+/* TIER COLORS & ANIMATIONS */
+.t-common { 
+    background: linear-gradient(135deg, #3d2b1f 0%, #8b4513 50%, #2e1a0a 100%); /* Old wet bronze */
+    border-color: #5d3a1a;
+}
+
+.t-uncommon {
+    background: linear-gradient(135deg, #bdc3c7, #fff, #bdc3c7);
+    background-size: 200% auto;
+    animation: shineSweep 3s linear infinite;
+    color: #333;
+}
+.t-uncommon .tier-reward, .t-uncommon .tier-name { color: #2c3e50; }
+
+.t-rare {
+    background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+}
+
+.t-epic {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    animation: pulse-intense 2s infinite;
+}
+
+.t-legendary {
+    background: linear-gradient(45deg, #ffd700, #fff, #ffd700, #ffaa00);
+    background-size: 400% 400%;
+    animation: gradientMove 3s ease infinite;
+    border: 2px solid #fff;
+    box-shadow: 0 0 25px #ffd700;
+}
+.t-legendary .tier-reward, .t-legendary .tier-name { color: #000; text-shadow: none; }
   </style>
 </head>
 <body>
@@ -10346,9 +10424,26 @@ if (document.readyState === 'loading') {
 }
 
 
-// --- MYSTERY BOX SYSTEM ---
 const BOXES_DB = [
-    { id: 'box_basic', name: 'Basic Box', price: 1000, color: '#ff6a00', stockRange: [20, 500], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%201.png?alt=media&token=29742b82-3e51-408c-948e-c3bae712e2ca', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%202.png?alt=media&token=93a488b5-9ed7-4ab0-9333-3a67ca37fe3c' },
+    { 
+        id: 'box_basic', 
+        name: 'Basic Box', 
+        price: 1000, 
+        color: '#ff6a00', 
+        stockRange: [20, 500], 
+        img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%201.png?alt=media&token=29742b82-3e51-408c-948e-c3bae712e2ca', 
+        imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%202.png?alt=media&token=93a488b5-9ed7-4ab0-9333-3a67ca37fe3c',
+        rewards: [
+            { tier: 'Common', label: '250-750 Coins', chance: 60, style: 't-common' },
+            { tier: 'Uncommon', label: '1-3 Diamonds', chance: 25, style: 't-uncommon' },
+            { tier: 'Rare', label: '500-1500 Coins', chance: 10, style: 't-rare' },
+            { tier: 'Epic', label: '3-5 Diamonds', chance: 4.5, style: 't-epic' },
+            { tier: 'Legendary', label: 'Random Badge', chance: 0.5, style: 't-legendary' }
+        ]
+    },
+
+
+
     { id: 'box_gold', name: 'Gold Box', price: 5000, color: '#ffd700', stockRange: [10, 50], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FGold%20box%20closed.png?alt=media&token=ef29b342-4564-4379-b1ff-9b44eb926d5c', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FGold%20box%20Open.png?alt=media&token=815a539a-8fd8-495e-b0e6-790f7927352b' },
     { id: 'box_titanium', name: 'Titanium Box', price: 7500, color: '#00e5ff', stockRange: [8, 30], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Close.png?alt=media&token=e7bbc3f0-9ab6-46c2-a8d5-e5f76d4aed71', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Open.png?alt=media&token=43e6e8fc-6228-438f-97b3-0cbf7d5012ce' },
     { id: 'box_void', name: 'Void Box', price: 15000, color: '#7000ff', stockRange: [5, 15], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20close.png?alt=media&token=7da7421a-caf5-4a8a-a368-02393550bbe8', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20open.png?alt=media&token=39eb8f91-2c77-4bea-9337-ebf5ea391dc3' },
@@ -10495,18 +10590,23 @@ document.getElementById('boxQtyInfo').innerText = `> CUMPERI 1 CUTIE`;
 }
 
 window.openPrizeView = () => {
-    if(!selectedBox) return;
-    const table = document.getElementById('prizeTableBody');
-    table.innerHTML = '';
-    const rewards = [
-        { name: "Suma Minimă", val: `${Math.floor(selectedBox.price * 0.5).toLocaleString()} Coins`, chance: "40%" },
-        { name: "Suma Medie", val: `${selectedBox.price.toLocaleString()} Coins`, chance: "45%" },
-        { name: "Big Win", val: `${Math.floor(selectedBox.price * 1.8).toLocaleString()} Coins`, chance: "14%" },
-        { name: "JACKPOT", val: `${(selectedBox.price * 5).toLocaleString()} Coins`, chance: "1%" }
-    ];
-    rewards.forEach(r => {
-        table.innerHTML += `<tr><td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); font-weight:700;">${r.name}</td><td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); color:#ffd700; font-weight:800;">${r.val}</td><td style="padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); color:#aaa; text-align:right;">${r.chance}</td></tr>`;
+    if(!selectedBox || !selectedBox.rewards) return;
+    
+    const container = document.getElementById('prizeTableBody'); // Keep same ID but we change the innerHTML
+    container.innerHTML = `<div class="tier-grid"></div>`;
+    const grid = container.querySelector('.tier-grid');
+
+    selectedBox.rewards.forEach(r => {
+        const card = document.createElement('div');
+        card.className = `tier-card ${r.style}`;
+        card.innerHTML = `
+            <span class="tier-name">${r.tier}</span>
+            <span class="tier-reward">${r.label}</span>
+            <span class="tier-chance">${r.chance}% CHANCE</span>
+        `;
+        grid.appendChild(card);
     });
+    
     document.getElementById('prizeListModal').classList.add('active');
 };
 
@@ -10615,15 +10715,12 @@ function startUnboxingSequence() {
 
 window.revealReward = async () => {
     const boxImg = document.getElementById('unboxingBoxImg');
-    
-    // --- USE THE SAFE VARIABLE (lastPurchasedQty) ---
     const lockedQty = parseInt(lastPurchasedQty); 
     const lockedBox = JSON.parse(JSON.stringify(selectedBox));
-    const boxPrice = lockedBox.price;
 
     if(!lockedBox || isNaN(lockedQty) || lockedQty <= 0) {
         document.getElementById('unboxingOverlay').style.display = 'none';
-        return showCustomAlert("Eroare: Sistemul nu a găsit cutiile plătite!", "FAIL");
+        return;
     }
 
     boxImg.classList.remove('box-shake');
@@ -10632,35 +10729,68 @@ window.revealReward = async () => {
 
     setTimeout(async () => {
         document.getElementById('unboxingOverlay').style.display = 'none';
-        let totalWin = 0;
+        
+        let winCoins = 0;
+        let winDiamonds = 0;
+        let winBadges = [];
 
-        // --- ECONOMY SINK ENGINE (EV: 0.75 - VERY AGGRESSIVE) ---
+        // --- THE LOOT TABLE ENGINE ---
         for (let i = 0; i < lockedQty; i++) {
             const roll = Math.random() * 100;
-            let m = 0;
-
-            if (roll <= 0.5) m = (Math.random() * 3) + 5;      // 0.5% Jackpot (5x-8x)
-            else if (roll <= 5) m = (Math.random() * 1) + 1.5; // 4.5% Big Win (1.5x-2.5x)
-            else if (roll <= 20) m = (Math.random() * 0.2) + 1.1; // 15% Profit (1.1x-1.3x)
-            else if (roll <= 55) m = (Math.random() * 0.3) + 0.6; // 35% Small Loss (0.6x-0.9x)
-            else m = (Math.random() * 0.3) + 0.1;                // 45% Sink (0.1x-0.4x)
             
-            totalWin += (boxPrice * m);
+            if (roll <= 0.5) { // LEGENDARY
+                const randomBadge = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
+                winBadges.push(randomBadge);
+            } 
+            else if (roll <= 5) { // EPIC
+                winDiamonds += Math.floor(Math.random() * 3) + 3; // 3-5
+            }
+            else if (roll <= 15) { // RARE
+                winCoins += Math.floor(Math.random() * 1001) + 500; // 500-1500
+            }
+            else if (roll <= 40) { // UNCOMMON
+                winDiamonds += Math.floor(Math.random() * 3) + 1; // 1-3
+            }
+            else { // COMMON (The Sink)
+                winCoins += Math.floor(Math.random() * 501) + 250; // 250-750
+            }
         }
 
-        const finalAmount = Math.floor(totalWin);
-
+        // --- DATABASE SYNC ---
         try {
             const userRef = doc(db, "accounts", auth.currentUser.uid);
-            await updateDoc(userRef, { coins: increment(finalAmount) });
-            await logTransaction(finalAmount, "COINS", "Gamble", `Opened ${lockedQty}x ${lockedBox.name}`);
+            const updates = {
+                coins: increment(winCoins),
+                diamonds: increment(winDiamonds)
+            };
+            
+            if (winBadges.length > 0) {
+                updates.ownedBadges = arrayUnion(...winBadges.map(b => b.id));
+            }
+
+            await updateDoc(userRef, updates);
+            await logTransaction(winCoins, "COINS", "Gamble", `Loot from ${lockedQty}x ${lockedBox.name}`);
         } catch (e) { console.error(e); }
 
-        showRewardModal(finalAmount, lockedBox.name, lockedQty);
+        // --- DYNAMIC RESULTS MODAL ---
+        const modal = document.getElementById('rewardModal');
+        modal.querySelector('h2').innerText = "📦 CARGO DECRYPTED";
         
-        // Reset the safe variable so it can't be used twice
+        let resultHTML = `<div style="display:flex; flex-direction:column; gap:10px; align-items:center;">`;
+        if(winCoins > 0) resultHTML += `<div><span style="color:#ffd700; font-weight:900;">+${winCoins.toLocaleString()}</span> Coins</div>`;
+        if(winDiamonds > 0) resultHTML += `<div><span style="color:#00ff88; font-weight:900;">+${winDiamonds}</span> Diamonds</div>`;
+        if(winBadges.length > 0) {
+            winBadges.forEach(b => {
+                resultHTML += `<div style="font-size:10px; background:${b.color}; color:#000; padding:2px 8px; border-radius:4px;">NEW BADGE: ${b.text}</div>`;
+            });
+        }
+        resultHTML += `</div>`;
+
+        modal.querySelector('p').innerHTML = resultHTML;
+        modal.querySelector('.reward-coins-box').style.display = 'none'; // Hide the old single-coin box
+        modal.classList.add('active');
+
         lastPurchasedQty = 0;
-        
     }, 1200);
 };
 
