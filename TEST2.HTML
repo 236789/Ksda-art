@@ -6334,6 +6334,61 @@ body {
 }
 
 
+/* --- DEALS TERMINAL STYLES --- */
+.deals-container-v4 { width: 100%; max-width: 1000px; position: relative; z-index: 5; }
+
+/* THE DISCOUNT TAG */
+.discount-badge {
+    position: absolute; 
+    top: 10px; 
+    left: -5px; /* Slightly off-edge for depth */
+    background: #ff4757; 
+    color: #fff;
+    padding: 3px 10px; /* Smaller padding */
+    font-family: 'Orbitron'; 
+    font-weight: 900; 
+    font-size: 9px; /* Smaller font */
+    clip-path: polygon(0 0, 100% 0, 88% 100%, 0% 100%);
+    box-shadow: 3px 3px 10px rgba(255, 71, 87, 0.3);
+    z-index: 10; 
+    animation: pulseRed 2s infinite;
+    letter-spacing: 1px;
+}
+
+/* THE GLOWING X OVERLAY */
+.old-price-container {
+    position: relative; display: inline-block;
+    color: #555; font-size: 11px; margin-bottom: 5px;
+}
+.old-price-container::after {
+    content: ""; position: absolute; top: 50%; left: -10%; width: 120%; height: 2px;
+    background: #ff4757; transform: rotate(-15deg);
+    box-shadow: 0 0 10px #ff4757;
+}
+
+/* THE DEAL CARD (Blue/Cyan Neon) */
+.deal-card {
+    --r-color: #00ffff;
+    --r-bg: linear-gradient(180deg, #022525 0%, #08101b 100%);
+}
+
+.deal-card .aaa-card-value {
+    border-color: #00ff88 !important; /* New price is Green */
+}
+
+/* Button style for the deal */
+.btn-buy-deal {
+    background: #00ffff !important;
+    color: #000 !important;
+    font-weight: 900; font-family: 'Montserrat';
+    width: 100%; padding: 10px; margin-top: 10px;
+    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+    border: none; cursor: pointer; transition: 0.3s;
+}
+.btn-buy-deal:hover { transform: scale(1.05); filter: brightness(1.2); box-shadow: 0 0 20px #00ffff; }
+
+@keyframes pulseRed { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
 
   </style>
 </head>
@@ -6966,6 +7021,30 @@ body {
                 <i class="fas fa-box-open"></i>
                 <span>OPEN MYSTERY SHOP</span>
             </button>
+        </div>
+    </div>
+</section>
+
+
+<section id="zone-deals" class="shop-zone">
+    <!-- Transition Separator -->
+    <div class="hr-conduit sep-mystery-terminal" style="--start-color: #ff6a00; --end-color: #00ffff;">
+        <div class="conduit-line"></div>
+        <div class="conduit-particle"></div>
+        <div class="conduit-node" style="border-color: #00ffff; box-shadow: 0 0 20px #00ffff;">
+            <i class="fas fa-bolt" style="color: #00ffff;"></i>
+        </div>
+    </div>
+
+    <h1 class="metallic-title" style="background: linear-gradient(180deg, #fff 0%, #00ffff 100%); -webkit-background-clip: text;">Flash Deals</h1>
+    <p class="shop-desc">Sistem compromis: Prețuri reduse detectate în rețea.</p>
+
+    <!-- THE DEALS GRID -->
+    <div class="deals-container-v4">
+        <div id="dealsResetTimer" class="v4-timer-pill" style="border-color:#00ffff; color:#00ffff; margin-bottom:20px; display:block; width:fit-content; margin-left:auto; margin-right:auto;">REFRESH: 00:00</div>
+        
+        <div id="dealsGrid" class="aaa-loot-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <!-- 3 SICK CARDS LOAD HERE -->
         </div>
     </div>
 </section>
@@ -11182,6 +11261,140 @@ function showRewardModal(amount, boxName, qty) {
     modal.classList.add('active');
 }
 initMysteryStockSync();
+
+
+let dealsCountdownInterval = null; // To prevent multiple timers
+let isUpdatingDeals = false; // To prevent write-loops
+
+async function initFlashDeals() {
+    onSnapshot(doc(db, "system", "flash_deals"), async (snap) => {
+        const now = Date.now();
+        const REFRESH_MS = 60000; // 1 Minute
+
+        // 1. Check if we need to generate new deals
+        // Added a 2-second buffer to prevent "instant" re-triggering
+        if (!snap.exists() || (now - (snap.data().lastUpdate || 0) > REFRESH_MS + 2000)) {
+            
+            if (isUpdatingDeals) return; // Already writing, stop
+            isUpdatingDeals = true;
+
+            const allItems = [
+                ...BANNERS_DB.map(i => ({...i, category: 'banners'})),
+                ...TEXTS_DB.map(i => ({...i, category: 'texts'})),
+                ...FRAMES_DB.map(i => ({...i, category: 'frames'}))
+            ];
+            
+            const selectedDeals = [];
+            const usedIndexes = new Set();
+            
+            while(selectedDeals.length < 3) {
+                let idx = Math.floor(Math.random() * allItems.length);
+                if(!usedIndexes.has(idx)) {
+                    const item = allItems[idx];
+                    const discountPct = Math.floor(Math.random() * 41) + 30; // 30-70%
+                    const newPrice = Math.floor(item.price * (1 - discountPct/100));
+                    selectedDeals.push({ ...item, discount: discountPct, salePrice: newPrice });
+                    usedIndexes.add(idx);
+                }
+            }
+
+            try {
+                await setDoc(doc(db, "system", "flash_deals"), { 
+                    items: selectedDeals, 
+                    lastUpdate: Date.now() 
+                });
+            } catch(e) { console.error("Update deals error:", e); }
+            
+            isUpdatingDeals = false;
+        } else {
+            // 2. Render and start Countdown
+            renderFlashDeals(snap.data().items);
+            
+            const lastUpdate = snap.data().lastUpdate;
+            
+            // CLEAR OLD TIMER BEFORE STARTING NEW ONE
+            if (dealsCountdownInterval) clearInterval(dealsCountdownInterval);
+            
+            dealsCountdownInterval = setInterval(() => {
+                const remaining = Math.max(0, REFRESH_MS - (Date.now() - lastUpdate));
+                const m = Math.floor(remaining / 60000);
+                const s = Math.floor((remaining % 60000) / 1000);
+                
+                const timerEl = document.getElementById('dealsResetTimer');
+                if (timerEl) {
+                    timerEl.innerText = `REFRESH: ${m}:${s < 10 ? '0':''}${s}`;
+                }
+
+                // If timer hits 0, the next onSnapshot trigger will handle the refresh
+                if (remaining <= 0) clearInterval(dealsCountdownInterval);
+            }, 1000);
+        }
+    });
+}
+function renderFlashDeals(items) {
+    const grid = document.getElementById('dealsGrid');
+    if(!grid) return;
+    grid.innerHTML = '';
+
+    items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = `aaa-card deal-card`;
+        
+        // Item specific preview logic
+        let previewHtml = '';
+        if(item.category === 'banners') previewHtml = `<div class="${item.cssClass}" style="padding:10px; border-radius:5px; font-size:10px; width:100%;">BANNER</div>`;
+        if(item.category === 'texts') previewHtml = `<div class="${item.cssClass}" style="font-weight:900; font-size:16px;">TEXT COLOR</div>`;
+        if(item.category === 'frames') previewHtml = `<img src="${item.img}" style="height:60px; width:auto;">`;
+
+        card.innerHTML = `
+            <div class="discount-badge">-${item.discount}%</div>
+            <div class="aaa-card-content">
+                <div class="aaa-card-title">${item.category.slice(0, -1)}</div>
+                
+                <div style="height:60px; display:flex; align-items:center; width:100%; justify-content:center;">${previewHtml}</div>
+
+                <div style="width: 100%;">
+                    <div class="old-price-container">${item.price.toLocaleString()} Coins</div><br>
+                    <div class="aaa-card-value">
+                        ${item.salePrice.toLocaleString()} 
+                        <img src="https://iili.io/fhc1SKQ.png" style="width:16px; margin-left:8px;">
+                    </div>
+                    <button class="btn-buy-deal" onclick="buyFlashDeal('${item.id}', ${item.salePrice}, '${item.category}')">CLAIM DEAL</button>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+window.buyFlashDeal = async (id, price, category) => {
+    if(!auth.currentUser) return alert("Logat!");
+    
+    const userRef = doc(db, "accounts", auth.currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    const userData = userSnap.data();
+
+    // Mapping fields
+    const ownedField = category === 'banners' ? 'ownedBanners' : (category === 'texts' ? 'ownedTexts' : 'ownedFrames');
+    
+    if(userData[ownedField]?.includes(id)) return showCustomAlert("Ai deja acest obiect!", "INFO");
+    if((userData.coins || 0) < price) return showCustomAlert("Bani insuficienți!", "EROARE");
+
+    const confirmed = await showCustomConfirm(`Cumperi acest deal special pentru ${price} Coins?`, "CONFIRMĂ DEAL");
+    if(!confirmed) return;
+
+    try {
+        await updateDoc(userRef, {
+            coins: increment(-price),
+            [ownedField]: arrayUnion(id)
+        });
+        await logTransaction(-price, "COINS", "Flash Sale", `Bought Sale Item: ${id}`);
+        showCustomAlert("Obiect cumpărat la preț redus!", "SUCCES");
+    } catch(e) { console.error(e); }
+};
+
+// Start the engine
+initFlashDeals();
 </script>
 </body>
 </html>
