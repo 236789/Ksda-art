@@ -6029,6 +6029,101 @@ body {
     font-size: 22px;
 }
 .reward-line img { width: 35px; height: 35px; filter: drop-shadow(0 0 10px currentColor); }
+
+
+
+/* --- GOD-TIER LOOT CARDS (SHOP STYLE) --- */
+.loot-grid-v4 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 20px;
+}
+
+.loot-card-v4 {
+    background: #08101b;
+    border: 2px solid var(--tier-color); /* Neon Border like Shop */
+    border-radius: 24px;
+    padding: 25px 15px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.loot-card-v4:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px var(--tier-glow);
+}
+
+/* Tier Glow & Identity */
+.r-common { --tier-color: #8b4513; --tier-glow: rgba(139, 69, 19, 0.4); } /* Bronze/Scrap */
+.r-silver { --tier-color: #bdc3c7; --tier-glow: rgba(189, 195, 199, 0.4); } /* Silver */
+.r-rare   { --tier-color: #00d2ff; --tier-glow: rgba(0, 210, 255, 0.4); } /* Blue */
+.r-epic   { --tier-color: #f093fb; --tier-glow: rgba(240, 147, 251, 0.4); } /* Pink/Purple */
+.r-gold   { --tier-color: #ffd700; --tier-glow: rgba(255, 215, 0, 0.6); } /* Gold */
+
+/* Legendary Animated Border (Next Level) */
+.r-gold::before {
+    content: ''; position: absolute; inset: -2px;
+    background: conic-gradient(from 0deg, transparent, #ffd700, transparent 30%);
+    animation: borderRotate 2s linear infinite;
+    z-index: 0; border-radius: 24px;
+}
+.r-gold::after {
+    content: ''; position: absolute; inset: 2px;
+    background: #08101b; border-radius: 22px; z-index: 1;
+}
+
+/* Inner Elements */
+.loot-card-v4 img, .loot-card-v4 .tier-header { position: relative; z-index: 2; }
+
+.tier-header {
+    font-family: 'Orbitron';
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--tier-color);
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+.loot-main-img {
+    height: 60px;
+    width: auto;
+    margin-bottom: 15px;
+    filter: drop-shadow(0 0 10px var(--tier-glow));
+}
+
+/* THE CLIPPED MILITARY TAG (From Shop Screenshot) */
+.loot-tag-v4 {
+    position: relative;
+    z-index: 2;
+    background: transparent;
+    border: 1.5px solid var(--tier-color);
+    color: #fff;
+    font-family: 'Orbitron';
+    font-size: 13px;
+    font-weight: 900;
+    padding: 8px 20px;
+    margin-top: 10px;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.loot-chance-v4 {
+    position: relative;
+    z-index: 2;
+    font-size: 9px;
+    font-family: monospace;
+    color: #aaa;
+    margin-top: 12px;
+}
   </style>
 </head>
 <body>
@@ -10430,17 +10525,17 @@ const BOXES_DB = [
         name: 'Basic Box', 
         price: 1000, 
         color: '#ff6a00', 
-        stockRange: [20, 500], 
+        stockRange: [25, 100], 
         img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%201.png?alt=media&token=29742b82-3e51-408c-948e-c3bae712e2ca', 
         imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%202.png?alt=media&token=93a488b5-9ed7-4ab0-9333-3a67ca37fe3c',
         rewards: [
-            { tier: 'Common', label: '250-750 Coins', chance: 60, style: 't-common' },
-            { tier: 'Uncommon', label: '1-3 Diamonds', chance: 25, style: 't-uncommon' },
-            { tier: 'Rare', label: '500-1500 Coins', chance: 10, style: 't-rare' },
-            { tier: 'Epic', label: '3-5 Diamonds', chance: 4.5, style: 't-epic' },
-            { tier: 'Legendary', label: 'Random Badge', chance: 0.5, style: 't-legendary' }
+            { tier: 'COMMON', label: '250-750', icon: 'https://iili.io/fhc1SKQ.png', chance: 60, style: 'r-common' },
+            { tier: 'UNCOMMON', label: '1-3', icon: 'https://iili.io/fv5bmtj.png', chance: 25, style: 'r-silver' },
+            { tier: 'RARE', label: '500-1500', icon: 'https://iili.io/fhc1SKQ.png', chance: 10, style: 'r-rare' },
+            { tier: 'EPIC', label: '3-5', icon: 'https://iili.io/fv5bmtj.png', chance: 4.5, style: 'r-epic' },
+            { tier: 'LEGENDARY', label: 'BADGE', icon: 'https://i.ibb.co/4pGm9S2/user-placeholder.png', chance: 0.5, style: 'r-gold' }
         ]
-    },
+    }, 
 
 
 
@@ -10593,18 +10688,17 @@ window.openPrizeView = () => {
     if(!selectedBox || !selectedBox.rewards) return;
     
     const container = document.getElementById('prizeTableBody');
-    container.innerHTML = `<div class="tier-grid"></div>`;
-    const grid = container.querySelector('.tier-grid');
+    container.innerHTML = `<div class="loot-grid-v4"></div>`;
+    const grid = container.querySelector('.loot-grid-v4');
 
     selectedBox.rewards.forEach(r => {
         const card = document.createElement('div');
-        card.className = `tier-card ${r.style}`;
+        card.className = `loot-card-v4 ${r.style}`;
         card.innerHTML = `
-            <span class="tier-name">${r.tier}</span>
-            <div class="tier-reward">
-                ${r.label} <img src="${r.icon}">
-            </div>
-            <span class="tier-chance">${r.chance}% CHANCE</span>
+            <div class="tier-header">${r.tier}</div>
+            <img src="${r.icon}" class="loot-main-img">
+            <div class="loot-tag-v4">${r.label}</div>
+            <div class="loot-chance-v4">${r.chance}% CHANCE</div>
         `;
         grid.appendChild(card);
     });
@@ -10725,6 +10819,7 @@ window.revealReward = async () => {
         return;
     }
 
+    // Animation
     boxImg.classList.remove('box-shake');
     boxImg.src = lockedBox.imgOpen;
     boxImg.classList.add('open');
@@ -10736,60 +10831,67 @@ window.revealReward = async () => {
         let winDiamonds = 0;
         let wonBadge = null;
 
+        // Roll for each box
         for (let i = 0; i < lockedQty; i++) {
             const roll = Math.random() * 100;
-            
-            if (roll <= 0.5 && !wonBadge) { // 0.5% Legendary (Max 1 badge per mass-open for balance)
+            if (roll <= 0.5 && !wonBadge) {
                 wonBadge = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
-            } 
-            else if (roll <= 5) { // EPIC
-                winDiamonds += Math.floor(Math.random() * 3) + 3; 
-            }
-            else if (roll <= 15) { // RARE
-                winCoins += Math.floor(Math.random() * 1001) + 500;
-            }
-            else if (roll <= 40) { // UNCOMMON
-                winDiamonds += Math.floor(Math.random() * 3) + 1;
-            }
-            else { // COMMON
-                winCoins += Math.floor(Math.random() * 501) + 250;
+            } else if (roll <= 5) {
+                winDiamonds += Math.floor(Math.random() * 3) + 3; // Epic
+            } else if (roll <= 15) {
+                winCoins += Math.floor(Math.random() * 1001) + 500; // Rare
+            } else if (roll <= 40) {
+                winDiamonds += Math.floor(Math.random() * 3) + 1; // Uncommon
+            } else {
+                winCoins += Math.floor(Math.random() * 501) + 250; // Common
             }
         }
 
-        // --- DATABASE UPDATE ---
-        const userRef = doc(db, "accounts", auth.currentUser.uid);
-        const updates = { coins: increment(winCoins), diamonds: increment(winDiamonds) };
-        if(wonBadge) updates.ownedBadges = arrayUnion(wonBadge.id);
-        await updateDoc(userRef, updates);
+        // Database Sync
+        try {
+            const userRef = doc(db, "accounts", auth.currentUser.uid);
+            const updates = { coins: increment(winCoins), diamonds: increment(winDiamonds) };
+            if(wonBadge) updates.ownedBadges = arrayUnion(wonBadge.id);
+            await updateDoc(userRef, updates);
+        } catch(e) { console.error(e); }
 
-        // --- FINAL RESULTS MODAL (SICK UI) ---
+        // --- THE NEXT-LEVEL RESULT MODAL ---
         const modal = document.getElementById('rewardModal');
-        modal.querySelector('h2').innerText = "DECRYPTED RESULTS";
+        modal.querySelector('h2').innerText = "DECRYPT COMPLETE";
+        modal.querySelector('h2').style.color = "#00ff88";
+
+        let resultHTML = `<div style="text-align:center; padding:10px;">`;
         
-        let resultHTML = `<div style="text-align:center; padding:20px;">`;
         if(winCoins > 0) {
             resultHTML += `
                 <div class="reward-line" style="color:#ffd700;">
-                    +${winCoins.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png">
+                    <img src="https://iili.io/fhc1SKQ.png" style="width:40px; height:40px;">
+                    +${winCoins.toLocaleString()}
                 </div>`;
         }
+        
         if(winDiamonds > 0) {
             resultHTML += `
                 <div class="reward-line" style="color:#00ff88;">
-                    +${winDiamonds} <img src="https://iili.io/fv5bmtj.png">
+                    <img src="https://iili.io/fv5bmtj.png" style="width:35px; height:35px;">
+                    +${winDiamonds}
                 </div>`;
         }
+
         if(wonBadge) {
             resultHTML += `
-                <div style="margin-top:20px; font-family:'Orbitron'; font-size:10px; color:#aaa;">NEW IDENTITY FOUND:</div>
-                <div style="display:inline-block; padding:10px 20px; background:${wonBadge.color}; color:#000; border-radius:10px; font-family:'Montserrat'; font-weight:900; margin-top:5px; box-shadow:0 0 20px ${wonBadge.color};">
-                    ${wonBadge.text}
+                <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+                    <div style="font-family:'Orbitron'; font-size:9px; color:#aaa; letter-spacing:2px; margin-bottom:10px;">UNIQUE ITEM RECOVERED</div>
+                    <span class="shop-badge-preview" style="background:${wonBadge.color}; color:#000; padding:10px 20px; font-size:14px; border-radius:8px;">
+                        <i class="fas ${wonBadge.icon}"></i> ${wonBadge.text}
+                    </span>
                 </div>`;
         }
+        
         resultHTML += `</div>`;
 
         modal.querySelector('p').innerHTML = resultHTML;
-        modal.querySelector('.reward-coins-box').style.display = 'none'; // Hide the old ugly box
+        modal.querySelector('.reward-coins-box').style.display = 'none';
         modal.classList.add('active');
 
         lastPurchasedQty = 0;
