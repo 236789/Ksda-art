@@ -5715,6 +5715,55 @@ body {
     border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 .chance-tag { color: #aaa; font-family: monospace; }
+
+
+
+/* Badge pentru numărul de cutii rămase */
+.stock-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid currentColor;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-family: 'Orbitron';
+    font-size: 10px;
+    font-weight: 800;
+    z-index: 5;
+}
+
+/* Overlay Stoc Epuizat */
+.stock-out-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 11, 20, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    border-radius: 2px;
+    backdrop-filter: blur(4px);
+    border: 1px solid #ff4757;
+    pointer-events: all; /* Blochează click-urile pe card */
+}
+
+.stock-out-text {
+    font-family: 'Montserrat';
+    font-weight: 900;
+    color: #ff4757;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px #ff4757;
+}
+
+/* Animație pentru deschiderea cutiei */
+.unboxing-box-img.open {
+    transform: scale(1.2) translateY(-20px);
+    filter: drop-shadow(0 0 50px currentColor);
+}
   </style>
 </head>
 <body>
@@ -10098,203 +10147,195 @@ if (document.readyState === 'loading') {
 }
 
 
-// --- MYSTERY BOX DATABASE ---
+// --- MYSTERY BOX DATABASE (UPDATED WITH OPEN IMAGES & STOCK RANGES) ---
 const BOXES_DB = [
-    { id: 'box_basic', name: 'Basic Box', price: 1000, img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%201.png?alt=media&token=29742b82-3e51-408c-948e-c3bae712e2ca', color: '#ff6a00' },
-    { id: 'box_gold', name: 'Gold Box', price: 5000, img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FGold%20box%20closed.png?alt=media&token=ef29b342-4564-4379-b1ff-9b44eb926d5c', color: '#ffd700' },
-    { id: 'box_titanium', name: 'Titanium Box', price: 7500, img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Close.png?alt=media&token=e7bbc3f0-9ab6-46c2-a8d5-e5f76d4aed71', color: '#00e5ff' },
-    { id: 'box_void', name: 'Void Box', price: 15000, img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20close.png?alt=media&token=7da7421a-caf5-4a8a-a368-02393550bbe8', color: '#7000ff' },
-    { id: 'box_celestial', name: 'Celestial Box', price: 25000, img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20chest%20close%20%20(2).png?alt=media&token=b23d04ee-ce8c-43d7-b2a8-315255e62ca6', color: '#ffffff' }
+    { 
+        id: 'box_basic', name: 'Basic Box', price: 1000, color: '#ff6a00',
+        img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%201.png?alt=media&token=29742b82-3e51-408c-948e-c3bae712e2ca',
+        imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%202.png?alt=media&token=93a488b5-9ed7-4ab0-9333-3a67ca37fe3c',
+        stockRange: [20, 500] 
+    },
+    { 
+        id: 'box_gold', name: 'Gold Box', price: 5000, color: '#ffd700',
+        img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FGold%20box%20closed.png?alt=media&token=ef29b342-4564-4379-b1ff-9b44eb926d5c',
+        imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FGold%20box%20Open.png?alt=media&token=815a539a-8fd8-495e-b0e6-790f7927352b',
+        stockRange: [10, 50]
+    },
+    { 
+        id: 'box_titanium', name: 'Titanium Box', price: 7500, color: '#00e5ff',
+        img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Close.png?alt=media&token=e7bbc3f0-9ab6-46c2-a8d5-e5f76d4aed71',
+        imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Open.png?alt=media&token=43e6e8fc-6228-438f-97b3-0cbf7d5012ce',
+        stockRange: [8, 30]
+    },
+    { 
+        id: 'box_void', name: 'Void Box', price: 15000, color: '#7000ff',
+        img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20close.png?alt=media&token=7da7421a-caf5-4a8a-a368-02393550bbe8',
+        imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20open.png?alt=media&token=39eb8f91-2c77-4bea-9337-ebf5ea391dc3',
+        stockRange: [5, 15]
+    },
+    { 
+        id: 'box_celestial', name: 'Celestial Box', price: 25000, color: '#ffffff',
+        img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20chest%20close%20%20(2).png?alt=media&token=b23d04ee-ce8c-43d7-b2a8-315255e62ca6',
+        imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20Chest%20Open%20.png?alt=media&token=68f031ce-57e2-44b2-b9e0-32453d4d1f10',
+        stockRange: [5, 10]
+    }
 ];
 
-let selectedBox = null;
-let selectedQty = 1;
+let globalStock = {};
 
-// --- OPEN SHOP ---
+// 1. SYNC STOCK SYSTEM
+function initMysteryStockSync() {
+    onSnapshot(doc(db, "system", "mystery_box_stock"), async (snap) => {
+        const now = Date.now();
+        
+        if (!snap.exists() || (now - snap.data().lastReset > 3600000)) {
+            // Trigger Reset if 1 hour passed or doc missing
+            await resetGlobalStock();
+        } else {
+            globalStock = snap.data().counts;
+            // Update UI if the shop is open
+            if(document.getElementById('mysteryShopModal').classList.contains('active')) {
+                renderMysteryShopItems();
+            }
+        }
+    });
+}
+
+async function resetGlobalStock() {
+    const newStock = {};
+    BOXES_DB.forEach(box => {
+        const [min, max] = box.stockRange;
+        newStock[box.id] = Math.floor(Math.random() * (max - min + 1) + min);
+    });
+    
+    await setDoc(doc(db, "system", "mystery_box_stock"), {
+        counts: newStock,
+        lastReset: Date.now()
+    });
+}
+
+// 2. RENDER SHOP WITH STOCK CHECK
 window.openMysteryShop = () => {
     if(!auth.currentUser) return alert("Loghează-te!");
-    const list = document.getElementById('mysteryBoxList');
-    if(!list) return;
-    list.innerHTML = '';
-    
-    BOXES_DB.forEach(box => {
-        const card = document.createElement('div');
-        // Adăugăm clasa m-celestial dacă este cazul pentru stilul special de PC
-        const specialClass = box.id === 'box_celestial' ? 'm-celestial' : '';
-        card.className = `mystery-card-v4 ${specialClass}`;
-        
-        // Stil inline pentru glow-ul specific fiecărei cutii
-        const glowColor = box.id === 'box_celestial' ? 'rgba(112, 0, 255, 0.6)' : box.color;
-        
-// În interiorul window.openMysteryShop, la loop-ul BOXES_DB.forEach:
-card.innerHTML = `
-    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-    
-    <!-- MODIFICAT: Am adăugat clasa mb-main-img -->
-    <img src="${box.img}" class="mb-main-img" style="filter: drop-shadow(0 0 15px ${glowColor});">
-    
-    <div style="font-family:'Montserrat'; font-weight:900; color:#fff; font-size:14px; margin-top:10px;">${box.name.toUpperCase()}</div>
-    
-    <div style="color:${box.color}; font-family:'Orbitron'; font-size:12px; margin:15px 0; font-weight:900; display:flex; align-items:center; justify-content:center; gap:5px;">
-        ${box.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="14" style="height:14px !important;">
-    </div>
-    
-    <button class="bm-price-btn-v4" style="background:${box.color} !important; color:#000; font-size:9px; font-weight:900;">SELECTEAZĂ</button>
-`;
-        card.onclick = () => openBoxDetail(box);
-        list.appendChild(card);
-    });
+    renderMysteryShopItems();
     document.getElementById('mysteryShopModal').classList.add('active');
 };
 
-function openBoxDetail(box) {
-    selectedBox = box;
-    selectedQty = 1;
-    const modal = document.getElementById('boxDetailModal');
-    const accent = document.getElementById('boxDetailAccent');
+function renderMysteryShopItems() {
+    const list = document.getElementById('mysteryBoxList');
+    list.innerHTML = '';
     
-    // Aplicăm culorile dinamice în modalul de detalii
-    accent.style.borderColor = box.color;
-    document.getElementById('detailBoxImg').src = box.img;
-    
-    const nameEl = document.getElementById('detailBoxName');
-    nameEl.innerText = box.name.toUpperCase();
-    nameEl.style.color = box.color;
-    nameEl.style.textShadow = `0 0 15px ${box.color}`;
-    
-    updateBoxTotal();
-    modal.classList.add('active');
-}
+    BOXES_DB.forEach(box => {
+        const count = globalStock[box.id] || 0;
+        const isOut = count <= 0;
+        const specialClass = box.id === 'box_celestial' ? 'm-celestial' : '';
+        
+        const card = document.createElement('div');
+        card.className = `mystery-card-v4 ${specialClass}`;
+        if(isOut) card.style.pointerEvents = 'none';
 
-// Rezolvare eroare: openPrizeView is not defined
-window.openPrizeView = () => {
-    if(!selectedBox) return;
-    const table = document.getElementById('prizeTableBody');
-    if(!table) return;
-    table.innerHTML = '';
-    
-    // Configurare șanse și sume
-    const rewards = [
-        { name: "Suma Minimă", val: `${Math.floor(selectedBox.price * 0.5).toLocaleString()} Coins`, chance: "40%" },
-        { name: "Suma Medie", val: `${selectedBox.price.toLocaleString()} Coins`, chance: "45%" },
-        { name: "Big Win", val: `${Math.floor(selectedBox.price * 1.8).toLocaleString()} Coins`, chance: "14%" },
-        { name: "JACKPOT", val: `${(selectedBox.price * 5).toLocaleString()} Coins`, chance: "1%" }
-    ];
-
-    rewards.forEach(r => {
-        table.innerHTML += `
-            <tr>
-                <td style="color:#fff; font-weight:700; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05);">${r.name}</td>
-                <td style="color:#ffd700; font-weight:800; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05);">${r.val}</td>
-                <td style="color:#aaa; font-family:monospace; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">${r.chance}</td>
-            </tr>
+        card.innerHTML = `
+            ${isOut ? `
+                <div class="stock-out-overlay">
+                    <i class="fas fa-ban" style="color:#ff4757; font-size:30px; margin-bottom:10px;"></i>
+                    <div class="stock-out-text">STOC EPUIZAT</div>
+                </div>
+            ` : ''}
+            
+            <div class="stock-badge" style="color:${box.color}">STOC: ${count}</div>
+            <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+            <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+            
+            <img src="${box.img}" class="mb-main-img" style="filter: drop-shadow(0 0 15px ${box.color});">
+            <div style="font-family:'Montserrat'; font-weight:900; color:#fff; font-size:14px; margin-top:10px;">${box.name.toUpperCase()}</div>
+            <div style="color:${box.color}; font-family:'Orbitron'; font-size:12px; margin:10px 0; font-weight:900;">
+                ${box.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="12">
+            </div>
+            <button class="bm-price-btn-v4" style="background:${box.color} !important; color:#000;">SELECTEAZĂ</button>
         `;
+        
+        card.onclick = () => openBoxDetail(box);
+        list.appendChild(card);
     });
-
-    document.getElementById('prizeListModal').classList.add('active');
-};
-
-window.setBoxQty = (q) => {
-    const btns = document.querySelectorAll('.qty-btn');
-    btns.forEach(b => b.classList.remove('active'));
-    
-    if(q === 'max') {
-        const userCoins = window.currentUserData?.coins || 0;
-        selectedQty = Math.floor(userCoins / selectedBox.price);
-        if(selectedQty < 1) selectedQty = 1;
-        // Folosim event.currentTarget pentru a găsi butonul corect
-        if(event) event.currentTarget.classList.add('active');
-    } else {
-        selectedQty = q;
-        if(event) event.currentTarget.classList.add('active');
-    }
-    updateBoxTotal();
-};
-
-function updateBoxTotal() {
-    if(!selectedBox) return;
-    const total = selectedBox.price * selectedQty;
-    document.getElementById('boxTotalDisplay').innerHTML = `Total: ${total.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="20">`;
 }
 
+// 3. SECURE PURCHASE (TRANSACTION)
 window.initiateBoxPurchase = async () => {
-    if(!auth.currentUser || !selectedBox) return;
+    if(!selectedBox) return;
     const total = selectedBox.price * selectedQty;
-    const userCoins = window.currentUserData?.coins || 0;
-    
-    if(userCoins < total) return showCustomAlert("Nu ai suficienți coins!", "FONDURI INSUFICIENTE");
-    
-    const confirm = await showCustomConfirm(`Confirmi achiziția a ${selectedQty}x ${selectedBox.name} pentru ${total.toLocaleString()} coins?`, "TRANZACȚIE");
-    if(!confirm) return;
+    const userRef = doc(db, "accounts", auth.currentUser.uid);
+    const stockRef = doc(db, "system", "mystery_box_stock");
 
     try {
-        await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
-            coins: increment(-total)
+        const result = await runTransaction(db, async (transaction) => {
+            const userSnap = await transaction.get(userRef);
+            const stockSnap = await transaction.get(stockRef);
+
+            if (userSnap.data().coins < total) throw "Fonduri insuficiente!";
+            if (stockSnap.data().counts[selectedBox.id] < selectedQty) throw "Stocul s-a epuizat între timp!";
+
+            // Update User
+            transaction.update(userRef, { coins: increment(-total) });
+            
+            // Update Global Stock
+            const updatedCounts = { ...stockSnap.data().counts };
+            updatedCounts[selectedBox.id] -= selectedQty;
+            transaction.update(stockRef, { counts: updatedCounts });
+
+            return true;
         });
-        
-        await logTransaction(-total, "COINS", "Gamble", `Bought ${selectedQty}x ${selectedBox.name}`);
-        
-        closeModal('boxDetailModal');
-        closeModal('mysteryShopModal');
-        
-        startUnboxingSequence();
-    } catch(e) { console.error(e); }
+
+        if(result) {
+            await logTransaction(-total, "COINS", "Gamble", `Bought ${selectedQty}x ${selectedBox.name}`);
+            closeModal('boxDetailModal');
+            startUnboxingSequence();
+        }
+    } catch (e) {
+        showCustomAlert(e, "EROARE TRANZACȚIE");
+    }
 };
 
+// 4. IMPROVED UNBOXING OVERLAY
 function startUnboxingSequence() {
     const overlay = document.getElementById('unboxingOverlay');
     const boxImg = document.getElementById('unboxingBoxImg');
+    
+    // Reset to closed state
     boxImg.src = selectedBox.img;
+    boxImg.classList.add('box-shake');
+    boxImg.classList.remove('open');
     boxImg.style.color = selectedBox.color;
     overlay.style.display = 'flex';
 }
 
 window.revealReward = async () => {
     const boxImg = document.getElementById('unboxingBoxImg');
-    boxImg.classList.remove('box-shake');
-    boxImg.style.transform = 'scale(1.5)';
-    boxImg.style.opacity = '0';
     
+    // 1. Play Opening Animation
+    boxImg.classList.remove('box-shake');
+    boxImg.src = selectedBox.imgOpen; // Change to the OPEN image
+    boxImg.classList.add('open');
+    
+    // Play sound if you want
+    new Audio('https://www.myinstants.com/media/sounds/box-opening.mp3').play().catch(e=>{});
+
     setTimeout(() => {
         document.getElementById('unboxingOverlay').style.display = 'none';
-        boxImg.classList.add('box-shake');
-        boxImg.style.transform = 'scale(1)';
-        boxImg.style.opacity = '1';
         
-        // Logică Random: 1% șansă Jackpot, restul variabil
+        // Generate Reward
         const roll = Math.random();
         let winMultiplier;
-        
-        if(roll <= 0.01) winMultiplier = 5; // Jackpot
-        else if(roll <= 0.15) winMultiplier = 1.8; // Big Win
-        else winMultiplier = (Math.random() * (1.2 - 0.5) + 0.5); // Normal range
+        if(roll <= 0.01) winMultiplier = 5; 
+        else if(roll <= 0.15) winMultiplier = 1.8;
+        else winMultiplier = (Math.random() * (1.2 - 0.5) + 0.5);
         
         const winAmount = Math.floor(selectedBox.price * winMultiplier * selectedQty);
         showRewardModal(winAmount);
-    }, 600);
+    }, 1200);
 };
 
-function showRewardModal(amount) {
-    const modal = document.getElementById('rewardModal');
-    if(!modal) return;
-    modal.querySelector('h2').innerText = "🎰 REZULTAT GAMBLE";
-    modal.querySelector('p').innerText = `Ai deschis cutia și ai găsit:`;
-    modal.querySelector('.reward-coins-box span').innerText = amount.toLocaleString();
-    modal.classList.add('active');
-    
-    updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(amount) });
-    logTransaction(amount, "COINS", "Gamble", `Won from ${selectedBox.name}`);
-}
-
-// Update Adaptive Nav Sensor (Asigură-te că pui asta în funcția ta initAdaptiveNav)
-// const sections = {
-//     'zone-hero': 'state-hero',
-//     'zone-vault': 'state-vault',
-//     'zone-atelier': 'state-atelier',
-//     'zone-mystery': 'state-mystery', // <--- Adăugat
-//     'zone-terminal': 'state-terminal'
-// };
+// Start the stock sync on page load
+initMysteryStockSync();
 </script>
 </body>
 </html>
