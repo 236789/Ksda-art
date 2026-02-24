@@ -10322,12 +10322,12 @@ function initMysteryStockSync() {
             });
             await setDoc(doc(db, "system", "mystery_box_stock"), { counts: newStock, lastReset: Date.now() });
         } else {
-            globalStock = snap.data().counts;
-            
-            // 1. INSTANT REFRESH: If main shop is open, re-render cards
-            if (document.getElementById('mysteryShopModal').classList.contains('active')) {
-                renderMysteryShopItems();
-            }
+// Add this inside initMysteryStockSync where you update globalStock:
+globalStock = snap.data().counts;
+
+// THE FIX: Trigger UI updates instantly
+if (document.getElementById('mysteryShopModal').classList.contains('active')) renderMysteryShopItems();
+if (document.getElementById('boxDetailModal').classList.contains('active')) updateBoxTotal();
 
             // 2. INSTANT REFRESH: If detail modal is open, adjust calculations
             if (document.getElementById('boxDetailModal').classList.contains('active') && selectedBox) {
