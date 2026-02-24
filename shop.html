@@ -5488,54 +5488,103 @@ body {
             <button class="close-pop" onclick="closeModal('blackMarketModal')" style="border-radius: 0; border: 1px solid #00ff88; background: transparent; width: 40px; height: 40px; position: static !important;">✕</button>
         </div>
 
-<!-- Containerul care face SCROLL -->
-<div class="bm-content-scroll">
-    <div class="bm-grid-v4">
-        <!-- OFERTA: DEATH RAIN -->
-        <div class="bm-offer-card-v4" id="bmRainCard" onclick="triggerRain()">
-            <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-            <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-            <i class="fas fa-cloud-showers-heavy" style="font-size: 30px; color: #00ff88;"></i>
-            <div class="bm-title-v4">DEATH RAIN</div>
-            <div class="bm-desc-v4">Oferă 5,000 Coins tuturor celor online.</div>
-            <button class="bm-price-btn-v4">50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem"></button>
-            
-            <!-- OVERLAY COOLDOWN RAIN -->
-            <div id="bmRainOverlay" class="bm-overlay">
-                <i class="fas fa-lock"></i>
-                <div id="bmRainTimer" class="bm-timer-text">00:00</div>
+<!-- BLACK MARKET MODAL (REMASTERED & FULLY FUNCTIONAL) -->
+<div id="blackMarketModal" class="account-modal-overlay">
+    <div class="bm-modal-v4" style="width: 95%; max-width: 850px; height: 85vh;">
+        
+        <!-- Efectul CRT Terminal -->
+        <div class="bm-scanline-overlay"></div>
+
+        <!-- Header Terminal -->
+        <div style="background: rgba(0, 255, 136, 0.05); padding: 30px; border-bottom: 1px solid #00ff88; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div>
+                <div style="font-family:'Montserrat'; font-size: 28px; color:#00ff88; text-shadow: 0 0 15px #00ff88;">BLACK_MARKET</div>
+                <div style="font-family:monospace; font-size: 11px; color:#adff2f; opacity:0.8; margin-top:5px;">SECURE_PROTOCOL: ENABLED | /// SERVICII ILEGALE ///</div>
             </div>
+            <button class="close-pop" onclick="closeModal('blackMarketModal')" style="border-radius: 0; border: 1px solid #00ff88; background: transparent; width: 40px; height: 40px; position: static !important; cursor: pointer;">✕</button>
         </div>
 
-        <!-- OFERTA: NEURAL HIJACK -->
-        <div class="bm-offer-card-v4" id="bmHijackCard" onclick="activateHijack()">
-            <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-            <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-            <i class="fas fa-user-secret" style="font-size: 30px; color: #adff2f;"></i>
-            <div class="bm-title-v4">NEURAL HIJACK</div>
-            <div class="bm-desc-v4">Furi 35% din câștigurile altora timp de 25 min.</div>
-            <button class="bm-price-btn-v4">150 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem"></button>
-            
-            <!-- OVERLAY HIJACK ACTIVE -->
-            <div id="bmHijackOverlay" class="bm-overlay" style="border-color: #ff4757;">
-                <i class="fas fa-biohazard" style="color: #ff4757;"></i>
-                <div id="bmHijackTimer" class="bm-timer-text" style="color: #ff4757;">00:00</div>
-            </div>
-        </div>
+        <!-- Containerul de Scroll pentru Oferte -->
+        <div class="bm-content-scroll" style="position: relative; z-index: 105;">
+            <div id="rainAnimContainer" class="bm-rain-container"></div> <!-- Container pentru animația de bani -->
 
-        <!-- OFERTA: LEADERBOARD BRIBE -->
-        <div class="bm-offer-card-v4" id="bmBribeCard" onclick="openBribeSelection()">
-            <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-            <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-            <i class="fas fa-handshake" style="font-size: 30px; color: #ffd700;"></i>
-            <div class="bm-title-v4">RANK BRIBE</div>
-            <div class="bm-desc-v4">Cumpără locul #1 în orice Top timp de 60 min.</div>
-            <button class="bm-price-btn-v4">50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem"></button>
+            <div class="bm-grid-v4">
+                
+                <!-- 1. DEATH RAIN -->
+                <div class="bm-offer-card-v4" id="bmRainCard" onclick="triggerRain()">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                    <i class="fas fa-cloud-showers-heavy" style="font-size: 30px; color: #fff;"></i>
+                    <div class="bm-title-v4">PLOAIE TORENȚIALĂ</div>
+                    <div class="bm-desc-v4">Declanșezi 5,000 monede gratuit pentru toți cei online.</div>
+                    <button class="bm-price-btn-v4">50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem"></button>
+                    
+                    <!-- Cooldown Overlay -->
+                    <div id="bmRainOverlay" class="bm-overlay">
+                        <i class="fas fa-lock"></i>
+                        <div id="bmRainTimer" class="bm-timer-text">00:00</div>
+                    </div>
+                </div>
+
+                <!-- 2. NEURAL HIJACK -->
+                <div class="bm-offer-card-v4" id="bmHijackCard" onclick="activateHijack()">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                    <i class="fas fa-satellite-dish" style="font-size: 30px; color: #adff2f;"></i>
+                    <div class="bm-title-v4">NEURAL HIJACK</div>
+                    <div class="bm-desc-v4">Furi 35% din tot ce câștigă alții timp de 25 min.</div>
+                    <button class="bm-price-btn-v4">150 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem"></button>
+                    
+                    <!-- Active Status Overlay -->
+                    <div id="bmHijackOverlay" class="bm-overlay" style="border-color: #ff4757;">
+                        <i class="fas fa-biohazard" style="color: #ff4757;"></i>
+                        <div id="bmHijackTimer" class="bm-timer-text" style="color: #ff4757;">00:00</div>
+                    </div>
+                </div>
+
+                <!-- 3. RANK BRIBE -->
+                <div class="bm-offer-card-v4" id="bmBribeCard" onclick="openBribeSelection()">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                    <i class="fas fa-handshake" style="font-size: 30px; color: #ffd700;"></i>
+                    <div class="bm-title-v4">MITUIEȘTE SISTEMUL</div>
+                    <div class="bm-desc-v4">Preiei locul #1 în orice clasament timp de 60 min.</div>
+                    <button class="bm-price-btn-v4">50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem"></button>
+                    
+                    <!-- Bribe Status Overlay -->
+                    <div id="bmBribeOverlay" class="bm-overlay">
+                        <i class="fas fa-gavel"></i>
+                        <div id="bmBribeTimer" class="bm-timer-text">00:00</div>
+                    </div>
+                </div>
+
+                <!-- 4. SWAP / EXCHANGE -->
+                <div class="bm-offer-card-v4" id="bmExchangeCard" onclick="openExchangeModal()">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/images%2F3690b989-4747-40a5-8eea-3eef98477fc9_removalai_preview.png?alt=media&token=8e291581-1581-4714-b277-813dfdfd88fa" style="height: 40px; width: auto; margin-bottom: 10px;">
+                    <div class="bm-title-v4">SCHIMB VALUTAR</div>
+                    <div class="bm-desc-v4">Vinde sau cumpără diamante folosind monede KSDA.</div>
+                    <button class="bm-price-btn-v4" style="background: transparent !important; border: 1px solid #00ff88; color: #00ff88;">DESCHIDE PIAȚA</button>
+                </div>
+
+                <!-- 5. NEW IDENTITY -->
+                <div class="bm-offer-card-v4" id="bmPfpCard" onclick="openPfpChangeModal()">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                    <i class="fas fa-user-secret" style="font-size: 30px; color: #ff00ff;"></i>
+                    <div class="bm-title-v4">IDENTITATE NOUĂ</div>
+                    <div class="bm-desc-v4">Înlocuiește poza Google cu o imagine personalizată.</div>
+                    <button class="bm-price-btn-v4">15 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem"></button>
+                </div>
+
+            </div>
             
-            <!-- OVERLAY BRIBE ACTIVE -->
-            <div id="bmBribeOverlay" class="bm-overlay">
-                <i class="fas fa-gavel"></i>
-                <div id="bmBribeTimer" class="bm-timer-text">00:00</div>
+            <!-- Terminal Footer -->
+            <div style="background: #000; padding: 20px 30px; font-family: monospace; font-size: 10px; color: #004400; border-top: 1px solid rgba(0, 255, 136, 0.2);">
+                > CACHE_CLEARED: SUCCESS...<br>
+                > USER_LOGS: ENCRYPTED...<br>
+                > LOGOUT_TIMER: INACTIVE
             </div>
         </div>
     </div>
