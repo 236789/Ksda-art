@@ -6116,21 +6116,122 @@ body {
         </div>
     </div>
 </div>
-     ========================================= -->
+
 <div id="alteShopModal" class="account-modal-overlay">
     <div class="shop-modal-v4 accent-alte" style="width: 95%; max-width: 600px; height: auto; max-height: 85vh;">
+        
+        <!-- Efectul CRT Terminal -->
         <div class="bm-scanline-overlay"></div>
+
+        <!-- Header Terminal -->
         <div style="background: rgba(255, 215, 0, 0.05); padding: 25px; border-bottom: 1px solid #ffd700; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
             <div>
                 <div class="title-alte" style="font-family:'Montserrat'; font-size: 22px; font-weight: 900;">SYSTEM_UTILITIES</div>
                 <div style="font-family:monospace; font-size: 10px; color:#aaa;">EXTRA_TOOLS: ENABLED | ACCESS: AUTHORIZED</div>
             </div>
-            <button class="close-pop" onclick="closeModal('alteShopModal')" style="border-radius:0; border:1px solid #ffd700; background:transparent; position:static !important;">✕</button>
+            <button class="close-pop" onclick="closeModal('alteShopModal')" style="border-radius:0; border:1px solid #ffd700; background:transparent; position:static !important; width:40px; height:40px; cursor:pointer;">✕</button>
         </div>
-        <div class="bm-content-scroll" style="padding: 20px;">
-            <div id="alteContent" style="display: flex; flex-direction: column; gap: 15px;">
-                <!-- Conținutul (Change Name, Donate etc.) va fi injectat aici sau rămâne cel din versiunea anterioară -->
+
+        <!-- Container de Scroll (Aici am pus logica ta originală) -->
+        <div class="bm-content-scroll" style="padding: 20px; z-index: 105; position: relative;">
+            
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                
+                <!-- Option 1: Change Name (CUMPARA IMAGE) -->
+                <div class="v4-badge-item" style="display: flex; flex-direction: row; justify-content: space-between; padding: 20px; align-items: center;">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                    
+                    <div style="text-align: left;">
+                        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #fff;">SCHIMBĂ NUMELE</div>
+                        <div style="font-size: 10px; color: #aaa;">Cooldown: 7 Zile</div>
+                        <div style="color: var(--gold); font-weight: 800; font-size: 12px; margin-top:5px;">2.500 <img src="https://iili.io/fhc1SKQ.png" width="12"></div>
+                    </div>
+                    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/images%2Fcumpara%20.png?alt=media&token=ad64b20d-9ce5-43d7-95b4-6b491295dfec" class="buy-btn-img" onclick="openNameChangeModal()">
+                </div>
+
+                <!-- Option 2: Donate (DONEAZA IMAGE) -->
+                <div class="v4-badge-item" style="display: flex; flex-direction: row; justify-content: space-between; padding: 20px; align-items: center;">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+
+                    <div style="text-align: left;">
+                        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #fff;">DONEAZĂ COINS</div>
+                        <div style="font-size: 10px; color: #aaa;">Trimite cuiva drag</div>
+                        <div id="donateCooldownTimer" style="font-size: 11px; color: var(--error); margin-top: 5px; display: none; font-weight: 700;">
+                            <i class="fas fa-clock"></i> <span id="donateTimeLeft">00:00</span>
+                        </div>
+                    </div>
+                    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/images%2Fdoneaza.png?alt=media&token=83620518-2824-416e-ab6d-5f67c0f76c8c" class="buy-btn-img" id="donateStartBtn" onclick="openDonationList()">
+                </div>
+
+                <!-- Option 3: Text Colors (SHOP IMAGE) -->
+                <div class="v4-badge-item" style="display: flex; flex-direction: row; justify-content: space-between; padding: 20px; align-items: center;">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+
+                    <div style="text-align: left;">
+                        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #00e5ff;">TEXT COLORS</div>
+                        <div style="font-size: 10px; color: #aaa;">Culoare nume animată</div>
+                    </div>
+                    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/images%2FShop.png?alt=media&token=c392cb10-b535-478c-9a17-c3c964387c33" class="buy-btn-img" onclick="closeModal('alteShopModal'); openTextShop();">
+                </div>
+
+                <!-- Option 4: Unlock GIFs -->
+                <div class="v4-badge-item" style="display: flex; flex-direction: row; justify-content: space-between; padding: 20px; align-items: center;">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+
+                    <div style="text-align: left;">
+                        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #ff00ff;">UNLOCK GIFS</div>
+                        <div style="font-size: 10px; color: #aaa;">Permisiune GIF pe chat</div>
+                    </div>
+                    
+                    <div id="gifBuyContainer" style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                        <button class="buy-badge-btn" onclick="buyGifs('coins')" style="background: var(--gold); color: #000; width: 110px; display: flex; align-items: center; justify-content: center; gap: 5px; border-radius:4px; font-family:'Orbitron'; font-weight:900;">
+                            5.000 <img src="https://iili.io/fhc1SKQ.png" width="16">
+                        </button>
+                        <button class="buy-badge-btn" onclick="buyGifs('diamonds')" style="background: #00e5ff; color: #000; width: 110px; display: flex; align-items: center; justify-content: center; gap: 5px; border-radius:4px; font-family:'Orbitron'; font-weight:900;">
+                            3 <img src="https://iili.io/fv5bmtj.png" width="16">
+                        </button>
+                    </div>
+
+                    <div id="gifOwnedLabel" style="display:none; color: #00ff88; font-weight: 800; font-size: 12px; font-family: 'Orbitron';">
+                        DEȚINUT <i class="fas fa-check"></i>
+                    </div>
+                </div>
+
+                <!-- Option 5: Unlock Stickers -->
+                <div class="v4-badge-item" style="display: flex; flex-direction: row; justify-content: space-between; padding: 20px; align-items: center;">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+
+                    <div style="text-align: left;">
+                        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #ff9900;">UNLOCK STICKERS</div>
+                        <div style="font-size: 10px; color: #aaa;">Stickere exclusive KSDA</div>
+                    </div>
+                    
+                    <div id="stickerBuyContainer" style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                        <button class="buy-badge-btn" onclick="buyStickers('coins')" style="background: var(--gold); color: #000; width: 110px; display: flex; align-items: center; justify-content: center; gap: 5px; border-radius:4px; font-family:'Orbitron'; font-weight:900;">
+                            5.000 <img src="https://iili.io/fhc1SKQ.png" width="16">
+                        </button>
+                        <button class="buy-badge-btn" onclick="buyStickers('diamonds')" style="background: #00e5ff; color: #000; width: 110px; display: flex; align-items: center; justify-content: center; gap: 5px; border-radius:4px; font-family:'Orbitron'; font-weight:900;">
+                            10 <img src="https://iili.io/fv5bmtj.png" width="16">
+                        </button>
+                    </div>
+
+                    <div id="stickerOwnedLabel" style="display:none; color: #00ff88; font-weight: 800; font-size: 12px; font-family: 'Orbitron';">
+                        DEȚINUT <i class="fas fa-check"></i>
+                    </div>
+                </div>
+
             </div>
+        </div>
+
+        <!-- Terminal Footer -->
+        <div style="background: #000; padding: 15px 25px; font-family: monospace; font-size: 9px; color: #444; border-top: 1px solid rgba(255, 215, 0, 0.1);">
+            > ALL_SYSTEMS_GO...<br>
+            > SESSION_ENCRYPTED: TRUE
         </div>
     </div>
 </div>
@@ -6174,9 +6275,7 @@ body {
         </div>
     </div>
 
-<!-- =========================================
-     BADGE SHOP MODAL V4
-     ========================================= -->
+
 <div id="badgeShopModal" class="account-modal-overlay">
     <div class="shop-modal-v4 accent-badges" style="width: 95%; max-width: 850px; height: 85vh;">
         <div class="bm-scanline-overlay"></div>
@@ -6212,9 +6311,7 @@ body {
     </div>
 </div>
 
-<!-- =========================================
-     BANNER SHOP MODAL V4
-     ========================================= -->
+
 <div id="bannerShopModal" class="account-modal-overlay">
     <div class="shop-modal-v4 accent-banners" style="width: 95%; max-width: 850px; height: 85vh;">
         <div class="bm-scanline-overlay"></div>
@@ -6231,9 +6328,7 @@ body {
     </div>
 </div>
 
-<!-- =========================================
-     TEXT SHOP MODAL V4
-     ========================================= -->
+
 <div id="textShopModal" class="account-modal-overlay">
     <div class="shop-modal-v4 accent-texts" style="width: 95%; max-width: 850px; height: 85vh;">
         <div class="bm-scanline-overlay"></div>
