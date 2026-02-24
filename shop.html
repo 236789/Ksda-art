@@ -3899,26 +3899,36 @@ body, p, span, div, input, button {
     margin-left: 5px;
 }
 
-/* --- BLACK MARKET TERMINAL UI --- */
+/* --- BLACK MARKET TERMINAL UI (FIXED) --- */
 .bm-modal-v4 {
     background: #02080a !important;
     border: 1px solid #00ff88 !important;
     box-shadow: 0 0 60px rgba(0, 255, 136, 0.15), inset 0 0 100px #000 !important;
     border-radius: 2px !important;
     position: relative;
-    overflow: hidden;
+    overflow: hidden; /* Overlay-ul CRT se va baza pe asta */
+    display: flex;
+    flex-direction: column;
 }
 
+/* Container de scroll separat pentru conținut */
+.bm-content-scroll {
+    overflow-y: auto;
+    flex: 1;
+    position: relative;
+    z-index: 1;
+}
 
 /* Scanlines Effect - ACUM ESTE FIXAT peste tot modalul */
 .bm-scanline-overlay {
     position: absolute; 
     inset: 0;
+    /* Gradientul CRT */
     background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 255, 136, 0.03) 50%), 
                 linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.01));
     background-size: 100% 3px, 3px 100%;
-    pointer-events: none;
-    z-index: 10; /* Deasupra conținutului */
+    pointer-events: none; /* Permite click-ul prin el */
+    z-index: 100; /* Mereu deasupra conținutului, dar sub butoanele de închidere dacă e cazul */
 }
 /* CRT Scanlines Effect */
 .bm-modal-v4::before {
@@ -8479,7 +8489,7 @@ onAuthStateChanged(auth, async user => {
                 window.currentUserData = d; 
 
         
-        // --- ADD THIS LINE HERE ---
+       // --- FIX TITLU HERO ---
         const heroTitle = document.getElementById('heroTitle');
         if (heroTitle) heroTitle.innerText = `Salut ${d.username.toUpperCase()}`;
                 
@@ -8500,17 +8510,16 @@ onAuthStateChanged(auth, async user => {
 
                 // 3. FORCE UPDATE ALL IMAGES
                 // Header Image
-                if (headerImg) headerImg.src = finalProfilePic;
+        if (headerImg) headerImg.src = finalProfilePic;
                 
                 // Mobile Menu Text
                 if (mobileText) mobileText.innerText = (d.username || "ACCOUNT").toUpperCase();
 
-                // Header Text
-                if(headerText) {
-                    headerText.innerText = (d.username || "").toUpperCase();
-                    headerText.className = 'login-btn-header ' + (d.equippedText?.cssClass || '');
-                }
-
+        if (headerText) {
+            headerText.innerText = (d.username || "").toUpperCase();
+            // Folosim className în loc să edităm style direct dacă e posibil
+            headerText.className = 'login-btn-header ' + (d.equippedText?.cssClass || '');
+        }
                 // Shop Hero Section
                 if(shopCard) shopCard.className = 'user-stats-card ' + (d.equippedBanner?.cssClass || '');
                 if(shopName) {
