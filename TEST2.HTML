@@ -5625,6 +5625,68 @@ body {
     padding: 10px 20px; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s;
 }
 .qty-btn.active { background: #ff6a00; color: #000; border-color: #fff; }
+
+
+/* Celestial Box Elite Theme */
+.m-celestial { 
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(112, 0, 255, 0.2)) !important;
+    border: 2px solid #fff !important;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.2), inset 0 0 20px rgba(112, 0, 255, 0.3) !important;
+}
+.m-celestial:hover {
+    box-shadow: 0 0 50px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* PC Grid Layout: Celestial takes 2 columns */
+@media (min-width: 1024px) {
+    #mysteryBoxList {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+    /* Forțăm Celestial Box (ultimul element) să ocupe tot rândul */
+    .mystery-card-v4:last-child {
+        grid-column: span 2;
+    }
+    .mystery-card-v4:last-child img {
+        height: 120px !important; /* Mai mare pe PC */
+    }
+}
+
+/* Stil Buton View Prizes (MAI MARE) */
+.btn-view-prizes {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #00e5ff;
+    padding: 12px 25px;
+    border-radius: 4px;
+    font-family: 'Orbitron';
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.btn-view-prizes:hover {
+    background: #00e5ff;
+    color: #000;
+    box-shadow: 0 0 20px #00e5ff;
+}
+
+/* Tabel Premii în Modal */
+.prize-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 12px;
+}
+.prize-table td {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.chance-tag { color: #aaa; font-family: monospace; }
   </style>
 </head>
 <body>
@@ -5648,31 +5710,55 @@ body {
     </div>
 </div>
 
-<!-- BOX SELECTION / BUY MODAL -->
+<!-- BOX SELECTION MODAL (FIXED WITH X BTN) -->
 <div id="boxDetailModal" class="account-modal-overlay">
     <div class="shop-modal-v4" id="boxDetailAccent" style="width: 95%; max-width: 450px;">
         <div class="bm-scanline-overlay"></div>
-        <div class="bm-content-scroll" style="padding: 30px; text-align: center;">
-            <div class="v4-badge-item" style="border: none; background: transparent;">
+        
+        <!-- CLOSE BUTTON (X) -->
+        <button class="close-pop" onclick="closeModal('boxDetailModal')" style="z-index: 120; border: 1px solid currentColor;">✕</button>
+
+        <div class="bm-content-scroll" style="padding: 40px 30px 30px; text-align: center;">
+            <div class="v4-badge-item" style="border: none; background: transparent; padding: 0;">
                 <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
                 <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
                 
-                <img id="detailBoxImg" src="" style="width: 180px; margin-bottom: 20px; filter: drop-shadow(0 0 20px currentColor);">
-                <h2 id="detailBoxName" style="font-family:'Montserrat'; font-weight: 900; margin-bottom: 5px;">BOX_NAME</h2>
-                <button onclick="openPrizeView()" style="background:none; border:none; color:#aaa; font-size:10px; cursor:pointer; text-decoration:underline;">[ VIEW_PROBABLE_PRIZES ]</button>
+                <img id="detailBoxImg" src="" style="width: 180px; margin-bottom: 20px; filter: drop-shadow(0 0 25px currentColor);">
+                <h2 id="detailBoxName" style="font-family:'Montserrat'; font-weight: 900; margin-bottom: 15px; font-size: 24px;">BOX_NAME</h2>
                 
-                <div style="display: flex; justify-content: center; gap: 10px; margin: 25px 0;">
+                <!-- VIEW PRIZES BUTTON -->
+                <button class="btn-view-prizes" onclick="openPrizeView()">
+                    <i class="fas fa-eye"></i> Vezi Recompense
+                </button>
+                
+                <div style="display: flex; justify-content: center; gap: 10px; margin: 30px 0 20px;">
                     <button class="qty-btn active" onclick="setBoxQty(1)">1x</button>
                     <button class="qty-btn" onclick="setBoxQty(3)">3x</button>
                     <button class="qty-btn" onclick="setBoxQty('max')">MAX</button>
                 </div>
 
-                <div id="boxTotalDisplay" style="font-family:'Orbitron'; font-size: 18px; color:#fff; margin-bottom: 20px;">
+                <div id="boxTotalDisplay" style="font-family:'Orbitron'; font-size: 20px; color:#fff; margin-bottom: 25px; font-weight: 900;">
                     Total: 0 <img src="https://iili.io/fhc1SKQ.png" width="18">
                 </div>
 
-                <button class="bm-price-btn-v4" id="boxBuyBtn" onclick="initiateBoxPurchase()" style="width: 100%;">AUTHORIZE_PURCHASE</button>
+                <button class="bm-price-btn-v4" id="boxBuyBtn" onclick="initiateBoxPurchase()" style="width: 100%; height: 50px; font-size: 14px;">EXECUTE_PURCHASE</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- PRIZE LIST MODAL (NEW) -->
+<div id="prizeListModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-mystery" style="width: 90%; max-width: 400px;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(0,0,0,0.8); padding: 20px; border-bottom: 1px solid #ff6a00; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family:'Orbitron'; font-size: 14px; color:#ff6a00;">PROBABILITY_LOG</div>
+            <button class="close-pop" onclick="closeModal('prizeListModal')" style="position: static !important; border: 1px solid #ff6a00; background: transparent;">✕</button>
+        </div>
+        <div class="bm-content-scroll" style="padding: 20px;">
+            <table class="prize-table" id="prizeTableBody">
+                <!-- Injected by JS -->
+            </table>
         </div>
     </div>
 </div>
@@ -10000,19 +10086,27 @@ let selectedQty = 1;
 window.openMysteryShop = () => {
     if(!auth.currentUser) return alert("Loghează-te!");
     const list = document.getElementById('mysteryBoxList');
+    if(!list) return;
     list.innerHTML = '';
     
     BOXES_DB.forEach(box => {
         const card = document.createElement('div');
-        card.className = `mystery-card-v4`;
-        card.style.borderColor = box.color + '44';
+        // Adăugăm clasa m-celestial dacă este cazul pentru stilul special de PC
+        const specialClass = box.id === 'box_celestial' ? 'm-celestial' : '';
+        card.className = `mystery-card-v4 ${specialClass}`;
+        
+        // Stil inline pentru glow-ul specific fiecărei cutii
+        const glowColor = box.id === 'box_celestial' ? 'rgba(112, 0, 255, 0.6)' : box.color;
+        
         card.innerHTML = `
             <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
             <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-            <img src="${box.img}" style="height:80px; margin-bottom:15px; filter: drop-shadow(0 0 10px ${box.color}66);">
+            <img src="${box.img}" style="height:80px; margin-bottom:15px; filter: drop-shadow(0 0 15px ${glowColor});">
             <div style="font-family:'Montserrat'; font-weight:900; color:#fff; font-size:14px;">${box.name.toUpperCase()}</div>
-            <div style="color:${box.color}; font-family:'Orbitron'; font-size:12px; margin:10px 0;">${box.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="12"></div>
-            <button class="bm-price-btn-v4" style="background:${box.color} !important; color:#000; font-size:9px;">SELECTEAZĂ</button>
+            <div style="color:${box.color}; font-family:'Orbitron'; font-size:12px; margin:10px 0; font-weight:900;">
+                ${box.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="12">
+            </div>
+            <button class="bm-price-btn-v4" style="background:${box.color} !important; color:#000; font-size:9px; font-weight:900;">SELECTEAZĂ</button>
         `;
         card.onclick = () => openBoxDetail(box);
         list.appendChild(card);
@@ -10026,15 +10120,46 @@ function openBoxDetail(box) {
     const modal = document.getElementById('boxDetailModal');
     const accent = document.getElementById('boxDetailAccent');
     
+    // Aplicăm culorile dinamice în modalul de detalii
     accent.style.borderColor = box.color;
     document.getElementById('detailBoxImg').src = box.img;
-    document.getElementById('detailBoxImg').style.color = box.color;
-    document.getElementById('detailBoxName').innerText = box.name.toUpperCase();
-    document.getElementById('detailBoxName').style.color = box.color;
+    
+    const nameEl = document.getElementById('detailBoxName');
+    nameEl.innerText = box.name.toUpperCase();
+    nameEl.style.color = box.color;
+    nameEl.style.textShadow = `0 0 15px ${box.color}`;
     
     updateBoxTotal();
     modal.classList.add('active');
 }
+
+// Rezolvare eroare: openPrizeView is not defined
+window.openPrizeView = () => {
+    if(!selectedBox) return;
+    const table = document.getElementById('prizeTableBody');
+    if(!table) return;
+    table.innerHTML = '';
+    
+    // Configurare șanse și sume
+    const rewards = [
+        { name: "Suma Minimă", val: `${Math.floor(selectedBox.price * 0.5).toLocaleString()} Coins`, chance: "40%" },
+        { name: "Suma Medie", val: `${selectedBox.price.toLocaleString()} Coins`, chance: "45%" },
+        { name: "Big Win", val: `${Math.floor(selectedBox.price * 1.8).toLocaleString()} Coins`, chance: "14%" },
+        { name: "JACKPOT", val: `${(selectedBox.price * 5).toLocaleString()} Coins`, chance: "1%" }
+    ];
+
+    rewards.forEach(r => {
+        table.innerHTML += `
+            <tr>
+                <td style="color:#fff; font-weight:700; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05);">${r.name}</td>
+                <td style="color:#ffd700; font-weight:800; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05);">${r.val}</td>
+                <td style="color:#aaa; font-family:monospace; padding:10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:right;">${r.chance}</td>
+            </tr>
+        `;
+    });
+
+    document.getElementById('prizeListModal').classList.add('active');
+};
 
 window.setBoxQty = (q) => {
     const btns = document.querySelectorAll('.qty-btn');
@@ -10044,20 +10169,23 @@ window.setBoxQty = (q) => {
         const userCoins = window.currentUserData?.coins || 0;
         selectedQty = Math.floor(userCoins / selectedBox.price);
         if(selectedQty < 1) selectedQty = 1;
-        event.target.classList.add('active');
+        // Folosim event.currentTarget pentru a găsi butonul corect
+        if(event) event.currentTarget.classList.add('active');
     } else {
         selectedQty = q;
-        event.target.classList.add('active');
+        if(event) event.currentTarget.classList.add('active');
     }
     updateBoxTotal();
 };
 
 function updateBoxTotal() {
+    if(!selectedBox) return;
     const total = selectedBox.price * selectedQty;
     document.getElementById('boxTotalDisplay').innerHTML = `Total: ${total.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="20">`;
 }
 
 window.initiateBoxPurchase = async () => {
+    if(!auth.currentUser || !selectedBox) return;
     const total = selectedBox.price * selectedQty;
     const userCoins = window.currentUserData?.coins || 0;
     
@@ -10100,16 +10228,24 @@ window.revealReward = async () => {
         boxImg.style.transform = 'scale(1)';
         boxImg.style.opacity = '1';
         
-        // Generate random reward (Example: Random Coins between 50% and 150% of price)
-        const winAmount = Math.floor(selectedBox.price * (Math.random() * (1.5 - 0.5) + 0.5) * selectedQty);
+        // Logică Random: 1% șansă Jackpot, restul variabil
+        const roll = Math.random();
+        let winMultiplier;
+        
+        if(roll <= 0.01) winMultiplier = 5; // Jackpot
+        else if(roll <= 0.15) winMultiplier = 1.8; // Big Win
+        else winMultiplier = (Math.random() * (1.2 - 0.5) + 0.5); // Normal range
+        
+        const winAmount = Math.floor(selectedBox.price * winMultiplier * selectedQty);
         showRewardModal(winAmount);
     }, 600);
 };
 
 function showRewardModal(amount) {
     const modal = document.getElementById('rewardModal');
+    if(!modal) return;
     modal.querySelector('h2').innerText = "🎰 REZULTAT GAMBLE";
-    modal.querySelector('p').innerText = `Ai deschis cutiile și ai găsit:`;
+    modal.querySelector('p').innerText = `Ai deschis cutia și ai găsit:`;
     modal.querySelector('.reward-coins-box span').innerText = amount.toLocaleString();
     modal.classList.add('active');
     
@@ -10117,9 +10253,14 @@ function showRewardModal(amount) {
     logTransaction(amount, "COINS", "Gamble", `Won from ${selectedBox.name}`);
 }
 
-// Ensure the scroll sensor is updated to include the new section
-// Update your initAdaptiveNav() list of sections:
-// const sections = { 'zone-hero': ..., 'zone-mystery': 'state-mystery', ... }
+// Update Adaptive Nav Sensor (Asigură-te că pui asta în funcția ta initAdaptiveNav)
+// const sections = {
+//     'zone-hero': 'state-hero',
+//     'zone-vault': 'state-vault',
+//     'zone-atelier': 'state-atelier',
+//     'zone-mystery': 'state-mystery', // <--- Adăugat
+//     'zone-terminal': 'state-terminal'
+// };
 </script>
 </body>
 </html>
