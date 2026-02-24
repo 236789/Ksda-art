@@ -5626,17 +5626,45 @@ body {
 }
 .qty-btn.active { background: #ff6a00; color: #000; border-color: #fff; }
 
+/* Imaginea principală (Chest-ul) */
+.mb-main-img {
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+    transition: 0.3s;
+}
 
-/* Celestial Box Elite Theme */
+/* Stil Celestial Box - Elite Galaxy Effect */
 .m-celestial { 
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(112, 0, 255, 0.2)) !important;
-    border: 2px solid #fff !important;
-    box-shadow: 0 0 30px rgba(255, 255, 255, 0.2), inset 0 0 20px rgba(112, 0, 255, 0.3) !important;
-}
-.m-celestial:hover {
-    box-shadow: 0 0 50px rgba(255, 255, 255, 0.5) !important;
+    background: radial-gradient(circle at center, rgba(112, 0, 255, 0.2) 0%, rgba(5, 11, 20, 1) 100%) !important;
+    border: 1px solid #7000ff !important;
+    box-shadow: 0 0 30px rgba(112, 0, 255, 0.3), inset 0 0 20px rgba(112, 0, 255, 0.2) !important;
 }
 
+/* PC Layout Fix: Celestial ocupă 2 coloane și imaginea crește corect */
+@media (min-width: 1024px) {
+    #mysteryBoxList {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    .mystery-card-v4.m-celestial {
+        grid-column: span 2;
+        padding: 40px;
+    }
+    
+    /* ACUM TARGETĂM DOAR IMAGINEA MARE, NU ȘI MONEDA */
+    .mystery-card-v4.m-celestial .mb-main-img {
+        height: 140px;
+    }
+}
+
+/* Asigurăm că iconița de monedă nu e niciodată deformată */
+.mystery-card-v4 img[src*="fhc1SKQ"] {
+    height: 14px !important;
+    width: 14px !important;
+}
 /* PC Grid Layout: Celestial takes 2 columns */
 @media (min-width: 1024px) {
     #mysteryBoxList {
@@ -10098,16 +10126,22 @@ window.openMysteryShop = () => {
         // Stil inline pentru glow-ul specific fiecărei cutii
         const glowColor = box.id === 'box_celestial' ? 'rgba(112, 0, 255, 0.6)' : box.color;
         
-        card.innerHTML = `
-            <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-            <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-            <img src="${box.img}" style="height:80px; margin-bottom:15px; filter: drop-shadow(0 0 15px ${glowColor});">
-            <div style="font-family:'Montserrat'; font-weight:900; color:#fff; font-size:14px;">${box.name.toUpperCase()}</div>
-            <div style="color:${box.color}; font-family:'Orbitron'; font-size:12px; margin:10px 0; font-weight:900;">
-                ${box.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="12">
-            </div>
-            <button class="bm-price-btn-v4" style="background:${box.color} !important; color:#000; font-size:9px; font-weight:900;">SELECTEAZĂ</button>
-        `;
+// În interiorul window.openMysteryShop, la loop-ul BOXES_DB.forEach:
+card.innerHTML = `
+    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+    
+    <!-- MODIFICAT: Am adăugat clasa mb-main-img -->
+    <img src="${box.img}" class="mb-main-img" style="filter: drop-shadow(0 0 15px ${glowColor});">
+    
+    <div style="font-family:'Montserrat'; font-weight:900; color:#fff; font-size:14px; margin-top:10px;">${box.name.toUpperCase()}</div>
+    
+    <div style="color:${box.color}; font-family:'Orbitron'; font-size:12px; margin:15px 0; font-weight:900; display:flex; align-items:center; justify-content:center; gap:5px;">
+        ${box.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="14" style="height:14px !important;">
+    </div>
+    
+    <button class="bm-price-btn-v4" style="background:${box.color} !important; color:#000; font-size:9px; font-weight:900;">SELECTEAZĂ</button>
+`;
         card.onclick = () => openBoxDetail(box);
         list.appendChild(card);
     });
