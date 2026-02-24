@@ -10269,12 +10269,10 @@ let globalStock = {};
 let selectedBox = null;
 let selectedQty = 1;
 
-let countdownInterval = null;
-
 function initMysteryStockSync() {
     onSnapshot(doc(db, "system", "mystery_box_stock"), async (snap) => {
         const now = Date.now();
-        const RESET_MS = 60000; // 1 MINUTE FOR TESTING (Change to 3600000 later)
+        const RESET_MS = 60000; // 1 Minute for testing
 
         if (!snap.exists() || (now - (snap.data().lastReset || 0) > RESET_MS)) {
             const newStock = {};
@@ -10285,29 +10283,33 @@ function initMysteryStockSync() {
             await setDoc(doc(db, "system", "mystery_box_stock"), { counts: newStock, lastReset: Date.now() });
         } else {
             globalStock = snap.data().counts;
-            const lastReset = snap.data().lastReset;
-
-            // Start/Update Visual Countdown
-            if (countdownInterval) clearInterval(countdownInterval);
-            countdownInterval = setInterval(() => {
-                const timePassed = Date.now() - lastReset;
-                const timeLeft = Math.max(0, RESET_MS - timePassed);
-                
-                const minutes = Math.floor(timeLeft / 60000);
-                const seconds = Math.floor((timeLeft % 60000) / 1000);
-                
-                const timerEl = document.getElementById('mysteryResetTimer');
-                if (timerEl) {
-                    timerEl.innerText = `REFRESH: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                }
-
-                // If timer hits zero, it will trigger a re-sync on next check
-                if (timeLeft <= 0) clearInterval(countdownInterval);
-            }, 1000);
-
+            
+            // 1. INSTANT REFRESH: If main shop is open, re-render cards
             if (document.getElementById('mysteryShopModal').classList.contains('active')) {
                 renderMysteryShopItems();
             }
+
+            // 2. INSTANT REFRESH: If detail modal is open, adjust calculations
+            if (document.getElementById('boxDetailModal').classList.contains('active') && selectedBox) {
+                const currentStock = globalStock[selectedBox.id] || 0;
+                // If stock dropped below current selection, lower the selection
+                if (selectedQty > currentStock) {
+                    selectedQty = Math.max(1, currentStock);
+                }
+                updateBoxTotal();
+            }
+
+            // Timer update logic
+            const lastReset = snap.data().lastReset;
+            if (countdownInterval) clearInterval(countdownInterval);
+            countdownInterval = setInterval(() => {
+                const timeLeft = Math.max(0, RESET_MS - (Date.now() - lastReset));
+                const m = Math.floor(timeLeft / 60000);
+                const s = Math.floor((timeLeft % 60000) / 1000);
+                const timerEl = document.getElementById('mysteryResetTimer');
+                if (timerEl) timerEl.innerText = `REFRESH: ${m}:${s < 10 ? '0' : ''}${s}`;
+                if (timeLeft <= 0) clearInterval(countdownInterval);
+            }, 1000);
         }
     });
 }
@@ -10377,20 +10379,54 @@ window.openPrizeView = () => {
 };
 
 window.setBoxQty = (q) => {
-    document.querySelectorAll('.qty-btn').forEach(b => b.classList.remove('active'));
+    const btns = document.querySelectorAll('.qty-btn');
+    btns.forEach(b => b.classList.remove('active'));
+    
+    const currentStock = globalStock[selectedBox.id] || 0;
+
     if(q === 'max') {
         const userCoins = window.currentUserData?.coins || 0;
-        selectedQty = Math.floor(userCoins / selectedBox.price);
+        // Calculation: What I can afford vs What is left in stock
+        const affordable = Math.floor(userCoins / selectedBox.price);
+        selectedQty = Math.min(affordable, currentStock); 
+        
         if(selectedQty < 1) selectedQty = 1;
-    } else { selectedQty = q; }
-    if(event) event.currentTarget.classList.add('active');
+        
+        // Find and highlight the MAX button
+        const maxBtn = Array.from(btns).find(b => b.innerText === 'MAX');
+        if(maxBtn) maxBtn.classList.add('active');
+    } else {
+        // For 1x and 3x, still check if stock is enough
+        selectedQty = Math.min(q, currentStock);
+        if(selectedQty < 1) selectedQty = 1;
+        
+        if(event) event.currentTarget.classList.add('active');
+    }
     updateBoxTotal();
 };
 
 function updateBoxTotal() {
     if(!selectedBox) return;
     const total = selectedBox.price * selectedQty;
-    document.getElementById('boxTotalDisplay').innerHTML = `Total: ${total.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="18" style="height:18px !important; vertical-align:middle;">`;
+    const currentStock = globalStock[selectedBox.id] || 0;
+    
+    // Update the total display
+    document.getElementById('boxTotalDisplay').innerHTML = `
+        <div style="font-size: 10px; color: ${selectedBox.color}; margin-bottom: 5px; opacity: 0.8;">DISPONIBIL: ${currentStock}</div>
+        Total: ${total.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="18" style="height:18px !important; vertical-align:middle;">
+    `;
+
+    // Disable purchase button if stock is 0
+    const buyBtn = document.getElementById('boxBuyBtn');
+    if (currentStock <= 0) {
+        buyBtn.innerText = "STOC EPUIZAT";
+        buyBtn.style.opacity = "0.5";
+        buyBtn.disabled = true;
+    } else {
+        buyBtn.innerText = "AUTHORIZE_PURCHASE";
+        buyBtn.style.opacity = "1";
+        buyBtn.disabled = false;
+    }
 }
 
 window.initiateBoxPurchase = async () => {
