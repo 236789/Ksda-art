@@ -5870,6 +5870,13 @@ body {
     text-shadow: 0 0 5px #ff6a00;
     letter-spacing: 1px;
 }
+
+
+/* Adaugă asta în secțiunea <style> */
+#unboxingBoxImg {
+    will-change: transform, opacity; /* Pregătește placa video pentru animație */
+    image-rendering: -webkit-optimize-contrast; /* Claritate maximă */
+}
   </style>
 </head>
 <body>
@@ -5922,10 +5929,10 @@ body {
                     <button class="qty-btn" onclick="setBoxQty(3)">3x</button>
                     <button class="qty-btn" onclick="setBoxQty('max')">MAX</button>
 
+                </div>
 
 <!-- Insert this below the buttons div -->
 <div id="boxQtyInfo" style="font-family:'Orbitron'; font-size: 11px; color: #ff6a00; margin-bottom: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 5px #ff6a00; height: 15px;"></div>
-                </div>
 
                 <div id="boxTotalDisplay" style="font-family:'Orbitron'; font-size: 20px; color:#fff; margin-bottom: 25px; font-weight: 900;">
                     Total: 0 <img src="https://iili.io/fhc1SKQ.png" width="18">
@@ -10268,6 +10275,32 @@ const BOXES_DB = [
     { id: 'box_void', name: 'Void Box', price: 15000, color: '#7000ff', stockRange: [5, 15], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20close.png?alt=media&token=7da7421a-caf5-4a8a-a368-02393550bbe8', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20open.png?alt=media&token=39eb8f91-2c77-4bea-9337-ebf5ea391dc3' },
     { id: 'box_celestial', name: 'Celestial Box', price: 25000, color: '#ffffff', stockRange: [5, 10], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20chest%20close%20%20(2).png?alt=media&token=b23d04ee-ce8c-43d7-b2a8-315255e62ca6', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20Chest%20Open%20.png?alt=media&token=68f031ce-57e2-44b2-b9e0-32453d4d1f10' }
 ];
+
+
+// --- IMAGE PRELOADER ENGINE ---
+function preloadMysteryImages() {
+    console.log("System: Starting image preloading...");
+    
+    // Colectăm toate link-urile de imagini din baza de date
+    const imagesToPreload = [];
+    BOXES_DB.forEach(box => {
+        imagesToPreload.push(box.img);      // Imaginea închisă
+        imagesToPreload.push(box.imgOpen);  // Imaginea deschisă
+    });
+
+    // Adăugăm și monedele/diamantele pentru siguranță
+    imagesToPreload.push("https://iili.io/fhc1SKQ.png");
+    imagesToPreload.push("https://iili.io/fv5bmtj.png");
+
+    // Executăm preîncărcarea
+    imagesToPreload.forEach(url => {
+        const img = new Image();
+        img.src = url;
+    });
+}
+
+// Lansăm preîncărcarea imediat
+preloadMysteryImages();
 
 let globalStock = {};
 let selectedBox = null;
