@@ -7362,7 +7362,6 @@ window.startGame = (gridSize) => {
 };
 
 async function setupBoardUI(isLoad = false) {
-    // UI state management
     document.getElementById('puzzleMenuContainer').style.display = 'none';
     const arena = document.getElementById('jigsawArena');
     arena.style.display = "grid"; 
@@ -7375,18 +7374,15 @@ async function setupBoardUI(isLoad = false) {
     tray.innerHTML = '';
     gridBox.innerHTML = '';
 
-    // 1. GET IMAGE ASPECT RATIO
     const img = new Image();
     img.src = jigState.imgUrl;
-    await img.decode(); // Wait for image to load to get dimensions
+    await img.decode(); 
 
     const imgRatio = img.naturalWidth / img.naturalHeight;
-
     const boardContainer = document.getElementById('boardContainer');
     let maxW = boardContainer.clientWidth - 40;
     let maxH = boardContainer.clientHeight - 40;
 
-    // 2. CALCULATE BOARD SIZE BASED ON RATIO
     let boardW, boardH;
     if (maxW / maxH > imgRatio) {
         boardH = maxH;
@@ -7396,37 +7392,32 @@ async function setupBoardUI(isLoad = false) {
         boardH = maxW / imgRatio;
     }
 
-    // Save individual piece dimensions
+    // Save accurate rectangle dimensions
     jigState.pWidth = boardW / jigState.cols;
     jigState.pHeight = boardH / jigState.rows;
-    jigState.totalW = boardW;
-    jigState.totalH = boardH;
 
-    // Set Board Grid
     gridBox.style.width = `${boardW}px`;
     gridBox.style.height = `${boardH}px`;
     gridBox.style.gridTemplateColumns = `repeat(${jigState.cols}, 1fr)`;
     gridBox.style.gridTemplateRows = `repeat(${jigState.rows}, 1fr)`;
-    gridBox.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url(${jigState.imgUrl})`;
+    gridBox.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${jigState.imgUrl})`;
     gridBox.style.backgroundSize = `${boardW}px ${boardH}px`;
 
-    // 3. RENDER PIECES
     jigState.pieces.forEach((pData) => {
         const piece = document.createElement('div');
         piece.className = 'jig-piece';
-        piece.style.width = `${jigState.pWidth}px`;
-        piece.style.height = `${jigState.pHeight}px`;
-        piece.style.backgroundImage = `url(${jigState.imgUrl})`;
-        piece.style.backgroundSize = `${boardW}px ${boardH}px`;
         
         const row = Math.floor(pData.id / jigState.cols);
         const col = pData.id % jigState.cols;
 
-        // Use precise pixels for background position
+        piece.style.backgroundImage = `url(${jigState.imgUrl})`;
+        piece.style.backgroundSize = `${boardW}px ${boardH}px`;
         piece.style.backgroundPosition = `-${col * jigState.pWidth}px -${row * jigState.pHeight}px`;
 
         if (pData.isLocked) {
             piece.classList.add('locked');
+            piece.style.width = `${jigState.pWidth}px`;
+            piece.style.height = `${jigState.pHeight}px`;
             piece.style.left = `${col * jigState.pWidth}px`;
             piece.style.top = `${row * jigState.pHeight}px`;
             gridBox.appendChild(piece);
@@ -7434,16 +7425,17 @@ async function setupBoardUI(isLoad = false) {
             piece.classList.add('in-tray');
             tray.appendChild(piece);
         } else {
+            piece.style.width = `${jigState.pWidth}px`;
+            piece.style.height = `${jigState.pHeight}px`;
             piece.style.left = `${pData.currentX}px`;
             piece.style.top = `${pData.currentY}px`;
             gridBox.appendChild(piece);
         }
 
-        if (!pData.isLocked) enablePointerDrag(piece, pData.id);
+        enablePointerDrag(piece, pData.id);
     });
 
     updateCount();
-    if(!isLoad) saveProgress();
 }
 // 4. Reset/Exit Logic
 window.resetToMenu = () => {
@@ -7661,66 +7653,45 @@ userData.puzzles.forEach(p => {
 // 3. GALLERY LOGIC
 function enablePointerDrag(el, id) {
     el.onpointerdown = function(e) {
-    window.audioManager.playSFX('pickup'); // <--- ADD THIS LINE
-        // Prevent default browser dragging behavior (ghost images)
+        if (el.classList.contains('locked')) return;
+        
+        window.audioManager.playSFX('pickup');
         e.preventDefault();
         e.stopPropagation();
 
-        if (el.classList.contains('locked')) return;
-
         const gridBox = document.getElementById('dropGrid');
-        
-        // 1. SNAPSHOT COORDINATES
-        // We get the rectangles BEFORE we move the element in the DOM
         const pieceRect = el.getBoundingClientRect(); 
         const gridRect = gridBox.getBoundingClientRect();
 
-        // Calculate where the mouse is INSIDE the piece (The Grip Offset)
         const offsetX = e.clientX - pieceRect.left;
         const offsetY = e.clientY - pieceRect.top;
 
-// 2. HANDLE TRAY TO BOARD TRANSFER
         if (el.classList.contains('in-tray')) {
-            // Calculate exact position relative to the grid
             const startLeft = pieceRect.left - gridRect.left;
             const startTop = pieceRect.top - gridRect.top;
 
-            // Apply coordinates IMMEDIATELY so it doesn't jump to 0,0
             el.style.left = startLeft + 'px';
             el.style.top = startTop + 'px';
 
-            // --- FIX: RESET SIZE AND BACKGROUND WHEN LEAVING TRAY ---
-            // This makes the piece its "real" size so the math matches the image
-            el.style.width = `${jigState.pieceSize}px`;
-            el.style.height = `${jigState.pieceSize}px`;
+            // FIX: Use rectangular dimensions immediately
+            el.style.width = `${jigState.pWidth}px`;
+            el.style.height = `${jigState.pHeight}px`;
+            el.style.backgroundSize = `${parseFloat(gridBox.style.width)}px ${parseFloat(gridBox.style.height)}px`;
             
-            // Ensure background size is scaled to the full board dimensions
-            el.style.backgroundSize = `${jigState.cols * 100}% ${jigState.rows * 100}%`;
-            // -------------------------------------------------------
-            
-            // Now safe to move in DOM
             el.classList.remove('in-tray');
             gridBox.appendChild(el);
             
-            // Update state
             const pState = jigState.pieces.find(p => p.id === id);
             if(pState) pState.inTray = false;
         }
 
-        // 3. START DRAG VISUALS
         el.classList.add('is-dragging');
         
-        // IMPORTANT: We attach move/up listeners to WINDOW, not the element.
-        // This fixes the "can't drag" issue if you move mouse too fast.
         window.addEventListener('pointermove', onPointerMove);
         window.addEventListener('pointerup', onPointerUp);
 
-        // --- MOVE FUNCTION ---
         function onPointerMove(moveEvent) {
-            // Recalculate grid rect in case of page scroll
             const currentGridRect = gridBox.getBoundingClientRect();
-
-            // Math: Mouse Global X - Grid Global X - Mouse Offset inside piece
             let newX = moveEvent.clientX - currentGridRect.left - offsetX;
             let newY = moveEvent.clientY - currentGridRect.top - offsetY;
 
@@ -7728,63 +7699,39 @@ function enablePointerDrag(el, id) {
             el.style.top = newY + 'px';
         }
 
-        // --- RELEASE FUNCTION ---
-function onPointerUp(upEvent) {
-            // Cleanup listeners immediately
+        function onPointerUp(upEvent) {
             window.removeEventListener('pointermove', onPointerMove);
             window.removeEventListener('pointerup', onPointerUp);
-            
             el.classList.remove('is-dragging');
 
             const pState = jigState.pieces.find(p => p.id === id);
-            if(!pState) return;
-
-            // 1. CALCULATE TARGETS USING INDIVIDUAL WIDTH/HEIGHT
-            const targetCol = id % jigState.cols;
-            const targetRow = Math.floor(id / jigState.cols);
+            const col = id % jigState.cols;
+            const row = Math.floor(id / jigState.cols);
             
-            const targetX = targetCol * jigState.pWidth;
-            const targetY = targetRow * jigState.pHeight;
+            const targetX = col * jigState.pWidth;
+            const targetY = row * jigState.pHeight;
 
             const currentX = parseFloat(el.style.left);
             const currentY = parseFloat(el.style.top);
 
-            // 2. RECTANGULAR SNAP LOGIC
-            // Instead of a circle (Math.sqrt), we check if the piece is within 
-            // a small box relative to its own size.
             const distX = Math.abs(targetX - currentX);
             const distY = Math.abs(targetY - currentY);
 
-            // Snap if within 40% of width AND 40% of height
+            // Updated snap check for rectangles
             if (distX < (jigState.pWidth * 0.4) && distY < (jigState.pHeight * 0.4)) {
-                // Snap to grid visually
                 el.style.left = `${targetX}px`;
                 el.style.top = `${targetY}px`;
-                
-                // Apply the "Locked" state
                 el.classList.add('locked');
-
-                // Play Audio
                 window.audioManager.playSFX('snap');
-
-                // Trigger the Cyber Flash Animation
                 el.classList.add('snap-anim');
-                setTimeout(() => {
-                    el.classList.remove('snap-anim');
-                }, 400);
 
-                // Trigger Reward
                 if(window.spawnCoinReward) window.spawnCoinReward(upEvent.clientX, upEvent.clientY);
-
-                // Update Game State
                 pState.isLocked = true;
                 updateCount(); 
             } else {
-                // Save the loose position
                 pState.currentX = currentX;
                 pState.currentY = currentY;
             }
-            
             saveProgress();
         }
     };
