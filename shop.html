@@ -3909,6 +3909,17 @@ body, p, span, div, input, button {
     overflow: hidden;
 }
 
+
+/* Scanlines Effect - ACUM ESTE FIXAT peste tot modalul */
+.bm-scanline-overlay {
+    position: absolute; 
+    inset: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 255, 136, 0.03) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.01));
+    background-size: 100% 3px, 3px 100%;
+    pointer-events: none;
+    z-index: 10; /* Deasupra conținutului */
+}
 /* CRT Scanlines Effect */
 .bm-modal-v4::before {
     content: " ";
@@ -5453,76 +5464,33 @@ body {
 
 <!-- BLACK MARKET MODAL (REMASTERED) -->
 <div id="blackMarketModal" class="account-modal-overlay">
-    <div class="bm-modal-v4" style="width: 95%; max-width: 850px; max-height: 85vh; overflow-y: auto;">
+    <div class="bm-modal-v4" style="width: 95%; max-width: 850px; height: 85vh;">
         
-        <!-- Header Industrial -->
-        <div style="background: rgba(0, 255, 136, 0.05); padding: 30px; border-bottom: 1px solid #00ff88; display: flex; justify-content: space-between; align-items: center;">
+        <!-- Efectul CRT care stă fix deasupra -->
+        <div class="bm-scanline-overlay"></div>
+
+        <!-- Header-ul (fix sus) -->
+        <div style="background: rgba(0, 255, 136, 0.05); padding: 30px; border-bottom: 1px solid #00ff88; display: flex; justify-content: space-between; align-items: center; z-index: 11;">
             <div>
-                <div style="font-family:'Montserrat'; font-size: 28px; color:#00ff88; text-shadow: 0 0 15px #00ff88;">BLACK_MARKET</div>
+                <div style="font-family:'Montserrat'; font-size: 28px; color:#00ff88; text-shadow: 0 0 15px #00ff88;"> BLACK_MARKET</div>
                 <div style="font-family:monospace; font-size: 11px; color:#adff2f; opacity:0.8; margin-top:5px;">SECURE_PROTOCOL: ENABLED | ENCRYPTION: AES-256</div>
             </div>
-            <button class="close-pop" onclick="closeModal('blackMarketModal')" style="border-radius: 0; border: 1px solid #00ff88; background: transparent; width: 40px; height: 40px;">✕</button>
+            <button class="close-pop" onclick="closeModal('blackMarketModal')" style="border-radius: 0; border: 1px solid #00ff88; background: transparent; width: 40px; height: 40px; position: static !important;">✕</button>
         </div>
 
-        <div class="bm-grid-v4">
+        <!-- Containerul care face SCROLL -->
+        <div class="bm-content-scroll">
+            <div class="bm-grid-v4">
+                <!-- Aici pui toate ofertele tale (RAIN, HIJACK, etc.) -->
+                <!-- Păstrează codul ofertelor neschimbat -->
+            </div>
             
-            <!-- OFFER 1: RAIN -->
-            <div class="bm-offer-card-v4" onclick="triggerRain()">
-                <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-                <i class="fas fa-cloud-showers-heavy" style="font-size: 35px; color: #fff;"></i>
-                <div class="bm-title-v4">PLOAIE TORENȚIALĂ</div>
-                <p class="bm-desc-v4">Lansează un script global: 5.000 monede pentru toți utilizatorii activi în acest moment.</p>
-                <div class="bm-price-btn-v4">50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem"></div>
+            <!-- Footer (în interiorul scroll-ului sau sub el) -->
+            <div style="background: #000; padding: 15px 30px; font-family: monospace; font-size: 10px; color: #004400; border-top: 1px solid rgba(0, 255, 136, 0.2);">
+                > CACHE_CLEARED: SUCCESS...<br>
+                > USER_LOGS: ENCRYPTED...<br>
+                > LOGOUT_TIMER: INACTIVE
             </div>
-
-            <!-- OFFER 2: HIJACK -->
-            <div class="bm-offer-card-v4" onclick="activateHijack()">
-                <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-                <i class="fas fa-satellite-dish" style="font-size: 35px; color: #adff2f;"></i>
-                <div class="bm-title-v4">NEURAL HIJACK</div>
-                <p class="bm-desc-v4">Redirecționează fluxul de profit: Extrage 35% din câștigurile tuturor timp de 25 minute.</p>
-                <div class="bm-price-btn-v4">150 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem"></div>
-            </div>
-
-            <!-- OFFER 3: BRIBE -->
-            <div class="bm-offer-card-v4" onclick="openBribeSelection()">
-                <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-                <i class="fas fa-handshake" style="font-size: 35px; color: #ffd700;"></i>
-                <div class="bm-title-v4">MITUIEȘTE SISTEMUL</div>
-                <p class="bm-desc-v4">Manipulează baza de date: Ocupă forțat Locul #1 în orice clasament timp de o oră.</p>
-                <div class="bm-price-btn-v4">50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem"></div>
-            </div>
-
-            <!-- OFFER 4: EXCHANGE -->
-            <div class="bm-offer-card-v4" onclick="openExchangeModal()">
-                <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-                <i class="fas fa-random" style="font-size: 35px; color: #00ff88;"></i>
-                <div class="bm-title-v4">SCHIMB VALUTAR</div>
-                <p class="bm-desc-v4">Spălare de bani digitali: Convertește monedele în diamante la cursul ilegal al pieței.</p>
-                <div class="bm-price-btn-v4">DESCHIDE PIAȚA</div>
-            </div>
-
-            <!-- OFFER 5: IDENTITY (Full Width) -->
-            <div class="bm-offer-card-v4" onclick="openPfpChangeModal()" style="grid-column: 1 / -1;">
-                <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-                <i class="fas fa-user-secret" style="font-size: 35px; color: #ff00ff;"></i>
-                <div class="bm-title-v4">IDENTITATE NOUĂ</div>
-                <p class="bm-desc-v4">Șterge amprenta digitală: Înlocuiește poza Google cu o imagine personalizată pentru a deveni anonim.</p>
-                <div class="bm-price-btn-v4">15 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem"></div>
-            </div>
-
-        </div>
-
-        <!-- Footer Log info -->
-        <div style="background: #000; padding: 15px 30px; font-family: monospace; font-size: 10px; color: #004400; border-top: 1px solid rgba(0, 255, 136, 0.2);">
-            > CACHE_CLEARED: SUCCESS...<br>
-            > USER_LOGS: ENCRYPTED...<br>
-            > LOGOUT_TIMER: INACTIVE
         </div>
     </div>
 </div>
@@ -9374,20 +9342,22 @@ window.uploadAndPayPfp = async () => {
 };
 
 
-// --- BLACK MARKET BACKGROUND ENGINE ---
+// --- BLACK MARKET BACKGROUND ENGINE (FIXED) ---
 const terminalSection = document.getElementById('zone-terminal');
 const termLight = document.getElementById('termLight');
 const nodeContainer = document.getElementById('nodeContainer');
 
-// 1. Mouse Follow Light
-terminalSection.addEventListener('mousemove', (e) => {
-    const rect = terminalSection.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    termLight.style.left = `${x}px`;
-    termLight.style.top = `${y}px`;
-});
+// 1. Mouse Follow Light (Adăugat verificare null)
+if (terminalSection && termLight) {
+    terminalSection.addEventListener('mousemove', (e) => {
+        const rect = terminalSection.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        termLight.style.left = `${x}px`;
+        termLight.style.top = `${y}px`;
+    });
+}
 
 // 2. Random Data Node Pulses (The "Lighting up" effect)
 function spawnNode() {
@@ -9461,16 +9431,17 @@ document.addEventListener('mousedown', (e) => {
 });
 
 
-// --- AUTO-ADAPTIVE NAV SENSOR ---
+// --- AUTO-ADAPTIVE NAV SENSOR (FIXED NULL CHECK) ---
 function initAdaptiveNav() {
     const trigger = document.querySelector('.nav-trigger-reactor');
+    if (!trigger) return; // FIX: Dacă nu există butonul, nu rula funcția
+
     const sections = {
         'zone-hero': 'state-hero',
         'zone-vault': 'state-vault',
         'zone-atelier': 'state-atelier',
         'zone-terminal': 'state-terminal'
     };
-
     const observerOptions = {
         root: null,
         threshold: 0.4 // Butonul se schimbă când 40% din secțiune e vizibilă
