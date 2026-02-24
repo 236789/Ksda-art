@@ -6124,6 +6124,121 @@ body {
     color: #aaa;
     margin-top: 12px;
 }
+
+
+
+/* --- AAA PRIZE VIEW HUD --- */
+.prize-view-container {
+    width: 95%;
+    max-width: 1100px;
+    background: rgba(5, 11, 20, 0.95);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 100px rgba(0,0,0,0.9);
+}
+
+/* THE 5 CARD LAYOUT */
+.aaa-loot-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    margin-top: 30px;
+}
+
+/* VERTICAL CARD BASE */
+.aaa-card {
+    height: 400px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 30px 15px;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.aaa-card:hover {
+    transform: scale(1.05) translateY(-10px);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* RARITY ENGINES */
+.tier-common    { --r-color: #8b8b8b; --r-glow: rgba(139,139,139,0.3); }
+.tier-uncommon  { --r-color: #00ff88; --r-glow: rgba(0, 255, 136, 0.4); }
+.tier-rare      { --r-color: #00d2ff; --r-glow: rgba(0, 210, 255, 0.4); }
+.tier-epic      { --r-color: #f093fb; --r-glow: rgba(240, 147, 251, 0.5); }
+.tier-legendary { --r-color: #ffd700; --r-glow: rgba(255, 215, 0, 0.7); }
+
+/* GLOWING BORDERS */
+.aaa-card::after {
+    content: ''; position: absolute; inset: 0;
+    border-radius: 20px; padding: 2px;
+    background: linear-gradient(180deg, transparent, var(--r-color), transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    opacity: 0.3; transition: 0.3s;
+}
+.aaa-card:hover::after { opacity: 1; }
+
+/* LEGENDARY RADIANT AURA */
+.tier-legendary::before {
+    content: ''; position: absolute; inset: -50%;
+    background: conic-gradient(from 0deg, transparent, #ffd700, transparent 30%);
+    animation: rotateAura 3s linear infinite;
+    opacity: 0.2; z-index: 0;
+}
+
+/* CARD INNER ELEMENTS */
+.aaa-card-title {
+    font-family: 'Orbitron'; font-size: 10px; font-weight: 900;
+    letter-spacing: 3px; color: var(--r-color); text-transform: uppercase;
+    text-shadow: 0 0 10px var(--r-color);
+}
+
+.aaa-card-img {
+    width: 70px; height: 70px; object-fit: contain;
+    filter: drop-shadow(0 0 15px var(--r-color));
+    transition: 0.4s; z-index: 2;
+}
+
+.aaa-card:hover .aaa-card-img { transform: scale(1.15) rotate(5deg); }
+
+.aaa-card-value {
+    background: rgba(0,0,0,0.6);
+    border: 1px solid var(--r-color);
+    width: 100%; padding: 10px; text-align: center;
+    font-family: 'Montserrat'; font-weight: 900; color: #fff;
+    font-size: 14px; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+
+.aaa-card-chance {
+    font-family: 'Courier New'; font-size: 9px; color: #666;
+    margin-top: 10px; letter-spacing: 1px;
+}
+
+/* FOOTER LOGO DECORATION */
+.modal-deco-line {
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    margin-top: 30px; opacity: 0.3;
+}
+
+@keyframes rotateAura { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* Mobile Optimization */
+@media (max-width: 850px) {
+    .aaa-loot-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .tier-legendary { grid-column: span 2; }
+    .aaa-card { height: 320px; }
+}
   </style>
 </head>
 <body>
@@ -6191,19 +6306,27 @@ body {
     </div>
 </div>
 
-<!-- PRIZE LIST MODAL (NEW) -->
 <div id="prizeListModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 accent-mystery" style="width: 90%; max-width: 400px;">
+    <div class="prize-view-container">
+        <!-- THE SCANLINES -->
         <div class="bm-scanline-overlay"></div>
-        <div style="background: rgba(0,0,0,0.8); padding: 20px; border-bottom: 1px solid #ff6a00; display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-family:'Orbitron'; font-size: 14px; color:#ff6a00;">PROBABILITY_LOG</div>
-            <button class="close-pop" onclick="closeModal('prizeListModal')" style="position: static !important; border: 1px solid #ff6a00; background: transparent;">✕</button>
+
+        <!-- HEADER -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; z-index: 10; position: relative;">
+            <div style="text-align: left;">
+                <h2 style="font-family:'Montserrat'; font-weight: 900; color:#fff; font-size: 24px; margin: 0;">PROBABILITY_LOG</h2>
+                <p style="font-family:'Courier New'; font-size: 11px; color: var(--primary); margin-top: 5px;">> SCANNING VAULT CONTENTS... [ENCRYPTION: LEVEL 5]</p>
+            </div>
+            <button class="close-pop" onclick="closeModal('prizeListModal')" style="position: static !important; border: 1px solid rgba(255,255,255,0.2);">✕</button>
         </div>
-        <div class="bm-content-scroll" style="padding: 20px;">
-            <table class="prize-table" id="prizeTableBody">
-                <!-- Injected by JS -->
-            </table>
+
+        <!-- THE 5 VERTICAL CARDS -->
+        <div class="aaa-loot-grid" id="prizeTableBody">
+            <!-- JS INJECTS CONTENT HERE -->
         </div>
+
+        <div class="modal-deco-line"></div>
+        <p style="font-family: monospace; font-size: 9px; color: #444; margin-top: 15px; text-align: center;">SECURE_PROTOCOL_v4.2 // ALL ODDS ARE FINAL</p>
     </div>
 </div>
 
@@ -10688,19 +10811,31 @@ window.openPrizeView = () => {
     if(!selectedBox || !selectedBox.rewards) return;
     
     const container = document.getElementById('prizeTableBody');
-    container.innerHTML = `<div class="loot-grid-v4"></div>`;
-    const grid = container.querySelector('.loot-grid-v4');
+    container.innerHTML = ""; // Clear old content
 
-    selectedBox.rewards.forEach(r => {
+    // Mapping current logic to the new AAA styles
+    const tierClasses = [
+        'tier-common',
+        'tier-uncommon',
+        'tier-rare',
+        'tier-epic',
+        'tier-legendary'
+    ];
+
+    selectedBox.rewards.forEach((r, index) => {
+        const cardClass = tierClasses[index] || 'tier-common';
         const card = document.createElement('div');
-        card.className = `loot-card-v4 ${r.style}`;
+        card.className = `aaa-card ${cardClass}`;
+        
         card.innerHTML = `
-            <div class="tier-header">${r.tier}</div>
-            <img src="${r.icon}" class="loot-main-img">
-            <div class="loot-tag-v4">${r.label}</div>
-            <div class="loot-chance-v4">${r.chance}% CHANCE</div>
+            <div class="aaa-card-title">${r.tier}</div>
+            <img src="${r.icon}" class="aaa-card-img">
+            <div style="width: 100%;">
+                <div class="aaa-card-value">${r.label}</div>
+                <div class="aaa-card-chance">${r.chance}% CHANCE</div>
+            </div>
         `;
-        grid.appendChild(card);
+        container.appendChild(card);
     });
     
     document.getElementById('prizeListModal').classList.add('active');
