@@ -10608,17 +10608,60 @@ function startUnboxingSequence() {
 
 window.revealReward = async () => {
     const boxImg = document.getElementById('unboxingBoxImg');
+    // Save current selection to local variables so they don't change during the animation
+    const qtyAtOpening = selectedQty; 
+    const boxAtOpening = selectedBox;
+
     boxImg.classList.remove('box-shake');
-    boxImg.src = selectedBox.imgOpen;
+    boxImg.src = boxAtOpening.imgOpen;
     boxImg.classList.add('open');
+
+    // Create a suspenseful delay
     setTimeout(() => {
         document.getElementById('unboxingOverlay').style.display = 'none';
+        
         const roll = Math.random();
-        let winMultiplier = (roll <= 0.01) ? 5 : (roll <= 0.15) ? 1.8 : (Math.random() * (1.2 - 0.5) + 0.5);
-        const winAmount = Math.floor(selectedBox.price * winMultiplier * selectedQty);
-        showRewardModal(winAmount);
+        let winMultiplier;
+
+        if (roll <= 0.01) {
+            winMultiplier = 5.0; // JACKPOT 1%
+        } else if (roll <= 0.15) {
+            winMultiplier = 1.8; // BIG WIN 14%
+        } else {
+            // Normal win between 0.5x and 1.2x
+            winMultiplier = (Math.random() * 0.7) + 0.5; 
+        }
+
+        // Calculate final amount: (Price * Multiplier) * Number of boxes
+        const winAmount = Math.floor((boxAtOpening.price * winMultiplier) * qtyAtOpening);
+        
+        // Safety check: if for some reason it's 0, give at least 100 coins
+        const finalWin = winAmount > 0 ? winAmount : 100;
+
+        showRewardModal(finalWin, boxAtOpening.name);
     }, 1200);
 };
+
+function showRewardModal(amount, boxName) {
+    const modal = document.getElementById('rewardModal');
+    // Update text to be clear
+    modal.querySelector('h2').innerText = "🎰 REZULTAT GAMBLE";
+    modal.querySelector('p').innerText = `Ai deschis cutiile și ai găsit:`;
+    
+    const amountSpan = modal.querySelector('.reward-coins-box span');
+    if (amountSpan) {
+        amountSpan.innerText = amount.toLocaleString();
+    }
+    
+    modal.classList.add('active');
+
+    // Update Database
+    updateDoc(doc(db, "accounts", auth.currentUser.uid), { 
+        coins: increment(amount) 
+    });
+    
+    logTransaction(amount, "COINS", "Gamble", `Câștig din ${boxName}`);
+}
 
 function showRewardModal(amount) {
     const modal = document.getElementById('rewardModal');
