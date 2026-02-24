@@ -5518,6 +5518,46 @@ body {
     box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
 }
 
+
+
+
+/* --- TERMINAL V4 INPUTS --- */
+.v4-input-wrapper {
+    position: relative;
+    margin: 20px 0;
+    width: 100%;
+}
+
+.v4-terminal-input {
+    background: rgba(0, 20, 10, 0.8) !important;
+    border: 1px solid rgba(255, 215, 0, 0.2) !important;
+    color: #fff !important;
+    font-family: 'Orbitron', sans-serif !important;
+    padding: 15px !important;
+    width: 100% !important;
+    text-align: center !important;
+    border-radius: 2px !important;
+    outline: none !important;
+    transition: 0.3s;
+    letter-spacing: 2px;
+}
+
+.v4-terminal-input:focus {
+    border-color: #ffd700 !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    background: rgba(0, 20, 10, 1) !important;
+}
+
+.v4-input-label {
+    font-family: 'Montserrat';
+    font-size: 9px;
+    color: #ffd700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: block;
+    opacity: 0.8;
+}
   </style>
 </head>
 <body>
@@ -6280,44 +6320,88 @@ body {
     </div>
 </div>
 
-    <!-- NAME CHANGE MODAL -->
-    <div id="nameChangeModal" class="modal-overlay">
-        <div class="payment-card">
-            <button class="close-modal-btn" onclick="closeModal('nameChangeModal')">✕</button>
-            <h2 style="color: var(--primary); font-size: 20px;">SCHIMBĂ NUME</h2>
-            <p id="cooldownWarning" style="font-size: 11px; color: var(--error); margin-bottom: 10px; display: none;"></p>
-            <input type="text" id="newNameInput" class="calc-input" placeholder="Nume nou..." maxlength="20">
-            <button class="pay-btn pay-rev" id="confirmNameBtn" onclick="processNameChange()">CONFIRMĂ (2500 Coins)</button>
+<!-- =========================================
+     NAME CHANGE MODAL V4
+     ========================================= -->
+<div id="nameChangeModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-alte" style="width: 95%; max-width: 450px;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 215, 0, 0.05); padding: 20px; border-bottom: 1px solid #ffd700; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div style="font-family:'Montserrat'; font-size: 18px; font-weight: 900; color: #ffd700;">NAME_REWRITE</div>
+            <button class="close-pop" onclick="closeModal('nameChangeModal')" style="position: static !important; border: 1px solid #ffd700; background: transparent;">✕</button>
         </div>
-    </div>
 
-    <!-- DONATION LIST MODAL -->
-<div id="donationListModal" class="modal-overlay">
-    <!-- Am adăugat position:relative aici -->
-    <div class="account-card" style="max-width: 500px; height: 80vh; display: flex; flex-direction: column; position: relative;">
-        <button class="close-pop" onclick="closeModal('donationListModal')">✕</button>
-        
-        <h3 style="font-family:'Orbitron'; color:var(--primary); margin-bottom: 20px; text-align: center;">ALEGE DESTINATARUL</h3>
-        
-        <input type="text" id="searchDonation" placeholder="Caută membru..." style="background:rgba(255,255,255,0.05); border:1px solid #333; color:#fff; padding:12px; width:100%; box-sizing:border-box; border-radius:12px; margin-bottom:15px; font-family:'Poppins';">
-        
-        <div id="donationUserList" style="overflow-y: auto; flex: 1; padding-right: 5px;">
-            <!-- Aici JS-ul va baga utilizatorii -->
-            <div style="text-align:center; color:#aaa; padding:20px;">Se încarcă...</div>
+        <div class="bm-content-scroll" style="padding: 30px; text-align: center;">
+            <div class="v4-badge-item" style="border: none; background: transparent;">
+                <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                
+                <div id="cooldownWarning" style="font-size: 11px; color: #ff4757; margin-bottom: 15px; font-weight: 700; display: none; font-family: 'Orbitron';"></div>
+                
+                <label class="v4-input-label">INTRODUCEȚI NOUL INDICATIV</label>
+                <input type="text" id="newNameInput" class="v4-terminal-input" placeholder="USERNAME..." maxlength="20">
+                
+                <p style="font-size: 10px; color: #aaa; margin-top: 15px;">COST OPERAȚIUNE: 2,500 COINS</p>
+                <button class="bm-price-btn-v4" id="confirmNameBtn" onclick="processNameChange()" style="background: #ffd700 !important; margin-top: 20px;">CONFIRMĂ SCHIMBAREA</button>
+            </div>
         </div>
     </div>
 </div>
 
-    <!-- DONATION AMOUNT MODAL -->
-    <div id="donationAmountModal" class="modal-overlay">
-        <div class="payment-card">
-            <button class="close-modal-btn" onclick="closeModal('donationAmountModal')">✕</button>
-            <h2 style="color: var(--primary); font-size: 20px;">DONEAZĂ CĂTRE</h2>
-            <h3 id="targetName" style="color: #fff; margin-top: 5px;">-</h3>
-            <input type="number" id="donateAmount" class="calc-input" placeholder="Sumă coins..." min="1">
-            <button class="pay-btn pay-rev" onclick="processDonation()">TRIMITE COINS</button>
+<!-- =========================================
+     DONATION LIST MODAL V4 (SELECT TARGET)
+     ========================================= -->
+<div id="donationListModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-alte" style="width: 95%; max-width: 550px; height: 80vh;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 215, 0, 0.05); padding: 20px; border-bottom: 1px solid #ffd700; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div style="font-family:'Montserrat'; font-size: 18px; font-weight: 900; color: #ffd700;">TRANSFER_TARGETS</div>
+            <button class="close-pop" onclick="closeModal('donationListModal')" style="position: static !important; border: 1px solid #ffd700; background: transparent;">✕</button>
+        </div>
+
+        <div style="padding: 15px; background: rgba(0,0,0,0.4);">
+            <input type="text" id="searchDonation" class="v4-terminal-input" placeholder="CAUTĂ MEMBRU..." style="margin: 0; padding: 10px !important; font-size: 14px;">
+        </div>
+
+        <div class="bm-content-scroll" style="flex: 1; padding: 15px;">
+            <div id="donationUserList" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- JS Inject here -->
+            </div>
         </div>
     </div>
+</div>
+
+<!-- =========================================
+     DONATION AMOUNT MODAL V4 (INPUT AMOUNT)
+     ========================================= -->
+<div id="donationAmountModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-alte" style="width: 95%; max-width: 450px;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 215, 0, 0.05); padding: 20px; border-bottom: 1px solid #ffd700; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div style="font-family:'Montserrat'; font-size: 18px; font-weight: 900; color: #ffd700;">COIN_TRANSFER</div>
+            <button class="close-pop" onclick="closeModal('donationAmountModal')" style="position: static !important; border: 1px solid #ffd700; background: transparent;">✕</button>
+        </div>
+
+        <div class="bm-content-scroll" style="padding: 30px; text-align: center;">
+            <div class="v4-badge-item" style="border: none; background: transparent;">
+                <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                
+                <label class="v4-input-label">DESTINATAR DETECTAT</label>
+                <div id="targetName" style="font-family: 'Orbitron'; color: #fff; font-size: 20px; text-shadow: 0 0 10px #ffd700; margin-bottom: 20px;">-</div>
+                
+                <label class="v4-input-label">SUMĂ TRANSFER</label>
+                <input type="number" id="donateAmount" class="v4-terminal-input" placeholder="0000" min="1">
+                
+                <div class="pay-hud-warning" style="margin-top: 20px; text-align: left;">
+                    <div class="pay-hud-text" style="font-size: 9px;">TAXĂ TRANSFER: 0% | LIMITĂ ZILNICĂ: 15,000</div>
+                </div>
+
+                <button class="bm-price-btn-v4" onclick="processDonation()" style="background: #ffd700 !important; margin-top: 25px; width: 100%;">INIȚIAZĂ TRANSFERUL</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <div id="badgeShopModal" class="account-modal-overlay">
@@ -6325,7 +6409,7 @@ body {
         <div class="bm-scanline-overlay"></div>
         <div style="background: rgba(214, 51, 132, 0.05); padding: 25px; border-bottom: 1px solid #d63384; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
             <div>
-                <div class="title-badges" style="font-family:'Montserrat'; font-size: 24px; font-weight: 900;">BADGE_OFFICIALS</div>
+                <div class="title-badges" style="font-family:'Montserrat'; font-size: 24px; font-weight: 900;">Cosmetic Badges</div>
                 <div style="font-family:monospace; font-size: 10px; color:#aaa;">STATUS: ATTAINABLE | REGISTRY: VERIFIED</div>
             </div>
             <button class="close-pop" onclick="closeModal('badgeShopModal')" style="border-radius:0; border:1px solid #d63384; background:transparent; position:static !important;">✕</button>
