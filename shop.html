@@ -9341,13 +9341,12 @@ window.uploadAndPayPfp = async () => {
     }
 };
 
-
-// --- BLACK MARKET BACKGROUND ENGINE (FIXED) ---
+// --- BLACK MARKET BACKGROUND ENGINE (FIXED & SECURED) ---
 const terminalSection = document.getElementById('zone-terminal');
 const termLight = document.getElementById('termLight');
 const nodeContainer = document.getElementById('nodeContainer');
 
-// 1. Mouse Follow Light (Adăugat verificare null)
+// 1. Mouse Follow Light - Verificăm dacă secțiunea și lumina există
 if (terminalSection && termLight) {
     terminalSection.addEventListener('mousemove', (e) => {
         const rect = terminalSection.getBoundingClientRect();
@@ -9359,58 +9358,54 @@ if (terminalSection && termLight) {
     });
 }
 
-// 2. Random Data Node Pulses (The "Lighting up" effect)
+// 2. Random Data Node Pulses - Verificăm dacă containerul există
 function spawnNode() {
-    if(!document.hidden) {
+    if (!document.hidden && nodeContainer) {
         const node = document.createElement('div');
         node.className = 'data-node';
         
-        // Random Position
         const x = Math.random() * 100;
         const y = Math.random() * 100;
         
         node.style.left = `${x}%`;
         node.style.top = `${y}%`;
-        
-        // Random size
         node.style.height = `${Math.random() * 50 + 10}px`;
-        
-        // Start animation
         node.style.animation = `nodePulse ${Math.random() * 2 + 1}s ease-out forwards`;
         
         nodeContainer.appendChild(node);
-        
-        // Cleanup memory
         setTimeout(() => node.remove(), 3000);
     }
 }
-
-// Spawn a new glow every 300ms
 setInterval(spawnNode, 300);
 
-// Extra effect: Make the light "breath"
+// 3. Reactor Breathing Effect - Verificăm dacă termLight există
 let lightSize = 600;
 let growing = true;
 setInterval(() => {
-    if (growing) lightSize += 2;
-    else lightSize -= 2;
-    
-    if (lightSize > 700) growing = false;
-    if (lightSize < 500) growing = true;
-    
-    termLight.style.width = `${lightSize}px`;
-    termLight.style.height = `${lightSize}px`;
+    if (termLight) {
+        if (growing) lightSize += 2;
+        else lightSize -= 2;
+        
+        if (lightSize > 700) growing = false;
+        if (lightSize < 500) growing = true;
+        
+        termLight.style.width = `${lightSize}px`;
+        termLight.style.height = `${lightSize}px`;
+    }
 }, 50);
 
-// --- LOGICA HUD NAVIGARE ---
+// --- LOGICA HUD NAVIGARE (FIXED) ---
 window.toggleNavHud = () => {
-    document.getElementById('navHud').classList.toggle('active');
+    const navHud = document.getElementById('navHud');
+    if (navHud) navHud.classList.toggle('active');
 };
 
 window.scrollToZone = (id) => {
     const section = document.getElementById(id);
-    if(section) {
-        const offset = 100; // Ajustare pentru a nu fi acoperit de header
+    const navHud = document.getElementById('navHud');
+    
+    if (section) {
+        const offset = 100; 
         const pos = section.getBoundingClientRect().top + window.pageYOffset - offset;
         
         window.scrollTo({
@@ -9418,23 +9413,25 @@ window.scrollToZone = (id) => {
             behavior: 'smooth'
         });
         
-        document.getElementById('navHud').classList.remove('active');
+        if (navHud) navHud.classList.remove('active');
     }
 };
 
-// Închide la click în exterior
+// Închide la click în exterior - Protecție împotriva elementelor inexistente
 document.addEventListener('mousedown', (e) => {
     const dock = document.querySelector('.quick-nav-dock');
-    if (!dock.contains(e.target)) {
-        document.getElementById('navHud').classList.remove('active');
+    const navHud = document.getElementById('navHud');
+    if (dock && navHud && !dock.contains(e.target)) {
+        navHud.classList.remove('active');
     }
 });
 
 
-// --- AUTO-ADAPTIVE NAV SENSOR (FIXED NULL CHECK) ---
+// --- AUTO-ADAPTIVE NAV SENSOR (CLEAN & FAST) ---
 function initAdaptiveNav() {
     const trigger = document.querySelector('.nav-trigger-reactor');
-    if (!trigger) return; // FIX: Dacă nu există butonul, nu rula funcția
+    // Dacă nu există butonul reactor, oprim funcția imediat
+    if (!trigger) return; 
 
     const sections = {
         'zone-hero': 'state-hero',
@@ -9442,35 +9439,38 @@ function initAdaptiveNav() {
         'zone-atelier': 'state-atelier',
         'zone-terminal': 'state-terminal'
     };
+
     const observerOptions = {
         root: null,
-        threshold: 0.4 // Butonul se schimbă când 40% din secțiune e vizibilă
+        threshold: 0.4 
     };
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                // Eliminăm toate stările anterioare
+                // Curățăm clasele vechi
                 Object.values(sections).forEach(cls => trigger.classList.remove(cls));
                 
-                // Adăugăm starea corespunzătoare secțiunii detectate
+                // Aplicăm clasa nouă
                 const newClass = sections[entry.target.id];
                 if (newClass) trigger.classList.add(newClass);
             }
         });
     }, observerOptions);
 
-    // Începem monitorizarea fiecărei secțiuni
+    // Pornim observatorul doar pentru ID-urile care există în pagină
     Object.keys(sections).forEach(id => {
         const el = document.getElementById(id);
         if (el) observer.observe(el);
     });
 }
 
-// Lansează senzorul după ce se încarcă pagina
-document.addEventListener('DOMContentLoaded', initAdaptiveNav);
-// Pentru siguranță (dacă DOM-ul e deja gata):
-initAdaptiveNav();
+// Lansare sigură
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAdaptiveNav);
+} else {
+    initAdaptiveNav();
+}
 </script>
 </body>
 </html>
