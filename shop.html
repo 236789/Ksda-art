@@ -50,10 +50,14 @@
       font-family: 'Poppins', sans-serif; color: #fff; overflow-x: hidden;
     }
 
-    h1, h2, h3, .logo, .btn, .package-count, .login-btn-header, .side-menu-login-btn, .pop-user, .streak-txt, .coins-count, .price-tag, .tasks-title, .currency-btn, .metallic-title, .top-rank-num { 
-        font-family: 'Orbitron', sans-serif; 
+    /* Înlocuiește vechiul tău bloc de fonturi cu acesta */
+    h1, h2, h3, .logo, .btn, .package-count, .login-btn-header, .pop-user, .price-tag, .metallic-title, .bm-title-v4 { 
+        font-family: 'Montserrat', sans-serif !important; 
+        letter-spacing: -0.5px;
     }
-
+    body, p, span, div, input, textarea { 
+        font-family: 'Poppins', sans-serif !important; 
+    }
     /* --- BANNED SCREEN --- */
     #bannedOverlay {
         display: none; position: fixed; inset: 0; background: rgba(10, 0, 0, 0.98); z-index: 20000;
@@ -3876,110 +3880,106 @@ input:checked + .slider:before { transform: translateX(16px); }
 }
 
 
-/* --- BLACK MARKET V3 CLEAN REWRITE --- */
-
-/* The Container */
-.bm-modal-v3 {
-    background: #050b14 !important;
+/* --- BLACK MARKET TERMINAL 2.0 (THE OVERHAUL) --- */
+.bm-modal-v4 {
+    background: #02080a !important; /* Aproape negru pur */
     border: 1px solid #00ff88 !important;
-    box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
-    border-radius: 20px;
-    padding: 0;
+    box-shadow: 0 0 50px rgba(0, 255, 136, 0.2), inset 0 0 100px rgba(0,0,0,1) !important;
+    border-radius: 4px !important; /* Colțuri drepte pentru look industrial */
+    position: relative;
     overflow: hidden;
+}
+
+/* Scan-lines efect pe tot modalul */
+.bm-modal-v4::after {
+    content: " ";
+    position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 255, 136, 0.05) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+    background-size: 100% 4px, 3px 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Cardurile de oferte */
+.bm-grid-v4 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 30px;
+    grid-auto-rows: min-content;
+}
+
+.bm-offer-card-v4 {
+    background: rgba(0, 255, 136, 0.02) !important;
+    border: 1px solid rgba(0, 255, 136, 0.1) !important;
+    position: relative;
+    padding: 25px 15px;
+    transition: 0.3s;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
-/* The Grid - This stops the "huge bars" issue */
-.bm-grid-v3 {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 15px !important;
-    padding: 20px !important;
-    grid-auto-rows: min-content !important; /* Only as tall as content */
-    align-items: start !important;
-    overflow-y: auto;
+/* Colțuri decorative "Hacker Brackets" */
+.bm-offer-card-v4::before, .bm-offer-card-v4::after {
+    content: ''; position: absolute; width: 10px; height: 10px;
+    border-color: #00ff88; border-style: solid; opacity: 0.3;
+}
+.bm-offer-card-v4::before { top: 5px; left: 5px; border-width: 2px 0 0 2px; }
+.bm-offer-card-v4::after { bottom: 5px; right: 5px; border-width: 0 2px 2px 0; }
+
+.bm-offer-card-v4:hover {
+    background: rgba(0, 255, 136, 0.05) !important;
+    border-color: #00ff88 !important;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-/* The Card - Unified Green Style */
-.bm-card-v3 {
-    background: rgba(0, 255, 136, 0.03) !important;
-    border: 1.5px solid #00ff88 !important;
-    border-radius: 15px !important;
-    padding: 20px 10px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    text-align: center !important;
-    transition: 0.3s !important;
-    height: auto !important; /* Fixed: No more huge bars */
+.bm-title-v4 {
+    color: #00ff88;
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin: 15px 0 10px 0;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
 }
 
-.bm-card-v3:hover {
-    background: rgba(0, 255, 136, 0.08) !important;
-    transform: translateY(-3px);
-    box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+.bm-desc-v4 {
+    font-size: 11px;
+    color: #a5b1c2;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    min-height: 45px;
 }
 
-/* Card Content Styling */
-.bm-icon-v3 {
-    height: 45px !important;
-    width: auto !important;
-    margin-bottom: 12px !important;
-    filter: drop-shadow(0 0 8px #00ff88);
-}
-
-.bm-title-v3 {
-    font-family: 'Orbitron', sans-serif !important;
-    font-size: 13px !important;
-    font-weight: 900 !important;
-    color: #fff !important;
-    text-transform: uppercase !important;
-    margin: 0 0 8px 0 !important;
-    letter-spacing: 1px;
-}
-
-.bm-desc-v3 {
-    font-family: 'Poppins', sans-serif !important;
-    font-size: 10px !important;
-    color: #ccc !important;
-    line-height: 1.4 !important;
-    margin: 0 0 15px 0 !important;
-}
-
-/* The Price Button (Pill Style) */
-.bm-price-v3 {
-    background: rgba(0, 0, 0, 0.6) !important;
-    border: 1px solid #00ff88 !important;
-    color: #fff !important;
-    padding: 6px 16px !important;
-    border-radius: 50px !important;
-    font-family: 'Orbitron', sans-serif !important;
-    font-size: 11px !important;
-    font-weight: 800 !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.bm-price-v3:hover {
+/* Prețul stilizat Cyber-Tag (Emerald) */
+.bm-price-tag-v4 {
     background: #00ff88 !important;
     color: #000 !important;
+    font-family: 'Montserrat' !important;
+    font-weight: 900;
+    font-size: 12px;
+    padding: 6px 20px;
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+    cursor: pointer;
+    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
-/* Inline Currency Icons */
-.bm-inline-coin { width: 14px; height: 14px; vertical-align: middle; margin: 0 2px; }
+.bm-price-tag-v4:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+    box-shadow: 0 0 20px #00ff88;
+}
 
-/* Mobile Fixes */
+/* Mobile Fix */
 @media (max-width: 768px) {
-    .bm-grid-v3 { padding: 10px !important; gap: 10px !important; }
-    .bm-title-v3 { font-size: 11px !important; }
-    .bm-desc-v3 { font-size: 9px !important; }
-    .bm-icon-v3 { height: 35px !important; }
+    .bm-grid-v4 { grid-template-columns: 1fr !important; padding: 15px; }
 }
-
 
 /* --- COSMETICS SHOWCASE UPGRADE --- */
 .cosmetic-section-header {
@@ -5171,6 +5171,226 @@ body {
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
     animation: btnScan 3s infinite linear;
 }
+
+/* --- ADAPTIVE REACTOR STATES --- */
+.nav-trigger-reactor {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* Tranziție fluidă de culoare */
+}
+
+/* 1. Starea HERO (Blue) */
+.nav-trigger-reactor.state-hero {
+    border-color: #29f3ff;
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.5), inset 0 0 10px rgba(41, 243, 255, 0.2);
+}
+.nav-trigger-reactor.state-hero i { color: #29f3ff; }
+
+/* 2. Starea VAULT (Gold) */
+.nav-trigger-reactor.state-vault {
+    border-color: #ffd700;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5), inset 0 0 10px rgba(255, 215, 0, 0.2);
+}
+.nav-trigger-reactor.state-vault i { color: #ffd700; }
+
+/* 3. Starea ATELIER (Pink) */
+.nav-trigger-reactor.state-atelier {
+    border-color: #d63384;
+    box-shadow: 0 0 20px rgba(214, 51, 132, 0.5), inset 0 0 10px rgba(214, 51, 132, 0.2);
+}
+.nav-trigger-reactor.state-atelier i { color: #d63384; }
+
+/* 4. Starea BLACK MARKET (Toxic Green) */
+.nav-trigger-reactor.state-terminal {
+    border-color: #00ff88;
+    box-shadow: 0 0 25px rgba(0, 255, 136, 0.6), inset 0 0 15px rgba(0, 255, 136, 0.2);
+    background: rgba(0, 20, 10, 0.9);
+}
+.nav-trigger-reactor.state-terminal i { 
+    color: #00ff88; 
+    animation: toxicPulse 2s infinite; /* Efect extra pentru Black Market */
+}
+
+@keyframes toxicPulse {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.5) drop-shadow(0 0 5px #00ff88); }
+}
+
+
+/* --- CYBER-CONDUIT SEPARATORS --- */
+.hr-conduit {
+    height: 120px; /* Spațiul între secțiuni */
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: transparent;
+    overflow: hidden;
+}
+
+/* Linia Laser */
+.conduit-line {
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--start-color) 30%, 
+        var(--end-color) 70%, 
+        transparent 100%
+    );
+    opacity: 0.5;
+}
+
+/* Nucleul Central (Rombul) */
+.conduit-node {
+    width: 30px;
+    height: 30px;
+    background: #050b14;
+    border: 2px solid var(--end-color);
+    transform: rotate(45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    box-shadow: 0 0 20px var(--end-color);
+    animation: nodeGlow 2s infinite alternate;
+}
+
+.conduit-node i {
+    transform: rotate(-45deg); /* Îndreaptă iconița */
+    font-size: 14px;
+    color: var(--end-color);
+}
+
+/* Efectul de particulă care circulă pe linie */
+.conduit-particle {
+    position: absolute;
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #fff, transparent);
+    filter: blur(2px);
+    animation: flowParticle 4s linear infinite;
+}
+
+@keyframes flowParticle {
+    0% { left: -100px; opacity: 0; }
+    50% { opacity: 1; }
+    100% { left: 100%; opacity: 0; }
+}
+
+@keyframes nodeGlow {
+    from { box-shadow: 0 0 5px var(--end-color); transform: rotate(45deg) scale(0.9); }
+    to { box-shadow: 0 0 25px var(--end-color); transform: rotate(45deg) scale(1.1); }
+}
+
+/* Culori per tranziție */
+.sep-hero-vault { --start-color: #29f3ff; --end-color: #ffd700; }
+.sep-vault-atelier { --start-color: #ffd700; --end-color: #d63384; }
+.sep-atelier-terminal { --start-color: #d63384; --end-color: #00ff88; }
+
+
+/* --- UPGRADED CYBER PRICE TAGS --- */
+.price-tag {
+    background: rgba(0, 0, 0, 0.6) !important;
+    border: 1.5px solid var(--vault-glow) !important; /* Folosește variabila secțiunii (Gold sau Green) */
+    color: #fff !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    padding: 8px 20px !important;
+    margin-top: 15px !important;
+    border-radius: 0 !important; /* Eliminăm rotunjirea bulei vechi */
+    
+    /* Taiem colțurile pentru aspect de "Military Tech" */
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    
+    box-shadow: 0 0 15px var(--vault-dim);
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: 1px;
+}
+
+/* Efectul de Laser în interiorul prețului */
+.price-tag::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: skewX(-20deg);
+    animation: tagScanner 3s infinite;
+}
+
+@keyframes tagScanner {
+    0% { left: -100%; }
+    20% { left: 150%; }
+    100% { left: 150%; }
+}
+
+/* Hover effect pe card face tag-ul să strălucească mai tare */
+.package-card:hover .price-tag {
+    transform: scale(1.1);
+    background: var(--vault-glow) !important;
+    color: #000 !important;
+    box-shadow: 0 0 25px var(--vault-glow);
+}
+
+.package-card:hover .price-tag::before {
+    display: none; /* Ascundem laserul când fundalul devine solid pe hover */
+}
+
+
+/* --- PERMANENT NEON OUTLINES --- */
+.package-card {
+    position: relative;
+    overflow: hidden;
+    background: rgba(13, 25, 41, 0.8) !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 1;
+    
+    /* Bordură de bază puțin mai vizibilă */
+    border-width: 2px !important;
+    border-style: solid !important;
+}
+
+/* --- STIL PERMANENT MONEDE (GOLD) --- */
+.package-card.pkg-coins {
+    border-color: #ffd700 !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.2), inset 0 0 10px rgba(255, 215, 0, 0.1);
+    animation: goldPulse Permanent 3s infinite alternate;
+}
+
+/* --- STIL PERMANENT DIAMANTE (GREEN) --- */
+.package-card.pkg-diamonds {
+    border-color: #00ff88 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.2), inset 0 0 10px rgba(0, 255, 136, 0.1);
+    animation: greenPulse Permanent 3s infinite alternate;
+}
+
+/* ANIMAȚII DE TIP PULSE (Face glow-ul să "respire") */
+@keyframes goldPulse {
+    from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
+    to { box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
+}
+
+@keyframes greenPulse {
+    from { box-shadow: 0 0 10px rgba(0, 255, 136, 0.2); }
+    to { box-shadow: 0 0 20px rgba(0, 255, 136, 0.4); }
+}
+
+/* HOVER EFFECT (Încă îl păstrăm ca să pară interactiv) */
+.package-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    filter: brightness(1.2);
+}
+
+.package-card.pkg-coins:hover { box-shadow: 0 0 30px rgba(255, 215, 0, 0.6); }
+.package-card.pkg-diamonds:hover { box-shadow: 0 0 30px rgba(0, 255, 136, 0.6); }
   </style>
 </head>
 <body>
@@ -5210,68 +5430,72 @@ body {
 
 <!-- BLACK MARKET MODAL (REMASTERED) -->
 <div id="blackMarketModal" class="account-modal-overlay">
-    
-
-
-<div class="bm-modal-v3">
-    <!-- Header -->
-    <div style="background: rgba(0,20,10,0.9); padding: 20px; border-bottom: 1px solid rgba(0,255,136,0.3); text-align: center; position: relative;">
-        <div style="font-family: 'Orbitron'; font-size: 22px; font-weight: 900; color: #00ff88; letter-spacing: 2px;">BLACK MARKET</div>
-        <div style="font-family: 'Courier New'; font-size: 10px; color: #adff2f;">/// SERVICII ILEGALE ///</div>
-        <button class="close-pop" onclick="closeModal('blackMarketModal')" style="top: 15px; right: 15px;">✕</button>
-    </div>
-
-    <!-- Grid -->
-    <div class="bm-grid-v3">
+    <div class="bm-modal-v4" style="width: 95%; max-width: 800px; max-height: 90vh; overflow-y: auto;">
         
-<!-- RAIN -->
-<div class="bm-card-v3" onclick="triggerRain()">
-    <i class="fas fa-cloud-showers-heavy bm-icon-v3" style="color: #fff; font-size: 30px;"></i>
-    <div class="bm-title-v3">PLOAIE TORENȚIALĂ DE MONEDE</div>
-    <p class="bm-desc-v3">Declanșezi o ploaie torențială de 5000 de monede pentru toți utilizatorii online.</p>
-    <!-- CHANGED FROM 5000 TO 50 BELOW -->
-    <div class="bm-price-v3">50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-coin"></div>
-</div>
-
-
-        <!-- HIJACK -->
-        <div class="bm-card-v3" onclick="activateHijack()">
-            <i class="fas fa-satellite-dish bm-icon-v3" style="color: #adff2f; font-size: 30px;"></i>
-            <div class="bm-title-v3">NEURAL HIJACK</div>
-            <p class="bm-desc-v3">Furi 35% din toate câștigurile celorlalți utilizatori timp de 15 min.</p>
-            <div class="bm-price-v3">100 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-coin"></div>
+        <!-- Terminal Header -->
+        <div style="background: rgba(0,255,136,0.1); padding: 25px; border-bottom: 1px solid #00ff88; position: relative;">
+            <div style="font-family:'Montserrat'; font-size: 26px; font-weight: 900; color: #00ff88; text-shadow: 0 0 15px #00ff88;">
+                TERMINAL / BLACK_MARKET
+            </div>
+            <div style="font-family:'Courier New'; font-size: 10px; color: #adff2f; letter-spacing: 2px;">
+                STATUS: [UNAUTHORIZED_ACCESS_GRANTED]
+            </div>
+            <button class="close-pop" onclick="closeModal('blackMarketModal')" style="top: 20px; right: 20px; border-radius:0;">✕</button>
         </div>
 
-        <!-- BRIBE -->
-        <div class="bm-card-v3" onclick="openBribeSelection()">
-            <i class="fas fa-handshake bm-icon-v3" style="color: #ffd700; font-size: 30px;"></i>
-            <div class="bm-title-v3">MITUIEȘTE SISTEMUL</div>
-            <p class="bm-desc-v3">Cumpără Locul #1 în clasamentul ales pentru o oră întreagă.</p>
-            <div class="bm-price-v3">50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-coin"></div>
+        <!-- Grid Oferte -->
+        <div class="bm-grid-v4">
+            
+            <!-- RAIN -->
+            <div class="bm-offer-card-v4" onclick="triggerRain()">
+                <i class="fas fa-cloud-showers-heavy" style="font-size: 32px; color: #fff;"></i>
+                <div class="bm-title-v4">PLOAIE TORENȚIALĂ</div>
+                <p class="bm-desc-v4">Declanșează un eveniment global: 5.000 monede pentru toți utilizatorii online.</p>
+                <div class="bm-price-tag-v4">50 💎</div>
+            </div>
+
+            <!-- HIJACK -->
+            <div class="bm-offer-card-v4" onclick="activateHijack()">
+                <i class="fas fa-satellite-dish" style="font-size: 32px; color: #adff2f;"></i>
+                <div class="bm-title-v4">NEURAL HIJACK</div>
+                <p class="bm-desc-v4">Interceptează fluxul de date: Furi 35% din câștigurile tuturor timp de 25 min.</p>
+                <div class="bm-price-tag-v4">150 💎</div>
+            </div>
+
+            <!-- BRIBE -->
+            <div class="bm-offer-card-v4" onclick="openBribeSelection()">
+                <i class="fas fa-handshake" style="font-size: 32px; color: #ffd700;"></i>
+                <div class="bm-title-v4">MITUIEȘTE SISTEMUL</div>
+                <p class="bm-desc-v4">Hackează clasamentul: Preia locul #1 în orice top timp de 60 de minute.</p>
+                <div class="bm-price-tag-v4">50 💎</div>
+            </div>
+
+            <!-- EXCHANGE -->
+            <div class="bm-offer-card-v4" onclick="openExchangeModal()">
+                <i class="fas fa-random" style="font-size: 32px; color: #00ff88;"></i>
+                <div class="bm-title-v4">SCHIMB VALUTAR</div>
+                <p class="bm-desc-v4">Spală diamantele: Schimbă monede în diamante sau invers la cursul pieței negre.</p>
+                <div class="bm-price-tag-v4">DESCHIDE PIAȚA</div>
+            </div>
+
+            <!-- IDENTITY -->
+            <div class="bm-offer-card-v4" onclick="openPfpChangeModal()" style="grid-column: 1 / -1;">
+                <i class="fas fa-user-ninja" style="font-size: 32px; color: #ff00ff;"></i>
+                <div class="bm-title-v4">IDENTITATE NOUĂ</div>
+                <p class="bm-desc-v4">Șterge-ți urmele: Înlocuiește poza de profil Google cu o imagine complet personalizată.</p>
+                <div class="bm-price-tag-v4">15 💎</div>
+            </div>
+
         </div>
 
-        <!-- EXCHANGE -->
-        <div class="bm-card-v3" onclick="openExchangeModal()">
-            <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/images%2F3690b989-4747-40a5-8eea-3eef98477fc9_removalai_preview.png?alt=media&token=8e291581-1581-4714-b277-813dfdfd88fa" class="bm-icon-v3">
-            <div class="bm-title-v3">SCHIMB VALUTAR</div>
-            <p class="bm-desc-v3">
-                Vinde: 1 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-coin"> = 500 <img src="https://iili.io/fhc1SKQ.png" class="bm-inline-coin"><br>
-                Cumpără: 1 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-coin"> = 750 <img src="https://iili.io/fhc1SKQ.png" class="bm-inline-coin">
-            </p>
-            <div class="bm-price-v3" style="border-color: #00ff88;">DESCHIDE PIAȚA</div>
+        <!-- Footer Log -->
+        <div style="padding: 10px 30px; font-size: 9px; color: #004400; font-family: monospace; background: #000;">
+            >> SECURE_CONNECTION: ESTABLISHED...<br>
+            >> ENCRYPTION_LAYER: AES-256...<br>
+            >> TRACE_CLEARED: TRUE
         </div>
-
-        <!-- IDENTITY -->
-        <div class="bm-card-v3" onclick="openPfpChangeModal()">
-            <i class="fas fa-user-secret bm-icon-v3" style="color: #ff00ff; font-size: 30px;"></i>
-            <div class="bm-title-v3">IDENTITATE NOUĂ</div>
-            <p class="bm-desc-v3">Schimbă-ți poza de profil Google cu o imagine personalizată.</p>
-            <div class="bm-price-v3">15 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-coin"></div>
-        </div>
-
     </div>
 </div>
-    </div>
 </div>
 
 
@@ -5506,6 +5730,14 @@ body {
 
 
     <section id="zone-vault" class="shop-zone">
+
+<div class="hr-conduit sep-hero-vault">
+    <div class="conduit-line"></div>
+    <div class="conduit-particle"></div>
+    <div class="conduit-node">
+        <i class="fas fa-vault"></i>
+    </div>
+</div>
         <h1 class="metallic-title">The Vault</h1>
         <p class="shop-desc">Achiziționează monede sau diamante pentru contul tău.</p>
 
@@ -5539,8 +5771,19 @@ body {
         <div class="recharge-grid" id="rechargeGrid"></div>
     </section>
 
+
+
 <!-- SECTION 3: THE ATELIER -->
 <section id="zone-atelier" class="shop-zone">
+
+<!-- Separator: Vault -> Atelier (Gold la Pink) -->
+<div class="hr-conduit sep-vault-atelier">
+    <div class="conduit-line"></div>
+    <div class="conduit-particle" style="animation-delay: 2s;"></div>
+    <div class="conduit-node">
+        <i class="fas fa-paint-brush"></i>
+    </div>
+</div>
     <h1 class="metallic-title">Atelier</h1>
     <p class="shop-desc">Personalizează-ți prezența pe platformă.</p>
 
@@ -5581,6 +5824,15 @@ body {
 
     <!-- SECTION 4: THE TERMINAL (Black Market) -->
     <section id="zone-terminal" class="shop-zone">
+
+<!-- Separator: Atelier -> Black Market (Pink la Green) -->
+<div class="hr-conduit sep-atelier-terminal">
+    <div class="conduit-line"></div>
+    <div class="conduit-particle"></div>
+    <div class="conduit-node">
+        <i class="fas fa-skull-crossbones"></i>
+    </div>
+</div>
     <div class="terminal-light" id="termLight"></div>
     <div id="nodeContainer" style="position: absolute; inset: 0; z-index: 0;"></div>
 
@@ -9177,6 +9429,47 @@ document.addEventListener('mousedown', (e) => {
         document.getElementById('navHud').classList.remove('active');
     }
 });
+
+
+// --- AUTO-ADAPTIVE NAV SENSOR ---
+function initAdaptiveNav() {
+    const trigger = document.querySelector('.nav-trigger-reactor');
+    const sections = {
+        'zone-hero': 'state-hero',
+        'zone-vault': 'state-vault',
+        'zone-atelier': 'state-atelier',
+        'zone-terminal': 'state-terminal'
+    };
+
+    const observerOptions = {
+        root: null,
+        threshold: 0.4 // Butonul se schimbă când 40% din secțiune e vizibilă
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Eliminăm toate stările anterioare
+                Object.values(sections).forEach(cls => trigger.classList.remove(cls));
+                
+                // Adăugăm starea corespunzătoare secțiunii detectate
+                const newClass = sections[entry.target.id];
+                if (newClass) trigger.classList.add(newClass);
+            }
+        });
+    }, observerOptions);
+
+    // Începem monitorizarea fiecărei secțiuni
+    Object.keys(sections).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el);
+    });
+}
+
+// Lansează senzorul după ce se încarcă pagina
+document.addEventListener('DOMContentLoaded', initAdaptiveNav);
+// Pentru siguranță (dacă DOM-ul e deja gata):
+initAdaptiveNav();
 </script>
 </body>
 </html>
