@@ -5853,6 +5853,23 @@ body {
     transform: scale(1.2) translateY(-20px);
     filter: drop-shadow(0 0 50px currentColor);
 }
+
+
+
+.v4-timer-pill {
+    font-family: 'Orbitron';
+    font-size: 11px;
+    color: #ff6a00;
+    background: rgba(255, 106, 0, 0.1);
+    border: 1px solid #ff6a00;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-left: 15px;
+    display: inline-block;
+    vertical-align: middle;
+    text-shadow: 0 0 5px #ff6a00;
+    letter-spacing: 1px;
+}
   </style>
 </head>
 <body>
@@ -5865,7 +5882,10 @@ body {
     <div class="shop-modal-v4 accent-mystery" style="width: 95%; max-width: 900px; height: 85vh;">
         <div class="bm-scanline-overlay"></div>
         <div style="background: rgba(255, 106, 0, 0.05); padding: 25px; border-bottom: 1px solid #ff6a00; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
-            <div class="title-mystery" style="font-family:'Montserrat'; font-size: 24px; font-weight: 900;">MYSTERY_VAULT</div>
+<div class="title-mystery" style="font-family:'Montserrat'; font-size: 24px; font-weight: 900;">
+    MYSTERY_VAULT 
+    <span id="mysteryResetTimer" class="v4-timer-pill">REFRESH: 00:00</span>
+</div>
             <button class="close-pop" onclick="closeModal('mysteryShopModal')" style="border-color: #ff6a00; background: transparent; position: static !important;">✕</button>
         </div>
         <div class="bm-content-scroll">
@@ -10249,10 +10269,14 @@ let globalStock = {};
 let selectedBox = null;
 let selectedQty = 1;
 
+let countdownInterval = null;
+
 function initMysteryStockSync() {
     onSnapshot(doc(db, "system", "mystery_box_stock"), async (snap) => {
         const now = Date.now();
-        if (!snap.exists() || (now - (snap.data().lastReset || 0) > 3600000)) {
+        const RESET_MS = 60000; // 1 MINUTE FOR TESTING (Change to 3600000 later)
+
+        if (!snap.exists() || (now - (snap.data().lastReset || 0) > RESET_MS)) {
             const newStock = {};
             BOXES_DB.forEach(box => {
                 const [min, max] = box.stockRange;
@@ -10261,7 +10285,29 @@ function initMysteryStockSync() {
             await setDoc(doc(db, "system", "mystery_box_stock"), { counts: newStock, lastReset: Date.now() });
         } else {
             globalStock = snap.data().counts;
-            if(document.getElementById('mysteryShopModal').classList.contains('active')) renderMysteryShopItems();
+            const lastReset = snap.data().lastReset;
+
+            // Start/Update Visual Countdown
+            if (countdownInterval) clearInterval(countdownInterval);
+            countdownInterval = setInterval(() => {
+                const timePassed = Date.now() - lastReset;
+                const timeLeft = Math.max(0, RESET_MS - timePassed);
+                
+                const minutes = Math.floor(timeLeft / 60000);
+                const seconds = Math.floor((timeLeft % 60000) / 1000);
+                
+                const timerEl = document.getElementById('mysteryResetTimer');
+                if (timerEl) {
+                    timerEl.innerText = `REFRESH: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                }
+
+                // If timer hits zero, it will trigger a re-sync on next check
+                if (timeLeft <= 0) clearInterval(countdownInterval);
+            }, 1000);
+
+            if (document.getElementById('mysteryShopModal').classList.contains('active')) {
+                renderMysteryShopItems();
+            }
         }
     });
 }
