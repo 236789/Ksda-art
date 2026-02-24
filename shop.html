@@ -5558,6 +5558,12 @@ body {
     display: block;
     opacity: 0.8;
 }
+
+@keyframes scanPfp {
+    0% { top: 0; opacity: 0; }
+    50% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+}
   </style>
 </head>
 <body>
@@ -5701,135 +5707,169 @@ body {
 
 
 
-<div id="bribeSelectionModal" class="account-modal-overlay">
-    <div class="payment-card" style="border-color: #ffd700; max-width: 400px; padding: 30px;">
-        <button class="close-modal-btn" onclick="closeModal('bribeSelectionModal')">✕</button>
-        
-        <h2 style="color: #ffd700; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 5px;">BLACK MARKET BRIBE</h2>
-        <p style="font-size: 10px; color: #aaa; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">Alege ținta manipulării</p>
-        
-        <div class="bribe-grid">
-            <!-- TOP COINS -->
-            <div class="bribe-cat-opt br-coins" onclick="processBribe('coins')">
-                <img src="https://iili.io/fhc1SKQ.png">
-                <span>COINS</span>
-            </div>
-            
-            <!-- TOP DIAMONDS -->
-            <div class="bribe-cat-opt br-diamonds" onclick="processBribe('diamonds')">
-                <img src="https://iili.io/fv5bmtj.png">
-                <span>DIAMONDS</span>
-            </div>
-            
-            <!-- TOP INVITES -->
-            <div class="bribe-cat-opt br-invites" onclick="processBribe('referrals')">
-                <i class="fas fa-user-plus" style="color: #00ff88;"></i>
-                <span>INVITES</span>
-            </div>
-            
-            <!-- TOP DONATED -->
-            <div class="bribe-cat-opt br-donated" onclick="processBribe('donated')">
-                <i class="fas fa-hand-holding-usd" style="color: #ffd700;"></i>
-                <span>DONATED</span>
-            </div>
-        </div>
-        
-        <div style="margin-top: 20px; font-size: 9px; color: #555; font-family: 'Orbitron';">
-            PAYMENT: 50 DIAMONDS | SESSION: 60 MIN
-        </div>
-    </div>
-</div>
 
 
 
-<!-- EXCHANGE CHOICE MODAL -->
+<!-- =========================================
+     BLACK MARKET EXCHANGE CHOICE MODAL V4
+     ========================================= -->
 <div id="exchangeModal" class="account-modal-overlay">
-    <div class="payment-card" style="border-color: #00ff88; max-width: 400px; padding: 30px;">
-        <button class="close-modal-btn" onclick="closeModal('exchangeModal')">✕</button>
-        
-        <h2 style="color: #00ff88; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 5px;">BLACK MARKET EXCHANGE</h2>
-        <p style="font-size: 10px; color: #aaa; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px;">Alege direcția schimbului</p>
-        
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            <!-- BUY DIAMONDS -->
-            <button class="pay-btn" style="background: rgba(0, 255, 136, 0.05); border: 1px solid #00ff88; color: #fff; flex-direction: column; height: auto; padding: 15px;" onclick="prepTrade('buy')">
-                <div style="display: flex; align-items: center; gap: 8px; font-family: 'Orbitron'; font-size: 12px; color: #00ff88;">
-                    CUMPĂRĂ <img src="https://iili.io/fv5bmtj.png" width="18">
-                </div>
-                <div style="font-size: 10px; opacity: 0.7; margin-top: 5px;">Cost: 750 <img src="https://iili.io/fhc1SKQ.png" width="12"> / 1 <img src="https://iili.io/fv5bmtj.png" width="12"></div>
-            </button>
-
-            <!-- SELL DIAMONDS -->
-            <button class="pay-btn" style="background: rgba(255, 215, 0, 0.05); border: 1px solid #ffd700; color: #fff; flex-direction: column; height: auto; padding: 15px;" onclick="prepTrade('sell')">
-                <div style="display: flex; align-items: center; gap: 8px; font-family: 'Orbitron'; font-size: 12px; color: #ffd700;">
-                    VINDE <img src="https://iili.io/fv5bmtj.png" width="18">
-                </div>
-                <div style="font-size: 10px; opacity: 0.7; margin-top: 5px;">Primești: 500 <img src="https://iili.io/fhc1SKQ.png" width="12"> / 1 <img src="https://iili.io/fv5bmtj.png" width="12"></div>
-            </button>
+    <div class="shop-modal-v4 accent-terminal" style="width: 95%; max-width: 550px;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(0, 255, 136, 0.05); padding: 25px; border-bottom: 1px solid #00ff88; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div class="title-terminal" style="font-family:'Montserrat'; font-size: 20px; font-weight: 900;">CURRENCY_SWAP</div>
+            <button class="close-pop" onclick="closeModal('exchangeModal')" style="position: static !important; border: 1px solid #00ff88; background: transparent; width:40px; height:40px;">✕</button>
         </div>
-    </div>
-</div>
 
-<!-- TRADE INPUT MODAL -->
-<div id="tradeInputModal" class="modal-overlay">
-    <div class="payment-card" style="max-width: 380px;">
-        <button class="close-modal-btn" onclick="closeModal('tradeInputModal')">✕</button>
-        <h2 id="tradeTitle" style="color: #00ff88; font-size: 18px; font-family: 'Orbitron';">TRADE</h2>
-        <p id="tradeSub" style="font-size: 11px; color: #a5b1c2; margin-bottom: 15px;">Câte diamante dorești?</p>
-        
-        <input type="number" id="tradeAmountInput" class="calc-input" placeholder="Cantitate..." min="1" oninput="updateTradeTotal()">
-        
-        <div id="tradeTotalDisplay" style="font-family: 'Orbitron'; color: #fff; font-size: 16px; margin-bottom: 25px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            Total: 0 <img src="https://iili.io/fhc1SKQ.png" width="20">
-        </div>
-        
-        <button class="pay-btn pay-rev" id="confirmTradeBtn" style="border-radius: 50px;">CONFIRMĂ SCHIMBUL</button>
-    </div>
-</div>
-
-
-
-
-<!-- CHANGE PFP MODAL -->
-<div id="pfpChangeModal" class="account-modal-overlay">
-    <div class="payment-card" style="border-color: #ff00ff; max-width: 400px; padding: 30px;">
-        <button class="close-modal-btn" onclick="closeModal('pfpChangeModal')">✕</button>
-        
-        <h2 style="color: #ff00ff; font-family: 'Orbitron'; font-size: 18px; margin-bottom: 5px;">CHANGE IDENTITY</h2>
-        <p style="font-size: 10px; color: #aaa; margin-bottom: 20px; text-transform: uppercase;">Alege o imagine nouă</p>
-        
-        <!-- Preview Area -->
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 20px;">
-            <div style="position: relative; width: 100px; height: 100px;">
-                <img id="pfpPreview" src="https://i.ibb.co/4pGm9S2/user-placeholder.png" 
-                     style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #ff00ff; box-shadow: 0 0 20px rgba(255, 0, 255, 0.4);">
+        <div class="bm-content-scroll" style="padding: 25px;">
+            <div class="bm-grid-v4" style="grid-template-columns: 1fr; gap: 15px; padding: 0;">
                 
-                <!-- Edit Icon Overlay -->
-                <label for="pfpFileInput" style="position: absolute; bottom: 0; right: 0; background: #ff00ff; color: #000; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid #fff;">
-                    <i class="fas fa-camera" style="font-size: 14px;"></i>
-                </label>
-            </div>
-            
-            <div id="pfpPreviewName" style="font-family: 'Orbitron'; font-weight: 800; font-size: 16px; color: #fff;">
-                USERNAME
+                <!-- BUY DIAMONDS CARD -->
+                <div class="bm-offer-card-v4" onclick="prepTrade('buy')" style="flex-direction: row; justify-content: space-between; padding: 20px; align-items: center;">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                    <div style="text-align: left;">
+                        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #00ff88;">CUMPĂRĂ DIAMANTE</div>
+                        <div style="font-size: 10px; color: #aaa; margin-top: 5px;">Rată: 750 <img src="https://iili.io/fhc1SKQ.png" width="10"> / 1 <img src="https://iili.io/fv5bmtj.png" width="10"></div>
+                    </div>
+                    <button class="bm-price-btn-v4" style="min-width: 100px;">SELECTEAZĂ</button>
+                </div>
+
+                <!-- SELL DIAMONDS CARD -->
+                <div class="bm-offer-card-v4" onclick="prepTrade('sell')" style="flex-direction: row; justify-content: space-between; padding: 20px; align-items: center;">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                    <div style="text-align: left;">
+                        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #ffd700;">VINDE DIAMANTE</div>
+                        <div style="font-size: 10px; color: #aaa; margin-top: 5px;">Rată: 1 <img src="https://iili.io/fv5bmtj.png" width="10"> = 500 <img src="https://iili.io/fhc1SKQ.png" width="10"></div>
+                    </div>
+                    <button class="bm-price-btn-v4" style="background: #ffd700 !important; color: #000; min-width: 100px;">SELECTEAZĂ</button>
+                </div>
+
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Hidden File Input -->
-        <input type="file" id="pfpFileInput" accept="image/*" style="display: none;" onchange="handlePfpSelect(event)">
-
-        <!-- Info -->
-        <div style="background: rgba(255, 0, 255, 0.05); border: 1px solid rgba(255, 0, 255, 0.2); padding: 10px; border-radius: 10px; margin-bottom: 20px;">
-            <p style="font-size: 9px; color: #ccc; margin: 0;">
-                <i class="fas fa-info-circle" style="color: #ff00ff;"></i> 
-                Poza se va actualiza pe tot site-ul (Chat, Top, Profil).
-            </p>
+<!-- =========================================
+     TRADE INPUT MODAL V4 (CALCULATOR)
+     ========================================= -->
+<div id="tradeInputModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-terminal" style="width: 95%; max-width: 450px;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(0, 255, 136, 0.05); padding: 20px; border-bottom: 1px solid #00ff88; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div id="tradeTitle" style="font-family:'Montserrat'; font-size: 18px; font-weight: 900; color: #00ff88;">TRADE_CALCULATOR</div>
+            <button class="close-pop" onclick="closeModal('tradeInputModal')" style="position: static !important; border: 1px solid #00ff88; background: transparent;">✕</button>
         </div>
 
-        <!-- Pay Button -->
-        <button id="btnPayPfp" class="pay-btn" style="background: #ff00ff; color: #fff; opacity: 0.5; cursor: not-allowed;" onclick="uploadAndPayPfp()" disabled>
-            PLĂTEȘTE 15 <img src="https://iili.io/fv5bmtj.png" width="16" style="vertical-align: middle;">
-        </button>
+        <div class="bm-content-scroll" style="padding: 30px; text-align: center;">
+            <div class="v4-badge-item" style="border: none; background: transparent; padding: 0;">
+                <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                
+                <p id="tradeSub" style="font-size: 10px; color: #aaa; margin-bottom: 15px; text-transform: uppercase;">INTRODUCEȚI CANTITATEA DORITĂ</p>
+                
+                <input type="number" id="tradeAmountInput" class="v4-terminal-input" placeholder="0" min="1" oninput="updateTradeTotal()" style="border-color: #00ff88 !important;">
+                
+                <div id="tradeTotalDisplay" style="font-family: 'Orbitron'; color: #fff; font-size: 16px; margin: 25px 0; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    Total: 0 <img src="https://iili.io/fhc1SKQ.png" width="20">
+                </div>
+                
+                <button class="bm-price-btn-v4" id="confirmTradeBtn" style="width: 100%;">EXECUTE_TRADE</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================
+     BLACK MARKET BRIBE SELECTION MODAL V4
+     ========================================= -->
+<div id="bribeSelectionModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-terminal" style="width: 95%; max-width: 500px;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(0, 255, 136, 0.05); padding: 25px; border-bottom: 1px solid #00ff88; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div>
+                <div class="title-terminal" style="font-family:'Montserrat'; font-size: 22px; font-weight: 900;">BRIBE_OFFICIALS</div>
+                <div style="font-family:monospace; font-size: 10px; color:#adff2f;">TARGET_SELECTION: MANUAL | COST: 50 DIAMONDS</div>
+            </div>
+            <button class="close-pop" onclick="closeModal('bribeSelectionModal')" style="position: static !important; border: 1px solid #00ff88; background: transparent;">✕</button>
+        </div>
+
+        <div class="bm-content-scroll" style="padding: 20px;">
+            <div class="bm-grid-v4" style="padding: 0; gap: 12px;">
+                <!-- COINS -->
+                <div class="v4-badge-item" onclick="processBribe('coins')" style="cursor:pointer; padding: 20px;">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                    <img src="https://iili.io/fhc1SKQ.png" height="40" style="margin-bottom:10px;">
+                    <div style="font-family:'Orbitron'; font-size:10px; color:#fff;">TOP COINS</div>
+                </div>
+                <!-- DIAMONDS -->
+                <div class="v4-badge-item" onclick="processBribe('diamonds')" style="cursor:pointer; padding: 20px;">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                    <img src="https://iili.io/fv5bmtj.png" height="40" style="margin-bottom:10px;">
+                    <div style="font-family:'Orbitron'; font-size:10px; color:#fff;">TOP DIAMONDS</div>
+                </div>
+                <!-- INVITES -->
+                <div class="v4-badge-item" onclick="processBribe('referrals')" style="cursor:pointer; padding: 20px;">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                    <i class="fas fa-user-plus" style="font-size:35px; color:#00ff88; margin-bottom:15px;"></i>
+                    <div style="font-family:'Orbitron'; font-size:10px; color:#fff;">TOP INVITES</div>
+                </div>
+                <!-- DONATED -->
+                <div class="v4-badge-item" onclick="processBribe('donated')" style="cursor:pointer; padding: 20px;">
+                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                    <i class="fas fa-hand-holding-usd" style="font-size:35px; color:#ffd700; margin-bottom:15px;"></i>
+                    <div style="font-family:'Orbitron'; font-size:10px; color:#fff;">TOP DONATED</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================
+     CHANGE IDENTITY MODAL V4 (PFP)
+     ========================================= -->
+<div id="pfpChangeModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-terminal" style="width: 95%; max-width: 450px;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 0, 255, 0.05); padding: 20px; border-bottom: 1px solid #ff00ff; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div style="font-family:'Montserrat'; font-size: 18px; font-weight: 900; color: #ff00ff;">IDENTITY_OVERRIDE</div>
+            <button class="close-pop" onclick="closeModal('pfpChangeModal')" style="position: static !important; border: 1px solid #ff00ff; background: transparent;">✕</button>
+        </div>
+
+        <div class="bm-content-scroll" style="padding: 30px; text-align: center;">
+            <div class="v4-badge-item" style="border: none; background: transparent; padding: 0;">
+                <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                
+                <!-- PFP PREVIEW AREA -->
+                <div style="position: relative; width: 120px; height: 120px; margin: 0 auto 20px;">
+                    <img id="pfpPreview" src="https://i.ibb.co/4pGm9S2/user-placeholder.png" 
+                         style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #ff00ff; padding: 5px;">
+                    
+                    <!-- Neon Scanner Line over PFP -->
+                    <div style="position: absolute; top:0; left:0; width:100%; height:2px; background:#ff00ff; box-shadow:0 0 10px #ff00ff; animation: scanPfp 3s infinite;"></div>
+                    
+                    <label for="pfpFileInput" style="position: absolute; bottom: 0; right: 0; background: #ff00ff; color: #000; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid #fff;">
+                        <i class="fas fa-camera"></i>
+                    </label>
+                </div>
+                
+                <div id="pfpPreviewName" style="font-family: 'Orbitron'; font-weight: 800; font-size: 16px; color: #fff; margin-bottom: 20px;">-</div>
+
+                <input type="file" id="pfpFileInput" accept="image/*" style="display: none;" onchange="handlePfpSelect(event)">
+
+                <div class="pay-hud-warning" style="text-align: left; background: rgba(255, 0, 255, 0.05); border-color: #ff00ff;">
+                    <div class="pay-hud-text" style="color: #fff; font-size: 10px;">ID_VERIFICATION: BYPASSED | COST: 15 DIAMONDS</div>
+                </div>
+
+                <button id="btnPayPfp" class="bm-price-btn-v4" style="background: #ff00ff !important; margin-top: 25px; width: 100%;" onclick="uploadAndPayPfp()" disabled>UPLOAD_NEW_ID</button>
+            </div>
+        </div>
     </div>
 </div>
 
