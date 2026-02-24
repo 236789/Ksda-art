@@ -6219,25 +6219,50 @@ body {
     transition: 0.3s;
 }
 
-/* 3. BLACK MARKET STYLE VALUE TAGS (The skewed form) */
 .aaa-card-value {
-    background: #000 !important;
-    /* Physical outline that matches the tier color */
-    border: 1.5px solid var(--r-color) !important; 
+    position: relative;
+    background: rgba(0, 0, 0, 0.9) !important;
     color: #fff !important;
     font-family: 'Montserrat', sans-serif;
     font-weight: 900;
     font-size: 13px;
     padding: 10px 25px;
-    clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 150px;
-    /* Subtle neon glow for the tag itself */
-    box-shadow: 0 0 10px var(--r-glow); 
+    min-width: 155px;
     text-transform: uppercase;
-    position: relative;
+    
+    /* The Shape */
+    clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+    
+    /* REMOVE standard border */
+    border: none !important;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+/* THE PERFECT UNIFORM BORDER ENGINE */
+.aaa-card-value::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1.5px; /* THIS IS YOUR BORDER THICKNESS (Uniform on all sides) */
+    background: var(--r-color); /* The neon tier color */
+    
+    /* Must match the parent's clip-path exactly */
+    clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+    
+    /* THE MAGIC: This hides the center of the background, leaving ONLY the edge */
+    -webkit-mask: 
+       linear-gradient(#fff 0 0) content-box, 
+       linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    
+    pointer-events: none;
+    z-index: 6;
+    /* Subtle glow pulse */
+    filter: drop-shadow(0 0 5px var(--r-color));
 }
 
 /* Add a permanent glow line under the tag to match the card color */
