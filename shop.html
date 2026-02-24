@@ -5363,8 +5363,8 @@ body {
     <div class="cyber-grid-bg"></div>
     <div class="cyber-scanner"></div>
 
-    <h1 class="metallic-title" style="position:relative; z-index:2;">USER TERMINAL</h1>
-
+<!-- Change this line (around line 1780) -->
+<h1 id="heroTitle" class="metallic-title" style="position:relative; z-index:2;">USER TERMINAL</h1>
     <!-- HOLOGRAPHIC CARD -->
     <div class="holo-id-card" id="shopUserCard">
         
@@ -8123,6 +8123,11 @@ onAuthStateChanged(auth, async user => {
             if(snap.exists()) {
                 const d = snap.data();
                 window.currentUserData = d; 
+
+        
+        // --- ADD THIS LINE HERE ---
+        const heroTitle = document.getElementById('heroTitle');
+        if (heroTitle) heroTitle.innerText = `Salut ${d.username.toUpperCase()}`;
                 
                 await resetUserQuests(userRef, d);
 
@@ -8190,6 +8195,10 @@ onAuthStateChanged(auth, async user => {
         });
 
     } else {
+
+        // --- ADD THIS LINE HERE ---
+        const heroTitle = document.getElementById('heroTitle');
+        if (heroTitle) heroTitle.innerText = "SALUT, VIZITATOR";
         // --- STARE LOGOUT (Dacă nu e nimeni logat) ---
         if (headerText) headerText.innerText = "Autentificare";
         if (headerImg) headerImg.style.display = "none";
