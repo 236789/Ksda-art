@@ -5921,6 +5921,10 @@ body {
                     <button class="qty-btn active" onclick="setBoxQty(1)">1x</button>
                     <button class="qty-btn" onclick="setBoxQty(3)">3x</button>
                     <button class="qty-btn" onclick="setBoxQty('max')">MAX</button>
+
+
+<!-- Insert this below the buttons div -->
+<div id="boxQtyInfo" style="font-family:'Orbitron'; font-size: 11px; color: #ff6a00; margin-bottom: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 5px #ff6a00; height: 15px;"></div>
                 </div>
 
                 <div id="boxTotalDisplay" style="font-family:'Orbitron'; font-size: 20px; color:#fff; margin-bottom: 25px; font-weight: 900;">
@@ -10360,6 +10364,9 @@ function openBoxDetail(box) {
     nameEl.style.color = box.color;
     updateBoxTotal();
     modal.classList.add('active');
+
+// Add this at the bottom of openBoxDetail function
+document.getElementById('boxQtyInfo').innerText = `> CUMPERI 1 CUTIE`;
 }
 
 window.openPrizeView = () => {
@@ -10383,25 +10390,34 @@ window.setBoxQty = (q) => {
     btns.forEach(b => b.classList.remove('active'));
     
     const currentStock = globalStock[selectedBox.id] || 0;
+    const userCoins = window.currentUserData?.coins || 0;
 
     if(q === 'max') {
-        const userCoins = window.currentUserData?.coins || 0;
-        // Calculation: What I can afford vs What is left in stock
+        // Calculate: How many can I afford vs how many are in stock
         const affordable = Math.floor(userCoins / selectedBox.price);
         selectedQty = Math.min(affordable, currentStock); 
         
         if(selectedQty < 1) selectedQty = 1;
         
-        // Find and highlight the MAX button
+        // Highlight the MAX button
         const maxBtn = Array.from(btns).find(b => b.innerText === 'MAX');
         if(maxBtn) maxBtn.classList.add('active');
     } else {
-        // For 1x and 3x, still check if stock is enough
+        // Check if selection is higher than stock
         selectedQty = Math.min(q, currentStock);
         if(selectedQty < 1) selectedQty = 1;
         
         if(event) event.currentTarget.classList.add('active');
     }
+
+    // UPDATE THE DYNAMIC TEXT
+    const infoEl = document.getElementById('boxQtyInfo');
+    if(infoEl) {
+        // If selection is 1, use singular "CUTIE", otherwise plural "CUTII"
+        const word = selectedQty === 1 ? "CUTIE" : "CUTII";
+        infoEl.innerText = `> CUMPERI ${selectedQty.toLocaleString()} ${word}`;
+    }
+
     updateBoxTotal();
 };
 
