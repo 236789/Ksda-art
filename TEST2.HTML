@@ -10309,12 +10309,14 @@ let selectedQty = 1;
 let countdownInterval = null;
 
 
+// --- UPDATED REAL-TIME STOCK SYNC ---
 function initMysteryStockSync() {
     onSnapshot(doc(db, "system", "mystery_box_stock"), async (snap) => {
         const now = Date.now();
-        const RESET_MS = 60000; // 1 Minute for testing
+        const RESET_MS = 60000; // 1 Minute
 
         if (!snap.exists() || (now - (snap.data().lastReset || 0) > RESET_MS)) {
+            // Logic to restock if expired
             const newStock = {};
             BOXES_DB.forEach(box => {
                 const [min, max] = box.stockRange;
@@ -10322,20 +10324,26 @@ function initMysteryStockSync() {
             });
             await setDoc(doc(db, "system", "mystery_box_stock"), { counts: newStock, lastReset: Date.now() });
         } else {
-// Add this inside initMysteryStockSync where you update globalStock:
-globalStock = snap.data().counts;
+            // Update the local variable with new data from Firebase
+            globalStock = snap.data().counts;
 
-// THE FIX: Trigger UI updates instantly
-if (document.getElementById('mysteryShopModal').classList.contains('active')) renderMysteryShopItems();
-if (document.getElementById('boxDetailModal').classList.contains('active')) updateBoxTotal();
+            // --- THE REAL-TIME UI FIX ---
+            // 1. Refresh the main grid if the shop is open
+            if (document.getElementById('mysteryShopModal').classList.contains('active')) {
+                renderMysteryShopItems();
+            }
 
-            // 2. INSTANT REFRESH: If detail modal is open, adjust calculations
+            // 2. Refresh the detail modal if the user is currently looking at a specific box
             if (document.getElementById('boxDetailModal').classList.contains('active') && selectedBox) {
                 const currentStock = globalStock[selectedBox.id] || 0;
-                // If stock dropped below current selection, lower the selection
-                if (selectedQty > currentStock) {
-                    selectedQty = Math.max(1, currentStock);
+                
+                // Adjust quantity if stock dropped below what the user selected
+                if (selectedQty > currentStock && currentStock > 0) {
+                    selectedQty = currentStock;
+                } else if (currentStock <= 0) {
+                    selectedQty = 0;
                 }
+                
                 updateBoxTotal();
             }
 
@@ -10347,7 +10355,9 @@ if (document.getElementById('boxDetailModal').classList.contains('active')) upda
                 const m = Math.floor(timeLeft / 60000);
                 const s = Math.floor((timeLeft % 60000) / 1000);
                 const timerEl = document.getElementById('mysteryResetTimer');
-                if (timerEl) timerEl.innerText = `REFRESH: ${m}:${s < 10 ? '0' : ''}${s}`;
+                if (timerEl) {
+                    timerEl.innerText = `REFRESH: ${m}:${s < 10 ? '0' : ''}${s}`;
+                }
                 if (timeLeft <= 0) clearInterval(countdownInterval);
             }, 1000);
         }
