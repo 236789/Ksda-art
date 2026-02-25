@@ -10151,11 +10151,11 @@ ownedIds.forEach(id => {
             <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
                 <div class="item-preview-box">
                     <span class="shop-badge-preview ${badge.animClass || ''}" 
-                          style="background:${badge.color} !important; color:#000 !important; font-weight:900; box-shadow: 0 0 10px ${badge.color};">
+                          style="background:${badge.color} !important; color:#000 !important; font-weight:900 !important; box-shadow: 0 0 10px ${badge.color}; border:none !important; display:inline-block; padding:5px 10px; border-radius:4px;">
                         <i class="fas ${badge.icon}"></i> ${badge.text}
                     </span>
                 </div>
-                <div style="font-weight:700; font-size:11px; margin-bottom:10px; color:#fff;">${badge.text}</div>
+                <div style="font-weight:700; font-size:11px; margin-bottom:10px; color:#fff; font-family:'Orbitron';">${badge.text}</div>
                 ${isEquipped 
                     ? `<button class="btn-equip-v6 is-equipped">ECHIPAT</button>` 
                     : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">ECHIPEAZĂ</button>`
@@ -12787,10 +12787,23 @@ window.showFinalBoxReward = async (res, box) => {
     titleEl.innerText = box.id === 'box_void' ? "VOID_BREACH_SUCCESS" : "DECRYPTION_SUCCESS";
     titleEl.style.color = box.id === 'box_void' ? "#7000ff" : "#00ffcc";
 
-    // Main wrapper with internal scroll
     let html = `<div style="display:flex; flex-direction:column; gap:15px; align-items:center; width:100%; max-height:400px; overflow-y:auto; padding:10px; scrollbar-width:none;">`;
 
-    // --- 1. GROUP BADGES ---
+    // --- 1. IMAGINI MANUALE PENTRU GRUPARE ---
+    const TICKET_IMGS = {
+        // Categoriile de Cosmetice (Verde)
+        badges: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
+        banners: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
+        frames: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
+        texts: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
+        // Curency (Gold)
+        coins: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d',
+        diamonds: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d',
+        // Black Market (Yellow Elite)
+        blackmarket: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d'
+    };
+
+    // --- 2. GRUPARE BADGE-URI ---
     const badgeMap = {};
     res.wonBadges.forEach(b => {
         if(!b) return;
@@ -12802,47 +12815,36 @@ window.showFinalBoxReward = async (res, box) => {
         const b = entry.item;
         html += `
             <div style="border:1px solid #7000ff; padding:12px; border-radius:12px; background:rgba(255,255,255,0.03); width:90%; position:relative; text-align:center;">
-                <span class="shop-badge-preview ${b.animClass || ''}" style="background:${b.color}; color:#000; padding:5px 10px; font-weight:900; border-radius:4px; font-size:11px;">
+                <span class="shop-badge-preview ${b.animClass || ''}" style="background:${b.color} !important; color:#000 !important; padding:5px 10px; font-weight:900; border-radius:4px; font-size:11px;">
                     <i class="fas ${b.icon}"></i> ${b.text}
                 </span>
-                ${entry.count > 1 ? `<span style="position:absolute; top:-12px; right:-5px; background:#ff4757; color:#fff; padding:2px 10px; border-radius:50px; font-family:'Orbitron'; font-size:12px; font-weight:900; border:2px solid #fff; box-shadow: 0 0 10px #ff4757;">x${entry.count}</span>` : ''}
+                ${entry.count > 1 ? `<span style="position:absolute; top:-12px; right:-5px; background:#ff4757; color:#fff; padding:2px 10px; border-radius:50px; font-family:'Orbitron'; font-size:12px; font-weight:900; border:2px solid #fff;">x${entry.count}</span>` : ''}
             </div>`;
     });
 
-    // --- 2. GROUP TICKETS ---
+    // --- 3. GRUPARE TICHETE (CU IMAGINI CORECTE) ---
     const ticketMap = {};
     res.wonTickets.forEach(t => {
         ticketMap[t.category] = (ticketMap[t.category] || { item: t, count: 0 });
         ticketMap[t.category].count++;
     });
 
-    const TICKET_IMGS = {
-        blackmarket: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d',
-        coins: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d',
-        diamonds: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FDiamonds%20Reduction%20cupon%20.png?alt=media&token=7fbf7d4f-78e1-4ea1-934e-619016889b84'
-    };
-
     Object.values(ticketMap).forEach(entry => {
         const t = entry.item;
+        const imgUrl = TICKET_IMGS[t.category] || TICKET_IMGS.blackmarket;
+        const labelText = t.category === 'blackmarket' ? 'BM VOUCHER' : (t.category === 'coins' || t.category === 'diamonds' ? 'CURRENCY VOUCHER' : 'COSMETIC VOUCHER');
+
         html += `
             <div style="border:1px solid #00ffcc; padding:10px; border-radius:12px; background:rgba(0,255,204,0.05); width:90%; display:flex; align-items:center; gap:10px; justify-content:center; position:relative;">
-                <img src="${TICKET_IMGS[t.category] || TICKET_IMGS.blackmarket}" style="height:35px; width:auto; filter:none;">
-                <div style="font-family:'Orbitron'; font-size:10px; color:#fff; font-weight:800;">${t.label || t.category.toUpperCase()} UNLOCKED</div>
-                ${entry.count > 1 ? `<span style="position:absolute; top:-12px; right:-5px; background:#00ffcc; color:#000; padding:2px 10px; border-radius:50px; font-family:'Orbitron'; font-size:12px; font-weight:900; border:2px solid #fff; box-shadow: 0 0 10px #00ffcc;">x${entry.count}</span>` : ''}
+                <img src="${imgUrl}" style="height:40px; width:auto; filter:none;">
+                <div style="font-family:'Orbitron'; font-size:10px; color:#fff; font-weight:800;">${labelText} UNLOCKED</div>
+                ${entry.count > 1 ? `<span style="position:absolute; top:-12px; right:-5px; background:#00ffcc; color:#000; padding:2px 10px; border-radius:50px; font-family:'Orbitron'; font-size:12px; font-weight:900; border:2px solid #fff;">x${entry.count}</span>` : ''}
             </div>`;
     });
 
-    // --- 3. CURRENCY (Already Summed) ---
-    if(res.winCoins > 0) {
-        html += `<div class="reward-line" style="color:#ffd700; font-size:22px; font-weight:900; margin-top:10px;">
-            <img src="https://iili.io/fhc1SKQ.png" style="height:30px; width:auto;"> +${res.winCoins.toLocaleString()}
-        </div>`;
-    }
-    if(res.winDiamonds > 0) {
-        html += `<div class="reward-line" style="color:#00ff88; font-size:22px; font-weight:900;">
-            <img src="https://iili.io/fv5bmtj.png" style="height:25px; width:auto;"> +${res.winDiamonds}
-        </div>`;
-    }
+    // --- 4. VALUTĂ ---
+    if(res.winCoins > 0) html += `<div class="reward-line" style="color:#ffd700; font-size:22px; font-weight:900; margin-top:10px;"><img src="https://iili.io/fhc1SKQ.png" style="height:30px; width:auto;"> +${res.winCoins.toLocaleString()}</div>`;
+    if(res.winDiamonds > 0) html += `<div class="reward-line" style="color:#00ff88; font-size:22px; font-weight:900;"><img src="https://iili.io/fv5bmtj.png" style="height:25px; width:auto;"> +${res.winDiamonds}</div>`;
 
     html += `</div>`;
     container.innerHTML = html;
