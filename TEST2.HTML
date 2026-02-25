@@ -10215,12 +10215,14 @@ window.openInventory = async (type = 'badges') => {
                  if(badge) {
                     const isEquipped = (id === equipped);
                     const isSingularity = badge.id === 'b_singularity';
+                    const textColor = isSingularity ? '#ffffff' : '#000000';
+                    const bgStyle = isSingularity ? 'background:#000000 !important;' : `background:${badge.color} !important;`;
                     
                     list.innerHTML += `
                         <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
                             <div class="item-preview-box">
                                 <span class="shop-badge-preview ${badge.animClass || ''}" 
-                                      style="background:${badge.color} !important; ${isSingularity ? 'color:#fff !important;' : 'color:#000 !important;'} font-weight:900; border:none; display:inline-block; padding:6px 12px; border-radius:4px; box-shadow: 0 0 15px ${badge.color};">
+                                      style="${bgStyle} color:${textColor} !important; font-weight:900 !important; border:none !important; display:inline-block; padding:6px 12px; border-radius:4px; box-shadow: 0 0 15px ${badge.color};">
                                     <i class="fas ${badge.icon}"></i> ${badge.text}
                                 </span>
                             </div>
