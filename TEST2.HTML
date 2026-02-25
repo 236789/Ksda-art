@@ -6780,6 +6780,30 @@ body {
     border-color: #00ffcc !important;
     transform: translateX(5px); /* Professional slide effect */
 }
+
+
+/* ADD THIS TO YOUR TIER DEFINITIONS */
+.tier-mythic { 
+    --r-color: #ff0000; /* Bright Crimson Red */
+    --r-bg: linear-gradient(180deg, #250202 0%, #08101b 100%); 
+}
+
+/* SICK MYTHIC PULSE FX */
+.tier-mythic::before {
+    animation: rotateAura 1s linear infinite !important; /* Fast rotation */
+    background: conic-gradient(from 0deg, transparent, #ff0000, transparent 40%) !important;
+}
+
+.tier-mythic .aaa-card-title {
+    animation: mythicGlitch 2s infinite;
+}
+
+@keyframes mythicGlitch {
+    0% { transform: skew(0); }
+    1% { transform: skew(10deg); filter: hue-rotate(90deg); }
+    2% { transform: skew(-10deg); filter: hue-rotate(0deg); }
+    3% { transform: skew(0); }
+}
   </style>
 </head>
 <body>
@@ -11375,13 +11399,31 @@ const BOXES_DB = [
             { tier: 'UNCOMMON', label: '1-3', icon: 'https://iili.io/fv5bmtj.png', chance: 25, style: 'r-silver' },
             { tier: 'RARE', label: '500-1500', icon: 'https://iili.io/fhc1SKQ.png', chance: 10, style: 'r-rare' },
             { tier: 'EPIC', label: '3-5', icon: 'https://iili.io/fv5bmtj.png', chance: 4.5, style: 'r-epic' },
-            { tier: 'LEGENDARY', label: 'BADGE', icon: 'https://i.ibb.co/4pGm9S2/user-placeholder.png', chance: 2,style: 'r-gold' }
+            { tier: 'LEGENDARY', label: 'BADGE', icon: 'https://i.ibb.co/4pGm9S2/user-placeholder.png', chance: 2,style: 'r-gold' },
+
         ]
     }, 
 
 
 
-    { id: 'box_gold', name: 'Gold Box', price: 5000, color: '#ffd700', stockRange: [10, 50], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FGold%20box%20closed.png?alt=media&token=ef29b342-4564-4379-b1ff-9b44eb926d5c', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FGold%20box%20Open.png?alt=media&token=815a539a-8fd8-495e-b0e6-790f7927352b' },
+{ 
+        id: 'box_gold', 
+        name: 'Gold Box', 
+        price: 5000, 
+        color: '#ffd700', 
+        stockRange: [10, 50], 
+        img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FGold%20box%20closed.png?alt=media&token=ef29b342-4564-4379-b1ff-9b44eb926d5c', 
+        imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FGold%20box%20Open.png?alt=media&token=815a539a-8fd8-495e-b0e6-790f7927352b',
+        rewards: [
+            { tier: 'UNCOMMON', label: '1000-1500', icon: 'https://iili.io/fhc1SKQ.png', chance: 60, style: 'tier-uncommon' },
+            { tier: 'RARE', label: '1-5', icon: 'https://iili.io/fv5bmtj.png', chance: 25, style: 'tier-rare' },
+            { tier: 'EPIC', label: '5-10', icon: 'https://iili.io/fv5bmtj.png', chance: 12.5, style: 'tier-epic' },
+            { tier: 'LEGENDARY', label: 'RANDOM FRAME', icon: '', chance: 2, style: 'tier-legendary' },
+            { tier: 'MYTHIC', label: 'MILIARDAR', icon: '', chance: 0.5, style: 'tier-mythic' }
+        ]
+    },
+
+
     { id: 'box_titanium', name: 'Titanium Box', price: 7500, color: '#00e5ff', stockRange: [8, 30], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Close.png?alt=media&token=e7bbc3f0-9ab6-46c2-a8d5-e5f76d4aed71', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Open.png?alt=media&token=43e6e8fc-6228-438f-97b3-0cbf7d5012ce' },
     { id: 'box_void', name: 'Void Box', price: 15000, color: '#7000ff', stockRange: [5, 15], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20close.png?alt=media&token=7da7421a-caf5-4a8a-a368-02393550bbe8', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20open.png?alt=media&token=39eb8f91-2c77-4bea-9337-ebf5ea391dc3' },
     { id: 'box_celestial', name: 'Celestial Box', price: 25000, color: '#ffffff', stockRange: [5, 10], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20chest%20close%20%20(2).png?alt=media&token=b23d04ee-ce8c-43d7-b2a8-315255e62ca6', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20Chest%20Open%20.png?alt=media&token=68f031ce-57e2-44b2-b9e0-32453d4d1f10' }
@@ -11528,48 +11570,52 @@ document.getElementById('boxQtyInfo').innerText = `> CUMPERI 1 CUTIE`;
 
 window.openPrizeView = () => {
     if(!selectedBox || !selectedBox.rewards) return;
-    
     const container = document.getElementById('prizeTableBody');
     container.innerHTML = ""; 
 
-    const tierClasses = ['tier-common', 'tier-uncommon', 'tier-rare', 'tier-epic', 'tier-legendary'];
-
-    selectedBox.rewards.forEach((r, index) => {
-        const isLegendary = (r.tier === 'LEGENDARY');
-        const cardClass = tierClasses[index] || 'tier-common';
+    selectedBox.rewards.forEach((r) => {
         const card = document.createElement('div');
-        card.className = `aaa-card ${cardClass}`;
+        card.className = `aaa-card ${r.style}`;
         
-      // This goes inside your .forEach loop in openPrizeView
-let displayValue = r.label;
-let coinIcon = `<img src="${r.icon}" style="width:16px; height:16px; margin-left:8px;">`;
-
-card.innerHTML = `
-    <div class="aaa-card-content">
-        <div class="aaa-card-title">${r.tier}</div>
+        let visualHtml = `<img src="${r.icon}" class="aaa-card-img">`;
         
-        ${isLegendary ? 
-            `<div id="badgeShuffleSlot"></div>` : 
-            `<img src="${r.icon}" class="aaa-card-img">`
+        // DYNAMIC SHUFFLER ENGINE
+        if(r.label === 'RANDOM BADGE') {
+            visualHtml = `<div id="badgeShuffleSlot"></div>`;
+            setTimeout(() => startBadgeShuffle(), 100);
+        } else if(r.label === 'RANDOM FRAME') {
+            visualHtml = `<div id="frameShuffleSlot"></div>`;
+            setTimeout(() => startFrameShuffle(), 100);
+        } else if(r.label === 'MILIARDAR') {
+            visualHtml = `<span class="shop-badge-preview" style="background:linear-gradient(45deg, #eef2f3, #8e9eab); color:#000; padding:10px 20px; font-weight:900;">MILIARDAR</span>`;
         }
 
-        <div style="width: 100%;">
-            <div class="aaa-card-value">
-                ${isLegendary ? 'RANDOM BADGE' : r.label}
-                ${isLegendary ? '' : coinIcon}
+        card.innerHTML = `
+            <div class="aaa-card-content">
+                <div class="aaa-card-title">${r.tier}</div>
+                <div style="height:70px; display:flex; align-items:center; justify-content:center;">${visualHtml}</div>
+                <div style="width: 100%;">
+                    <div class="aaa-card-value">
+                        ${r.label}
+                        ${(r.tier !== 'LEGENDARY' && r.tier !== 'MYTHIC') ? `<img src="${r.icon}" style="width:16px; height:16px; margin-left:8px;">` : ''}
+                    </div>
+                    <div class="aaa-card-chance">${r.chance}% CHANCE</div>
+                </div>
             </div>
-            <div class="aaa-card-chance">${r.chance}% CHANCE</div>
-        </div>
-    </div>
-`;
+        `;
         container.appendChild(card);
-
-        // Start Shuffle if Legendary
-        if(isLegendary) startBadgeShuffle();
     });
-    
     document.getElementById('prizeListModal').classList.add('active');
 };
+function startFrameShuffle() {
+    const slot = document.getElementById('frameShuffleSlot');
+    if(!slot) return;
+    setInterval(() => {
+        if (!document.getElementById('prizeListModal').classList.contains('active')) return;
+        const randomFrame = FRAMES_DB[Math.floor(Math.random() * FRAMES_DB.length)];
+        slot.innerHTML = `<div class="badge-reel-item"><img src="${randomFrame.img}" style="height:60px; filter:drop-shadow(0 0 10px #ffd700);"></div>`;
+    }, 800);
+}
 
 // --- LEGENDARY BADGE SHUFFLE ENGINE ---
 function startBadgeShuffle() {
@@ -11723,59 +11769,83 @@ window.revealReward = async () => {
         let winCoins = 0;
         let winDiamonds = 0;
         let wonBadge = null;
+        let wonFrame = null; // New storage for frames
 
-        // Roll for each box
+// --- THE MULTI-BOX MATH ENGINE ---
         for (let i = 0; i < lockedQty; i++) {
             const roll = Math.random() * 100;
-            if (roll <= 2 && !wonBadge) {
-                wonBadge = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
-            } else if (roll <= 5) {
-                winDiamonds += Math.floor(Math.random() * 3) + 3; // Epic
-            } else if (roll <= 15) {
-                winCoins += Math.floor(Math.random() * 1001) + 500; // Rare
-            } else if (roll <= 40) {
-                winDiamonds += Math.floor(Math.random() * 3) + 1; // Uncommon
+
+            if (lockedBox.id === 'box_gold') {
+                // --- GOLD BOX LOGIC ---
+                if (roll <= 0.5 && !wonBadge) { 
+                    wonBadge = BADGES_DB.find(b => b.id === 'b_miliardar');
+                } else if (roll <= 2.5 && !wonFrame) { 
+                    wonFrame = FRAMES_DB[Math.floor(Math.random() * FRAMES_DB.length)];
+                } else if (roll <= 15) {
+                    winDiamonds += Math.floor(Math.random() * 6) + 5; // 5-10 Gems
+                } else if (roll <= 40) {
+                    winDiamonds += Math.floor(Math.random() * 5) + 1; // 1-5 Gems
+                } else {
+                    winCoins += Math.floor(Math.random() * 501) + 1000; // 1000-1500 Coins
+                }
             } else {
-                winCoins += Math.floor(Math.random() * 501) + 250; // Common
+                // --- BASIC BOX LOGIC (Keeping your old math for the cheap box) ---
+                if (roll <= 2 && !wonBadge) {
+                    wonBadge = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
+                } else if (roll <= 10) {
+                    winDiamonds += Math.floor(Math.random() * 3) + 3;
+                } else if (roll <= 40) {
+                    winDiamonds += Math.floor(Math.random() * 3) + 1;
+                } else {
+                    winCoins += Math.floor(Math.random() * 501) + 250;
+                }
             }
         }
 
-        // Database Sync
+        // --- DATABASE SYNC ---
         try {
             const userRef = doc(db, "accounts", auth.currentUser.uid);
             const updates = { coins: increment(winCoins), diamonds: increment(winDiamonds) };
+            
             if(wonBadge) updates.ownedBadges = arrayUnion(wonBadge.id);
+            if(wonFrame) updates.ownedFrames = arrayUnion(wonFrame.id); // Save the frame
+            
             await updateDoc(userRef, updates);
-        } catch(e) { console.error(e); }
+        } catch(e) { console.error("Sync Error:", e); }
 
         // --- THE NEXT-LEVEL RESULT MODAL ---
         const modal = document.getElementById('rewardModal');
-        modal.querySelector('h2').innerText = "DECRYPT COMPLETE";
-        modal.querySelector('h2').style.color = "#00ff88";
+        modal.querySelector('h2').innerText = "DECRYPTION_SUCCESS";
+        modal.querySelector('h2').style.color = wonBadge ? "#ff0000" : "#00ffcc";
 
-        let resultHTML = `<div style="text-align:center; padding:10px;">`;
+        let resultHTML = `<div style="text-align:center; padding:10px; display:flex; flex-direction:column; gap:10px;">`;
         
         if(winCoins > 0) {
-            resultHTML += `
-                <div class="reward-line" style="color:#ffd700;">
-                    <img src="https://iili.io/fhc1SKQ.png" style="width:40px; height:40px;">
-                    +${winCoins.toLocaleString()}
-                </div>`;
+            resultHTML += `<div class="reward-line" style="color:#ffd700;"><img src="https://iili.io/fhc1SKQ.png"> +${winCoins.toLocaleString()}</div>`;
         }
-        
         if(winDiamonds > 0) {
+            resultHTML += `<div class="reward-line" style="color:#00ff88;"><img src="https://iili.io/fv5bmtj.png"> +${winDiamonds}</div>`;
+        }
+
+        // Show Frame if won
+        if(wonFrame) {
             resultHTML += `
-                <div class="reward-line" style="color:#00ff88;">
-                    <img src="https://iili.io/fv5bmtj.png" style="width:35px; height:35px;">
-                    +${winDiamonds}
+                <div style="margin-top:15px; border: 1px solid #ffd700; background: rgba(255,215,0,0.05); padding: 15px; border-radius: 12px;">
+                    <div style="font-family:'Orbitron'; font-size:9px; color:#ffd700; letter-spacing:2px; margin-bottom:10px;">LEGENDARY FRAME ACQUIRED</div>
+                    <div class="frame-preview-box" style="margin:0 auto;">
+                        <img src="${window.currentUserData?.image || ''}" class="frame-preview-user">
+                        <img src="${wonFrame.img}" class="frame-preview-img">
+                    </div>
+                    <div style="font-family:'Montserrat'; font-weight:900; font-size:12px; color:#fff; margin-top:10px;">${wonFrame.name}</div>
                 </div>`;
         }
 
+        // Show Mythic Badge if won
         if(wonBadge) {
             resultHTML += `
-                <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
-                    <div style="font-family:'Orbitron'; font-size:9px; color:#aaa; letter-spacing:2px; margin-bottom:10px;">UNIQUE ITEM RECOVERED</div>
-                    <span class="shop-badge-preview" style="background:${wonBadge.color}; color:#000; padding:10px 20px; font-size:14px; border-radius:8px;">
+                <div style="margin-top:15px; border: 1px solid #ff0000; background: rgba(255,0,0,0.1); padding: 15px; border-radius: 12px; animation: mythicPulse 1s infinite alternate;">
+                    <div style="font-family:'Orbitron'; font-size:10px; color:#ff0000; font-weight:900; letter-spacing:3px; margin-bottom:10px;">!!! MYTHIC DROP !!!</div>
+                    <span class="shop-badge-preview" style="background:${wonBadge.color}; color:#000; padding:10px 20px; font-size:16px; border-radius:8px; font-weight:900;">
                         <i class="fas ${wonBadge.icon}"></i> ${wonBadge.text}
                     </span>
                 </div>`;
