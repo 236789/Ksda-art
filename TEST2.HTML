@@ -6957,52 +6957,45 @@ body {
 
 
 
-/* --- UNIFORM STACKED CARDS ENGINE --- */
-.aaa-loot-grid {
-    display: flex !important;
-    flex-direction: column !important; /* Stacks them on top of each other */
-    align-items: center !important;    /* Centers them horizontally */
-    gap: 25px !important;             /* Space between the cards */
-    padding: 30px 20px !important;    /* Breathing room */
-    overflow-y: auto !important;
-    scrollbar-width: none;            /* Hides scrollbar (Firefox) */
-    -ms-overflow-style: none;         /* Hides scrollbar (IE/Edge) */
-}
+/* --- MOBILE ONLY: UNIFORM STACKED CARDS --- */
+@media (max-width: 800px) {
+    .aaa-loot-grid {
+        display: flex !important;
+        flex-direction: column !important; /* Stack vertically */
+        align-items: center !important;
+        gap: 20px !important;
+        padding: 15px !important;
+        overflow-y: auto !important;
+        scrollbar-width: none;
+    }
 
-.aaa-loot-grid::-webkit-scrollbar {
-    display: none;                    /* Hides scrollbar (Chrome/Safari) */
-}
+    .aaa-loot-grid::-webkit-scrollbar {
+        display: none;
+    }
 
-.aaa-card {
-    /* FORCES ALL CARDS TO THE SAME SIZE */
-    width: 100% !important;
-    max-width: 480px !important;      /* Matches the width of the Legendary card */
-    min-height: 300px !important;     /* Matches the height of the Legendary card */
-    
-    flex-shrink: 0 !important;        /* Prevents cards from squishing */
-    margin: 0 auto !important;
-    border-radius: 20px !important;
-    position: relative;
-}
+    .aaa-card {
+        /* This makes every card look like the Legendary one */
+        width: 100% !important;
+        max-width: 380px !important; 
+        min-height: 280px !important; 
+        flex-shrink: 0 !important;
+        margin: 0 auto !important;
+        aspect-ratio: auto !important; /* Reset any grid-square logic */
+    }
 
-.aaa-card-content {
-    /* Ensures content is spaced exactly like the Legendary one */
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-around !important;
-    height: 100% !important;
-    padding: 25px !important;
-}
+    .aaa-card-content {
+        height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-around !important;
+        padding: 20px !important;
+    }
 
-/* Ensure the titles look sharp and centered */
-.aaa-card-title {
-    font-size: 13px !important;
-    letter-spacing: 4px !important;
-}
-
-/* Adjust tag width to look uniform across the list */
-.aaa-card-value {
-    min-width: 180px !important;
+    /* Fix image/icon sizing in the stack */
+    .aaa-card-img, .badge-reel-item img {
+        height: 70px !important;
+        width: auto !important;
+    }
 }
   </style>
 </head>
