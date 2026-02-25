@@ -1,5 +1,4 @@
 
-
   
 
 
@@ -6860,45 +6859,6 @@ body {
     text-shadow: 0 0 15px #ff00ff, 0 0 30px #00ffff;
     animation: pulse-intense 2s infinite;
 }
-
-
-/* --- CUSTOM GAMING BUY BUTTONS --- */
-.custom-buy-btn {
-    background: linear-gradient(180deg, #ffd700 0%, #b8860b 100%);
-    border: 2px solid #fff;
-    border-radius: 8px;
-    color: #000;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900;
-    font-size: 11px;
-    padding: 8px 20px;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: 0.3s;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    width: 130px;
-    display: inline-block;
-}
-
-.custom-buy-btn:hover {
-    transform: scale(1.05);
-    filter: brightness(1.2);
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
-}
-
-/* --- THE FREE VOUCHER BUTTON MODE --- */
-.custom-buy-btn.free-mode {
-    background: linear-gradient(180deg, #00ffcc 0%, #008066 100%);
-    border-color: #fff;
-    color: #000;
-    animation: buttonPulseFree 1.5s infinite;
-}
-
-@keyframes buttonPulseFree {
-    0% { box-shadow: 0 0 5px #00ffcc; }
-    50% { box-shadow: 0 0 25px #00ffcc; }
-    100% { box-shadow: 0 0 5px #00ffcc; }
-}
   </style>
 </head>
 <body>
@@ -9799,10 +9759,9 @@ window.openBadgeShop = async () => {
     modal.classList.add('active');
 
     const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
-    const userData = userSnap.data();
-    const owned = userData.ownedBadges || [];
-    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'badges';
+    const owned = userSnap.data().ownedBadges || [];
 
+    // Buy All button
     list.innerHTML = `
         <div style="grid-column: 1 / -1; margin-bottom: 15px;">
             <button class="buy-badge-btn" style="background:var(--gold); color:#000; padding:15px; font-size:13px;" onclick="buyAllItems('badges')">
@@ -9813,107 +9772,54 @@ window.openBadgeShop = async () => {
 
     BADGES_DB.forEach(badge => {
         const isOwned = owned.includes(badge.id);
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'shop-badge-item';
-        
-        let buttonHtml = '';
-        if(isOwned) {
-            buttonHtml = `<span class="owned-label"><i class="fas fa-check"></i> DEȚINUT</span>`;
-        } else if(isFree) {
-            buttonHtml = `<button class="custom-buy-btn free-mode" onclick="buyBadge('${badge.id}', 0)">CLAIM FREE</button>`;
-        } else {
-            buttonHtml = `<button class="custom-buy-btn" onclick="buyBadge('${badge.id}', ${badge.price})">CUMPĂRĂ</button>`;
-        }
-
-        itemDiv.innerHTML = `
-            <span class="shop-badge-preview" style="background:${badge.color}; color:#000; border:none; box-shadow:0 0 10px ${badge.color};">
+        const item = document.createElement('div');
+        item.className = 'shop-badge-item';
+        item.innerHTML = `
+            <span class="shop-badge-preview" style="background:${badge.color}; color:${badge.id.includes('dark')?'#fff':'#000'}; border:none; box-shadow:0 0 10px ${badge.color};">
                 <i class="fas ${badge.icon}"></i> ${badge.text}
             </span>
-            <div class="shop-badge-price" style="margin: 10px 0;">
-                ${isOwned ? '' : `<img src="https://iili.io/fhc1SKQ.png" width="15"> ${badge.price}`}
+            <div class="shop-badge-price">
+                ${isOwned ? 'DEȚINUT' : `<img src="https://iili.io/fhc1SKQ.png" width="15"> ${badge.price}`}
             </div>
-            ${buttonHtml}
+            ${isOwned 
+                ? `<span class="owned-label"><i class="fas fa-check"></i></span>` 
+                : `<img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/images%2Fcumpara%20.png?alt=media&token=ad64b20d-9ce5-43d7-95b4-6b491295dfec" class="buy-btn-img" onclick="buyBadge('${badge.id}', ${badge.price})">`
+            }
         `;
-        list.appendChild(itemDiv);
+        list.appendChild(item);
     });
 };
 
 
 window.buyBadge = async (badgeId, price) => {
-    const isFreeSession = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'badges';
-
-    const confirmed = await showCustomConfirm(
-        isFreeSession 
-            ? "Folosești VOUCHER-UL GRATUIT pentru această insignă?" 
-            : `Cumperi insigna pentru ${price} monede?`,
-        "CONFIRMĂ"
-    );
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'badges';
+    
+    const msg = isFree ? "Folosești tichetul pentru a lua această insignă GRATIS?" : `Cumperi insigna pentru ${price} coins?`;
+    const confirmed = await showCustomConfirm(msg);
     if(!confirmed) return;
 
     const userRef = doc(db, "accounts", auth.currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    const userData = userSnap.data();
+
+    if(!isFree && (userData.coins || 0) < price) return showCustomAlert("Nu ai destui coins!", "EROARE");
 
     try {
-        await runTransaction(db, async (transaction) => {
-            const userSnap = await transaction.get(userRef);
-            if(!userSnap.exists()) throw "User not found";
-
-            const userData = userSnap.data();
-
-            let isFree = false;
-            let ticketIndex = -1;
-
-            const vouchers = (userData.myCoupons?.badges) || [];
-
-            // 🔍 verificăm dacă există voucher real în DB
-            if(isFreeSession && window.activeCosmeticTicket) {
-                ticketIndex = vouchers.findIndex(v => v.code === window.activeCosmeticTicket.id);
-                if(ticketIndex !== -1) {
-                    isFree = true;
-                }
-            }
-
-            // ❌ dacă nu mai există în DB, anulăm free mode
-            if(isFreeSession && !isFree) {
-                throw new Error("Voucher deja folosit!");
-            }
-
-            // 💰 verificare coins
-            if(!isFree && (userData.coins || 0) < price) {
-                throw new Error("Nu ai destule monede!");
-            }
-
-            // 📦 deja deține badge-ul?
-            if((userData.ownedBadges || []).includes(badgeId)) {
-                throw new Error("Deja ai insigna!");
-            }
-
-            let updates = {
-                ownedBadges: arrayUnion(badgeId)
-            };
-
-            if(isFree) {
-                // 🔥 ștergem voucherul exact din DB
-                vouchers.splice(ticketIndex, 1);
-                updates['myCoupons.badges'] = vouchers;
-
-                // invalidăm sesiunea
-                window.activeCosmeticTicket = null;
-            } else {
-                updates.coins = increment(-price);
-            }
-
-            transaction.update(userRef, updates);
-        });
-
-        await showCustomAlert("Insignă deblocată!", "SUCCES");
-
-        checkShopQuest('badge');
-        openBadgeShop();
-
-    } catch(e) {
-        console.error(e);
-        showCustomAlert(e.message || "Eroare!", "EROARE");
-    }
+        if(isFree) {
+            // REMOVE TICKET FROM DB
+            const remainingTickets = (userData.myCoupons?.badges || []).filter(t => t.id !== window.activeCosmeticTicket.id);
+            await updateDoc(userRef, { 
+                ownedBadges: arrayUnion(badgeId),
+                'myCoupons.badges': remainingTickets
+            });
+            window.activeCosmeticTicket = null; // Reset
+        } else {
+            await updateDoc(userRef, { coins: increment(-price), ownedBadges: arrayUnion(badgeId) });
+        } 
+        
+        await showCustomAlert("Achiziție finalizată!", "SUCCES");
+        openBadgeShop(); 
+    } catch(e) { console.error(e); }
 };
 
 window.buyAllItems = async (category) => {
@@ -10222,23 +10128,91 @@ window.buyBanner = async (id, price) => {
 };
 
 window.buyBadge = async (badgeId, price) => {
-    const confirmed = await showCustomConfirm(`Cumperi insigna pentru ${price} coins?`);
+    // 1. Check if we are in "Free Mode"
+    const isFreeSession = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'badges';
+    const ticketCode = isFreeSession ? window.activeCosmeticTicket.id : null;
+
+    console.log("--- Redempton Process Started ---");
+    console.log("Item ID:", badgeId);
+    console.log("Is Free Session:", isFreeSession);
+    console.log("Ticket Code used:", ticketCode);
+
+    const confirmed = await showCustomConfirm(
+        isFreeSession 
+            ? "Folosești VOUCHER-UL GRATUIT pentru această insignă?" 
+            : `Cumperi insigna pentru ${price} monede?`,
+        "CONFIRMĂ"
+    );
     if(!confirmed) return;
 
+    if (!auth.currentUser) return;
     const userRef = doc(db, "accounts", auth.currentUser.uid);
-    const userSnap = await getDoc(userRef);
-    if((userSnap.data().coins || 0) < price) return await showCustomAlert("Nu ai destule monede!", "EROARE");
-    
-    try {
-        await updateDoc(userRef, { coins: increment(-price), ownedBadges: arrayUnion(badgeId) });
-        
-        // --- LOG TRANSACTION ---
-        await logTransaction(-price, "COINS", "Shop", "Bought Badge: " + badgeId);
 
-        await showCustomAlert("Insignă cumpărată!", "SUCCES");
+    try {
+        await runTransaction(db, async (transaction) => {
+            const userSnap = await transaction.get(userRef);
+            if(!userSnap.exists()) throw "User not found in Database";
+
+            const userData = userSnap.data();
+            let updates = {};
+
+            if (isFreeSession) {
+                console.log("Database Sync: Looking for voucher in cloud...");
+                // Find the specific ticket array
+                let vouchers = (userData.myCoupons && userData.myCoupons.badges) ? [...userData.myCoupons.badges] : [];
+                
+                // Find index of the specific ticket code
+                const ticketIndex = vouchers.findIndex(v => v.code === ticketCode);
+
+                if (ticketIndex === -1) {
+                    console.error("CRITICAL: Voucher not found in Database. It was likely already used.");
+                    throw new Error("Acest voucher a fost deja folosit sau este invalid!");
+                }
+
+                // Delete the voucher from the array
+                console.log("Database Sync: Voucher found. Deleting index:", ticketIndex);
+                vouchers.splice(ticketIndex, 1);
+                
+                // Update the array in Firestore
+                updates['myCoupons.badges'] = vouchers;
+            } else {
+                // Paid mode
+                if ((userData.coins || 0) < price) throw new Error("Nu ai destui coins!");
+                updates.coins = increment(-price);
+            }
+
+            // Check if user already has the badge
+            if ((userData.ownedBadges || []).includes(badgeId)) {
+                throw new Error("Ai deja această insignă!");
+            }
+
+            // Add the badge to user's inventory
+            updates.ownedBadges = arrayUnion(badgeId);
+
+            // Execute Transaction
+            transaction.update(userRef, updates);
+            console.log("Transaction: Success. Item added, Voucher/Coins removed.");
+        });
+
+        // 2. CRITICAL FIX: Clear the free session LOCALLY so the button stops being "Claim Free"
+        if (isFreeSession) {
+            window.activeCosmeticTicket = null; 
+            console.log("Local State: Free session cleared.");
+        }
+
+        await showCustomAlert("Insignă deblocată!", "SUCCES");
+        
+        // Refresh UI
         checkShopQuest('badge');
-        window.openBadgeShop(); 
-    } catch(e) { console.error(e); }
+        openBadgeShop();
+
+    } catch(e) {
+        console.error("Redemption Error:", e.message);
+        showCustomAlert(e.message || "Eroare la procesare", "EROARE");
+        // If error happens, we might want to clear the session anyway to be safe
+        window.activeCosmeticTicket = null;
+        openBadgeShop();
+    }
 };
 
     // UPDATE INVENTORY LOGIC TO SUPPORT BANNERS
@@ -11976,116 +11950,188 @@ window.revealReward = async () => {
     setTimeout(async () => {
         document.getElementById('unboxingOverlay').style.display = 'none';
         
+        // --- CRITICAL FIX: DEFINE ALL VARIABLES ---
         let winCoins = 0;
         let winDiamonds = 0;
         let wonBadge = null;
         let wonFrame = null; 
-        let wonBanner = null; 
-        let wonTicket = null; 
+        let wonBanner = null; // <--- This was missing!
+        let wonTicket = null; // This fixes the console error
 
         const TICKET_IMGS = {
             badges: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
             frames: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FFrame%20discount%20cupon%20.png?alt=media&token=c49a5fb2-06e8-4df5-bcf3-ed37afd1cdef',
             banners: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBanner%20discount%20cupon%20.png?alt=media&token=e75ab8ee-5278-496c-9938-d1796bda02e0',
-            texts: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f',
-            coins: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d',
-            diamonds: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FDiamonds%20Reduction%20cupon%20.png?alt=media&token=7fbf7d4f-78e1-4ea1-934e-619016889b84'
+            texts: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f'
         };
 
+        
+        // ... (rest of your math loop)
+      
+
+// --- THE STRICT MULTI-BOX MATH ENGINE ---
         for (let i = 0; i < lockedQty; i++) {
             const roll = Math.random() * 100;
 
-            if (lockedBox.id === 'box_platinum') {
-                if (roll <= 1) { // EXOTIC (CURRENCY)
-                    const types = ['coins', 'diamonds'];
-                    const chosenType = types[Math.floor(Math.random() * types.length)];
-                    wonTicket = { category: chosenType, tier: 'EXOTIC ITEM UNLOCKED', name: `FREE ${chosenType.toUpperCase()} 1 TIME USE` };
-                } 
-                else if (roll <= 5) { winDiamonds += 50; } 
-                else if (roll <= 15) { // LEGENDARY (COSMETICS)
-                    const cosmoTypes = ['badges', 'banners', 'frames', 'texts'];
-                    const chosenCosmo = cosmoTypes[Math.floor(Math.random() * cosmoTypes.length)];
-                    const label = chosenCosmo.toUpperCase().replace('S', ''); // Badge, Frame, etc
-                    wonTicket = { category: chosenCosmo, tier: 'LEGENDARY ITEM UNLOCKED', name: `FREE ${label} 1 TIME USE` };
-                } 
-                else if (roll <= 45) { winDiamonds += Math.floor(Math.random() * 11) + 10; } 
-                else { winCoins += Math.floor(Math.random() * 3001) + 2000; }
+// --- Inside revealReward loop for Platinum ---
+if (lockedBox.id === 'box_platinum') {
+    const roll = Math.random() * 100;
+
+    if (roll <= 1) { // EXOTIC (1%)
+        const types = ['coins', 'diamonds'];
+        const chosenType = types[Math.floor(Math.random() * types.length)];
+        const discount = [15, 20, 25][Math.floor(Math.random() * 3)];
+        wonTicket = { category: chosenType, val: discount, name: `EXOTIC ${chosenType.toUpperCase()} VOUCHER` };
+    } 
+    else if (roll <= 5) { // MYTHIC (4%)
+        winDiamonds += 50;
+    } 
+    else if (roll <= 15) { // LEGENDARY (10%)
+        const cosmoTypes = ['badges', 'banners', 'frames', 'texts'];
+        const chosenCosmo = cosmoTypes[Math.floor(Math.random() * cosmoTypes.length)];
+        wonTicket = { category: chosenCosmo, val: 50, name: `50% ${chosenCosmo.toUpperCase()} VOUCHER` };
+    } 
+    else if (roll <= 45) { // EPIC (30%)
+        winDiamonds += Math.floor(Math.random() * 11) + 10; // 10-20 Gems
+    } 
+    else { // RARE (55%)
+        winCoins += Math.floor(Math.random() * 3001) + 2000; // 2000-5000 Coins
+    }
+
             } else if (lockedBox.id === 'box_gold') {
-                if (roll <= 0.5 && !wonBadge) { wonBadge = BADGES_DB.find(b => b.id === 'b_miliardar'); } 
-                else if (roll <= 2.5 && !wonFrame) { wonFrame = FRAMES_DB[Math.floor(Math.random() * FRAMES_DB.length)]; } 
-                else if (roll <= 13) { winDiamonds += Math.floor(Math.random() * 4) + 2; } 
-                else if (roll <= 40) { winCoins += Math.floor(Math.random() * 1501) + 2500; } 
-                else { winCoins += Math.floor(Math.random() * 501) + 1000; }
+                // --- GOLD BOX MATH ---
+                if (roll <= 0.5 && !wonBadge) { 
+                    wonBadge = BADGES_DB.find(b => b.id === 'b_miliardar');
+                } else if (roll <= 2.5 && !wonFrame) { 
+                    wonFrame = FRAMES_DB[Math.floor(Math.random() * FRAMES_DB.length)];
+                } else if (roll <= 13) {
+                    winDiamonds += Math.floor(Math.random() * 4) + 2; // 2-5 Gems
+                } else if (roll <= 40) {
+                    winCoins += Math.floor(Math.random() * 1501) + 2500; // 2500-4000 Coins
+                } else {
+                    winCoins += Math.floor(Math.random() * 501) + 1000; // 1000-1500 Coins
+                }
             } else {
+                // --- BASIC BOX MATH ---
                 if (roll <= 2 && !wonBadge) {
+                    // Pull any badge EXCEPT Miliardar for Basic box
                     const basicPool = BADGES_DB.filter(b => b.id !== 'b_miliardar');
                     wonBadge = basicPool[Math.floor(Math.random() * basicPool.length)];
-                } else if (roll <= 6.5) { winDiamonds += Math.floor(Math.random() * 3) + 3; } 
-                else if (roll <= 16.5) { winCoins += Math.floor(Math.random() * 1001) + 500; } 
-                else if (roll <= 41.5) { winDiamonds += Math.floor(Math.random() * 3) + 1; } 
-                else { winCoins += Math.floor(Math.random() * 501) + 250; }
+                } else if (roll <= 6.5) { // Matching your Probability Log UI
+                    winDiamonds += Math.floor(Math.random() * 3) + 3; // 3-5 Gems
+                } else if (roll <= 16.5) {
+                    winCoins += Math.floor(Math.random() * 1001) + 500; // 500-1500 Coins
+                } else if (roll <= 41.5) {
+                    winDiamonds += Math.floor(Math.random() * 3) + 1; // 1-3 Gems
+                } else {
+                    winCoins += Math.floor(Math.random() * 501) + 250; // 250-750 Coins
+                }
             }
         }
 
+        // --- DATABASE SYNC ---
         try {
             const userRef = doc(db, "accounts", auth.currentUser.uid);
             const updates = { coins: increment(winCoins), diamonds: increment(winDiamonds) };
-            if(wonTicket) {
-                const ticketID = "TICK-" + Math.random().toString(36).substr(2, 5).toUpperCase();
-                updates[`myCoupons.${wonTicket.category}`] = arrayUnion({ id: ticketID, code: ticketID, used: false });
-            }
+
+
+   // If user won a ticket/voucher
+    if(wonTicket) {
+        const ticketID = "TICK-" + Math.random().toString(36).substr(2, 5).toUpperCase();
+        const newTicket = {
+            id: ticketID,
+            code: ticketID,
+            val: wonTicket.val,
+            used: false
+        };
+        // This adds it to the correct folder in your 'myCoupons' structure
+        updates[`myCoupons.${wonTicket.category}`] = arrayUnion(newTicket);
+    }
+
             if(wonBadge) updates.ownedBadges = arrayUnion(wonBadge.id);
             if(wonFrame) updates.ownedFrames = arrayUnion(wonFrame.id);
             if(wonBanner) updates.ownedBanners = arrayUnion(wonBanner.id);
             await updateDoc(userRef, updates);
-        } catch(e) { console.error(e); }
+        } catch(e) { console.error("Database sync failed:", e); }
 
+        // --- THE NEXT-LEVEL RESULT MODAL ---
         const modal = document.getElementById('rewardModal');
         const titleEl = modal.querySelector('h2');
-        const container = modal.querySelector('p');
+        const container = modal.querySelector('p'); // We use the <p> as our dynamic container
 
-        if (wonTicket) {
-            titleEl.innerText = wonTicket.tier.replace(" UNLOCKED", "");
-            titleEl.style.color = wonTicket.tier.includes("EXOTIC") ? "#ff00ff" : "#ffd700";
-        } else if (wonBadge && wonBadge.id === 'b_miliardar') {
+        // Set Title Color & Text based on drop
+        if (wonBadge && wonBadge.id === 'b_miliardar') {
             titleEl.innerText = "!!! MYTHIC DROP !!!";
-            titleEl.style.color = "#ff4757"; 
+            titleEl.style.color = "#ff4757"; // Crimson
         } else if (wonBadge || wonFrame || wonBanner) {
             titleEl.innerText = "LEGENDARY_UNLOCKED";
-            titleEl.style.color = "#ffd700"; 
+            titleEl.style.color = "#ffd700"; // Gold
         } else {
             titleEl.innerText = "DECRYPTION_SUCCESS";
-            titleEl.style.color = "#00ffcc";
+            titleEl.style.color = "#00ffcc"; // Mint
         }
 
         let resultHTML = `<div style="text-align:center; display:flex; flex-direction:column; gap:12px; align-items:center; padding:10px;">`;
 
-        if(wonTicket) {
-            const ticketColor = wonTicket.tier.includes("EXOTIC") ? "#ff00ff" : "#ffd700";
+
+if(wonTicket) {
+    resultHTML += `
+        <div style="border: 1px solid var(--r-color); background: rgba(255,0,255,0.05); padding: 15px; border-radius: 12px; width: 100%; border-color:#ff00ff;">
+            <div style="font-family:'Orbitron'; font-size:10px; color:#ff00ff; font-weight:900; letter-spacing:2px; margin-bottom:10px;">EXOTIC ITEM UNLOCKED</div>
+            <div style="font-family:'Montserrat'; font-weight:900; font-size:16px; color:#fff;">${wonTicket.name}</div>
+            <div style="font-size:10px; color:#aaa; margin-top:5px;">Check your Coupon Vault to activate!</div>
+        </div>`;
+}
+        
+        if(winCoins > 0) {
+            resultHTML += `<div class="reward-line" style="color:#ffd700;"><img src="https://iili.io/fhc1SKQ.png" style="width:30px;"> +${winCoins.toLocaleString()}</div>`;
+        }
+        if(winDiamonds > 0) {
+            resultHTML += `<div class="reward-line" style="color:#00ff88;"><img src="https://iili.io/fv5bmtj.png" style="width:25px;"> +${winDiamonds}</div>`;
+        }
+
+        // Display won Frame
+        if(wonFrame) {
             resultHTML += `
-                <div style="border: 1px solid ${ticketColor}; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 12px; width: 100%;">
-                    <div style="font-family:'Orbitron'; font-size:10px; color:${ticketColor}; font-weight:900; letter-spacing:2px; margin-bottom:10px;">${wonTicket.tier}</div>
-                    <img src="${TICKET_IMGS[wonTicket.category]}" style="height:80px; margin-bottom:10px; filter: drop-shadow(0 0 10px ${ticketColor});">
-                    <div style="font-family:'Montserrat'; font-weight:900; font-size:15px; color:#fff;">${wonTicket.name}</div>
-                    <div style="font-size:10px; color:#aaa; margin-top:5px;">Check your Coupon Vault to activate!</div>
+                <div style="border: 1px solid #ffd700; background: rgba(255,215,0,0.05); padding: 15px; border-radius: 12px; width: 100%;">
+                    <div style="font-family:'Orbitron'; font-size:9px; color:#ffd700; letter-spacing:2px; margin-bottom:10px;">LEGENDARY FRAME</div>
+                    <div class="frame-preview-box" style="margin:0 auto;">
+                        <img src="${window.currentUserData?.image || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" class="frame-preview-user">
+                        <img src="${wonFrame.img}" class="frame-preview-img">
+                    </div>
+                    <div style="font-family:'Montserrat'; font-weight:900; font-size:12px; color:#fff; margin-top:10px;">${wonFrame.name}</div>
+                </div>`;
+        }
+
+        // Display won Banner
+        if(wonBanner) {
+            resultHTML += `
+                <div style="border: 1px solid #00e5ff; background: rgba(0,229,255,0.05); padding: 15px; border-radius: 12px; width: 100%;">
+                    <div style="font-family:'Orbitron'; font-size:9px; color:#00e5ff; letter-spacing:2px; margin-bottom:10px;">LEGENDARY BANNER</div>
+                    <div class="${wonBanner.cssClass}" style="padding:10px; border-radius:8px; font-size:11px; font-weight:800;">${window.currentUserData?.username || 'USER'}</div>
+                    <div style="font-family:'Montserrat'; font-weight:900; font-size:12px; color:#fff; margin-top:10px;">${wonBanner.name}</div>
+                </div>`;
+        }
+
+        // Display won Badge (Mythic or Regular)
+        if(wonBadge) {
+            const isMythic = wonBadge.id === 'b_miliardar';
+            resultHTML += `
+                <div style="border: 1px solid ${isMythic ? '#ff4757' : '#ffd700'}; background: ${isMythic ? 'rgba(255,71,87,0.1)' : 'rgba(255,215,0,0.05)'}; padding: 15px; border-radius: 12px; width: 100%; ${isMythic ? 'animation: mythicPulse 1.5s infinite alternate;' : ''}">
+                    <div style="font-family:'Orbitron'; font-size:10px; color:${isMythic ? '#ff4757' : '#ffd700'}; font-weight:900; letter-spacing:2px; margin-bottom:10px;">${isMythic ? '!!! MYTHIC DROP !!!' : 'UNIQUE BADGE'}</div>
+                    <span class="shop-badge-preview" style="background:${wonBadge.color}; color:#000; padding:10px 20px; font-size:14px; border-radius:8px; font-weight:900; display:inline-block;">
+                        <i class="fas ${wonBadge.icon}"></i> ${wonBadge.text}
+                    </span>
                 </div>`;
         }
         
-        if(winCoins > 0) resultHTML += `<div class="reward-line" style="color:#ffd700;"><img src="https://iili.io/fhc1SKQ.png" style="width:30px;"> +${winCoins.toLocaleString()}</div>`;
-        if(winDiamonds > 0) resultHTML += `<div class="reward-line" style="color:#00ff88;"><img src="https://iili.io/fv5bmtj.png" style="width:25px;"> +${winDiamonds}</div>`;
-
-        if(wonFrame) {
-            resultHTML += `<div style="border: 1px solid #ffd700; background: rgba(255,215,0,0.05); padding: 15px; border-radius: 12px; width: 100%;"><div style="font-family:'Orbitron'; font-size:9px; color:#ffd700; letter-spacing:2px; margin-bottom:10px;">LEGENDARY FRAME</div><div class="frame-preview-box" style="margin:0 auto;"><img src="${window.currentUserData?.image || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" class="frame-preview-user"><img src="${wonFrame.img}" class="frame-preview-img"></div><div style="font-family:'Montserrat'; font-weight:900; font-size:12px; color:#fff; margin-top:10px;">${wonFrame.name}</div></div>`;
-        }
-
-        if(wonBadge) {
-            const isMythic = wonBadge.id === 'b_miliardar';
-            resultHTML += `<div style="border: 1px solid ${isMythic ? '#ff4757' : '#ffd700'}; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; width: 100%;"><div style="font-family:'Orbitron'; font-size:10px; color:${isMythic ? '#ff4757' : '#ffd700'}; font-weight:900; letter-spacing:2px; margin-bottom:10px;">${isMythic ? '!!! MYTHIC DROP !!!' : 'UNIQUE BADGE'}</div><span class="shop-badge-preview" style="background:${wonBadge.color}; color:#000; padding:10px 20px; font-size:14px; border-radius:8px; font-weight:900; display:inline-block;"><i class="fas ${wonBadge.icon}"></i> ${wonBadge.text}</span></div>`;
-        }
-        
         resultHTML += `</div>`;
+
         container.innerHTML = resultHTML;
-        modal.querySelector('.reward-coins-box').style.display = 'none';
+        // Hide the old reward box if it's still there
+        const oldBox = modal.querySelector('.reward-coins-box');
+        if(oldBox) oldBox.style.display = 'none';
+
         modal.classList.add('active');
         lastPurchasedQty = 0;
     }, 1200);
@@ -12260,45 +12306,14 @@ window.redeemCoupon = async () => {
     const code = document.getElementById('couponInput').value.trim().toUpperCase();
     if(!code) return showCustomAlert("Te rugăm să introduci un cod valid.", "SISTEM_ERROR");
 
+    // UI FEEDBACK
     const btn = document.getElementById('btnRedeem');
     btn.innerText = "AUTHENTICATING...";
     btn.disabled = true;
 
-    // Check inventory locally first
-    let foundCategory = null;
-    const categories = ['coins', 'diamonds', 'texts', 'frames', 'banners', 'badges', 'blackmarket'];
-    
-    for (const cat of categories) {
-        const hasIt = window.currentUserData?.myCoupons?.[cat]?.some(c => c.code === code);
-        if(hasIt) {
-            foundCategory = cat;
-            break;
-        }
-    }
-
-    setTimeout(async () => {
-        if (foundCategory) {
-            // Apply the logic
-            window.activeCosmeticTicket = { id: code, category: foundCategory };
-            
-            await showCustomAlert(`Cod verificat! Tichetul pentru categoria ${foundCategory.toUpperCase()} a fost aplicat. Următorul obiect este GRATUIT.`, "ACCESS GRANTED");
-            
-            // Auto open shop
-            if(['badges', 'frames', 'banners', 'texts'].includes(foundCategory)) {
-                if(foundCategory === 'badges') openBadgeShop();
-                if(foundCategory === 'frames') openFrameShop();
-                if(foundCategory === 'banners') openBannerShop();
-                if(foundCategory === 'texts') openTextShop();
-            } else if(foundCategory === 'blackmarket') {
-                openBlackMarket();
-            } else {
-                scrollToZone('zone-vault');
-            }
-            
-            document.getElementById('couponInput').value = "";
-        } else {
-            showCustomAlert("Codul '" + code + "' nu este valid sau a expirat.", "ACCESS_DENIED");
-        }
+    // Logic for Firebase will go here next
+    setTimeout(() => {
+        showCustomAlert("Codul '" + code + "' nu este valid sau a expirat.", "ACCESS_DENIED");
         btn.innerText = "VALIDATE_CREDENTIALS";
         btn.disabled = false;
     }, 1500);
@@ -12312,61 +12327,51 @@ window.openCouponInventory = () => {
 };
 window.openSubCoupon = (type) => {
     const categoryInfo = {
-        coins: { title: "COINS_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d' },
-        diamonds: { title: "DIAMOND_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FDiamonds%20Reduction%20cupon%20.png?alt=media&token=7fbf7d4f-78e1-4ea1-934e-619016889b84' },
-        texts: { title: "TEXT_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f' },
-        frames: { title: "FRAME_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FFrame%20discount%20cupon%20.png?alt=media&token=c49a5fb2-06e8-4df5-bcf3-ed37afd1cdef' },
-        banners: { title: "BANNER_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBanner%20discount%20cupon%20.png?alt=media&token=e75ab8ee-5278-496c-9938-d1796bda02e0' },
-        badges: { title: "BADGE_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae' },
-        blackmarket: { title: "ELITE_ACCESS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d' }
+        coins: { title: "COINS_REDUCTION" },
+        diamonds: { title: "DIAMOND_REDUCTION" },
+        texts: { title: "TEXT_REDUCTION" },
+        frames: { title: "FRAME_REDUCTION" },
+        banners: { title: "BANNER_REDUCTION" },
+        blackmarket: { title: "ELITE_ACCESS" }
     };
 
     const info = categoryInfo[type];
+    if(!info) return;
+
+    // Set text (Note: I removed the 'subCouponIcon' line because it was causing the error)
     document.getElementById('subCouponTitle').innerText = info.title;
+    
+    // Switch Modals
     document.getElementById('couponInventoryModal').classList.remove('active');
     document.getElementById('subCouponModal').classList.add('active');
 
+    // Populate List
     const listContainer = document.getElementById('subCouponList');
     listContainer.innerHTML = '';
+    
     const userCoupons = (window.currentUserData?.myCoupons?.[type]) || [];
 
     if(userCoupons.length === 0) {
-        listContainer.innerHTML = `<div class="empty-coupons">> NU S-AU GĂSIT TICHETE...</div>`;
+        listContainer.innerHTML = `<div class="empty-coupons" style="color:#444; padding:40px; text-align:center; font-family:'Orbitron'; font-size:10px;">> NU S-AU GĂSIT TICHETE ACTIVE...</div>`;
         return;
     }
 
     userCoupons.forEach(coupon => {
         const ticket = document.createElement('div');
         ticket.className = 'v4-badge-item';
-        ticket.style.cssText = "display:flex; flex-direction:row; justify-content:space-between; align-items:center; padding:15px 20px; border-color: rgba(0,255,204,0.3) !important;";
+        ticket.style.cssText = "display:flex; flex-direction:row; justify-content:space-between; align-items:center; padding:15px 20px; border-color: rgba(0,255,204,0.3) !important; cursor:pointer;";
         
         ticket.innerHTML = `
             <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
             <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-            <div style="display:flex; align-items:center; gap:15px;">
-                <img src="${info.img}" style="height:50px; filter: drop-shadow(0 0 5px #00ffcc);">
-                <div style="text-align: left;">
-                    <div style="font-family:'Montserrat'; font-weight:900; font-size:13px; color:#fff;">FREE ${type.toUpperCase().slice(0,-1)} 1 TIME USE</div>
-                    <div style="font-family:monospace; font-size:10px; color:#555;">CODE: #${coupon.code}</div>
-                </div>
+            <div style="text-align: left;">
+                <div style="font-family:'Montserrat'; font-weight:900; font-size:20px; color:#00ffcc;">-${coupon.val}%</div>
+                <div style="font-family:monospace; font-size:10px; color:#555;">CODE: #${coupon.code}</div>
             </div>
-            <button class="bm-price-btn-v4" onclick="activateCouponCode('${coupon.code}')">ACTIVATE</button>
+            <button class="bm-price-btn-v4" onclick="activateCoupon('${coupon.id}', '${type}')">ACTIVATE</button>
         `;
         listContainer.appendChild(ticket);
     });
-};
-
-window.activateCouponCode = (code) => {
-    // 1. Paste code into input
-    const input = document.getElementById('couponInput');
-    input.value = code;
-    
-    // 2. Close modals
-    closeModal('subCouponModal');
-    
-    
-    // 4. Subtle Toast
-    showCustomAlert("Codul a fost introdus în Terminal. Apasă 'VALIDATE_CREDENTIALS' pentru a-l folosi.", "SISTEM GATA");
 };
 
 window.activateCoupon = (id, category) => {
