@@ -6840,6 +6840,25 @@ body {
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor; mask-composite: exclude;
 }
+
+
+/* --- EXOTIC TIER STYLE --- */
+.tier-exotic { 
+    --r-color: #ff00ff; /* Neon Magenta */
+    --r-bg: linear-gradient(180deg, #25021a 0%, #08101b 100%); 
+}
+
+.tier-exotic::before {
+    /* Fast rotation with a Pink-to-Cyan trail */
+    animation: rotateAura 1.5s linear infinite !important; 
+    background: conic-gradient(from 0deg, transparent, #ff00ff, #00ffff, transparent 50%) !important;
+}
+
+.tier-exotic .aaa-card-title {
+    color: #ff00ff;
+    text-shadow: 0 0 15px #ff00ff, 0 0 30px #00ffff;
+    animation: pulse-intense 2s infinite;
+}
   </style>
 </head>
 <body>
@@ -11459,8 +11478,22 @@ rewards: [
 ]
     },
 
-
-    { id: 'box_titanium', name: 'Titanium Box', price: 7500, color: '#00e5ff', stockRange: [8, 30], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Close.png?alt=media&token=e7bbc3f0-9ab6-46c2-a8d5-e5f76d4aed71', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Open.png?alt=media&token=43e6e8fc-6228-438f-97b3-0cbf7d5012ce' },
+{ 
+    id: 'box_platinum', 
+    name: 'Platinum Box', 
+    price: 12500, 
+    color: '#e5e4e2', 
+    stockRange: [10, 25], 
+    img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FPlatinum%20Chest%20Close.png?alt=media&token=8544f128-4033-4f91-8608-208b8b05615d', 
+    imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FPlatinum%20Chest%20Open.png?alt=media&token=6f21789c-6e8e-4a6f-b271-477583693e50',
+    rewards: [
+        { tier: 'RARE', label: '2000-5000', icon: 'https://iili.io/fhc1SKQ.png', chance: 55, style: 'tier-rare' },
+        { tier: 'EPIC', label: '10-20 GEMS', icon: 'https://iili.io/fv5bmtj.png', chance: 30, style: 'tier-epic' },
+        { tier: 'LEGENDARY', label: 'COSMETIC VOUCHER', icon: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d', chance: 10, style: 'tier-legendary' },
+        { tier: 'MYTHIC', label: '50 DIAMONDS', icon: 'https://iili.io/fv5bmtj.png', chance: 4, style: 'tier-mythic' },
+        { tier: 'EXOTIC', label: 'CURRENCY VOUCHER', icon: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d', chance: 1, style: 'tier-exotic' }
+    ]
+},
     { id: 'box_void', name: 'Void Box', price: 15000, color: '#7000ff', stockRange: [5, 15], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20close.png?alt=media&token=7da7421a-caf5-4a8a-a368-02393550bbe8', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20open.png?alt=media&token=39eb8f91-2c77-4bea-9337-ebf5ea391dc3' },
     { id: 'box_celestial', name: 'Celestial Box', price: 25000, color: '#ffffff', stockRange: [5, 10], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20chest%20close%20%20(2).png?alt=media&token=b23d04ee-ce8c-43d7-b2a8-315255e62ca6', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20Chest%20Open%20.png?alt=media&token=68f031ce-57e2-44b2-b9e0-32453d4d1f10' }
 ];
@@ -11813,19 +11846,31 @@ window.revealReward = async () => {
         for (let i = 0; i < lockedQty; i++) {
             const roll = Math.random() * 100;
 
-            if (lockedBox.id === 'box_titanium') {
-                // --- TITANIUM BOX MATH ---
-                if (roll <= 2 && !wonBadge) { 
-                    wonBadge = BADGES_DB.find(b => b.id === 'b_miliardar');
-                } else if (roll <= 5 && !wonBanner) { 
-                    wonBanner = BANNERS_DB[Math.floor(Math.random() * BANNERS_DB.length)];
-                } else if (roll <= 20) {
-                    winDiamonds += Math.floor(Math.random() * 4) + 5; // 5-8 Gems
-                } else if (roll <= 40) {
-                    winCoins += Math.floor(Math.random() * 2501) + 5000; // 5000-7500 Coins
-                } else {
-                    winCoins += Math.floor(Math.random() * 1501) + 2000; // 2000-3500 Coins
-                }
+// --- Inside revealReward loop for Platinum ---
+if (lockedBox.id === 'box_platinum') {
+    const roll = Math.random() * 100;
+
+    if (roll <= 1) { // EXOTIC (1%)
+        const types = ['coins', 'diamonds'];
+        const chosenType = types[Math.floor(Math.random() * types.length)];
+        const discount = [15, 20, 25][Math.floor(Math.random() * 3)];
+        wonTicket = { category: chosenType, val: discount, name: `EXOTIC ${chosenType.toUpperCase()} VOUCHER` };
+    } 
+    else if (roll <= 5) { // MYTHIC (4%)
+        winDiamonds += 50;
+    } 
+    else if (roll <= 15) { // LEGENDARY (10%)
+        const cosmoTypes = ['badges', 'banners', 'frames', 'texts'];
+        const chosenCosmo = cosmoTypes[Math.floor(Math.random() * cosmoTypes.length)];
+        wonTicket = { category: chosenCosmo, val: 50, name: `50% ${chosenCosmo.toUpperCase()} VOUCHER` };
+    } 
+    else if (roll <= 45) { // EPIC (30%)
+        winDiamonds += Math.floor(Math.random() * 11) + 10; // 10-20 Gems
+    } 
+    else { // RARE (55%)
+        winCoins += Math.floor(Math.random() * 3001) + 2000; // 2000-5000 Coins
+    }
+
             } else if (lockedBox.id === 'box_gold') {
                 // --- GOLD BOX MATH ---
                 if (roll <= 0.5 && !wonBadge) { 
@@ -11861,6 +11906,21 @@ window.revealReward = async () => {
         try {
             const userRef = doc(db, "accounts", auth.currentUser.uid);
             const updates = { coins: increment(winCoins), diamonds: increment(winDiamonds) };
+
+
+   // If user won a ticket/voucher
+    if(wonTicket) {
+        const ticketID = "TICK-" + Math.random().toString(36).substr(2, 5).toUpperCase();
+        const newTicket = {
+            id: ticketID,
+            code: ticketID,
+            val: wonTicket.val,
+            used: false
+        };
+        // This adds it to the correct folder in your 'myCoupons' structure
+        updates[`myCoupons.${wonTicket.category}`] = arrayUnion(newTicket);
+    }
+
             if(wonBadge) updates.ownedBadges = arrayUnion(wonBadge.id);
             if(wonFrame) updates.ownedFrames = arrayUnion(wonFrame.id);
             if(wonBanner) updates.ownedBanners = arrayUnion(wonBanner.id);
@@ -11885,6 +11945,16 @@ window.revealReward = async () => {
         }
 
         let resultHTML = `<div style="text-align:center; display:flex; flex-direction:column; gap:12px; align-items:center; padding:10px;">`;
+
+
+if(wonTicket) {
+    resultHTML += `
+        <div style="border: 1px solid var(--r-color); background: rgba(255,0,255,0.05); padding: 15px; border-radius: 12px; width: 100%; border-color:#ff00ff;">
+            <div style="font-family:'Orbitron'; font-size:10px; color:#ff00ff; font-weight:900; letter-spacing:2px; margin-bottom:10px;">EXOTIC ITEM UNLOCKED</div>
+            <div style="font-family:'Montserrat'; font-weight:900; font-size:16px; color:#fff;">${wonTicket.name}</div>
+            <div style="font-size:10px; color:#aaa; margin-top:5px;">Check your Coupon Vault to activate!</div>
+        </div>`;
+}
         
         if(winCoins > 0) {
             resultHTML += `<div class="reward-line" style="color:#ffd700;"><img src="https://iili.io/fhc1SKQ.png" style="width:30px;"> +${winCoins.toLocaleString()}</div>`;
