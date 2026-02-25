@@ -6913,59 +6913,55 @@ body {
     background: conic-gradient(from 0deg, transparent, #7000ff, #00ffff, #7000ff, transparent 60%) !important;
 }
 
-/* --- GOD-TIER SINGULARITY BADGE REVAMP --- */
+/* --- GOD-TIER SINGULARITY (EVENT HORIZON) --- */
 .badge-singularity {
     background: #000 !important;
     color: #fff !important;
-    border: none !important;
+    border: 1px solid #7000ff !important;
     position: relative;
     z-index: 1;
-    padding: 6px 15px !important;
+    padding: 4px 12px !important;
     font-family: 'Orbitron', sans-serif !important;
     font-weight: 900 !important;
-    letter-spacing: 2px;
     text-transform: uppercase;
-    display: inline-flex;
+    display: inline-flex !important;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     border-radius: 4px;
-    overflow: hidden; /* Clips the spinning aura */
-    box-shadow: 0 0 30px rgba(112, 0, 255, 0.8);
-    animation: singularityWarp 4s infinite alternate ease-in-out;
+    overflow: hidden; 
+    box-shadow: 0 0 20px rgba(112, 0, 255, 0.6), inset 0 0 10px #000;
+    text-shadow: 0 0 8px #fff !important;
 }
 
-/* The Spinning Event Horizon (Aura) */
+/* Rotating Event Horizon */
 .badge-singularity::before {
     content: '';
     position: absolute;
-    inset: -150%; /* Large enough to rotate without showing edges */
+    inset: -100% -150%; 
     background: conic-gradient(
         from 0deg, 
         transparent 0deg, 
-        #7000ff 90deg, 
-        #ff00ff 180deg, 
-        #00ffff 270deg, 
+        #7000ff 120deg, 
+        #29f3ff 240deg, 
         transparent 360deg
     );
-    animation: rotateAura 1.5s linear infinite;
+    animation: rotateAura 2s linear infinite;
     z-index: -2;
 }
 
-/* The Black Hole Core */
+/* Inner Core */
 .badge-singularity::after {
     content: '';
     position: absolute;
     inset: 2px;
-    background: #000;
-    border-radius: 3px;
+    background: #050b14;
+    border-radius: 2px;
     z-index: -1;
 }
 
-/* Chromatic Distortion Animation */
-@keyframes singularityWarp {
-    0% { filter: hue-rotate(0deg) brightness(1); transform: scale(1); }
-    50% { filter: hue-rotate(20deg) brightness(1.5); transform: scale(1.05); }
-    100% { filter: hue-rotate(-20deg) brightness(1.2); transform: scale(1); }
+@keyframes rotateAura {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 /* The Icon inside pulses too */
@@ -10092,21 +10088,28 @@ window.openBadgeShop = async () => {
     `;
 
 BADGES_DB.forEach(badge => {
-    const isOwned = owned.includes(badge.id);
-    const item = document.createElement('div');
-    item.className = 'shop-badge-item';
-    
-    const priceDisplay = isFree 
-        ? `<span style="color:#00ff88; animation: pulse 1s infinite;">GRATUIT</span>` 
-        : `<img src="https://iili.io/fhc1SKQ.png" width="15"> ${badge.price}`;
+        const isOwned = owned.includes(badge.id);
+        const item = document.createElement('div');
+        item.className = 'shop-badge-item';
+        
+        // --- SPECIAL BADGE CHECK ---
+        const specialBadges = ['b_wheel_god', 'b_immortal', 'b_celestial', 'b_cyber_ghost', 'b_demon_slayer', 'b_void_master', 'b_singularity'];
+        const isSpecial = specialBadges.includes(badge.id);
+        const badgeClass = badge.id === 'b_singularity' ? 'badge-singularity' : (isSpecial ? `badge-${badge.id}` : 'shop-badge-preview');
+        const inlineStyle = isSpecial ? "" : `background:${badge.color} !important; color:#000 !important; border:none; box-shadow:0 0 10px ${badge.color};`;
 
-    // UPDATE THIS LINE BELOW (Added ${badge.animClass || ''})
-    item.innerHTML = `
-        <span class="shop-badge-preview ${badge.animClass || ''}" style="background:${badge.color}; color:#000; border:none; box-shadow:0 0 10px ${badge.color};">
-            <i class="fas ${badge.icon}"></i> ${badge.text}
-        </span>
-        <div class="shop-badge-price" style="margin: 10px 0;">
-            ${isOwned ? 'DEȚINUT' : priceDisplay}
+        const priceDisplay = isFree 
+            ? `<span style="color:#00ff88; animation: pulse 1s infinite;">GRATUIT</span>` 
+            : `<img src="https://iili.io/fhc1SKQ.png" width="15"> ${badge.price.toLocaleString()}`;
+
+        item.innerHTML = `
+            <div style="min-height:50px; display:flex; align-items:center; overflow:visible !important;">
+                <span class="${badgeClass}" style="${inlineStyle}">
+                    <i class="fas ${badge.icon}"></i> ${badge.text}
+                </span>
+            </div>
+            <div class="shop-badge-price" style="margin: 10px 0;">
+                ${isOwned ? 'DEȚINUT' : priceDisplay}
             </div>
             ${isOwned 
                 ? `<span class="owned-label"><i class="fas fa-check"></i></span>` 
@@ -10266,16 +10269,19 @@ else if(type === 'badges') {
                  const badge = BADGES_DB.find(b => b.id === id);
                  if(badge) {
                     const isEquipped = (id === equipped);
-                    const isSingularity = (badge.id === 'b_singularity');
                     
-                    // If it's singularity, we DON'T force the inline background/color
-                    const inlineStyle = isSingularity ? "" : `background:${badge.color} !important; color:#000 !important; font-weight:900; box-shadow: 0 0 10px ${badge.color}; border:none;`;
-                    const badgeClass = isSingularity ? 'badge-singularity' : 'shop-badge-preview';
+                    // --- SPECIAL BADGE CHECK ---
+                    const specialBadges = ['b_wheel_god', 'b_immortal', 'b_celestial', 'b_cyber_ghost', 'b_demon_slayer', 'b_void_master', 'b_singularity'];
+                    const isSpecial = specialBadges.includes(badge.id);
+                    
+                    // Logic: If special, use CSS class. If normal, use DB colors.
+                    const badgeClass = badge.id === 'b_singularity' ? 'badge-singularity' : (isSpecial ? `badge-${badge.id}` : 'shop-badge-preview');
+                    const inlineStyle = isSpecial ? "" : `background:${badge.color} !important; color:#000 !important; font-weight:900; box-shadow: 0 0 10px ${badge.color}; border:none;`;
 
                     list.innerHTML += `
                         <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
-                            <div class="item-preview-box">
-                                <span class="${badgeClass} ${badge.animClass || ''}" style="${inlineStyle} display:inline-flex; align-items:center;">
+                            <div class="item-preview-box" style="overflow:visible !important;">
+                                <span class="${badgeClass}" style="${inlineStyle}">
                                     <i class="fas ${badge.icon}"></i> ${badge.text}
                                 </span>
                             </div>
@@ -10283,18 +10289,17 @@ else if(type === 'badges') {
                                 ${badge.text}
                             </div>
                             ${isEquipped 
-                                ? `<button class="btn-equip-v6 is-equipped">ACTIVE_LINK</button>` 
-                                : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">INITIALIZE</button>`
+                                ? `<button class="btn-equip-v6 is-equipped">LINK_ACTIVE</button>` 
+                                : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">ESTABLISH_MOUNT</button>`
                             }
                         </div>`;
                  }
             });
              if(equipped) {
                 const actionArea = document.getElementById('inventoryActions');
-                if(actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('badge')">TERMINATE_SESSION</button>`;
+                if(actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('badge')">TERMINATE_LINK_SESSION</button>`;
              }
         }
-        
         else if (type === 'banners') {
             const ownedIds = data.ownedBanners || [];
             const equipped = data.equippedBanner?.id || null;
