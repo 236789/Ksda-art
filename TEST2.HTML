@@ -9839,36 +9839,52 @@ window.openBadgeShop = async () => {
 
 
 window.buyBadge = async (badgeId, price) => {
+    // 1. Check if we have an active voucher for badges
     const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'badges';
-    const confirmMsg = isFree ? "Folosești VOUCHER-UL GRATUIT?" : `Cumperi insigna pentru ${price} monede?`;
+    const confirmMsg = isFree ? "Folosești VOUCHER-UL GRATUIT pentru această insignă?" : `Cumperi insigna pentru ${price} monede?`;
 
-    const confirmed = await showCustomConfirm(confirmMsg, "CONFIRMĂ");
+    const confirmed = await showCustomConfirm(confirmMsg, "CONFIRMĂ ACHIZIȚIA");
     if(!confirmed) return;
 
     const userRef = doc(db, "accounts", auth.currentUser.uid);
     const userSnap = await getDoc(userRef);
     const userData = userSnap.data();
 
-    if(!isFree && (userData.coins || 0) < price) return await showCustomAlert("Nu ai destule monede!", "EROARE");
+    // 2. Validate funds if not free
+    if(!isFree && (userData.coins || 0) < price) {
+        return await showCustomAlert("Nu ai destule monede!", "EROARE");
+    }
 
     try {
         if(isFree) {
+            // IMPORTANT: Capture the ID then CLEAR IT IMMEDIATELY
             const ticketIdToRemove = window.activeCosmeticTicket.id;
-            const updatedVouchers = userData.myCoupons.badges.filter(t => t.id !== ticketIdToRemove);
+            window.activeCosmeticTicket = null; // Local reset so no more free items this session
+
+            // Remove the ticket from the specific category array in Firestore
+            const updatedVouchers = (userData.myCoupons?.badges || []).filter(t => t.id !== ticketIdToRemove);
+            
             await updateDoc(userRef, { 
                 ownedBadges: arrayUnion(badgeId),
                 'myCoupons.badges': updatedVouchers 
             });
-            window.activeCosmeticTicket = null;
+            
+            await showCustomAlert("Insignă deblocată GRATUIT!", "SUCCES");
         } else {
-            await updateDoc(userRef, { coins: increment(-price), ownedBadges: arrayUnion(badgeId) });
+            // Normal purchase
+            await updateDoc(userRef, { 
+                coins: increment(-price), 
+                ownedBadges: arrayUnion(badgeId) 
+            });
             await logTransaction(-price, "COINS", "Shop", "Bought Badge: " + badgeId);
         }
 
-        // FULL PAGE REFRESH TO RESET STATE
-window.location.reload();
-
-    } catch(e) { console.error(e); } 
+        // Refresh the shop UI
+        openBadgeShop(); 
+    } catch(e) { 
+        console.error(e);
+        showCustomAlert("A apărut o eroare.", "FAIL");
+    } 
 };
 
 window.buyAllItems = async (category) => {
