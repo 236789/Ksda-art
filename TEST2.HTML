@@ -9759,9 +9759,12 @@ window.openBadgeShop = async () => {
     modal.classList.add('active');
 
     const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
-    const owned = userSnap.data().ownedBadges || [];
+    const userData = userSnap.data();
+    const owned = userData.ownedBadges || [];
+    
+    // Check if a badge voucher is currently active
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'badges';
 
-    // Buy All button
     list.innerHTML = `
         <div style="grid-column: 1 / -1; margin-bottom: 15px;">
             <button class="buy-badge-btn" style="background:var(--gold); color:#000; padding:15px; font-size:13px;" onclick="buyAllItems('badges')">
@@ -9774,16 +9777,24 @@ window.openBadgeShop = async () => {
         const isOwned = owned.includes(badge.id);
         const item = document.createElement('div');
         item.className = 'shop-badge-item';
+        
+        // Task 3: Change price text if voucher is active
+        const priceDisplay = isFree 
+            ? `<span style="color:#00ff88; animation: pulse 1s infinite;">GRATUIT</span>` 
+            : `<img src="https://iili.io/fhc1SKQ.png" width="15"> ${badge.price}`;
+
         item.innerHTML = `
-            <span class="shop-badge-preview" style="background:${badge.color}; color:${badge.id.includes('dark')?'#fff':'#000'}; border:none; box-shadow:0 0 10px ${badge.color};">
+            <span class="shop-badge-preview" style="background:${badge.color}; color:#000; border:none; box-shadow:0 0 10px ${badge.color};">
                 <i class="fas ${badge.icon}"></i> ${badge.text}
             </span>
-            <div class="shop-badge-price">
-                ${isOwned ? 'DEȚINUT' : `<img src="https://iili.io/fhc1SKQ.png" width="15"> ${badge.price}`}
+            <div class="shop-badge-price" style="margin: 10px 0;">
+                ${isOwned ? 'DEȚINUT' : priceDisplay}
             </div>
             ${isOwned 
                 ? `<span class="owned-label"><i class="fas fa-check"></i></span>` 
-                : `<img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/images%2Fcumpara%20.png?alt=media&token=ad64b20d-9ce5-43d7-95b4-6b491295dfec" class="buy-btn-img" onclick="buyBadge('${badge.id}', ${badge.price})">`
+                : `<img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/images%2Fcumpara%20.png?alt=media&token=ad64b20d-9ce5-43d7-95b4-6b491295dfec" 
+                    class="buy-btn-img" style="${isFree ? 'filter: hue-rotate(90deg) brightness(1.5);' : ''}" 
+                    onclick="buyBadge('${badge.id}', ${isFree ? 0 : badge.price})">`
             }
         `;
         list.appendChild(item);
@@ -11974,7 +11985,9 @@ window.revealReward = async () => {
             const roll = Math.random() * 100;
 
 // --- Inside revealReward loop for Platinum ---
-if (lockedBox.id === 'box_platinum') {
+if (lockedBox.id === 'box_platinum')
+
+ {
     const roll = Math.random() * 100;
 
     if (roll <= 1) { // EXOTIC (1%)
@@ -11997,6 +12010,21 @@ if (lockedBox.id === 'box_platinum') {
     else { // RARE (55%)
         winCoins += Math.floor(Math.random() * 3001) + 2000; // 2000-5000 Coins
     }
+
+// --- Updated resultHTML generation for wonTicket (Task 2) ---
+if(wonTicket) {
+    const isExotic = wonTicket.tier.includes("EXOTIC");
+    const ticketColor = isExotic ? "#ff00ff" : "#ffd700";
+    
+    resultHTML += `
+        <div style="border: 1px solid ${ticketColor}; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 12px; width: 100%;">
+            <div style="font-family:'Orbitron'; font-size:10px; color:${ticketColor}; font-weight:900; letter-spacing:2px; margin-bottom:10px;">${wonTicket.tier}</div>
+            <!-- Show the real ticket image -->
+            <img src="${TICKET_IMGS[wonTicket.category]}" style="height:80px; margin-bottom:10px; filter: drop-shadow(0 0 10px ${ticketColor});">
+            <div style="font-family:'Montserrat'; font-weight:900; font-size:15px; color:#fff;">${wonTicket.name}</div>
+            <div style="font-size:10px; color:#aaa; margin-top:5px;">Check your Coupon Vault to activate!</div>
+        </div>`;
+}
 
             } else if (lockedBox.id === 'box_gold') {
                 // --- GOLD BOX MATH ---
@@ -12356,50 +12384,53 @@ window.openCouponInventory = () => {
     document.getElementById('couponInventoryModal').classList.add('active');
 };
 window.openSubCoupon = (type) => {
+    console.log("Opening Vault Category:", type);
+
     const categoryInfo = {
-        coins: { title: "COINS_REDUCTION" },
-        diamonds: { title: "DIAMOND_REDUCTION" },
-        texts: { title: "TEXT_REDUCTION" },
-        frames: { title: "FRAME_REDUCTION" },
-        banners: { title: "BANNER_REDUCTION" },
-        badges: { title: "BADGE_VOUCHERS" }, // WAS MISSING
-        blackmarket: { title: "ELITE_ACCESS" }
+        coins: { title: "COINS_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d' },
+        diamonds: { title: "DIAMOND_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FDiamonds%20Reduction%20cupon%20.png?alt=media&token=7fbf7d4f-78e1-4ea1-934e-619016889b84' },
+        texts: { title: "TEXT_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f' },
+        frames: { title: "FRAME_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FFrame%20discount%20cupon%20.png?alt=media&token=c49a5fb2-06e8-4df5-bcf3-ed37afd1cdef' },
+        banners: { title: "BANNER_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBanner%20discount%20cupon%20.png?alt=media&token=e75ab8ee-5278-496c-9938-d1796bda02e0' },
+        badges: { title: "BADGE_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae' },
+        blackmarket: { title: "ELITE_ACCESS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d' }
     };
 
     const info = categoryInfo[type];
     if(!info) return;
 
-    // Set text (Note: I removed the 'subCouponIcon' line because it was causing the error)
     document.getElementById('subCouponTitle').innerText = info.title;
-    
-    // Switch Modals
     document.getElementById('couponInventoryModal').classList.remove('active');
     document.getElementById('subCouponModal').classList.add('active');
 
-    // Populate List
     const listContainer = document.getElementById('subCouponList');
     listContainer.innerHTML = '';
     
     const userCoupons = (window.currentUserData?.myCoupons?.[type]) || [];
 
     if(userCoupons.length === 0) {
-        listContainer.innerHTML = `<div class="empty-coupons" style="color:#444; padding:40px; text-align:center; font-family:'Orbitron'; font-size:10px;">> NU S-AU GĂSIT TICHETE ACTIVE...</div>`;
+        listContainer.innerHTML = `<div class="empty-coupons">> NU S-AU GĂSIT TICHETE ACTIVE...</div>`;
         return;
     }
 
     userCoupons.forEach(coupon => {
         const ticket = document.createElement('div');
         ticket.className = 'v4-badge-item';
-        ticket.style.cssText = "display:flex; flex-direction:row; justify-content:space-between; align-items:center; padding:15px 20px; border-color: rgba(0,255,204,0.3) !important; cursor:pointer;";
+        ticket.style.cssText = "display:flex; flex-direction:row; justify-content:space-between; align-items:center; padding:15px 20px; border-color: rgba(0,255,204,0.3) !important;";
         
         ticket.innerHTML = `
             <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
             <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-            <div style="text-align: left;">
-                <div style="font-family:'Montserrat'; font-weight:900; font-size:20px; color:#00ffcc;">-${coupon.val}%</div>
-                <div style="font-family:monospace; font-size:10px; color:#555;">CODE: #${coupon.code}</div>
+            <div style="display:flex; align-items:center; gap:15px;">
+                <!-- Task 4: Show Ticket Image -->
+                <img src="${info.img}" style="height:50px; filter: drop-shadow(0 0 5px #00ffcc);">
+                <div style="text-align: left;">
+                    <!-- Task 4: 1 Free item text -->
+                    <div style="font-family:'Montserrat'; font-weight:900; font-size:13px; color:#fff;">1 FREE ${type.toUpperCase().slice(0,-1)} (1 TIME USE)</div>
+                    <div style="font-family:monospace; font-size:10px; color:#555;">CODE: #${coupon.code}</div>
+                </div>
             </div>
-            <button class="bm-price-btn-v4" onclick="activateCoupon('${coupon.id}', '${type}')">ACTIVATE</button>
+            <button class="bm-price-btn-v4" onclick="activateCouponCode('${coupon.code}')">ACTIVATE</button>
         `;
         listContainer.appendChild(ticket);
     });
