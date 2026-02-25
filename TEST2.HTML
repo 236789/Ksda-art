@@ -6859,6 +6859,46 @@ body {
     text-shadow: 0 0 15px #ff00ff, 0 0 30px #00ffff;
     animation: pulse-intense 2s infinite;
 }
+
+
+
+/* --- SICK ANIMATION ENGINE --- */
+@keyframes pulse-neon { 0%, 100% { filter: drop-shadow(0 0 5px var(--glow-color)); } 50% { filter: drop-shadow(0 0 20px var(--glow-color)) brightness(1.2); } }
+@keyframes glitch-anim { 0% { transform: translate(0); } 20% { transform: translate(-2px, 2px); } 40% { transform: translate(-2px, -2px); } 60% { transform: translate(2px, 2px); } 80% { transform: translate(2px, -2px); } 100% { transform: translate(0); } }
+@keyframes rotate-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes text-shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+
+/* --- NEW ANIMATED BADGE CLASSES --- */
+.badge-anim-dragon { --glow-color: #ff0000; animation: pulse-neon 2s infinite; color: #ff0000 !important; }
+.badge-anim-radar { --glow-color: #00ff88; animation: rotate-slow 4s linear infinite; color: #00ff88 !important; }
+.badge-anim-glitch { animation: glitch-anim 0.3s infinite; color: #00ffff !important; text-shadow: 2px 0 #ff00ff; }
+.badge-anim-gold { --glow-color: #ffd700; animation: pulse-neon 1.5s infinite alternate; color: #ffd700 !important; }
+
+/* --- NEW TEXT STYLES --- */
+.t-hacker-green { color: #00ff41; text-shadow: 0 0 10px #00ff41; font-family: 'Courier New', monospace !important; }
+.t-lava-flow { 
+    background: linear-gradient(90deg, #ff4500, #ff8c00, #ff4500); 
+    background-size: 200% auto; 
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent; 
+    animation: text-shimmer 3s linear infinite;
+    font-weight: 900;
+}
+.t-diamond-ice { color: #b9f2ff; text-shadow: 0 0 15px #fff, 0 0 25px #00e5ff; font-weight: 800; }
+
+/* --- NEW BANNER STYLES --- */
+.bubble-pulse-void {
+    background: rgba(10, 0, 20, 0.9) !important;
+    border: 2px solid #7000ff !important;
+    box-shadow: inset 0 0 20px #7000ff, 0 0 15px #7000ff !important;
+    animation: pulse-neon 3s infinite;
+}
+.bubble-emerald-shard {
+    background: linear-gradient(135deg, #004d26, #00ff88) !important;
+    clip-path: polygon(5% 0%, 95% 0%, 100% 50%, 95% 100%, 5% 100%, 0% 50%);
+    color: #000 !important;
+    font-weight: 800;
+}
   </style>
 </head>
 <body>
@@ -8796,6 +8836,8 @@ const BANNERS_DB = [
     { id: 'anim_ghost',    name: 'POLTERGEIST', cssClass: 'bubble-anim-ghost',    price: 1600, desc: 'Floating Fade' },
     { id: 'anim_love',     name: 'HEARTBEAT',   cssClass: 'bubble-anim-love',     price: 1550, desc: 'Pulsing Hearts' },
     { id: 'anim_sparkle',  name: 'STARDUST',    cssClass: 'bubble-anim-sparkle',  price: 1700, desc: 'Twinkling' },
+    { id: 'bub_void_pulse', name: 'VOID PULSE', cssClass: 'bubble-pulse-void', price: 3500, desc: 'Efect de respirație mov' },
+    { id: 'bub_emerald', name: 'EMERALD SHARD', cssClass: 'bubble-emerald-shard', price: 3000, desc: 'Formă de cristal tăiat' },
 ];
 
 
@@ -8821,7 +8863,13 @@ const FRAMES_DB = [
     { id: 'fr_mech', name: 'MECHA', price: 1600, img: 'https://i.ibb.co/Vpx0fnbP/3decd472-3a37-4d3c-95fa-f9fefab8ee78-removalai-preview.png' },
     { id: 'fr_glitch', name: 'GLITCH ERROR', price: 1850, img: 'https://i.ibb.co/fzWVhtv2/2bffa166-2107-4bef-b744-3cc7c8e04593-removalai-preview.png' },
     { id: 'fr_vintage', name: 'VINTAGE', price: 850, img: 'https://i.ibb.co/0ymk5P5K/060318de-c831-456c-8bd5-48361a2910eb-removalai-preview.png' },
-    { id: 'fr_galaxy', name: 'GALAXY', price: 2250, img: 'https://i.ibb.co/qL909PLy/2640f988-a425-4589-ba5a-1f780d24916a-removalai-preview.png' }
+    { id: 'fr_galaxy', name: 'GALAXY', price: 2250, img: 'https://i.ibb.co/qL909PLy/2640f988-a425-4589-ba5a-1f780d24916a-removalai-preview.png' },
+
+
+    { id: 'b_dragon_anim', text: 'DRAGON SPIRIT', color: 'rgba(255,0,0,0.2)', price: 5000, icon: 'fa-dragon', animClass: 'badge-anim-dragon' },
+    { id: 'b_radar_anim', text: 'ELITE SNIPER', color: 'rgba(0,255,136,0.2)', price: 4500, icon: 'fa-crosshairs', animClass: 'badge-anim-radar' },
+    { id: 'b_glitch_anim', text: 'SYSTEM ERROR', color: 'rgba(0,255,255,0.2)', price: 6000, icon: 'fa-microchip', animClass: 'badge-anim-glitch' },
+    { id: 'b_king_anim', text: 'ETERNAL KING', color: 'rgba(255,215,0,0.2)', price: 8000, icon: 'fa-crown', animClass: 'badge-anim-gold' },
 ];
 
 
@@ -8921,7 +8969,11 @@ const TEXTS_DB = [
     { id: 't_zebra', name: 'ZEBRA', cssClass: 'bubble-comic', price: 1000 },
     { id: 't_tiger', name: 'TIGRU', cssClass: 't-fire', price: 1200 },
     { id: 't_army', name: 'MILITAR', cssClass: 'bubble-military', price: 1300 },
-    { id: 't_lava', name: 'LAVĂ', cssClass: 'bubble-fire', price: 1400 }
+    { id: 't_lava', name: 'LAVĂ', cssClass: 'bubble-fire', price: 1400 },
+
+    { id: 't_hacker', name: 'MATRIX CODE', cssClass: 't-hacker-green', price: 2500 },
+    { id: 't_lava', name: 'LAVA FLOW', cssClass: 't-lava-flow', price: 4000 },
+    { id: 't_ice', name: 'DIAMOND ICE', cssClass: 't-diamond-ice', price: 3500 },
 ];
 
 // PRO TIP: To reach 80 quickly without writing 80 separate lines, 
@@ -9802,22 +9854,22 @@ window.openBadgeShop = async () => {
         </div>
     `;
 
-    BADGES_DB.forEach(badge => {
-        const isOwned = owned.includes(badge.id);
-        const item = document.createElement('div');
-        item.className = 'shop-badge-item';
-        
-        // Task 3: Change price text if voucher is active
-        const priceDisplay = isFree 
-            ? `<span style="color:#00ff88; animation: pulse 1s infinite;">GRATUIT</span>` 
-            : `<img src="https://iili.io/fhc1SKQ.png" width="15"> ${badge.price}`;
+BADGES_DB.forEach(badge => {
+    const isOwned = owned.includes(badge.id);
+    const item = document.createElement('div');
+    item.className = 'shop-badge-item';
+    
+    const priceDisplay = isFree 
+        ? `<span style="color:#00ff88; animation: pulse 1s infinite;">GRATUIT</span>` 
+        : `<img src="https://iili.io/fhc1SKQ.png" width="15"> ${badge.price}`;
 
-        item.innerHTML = `
-            <span class="shop-badge-preview" style="background:${badge.color}; color:#000; border:none; box-shadow:0 0 10px ${badge.color};">
-                <i class="fas ${badge.icon}"></i> ${badge.text}
-            </span>
-            <div class="shop-badge-price" style="margin: 10px 0;">
-                ${isOwned ? 'DEȚINUT' : priceDisplay}
+    // UPDATE THIS LINE BELOW (Added ${badge.animClass || ''})
+    item.innerHTML = `
+        <span class="shop-badge-preview ${badge.animClass || ''}" style="background:${badge.color}; color:#000; border:none; box-shadow:0 0 10px ${badge.color};">
+            <i class="fas ${badge.icon}"></i> ${badge.text}
+        </span>
+        <div class="shop-badge-price" style="margin: 10px 0;">
+            ${isOwned ? 'DEȚINUT' : priceDisplay}
             </div>
             ${isOwned 
                 ? `<span class="owned-label"><i class="fas fa-check"></i></span>` 
@@ -12485,7 +12537,6 @@ window.activateCouponCode = (code) => {
         input.value = code;
         closeModal('subCouponModal');
         closeModal('couponInventoryModal');
-        scrollToZone('zone-deals'); // Mergem la secțiunea terminalului
         showCustomAlert("Codul a fost introdus în Terminal.<br>Apasă <b>VALIDATE_CREDENTIALS</b>!", "SISTEM GATA");
     }
 };
