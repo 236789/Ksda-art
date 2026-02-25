@@ -6913,44 +6913,66 @@ body {
     background: conic-gradient(from 0deg, transparent, #7000ff, #00ffff, #7000ff, transparent 60%) !important;
 }
 
+/* --- GOD-TIER SINGULARITY BADGE REVAMP --- */
 .badge-singularity {
-    background: radial-gradient(circle at center, #1a0033 0%, #050508 40%, #000 100%) !important;
+    background: #000 !important;
     color: #fff !important;
-    border: 2px solid #7000ff !important;
-    box-shadow: 0 0 20px #7000ff, inset 0 0 30px #7000ff, 0 0 60px rgba(112, 0, 255, 0.5) !important;
-    text-shadow: 0 0 10px #7000ff, 0 0 20px #fff !important;
+    border: none !important;
+    position: relative;
+    z-index: 1;
+    padding: 6px 15px !important;
+    font-family: 'Orbitron', sans-serif !important;
     font-weight: 900 !important;
-    letter-spacing: 3px !important;
-    position: relative !important;
-    overflow: hidden !important;
-    animation: quantum-flux 4s infinite alternate ease-in-out !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    padding: 10px 20px !important;
-    border-radius: 8px !important;
-    font-family: 'Orbitron' !important;
-    text-transform: uppercase !important;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 4px;
+    overflow: hidden; /* Clips the spinning aura */
+    box-shadow: 0 0 30px rgba(112, 0, 255, 0.8);
+    animation: singularityWarp 4s infinite alternate ease-in-out;
 }
 
+/* The Spinning Event Horizon (Aura) */
+.badge-singularity::before {
+    content: '';
+    position: absolute;
+    inset: -150%; /* Large enough to rotate without showing edges */
+    background: conic-gradient(
+        from 0deg, 
+        transparent 0deg, 
+        #7000ff 90deg, 
+        #ff00ff 180deg, 
+        #00ffff 270deg, 
+        transparent 360deg
+    );
+    animation: rotateAura 1.5s linear infinite;
+    z-index: -2;
+}
+
+/* The Black Hole Core */
+.badge-singularity::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    background: #000;
+    border-radius: 3px;
+    z-index: -1;
+}
+
+/* Chromatic Distortion Animation */
+@keyframes singularityWarp {
+    0% { filter: hue-rotate(0deg) brightness(1); transform: scale(1); }
+    50% { filter: hue-rotate(20deg) brightness(1.5); transform: scale(1.05); }
+    100% { filter: hue-rotate(-20deg) brightness(1.2); transform: scale(1); }
+}
+
+/* The Icon inside pulses too */
 .badge-singularity i {
-    color: #7000ff !important;
-    filter: drop-shadow(0 0 8px #fff) brightness(2) !important;
-    animation: fa-spin 2s infinite linear !important;
-}
-
-@keyframes quantum-flux {
-    0% { transform: scale(1); filter: hue-rotate(0deg) brightness(1); box-shadow: 0 0 20px #7000ff, inset 0 0 30px #7000ff; }
-    50% { transform: scale(1.05); filter: hue-rotate(180deg) brightness(1.4); box-shadow: 0 0 40px #00ffff, inset 0 0 50px #7000ff; }
-    100% { transform: scale(1); filter: hue-rotate(360deg) brightness(1); box-shadow: 0 0 20px #7000ff, inset 0 0 30px #7000ff; }
-}
-
-.abyssal-card-takeover {
-    border: 3px solid #7000ff !important;
-    background: radial-gradient(circle at top, #1a0033 0%, #050508 100%) !important;
-    box-shadow: 0 0 50px rgba(112, 0, 255, 0.6), inset 0 0 40px #000 !important;
-    transform: scale(1.05) translateY(-5px) !important;
-    z-index: 10 !important;
+    color: #fff;
+    text-shadow: 0 0 10px #7000ff;
+    animation: pulse 1s infinite alternate;
 }
 /* Exclusive Choice Modal Grid */
 .exclusive-choice-grid {
@@ -8993,7 +9015,14 @@ window.showCustomConfirm = (msg, title = "CONFIRMARE") => {
     { id: 'b_bisericos', text: 'SFINȚIȘOR', color: 'linear-gradient(45deg, #fff, #ffd700)', price: 3333, icon: 'fa-cross' },
     { id: 'b_escroc', text: 'ESCROC SENTIMENTAL', color: 'linear-gradient(45deg, #2C3E50, #FD746C)', price: 1669, icon: 'fa-user-tie' },
 
-{ id: 'b_singularity', text: 'THE SINGULARITY', color: '#000', icon: 'fa-atom', price: 99999, animClass: 'badge-singularity' },
+{ 
+    id: 'b_singularity', 
+    text: 'SINGULARITY', 
+    price: 99999, 
+    icon: 'fa-atom', 
+    animClass: 'badge-singularity' 
+},
+
 
 ];
 
@@ -10225,7 +10254,7 @@ window.openInventory = async (type = 'badges') => {
             }
         }
         
-        else if(type === 'badges') {
+else if(type === 'badges') {
             const ownedIds = data.ownedBadges || [];
             const equipped = data.equippedBadge?.id || null;
             
@@ -10238,32 +10267,33 @@ window.openInventory = async (type = 'badges') => {
                  if(badge) {
                     const isEquipped = (id === equipped);
                     const isSingularity = (badge.id === 'b_singularity');
-                    const badgeClass = isSingularity ? 'badge-singularity' : 'shop-badge-preview';
-                    const cardClass = isSingularity ? 'item-card-v6 abyssal-card-takeover' : 'item-card-v6';
                     
+                    // If it's singularity, we DON'T force the inline background/color
+                    const inlineStyle = isSingularity ? "" : `background:${badge.color} !important; color:#000 !important; font-weight:900; box-shadow: 0 0 10px ${badge.color}; border:none;`;
+                    const badgeClass = isSingularity ? 'badge-singularity' : 'shop-badge-preview';
+
                     list.innerHTML += `
-                        <div class="${cardClass} ${isEquipped ? 'equipped' : ''}">
+                        <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
                             <div class="item-preview-box">
-                                <span class="${badgeClass} ${badge.animClass || ''}" 
-                                      style="${!isSingularity ? `background:${badge.color} !important; color:#000 !important; font-weight:900; box-shadow: 0 0 10px ${badge.color}; border:none;` : ''} display:inline-flex; align-items:center; border-radius:4px;">
-                                    <i class="fas ${isSingularity ? 'fa-atom' : badge.icon}"></i> ${badge.text}
+                                <span class="${badgeClass} ${badge.animClass || ''}" style="${inlineStyle} display:inline-flex; align-items:center;">
+                                    <i class="fas ${badge.icon}"></i> ${badge.text}
                                 </span>
                             </div>
-                            <div style="font-weight:900; font-size:12px; margin-bottom:10px; color:${isSingularity ? '#7000ff' : '#fff'}; font-family:'Orbitron'; text-transform:uppercase; text-shadow: ${isSingularity ? '0 0 15px rgba(112,0,255,0.8)' : 'none'};">
+                            <div style="font-weight:900; font-size:11px; margin-bottom:10px; color:#fff; font-family:'Orbitron'; text-transform:uppercase;">
                                 ${badge.text}
                             </div>
                             ${isEquipped 
-                                ? `<button class="btn-equip-v6 is-equipped" style="${isSingularity ? 'background:#7000ff; color:#fff; border:none;' : ''}">QUANTUM_LINK_ACTIVE</button>` 
-                                : `<button class="btn-equip-v6 do-equip" style="${isSingularity ? 'background:#000; color:#7000ff; border:2px solid #7000ff;' : ''}" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">ESTABLISH_MOUNT</button>`
+                                ? `<button class="btn-equip-v6 is-equipped">ACTIVE_LINK</button>` 
+                                : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">INITIALIZE</button>`
                             }
                         </div>`;
                  }
             });
              if(equipped) {
                 const actionArea = document.getElementById('inventoryActions');
-                if(actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('badge')">TERMINATE_LINK_SESSION</button>`;
+                if(actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('badge')">TERMINATE_SESSION</button>`;
              }
-        } 
+        }
         
         else if (type === 'banners') {
             const ownedIds = data.ownedBanners || [];
