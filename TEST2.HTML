@@ -11887,48 +11887,43 @@ window.revealReward = async () => {
         let winDiamonds = 0;
         let wonBadge = null;
         let wonFrame = null; 
-        let wonBanner = null; // <--- This was missing!
-        let wonTicket = null; // This fixes the console error
+        let wonBanner = null; 
+        let wonTicket = null; 
 
         const TICKET_IMGS = {
             badges: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
             frames: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FFrame%20discount%20cupon%20.png?alt=media&token=c49a5fb2-06e8-4df5-bcf3-ed37afd1cdef',
             banners: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBanner%20discount%20cupon%20.png?alt=media&token=e75ab8ee-5278-496c-9938-d1796bda02e0',
-            texts: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f'
+            texts: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f',
+            coins: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d',
+            diamonds: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FDiamonds%20Reduction%20cupon%20.png?alt=media&token=7fbf7d4f-78e1-4ea1-934e-619016889b84'
         };
 
-        
-        // ... (rest of your math loop)
-      
-
-// --- THE STRICT MULTI-BOX MATH ENGINE ---
+        // --- THE STRICT MULTI-BOX MATH ENGINE ---
         for (let i = 0; i < lockedQty; i++) {
             const roll = Math.random() * 100;
 
-// --- Inside revealReward loop for Platinum ---
-if (lockedBox.id === 'box_platinum') {
-    const roll = Math.random() * 100;
-
-    if (roll <= 1) { // EXOTIC (1%)
-        const types = ['coins', 'diamonds'];
-        const chosenType = types[Math.floor(Math.random() * types.length)];
-        const discount = [15, 20, 25][Math.floor(Math.random() * 3)];
-        wonTicket = { category: chosenType, val: discount, name: `EXOTIC ${chosenType.toUpperCase()} VOUCHER` };
-    } 
-    else if (roll <= 5) { // MYTHIC (4%)
-        winDiamonds += 50;
-    } 
-    else if (roll <= 15) { // LEGENDARY (10%)
-        const cosmoTypes = ['badges', 'banners', 'frames', 'texts'];
-        const chosenCosmo = cosmoTypes[Math.floor(Math.random() * cosmoTypes.length)];
-        wonTicket = { category: chosenCosmo, val: 50, name: `50% ${chosenCosmo.toUpperCase()} VOUCHER` };
-    } 
-    else if (roll <= 45) { // EPIC (30%)
-        winDiamonds += Math.floor(Math.random() * 11) + 10; // 10-20 Gems
-    } 
-    else { // RARE (55%)
-        winCoins += Math.floor(Math.random() * 3001) + 2000; // 2000-5000 Coins
-    }
+            // --- Inside revealReward loop for Platinum ---
+            if (lockedBox.id === 'box_platinum') {
+                if (roll <= 1) { // EXOTIC (CURRENCY VOUCHERS)
+                    const types = ['coins', 'diamonds'];
+                    const chosenType = types[Math.floor(Math.random() * types.length)];
+                    wonTicket = { category: chosenType, tier: 'EXOTIC ITEM UNLOCKED', name: `FREE ${chosenType.toUpperCase()} 1 TIME USE` };
+                } 
+                else if (roll <= 5) { // MYTHIC (4%)
+                    winDiamonds += 50;
+                } 
+                else if (roll <= 15) { // LEGENDARY (COSMETIC VOUCHERS)
+                    const cosmoTypes = ['badges', 'banners', 'frames', 'texts'];
+                    const chosenCosmo = cosmoTypes[Math.floor(Math.random() * cosmoTypes.length)];
+                    wonTicket = { category: chosenCosmo, tier: 'LEGENDARY ITEM UNLOCKED', name: `FREE ${chosenCosmo.toUpperCase().slice(0, -1)} 1 TIME USE` };
+                } 
+                else if (roll <= 45) { // EPIC (30%)
+                    winDiamonds += Math.floor(Math.random() * 11) + 10; 
+                } 
+                else { // RARE (55%)
+                    winCoins += Math.floor(Math.random() * 3001) + 2000; 
+                }
 
             } else if (lockedBox.id === 'box_gold') {
                 // --- GOLD BOX MATH ---
@@ -11937,26 +11932,25 @@ if (lockedBox.id === 'box_platinum') {
                 } else if (roll <= 2.5 && !wonFrame) { 
                     wonFrame = FRAMES_DB[Math.floor(Math.random() * FRAMES_DB.length)];
                 } else if (roll <= 13) {
-                    winDiamonds += Math.floor(Math.random() * 4) + 2; // 2-5 Gems
+                    winDiamonds += Math.floor(Math.random() * 4) + 2; 
                 } else if (roll <= 40) {
-                    winCoins += Math.floor(Math.random() * 1501) + 2500; // 2500-4000 Coins
+                    winCoins += Math.floor(Math.random() * 1501) + 2500; 
                 } else {
-                    winCoins += Math.floor(Math.random() * 501) + 1000; // 1000-1500 Coins
+                    winCoins += Math.floor(Math.random() * 501) + 1000; 
                 }
             } else {
                 // --- BASIC BOX MATH ---
                 if (roll <= 2 && !wonBadge) {
-                    // Pull any badge EXCEPT Miliardar for Basic box
                     const basicPool = BADGES_DB.filter(b => b.id !== 'b_miliardar');
                     wonBadge = basicPool[Math.floor(Math.random() * basicPool.length)];
-                } else if (roll <= 6.5) { // Matching your Probability Log UI
-                    winDiamonds += Math.floor(Math.random() * 3) + 3; // 3-5 Gems
+                } else if (roll <= 6.5) { 
+                    winDiamonds += Math.floor(Math.random() * 3) + 3; 
                 } else if (roll <= 16.5) {
-                    winCoins += Math.floor(Math.random() * 1001) + 500; // 500-1500 Coins
+                    winCoins += Math.floor(Math.random() * 1001) + 500; 
                 } else if (roll <= 41.5) {
-                    winDiamonds += Math.floor(Math.random() * 3) + 1; // 1-3 Gems
+                    winDiamonds += Math.floor(Math.random() * 3) + 1; 
                 } else {
-                    winCoins += Math.floor(Math.random() * 501) + 250; // 250-750 Coins
+                    winCoins += Math.floor(Math.random() * 501) + 250; 
                 }
             }
         }
@@ -11966,19 +11960,15 @@ if (lockedBox.id === 'box_platinum') {
             const userRef = doc(db, "accounts", auth.currentUser.uid);
             const updates = { coins: increment(winCoins), diamonds: increment(winDiamonds) };
 
-
-   // If user won a ticket/voucher
-    if(wonTicket) {
-        const ticketID = "TICK-" + Math.random().toString(36).substr(2, 5).toUpperCase();
-        const newTicket = {
-            id: ticketID,
-            code: ticketID,
-            val: wonTicket.val,
-            used: false
-        };
-        // This adds it to the correct folder in your 'myCoupons' structure
-        updates[`myCoupons.${wonTicket.category}`] = arrayUnion(newTicket);
-    }
+            if(wonTicket) {
+                const ticketID = "TICK-" + Math.random().toString(36).substr(2, 5).toUpperCase();
+                const newTicket = {
+                    id: ticketID,
+                    code: ticketID,
+                    used: false
+                };
+                updates[`myCoupons.${wonTicket.category}`] = arrayUnion(newTicket);
+            }
 
             if(wonBadge) updates.ownedBadges = arrayUnion(wonBadge.id);
             if(wonFrame) updates.ownedFrames = arrayUnion(wonFrame.id);
@@ -11989,31 +11979,35 @@ if (lockedBox.id === 'box_platinum') {
         // --- THE NEXT-LEVEL RESULT MODAL ---
         const modal = document.getElementById('rewardModal');
         const titleEl = modal.querySelector('h2');
-        const container = modal.querySelector('p'); // We use the <p> as our dynamic container
+        const container = modal.querySelector('p'); 
 
         // Set Title Color & Text based on drop
         if (wonBadge && wonBadge.id === 'b_miliardar') {
             titleEl.innerText = "!!! MYTHIC DROP !!!";
-            titleEl.style.color = "#ff4757"; // Crimson
+            titleEl.style.color = "#ff4757"; 
+        } else if (wonTicket) {
+            titleEl.innerText = wonTicket.tier.replace(" UNLOCKED", "");
+            titleEl.style.color = (wonTicket.tier.includes("EXOTIC")) ? "#ff00ff" : "#ffd700";
         } else if (wonBadge || wonFrame || wonBanner) {
             titleEl.innerText = "LEGENDARY_UNLOCKED";
-            titleEl.style.color = "#ffd700"; // Gold
+            titleEl.style.color = "#ffd700"; 
         } else {
             titleEl.innerText = "DECRYPTION_SUCCESS";
-            titleEl.style.color = "#00ffcc"; // Mint
+            titleEl.style.color = "#00ffcc"; 
         }
 
         let resultHTML = `<div style="text-align:center; display:flex; flex-direction:column; gap:12px; align-items:center; padding:10px;">`;
 
-
-if(wonTicket) {
-    resultHTML += `
-        <div style="border: 1px solid var(--r-color); background: rgba(255,0,255,0.05); padding: 15px; border-radius: 12px; width: 100%; border-color:#ff00ff;">
-            <div style="font-family:'Orbitron'; font-size:10px; color:#ff00ff; font-weight:900; letter-spacing:2px; margin-bottom:10px;">EXOTIC ITEM UNLOCKED</div>
-            <div style="font-family:'Montserrat'; font-weight:900; font-size:16px; color:#fff;">${wonTicket.name}</div>
-            <div style="font-size:10px; color:#aaa; margin-top:5px;">Check your Coupon Vault to activate!</div>
-        </div>`;
-}
+        if(wonTicket) {
+            const ticketColor = wonTicket.tier.includes("EXOTIC") ? "#ff00ff" : "#ffd700";
+            resultHTML += `
+                <div style="border: 1px solid ${ticketColor}; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; width: 100%;">
+                    <div style="font-family:'Orbitron'; font-size:10px; color:${ticketColor}; font-weight:900; letter-spacing:2px; margin-bottom:10px;">${wonTicket.tier}</div>
+                    <img src="${TICKET_IMGS[wonTicket.category]}" style="height:80px; margin-bottom:10px; filter: drop-shadow(0 0 10px ${ticketColor});">
+                    <div style="font-family:'Montserrat'; font-weight:900; font-size:16px; color:#fff;">${wonTicket.name}</div>
+                    <div style="font-size:10px; color:#aaa; margin-top:5px;">Check your Coupon Vault to activate!</div>
+                </div>`;
+        }
         
         if(winCoins > 0) {
             resultHTML += `<div class="reward-line" style="color:#ffd700;"><img src="https://iili.io/fhc1SKQ.png" style="width:30px;"> +${winCoins.toLocaleString()}</div>`;
@@ -12060,7 +12054,6 @@ if(wonTicket) {
         resultHTML += `</div>`;
 
         container.innerHTML = resultHTML;
-        // Hide the old reward box if it's still there
         const oldBox = modal.querySelector('.reward-coins-box');
         if(oldBox) oldBox.style.display = 'none';
 
@@ -12238,14 +12231,45 @@ window.redeemCoupon = async () => {
     const code = document.getElementById('couponInput').value.trim().toUpperCase();
     if(!code) return showCustomAlert("Te rugăm să introduci un cod valid.", "SISTEM_ERROR");
 
-    // UI FEEDBACK
     const btn = document.getElementById('btnRedeem');
     btn.innerText = "AUTHENTICATING...";
     btn.disabled = true;
 
-    // Logic for Firebase will go here next
-    setTimeout(() => {
-        showCustomAlert("Codul '" + code + "' nu este valid sau a expirat.", "ACCESS_DENIED");
+    // Check inventory locally first
+    let foundCategory = null;
+    const categories = ['coins', 'diamonds', 'texts', 'frames', 'banners', 'badges', 'blackmarket'];
+    
+    for (const cat of categories) {
+        const hasIt = window.currentUserData?.myCoupons?.[cat]?.some(c => c.code === code);
+        if(hasIt) {
+            foundCategory = cat;
+            break;
+        }
+    }
+
+    setTimeout(async () => {
+        if (foundCategory) {
+            // Apply the logic
+            window.activeCosmeticTicket = { id: code, category: foundCategory };
+            
+            await showCustomAlert(`Cod verificat! Tichetul pentru categoria ${foundCategory.toUpperCase()} a fost aplicat. Următorul obiect este GRATUIT.`, "ACCESS GRANTED");
+            
+            // Auto open shop
+            if(['badges', 'frames', 'banners', 'texts'].includes(foundCategory)) {
+                if(foundCategory === 'badges') openBadgeShop();
+                if(foundCategory === 'frames') openFrameShop();
+                if(foundCategory === 'banners') openBannerShop();
+                if(foundCategory === 'texts') openTextShop();
+            } else if(foundCategory === 'blackmarket') {
+                openBlackMarket();
+            } else {
+                scrollToZone('zone-vault');
+            }
+            
+            document.getElementById('couponInput').value = "";
+        } else {
+            showCustomAlert("Codul '" + code + "' nu este valid sau a expirat.", "ACCESS_DENIED");
+        }
         btn.innerText = "VALIDATE_CREDENTIALS";
         btn.disabled = false;
     }, 1500);
@@ -12259,51 +12283,63 @@ window.openCouponInventory = () => {
 };
 window.openSubCoupon = (type) => {
     const categoryInfo = {
-        coins: { title: "COINS_REDUCTION" },
-        diamonds: { title: "DIAMOND_REDUCTION" },
-        texts: { title: "TEXT_REDUCTION" },
-        frames: { title: "FRAME_REDUCTION" },
-        banners: { title: "BANNER_REDUCTION" },
-        blackmarket: { title: "ELITE_ACCESS" }
+        coins: { title: "COINS_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d' },
+        diamonds: { title: "DIAMOND_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FDiamonds%20Reduction%20cupon%20.png?alt=media&token=7fbf7d4f-78e1-4ea1-934e-619016889b84' },
+        texts: { title: "TEXT_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f' },
+        frames: { title: "FRAME_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FFrame%20discount%20cupon%20.png?alt=media&token=c49a5fb2-06e8-4df5-bcf3-ed37afd1cdef' },
+        banners: { title: "BANNER_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBanner%20discount%20cupon%20.png?alt=media&token=e75ab8ee-5278-496c-9938-d1796bda02e0' },
+        badges: { title: "BADGE_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae' },
+        blackmarket: { title: "ELITE_ACCESS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d' }
     };
 
     const info = categoryInfo[type];
-    if(!info) return;
-
-    // Set text (Note: I removed the 'subCouponIcon' line because it was causing the error)
     document.getElementById('subCouponTitle').innerText = info.title;
-    
-    // Switch Modals
     document.getElementById('couponInventoryModal').classList.remove('active');
     document.getElementById('subCouponModal').classList.add('active');
 
-    // Populate List
     const listContainer = document.getElementById('subCouponList');
     listContainer.innerHTML = '';
-    
     const userCoupons = (window.currentUserData?.myCoupons?.[type]) || [];
 
     if(userCoupons.length === 0) {
-        listContainer.innerHTML = `<div class="empty-coupons" style="color:#444; padding:40px; text-align:center; font-family:'Orbitron'; font-size:10px;">> NU S-AU GĂSIT TICHETE ACTIVE...</div>`;
+        listContainer.innerHTML = `<div class="empty-coupons">> NU S-AU GĂSIT TICHETE...</div>`;
         return;
     }
 
     userCoupons.forEach(coupon => {
         const ticket = document.createElement('div');
         ticket.className = 'v4-badge-item';
-        ticket.style.cssText = "display:flex; flex-direction:row; justify-content:space-between; align-items:center; padding:15px 20px; border-color: rgba(0,255,204,0.3) !important; cursor:pointer;";
+        ticket.style.cssText = "display:flex; flex-direction:row; justify-content:space-between; align-items:center; padding:15px 20px; border-color: rgba(0,255,204,0.3) !important;";
         
         ticket.innerHTML = `
             <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
             <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-            <div style="text-align: left;">
-                <div style="font-family:'Montserrat'; font-weight:900; font-size:20px; color:#00ffcc;">-${coupon.val}%</div>
-                <div style="font-family:monospace; font-size:10px; color:#555;">CODE: #${coupon.code}</div>
+            <div style="display:flex; align-items:center; gap:15px;">
+                <img src="${info.img}" style="height:50px;">
+                <div style="text-align: left;">
+                    <div style="font-family:'Montserrat'; font-weight:900; font-size:14px; color:#fff;">Free ${type.charAt(0).toUpperCase() + type.slice(1, -1)}</div>
+                    <div style="font-size:10px; color:#555;">CODE: #${coupon.code}</div>
+                </div>
             </div>
-            <button class="bm-price-btn-v4" onclick="activateCoupon('${coupon.id}', '${type}')">ACTIVATE</button>
+            <button class="bm-price-btn-v4" onclick="activateCouponCode('${coupon.code}')">ACTIVATE</button>
         `;
         listContainer.appendChild(ticket);
     });
+};
+
+window.activateCouponCode = (code) => {
+    // 1. Paste code into input
+    const input = document.getElementById('couponInput');
+    input.value = code;
+    
+    // 2. Close modals
+    closeModal('subCouponModal');
+    
+    // 3. Scroll to Coupon Center
+    scrollToZone('zone-deals');
+    
+    // 4. Subtle Toast
+    showCustomAlert("Codul a fost introdus în Terminal. Apasă 'VALIDATE_CREDENTIALS' pentru a-l folosi.", "SISTEM GATA");
 };
 
 window.activateCoupon = (id, category) => {
