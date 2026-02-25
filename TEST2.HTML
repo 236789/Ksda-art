@@ -7159,31 +7159,106 @@ body {
 /* Elite button inside the Selection Grid */
 .c-elite { color: #ff4757; border-color: #ff4757; grid-column: span 2; }
 .c-elite i { filter: drop-shadow(0 0 10px #ff4757); }
+
+
+
+/* --- ELITE BOUTIQUE RED REBORN --- */
+.accent-elite { 
+    border: 1.5px solid #ff4757 !important; 
+    box-shadow: inset 0 0 100px rgba(255, 71, 87, 0.15), 0 0 40px rgba(255, 71, 87, 0.3) !important;
+}
+
+/* Elite Price Tag (Clipped Military Style) */
+.elite-price-tag {
+    background: rgba(0, 0, 0, 0.8) !important;
+    border: 1px solid #ff4757 !important;
+    color: #fff !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 900;
+    padding: 8px 15px !important;
+    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-shadow: 0 0 10px #ff4757;
+}
+
+/* Elite Play Button (Neon Circular) */
+.elite-play-btn {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: rgba(255, 71, 87, 0.1);
+    border: 2px solid #ff4757;
+    color: #ff4757;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: 0.3s;
+    position: relative;
+    box-shadow: 0 0 15px rgba(255, 71, 87, 0.4);
+}
+.elite-play-btn:hover {
+    background: #ff4757;
+    color: #000;
+    transform: scale(1.1);
+    box-shadow: 0 0 30px #ff4757;
+}
+.elite-play-btn::after {
+    content: ''; position: absolute; inset: -5px; border-radius: 50%;
+    border: 1px solid #ff4757; opacity: 0.5; animation: sonarPulse 1.5s infinite;
+}
+@keyframes sonarPulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 0; } }
+
+/* Elite Tab Buttons */
+.elite-tab-btn {
+    flex: 1; background: transparent; border: 1px solid rgba(255, 71, 87, 0.3);
+    color: rgba(255, 255, 255, 0.5); padding: 12px; font-family: 'Orbitron';
+    font-size: 10px; cursor: pointer; transition: 0.3s;
+    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+.elite-tab-btn.active {
+    border-color: #ff4757; color: #fff; background: rgba(255, 71, 87, 0.1);
+    box-shadow: 0 0 15px rgba(255, 71, 87, 0.2);
+}
   </style>
 </head>
 <body>
 
 
-
+<!-- ELITE SHOP REBORN -->
 <div id="eliteShopModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 accent-elite" style="width: 95%; max-width: 850px; height: 85vh;">
+    <div class="shop-modal-v4 accent-elite" style="width: 95%; max-width: 800px; height: 85vh;">
         <div class="bm-scanline-overlay"></div>
-        <div style="background: rgba(255, 71, 87, 0.05); padding: 25px; border-bottom: 1px solid #ff4757; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
-            <div>
-                <div class="title-elite" style="font-family:'Montserrat'; font-size: 24px; font-weight: 900;">ELITE_STORE</div>
-                <div style="font-family:monospace; font-size: 10px; color:#aaa;">TAB: INTROS & BANNERS | PRICE_UNIT: DIAMONDS</div>
-            </div>
-            <button class="close-pop" onclick="closeModal('eliteShopModal')" style="border-color: #ff4757; background: transparent; position: static !important;">✕</button>
+        <div style="background: rgba(255, 71, 87, 0.1); padding: 25px; border-bottom: 1px solid #ff4757; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div class="title-elite" style="font-family:'Montserrat'; font-size: 22px; font-weight: 900;">ELITE_BOUTIQUE</div>
+            <button class="close-pop" onclick="closeModal('eliteShopModal')" style="position:static!important; border-color:#ff4757; background:transparent;">✕</button>
         </div>
-        
-        <!-- Tab Toggles -->
-        <div style="display:flex; gap:10px; padding: 15px 30px; background: rgba(0,0,0,0.4);">
-             <button class="view-all-btn" onclick="renderEliteContent('intros')">PROFILE INTROS</button>
-             <button class="view-all-btn" onclick="renderEliteContent('banners')">PROFILE BANNERS</button>
+
+        <div style="display:flex; gap:10px; padding: 15px 25px; background:rgba(0,0,0,0.5);">
+            <button class="elite-tab-btn active" id="tab-intros" onclick="switchEliteTab('intros')">INTROS</button>
+            <button class="elite-tab-btn" id="tab-banners" onclick="switchEliteTab('banners')">BANNERS</button>
         </div>
 
         <div class="bm-content-scroll">
             <div id="eliteShopList" class="bm-grid-v4"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ELITE INVENTORY (Triggered from Cosmetics Modal) -->
+<div id="eliteInventoryModal" class="account-modal-overlay">
+    <div class="cosmetics-card-v6" style="border-color: #ff4757; box-shadow: 0 0 50px rgba(255, 71, 87, 0.3);">
+        <button class="close-pop" onclick="document.getElementById('eliteInventoryModal').classList.remove('active')">✕</button>
+        <div class="cosmo-content-v6">
+            <div class="cosmo-header">
+                <div class="cosmo-title" style="color:#ff4757; text-shadow: 0 0 10px #ff4757;">ELITE_ARCHIVE</div>
+                <div style="font-size: 10px; color: #aaa; margin-top: 5px;">Colecția ta de elită</div>
+            </div>
+            <div id="eliteInventoryList" class="inventory-scroll-area"></div>
+            <div class="nav-btn-row">
+                <button class="btn-nav-v6" onclick="document.getElementById('eliteInventoryModal').classList.remove('active'); document.getElementById('cosmeticsSelectModal').classList.add('active');">ÎNAPOI</button>
+            </div>
         </div>
     </div>
 </div>
@@ -8767,10 +8842,10 @@ body {
 </div>
 
 
-   <div class="select-btn-v6 c-elite" onclick="document.getElementById('cosmeticsSelectModal').classList.remove('active'); openEliteShop();">
-        <i class="fas fa-crown"></i>
-        <span>ELITE CUSTOMS</span>
-    </div>
+<div class="select-btn-v6 c-elite" onclick="document.getElementById('cosmeticsSelectModal').classList.remove('active'); openEliteInventory();">
+    <i class="fas fa-crown"></i>
+    <span>ELITE INVENTORY</span>
+</div>
         </div>
     </div>
 </div>
@@ -9150,16 +9225,7 @@ window.showCustomConfirm = (msg, title = "CONFIRMARE") => {
 
 
 
-const ELITE_INTROS_DB = [
-    { id: 'intro_fato', name: 'Haide Fato', audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/BOR%2FVideo%20Project.m4a?alt=media&token=da2abb25-537e-403b-89e0-7842284f8597', price: 15 },
-    { id: 'intro_hacker', name: 'Cyber Alert', audio: 'https://www.soundjay.com/communication/pda-alert-1.mp3', price: 10 }
-];
 
-const ELITE_BANNERS_DB = [
-    { id: 'bg_matrix', name: 'MATRIX RAIN', css: 'elite-bg-matrix', price: 20 },
-    { id: 'bg_blood', name: 'BLOOD MOON', css: 'elite-bg-bloodmoon', price: 25 },
-    { id: 'bg_void', name: 'VOID SWIRL', css: 'elite-bg-void', price: 15 }
-];
 const BANNERS_DB = [
     // --- BASIC / STATIC (850 – 1500) ---
     { id: 'bub_galaxy',    name: 'GALAXY',   cssClass: 'bubble-galaxy',    price: 1300, desc: 'Spațial' },
@@ -13095,6 +13161,104 @@ window.showFinalBoxReward = async (res, box) => {
     html += `</div>`;
     container.innerHTML = html;
     modal.classList.add('active');
+};
+
+
+// --- ELITE DATABASES ---
+const ELITE_INTROS_DB = [
+    { id: 'intro_fato', name: 'HAIDE FATO', audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/BOR%2FVideo%20Project.m4a?alt=media&token=da2abb25-537e-403b-89e0-7842284f8597', price: 15 },
+    { id: 'intro_alert', name: 'SYSTEM OVERRIDE', audio: 'https://www.soundjay.com/communication/pda-alert-1.mp3', price: 10 }
+];
+
+const ELITE_BANNERS_DB = [
+    { id: 'bg_matrix', name: 'DIGITAL RAIN', css: 'elite-bg-matrix', price: 20 },
+    { id: 'bg_blood', name: 'BLOOD MOON', css: 'elite-bg-bloodmoon', price: 25 },
+    { id: 'bg_void', name: 'THE SINGULARITY', css: 'elite-bg-void', price: 15 }
+];
+
+// Audio Preloader to fix delay
+let eliteAudioPreview = new Audio();
+window.playElitePreview = (url) => {
+    eliteAudioPreview.src = url;
+    eliteAudioPreview.play();
+};
+
+let currentEliteTab = 'intros';
+
+window.switchEliteTab = (tab) => {
+    currentEliteTab = tab;
+    document.getElementById('tab-intros').classList.toggle('active', tab === 'intros');
+    document.getElementById('tab-banners').classList.toggle('active', tab === 'banners');
+    renderEliteShop();
+};
+
+window.renderEliteShop = async () => {
+    const list = document.getElementById('eliteShopList');
+    list.innerHTML = '';
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const d = userSnap.data();
+    
+    const dbSource = currentEliteTab === 'intros' ? ELITE_INTROS_DB : ELITE_BANNERS_DB;
+    const owned = currentEliteTab === 'intros' ? (d.ownedIntros || []) : (d.ownedProfileBGs || []);
+
+    dbSource.forEach(item => {
+        const isOwned = owned.includes(item.id);
+        const card = document.createElement('div');
+        card.className = 'bm-offer-card-v4';
+        
+        let visual = '';
+        if(currentEliteTab === 'intros') {
+            visual = `<button class="elite-play-btn" onclick="playElitePreview('${item.audio}')"><i class="fas fa-play"></i></button>`;
+        } else {
+            visual = `<div class="${item.css}" style="width:100%; height:80px; border-radius:10px; border:1px solid rgba(255,255,255,0.1);"></div>`;
+        }
+
+        card.innerHTML = `
+            <div class="bm-bracket br-tl" style="border-color:#ff4757"></div><div class="bm-bracket br-tr" style="border-color:#ff4757"></div>
+            <div style="height:100px; display:flex; align-items:center; justify-content:center;">${visual}</div>
+            <div class="bm-title-v4" style="color:#fff;">${item.name}</div>
+            <div style="margin: 15px 0;">
+                <span class="elite-price-tag">${isOwned ? 'ARCHIVE_UNLOCKED' : `${item.price} <img src="https://iili.io/fv5bmtj.png" width="14">`}</span>
+            </div>
+            ${isOwned ? '<div style="color:#ff4757; font-size:10px; font-family:Orbitron;">SECURED_DATA</div>' : 
+            `<button class="bm-price-btn-v4" style="background:#ff4757!important; color:#fff;" onclick="buyEliteItem('${item.id}', ${item.price}, '${currentEliteTab}')">INITIALIZE_LINK</button>`}
+        `;
+        list.appendChild(card);
+    });
+};
+
+// --- ELITE INVENTORY LOGIC ---
+window.openEliteInventory = async () => {
+    const modal = document.getElementById('eliteInventoryModal');
+    const list = document.getElementById('eliteInventoryList');
+    list.innerHTML = '';
+    modal.classList.add('active');
+
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const d = userSnap.data();
+
+    // Show Owned Banners
+    const ownedBGs = d.ownedProfileBGs || [];
+    ownedBGs.forEach(id => {
+        const item = ELITE_BANNERS_DB.find(b => b.id === id);
+        if(item) {
+            const isEquipped = d.equippedProfileBG?.id === id;
+            list.innerHTML += `
+                <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
+                    <div class="${item.css}" style="width:100%; height:50px; border-radius:8px;"></div>
+                    <div style="font-size:10px; margin:10px 0;">${item.name}</div>
+                    <button class="btn-equip-v6 ${isEquipped ? 'is-equipped' : 'do-equip'}" onclick="equipEliteBG('${item.id}', '${item.css}')">
+                        ${isEquipped ? 'ACTIVE' : 'SYNC_BG'}
+                    </button>
+                </div>`;
+        }
+    });
+};
+
+window.equipEliteBG = async (id, css) => {
+    await updateDoc(doc(db, "accounts", auth.currentUser.uid), { equippedProfileBG: { id, css } });
+    showCustomAlert("Background elit sincronizat!", "SUCCES");
+    openEliteInventory();
 };
 </script>
 </body>
