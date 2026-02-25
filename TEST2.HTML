@@ -9839,39 +9839,42 @@ window.openBadgeShop = async () => {
 
 
 window.buyBadge = async (badgeId, price) => {
-    // 1. Identify if we are in "Free Mode"
-    // We check if the active ticket category is 'badges'
+    // 1. CHECK FOR ACTIVE TICKET (FREE MODE)
     const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'badges';
     const confirmMsg = isFree ? "Folosești VOUCHER-UL GRATUIT pentru această insignă?" : `Cumperi insigna pentru ${price} monede?`;
 
     const confirmed = await showCustomConfirm(confirmMsg, "CONFIRMĂ");
     if(!confirmed) return;
 
-    // 2. SAVE THE TICKET CODE AND KILL THE FREE MODE IMMEDIATELY
-    // We do this before the database work so the user can't click "Free" again.
+    // 2. IMMEDIATE STATE LOCK (Prevents multi-claim exploit)
     let ticketCodeToUse = null;
     if(isFree) {
-        ticketCodeToUse = window.activeCosmeticTicket.id; // This holds the Code string (e.g. TICK-12345)
-        window.activeCosmeticTicket = null; // KILL the free state right now!
+        ticketCodeToUse = window.activeCosmeticTicket.id; // Capture the code
+        window.activeCosmeticTicket = null; // KILL the free state immediately!
     }
 
     const userRef = doc(db, "accounts", auth.currentUser.uid);
-    const userSnap = await getDoc(userRef);
-    const userData = userSnap.data();
-
-    // 3. Check for coins if NOT using a voucher
-    if(!isFree && (userData.coins || 0) < price) {
-        return await showCustomAlert("Nu ai destule monede!", "EROARE");
-    }
-
+    
     try {
+        // 3. GET FRESH DATA
+        const userSnap = await getDoc(userRef);
+        const userData = userSnap.data();
+
+        // 4. VALIDATION (If not free, check coins)
+        if(!isFree && (userData.coins || 0) < price) {
+            return await showCustomAlert("Nu ai destule monede!", "EROARE");
+        }
+
         if(isFree && ticketCodeToUse) {
-            // DATABASE FIX: Filter the array looking for the CODE, not just ID
+            // --- FIX FOR ISSUE 2: VOUCHER DELETION ---
+            
+            // A. Get current array safely
             const currentBadges = (userData.myCoupons && userData.myCoupons.badges) ? userData.myCoupons.badges : [];
             
-            // Filter out the ticket where the .code matches our ticketCodeToUse
+            // B. Filter out the specific ticket used
             const updatedVouchers = currentBadges.filter(t => t.code !== ticketCodeToUse);
 
+            // C. Update Database (Remove Voucher + Add Badge)
             await updateDoc(userRef, { 
                 ownedBadges: arrayUnion(badgeId),
                 'myCoupons.badges': updatedVouchers 
@@ -9888,12 +9891,12 @@ window.buyBadge = async (badgeId, price) => {
             await showCustomAlert("Insignă cumpărată!", "SUCCES");
         }
 
-        // 4. RE-RENDER THE SHOP UI
-        // This forces the "CLAIM FREE" buttons to turn back into "CUMPĂRĂ"
+        // 5. REFRESH UI (Removes 'CLAIM FREE' buttons)
+        checkShopQuest('badge');
         openBadgeShop(); 
 
     } catch(e) { 
-        console.error("Critical Purchase Error:", e);
+        console.error("Purchase Error:", e);
         showCustomAlert("Eroare la procesare. Reîncearcă.", "EROARE");
     } 
 };
