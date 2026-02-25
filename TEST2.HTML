@@ -7045,6 +7045,67 @@ body {
     min-height: 50px;
     overflow: visible !important;
 }
+
+
+
+/* --- UNIVERSAL BADGE & STACKING REPAIR --- */
+
+/* Fix: Make badges show their colors in Inventory & Modals */
+.shop-badge-preview {
+    color: #000 !important; /* Force black text for readability */
+    background-image: inherit !important; /* Ensure gradient shows */
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px !important;
+    border-radius: 4px !important;
+    font-weight: 900 !important;
+    text-shadow: none !important;
+    border: none !important;
+}
+
+/* Exception: Singularity is always white on black */
+.badge-singularity {
+    background: #000 !important;
+    color: #fff !important;
+    border: 1px solid #7000ff !important;
+}
+
+/* Mobile Stacking Fix for Probability Log */
+@media (max-width: 800px) {
+    .aaa-loot-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        padding: 20px 10px !important;
+        gap: 20px !important;
+    }
+    
+    .aaa-card {
+        width: 100% !important;
+        max-width: 350px !important;
+        min-height: 250px !important;
+        flex-shrink: 0;
+    }
+
+    /* Fix image stretching in reward modal */
+    .reward-line img {
+        width: auto !important;
+        height: 25px !important;
+        object-fit: contain !important;
+    }
+}
+
+/* Hide scrollbars everywhere but keep scroll working */
+.aaa-loot-grid, .inventory-scroll-area, .bm-content-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.aaa-loot-grid::-webkit-scrollbar, 
+.inventory-scroll-area::-webkit-scrollbar,
+.bm-content-scroll::-webkit-scrollbar {
+    display: none;
+}
   </style>
 </head>
 <body>
@@ -12132,9 +12193,9 @@ window.openPrizeView = () => {
     const container = document.getElementById('prizeTableBody');
     container.innerHTML = ""; 
 
-    // IMAGINI SPECIFICE PENTRU FIECARE TIP DE VOUCHER
     const VOUCHER_MAP = {
         'BADGE VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
+        'COSMETIC VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
         'BANNER VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBanner%20discount%20cupon%20.png?alt=media&token=e75ab8ee-5278-496c-9938-d1796bda02e0',
         'FRAME VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FFrame%20discount%20cupon%20.png?alt=media&token=c49a5fb2-06e8-4df5-bcf3-ed37afd1cdef',
         'TEXT VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f',
@@ -12145,25 +12206,43 @@ window.openPrizeView = () => {
     selectedBox.rewards.forEach((r, idx) => {
         const card = document.createElement('div');
         card.className = `aaa-card ${r.style}`;
-        
         let visualHtml = "";
-        const slotID = `shuffler_${idx}`;
+        const slotID = `shuf_${idx}_${Math.floor(Math.random()*999)}`;
 
-        // Dacă e un voucher, folosim imaginea din map
-        if(VOUCHER_MAP[r.label]) {
-            visualHtml = `<img src="${VOUCHER_MAP[r.label]}" style="height:55px; width:auto; filter:none;">`;
-        } 
-        // Logica pentru Frames/Badges (Shuffle)
-        else if(r.label.includes('FRAME')) {
+        // --- THE ANIMATION ENGINE ---
+        if(r.label === 'RANDOM BADGE') {
             visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
-            // ... (restul codului de shuffle rămâne neschimbat)
+            setTimeout(() => {
+                const el = document.getElementById(slotID);
+                if(el) setInterval(() => {
+                    if (!document.getElementById('prizeListModal').classList.contains('active')) return;
+                    const b = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
+                    el.innerHTML = `<span class="shop-badge-preview" style="background:${b.color} !important; color:#000 !important; font-size:9px;">${b.text}</span>`;
+                }, 600);
+            }, 100);
         }
-        else if(r.label === 'RANDOM BADGE') {
+        else if(r.label === 'RANDOM FRAME' || r.label === 'EXCLUSIVE FRAME') {
             visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
-            // ... (restul codului de shuffle rămâne neschimbat)
+            setTimeout(() => {
+                const el = document.getElementById(slotID);
+                if(el) setInterval(() => {
+                    if (!document.getElementById('prizeListModal').classList.contains('active')) return;
+                    const f = FRAMES_DB[Math.floor(Math.random() * FRAMES_DB.length)];
+                    el.innerHTML = `<img src="${f.img}" style="height:55px; filter:drop-shadow(0 0 10px gold);">`;
+                }, 600);
+            }, 100);
         }
-        else {
-            visualHtml = `<img src="${r.icon}" class="aaa-card-img" style="height:50px; width:auto; filter:none;">`;
+        else if(r.label === 'MILIARDAR') {
+            const b = BADGES_DB.find(x => x.id === 'b_miliardar');
+            visualHtml = `<span class="shop-badge-preview" style="background:${b.color} !important; color:#000 !important; font-weight:900;">${b.text}</span>`;
+        }
+        else if(r.label === 'SINGULARITY') {
+            visualHtml = `<span class="shop-badge-preview badge-singularity" style="padding:10px 15px;"><i class="fas fa-atom"></i> SINGULARITY</span>`;
+        }
+        else if(VOUCHER_MAP[r.label]) {
+            visualHtml = `<img src="${VOUCHER_MAP[r.label]}" style="height:55px; width:auto;">`;
+        } else {
+            visualHtml = `<img src="${r.icon}" class="aaa-card-img" style="height:50px;">`;
         }
 
         card.innerHTML = `
