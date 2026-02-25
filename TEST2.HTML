@@ -10214,15 +10214,20 @@ window.openInventory = async (type = 'badges') => {
                  const badge = BADGES_DB.find(b => b.id === id);
                  if(badge) {
                     const isEquipped = (id === equipped);
-                    const isSingularity = badge.id === 'b_singularity';
-                    const textColor = isSingularity ? '#ffffff' : '#000000';
-                    const bgStyle = isSingularity ? 'background:#000000 !important;' : `background:${badge.color} !important;`;
+                    const isSingularity = (badge.id === 'b_singularity');
+                    
+                    let customStyle = '';
+                    if(isSingularity) {
+                        customStyle = `background: radial-gradient(circle at center, #1a0033 0%, #000 100%) !important; color: #fff !important; border: 1px solid #7000ff !important; box-shadow: 0 0 20px #7000ff, inset 0 0 10px #7000ff !important; text-shadow: 0 0 10px #fff !important; font-weight: 900 !important;`;
+                    } else {
+                        customStyle = `background: ${badge.color} !important; color: #000 !important; font-weight: 900 !important; box-shadow: 0 0 10px ${badge.color}; border: none !important;`;
+                    }
                     
                     list.innerHTML += `
-                        <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
+                        <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}" style="${isSingularity ? 'border-color: #7000ff; box-shadow: 0 0 25px rgba(112, 0, 255, 0.2);' : ''}">
                             <div class="item-preview-box">
                                 <span class="shop-badge-preview ${badge.animClass || ''}" 
-                                      style="${bgStyle} color:${textColor} !important; font-weight:900 !important; border:none !important; display:inline-block; padding:6px 12px; border-radius:4px; box-shadow: 0 0 15px ${badge.color};">
+                                      style="${customStyle} display:inline-block; padding:6px 12px; border-radius:4px; text-transform: uppercase; font-family: 'Orbitron'; font-size: 10px;">
                                     <i class="fas ${badge.icon}"></i> ${badge.text}
                                 </span>
                             </div>
