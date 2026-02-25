@@ -6913,22 +6913,45 @@ body {
     background: conic-gradient(from 0deg, transparent, #7000ff, #00ffff, #7000ff, transparent 60%) !important;
 }
 
-/* Sucking Light Animation for Singularity Badge */
 .badge-singularity {
-    background: #000 !important;
+    background: radial-gradient(circle at center, #1a0033 0%, #050508 40%, #000 100%) !important;
     color: #fff !important;
-    border: 1px solid #7000ff !important;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 0 20px #7000ff, inset 0 0 15px #7000ff;
-    animation: singularityPulse 2s infinite ease-in-out;
+    border: 2px solid #7000ff !important;
+    box-shadow: 0 0 20px #7000ff, inset 0 0 30px #7000ff, 0 0 60px rgba(112, 0, 255, 0.5) !important;
+    text-shadow: 0 0 10px #7000ff, 0 0 20px #fff !important;
+    font-weight: 900 !important;
+    letter-spacing: 3px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    animation: quantum-flux 4s infinite alternate ease-in-out !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 10px 20px !important;
+    border-radius: 8px !important;
+    font-family: 'Orbitron' !important;
+    text-transform: uppercase !important;
 }
 
-@keyframes singularityPulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 20px #7000ff; }
-    50% { transform: scale(0.95); box-shadow: 0 0 40px #7000ff, inset 0 0 30px #000; }
+.badge-singularity i {
+    color: #7000ff !important;
+    filter: drop-shadow(0 0 8px #fff) brightness(2) !important;
+    animation: fa-spin 2s infinite linear !important;
 }
 
+@keyframes quantum-flux {
+    0% { transform: scale(1); filter: hue-rotate(0deg) brightness(1); box-shadow: 0 0 20px #7000ff, inset 0 0 30px #7000ff; }
+    50% { transform: scale(1.05); filter: hue-rotate(180deg) brightness(1.4); box-shadow: 0 0 40px #00ffff, inset 0 0 50px #7000ff; }
+    100% { transform: scale(1); filter: hue-rotate(360deg) brightness(1); box-shadow: 0 0 20px #7000ff, inset 0 0 30px #7000ff; }
+}
+
+.abyssal-card-takeover {
+    border: 3px solid #7000ff !important;
+    background: radial-gradient(circle at top, #1a0033 0%, #050508 100%) !important;
+    box-shadow: 0 0 50px rgba(112, 0, 255, 0.6), inset 0 0 40px #000 !important;
+    transform: scale(1.05) translateY(-5px) !important;
+    z-index: 10 !important;
+}
 /* Exclusive Choice Modal Grid */
 .exclusive-choice-grid {
     display: grid;
@@ -10160,7 +10183,7 @@ window.buyAllItems = async (category) => {
 window.openInventory = async (type = 'badges') => {
         const modal = document.getElementById('inventoryModal');
         const list = document.getElementById('inventoryList');
-        list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px; font-family:Orbitron;">> ACCESSING DATABASE...</div>';
+        list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px; font-family:Orbitron;">> ACCESSING QUANTUM REPOSITORY...</div>';
         modal.classList.add('active');
         
         const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
@@ -10215,33 +10238,30 @@ window.openInventory = async (type = 'badges') => {
                  if(badge) {
                     const isEquipped = (id === equipped);
                     const isSingularity = (badge.id === 'b_singularity');
-                    
-                    let customStyle = '';
-                    if(isSingularity) {
-                        customStyle = `background: radial-gradient(circle at center, #1a0033 0%, #000 100%) !important; color: #fff !important; border: 1px solid #7000ff !important; box-shadow: 0 0 20px #7000ff, inset 0 0 10px #7000ff !important; text-shadow: 0 0 10px #fff !important; font-weight: 900 !important;`;
-                    } else {
-                        customStyle = `background: ${badge.color} !important; color: #000 !important; font-weight: 900 !important; box-shadow: 0 0 10px ${badge.color}; border: none !important;`;
-                    }
+                    const badgeClass = isSingularity ? 'badge-singularity' : 'shop-badge-preview';
+                    const cardClass = isSingularity ? 'item-card-v6 abyssal-card-takeover' : 'item-card-v6';
                     
                     list.innerHTML += `
-                        <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}" style="${isSingularity ? 'border-color: #7000ff; box-shadow: 0 0 25px rgba(112, 0, 255, 0.2);' : ''}">
+                        <div class="${cardClass} ${isEquipped ? 'equipped' : ''}">
                             <div class="item-preview-box">
-                                <span class="shop-badge-preview ${badge.animClass || ''}" 
-                                      style="${customStyle} display:inline-block; padding:6px 12px; border-radius:4px; text-transform: uppercase; font-family: 'Orbitron'; font-size: 10px;">
-                                    <i class="fas ${badge.icon}"></i> ${badge.text}
+                                <span class="${badgeClass} ${badge.animClass || ''}" 
+                                      style="${!isSingularity ? `background:${badge.color} !important; color:#000 !important; font-weight:900; box-shadow: 0 0 10px ${badge.color}; border:none;` : ''} display:inline-flex; align-items:center; border-radius:4px;">
+                                    <i class="fas ${isSingularity ? 'fa-atom' : badge.icon}"></i> ${badge.text}
                                 </span>
                             </div>
-                            <div style="font-weight:700; font-size:11px; margin-bottom:10px; color:#fff; font-family:'Orbitron'; text-transform:uppercase;">${badge.text}</div>
+                            <div style="font-weight:900; font-size:12px; margin-bottom:10px; color:${isSingularity ? '#7000ff' : '#fff'}; font-family:'Orbitron'; text-transform:uppercase; text-shadow: ${isSingularity ? '0 0 15px rgba(112,0,255,0.8)' : 'none'};">
+                                ${badge.text}
+                            </div>
                             ${isEquipped 
-                                ? `<button class="btn-equip-v6 is-equipped">EQUIPPED</button>` 
-                                : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">MOUNT_BADGE</button>`
+                                ? `<button class="btn-equip-v6 is-equipped" style="${isSingularity ? 'background:#7000ff; color:#fff; border:none;' : ''}">QUANTUM_LINK_ACTIVE</button>` 
+                                : `<button class="btn-equip-v6 do-equip" style="${isSingularity ? 'background:#000; color:#7000ff; border:2px solid #7000ff;' : ''}" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">ESTABLISH_MOUNT</button>`
                             }
                         </div>`;
                  }
             });
              if(equipped) {
                 const actionArea = document.getElementById('inventoryActions');
-                if(actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('badge')">DETACH_BADGE_MODULE</button>`;
+                if(actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('badge')">TERMINATE_LINK_SESSION</button>`;
              }
         } 
         
