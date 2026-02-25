@@ -9860,17 +9860,15 @@ window.buyBadge = async (badgeId, price) => {
                 'myCoupons.badges': updatedVouchers 
             });
             window.activeCosmeticTicket = null;
-            await showCustomAlert("Voucher folosit cu succes! Pagina se va reîncărca.", "SUCCES");
         } else {
             await updateDoc(userRef, { coins: increment(-price), ownedBadges: arrayUnion(badgeId) });
             await logTransaction(-price, "COINS", "Shop", "Bought Badge: " + badgeId);
-            await showCustomAlert("Achiziție reușită! Pagina se va reîncărca.", "SUCCES");
         }
 
-        // FORCE REFRESH to clear all free buttons immediately
-        location.reload(); 
+        // FULL PAGE REFRESH TO RESET STATE
+window.location.reload();
 
-    } catch(e) { console.error(e); }
+    } catch(e) { console.error(e); } 
 };
 
 window.buyAllItems = async (category) => {
