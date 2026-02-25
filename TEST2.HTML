@@ -9839,59 +9839,62 @@ window.openBadgeShop = async () => {
 
 
 window.buyBadge = async (badgeId, price) => {
-    // 1. Detect if we are in Free Mode
+    // 1. Identify if we are in "Free Mode"
+    // We check if the active ticket category is 'badges'
     const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'badges';
     const confirmMsg = isFree ? "Folosești VOUCHER-UL GRATUIT pentru această insignă?" : `Cumperi insigna pentru ${price} monede?`;
 
     const confirmed = await showCustomConfirm(confirmMsg, "CONFIRMĂ");
     if(!confirmed) return;
 
-    // 2. IMPORTANT: If it's free, we KILL the free mode LOCALLY right now 
-    // so you can't click another badge while the first one is loading.
-    let savedTicketId = null;
+    // 2. SAVE THE TICKET CODE AND KILL THE FREE MODE IMMEDIATELY
+    // We do this before the database work so the user can't click "Free" again.
+    let ticketCodeToUse = null;
     if(isFree) {
-        savedTicketId = window.activeCosmeticTicket.id;
-        window.activeCosmeticTicket = null; // This stops the "whole shop is free" bug
+        ticketCodeToUse = window.activeCosmeticTicket.id; // This holds the Code string (e.g. TICK-12345)
+        window.activeCosmeticTicket = null; // KILL the free state right now!
     }
 
     const userRef = doc(db, "accounts", auth.currentUser.uid);
     const userSnap = await getDoc(userRef);
     const userData = userSnap.data();
 
-    // 3. Check money if it's NOT free
+    // 3. Check for coins if NOT using a voucher
     if(!isFree && (userData.coins || 0) < price) {
-        // Since we cancelled the free ticket above, if it was an error, we shouldn't let them stuck
-        // But usually, the logic reaches here only for paid items.
         return await showCustomAlert("Nu ai destule monede!", "EROARE");
     }
 
     try {
-        if(isFree && savedTicketId) {
-            // Safe way to filter vouchers (prevents crashing if myCoupons is missing)
+        if(isFree && ticketCodeToUse) {
+            // DATABASE FIX: Filter the array looking for the CODE, not just ID
             const currentBadges = (userData.myCoupons && userData.myCoupons.badges) ? userData.myCoupons.badges : [];
-            const updatedVouchers = currentBadges.filter(t => t.id !== savedTicketId);
+            
+            // Filter out the ticket where the .code matches our ticketCodeToUse
+            const updatedVouchers = currentBadges.filter(t => t.code !== ticketCodeToUse);
 
             await updateDoc(userRef, { 
                 ownedBadges: arrayUnion(badgeId),
                 'myCoupons.badges': updatedVouchers 
             });
-            await showCustomAlert("Insignă deblocată GRATUIT!", "SUCCES");
+            
+            await showCustomAlert("Insignă deblocată GRATUIT! Tichetul a fost consumat.", "SUCCES");
         } else {
-            // Normal paid purchase
+            // Standard paid purchase
             await updateDoc(userRef, { 
                 coins: increment(-price), 
                 ownedBadges: arrayUnion(badgeId) 
             });
             await logTransaction(-price, "COINS", "Shop", "Bought Badge: " + badgeId);
-            await showCustomAlert("Insignă cumpărată cu succes!", "SUCCES");
+            await showCustomAlert("Insignă cumpărată!", "SUCCES");
         }
 
-        // 4. Refresh the shop UI instead of reloading the whole page
+        // 4. RE-RENDER THE SHOP UI
+        // This forces the "CLAIM FREE" buttons to turn back into "CUMPĂRĂ"
         openBadgeShop(); 
+
     } catch(e) { 
-        console.error("Purchase Error:", e);
-        showCustomAlert("A apărut o eroare la procesare.", "EROARE");
-        // If it failed, you might want to reset the ticket, but usually, it's safer to keep it null
+        console.error("Critical Purchase Error:", e);
+        showCustomAlert("Eroare la procesare. Reîncearcă.", "EROARE");
     } 
 };
 
