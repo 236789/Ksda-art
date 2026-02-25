@@ -10157,115 +10157,149 @@ window.buyAllItems = async (category) => {
     }
 };
 
-    // --- INVENTORY LOGIC ---
 window.openInventory = async (type = 'badges') => {
         const modal = document.getElementById('inventoryModal');
         const list = document.getElementById('inventoryList');
-        list.innerHTML = '<div style="color:#aaa;">Se încarcă...</div>';
+        list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px; font-family:Orbitron;">> ACCESSING DATABASE...</div>';
         modal.classList.add('active');
         
         const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+        if (!userSnap.exists()) return;
+
         const data = userSnap.data();
         const userPic = data.image || auth.currentUser.photoURL;
 
         list.innerHTML = '';
         
-        // --- TEXTS LOGIC (NEW) ---
         if(type === 'texts') {
             const ownedIds = data.ownedTexts || [];
             const equipped = data.equippedText?.id || null;
-            if(ownedIds.length === 0) list.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">Nu ai culori text.</p>';
             
-// --- ÎN INTERIORUL openInventory(type = 'badges') ---
-ownedIds.forEach(id => {
-    const badge = BADGES_DB.find(b => b.id === id);
-    if(badge) {
-        const isEquipped = (id === equipped);
-        list.innerHTML += `
-            <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
-                <div class="item-preview-box">
-                    <span class="shop-badge-preview ${badge.animClass || ''}" 
-                          style="background:${badge.color} !important; color:#000 !important; font-weight:900 !important; box-shadow: 0 0 10px ${badge.color}; border:none !important; display:inline-block; padding:5px 10px; border-radius:4px;">
-                        <i class="fas ${badge.icon}"></i> ${badge.text}
-                    </span>
-                </div>
-                <div style="font-weight:700; font-size:11px; margin-bottom:10px; color:#fff; font-family:'Orbitron';">${badge.text}</div>
-                ${isEquipped 
-                    ? `<button class="btn-equip-v6 is-equipped">ECHIPAT</button>` 
-                    : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">ECHIPEAZĂ</button>`
+            if(ownedIds.length === 0) {
+                list.innerHTML = '<div style="color:#aaa; width:100%; text-align:center; padding:40px; font-family:Orbitron; font-size:11px;">DATAFRAME_EMPTY: NO_TEXT_STYLING_FOUND</div>';
+            }
+            
+            ownedIds.forEach(id => {
+                const item = TEXTS_DB.find(b => b.id === id);
+                if(item) {
+                    const isEquipped = (id === equipped);
+                    list.innerHTML += `
+                        <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
+                            <div class="item-preview-box">
+                                <div class="${item.cssClass}" style="font-size:14px; font-weight:800; text-align:center;">${data.username}</div>
+                            </div>
+                            <div style="font-weight:700; font-size:11px; margin-bottom:10px; color:#fff; font-family:'Orbitron'; text-transform:uppercase;">${item.name}</div>
+                            ${isEquipped 
+                                ? `<button class="btn-equip-v6 is-equipped">EQUIPPED</button>` 
+                                : `<button class="btn-equip-v6 do-equip" onclick="equipText('${item.id}', '${item.cssClass}')">USE_STYLE</button>`
+                            }
+                        </div>`;
                 }
-            </div>`;
-    }
-});
-            if(equipped) list.innerHTML += `<button class="btn-tasks" onclick="unequipItem('text')">Resetează Culoarea</button>`;
+            });
+            if(equipped) {
+                const actionArea = document.getElementById('inventoryActions');
+                if(actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('text')">RESET_TO_DEFAULT_COLOR</button>`;
+            }
         }
-        // --- BADGES LOGIC ---
+        
         else if(type === 'badges') {
             const ownedIds = data.ownedBadges || [];
             const equipped = data.equippedBadge?.id || null;
-            if(ownedIds.length === 0) list.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">Nu ai insigne.</p>';
+            
+            if(ownedIds.length === 0) {
+                list.innerHTML = '<div style="color:#aaa; width:100%; text-align:center; padding:40px; font-family:Orbitron; font-size:11px;">DATAFRAME_EMPTY: NO_BADGES_RECORDED</div>';
+            }
             
             ownedIds.forEach(id => {
                  const badge = BADGES_DB.find(b => b.id === id);
                  if(badge) {
                     const isEquipped = (id === equipped);
+                    const isSingularity = badge.id === 'b_singularity';
+                    
                     list.innerHTML += `
-                        <div class="shop-badge-item">
-                            <span class="shop-badge-preview" style="background:${badge.color}; color:#000;"><i class="fas ${badge.icon}"></i> ${badge.text}</span>
-                            ${isEquipped ? `<button class="equip-btn" style="background:#555;">ECHIPAT</button>` : `<button class="equip-btn" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">ECHIPEAZĂ</button>`}
+                        <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
+                            <div class="item-preview-box">
+                                <span class="shop-badge-preview ${badge.animClass || ''}" 
+                                      style="background:${badge.color} !important; ${isSingularity ? 'color:#fff !important;' : 'color:#000 !important;'} font-weight:900; border:none; display:inline-block; padding:6px 12px; border-radius:4px; box-shadow: 0 0 15px ${badge.color};">
+                                    <i class="fas ${badge.icon}"></i> ${badge.text}
+                                </span>
+                            </div>
+                            <div style="font-weight:700; font-size:11px; margin-bottom:10px; color:#fff; font-family:'Orbitron'; text-transform:uppercase;">${badge.text}</div>
+                            ${isEquipped 
+                                ? `<button class="btn-equip-v6 is-equipped">EQUIPPED</button>` 
+                                : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">MOUNT_BADGE</button>`
+                            }
                         </div>`;
                  }
             });
-             if(equipped) list.innerHTML += `<button class="btn-tasks" onclick="unequipItem('badge')">Scoate Insigna</button>`;
+             if(equipped) {
+                const actionArea = document.getElementById('inventoryActions');
+                if(actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('badge')">DETACH_BADGE_MODULE</button>`;
+             }
         } 
-        // --- BANNERS LOGIC ---
+        
         else if (type === 'banners') {
             const ownedIds = data.ownedBanners || [];
             const equipped = data.equippedBanner?.id || null;
-            if(ownedIds.length === 0) list.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">Nu ai bannere.</p>';
+            if(ownedIds.length === 0) {
+                list.innerHTML = '<div style="color:#aaa; width:100%; text-align:center; padding:40px; font-family:Orbitron; font-size:11px;">DATAFRAME_EMPTY: NO_BANNERS_ARCHIVED</div>';
+            }
             
             ownedIds.forEach(id => {
                 const item = BANNERS_DB.find(b => b.id === id);
                 if(item) {
                     const isEquipped = (id === equipped);
                     list.innerHTML += `
-                        <div class="shop-badge-item">
-                            <div class="${item.cssClass}" style="padding:5px; border-radius:5px; font-size:10px;">PREVIEW</div>
-                            <div style="font-weight:700; font-size:11px; margin:5px 0;">${item.name}</div>
+                        <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
+                            <div class="item-preview-box" style="width:100%; padding:0 10px;">
+                                <div class="${item.cssClass}" style="padding:10px; border-radius:8px; font-size:9px; width:100%; text-align:center; font-weight:700;">PREVIEW_SIGNAL</div>
+                            </div>
+                            <div style="font-weight:700; font-size:11px; margin-bottom:10px; color:#fff; font-family:'Orbitron'; text-transform:uppercase;">${item.name}</div>
                             ${isEquipped 
-                                ? `<button class="equip-btn" style="background:#555;">ECHIPAT</button>` 
-                                : `<button class="equip-btn" onclick="equipBanner('${item.id}', '${item.cssClass}')">ECHIPEAZĂ</button>`
+                                ? `<button class="btn-equip-v6 is-equipped">EQUIPPED</button>` 
+                                : `<button class="btn-equip-v6 do-equip" onclick="equipBanner('${item.id}', '${item.cssClass}')">LOAD_INTERFACE</button>`
                             }
                         </div>`;
                 }
             });
-            if(equipped) list.innerHTML += `<button class="btn-tasks" onclick="unequipItem('banner')">Scoate Banner</button>`;
+            if(equipped) {
+                const actionArea = document.getElementById('inventoryActions');
+                if(actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('banner')">CLEAR_UI_LAYER</button>`;
+            }
         }
-        // --- FRAMES LOGIC ---
+        
         else if (type === 'frames') {
             const ownedIds = data.ownedFrames || [];
             const equipped = data.equippedFrame?.id || null;
-            if(ownedIds.length === 0) list.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">Nu ai rame.</p>';
+            
+            if(ownedIds.length === 0) {
+                list.innerHTML = '<div style="color:#aaa; width:100%; text-align:center; padding:40px; font-family:Orbitron; font-size:11px;">DATAFRAME_EMPTY: NO_FRAMES_SYNCHRONIZED</div>';
+            }
             
             ownedIds.forEach(id => {
                 const item = FRAMES_DB.find(b => b.id === id);
                 if(item) {
                     const isEquipped = (id === equipped);
                     list.innerHTML += `
-                        <div class="shop-badge-item">
-                            <div class="frame-preview-box">
-                                <img src="${userPic}" class="frame-preview-user">
-                                <img src="${item.img}" class="frame-preview-img">
+                        <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
+                            <div class="item-preview-box">
+                                <div class="frame-render-box" style="position:relative; width:55px; height:55px;">
+                                    <img src="${userPic}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; z-index:1;">
+                                    <img src="${item.img}" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:145%; height:145%; z-index:2; pointer-events:none;">
+                                </div>
                             </div>
-                            <div style="font-weight:700; font-size:11px; margin:5px 0;">${item.name}</div>
+                            <div style="font-weight:700; font-size:11px; margin-bottom:10px; color:#fff; font-family:'Orbitron'; text-transform:uppercase;">${item.name}</div>
                             ${isEquipped 
-                                ? `<button class="equip-btn" style="background:#555;">ECHIPAT</button>` 
-                                : `<button class="equip-btn" onclick="equipFrame('${item.id}', '${item.img}')">ECHIPEAZĂ</button>`
+                                ? `<button class="btn-equip-v6 is-equipped">EQUIPPED</button>` 
+                                : `<button class="btn-equip-v6 do-equip" onclick="equipFrame('${item.id}', '${item.img}')">SYNC_FRAME</button>`
                             }
                         </div>`;
                 }
             });
-            if(equipped) list.innerHTML += `<button class="btn-tasks" onclick="unequipItem('frame')">Scoate Rama</button>`;
+            if(equipped) {
+                const actionArea = document.getElementById('inventoryActions');
+                if(actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('frame')">REMOVE_VISUAL_SHIELD</button>`;
+            }
         }
     };
 
