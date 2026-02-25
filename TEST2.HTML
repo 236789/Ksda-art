@@ -10142,21 +10142,27 @@ window.openInventory = async (type = 'badges') => {
             const equipped = data.equippedText?.id || null;
             if(ownedIds.length === 0) list.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">Nu ai culori text.</p>';
             
-            ownedIds.forEach(id => {
-                const item = TEXTS_DB.find(b => b.id === id);
-                if(item) {
-                    const isEquipped = (id === equipped);
-                    list.innerHTML += `
-                        <div class="shop-badge-item">
-                            <div class="${item.cssClass}" style="font-size:14px; font-weight:800; margin-bottom:10px;">${data.username}</div>
-                            <div style="font-weight:700; font-size:11px; margin-bottom:5px;">${item.name}</div>
-                            ${isEquipped 
-                                ? `<button class="equip-btn" style="background:#555;">ECHIPAT</button>` 
-                                : `<button class="equip-btn" onclick="equipText('${item.id}', '${item.cssClass}')">ECHIPEAZĂ</button>`
-                            }
-                        </div>`;
+// --- ÎN INTERIORUL openInventory(type = 'badges') ---
+ownedIds.forEach(id => {
+    const badge = BADGES_DB.find(b => b.id === id);
+    if(badge) {
+        const isEquipped = (id === equipped);
+        list.innerHTML += `
+            <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
+                <div class="item-preview-box">
+                    <span class="shop-badge-preview ${badge.animClass || ''}" 
+                          style="background:${badge.color} !important; color:#000 !important; font-weight:900; box-shadow: 0 0 10px ${badge.color};">
+                        <i class="fas ${badge.icon}"></i> ${badge.text}
+                    </span>
+                </div>
+                <div style="font-weight:700; font-size:11px; margin-bottom:10px; color:#fff;">${badge.text}</div>
+                ${isEquipped 
+                    ? `<button class="btn-equip-v6 is-equipped">ECHIPAT</button>` 
+                    : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">ECHIPEAZĂ</button>`
                 }
-            });
+            </div>`;
+    }
+});
             if(equipped) list.innerHTML += `<button class="btn-tasks" onclick="unequipItem('text')">Resetează Culoarea</button>`;
         }
         // --- BADGES LOGIC ---
@@ -12095,9 +12101,12 @@ window.openPrizeView = () => {
     const container = document.getElementById('prizeTableBody');
     container.innerHTML = ""; 
 
-    // Specific Images for specific Vouchers
-    const VOUCHER_IMAGES = {
-        'COSMETIC VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
+    // IMAGINI SPECIFICE PENTRU FIECARE TIP DE VOUCHER
+    const VOUCHER_MAP = {
+        'BADGE VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
+        'BANNER VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBanner%20discount%20cupon%20.png?alt=media&token=e75ab8ee-5278-496c-9938-d1796bda02e0',
+        'FRAME VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FFrame%20discount%20cupon%20.png?alt=media&token=c49a5fb2-06e8-4df5-bcf3-ed37afd1cdef',
+        'TEXT VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f',
         'CURRENCY VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d',
         'BM VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d'
     };
@@ -12109,44 +12118,21 @@ window.openPrizeView = () => {
         let visualHtml = "";
         const slotID = `shuffler_${idx}`;
 
-        // 1. FRAME SHUFFLE LOGIC
-        if(r.label.includes('FRAME')) {
-            visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
-            setTimeout(() => {
-                const el = document.getElementById(slotID);
-                if(el) setInterval(() => {
-                    if (!document.getElementById('prizeListModal').classList.contains('active')) return;
-                    const f = FRAMES_DB[Math.floor(Math.random() * FRAMES_DB.length)];
-                    el.innerHTML = `<img src="${f.img}" style="height:55px; filter:drop-shadow(0 0 10px var(--r-color));">`;
-                }, 600);
-            }, 100);
+        // Dacă e un voucher, folosim imaginea din map
+        if(VOUCHER_MAP[r.label]) {
+            visualHtml = `<img src="${VOUCHER_MAP[r.label]}" style="height:55px; width:auto; filter:none;">`;
         } 
-        // 2. VOUCHER IMAGE LOGIC (No Green Filter)
-        else if(VOUCHER_IMAGES[r.label]) {
-            visualHtml = `<img src="${VOUCHER_IMAGES[r.label]}" style="height:55px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));">`;
+        // Logica pentru Frames/Badges (Shuffle)
+        else if(r.label.includes('FRAME')) {
+            visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
+            // ... (restul codului de shuffle rămâne neschimbat)
         }
-        // 3. BADGE SHUFFLE
         else if(r.label === 'RANDOM BADGE') {
             visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
-            setTimeout(() => {
-                const el = document.getElementById(slotID);
-                if(el) setInterval(() => {
-                    if (!document.getElementById('prizeListModal').classList.contains('active')) return;
-                    const b = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
-                    el.innerHTML = `<span class="shop-badge-preview" style="background:${b.color}; color:#000; font-size:9px; border-radius:4px; padding:2px 5px;">${b.text}</span>`;
-                }, 600);
-            }, 100);
+            // ... (restul codului de shuffle rămâne neschimbat)
         }
-        // 4. SINGULARITY
-        else if(r.label === 'SINGULARITY') {
-            visualHtml = `<span class="shop-badge-preview badge-singularity" style="padding:10px 15px;"><i class="fas fa-atom"></i> SINGULARITY</span>`;
-        } 
-        else if(r.label === 'MILIARDAR') {
-            visualHtml = `<span class="shop-badge-preview" style="background:linear-gradient(45deg, #eef2f3, #8e9eab); color:#000; padding:5px 10px;">MILIARDAR</span>`;
-        }
-        // 5. DEFAULT (Coins/Diamonds)
         else {
-            visualHtml = `<img src="${r.icon}" class="aaa-card-img" style="height:50px;">`;
+            visualHtml = `<img src="${r.icon}" class="aaa-card-img" style="height:50px; width:auto; filter:none;">`;
         }
 
         card.innerHTML = `
