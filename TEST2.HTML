@@ -12306,17 +12306,47 @@ window.redeemCoupon = async () => {
     const code = document.getElementById('couponInput').value.trim().toUpperCase();
     if(!code) return showCustomAlert("Te rugăm să introduci un cod valid.", "SISTEM_ERROR");
 
-    // UI FEEDBACK
+    console.log("Validating manual code entry:", code);
+
     const btn = document.getElementById('btnRedeem');
     btn.innerText = "AUTHENTICATING...";
     btn.disabled = true;
 
-    // Logic for Firebase will go here next
-    setTimeout(() => {
-        showCustomAlert("Codul '" + code + "' nu este valid sau a expirat.", "ACCESS_DENIED");
+    // Check inventory categories
+    const categories = ['coins', 'diamonds', 'texts', 'frames', 'banners', 'badges', 'blackmarket'];
+    let foundCategory = null;
+
+    // Search for the code in user's data
+    for (const cat of categories) {
+        const hasIt = window.currentUserData?.myCoupons?.[cat]?.some(c => c.code === code || c.id === code);
+        if(hasIt) {
+            foundCategory = cat;
+            break;
+        }
+    }
+
+    setTimeout(async () => {
+        if (foundCategory) {
+            console.log("Match found! Category:", foundCategory);
+            // SET THE GLOBAL TICKET SESSION
+            window.activeCosmeticTicket = { id: code, category: foundCategory };
+            
+            await showCustomAlert(`Cod validat! Tichetul pentru categoria ${foundCategory.toUpperCase()} este acum ACTIV. Următorul obiect este GRATUIT.`, "ACCESS GRANTED");
+            
+            // Redirect to the right shop
+            if(foundCategory === 'badges') openBadgeShop();
+            if(foundCategory === 'frames') openFrameShop();
+            if(foundCategory === 'banners') openBannerShop();
+            if(foundCategory === 'texts') openTextShop();
+            
+            document.getElementById('couponInput').value = "";
+        } else {
+            console.warn("No match found for code:", code);
+            showCustomAlert("Codul '" + code + "' nu este valid în inventarul tău.", "ACCESS_DENIED");
+        }
         btn.innerText = "VALIDATE_CREDENTIALS";
         btn.disabled = false;
-    }, 1500);
+    }, 1200);
 };
 
 
@@ -12332,6 +12362,7 @@ window.openSubCoupon = (type) => {
         texts: { title: "TEXT_REDUCTION" },
         frames: { title: "FRAME_REDUCTION" },
         banners: { title: "BANNER_REDUCTION" },
+        badges: { title: "BADGE_VOUCHERS" }, // WAS MISSING
         blackmarket: { title: "ELITE_ACCESS" }
     };
 
