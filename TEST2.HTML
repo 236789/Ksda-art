@@ -6913,62 +6913,32 @@ body {
     background: conic-gradient(from 0deg, transparent, #7000ff, #00ffff, #7000ff, transparent 60%) !important;
 }
 
-/* --- GOD-TIER SINGULARITY (EVENT HORIZON) --- */
+/* --- GOD-TIER SINGULARITY (GIF VERSION) --- */
 .badge-singularity {
-    background: #000 !important;
-    color: #fff !important;
-    border: 1px solid #7000ff !important;
-    position: relative;
-    z-index: 1;
-    padding: 4px 12px !important;
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/desc%C4%83rcare.gif?alt=media&token=f0045bb9-4176-4e6a-92e2-25be1eea9bae') !important;
+    background-size: cover;
+    background-position: center;
+    color: #ffffff !important;
+    border: 1.5px solid #fff !important; /* Bordură albă fină pentru contrast */
     font-family: 'Orbitron', sans-serif !important;
     font-weight: 900 !important;
     text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 5px 15px !important;
+    border-radius: 4px;
     display: inline-flex !important;
     align-items: center;
-    gap: 6px;
-    border-radius: 4px;
-    overflow: hidden; 
-    box-shadow: 0 0 20px rgba(112, 0, 255, 0.6), inset 0 0 10px #000;
-    text-shadow: 0 0 8px #fff !important;
+    gap: 8px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+    /* Umbră neagră puternică la text pentru a fi citit peste GIF-ul animat */
+    text-shadow: 2px 2px 4px #000, 0 0 10px #000 !important;
+    overflow: hidden;
 }
 
-/* Rotating Event Horizon */
-.badge-singularity::before {
-    content: '';
-    position: absolute;
-    inset: -100% -150%; 
-    background: conic-gradient(
-        from 0deg, 
-        transparent 0deg, 
-        #7000ff 120deg, 
-        #29f3ff 240deg, 
-        transparent 360deg
-    );
-    animation: rotateAura 2s linear infinite;
-    z-index: -2;
-}
-
-/* Inner Core */
-.badge-singularity::after {
-    content: '';
-    position: absolute;
-    inset: 2px;
-    background: #050b14;
-    border-radius: 2px;
-    z-index: -1;
-}
-
-@keyframes rotateAura {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-/* The Icon inside pulses too */
+/* Efect de strălucire extra la iconiță */
 .badge-singularity i {
-    color: #fff;
-    text-shadow: 0 0 10px #7000ff;
-    animation: pulse 1s infinite alternate;
+    color: #fff !important;
+    filter: drop-shadow(0 0 5px #fff);
 }
 /* Exclusive Choice Modal Grid */
 .exclusive-choice-grid {
@@ -10258,55 +10228,37 @@ window.openInventory = async (type = 'badges') => {
         }
         
 else if(type === 'badges') {
-    const ownedIds = data.ownedBadges || [];
-    const equipped = data.equippedBadge?.id || null;
-    
-    // THE LIST: Add 'b_singularity' here so the system knows it's animated!
-    const godTierBadges = ['b_wheel_god', 'b_spin_god', 'b_immortal', 'b_celestial', 'b_cyber_ghost', 'b_demon_slayer', 'b_void_master', 'b_singularity'];
-
-    if(ownedIds.length === 0) list.innerHTML = '<p style="width:100%; text-align:center; color:#aaa; font-family:Orbitron; padding:20px;">Nu ai insigne.</p>';
-    
-    ownedIds.forEach(id => {
-        const badge = BADGES_DB.find(b => b.id === id);
-        if(badge) {
-            const isEquipped = (id === equipped);
-            const isGodTier = godTierBadges.includes(badge.id);
+            const ownedIds = data.ownedBadges || [];
+            const equipped = data.equippedBadge?.id || null;
+            if(ownedIds.length === 0) list.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">Nu ai insigne.</p>';
             
-            let badgeDisplayHtml = '';
-            
-            if (isGodTier) {
-                // For Singularity, we use its specific class, others use the badge-ID format
-                let className = (badge.id === 'b_singularity') ? 'badge-singularity' : `badge-${badge.id}`;
-                
-                // Quantum God ID Fix for consistency
-                if(badge.id === 'b_wheel_god') className = 'badge-wheel-god';
+            ownedIds.forEach(id => {
+                 const badge = BADGES_DB.find(b => b.id === id);
+                 if(badge) {
+                    const isEquipped = (id === equipped);
+                    const isSingularity = (badge.id === 'b_singularity');
 
-                badgeDisplayHtml = `<span class="${className}" style="font-size:9px; padding:4px 10px; margin-bottom:10px; border-radius:50px; display:inline-flex; align-items:center; gap:5px;"><i class="fas ${badge.icon}"></i> ${badge.text}</span>`;
-            } else {
-                // Standard Badges: They keep the inline color and black text
-                badgeDisplayHtml = `<span class="shop-badge-preview" style="background:${badge.color}; color:#000; border:none; box-shadow:0 0 5px ${badge.color};"><i class="fas ${badge.icon}"></i> ${badge.text}</span>`;
-            }
+                    // Daca e Singularity, folosim DOAR clasa. Altfel, punem culorile din DB.
+                    const badgeClass = isSingularity ? 'badge-singularity' : 'shop-badge-preview';
+                    const inlineStyle = isSingularity ? "" : `background:${badge.color}; color:#000; font-weight:900;`;
 
-            list.innerHTML += `
-                <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
-                    <div class="item-preview-box" style="overflow:visible !important; min-height:50px;">
-                        ${badgeDisplayHtml}
-                    </div>
-                    <div style="font-weight:900; font-size:11px; margin-bottom:10px; color:#fff; font-family:'Orbitron'; text-transform:uppercase;">
-                        ${badge.text}
-                    </div>
-                    ${isEquipped 
-                        ? `<button class="btn-equip-v6 is-equipped">ACTIVE_LINK</button>` 
-                        : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">INITIALIZE</button>`
-                    }
-                </div>`;
+                    list.innerHTML += `
+                        <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
+                            <div class="item-preview-box" style="min-height:60px;">
+                                <span class="${badgeClass}" style="${inlineStyle}">
+                                    <i class="fas ${badge.icon}"></i> ${badge.text}
+                                </span>
+                            </div>
+                            <div style="font-weight:700; font-size:11px; margin-top:10px;">${badge.text}</div>
+                            ${isEquipped 
+                                ? `<button class="equip-btn" style="background:#555;">ECHIPAT</button>` 
+                                : `<button class="equip-btn" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">ECHIPEAZĂ</button>`
+                            }
+                        </div>`;
+                 }
+            });
+             if(equipped) list.innerHTML += `<button class="btn-tasks" onclick="unequipItem('badge')">Scoate Insigna</button>`;
         }
-    });
-    if(equipped) {
-         const actionArea = document.getElementById('inventoryActions');
-         if(actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('badge')">TERMINATE_SESSION</button>`;
-    }
-}
         else if (type === 'banners') {
             const ownedIds = data.ownedBanners || [];
             const equipped = data.equippedBanner?.id || null;
