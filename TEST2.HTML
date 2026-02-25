@@ -9840,19 +9840,19 @@ window.openBadgeShop = async () => {
 
 
 window.buyBadge = async (badgeId, price) => {
-    // 1. CHECK FOR ACTIVE TICKET (FREE MODE)
+    // 1. Verificăm dacă există un bilet activ pentru categoria badges
     const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'badges';
     const confirmMsg = isFree ? "Folosești VOUCHER-UL GRATUIT pentru această insignă?" : `Cumperi insigna pentru ${price} monede?`;
 
     const confirmed = await showCustomConfirm(confirmMsg, "CONFIRMĂ");
     if(!confirmed) return;
 
-    // 2. IMMEDIATE STATE LOCK
-    // We capture the code then kill the global state immediately to prevent double-claiming
+    // 2. LOCK IMEDIAT: Salvăm codul biletului și îl anulăm din sesiune 
+    // pentru a preveni folosirea lui de mai multe ori până termină baza de date update-ul
     let ticketCodeToUse = null;
     if(isFree) {
         ticketCodeToUse = window.activeCosmeticTicket.id;
-        window.activeCosmeticTicket = null; // Important: Prevents multi-free-buys in same session
+        window.activeCosmeticTicket = null; // DISTRUGEM sesiunea free imediat!
     }
 
     const userRef = doc(db, "accounts", auth.currentUser.uid);
@@ -9861,18 +9861,20 @@ window.buyBadge = async (badgeId, price) => {
         const userSnap = await getDoc(userRef);
         const userData = userSnap.data();
 
+        // Verificare fonduri dacă NU e moca
         if(!isFree && (userData.coins || 0) < price) {
             return await showCustomAlert("Nu ai destule monede!", "EROARE");
         }
 
         if(isFree && ticketCodeToUse) {
-            // --- FIX: VOUCHER DELETION LOGIC ---
-            const currentVouchers = (userData.myCoupons && userData.myCoupons.badges) ? userData.myCoupons.badges : [];
+            // --- LOGICA DE ȘTERGERE DIN DATABASE ---
+            // Luăm array-ul actual de bilete de insigne
+            const currentBadgesVouchers = (userData.myCoupons && userData.myCoupons.badges) ? userData.myCoupons.badges : [];
             
-            // Filter out the used ticket
-            const updatedVouchers = currentVouchers.filter(t => t.code !== ticketCodeToUse);
+            // Filtrăm: păstrăm toate în afară de cel cu codul curent
+            const updatedVouchers = currentBadgesVouchers.filter(t => t.code !== ticketCodeToUse);
 
-            // Update Database: Add Badge AND Update the Voucher List
+            // Update Firestore: Adăugăm insigna ȘI suprascriem array-ul de vouchere cu cel nou (fără codul folosit)
             await updateDoc(userRef, { 
                 ownedBadges: arrayUnion(badgeId),
                 'myCoupons.badges': updatedVouchers 
@@ -9880,7 +9882,7 @@ window.buyBadge = async (badgeId, price) => {
             
             await showCustomAlert("Insignă deblocată GRATUIT! Tichetul a fost consumat.", "SUCCES");
         } else {
-            // Standard paid purchase
+            // Achiziție standard cu bani
             await updateDoc(userRef, { 
                 coins: increment(-price), 
                 ownedBadges: arrayUnion(badgeId) 
@@ -9889,15 +9891,18 @@ window.buyBadge = async (badgeId, price) => {
             await showCustomAlert("Insignă cumpărată!", "SUCCES");
         }
 
-        // 3. REFRESH UI
+        // Refresh UI pentru a vedea că butonul de "Claim Free" a dispărut
         checkShopQuest('badge');
-        openBadgeShop(); // This will re-render buttons as "BUY" instead of "CLAIM FREE"
-
-    } catch(e) { 
+        openBadgeShop(); 
+    
+} catch(e) { 
         console.error("Purchase Error:", e);
-        showCustomAlert("Eroare la procesare. Reîncearcă.", "EROARE");
-        // Optional: restore ticket state if db fails
-    } 
+        // Dacă a fost o eroare de rețea, îi dăm biletul înapoi în sesiune ca să mai poată încerca
+        if(isFree) {
+            window.activeCosmeticTicket = { id: ticketCodeToUse, category: 'badges' };
+        }
+        showCustomAlert("Eroare la procesare: " + e.message, "EROARE");
+    }
 };
 
 window.buyAllItems = async (category) => {
