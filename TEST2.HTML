@@ -11484,8 +11484,8 @@ rewards: [
     price: 12500, 
     color: '#e5e4e2', 
     stockRange: [10, 25], 
-    img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FPlatinum%20Chest%20Close.png?alt=media&token=8544f128-4033-4f91-8608-208b8b05615d', 
-    imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FPlatinum%20Chest%20Open.png?alt=media&token=6f21789c-6e8e-4a6f-b271-477583693e50',
+    img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Close.png?alt=media&token=e7bbc3f0-9ab6-46c2-a8d5-e5f76d4aed71', 
+    imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Open.png?alt=media&token=43e6e8fc-6228-438f-97b3-0cbf7d5012ce0',
     rewards: [
         { tier: 'RARE', label: '2000-5000', icon: 'https://iili.io/fhc1SKQ.png', chance: 55, style: 'tier-rare' },
         { tier: 'EPIC', label: '10-20 GEMS', icon: 'https://iili.io/fv5bmtj.png', chance: 30, style: 'tier-epic' },
@@ -11657,6 +11657,11 @@ window.openPrizeView = () => {
             setTimeout(() => startFrameShuffle(), 50);
         } else if(r.label === 'RANDOM BANNER') {
             visualHtml = `<div id="bannerShuffleSlot"></div>`;
+
+            visualHtml = `<div id="ticketShuffleSlot"></div>`;
+            setTimeout(() => startTicketShuffle(), 50);
+        } else if(r.label === 'RANDOM FRAME') {
+
             setTimeout(() => startBannerShuffle(), 50);
         } else if(r.label === 'MILIARDAR') {
             visualHtml = `<span class="shop-badge-preview" style="background:linear-gradient(45deg, #eef2f3, #8e9eab); color:#000; padding:10px 20px; font-weight:900;">MILIARDAR</span>`;
@@ -11689,7 +11694,7 @@ function startBadgeShuffle() {
         if (!document.getElementById('prizeListModal').classList.contains('active')) return clearInterval(interval);
         const b = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
         slot.innerHTML = `<div class="badge-reel-item"><span class="shop-badge-preview" style="background:${b.color}; color:#000; font-size:10px; padding:5px 10px;">${b.text}</span></div>`;
-    }, 1500); // Fast shuffle
+    }, 600); // Fast shuffle
 }
 
 function startFrameShuffle() {
@@ -11699,7 +11704,7 @@ function startFrameShuffle() {
         if (!document.getElementById('prizeListModal').classList.contains('active')) return clearInterval(interval);
         const f = FRAMES_DB[Math.floor(Math.random() * FRAMES_DB.length)];
         slot.innerHTML = `<div class="badge-reel-item"><img src="${f.img}" style="height:55px; filter:drop-shadow(0 0 10px #ffd700);"></div>`;
-    }, 200);
+    }, 600);
 }
 
 function startBannerShuffle() {
@@ -11709,7 +11714,32 @@ function startBannerShuffle() {
         if (!document.getElementById('prizeListModal').classList.contains('active')) return clearInterval(interval);
         const b = BANNERS_DB[Math.floor(Math.random() * BANNERS_DB.length)];
         slot.innerHTML = `<div class="badge-reel-item"><div class="${b.cssClass}" style="padding:5px 10px; border-radius:4px; font-size:9px;">BANNER</div></div>`;
-    }, 250);
+    }, 600);
+}
+
+
+function startTicketShuffle() {
+    const slot = document.getElementById('ticketShuffleSlot');
+    if(!slot) return;
+    
+    // The 4 specific cosmetic ticket images from your DB
+    const ticketImages = [
+        'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f', // TEXT
+        'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FFrame%20discount%20cupon%20.png?alt=media&token=c49a5fb2-06e8-4df5-bcf3-ed37afd1cdef', // FRAME
+        'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBanner%20discount%20cupon%20.png?alt=media&token=e75ab8ee-5278-496c-9938-d1796bda02e0', // BANNER
+        'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d'  // BADGE/ELITE
+    ];
+
+    const interval = setInterval(() => {
+        // Stop if modal is closed
+        if (!document.getElementById('prizeListModal').classList.contains('active')) return clearInterval(interval);
+        
+        const randomImg = ticketImages[Math.floor(Math.random() * ticketImages.length)];
+        slot.innerHTML = `
+            <div class="badge-reel-item">
+                <img src="${randomImg}" style="height:60px; filter: drop-shadow(0 0 10px #ffd700);">
+            </div>`;
+    }, 600); // Shuffles every 200ms
 }
 
 window.setBoxQty = (q) => {
@@ -11838,6 +11868,8 @@ window.revealReward = async () => {
         let wonBadge = null;
         let wonFrame = null; 
         let wonBanner = null; // <--- This was missing!
+        let wonTicket = null; // This fixes the console error
+
         
         // ... (rest of your math loop)
       
