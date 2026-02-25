@@ -6804,6 +6804,42 @@ body {
     2% { transform: skew(-10deg); filter: hue-rotate(0deg); }
     3% { transform: skew(0); }
 }
+
+
+
+/* --- SICK AAA TIER STYLES --- */
+.tier-common    { --r-color: #cd7f32; --r-bg: linear-gradient(180deg, #1a0f05 0%, #08101b 100%); }
+.tier-uncommon  { --r-color: #c0c0c0; --r-bg: linear-gradient(180deg, #161a1d 0%, #08101b 100%); }
+.tier-rare      { --r-color: #00d2ff; --r-bg: linear-gradient(180deg, #021a25 0%, #08101b 100%); }
+.tier-epic      { --r-color: #d32ce6; --r-bg: linear-gradient(180deg, #1a0225 0%, #08101b 100%); }
+.tier-legendary { --r-color: #ffd700; --r-bg: linear-gradient(180deg, #251e02 0%, #08101b 100%); }
+.tier-mythic    { --r-color: #ff4757; --r-bg: linear-gradient(180deg, #250202 0%, #08101b 100%); }
+
+/* THE ROTATING BORDER ENGINE */
+.aaa-card::before {
+    content: ''; position: absolute; inset: -50%;
+    background: conic-gradient(from 0deg, transparent, var(--r-color), transparent 30%);
+    animation: rotateAura 3s linear infinite; z-index: 0;
+}
+.aaa-card::after {
+    content: ''; position: absolute; inset: 2px;
+    background: var(--r-bg); border-radius: 13px; z-index: 1;
+}
+
+/* SICK VALUE TAG (UNIFORM BORDER) */
+.aaa-card-value {
+    position: relative; background: rgba(0, 0, 0, 0.9) !important;
+    color: #fff !important; font-family: 'Montserrat'; font-weight: 900; font-size: 12px;
+    padding: 8px 20px; display: inline-flex; align-items: center; justify-content: center;
+    min-width: 140px; text-transform: uppercase; border: none !important;
+    clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+}
+.aaa-card-value::before {
+    content: ""; position: absolute; inset: 0; padding: 1.5px;
+    background: var(--r-color); clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+}
   </style>
 </head>
 <body>
@@ -11579,13 +11615,16 @@ window.openPrizeView = () => {
         
         let visualHtml = `<img src="${r.icon}" class="aaa-card-img">`;
         
-        // DYNAMIC SHUFFLER ENGINE
+        // Logic to choose which shuffle engine to run
         if(r.label === 'RANDOM BADGE') {
             visualHtml = `<div id="badgeShuffleSlot"></div>`;
-            setTimeout(() => startBadgeShuffle(), 100);
+            setTimeout(() => startBadgeShuffle(), 50);
         } else if(r.label === 'RANDOM FRAME') {
             visualHtml = `<div id="frameShuffleSlot"></div>`;
-            setTimeout(() => startFrameShuffle(), 100);
+            setTimeout(() => startFrameShuffle(), 50);
+        } else if(r.label === 'RANDOM BANNER') {
+            visualHtml = `<div id="bannerShuffleSlot"></div>`;
+            setTimeout(() => startBannerShuffle(), 50);
         } else if(r.label === 'MILIARDAR') {
             visualHtml = `<span class="shop-badge-preview" style="background:linear-gradient(45deg, #eef2f3, #8e9eab); color:#000; padding:10px 20px; font-weight:900;">MILIARDAR</span>`;
         }
@@ -11597,7 +11636,7 @@ window.openPrizeView = () => {
                 <div style="width: 100%;">
                     <div class="aaa-card-value">
                         ${r.label}
-                        ${(r.tier !== 'LEGENDARY' && r.tier !== 'MYTHIC') ? `<img src="${r.icon}" style="width:16px; height:16px; margin-left:8px;">` : ''}
+                        ${(r.label.includes('RANDOM') || r.label === 'MILIARDAR') ? '' : `<img src="${r.icon}" style="width:14px; margin-left:8px;">`}
                     </div>
                     <div class="aaa-card-chance">${r.chance}% CHANCE</div>
                 </div>
@@ -11607,42 +11646,37 @@ window.openPrizeView = () => {
     });
     document.getElementById('prizeListModal').classList.add('active');
 };
-function startFrameShuffle() {
-    const slot = document.getElementById('frameShuffleSlot');
-    if(!slot) return;
-    setInterval(() => {
-        if (!document.getElementById('prizeListModal').classList.contains('active')) return;
-        const randomFrame = FRAMES_DB[Math.floor(Math.random() * FRAMES_DB.length)];
-        slot.innerHTML = `<div class="badge-reel-item"><img src="${randomFrame.img}" style="height:60px; filter:drop-shadow(0 0 10px #ffd700);"></div>`;
-    }, 800);
-}
+
 
 // --- LEGENDARY BADGE SHUFFLE ENGINE ---
 function startBadgeShuffle() {
     const slot = document.getElementById('badgeShuffleSlot');
     if(!slot) return;
+    const interval = setInterval(() => {
+        if (!document.getElementById('prizeListModal').classList.contains('active')) return clearInterval(interval);
+        const b = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
+        slot.innerHTML = `<div class="badge-reel-item"><span class="shop-badge-preview" style="background:${b.color}; color:#000; font-size:10px; padding:5px 10px;">${b.text}</span></div>`;
+    }, 150); // Fast shuffle
+}
 
-    let iterations = 0;
-    const maxIterations = 50000; // Runs essentially forever while modal is open
+function startFrameShuffle() {
+    const slot = document.getElementById('frameShuffleSlot');
+    if(!slot) return;
+    const interval = setInterval(() => {
+        if (!document.getElementById('prizeListModal').classList.contains('active')) return clearInterval(interval);
+        const f = FRAMES_DB[Math.floor(Math.random() * FRAMES_DB.length)];
+        slot.innerHTML = `<div class="badge-reel-item"><img src="${f.img}" style="height:55px; filter:drop-shadow(0 0 10px #ffd700);"></div>`;
+    }, 200);
+}
 
-    const shuffle = setInterval(() => {
-        if (!document.getElementById('prizeListModal').classList.contains('active')) {
-            clearInterval(shuffle);
-            return;
-        }
-
-        const randomBadge = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
-        
-        slot.innerHTML = `
-            <div class="badge-reel-item">
-                <span style="background:${randomBadge.color}; padding: 5px 10px; border-radius: 4px; font-family:'Orbitron'; font-size:10px; color:#000; font-weight:900; white-space:nowrap;">
-                    <i class="fas ${randomBadge.icon}"></i> ${randomBadge.text}
-                </span>
-            </div>
-        `;
-        
-        iterations++;
-    }, 800); // Changes every 0.8 seconds for a "live" look
+function startBannerShuffle() {
+    const slot = document.getElementById('bannerShuffleSlot');
+    if(!slot) return;
+    const interval = setInterval(() => {
+        if (!document.getElementById('prizeListModal').classList.contains('active')) return clearInterval(interval);
+        const b = BANNERS_DB[Math.floor(Math.random() * BANNERS_DB.length)];
+        slot.innerHTML = `<div class="badge-reel-item"><div class="${b.cssClass}" style="padding:5px 10px; border-radius:4px; font-size:9px;">BANNER</div></div>`;
+    }, 250);
 }
 
 window.setBoxQty = (q) => {
@@ -11758,7 +11792,6 @@ window.revealReward = async () => {
         return;
     }
 
-    // Animation
     boxImg.classList.remove('box-shake');
     boxImg.src = lockedBox.imgOpen;
     boxImg.classList.add('open');
@@ -11766,10 +11799,15 @@ window.revealReward = async () => {
     setTimeout(async () => {
         document.getElementById('unboxingOverlay').style.display = 'none';
         
+        // --- CRITICAL FIX: DEFINE ALL VARIABLES ---
         let winCoins = 0;
         let winDiamonds = 0;
         let wonBadge = null;
-        let wonFrame = null; // New storage for frames
+        let wonFrame = null; 
+        let wonBanner = null; // <--- This was missing!
+        
+        // ... (rest of your math loop)
+      
 
 // --- THE STRICT MULTI-BOX MATH ENGINE ---
         for (let i = 0; i < lockedQty; i++) {
