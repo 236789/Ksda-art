@@ -7007,6 +7007,57 @@ body {
         border: 1px solid #fff !important;
     }
 }
+
+
+/* --- PROBABILITY LOG OVERHAUL --- */
+.prize-view-container {
+    max-height: 85vh !important;
+    overflow: hidden !important;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hide scrollbars but keep functionality */
+.aaa-loot-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    padding: 20px !important;
+    overflow-y: auto !important;
+    flex: 1;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.aaa-loot-grid::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+/* Fix Mobile Layout Issues from Screenshots */
+@media (max-width: 800px) {
+    .aaa-loot-grid {
+        grid-template-columns: 1fr !important; /* Stack 1 by 1 to stop overlap */
+        padding: 10px !important;
+    }
+    
+    .aaa-card {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 220px;
+        margin-bottom: 10px;
+    }
+
+    .aaa-card-content {
+        padding: 15px !important;
+    }
+
+    /* Ensure X button is always accessible */
+    #prizeListModal .close-pop {
+        top: 10px !important;
+        right: 10px !important;
+        position: absolute !important;
+    }
+}
   </style>
 </head>
 <body>
@@ -12086,15 +12137,22 @@ window.openPrizeView = () => {
     const container = document.getElementById('prizeTableBody');
     container.innerHTML = ""; 
 
+    // Specific Images for specific Vouchers
+    const VOUCHER_IMAGES = {
+        'COSMETIC VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
+        'CURRENCY VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d',
+        'BM VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d'
+    };
+
     selectedBox.rewards.forEach((r, idx) => {
         const card = document.createElement('div');
         card.className = `aaa-card ${r.style}`;
         
         let visualHtml = "";
-        const slotID = `shuffle_slot_${idx}`;
+        const slotID = `shuffler_${idx}`;
 
-        // LOGIC FOR SHUFFLE ITEMS
-        if(r.label === 'EXCLUSIVE FRAME' || r.label === 'RANDOM FRAME') {
+        // 1. FRAME SHUFFLE LOGIC
+        if(r.label.includes('FRAME')) {
             visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
             setTimeout(() => {
                 const el = document.getElementById(slotID);
@@ -12105,6 +12163,11 @@ window.openPrizeView = () => {
                 }, 600);
             }, 100);
         } 
+        // 2. VOUCHER IMAGE LOGIC (No Green Filter)
+        else if(VOUCHER_IMAGES[r.label]) {
+            visualHtml = `<img src="${VOUCHER_IMAGES[r.label]}" style="height:55px; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));">`;
+        }
+        // 3. BADGE SHUFFLE
         else if(r.label === 'RANDOM BADGE') {
             visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
             setTimeout(() => {
@@ -12112,18 +12175,19 @@ window.openPrizeView = () => {
                 if(el) setInterval(() => {
                     if (!document.getElementById('prizeListModal').classList.contains('active')) return;
                     const b = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
-                    el.innerHTML = `<span class="shop-badge-preview" style="background:${b.color}; color:#000; font-size:9px;">${b.text}</span>`;
+                    el.innerHTML = `<span class="shop-badge-preview" style="background:${b.color}; color:#000; font-size:9px; border-radius:4px; padding:2px 5px;">${b.text}</span>`;
                 }, 600);
             }, 100);
         }
+        // 4. SINGULARITY
         else if(r.label === 'SINGULARITY') {
             visualHtml = `<span class="shop-badge-preview badge-singularity" style="padding:10px 15px;"><i class="fas fa-atom"></i> SINGULARITY</span>`;
         } 
-        else if(r.label.includes('VOUCHER')) {
-            visualHtml = `<img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae" style="height:50px; filter: hue-rotate(90deg);">`;
+        else if(r.label === 'MILIARDAR') {
+            visualHtml = `<span class="shop-badge-preview" style="background:linear-gradient(45deg, #eef2f3, #8e9eab); color:#000; padding:5px 10px;">MILIARDAR</span>`;
         }
+        // 5. DEFAULT (Coins/Diamonds)
         else {
-            // Standard Coins/Diamonds
             visualHtml = `<img src="${r.icon}" class="aaa-card-img" style="height:50px;">`;
         }
 
