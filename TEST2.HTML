@@ -12350,55 +12350,65 @@ window.revealReward = async () => {
         for (let i = 0; i < lockedQty; i++) {
             const roll = Math.random() * 100;
 
+            // --- VOID BOX LOGIC (Synced with Log Images) ---
             if (lockedBox.id === 'box_void') {
-                if (roll <= 0.5) { 
+                if (roll <= 0.5) { // Abyssal (0.5%)
                     const item = BADGES_DB.find(b => b.id === 'b_singularity');
                     if(item) results.wonBadges.push(item);
-                } else if (roll <= 5.0) { 
-                    results.wonTickets.push({ category: 'blackmarket', tier: 'EXOTIC', name: 'BM VOUCHER' });
-                } else if (roll <= 10.0) { 
+                } else if (roll <= 5.0) { // Exotic (4.5%)
+                    results.wonTickets.push({ category: 'blackmarket', tier: 'EXOTIC', label: 'BM VOUCHER' });
+                } else if (roll <= 10.0) { // Legendary (5%)
                     results.requiresChoice = true; 
-                } else if (roll <= 30.0) { 
-                    results.winCoins += 12500; // Corrected to your requested 12.5k
-                } else {
-                    results.winDiamonds += 5; // REDUCED: Was 75, now 5 per roll
+                } else if (roll <= 20.0) { // Mythic (10%)
+                    results.winDiamonds += 75; // AS SHOWN IN LOG
+                } else { // Epic (80%)
+                    results.winCoins += 12500; // AS SHOWN IN LOG
                 }
             } 
+            // --- PLATINUM BOX LOGIC ---
             else if (lockedBox.id === 'box_platinum') {
-                if (roll <= 1) { 
-                    results.wonTickets.push({ category: 'coins', tier: 'EXOTIC', name: 'CURRENCY VOUCHER' });
-                } else if (roll <= 5) { 
+                if (roll <= 1) { // Exotic (1%)
+                    results.wonTickets.push({ category: 'coins', tier: 'EXOTIC', label: 'CURRENCY VOUCHER' });
+                } else if (roll <= 5) { // Mythic (4%)
                     results.winDiamonds += 50; 
-                } else if (roll <= 15) { 
+                } else if (roll <= 15) { // Legendary (10%)
                     const cosmoTypes = ['badges', 'banners', 'frames', 'texts'];
                     const chosenCosmo = cosmoTypes[Math.floor(Math.random() * cosmoTypes.length)];
-                    results.wonTickets.push({ category: chosenCosmo, tier: 'LEGENDARY', name: 'COSMETIC VOUCHER' });
-                } else if (roll <= 45) { 
-                    results.winDiamonds += Math.floor(Math.random() * 11) + 10; 
-                } else { 
-                    results.winCoins += Math.floor(Math.random() * 3001) + 2000; 
+                    results.wonTickets.push({ category: chosenCosmo, tier: 'LEGENDARY', label: 'COSMETIC VOUCHER' });
+                } else if (roll <= 45) { // Epic (30%)
+                    results.winDiamonds += Math.floor(Math.random() * 11) + 10; // 10-20 Gems
+                } else { // Rare (55%)
+                    results.winCoins += Math.floor(Math.random() * 3001) + 2000; // 2000-5000 Coins
                 }
             }
+            // --- GOLD BOX LOGIC ---
             else if (lockedBox.id === 'box_gold') {
-                if (roll <= 1.5) { 
+                if (roll <= 0.5) { // Mythic (0.5%)
                     const item = BADGES_DB.find(b => b.id === 'b_miliardar');
                     if(item) results.wonBadges.push(item);
-                } else if (roll <= 5) { 
+                } else if (roll <= 2.5) { // Legendary (2%)
                     results.wonFrames.push(FRAMES_DB[Math.floor(Math.random() * FRAMES_DB.length)]); 
-                } else if (roll <= 15) { 
-                    results.winDiamonds += Math.floor(Math.random() * 5) + 5; 
-                } else { 
-                    results.winCoins += Math.floor(Math.random() * 1501) + 2500; 
+                } else if (roll <= 13) { // Epic (10.5%)
+                    results.winDiamonds += Math.floor(Math.random() * 4) + 2; // 2-5 Gems
+                } else if (roll <= 38) { // Rare (25%)
+                    results.winCoins += Math.floor(Math.random() * 1501) + 2500; // 2500-4000 Coins
+                } else { // Uncommon (60%)
+                    results.winCoins += Math.floor(Math.random() * 501) + 1000; // 1000-1500 Coins
                 }
-            } else {
-                // Basic Box
-                if (roll <= 3) {
+            } 
+            // --- BASIC BOX LOGIC ---
+            else {
+                if (roll <= 2) { // Legendary (2%)
                     const basicPool = BADGES_DB.filter(b => b.id !== 'b_miliardar' && b.id !== 'b_singularity');
                     results.wonBadges.push(basicPool[Math.floor(Math.random() * basicPool.length)]);
-                } else if (roll <= 15) { 
-                    results.winDiamonds += Math.floor(Math.random() * 3) + 2; 
-                } else { 
-                    results.winCoins += Math.floor(Math.random() * 1001) + 250; 
+                } else if (roll <= 6.5) { // Epic (4.5%)
+                    results.winDiamonds += Math.floor(Math.random() * 3) + 3; // 3-5 Gems
+                } else if (roll <= 16.5) { // Rare (10%)
+                    results.winCoins += Math.floor(Math.random() * 1001) + 500; // 500-1500 Coins
+                } else if (roll <= 41.5) { // Uncommon (25%)
+                    results.winDiamonds += Math.floor(Math.random() * 3) + 1; // 1-3 Gems
+                } else { // Common (60%)
+                    results.winCoins += Math.floor(Math.random() * 501) + 250; // 250-750 Coins
                 }
             }
         }
@@ -12411,15 +12421,12 @@ window.revealReward = async () => {
                 diamonds: increment(results.winDiamonds) 
             };
             
-            // Collect Badge IDs
             if(results.wonBadges.length > 0) {
                 batchUpdate.ownedBadges = arrayUnion(...results.wonBadges.map(b => b.id));
             }
-            // Collect Frame IDs
             if(results.wonFrames.length > 0) {
                 batchUpdate.ownedFrames = arrayUnion(...results.wonFrames.map(f => f.id));
             }
-            // Collect Tickets
             results.wonTickets.forEach(t => {
                 const ticketID = "TICK-" + Math.random().toString(36).substr(2, 5).toUpperCase();
                 batchUpdate[`myCoupons.${t.category}`] = arrayUnion({ id: ticketID, code: ticketID, used: false });
@@ -12792,37 +12799,43 @@ window.showFinalBoxReward = async (res, box) => {
     titleEl.innerText = box.id === 'box_void' ? "VOID_BREACH_SUCCESS" : "DECRYPTION_SUCCESS";
     titleEl.style.color = box.id === 'box_void' ? "#7000ff" : "#00ffcc";
 
-    let html = `<div style="display:flex; flex-direction:column; gap:12px; align-items:center; width:100%; max-height: 400px; overflow-y: auto;">`;
+    // Start wrapper with internal scroll in case of massive wins
+    let html = `<div style="display:flex; flex-direction:column; gap:12px; align-items:center; width:100%; max-height:350px; overflow-y:auto; padding:5px; scrollbar-width:none;">`;
 
-    // Badges UI (Fixes animClass crash)
+    // Badges Display
     if(res.wonBadges && res.wonBadges.length > 0) {
         res.wonBadges.forEach(b => {
-            if(!b) return; // Safety check
-            html += `<div style="border:1px solid #7000ff; padding:10px; border-radius:12px; background:rgba(0,0,0,0.5); width:100%;">
-                <span class="shop-badge-preview ${b.animClass || ''}" style="background:${b.color || '#333'}; color:#000; padding:5px 10px; font-weight:900;">
-                    <i class="fas ${b.icon || 'fa-award'}"></i> ${b.text || 'REWARD'}
+            if(!b) return;
+            html += `<div style="border:1px solid #7000ff; padding:10px; border-radius:12px; background:rgba(255,255,255,0.03); width:90%;">
+                <span class="shop-badge-preview ${b.animClass || ''}" style="background:${b.color}; color:#000; padding:5px 10px; font-weight:900; border-radius:4px; font-size:11px;">
+                    <i class="fas ${b.icon}"></i> ${b.text}
                 </span>
             </div>`;
         });
     }
 
-    // Frames UI
-    if(res.wonFrames && res.wonFrames.length > 0) {
-        res.wonFrames.forEach(f => {
-            if(!f) return;
-            html += `<div style="border:1px solid #ffd700; padding:10px; border-radius:12px; background:rgba(0,0,0,0.5); width:100%;">
-                <div class="frame-preview-box" style="margin:0 auto; width:50px; height:50px;">
-                    <img src="${window.currentUserData?.image || ''}" class="frame-preview-user">
-                    <img src="${f.img}" class="frame-preview-img">
-                </div>
-                <div style="font-weight:900; color:#fff; margin-top:5px; font-size:11px;">${f.name}</div>
+    // Tickets Display
+    if(res.wonTickets && res.wonTickets.length > 0) {
+        const tImg = 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d';
+        res.wonTickets.forEach(t => {
+            html += `<div style="border:1px solid #00ffcc; padding:10px; border-radius:12px; background:rgba(0,255,204,0.05); width:90%; display:flex; align-items:center; gap:10px; justify-content:center;">
+                <img src="${tImg}" style="height:35px; width:auto;">
+                <div style="font-family:'Orbitron'; font-size:10px; color:#fff; font-weight:800;">${t.label} UNLOCKED</div>
             </div>`;
         });
     }
 
-    // Individual Win display (Coins & Diamonds) - Fixes stretching with height:auto
-    if(res.winCoins > 0) html += `<div class="reward-line" style="color:#ffd700; font-size:18px;"><img src="https://iili.io/fhc1SKQ.png" style="width:25px; height:auto; object-fit:contain;"> +${res.winCoins.toLocaleString()}</div>`;
-    if(res.winDiamonds > 0) html += `<div class="reward-line" style="color:#00ff88; font-size:18px;"><img src="https://iili.io/fv5bmtj.png" style="width:20px; height:auto; object-fit:contain;"> +${res.winDiamonds}</div>`;
+    // Individual Coins/Diamonds Display (FIXED STRETCHING)
+    if(res.winCoins > 0) {
+        html += `<div class="reward-line" style="color:#ffd700; font-size:22px; font-weight:900;">
+            <img src="https://iili.io/fhc1SKQ.png" style="height:30px; width:auto; vertical-align:middle;"> +${res.winCoins.toLocaleString()}
+        </div>`;
+    }
+    if(res.winDiamonds > 0) {
+        html += `<div class="reward-line" style="color:#00ff88; font-size:22px; font-weight:900;">
+            <img src="https://iili.io/fv5bmtj.png" style="height:25px; width:auto; vertical-align:middle;"> +${res.winDiamonds}
+        </div>`;
+    }
 
     html += `</div>`;
     container.innerHTML = html;
