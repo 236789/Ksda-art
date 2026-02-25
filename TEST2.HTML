@@ -9551,24 +9551,43 @@ window.buyGifs = async (currency) => {
 };
 
 
-window.buyText = async (id, price) => {
-    const confirmed = await showCustomConfirm(`Cumperi culoarea pentru ${price} coins?`);
-    if(!confirmed) return;
+// --- STRICT BUY TEXT COLOR ---
+window.buyText = async (textId, price) => {
+    const isFreeSession = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'texts';
+    const usedTicketId = isFreeSession ? window.activeCosmeticTicket.id : null;
+
+    if(!(await showCustomConfirm(isFreeSession ? "Activezi culoarea GRATUIT prin voucher?" : `Cumperi culoarea pentru ${price} monede?`))) return;
 
     const userRef = doc(db, "accounts", auth.currentUser.uid);
-    const userSnap = await getDoc(userRef);
-    
-    if((userSnap.data().coins || 0) < price) return await showCustomAlert("Nu ai destule monede!", "EROARE");
-    
     try {
-        await updateDoc(userRef, { coins: increment(-price), ownedTexts: arrayUnion(id) });
-        
-        // --- LOG TRANSACTION ---
-        await logTransaction(-price, "COINS", "Shop", "Bought Text Color: " + id);
+        await runTransaction(db, async (transaction) => {
+            const userSnap = await transaction.get(userRef);
+            const userData = userSnap.data();
+            let updates = {};
 
-        await showCustomAlert("Culoare cumpărată!", "SUCCES");
-        window.openTextShop();
-    } catch(e) { console.error(e); }
+            if (isFreeSession) {
+                let dbVouchers = userData.myCoupons?.texts || [];
+                const vIdx = dbVouchers.findIndex(v => v.id === usedTicketId || v.code === usedTicketId);
+                if (vIdx === -1) throw new Error("Voucherul nu a fost găsit!");
+                dbVouchers.splice(vIdx, 1);
+                updates['myCoupons.texts'] = dbVouchers;
+            } else {
+                if ((userData.coins || 0) < price) throw new Error("Nu ai destule monede!");
+                updates.coins = increment(-price);
+            }
+            if ((userData.ownedTexts || []).includes(textId)) throw new Error("Ai deja această culoare!");
+            updates.ownedTexts = arrayUnion(textId);
+            transaction.update(userRef, updates);
+        });
+
+        window.activeCosmeticTicket = null;
+        await showCustomAlert("Culoare text deblocată!", "SUCCES");
+        openTextShop();
+    } catch (e) { 
+        window.activeCosmeticTicket = null;
+        showCustomAlert(e.message, "EROARE"); 
+        openTextShop();
+    }
 };
 
 window.equipText = async (id, cssClass) => {
@@ -10044,25 +10063,45 @@ window.openFrameShop = async () => {
     });
 };
 
+window.buyFrame = async (frameId, price) => {
+    const isFreeSession = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'frames';
+    const usedTicketId = isFreeSession ? window.activeCosmeticTicket.id : null;
 
-window.buyFrame = async (id, price) => {
-    const confirmed = await showCustomConfirm(`Cumperi această ramă pentru ${price} coins?`);
-    if(!confirmed) return;
+    const msg = isFreeSession ? "Folosești VOUCHER-UL GRATUIT pentru această ramă?" : `Cumperi rama pentru ${price} monede?`;
+    if(!(await showCustomConfirm(msg))) return;
 
     const userRef = doc(db, "accounts", auth.currentUser.uid);
-    const userSnap = await getDoc(userRef);
-    if((userSnap.data().coins || 0) < price) return await showCustomAlert("Nu ai destule monede!", "EROARE");
-    
     try {
-        await updateDoc(userRef, { coins: increment(-price), ownedFrames: arrayUnion(id) });
-        
-        // --- LOG TRANSACTION ---
-        await logTransaction(-price, "COINS", "Shop", "Bought Frame: " + id);
+        await runTransaction(db, async (transaction) => {
+            const userSnap = await transaction.get(userRef);
+            const userData = userSnap.data();
+            let updates = {};
 
-        await showCustomAlert("Ramă cumpărată!", "SUCCES");
+            if (isFreeSession) {
+                let dbVouchers = userData.myCoupons?.frames || [];
+                const vIdx = dbVouchers.findIndex(v => v.id === usedTicketId || v.code === usedTicketId);
+                if (vIdx === -1) throw new Error("Voucher invalid sau expirat!");
+                dbVouchers.splice(vIdx, 1);
+                updates['myCoupons.frames'] = dbVouchers;
+            } else {
+                if ((userData.coins || 0) < price) throw new Error("Fonduri insuficiente!");
+                updates.coins = increment(-price);
+            }
+            if ((userData.ownedFrames || []).includes(frameId)) throw new Error("Ai deja această ramă!");
+            updates.ownedFrames = arrayUnion(frameId);
+            transaction.update(userRef, updates);
+        });
+
+        window.activeCosmeticTicket = null; 
+        await showCustomAlert("Ramă deblocată!", "SUCCES");
         checkShopQuest('frame');
-        openFrameShop(); 
-    } catch(e) { console.error(e); }
+        openFrameShop();
+    } catch (e) { 
+        console.error(e); 
+        window.activeCosmeticTicket = null;
+        showCustomAlert(e.message, "EROARE"); 
+        openFrameShop();
+    }
 };
 
     window.equipFrame = async (id, imgUrl) => {
@@ -10117,25 +10156,44 @@ window.openBannerShop = async () => {
     });
 };
 
-window.buyBanner = async (id, price) => {
-    const confirmed = await showCustomConfirm(`Cumperi acest banner pentru ${price} coins?`);
-    if(!confirmed) return;
+// --- STRICT BUY BANNER ---
+window.buyBanner = async (bannerId, price) => {
+    const isFreeSession = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'banners';
+    const usedTicketId = isFreeSession ? window.activeCosmeticTicket.id : null;
+
+    if(!(await showCustomConfirm(isFreeSession ? "Folosești VOUCHER-UL GRATUIT?" : `Cumperi bannerul pentru ${price} monede?`))) return;
 
     const userRef = doc(db, "accounts", auth.currentUser.uid);
-    const userSnap = await getDoc(userRef);
-    
-    if((userSnap.data().coins || 0) < price) return await showCustomAlert("Nu ai destule monede!", "EROARE");
-    
     try {
-        await updateDoc(userRef, { coins: increment(-price), ownedBanners: arrayUnion(id) });
-        
-        // --- LOG TRANSACTION ---
-        await logTransaction(-price, "COINS", "Shop", "Bought Banner: " + id);
+        await runTransaction(db, async (transaction) => {
+            const userSnap = await transaction.get(userRef);
+            const userData = userSnap.data();
+            let updates = {};
 
-        await showCustomAlert("Banner cumpărat!", "SUCCES");
+            if (isFreeSession) {
+                let dbVouchers = userData.myCoupons?.banners || [];
+                const vIdx = dbVouchers.findIndex(v => v.id === usedTicketId || v.code === usedTicketId);
+                if (vIdx === -1) throw new Error("Voucher invalid!");
+                dbVouchers.splice(vIdx, 1);
+                updates['myCoupons.banners'] = dbVouchers;
+            } else {
+                if ((userData.coins || 0) < price) throw new Error("Bani insuficienți!");
+                updates.coins = increment(-price);
+            }
+            if ((userData.ownedBanners || []).includes(bannerId)) throw new Error("Ai deja acest banner!");
+            updates.ownedBanners = arrayUnion(bannerId);
+            transaction.update(userRef, updates);
+        });
+
+        window.activeCosmeticTicket = null;
+        await showCustomAlert("Banner deblocat!", "SUCCES");
         checkShopQuest('banner');
-        window.openBannerShop();
-    } catch(e) { console.error(e); }
+        openBannerShop();
+    } catch (e) { 
+        window.activeCosmeticTicket = null;
+        showCustomAlert(e.message, "EROARE"); 
+        openBannerShop();
+    }
 };
 
 window.buyBadge = async (badgeId, price) => {
