@@ -6954,6 +6954,59 @@ body {
 }
 
 .choice-card img { width: 100%; height: auto; }
+
+
+
+/* FORCE PROBABILITY LOG TO STAY ON SCREEN */
+.prize-view-container {
+    width: min(1000px, 95vw);
+    max-height: 90vh; /* Prevents going off-screen */
+    background: #02050a;
+    border-radius: 20px;
+    padding: 20px;
+    position: relative;
+    display: flex;
+    flex-direction: column; /* Allows internal scroll */
+    overflow: hidden;
+}
+
+/* Internal Scroll Area for the cards */
+.aaa-loot-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+    overflow-y: auto; /* Enable scrolling for the cards only */
+    padding: 10px;
+    flex: 1;
+}
+
+/* FIX MOBILE LAYOUT: Stack cards on phones */
+@media (max-width: 768px) {
+    .aaa-loot-grid {
+        grid-template-columns: 1fr !important; /* One big card per row on mobile */
+        gap: 20px;
+    }
+    
+    .aaa-card {
+        height: auto !important;
+        min-height: 200px;
+        padding: 20px 0;
+    }
+
+    .prize-view-container {
+        padding: 15px;
+    }
+
+    /* Make the close button easier to find */
+    #prizeListModal .close-pop {
+        position: absolute !important;
+        top: 15px !important;
+        right: 15px !important;
+        background: rgba(255,255,255,0.1) !important;
+        border: 1px solid #fff !important;
+    }
+}
   </style>
 </head>
 <body>
@@ -11857,22 +11910,22 @@ rewards: [
 
 
 // Replace the box_void entry in your BOXES_DB array with this:
-  { 
-        id: 'box_void', 
-        name: 'Void Box', 
-        price: 15000, 
-        color: '#7000ff', 
-        stockRange: [5, 15], 
-        img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20close.png?alt=media&token=7da7421a-caf5-4a8a-a368-02393550bbe8', 
-        imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20open.png?alt=media&token=39eb8f91-2c77-4bea-9337-ebf5ea391dc3',
-        rewards: [
-            { tier: 'ABYSSAL', label: 'SINGULARITY', icon: '', chance: 0.5, style: 'tier-abyssal' },
-            { tier: 'EXOTIC', label: 'BM VOUCHER', icon: '', chance: 4.5, style: 'tier-exotic' },
-            { tier: 'LEGENDARY', label: 'EXCLUSIVE FRAME', icon: '', chance: 5, style: 'tier-legendary' },
-            { tier: 'MYTHIC', label: '25.000 COINS', icon: 'https://iili.io/fhc1SKQ.png', chance: 10, style: 'tier-mythic' },
-            { tier: 'EPIC', label: '75 DIAMONDS', icon: 'https://iili.io/fv5bmtj.png', chance: 80, style: 'tier-epic' }
-        ]
-    },
+{ 
+    id: 'box_void', 
+    name: 'Void Box', 
+    price: 15000, 
+    color: '#7000ff', 
+    stockRange: [5, 15], 
+    img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20close.png?alt=media&token=7da7421a-caf5-4a8a-a368-02393550bbe8', 
+    imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20open.png?alt=media&token=39eb8f91-2c77-4bea-9337-ebf5ea391dc3',
+    rewards: [
+        { tier: 'EPIC', label: '12.500 COINS', icon: 'https://iili.io/fhc1SKQ.png', chance: 80, style: 'tier-epic' },
+        { tier: 'LEGENDARY', label: 'EXCLUSIVE FRAME', icon: '', chance: 5, style: 'tier-legendary' },
+        { tier: 'MYTHIC', label: '75 DIAMONDS', icon: 'https://iili.io/fv5bmtj.png', chance: 10, style: 'tier-mythic' },
+        { tier: 'EXOTIC', label: 'BM VOUCHER', icon: '', chance: 4.5, style: 'tier-exotic' },
+        { tier: 'ABYSSAL', label: 'SINGULARITY', icon: '', chance: 0.5, style: 'tier-abyssal' }
+    ]
+},
     { id: 'box_celestial', name: 'Celestial Box', price: 25000, color: '#ffffff', stockRange: [5, 10], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20chest%20close%20%20(2).png?alt=media&token=b23d04ee-ce8c-43d7-b2a8-315255e62ca6', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20Chest%20Open%20.png?alt=media&token=68f031ce-57e2-44b2-b9e0-32453d4d1f10' }
 ];
 
@@ -12033,38 +12086,27 @@ window.openPrizeView = () => {
     const container = document.getElementById('prizeTableBody');
     container.innerHTML = ""; 
 
-
-    // Helper for images within the log
-    const TICKET_IMGS = {
-        badges: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
-        frames: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FFrame%20discount%20cupon%20.png?alt=media&token=c49a5fb2-06e8-4df5-bcf3-ed37afd1cdef',
-        banners: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBanner%20discount%20cupon%20.png?alt=media&token=e75ab8ee-5278-496c-9938-d1796bda02e0',
-        texts: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f',
-        coins: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d',
-        blackmarket: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d'
-    };
-
     selectedBox.rewards.forEach((r, idx) => {
         const card = document.createElement('div');
         card.className = `aaa-card ${r.style}`;
         
         let visualHtml = "";
-        const slotID = `slot_${idx}_${Math.floor(Math.random()*1000)}`;
+        const slotID = `shuffle_slot_${idx}`;
 
-        if(r.label === 'EXCLUSIVE FRAME') {
-            visualHtml = `<div id="${slotID}" style="min-height:70px; display:flex; align-items:center; justify-content:center;"></div>`;
-            const exPool = FRAMES_DB.filter(f => f.exclusive);
+        // LOGIC FOR SHUFFLE ITEMS
+        if(r.label === 'EXCLUSIVE FRAME' || r.label === 'RANDOM FRAME') {
+            visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
             setTimeout(() => {
                 const el = document.getElementById(slotID);
                 if(el) setInterval(() => {
                     if (!document.getElementById('prizeListModal').classList.contains('active')) return;
-                    const f = exPool[Math.floor(Math.random() * exPool.length)];
-                    el.innerHTML = `<img src="${f.img}" style="height:55px; filter:drop-shadow(0 0 10px #7000ff);">`;
+                    const f = FRAMES_DB[Math.floor(Math.random() * FRAMES_DB.length)];
+                    el.innerHTML = `<img src="${f.img}" style="height:55px; filter:drop-shadow(0 0 10px var(--r-color));">`;
                 }, 600);
             }, 100);
         } 
         else if(r.label === 'RANDOM BADGE') {
-            visualHtml = `<div id="${slotID}" style="min-height:70px; display:flex; align-items:center; justify-content:center;"></div>`;
+            visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
             setTimeout(() => {
                 const el = document.getElementById(slotID);
                 if(el) setInterval(() => {
@@ -12076,7 +12118,12 @@ window.openPrizeView = () => {
         }
         else if(r.label === 'SINGULARITY') {
             visualHtml = `<span class="shop-badge-preview badge-singularity" style="padding:10px 15px;"><i class="fas fa-atom"></i> SINGULARITY</span>`;
-        } else {
+        } 
+        else if(r.label.includes('VOUCHER')) {
+            visualHtml = `<img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae" style="height:50px; filter: hue-rotate(90deg);">`;
+        }
+        else {
+            // Standard Coins/Diamonds
             visualHtml = `<img src="${r.icon}" class="aaa-card-img" style="height:50px;">`;
         }
 
