@@ -6949,6 +6949,16 @@ body {
     <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBanner%20discount%20cupon%20.png?alt=media&token=e75ab8ee-5278-496c-9938-d1796bda02e0" style="height: 50px;">
 </div>
 
+<div class="v4-badge-item" style="display: flex; flex-direction: row; justify-content: space-between; padding: 15px 20px; align-items: center; cursor: pointer;" onclick="openSubCoupon('badges')">
+    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+    <div style="text-align: left;">
+        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #fff;">BADGE DISCOUNTS</div>
+        <div style="font-size: 10px; color: #aaa;">Tichete pentru insigne profil</div>
+    </div>
+    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae" style="height: 50px;">
+</div>
+
 <!-- Elite Black Market row -->
 <div class="v4-badge-item" style="display: flex; flex-direction: row; justify-content: space-between; padding: 15px 20px; align-items: center; border-color: #ffd700 !important; cursor: pointer;" onclick="openSubCoupon('blackmarket')">
     <div class="bm-bracket br-tl" style="border-color:#ffd700;"></div><div class="bm-bracket br-tr" style="border-color:#ffd700;"></div>
@@ -9737,6 +9747,9 @@ window.processDonation = async () => {
 };
 
 
+window.activeCosmeticTicket = null; // Stores { category: 'badges', id: 'TICK-123' }
+
+
 
 window.openBadgeShop = async () => {
     if(!auth.currentUser) return alert("Loghează-te!");
@@ -9779,28 +9792,35 @@ window.openBadgeShop = async () => {
 
 
 window.buyBadge = async (badgeId, price) => {
-        // REPLACE CONFIRM
-        const confirmed = await showCustomConfirm(`Cumperi insigna pentru ${price} coins?`);
-        if(!confirmed) return;
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'badges';
+    
+    const msg = isFree ? "Folosești tichetul pentru a lua această insignă GRATIS?" : `Cumperi insigna pentru ${price} coins?`;
+    const confirmed = await showCustomConfirm(msg);
+    if(!confirmed) return;
 
-        const userRef = doc(db, "accounts", auth.currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        if((userSnap.data().coins || 0) < price) {
-            // REPLACE ALERT
-            await showCustomAlert("Nu ai destule monede!", "EROARE"); 
-            return;
-        }
-        
-        try {
+    const userRef = doc(db, "accounts", auth.currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    const userData = userSnap.data();
+
+    if(!isFree && (userData.coins || 0) < price) return showCustomAlert("Nu ai destui coins!", "EROARE");
+
+    try {
+        if(isFree) {
+            // REMOVE TICKET FROM DB
+            const remainingTickets = (userData.myCoupons?.badges || []).filter(t => t.id !== window.activeCosmeticTicket.id);
+            await updateDoc(userRef, { 
+                ownedBadges: arrayUnion(badgeId),
+                'myCoupons.badges': remainingTickets
+            });
+            window.activeCosmeticTicket = null; // Reset
+        } else {
             await updateDoc(userRef, { coins: increment(-price), ownedBadges: arrayUnion(badgeId) });
-            
-            // REPLACE ALERT
-            await showCustomAlert("Insignă cumpărată cu succes!", "SUCCES");
-            
-            checkShopQuest('badge');
-            window.openBadgeShop(); 
-        } catch(e) { console.error(e); }
-    };
+        } 
+        
+        await showCustomAlert("Achiziție finalizată!", "SUCCES");
+        openBadgeShop(); 
+    } catch(e) { console.error(e); }
+};
 
 window.buyAllItems = async (category) => {
     if (!auth.currentUser) return showCustomAlert("Loghează-te mai întâi!", "EROARE");
@@ -11489,7 +11509,7 @@ rewards: [
     rewards: [
         { tier: 'RARE', label: '2000-5000', icon: 'https://iili.io/fhc1SKQ.png', chance: 55, style: 'tier-rare' },
         { tier: 'EPIC', label: '10-20 GEMS', icon: 'https://iili.io/fv5bmtj.png', chance: 30, style: 'tier-epic' },
-        { tier: 'LEGENDARY', label: 'COSMETIC VOUCHER', icon: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d', chance: 10, style: 'tier-legendary' },
+        { tier: 'LEGENDARY', label: 'COSMETIC VOUCHER', icon: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae', chance: 10, style: 'tier-legendary' },
         { tier: 'MYTHIC', label: '50 DIAMONDS', icon: 'https://iili.io/fv5bmtj.png', chance: 4, style: 'tier-mythic' },
         { tier: 'EXOTIC', label: 'CURRENCY VOUCHER', icon: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d', chance: 1, style: 'tier-exotic' }
     ]
@@ -11869,6 +11889,13 @@ window.revealReward = async () => {
         let wonFrame = null; 
         let wonBanner = null; // <--- This was missing!
         let wonTicket = null; // This fixes the console error
+
+        const TICKET_IMGS = {
+            badges: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
+            frames: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FFrame%20discount%20cupon%20.png?alt=media&token=c49a5fb2-06e8-4df5-bcf3-ed37afd1cdef',
+            banners: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBanner%20discount%20cupon%20.png?alt=media&token=e75ab8ee-5278-496c-9938-d1796bda02e0',
+            texts: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f'
+        };
 
         
         // ... (rest of your math loop)
@@ -12279,10 +12306,18 @@ window.openSubCoupon = (type) => {
     });
 };
 
-function activateCoupon(id, category) {
-    showCustomAlert("Tichet selectat! Reducerea se va aplica la următorul " + category + " cumpărat.", "SUCCES");
+window.activateCoupon = (id, category) => {
+    window.activeCosmeticTicket = { id, category };
     closeModal('subCouponModal');
-}
+    
+    showCustomAlert(`Tichetul a fost activat! Magazinul se va deschide acum, iar următorul obiect din categoria ${category.toUpperCase()} este GRATUIT.`, "TICHET ACTIVAT");
+    
+    // Open the correct shop automatically
+    if(category === 'badges') openBadgeShop();
+    if(category === 'frames') openFrameShop();
+    if(category === 'banners') openBannerShop();
+    if(category === 'texts') openTextShop();
+};
 </script>
 </body>
 </html>
