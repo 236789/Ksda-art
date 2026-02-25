@@ -5228,67 +5228,32 @@ body {
 }
 
 
-
-  /* --- GOD-TIER SINGULARITY BADGE REVAMP --- */
+/* --- SINGULARITY BADGE: WALL OPTIMIZED --- */
 .badge-singularity {
-    background: #000 !important;
-    color: #fff !important;
-    border: none !important;
-    position: relative;
-    z-index: 1;
-    padding: 6px 15px !important;
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/desc%C4%83rcare.gif?alt=media&token=f0045bb9-4176-4e6a-92e2-25be1eea9bae') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.6) !important;
     font-family: 'Orbitron', sans-serif !important;
     font-weight: 900 !important;
-    letter-spacing: 2px;
     text-transform: uppercase;
-    display: inline-flex;
+    font-size: 8px !important; /* Smaller for chat */
+    padding: 2px 8px !important;
+    border-radius: 4px !important;
+    display: inline-flex !important;
     align-items: center;
-    gap: 8px;
-    border-radius: 4px;
-    overflow: hidden; /* Clips the spinning aura */
-    box-shadow: 0 0 30px rgba(112, 0, 255, 0.8);
-    animation: singularityWarp 4s infinite alternate ease-in-out;
+    gap: 4px;
+    box-shadow: 0 0 10px rgba(112, 0, 255, 0.6);
+    text-shadow: 1px 1px 3px #000, 0 0 5px #000 !important;
+    vertical-align: middle;
+    margin-left: 5px;
 }
 
-/* The Spinning Event Horizon (Aura) */
-.badge-singularity::before {
-    content: '';
-    position: absolute;
-    inset: -150%; /* Large enough to rotate without showing edges */
-    background: conic-gradient(
-        from 0deg, 
-        transparent 0deg, 
-        #7000ff 90deg, 
-        #ff00ff 180deg, 
-        #00ffff 270deg, 
-        transparent 360deg
-    );
-    animation: rotateAura 1.5s linear infinite;
-    z-index: -2;
-}
-
-/* The Black Hole Core */
-.badge-singularity::after {
-    content: '';
-    position: absolute;
-    inset: 2px;
-    background: #000;
-    border-radius: 3px;
-    z-index: -1;
-}
-
-/* Chromatic Distortion Animation */
-@keyframes singularityWarp {
-    0% { filter: hue-rotate(0deg) brightness(1); transform: scale(1); }
-    50% { filter: hue-rotate(20deg) brightness(1.5); transform: scale(1.05); }
-    100% { filter: hue-rotate(-20deg) brightness(1.2); transform: scale(1); }
-}
-
-/* The Icon inside pulses too */
+/* Ensure the icon inside is visible */
 .badge-singularity i {
-    color: #fff;
-    text-shadow: 0 0 10px #7000ff;
-    animation: pulse 1s infinite alternate;
+    font-size: 9px;
+    filter: drop-shadow(0 0 3px #fff);
 }
   </style>
 
@@ -6755,8 +6720,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // UPDATED: b_wheel_god -> QUANTUM GOD (Void/Cyan)
     { id: 'b_wheel_god', text: 'QUANTUM GOD', color: '#050b14', price: 99999, icon: 'fa-atom' },
     
-    // NEW: b_spin_god -> WHEEL GOD (Gold/Electric)
-    { id: 'b_spin_god', text: 'WHEEL GOD', color: 'linear-gradient(45deg, #ffffff, #ffd700, #ffffff)', price: 99999, icon: 'fa-bolt' },
 
     { id: 'b_immortal', text: 'IMMORTAL', color: 'linear-gradient(45deg, #000, #7000ff)', price: 99999, icon: 'fa-skull' },
     { id: 'b_celestial', text: 'CELESTIAL', color: 'linear-gradient(45deg, #fff, #00e5ff)', price: 99999, icon: 'fa-sun' },
@@ -6964,11 +6927,20 @@ const TEXTS_DB = [
 function getCosmeticBadge(equippedBadge) {
     if (!equippedBadge) return "";
     
-    // List of special animated badges
-    const godTierBadges = ['b_wheel_god', 'b_spin_god', 'b_immortal', 'b_celestial', 'b_cyber_ghost', 'b_demon_slayer', 'b_void_master'];
+    // Updated list to include Singularity
+    const godTierIds = [
+        'b_wheel_god', 
+        'b_spin_god', 
+        'b_immortal', 
+        'b_celestial', 
+        'b_cyber_ghost', 
+        'b_demon_slayer', 
+        'b_void_master', 
+        'b_singularity' // <--- ADDED THIS
+    ];
 
-    if (godTierBadges.includes(equippedBadge.id)) {
-        // Special Animated Style - Uses the CSS classes we just added
+    if (godTierIds.includes(equippedBadge.id)) {
+        // Special Animated Style
         let className = `badge-${equippedBadge.id}`;
         
         // Legacy ID fix to ensure Quantum God matches new style
@@ -6977,8 +6949,8 @@ function getCosmeticBadge(equippedBadge) {
         return ` <span class="${className}"><i class="fas ${equippedBadge.icon}"></i> ${equippedBadge.text}</span>`;
     }
 
-    // Default style for standard shop badges
-    return ` <span class="cosmetic-badge" style="background:${equippedBadge.color}; color:#000; border:none; box-shadow:0 0 5px ${equippedBadge.color};"><i class="fas ${equippedBadge.icon}"></i> ${equippedBadge.text}</span>`;
+    // Default style for standard solid-color badges
+    return ` <span class="cosmetic-badge" style="background:${equippedBadge.color} !important; color:#000 !important; border:none; box-shadow:0 0 5px ${equippedBadge.color}; font-weight:900;"><i class="fas ${equippedBadge.icon}"></i> ${equippedBadge.text}</span>`;
 }
     // DOM ELEMENTS
     const lockedView = document.getElementById('lockedView');
