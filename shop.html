@@ -1,4 +1,5 @@
 
+
   
 
 
@@ -5133,7 +5134,7 @@ body {
     position: fixed;
     bottom: 30px;
     left: 30px; /* Mutat pe stânga */
-    z-index: 10;
+    z-index: 25000;
     display: flex;
     flex-direction: column;
     align-items: flex-start; /* Aliniere pe stânga */
@@ -5566,1423 +5567,204 @@ body {
 }
 
 
-/* --- ZONE: MYSTERY (ORANGE/FIRE THEME) --- */
-.accent-mystery { border: 1px solid #ff6a00 !important; box-shadow: inset 0 0 100px rgba(255, 106, 0, 0.1) !important; }
-.title-mystery { color: #ff6a00 !important; text-shadow: 0 0 15px #ff6a00; }
-.sep-atelier-mystery { --start-color: #d63384; --end-color: #ff6a00; }
-.sep-mystery-terminal { --start-color: #ff6a00; --end-color: #00ff88; }
-
-/* Quick Nav Reactor State */
-.nav-trigger-reactor.state-mystery {
-    border-color: #ff6a00;
-    box-shadow: 0 0 20px rgba(255, 106, 0, 0.5), inset 0 0 10px rgba(255, 106, 0, 0.2);
-}
-.nav-trigger-reactor.state-mystery i { color: #ff6a00; }
-.btn-nav-mystery { background: rgba(255, 106, 0, 0.05); border: 1px solid #ff6a00; color: #ff6a00; font-family:'Orbitron'; font-weight:900; text-transform:uppercase; position:relative; overflow:hidden; display:flex; align-items:center; gap:10px; transition:0.3s; padding: 10px 12px; font-size: 9px; letter-spacing: 1px; border-radius: 4px; }
-.btn-nav-mystery:hover { transform: translateX(8px); }
-
-/* --- MYSTERY BOX SHOP CARDS --- */
-.mystery-card-v4 {
-    background: rgba(255, 106, 0, 0.03) !important;
-    border: 1px solid rgba(255, 106, 0, 0.1) !important;
-    padding: 20px;
-    text-align: center;
-    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    position: relative;
-    cursor: pointer;
-}
-.mystery-card-v4:hover { border-color: #ff6a00 !important; transform: translateY(-5px); }
-
-/* Box Type Specific Accents */
-.m-gold { border-color: #ffd700 !important; }
-.m-titanium { border-color: #00e5ff !important; }
-.m-void { border-color: #7000ff !important; }
-.m-celestial { border-color: #ffffff !important; box-shadow: 0 0 20px rgba(255,255,255,0.1); }
-
-/* --- UNBOXING OVERLAY --- */
-#unboxingOverlay {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-    z-index: 50000; flex-direction: column; justify-content: center; align-items: center;
-    backdrop-filter: blur(15px);
-}
-.unboxing-box-img {
-    width: 250px; height: auto; cursor: pointer;
-    filter: drop-shadow(0 0 30px currentColor);
-    transition: 0.2s;
-}
-.box-shake { animation: boxShake 0.5s infinite; }
-@keyframes boxShake {
-    0% { transform: rotate(0); }
-    25% { transform: rotate(5deg); }
-    50% { transform: rotate(0); }
-    75% { transform: rotate(-5deg); }
-    100% { transform: rotate(0); }
-}
-
-/* Quantity Selector */
-.qty-btn {
-    background: rgba(255,255,255,0.05); border: 1px solid #444; color: #fff;
-    padding: 10px 20px; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s;
-}
-.qty-btn.active { background: #ff6a00; color: #000; border-color: #fff; }
-
-/* Imaginea principală (Chest-ul) */
-.mb-main-img {
-    height: 80px;
-    width: auto;
-    object-fit: contain;
-    transition: 0.3s;
-}
-
-/* Stil Celestial Box - Elite Galaxy Effect */
-.m-celestial { 
-    background: radial-gradient(circle at center, rgba(112, 0, 255, 0.2) 0%, rgba(5, 11, 20, 1) 100%) !important;
-    border: 1px solid #7000ff !important;
-    box-shadow: 0 0 30px rgba(112, 0, 255, 0.3), inset 0 0 20px rgba(112, 0, 255, 0.2) !important;
-}
-
-/* PC Layout Fix: Celestial ocupă 2 coloane și imaginea crește corect */
-@media (min-width: 1024px) {
-    #mysteryBoxList {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-    }
-    
-    .mystery-card-v4.m-celestial {
-        grid-column: span 2;
-        padding: 40px;
-    }
-    
-    /* ACUM TARGETĂM DOAR IMAGINEA MARE, NU ȘI MONEDA */
-    .mystery-card-v4.m-celestial .mb-main-img {
-        height: 140px;
-    }
-}
-
-/* Asigurăm că iconița de monedă nu e niciodată deformată */
-.mystery-card-v4 img[src*="fhc1SKQ"] {
-    height: 14px !important;
-    width: 14px !important;
-}
-/* PC Grid Layout: Celestial takes 2 columns */
-@media (min-width: 1024px) {
-    #mysteryBoxList {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 25px;
-    }
-    /* Forțăm Celestial Box (ultimul element) să ocupe tot rândul */
-    .mystery-card-v4:last-child {
-        grid-column: span 2;
-    }
-    .mystery-card-v4:last-child img {
-        height: 120px !important; /* Mai mare pe PC */
-    }
-}
-
-/* Stil Buton View Prizes (MAI MARE) */
-.btn-view-prizes {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: #00e5ff;
-    padding: 12px 25px;
-    border-radius: 4px;
-    font-family: 'Orbitron';
-    font-size: 11px;
-    font-weight: 800;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: 0.3s;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-.btn-view-prizes:hover {
-    background: #00e5ff;
-    color: #000;
-    box-shadow: 0 0 20px #00e5ff;
-}
-
-/* Tabel Premii în Modal */
-.prize-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    font-size: 12px;
-}
-.prize-table td {
-    padding: 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-.chance-tag { color: #aaa; font-family: monospace; }
-
-
-
-/* Badge pentru numărul de cutii rămase */
-.stock-badge {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid currentColor;
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-family: 'Orbitron';
-    font-size: 10px;
-    font-weight: 800;
-    z-index: 5;
-}
-
-/* Overlay Stoc Epuizat */
-.stock-out-overlay {
-    position: absolute;
+    /* --- SICK RENOVATION OVERLAY STYLES --- */
+#renovationOverlay {
+    position: fixed;
     inset: 0;
-    background: rgba(5, 11, 20, 0.9);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 20;
-    border-radius: 2px;
-    backdrop-filter: blur(4px);
-    border: 1px solid #ff4757;
-    pointer-events: all; /* Blochează click-urile pe card */
-}
-
-.stock-out-text {
-    font-family: 'Montserrat';
-    font-weight: 900;
-    color: #ff4757;
-    font-size: 16px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    text-shadow: 0 0 10px #ff4757;
-}
-
-/* Animație pentru deschiderea cutiei */
-.unboxing-box-img.open {
-    transform: scale(1.2) translateY(-20px);
-    filter: drop-shadow(0 0 50px currentColor);
-}
-
-
-/* --- MYSTERY BOX SYSTEM V4 --- */
-.mb-main-img {
-    height: 80px;
-    width: auto;
-    object-fit: contain;
-    transition: 0.3s;
-    display: block;
-    margin: 0 auto 15px;
-}
-
-/* PC Grid: Celestial takes 2 columns, others take 1 */
-@media (min-width: 1024px) {
-    #mysteryBoxList {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-    }
-    .mystery-card-v4.m-celestial {
-        grid-column: span 2;
-        padding: 40px;
-    }
-    .mystery-card-v4.m-celestial .mb-main-img {
-        height: 140px;
-    }
-}
-
-/* Stock Badge */
-.stock-badge {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: rgba(0, 0, 0, 0.7);
-    border: 1px solid currentColor;
-    padding: 3px 10px;
-    border-radius: 4px;
-    font-family: 'Orbitron';
-    font-size: 10px;
-    font-weight: 800;
-    z-index: 5;
-}
-
-/* Stock Out Overlay (Blocking) */
-.stock-out-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(5, 11, 20, 0.92);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 20;
-    backdrop-filter: blur(6px);
-    border: 1px solid #ff4757;
-    cursor: not-allowed;
-}
-
-.stock-out-text {
-    font-family: 'Montserrat';
-    font-weight: 900;
-    color: #ff4757;
-    font-size: 16px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    text-shadow: 0 0 10px #ff4757;
-}
-
-/* Celestial Elite Theme */
-.m-celestial { 
-    background: radial-gradient(circle at center, rgba(112, 0, 255, 0.2) 0%, rgba(5, 11, 20, 1) 100%) !important;
-    border: 1px solid #7000ff !important;
-    box-shadow: 0 0 30px rgba(112, 0, 255, 0.3), inset 0 0 20px rgba(112, 0, 255, 0.2) !important;
-}
-
-/* Fix for icons inside cards (Prevents stretching) */
-.mystery-card-v4 img[src*="fhc1SKQ"] {
-    height: 14px !important;
-    width: 14px !important;
-    object-fit: contain !important;
-    display: inline-block !important;
-    margin: 0 !important;
-}
-
-/* Unboxing Animation */
-.unboxing-box-img.open {
-    transform: scale(1.2) translateY(-20px);
-    filter: drop-shadow(0 0 50px currentColor);
-}
-
-
-
-.v4-timer-pill {
-    font-family: 'Orbitron';
-    font-size: 11px;
-    color: #ff6a00;
-    background: rgba(255, 106, 0, 0.1);
-    border: 1px solid #ff6a00;
-    padding: 4px 12px;
-    border-radius: 20px;
-    margin-left: 15px;
-    display: inline-block;
-    vertical-align: middle;
-    text-shadow: 0 0 5px #ff6a00;
-    letter-spacing: 1px;
-}
-
-
-/* Adaugă asta în secțiunea <style> */
-#unboxingBoxImg {
-    will-change: transform, opacity; /* Pregătește placa video pentru animație */
-    image-rendering: -webkit-optimize-contrast; /* Claritate maximă */
-}
-
-
-
-/* --- ANIMATED GAMBLING ZONE --- */
-#zone-mystery {
     background: #050b14;
-    position: relative;
-    overflow: hidden;
-    padding: 100px 20px;
-    border-bottom: 2px solid #ff6a0033;
-}
-
-/* Layer 1: Shifting Liquid Orange Mesh */
-.mystery-liquid-bg {
-    position: absolute;
-    inset: 0;
-    background: 
-        radial-gradient(circle at 20% 30%, rgba(255, 106, 0, 0.15) 0%, transparent 40%),
-        radial-gradient(circle at 80% 70%, rgba(255, 69, 0, 0.15) 0%, transparent 40%),
-        radial-gradient(circle at 50% 50%, rgba(20, 10, 0, 1) 0%, #050b14 100%);
-    animation: meshMove 15s ease-in-out infinite alternate;
-    z-index: 0;
-}
-
-@keyframes meshMove {
-    0% { transform: scale(1) translate(0, 0); }
-    100% { transform: scale(1.2) translate(-5%, -5%); }
-}
-
-/* Layer 2: Animated Floating Embers */
-.mystery-embers {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0; left: 0;
-    background-image: 
-        radial-gradient(circle at 2px 2px, rgba(255, 106, 0, 0.4) 1px, transparent 0);
-    background-size: 40px 40px;
-    z-index: 1;
-    mask-image: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0));
-    animation: embersUp 20s linear infinite;
-}
-
-@keyframes embersUp {
-    from { background-position: 0 0; }
-    to { background-position: 0 -1000px; }
-}
-
-/* Layer 3: Tech Grid Pulse */
-#zone-mystery::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: 
-        linear-gradient(rgba(255, 106, 0, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 106, 0, 0.05) 1px, transparent 1px);
-    background-size: 60px 60px;
-    z-index: 1;
-    pointer-events: none;
-    animation: gridPulse 4s ease-in-out infinite;
-}
-
-@keyframes gridPulse {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 0.7; }
-}
-
-/* Ensure content stays on top of animations */
-#zone-mystery .metallic-title, 
-#zone-mystery .shop-desc, 
-#zone-mystery .bm-terminal-container {
-    position: relative;
-    z-index: 5;
-}
-
-/* --- PREMIUM LOOT UI --- */
-.tier-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2x2 for better mobile/pc fit */
-    gap: 15px;
-    padding: 10px;
-}
-
-.tier-card {
-    position: relative;
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 20px 10px;
-    text-align: center;
-    backdrop-filter: blur(10px);
-    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    overflow: hidden;
+    z-index: 999999; /* Above everything */
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
-}
-
-.tier-card:hover { transform: translateY(-5px); border-color: rgba(255,255,255,0.3); }
-
-/* Glow Effects */
-.t-common { border-bottom: 4px solid #8b4513; box-shadow: inset 0 0 15px rgba(139, 69, 19, 0.2); }
-.t-uncommon { border-bottom: 4px solid #bdc3c7; box-shadow: inset 0 0 15px rgba(189, 195, 199, 0.2); }
-.t-rare { border-bottom: 4px solid #00d2ff; box-shadow: inset 0 0 15px rgba(0, 210, 255, 0.2); }
-.t-epic { border-bottom: 4px solid #f093fb; box-shadow: inset 0 0 20px rgba(240, 147, 251, 0.3); }
-.t-legendary { 
-    border: 1px solid #ffd700;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4), inset 0 0 20px rgba(255, 215, 0, 0.2);
-    animation: goldPulse 2s infinite alternate;
-}
-
-.tier-name {
-    font-family: 'Orbitron';
-    font-size: 9px;
-    font-weight: 900;
-    letter-spacing: 2px;
-    margin-bottom: 10px;
-    opacity: 0.7;
-}
-
-.tier-reward {
-    font-family: 'Montserrat';
-    font-weight: 900;
-    font-size: 15px;
-    color: #fff;
-    display: flex;
     align-items: center;
-    gap: 8px;
-}
-
-.tier-reward img { height: 20px; width: auto; }
-
-.tier-chance {
-    font-family: 'Courier New';
-    font-size: 10px;
-    color: rgba(255,255,255,0.4);
-    margin-top: 12px;
-}
-
-/* Result Screen Styles */
-.reward-line {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin: 10px 0;
-    font-family: 'Orbitron';
-    font-weight: 900;
-    font-size: 22px;
-}
-.reward-line img { width: 35px; height: 35px; filter: drop-shadow(0 0 10px currentColor); }
-
-
-
-/* --- GOD-TIER LOOT CARDS (SHOP STYLE) --- */
-.loot-grid-v4 {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    padding: 20px;
-}
-
-.loot-card-v4 {
-    background: #08101b;
-    border: 2px solid var(--tier-color); /* Neon Border like Shop */
-    border-radius: 24px;
-    padding: 25px 15px;
-    text-align: center;
-    position: relative;
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-family: 'Orbitron', sans-serif;
 }
 
-.loot-card-v4:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px var(--tier-glow);
-}
-
-/* Tier Glow & Identity */
-.r-common { --tier-color: #8b4513; --tier-glow: rgba(139, 69, 19, 0.4); } /* Bronze/Scrap */
-.r-silver { --tier-color: #bdc3c7; --tier-glow: rgba(189, 195, 199, 0.4); } /* Silver */
-.r-rare   { --tier-color: #00d2ff; --tier-glow: rgba(0, 210, 255, 0.4); } /* Blue */
-.r-epic   { --tier-color: #f093fb; --tier-glow: rgba(240, 147, 251, 0.4); } /* Pink/Purple */
-.r-gold   { --tier-color: #ffd700; --tier-glow: rgba(255, 215, 0, 0.6); } /* Gold */
-
-/* Legendary Animated Border (Next Level) */
-.r-gold::before {
-    content: ''; position: absolute; inset: -2px;
-    background: conic-gradient(from 0deg, transparent, #ffd700, transparent 30%);
-    animation: borderRotate 2s linear infinite;
-    z-index: 0; border-radius: 24px;
-}
-.r-gold::after {
-    content: ''; position: absolute; inset: 2px;
-    background: #08101b; border-radius: 22px; z-index: 1;
-}
-
-/* Inner Elements */
-.loot-card-v4 img, .loot-card-v4 .tier-header { position: relative; z-index: 2; }
-
-.tier-header {
-    font-family: 'Orbitron';
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: 2px;
-    color: var(--tier-color);
-    margin-bottom: 15px;
-    text-transform: uppercase;
-}
-
-.loot-main-img {
-    height: 60px;
-    width: auto;
-    margin-bottom: 15px;
-    filter: drop-shadow(0 0 10px var(--tier-glow));
-}
-
-/* THE CLIPPED MILITARY TAG (From Shop Screenshot) */
-.loot-tag-v4 {
-    position: relative;
-    z-index: 2;
-    background: transparent;
-    border: 1.5px solid var(--tier-color);
-    color: #fff;
-    font-family: 'Orbitron';
-    font-size: 13px;
-    font-weight: 900;
-    padding: 8px 20px;
-    margin-top: 10px;
-    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.loot-chance-v4 {
-    position: relative;
-    z-index: 2;
-    font-size: 9px;
-    font-family: monospace;
-    color: #aaa;
-    margin-top: 12px;
-}
-
-/* --- GOD-TIER AAA PRIZE HUD --- */
-.prize-view-container {
-    width: min(1000px, 95vw);
-    background: #02050a;
-    border-radius: 20px;
-    padding: 30px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 0 100px rgba(0,0,0,1);
-    border: 1px solid rgba(255,255,255,0.1);
-}
-
-/* THE GRID SYSTEM (PC: 5 Columns | Mobile: 2 Columns) */
-.aaa-loot-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 15px;
-    margin-top: 30px;
-}
-
-/* THE SICK ROTATING CARD */
-.aaa-card {
-    position: relative;
-    height: 320px;
-    background: #08101b;
-    border-radius: 15px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 1;
-}
-
-/* THE ROTATING NEON BORDER (Pseudo Element) */
-.aaa-card::before {
-    content: '';
+/* Moving Scanline Effect */
+.reno-scanline {
     position: absolute;
-    inset: -50%;
-    background: conic-gradient(from 0deg, transparent, var(--r-color), transparent 30%);
-    animation: rotateAura 3s linear infinite;
-    z-index: 0;
-}
-
-/* INNER MASK & BACKGROUNDS */
-.aaa-card::after {
-    content: '';
-    position: absolute;
-    inset: 3px;
-    background: var(--r-bg);
-    border-radius: 12px;
-    z-index: 1;
-}
-
-/* TIER DEFINITIONS */
-.tier-common    { --r-color: #cd7f32; --r-bg: linear-gradient(180deg, #1a0f05 0%, #08101b 100%); }
-.tier-uncommon  { --r-color: #c0c0c0; --r-bg: linear-gradient(180deg, #161a1d 0%, #08101b 100%); }
-.tier-rare      { --r-color: #00d2ff; --r-bg: linear-gradient(180deg, #021a25 0%, #08101b 100%); }
-.tier-epic      { --r-color: #d32ce6; --r-bg: linear-gradient(180deg, #1a0225 0%, #08101b 100%); }
-.tier-legendary { --r-color: #ffd700; --r-bg: linear-gradient(180deg, #251e02 0%, #08101b 100%); }
-
-/* 1. FIXED CENTERING & BADGE POSITIONING */
-.aaa-card-content {
-    position: relative;
-    z-index: 5;
-    text-align: center;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center; /* Centered vertically */
-    gap: 20px; /* Space between Title, Image/Badge, and Tag */
-    padding: 15px;
-}
-.aaa-card-title {
-    font-family: 'Orbitron'; 
-    font-size: 11px; 
-    font-weight: 900;
-    letter-spacing: 3px; 
-    color: var(--r-color); 
-    text-transform: uppercase;
-    /* Sharp Character Outline */
-    -webkit-text-stroke: 1px rgba(0,0,0,0.8); 
-    text-shadow: 0 0 15px var(--r-color), 0 0 5px #000;
-}
-
-.aaa-card-img {
-    height: 60px; width: auto; 
-    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
-    transition: 0.3s;
-}
-
-.aaa-card-value {
-    position: relative;
-    background: rgba(0, 0, 0, 0.9) !important;
-    color: #fff !important;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 900;
-    font-size: 13px;
-    padding: 10px 25px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 155px;
-    text-transform: uppercase;
-    
-    /* The Shape */
-    clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
-    
-    /* REMOVE standard border */
-    border: none !important;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-}
-
-/* THE PERFECT UNIFORM BORDER ENGINE */
-.aaa-card-value::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    padding: 1.5px; /* THIS IS YOUR BORDER THICKNESS (Uniform on all sides) */
-    background: var(--r-color); /* The neon tier color */
-    
-    /* Must match the parent's clip-path exactly */
-    clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%);
-    
-    /* THE MAGIC: This hides the center of the background, leaving ONLY the edge */
-    -webkit-mask: 
-       linear-gradient(#fff 0 0) content-box, 
-       linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
-    
-    pointer-events: none;
-    z-index: 6;
-    /* Subtle glow pulse */
-    filter: drop-shadow(0 0 5px var(--r-color));
-}
-
-/* Add a permanent glow line under the tag to match the card color */
-.aaa-card-value::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: var(--r-color);
-    box-shadow: 0 0 10px var(--r-color);
-}
-
-
-.aaa-card-chance { font-family: monospace; font-size: 9px; color: #555; margin-top: 5px; }
-
-/* 2. MOVE SHUFFLE SLOT UP (Fixing collision) */
-#badgeShuffleSlot {
-    height: 60px;
-    width: 100%;
-    margin-top: -10px; /* Pulls it up away from the value tag */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: visible; /* Prevents badge glow from cutting off */
-}
-.badge-reel-item {
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: badgeDrop 0.2s ease-in-out;
-}
-
-@keyframes badgeDrop {
-    0% { transform: translateY(-50px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes rotateAura { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-/* MOBILE FIX: SMALL SQUARES GRID */
-@media (max-width: 768px) {
-    .aaa-loot-grid {
-        grid-template-columns: repeat(2, 1fr); /* 2x2 Grid */
-        gap: 10px;
-    }
-    .aaa-card {
-        height: 180px; /* Squares on mobile */
-    }
-    .aaa-card-title { font-size: 8px; }
-    .aaa-card-img { height: 40px; }
-    .aaa-card-value { font-size: 10px; padding: 5px; }
-    .tier-legendary { grid-column: span 2; height: 140px; } /* Legendary is wide at bottom */
-}
-
-
-@media (max-width: 768px) {
-    .aaa-card-value {
-        min-width: 100px;
-        font-size: 10px;
-        padding: 6px 15px;
-        clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
-    }
-    .aaa-card-content {
-        gap: 10px; /* Tighter gap for small screens */
-    }
-}
-
-
-/* --- DEALS TERMINAL STYLES --- */
-.deals-container-v4 { width: 100%; max-width: 1000px; position: relative; z-index: 5; }
-
-/* THE DISCOUNT TAG */
-.discount-badge {
-    position: absolute; 
-    top: 10px; 
-    left: -5px; /* Slightly off-edge for depth */
-    background: #ff4757; 
-    color: #fff;
-    padding: 3px 10px; /* Smaller padding */
-    font-family: 'Orbitron'; 
-    font-weight: 900; 
-    font-size: 9px; /* Smaller font */
-    clip-path: polygon(0 0, 100% 0, 88% 100%, 0% 100%);
-    box-shadow: 3px 3px 10px rgba(255, 71, 87, 0.3);
-    z-index: 10; 
-    animation: pulseRed 2s infinite;
-    letter-spacing: 1px;
-}
-
-/* THE GLOWING X OVERLAY */
-.old-price-container {
-    position: relative; display: inline-block;
-    color: #555; font-size: 11px; margin-bottom: 5px;
-}
-.old-price-container::after {
-    content: ""; position: absolute; top: 50%; left: -10%; width: 120%; height: 2px;
-    background: #ff4757; transform: rotate(-15deg);
-    box-shadow: 0 0 10px #ff4757;
-}
-
-/* THE DEAL CARD (Blue/Cyan Neon) */
-.deal-card {
-    --r-color: #00ffff;
-    --r-bg: linear-gradient(180deg, #022525 0%, #08101b 100%);
-}
-
-.deal-card .aaa-card-value {
-    border-color: #00ff88 !important; /* New price is Green */
-}
-
-/* --- UPDATED DEALS CSS --- */
-.btn-buy-deal {
-    background: #00ffff !important;
-    color: #000 !important;
-    font-weight: 900;
-    font-family: 'Montserrat';
-    width: 100%; padding: 12px; margin-top: 10px;
-    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
-    border: none; cursor: pointer; transition: 0.3s;
-    text-transform: uppercase;
-}
-
-/* STATE: ALREADY OWNED */
-.btn-buy-deal.is-owned {
-    background: #1a1a1a !important;
-    color: #444 !important;
-    cursor: not-allowed;
-    box-shadow: none !important;
-    filter: grayscale(1);
-}
-
-/* MOBILE FIX: STACK DEALS VERTICALLY */
-@media (max-width: 768px) {
-    #dealsGrid {
-        grid-template-columns: 1fr !important; /* One big sick card per row */
-        gap: 25px;
-        padding: 0 20px;
-    }
-    
-    .aaa-card.deal-card {
-        height: auto;
-        min-height: 300px;
-        padding-bottom: 30px;
-    }
-
-    .discount-badge {
-        font-size: 11px;
-        top: 5px;
-        left: 0px;
-    }
-}
-
-
-/* --- FLASH DEALS ANIMATED ENGINE --- */
-#zone-deals {
-    position: relative;
-    background: #02080a; /* Deepest Black */
-    overflow: hidden;
-    padding-bottom: 120px;
-}
-
-.deals-bg-wrapper {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-}
-
-/* Layer 1: Atmospheric Cyan Fog */
-.deals-fog {
-    position: absolute;
-    inset: 0;
-    background: 
-        radial-gradient(circle at 20% 30%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(0, 255, 255, 0.08) 0%, transparent 50%);
-    filter: blur(60px);
-    animation: fogDrift 15s ease-in-out infinite alternate;
-}
-
-/* Layer 2: 3D Scrolling Grid */
-.deals-grid-anim {
-    position: absolute;
-    width: 200%;
-    height: 200%;
-    top: -50%;
-    left: -50%;
-    background-image: 
-        linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 60px 60px;
-    transform: perspective(500px) rotateX(60deg);
-    animation: gridScroll 20s linear infinite;
-    mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 80%);
-}
-
-/* Layer 3: Vertical Laser Scanner */
-.deals-scanner {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100px;
-    background: linear-gradient(180deg, 
-        transparent 0%, 
-        rgba(0, 255, 255, 0.15) 50%, 
-        transparent 100%);
-    box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
-    animation: scanVertical 6s linear infinite;
+    z-index: 2;
+    background: linear-gradient(to bottom, transparent, rgba(41, 243, 255, 0.1), transparent);
+    opacity: 0.5;
+    animation: scanMove 4s linear infinite;
 }
 
-/* --- ANIMATION KEYFRAMES --- */
-@keyframes fogDrift {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(5%, 5%) scale(1.2); }
+@keyframes scanMove {
+    0% { top: -100px; }
+    100% { top: 100%; }
 }
 
-@keyframes gridScroll {
-    from { background-position: 0 0; }
-    to { background-position: 0 120px; } /* Scrolls "forward" */
-}
-
-@keyframes scanVertical {
-    0% { top: -10%; opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { top: 110%; opacity: 0; }
-}
-
-/* Ensure content stays on top of animations */
-#zone-deals .metallic-title, 
-#zone-deals .shop-desc, 
-#zone-deals .deals-container-v4,
-#zone-deals .hr-conduit {
-    position: relative;
-    z-index: 5;
-}
-
-
-/* --- FLASH DEALS NAV BUTTON (NEON MINT) --- */
-.btn-nav-deals { 
-    background: rgba(0, 255, 204, 0.05); 
-    border: 1px solid #00ffcc; /* NEON MINT */
-    color: #00ffcc; 
-    font-family:'Orbitron'; 
-    font-weight:900; 
-    text-transform:uppercase; 
-    position:relative; 
-    overflow:hidden; 
-    display:flex; 
-    align-items:center; 
-    gap:10px; 
-    transition:0.3s; 
-    padding: 10px 12px; 
-    font-size: 9px; 
-    letter-spacing: 1px; 
-    border-radius: 4px; 
-}
-.btn-nav-deals:hover { 
-    transform: translateX(8px); 
-    background: rgba(0, 255, 204, 0.15); 
-    box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
-}
-
-/* Laser Scan for Deals Button - White/Mint */
-.btn-nav-deals::before {
-    content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(200, 255, 240, 0.4), transparent);
-    animation: btnScan 3.5s infinite linear;
-}
-
-/* --- REACTOR NEON MINT STATE --- */
-.nav-trigger-reactor.state-deals {
-    border-color: #00ffcc;
-    box-shadow: 0 0 25px rgba(0, 255, 204, 0.6), inset 0 0 10px rgba(0, 255, 204, 0.2);
-}
-.nav-trigger-reactor.state-deals i { 
-    color: #00ffcc; 
-    filter: drop-shadow(0 0 5px #00ffcc);
-}
-
-
-/* Update the title gradient to Mint */
-#zone-deals .metallic-title { 
-    background: linear-gradient(180deg, #fff 0%, #00ffcc 100%); 
-    -webkit-background-clip: text; 
-}
-
-/* Update the background fog and grid to Mint */
-.deals-fog {
-    background: 
-        radial-gradient(circle at 20% 30%, rgba(0, 255, 204, 0.12) 0%, transparent 50%),
-        radial-gradient(circle at 80% 70%, rgba(0, 255, 204, 0.1) 0%, transparent 50%);
-}
-
-.deals-grid-anim {
+/* Background Grid */
+.reno-grid {
+    position: absolute;
+    inset: 0;
     background-image: 
-        linear-gradient(rgba(0, 255, 204, 0.05) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 204, 0.05) 1px, transparent 1px);
+        linear-gradient(rgba(41, 243, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(41, 243, 255, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 1;
 }
 
-.deals-scanner {
-    background: linear-gradient(180deg, 
-        transparent 0%, 
-        rgba(0, 255, 204, 0.2) 50%, 
-        transparent 100%);
-    box-shadow: 0 0 30px rgba(0, 255, 204, 0.2);
-}
-
-/* --- REACTOR NEON MINT STATE (FLASH DEALS) --- */
-.nav-trigger-reactor.state-deals {
-    border-color: #00ffcc !important;
-    box-shadow: 0 0 25px rgba(0, 255, 204, 0.6), inset 0 0 10px rgba(0, 255, 204, 0.2) !important;
-    background: #050b14 !important;
-}
-
-.nav-trigger-reactor.state-deals i { 
-    color: #00ff88 !important; /* Slightly greener mint for the icon */
-    filter: drop-shadow(0 0 5px #00ffcc);
-}
-
-
-/* --- COUPON HERO IMAGE UPGRADE --- */
-.coupon-hero-img {
-    height: 150px; /* Base Mobile Height */
-    width: auto;
-    display: block;
-    margin: 0 auto;
-    /* Neon Mint Glow */
-    filter: drop-shadow(0 0 30px rgba(0, 255, 204, 0.4));
-    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 6;
+.reno-content {
     position: relative;
-    animation: floatingGlow 4s ease-in-out infinite;
+    z-index: 10;
+    text-align: center;
+    padding: 20px;
 }
 
-/* PC SCALE UP (INSANE SIZE) */
-@media (min-width: 1024px) {
-    .coupon-hero-img {
-        height: 350px; /* Much bigger for desktop users */
-        filter: drop-shadow(0 0 50px rgba(0, 255, 204, 0.5));
-    }
-}
-
-.coupon-hero-img:hover {
-    transform: scale(1.05) translateY(-15px);
-    filter: drop-shadow(0 0 70px #00ffcc);
-}
-
-/* Floating Animation with Glow Pulse */
-@keyframes floatingGlow {
-    0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 30px rgba(0, 255, 204, 0.4)); }
-    50% { transform: translateY(-15px); filter: drop-shadow(0 0 50px rgba(0, 255, 204, 0.7)); }
-}
-
-.coupon-input-wrapper {
-    background: rgba(0, 20, 15, 0.6);
-    border: 1px solid rgba(0, 255, 204, 0.1);
-    padding: 30px;
-    border-radius: 4px;
-    position: relative;
-    backdrop-filter: blur(10px);
-}
-
-/* Mobile Tweak for Coupons */
-@media (max-width: 768px) {
-    .coupon-terminal-v4 { padding: 0 20px; }
-    .coupon-hero-img { height: 110px; }
-}
-
-
-/* --- COUPON INVENTORY GRID --- */
-.coupon-grid-v6 {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 coloane pe mobil/PC */
-    gap: 15px;
-    margin-top: 10px;
-    padding-bottom: 20px;
-}
-
-.coupon-cat-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(0, 255, 204, 0.2);
-    border-radius: 15px;
-    padding: 15px 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    position: relative;
-    overflow: hidden;
-}
-
-.coupon-cat-card span {
-    font-family: 'Orbitron';
-    font-size: 8px;
+/* Glitch Text Effect */
+.reno-title {
+    font-size: clamp(30px, 8vw, 70px);
     font-weight: 900;
-    letter-spacing: 1px;
-    color: #00ffcc;
-    margin-bottom: 10px;
-    text-shadow: 0 0 5px #00ffcc;
-}
-
-.coupon-cat-card img {
-    width: 80%;
-    height: auto;
-    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
-    transition: 0.3s;
-}
-
-.coupon-cat-card:hover {
-    transform: translateY(-5px);
-    background: rgba(0, 255, 204, 0.08);
-    border-color: #00ffcc;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-}
-
-.coupon-cat-card:hover img {
-    transform: scale(1.1) rotate(2deg);
-    filter: drop-shadow(0 0 15px #00ffcc);
-}
-
-/* Efect de laser scan similar cu restul site-ului */
-.coupon-cat-card::before {
-    content: '';
-    position: absolute; top: 0; left: -150%;
-    width: 50%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(0, 255, 204, 0.2), transparent);
-    transform: skewX(-20deg);
-    animation: couponLaser 4s infinite;
-}
-
-@keyframes couponLaser {
-    0% { left: -150%; }
-    20% { left: 150%; }
-    100% { left: 150%; }
-}
-
-
-.coupon-cat-card[onclick*="blackmarket"]:hover {
-    border-color: #ffd700;
-    box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
-}
-
-
-
-/* --- SICK INDIVIDUAL TICKET STYLES --- */
-.coupon-ticket {
-    background: linear-gradient(90deg, #001a0f 0%, #08101b 100%);
-    border: 1px solid rgba(0, 255, 204, 0.3);
-    padding: 15px 20px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    color: #fff;
     position: relative;
-    cursor: pointer;
-    transition: 0.3s;
+    text-shadow: 0.05em 0 0 rgba(255, 0, 80, 0.75),
+                -0.025em -0.05em 0 rgba(0, 255, 200, 0.75),
+                0.025em 0.05em 0 rgba(41, 243, 255, 0.75);
+    animation: glitch 500ms infinite;
+}
+
+.reno-title::before, .reno-title::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0.8;
+}
+
+.reno-title::before {
+    animation: glitch 650ms infinite;
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    transform: translate(-0.025em, -0.0125em);
+    color: #ff0050;
+}
+
+.reno-title::after {
+    animation: glitch 300ms infinite;
+    clip-path: polygon(0 80%, 100% 20%, 100% 100%, 0 100%);
+    transform: translate(0.0125em, 0.025em);
+    color: #29f3ff;
+}
+
+@keyframes glitch {
+    0% { text-shadow: 0.05em 0 0 #ff0050, -0.05em -0.025em 0 #29f3ff; }
+    14% { text-shadow: 0.05em 0 0 #ff0050, -0.05em -0.025em 0 #29f3ff; }
+    15% { text-shadow: -0.05em -0.025em 0 #ff0050, 0.025em 0.025em 0 #29f3ff; }
+    49% { text-shadow: -0.05em -0.025em 0 #ff0050, 0.025em 0.025em 0 #29f3ff; }
+    50% { text-shadow: 0.025em 0.05em 0 #ff0050, 0.05em 0 0 #29f3ff; }
+    99% { text-shadow: 0.025em 0.05em 0 #ff0050, 0.05em 0 0 #29f3ff; }
+    100% { text-shadow: -0.025em 0 0 #ff0050, -0.025em -0.05em 0 #29f3ff; }
+}
+
+/* Loading Bar */
+.reno-status-box {
+    margin: 40px auto;
+    max-width: 400px;
+}
+
+.reno-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    position: relative;
     overflow: hidden;
-    /* Creating the "Ticket Notch" look on the sides */
-    mask-image: radial-gradient(circle at 0% 50%, transparent 10px, black 11px), 
-                radial-gradient(circle at 100% 50%, transparent 10px, black 11px);
+    border: 1px solid rgba(41, 243, 255, 0.2);
 }
 
-.coupon-ticket:hover {
-    border-color: #00ffcc;
-    transform: scale(1.02);
-    box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
-    background: linear-gradient(90deg, #002a1a 0%, #08101b 100%);
+.reno-progress {
+    position: absolute;
+    left: 0; top: 0; height: 100%;
+    width: 0%;
+    background: #29f3ff;
+    box-shadow: 0 0 15px #29f3ff;
+    animation: renoLoad 10s ease-in-out infinite;
 }
 
-.ticket-left { text-align: left; }
-.ticket-discount {
-    font-family: 'Montserrat'; font-weight: 900; font-size: 22px; color: #00ffcc; line-height: 1;
-}
-.ticket-code {
-    font-family: 'Courier New'; font-size: 10px; color: #555; letter-spacing: 1px; margin-top: 5px;
-}
-
-.ticket-right {
-    background: rgba(0, 255, 204, 0.1);
-    border: 1px dashed #00ffcc;
-    padding: 5px 12px;
-    border-radius: 4px;
-    font-family: 'Orbitron'; font-size: 10px; font-weight: 800; color: #fff;
+@keyframes renoLoad {
+    0% { width: 0%; }
+    20% { width: 15%; }
+    40% { width: 45%; }
+    80% { width: 85%; }
+    100% { width: 98%; }
 }
 
-/* Empty State Styling */
-.empty-coupons {
-    padding: 40px 20px; text-align: center; color: #444; font-family: 'Orbitron'; font-size: 11px;
+.reno-loading-text {
+    font-size: 10px;
+    color: #29f3ff;
+    margin-top: 10px;
+    letter-spacing: 2px;
 }
 
+.reno-desc {
+    color: #a5b1c2;
+    font-family: 'Poppins';
+    font-size: 14px;
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
 
-/* --- NEON MINT TERMINAL THEME --- */
-.accent-mint { border: 1px solid #00ffcc !important; box-shadow: inset 0 0 100px rgba(0, 255, 204, 0.1) !important; }
-.title-mint { color: #00ffcc !important; text-shadow: 0 0 15px #00ffcc; }
+/* Hazard Tape */
+.reno-hazard-tape {
+    position: absolute;
+    bottom: 50px;
+    width: 150%;
+    background: #ffd700;
+    color: #000;
+    padding: 10px 0;
+    font-weight: 900;
+    font-size: 14px;
+    transform: rotate(-3deg);
+    white-space: nowrap;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+}
 
-/* Mirroring the "Alte" scrollbar for consistency */
-#couponInventoryModal .bm-content-scroll::-webkit-scrollbar-thumb,
-#subCouponModal .bm-content-scroll::-webkit-scrollbar-thumb { 
-    background: #00ffcc; 
-    box-shadow: 0 0 10px #00ffcc; 
+.reno-hazard-tape span {
+    display: inline-block;
+    animation: scrollTape 20s linear infinite;
+}
+
+@keyframes scrollTape {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
 }
   </style>
+
+
+  <!-- UNDER RENOVATION OVERLAY -->
+<!-- UNDER RENOVATION OVERLAY -->
+<div id="renovationOverlay">
+    <div class="reno-scanline"></div>
+    <div class="reno-grid"></div>
+    
+    <div class="reno-content">
+        <div class="reno-glitch-wrapper">
+            <h1 class="reno-title" data-text="SISTEM ÎN RENOVARE">SISTEM ÎN RENOVARE</h1>
+        </div>
+        
+        <div class="reno-status-box">
+            <div class="reno-bar">
+                <div class="reno-progress"></div>
+            </div>
+            <p class="reno-loading-text">UPDATING CORE MODULES... <span id="renoPercent">0</span>%</p>
+        </div>
+
+        <p class="reno-desc">Momentan lucrăm la îmbunătățirea experienței tale în Shop. <br> Revenim imediat cu noi funcții și design optimizat.</p>
+    </div>
+
+    <!-- FIXED YELLOW BAND -->
+    <div class="reno-hazard-tape">
+        <div class="tape-scroller">
+            <span>DANGER // UNDER CONSTRUCTION // ACCESS RESTRICTED // CAUTION: SYSTEM OFFLINE // </span>
+            <span>DANGER // UNDER CONSTRUCTION // ACCESS RESTRICTED // CAUTION: SYSTEM OFFLINE // </span>
+            <span>DANGER // UNDER CONSTRUCTION // ACCESS RESTRICTED // CAUTION: SYSTEM OFFLINE // </span>
+        </div>
+    </div>
+</div>
 </head>
 <body>
-
-<div id="subCouponModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 accent-mint" style="width: 95%; max-width: 500px;">
-        <div class="bm-scanline-overlay"></div>
-        <div style="background: rgba(0, 255, 204, 0.05); padding: 20px; border-bottom: 1px solid #00ff88; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
-            <div id="subCouponTitle" style="font-family:'Montserrat'; font-size: 18px; font-weight: 900; color: #00ffcc;">CATEGORY_VOUCHERS</div>
-            <button class="close-pop" onclick="closeModal('subCouponModal')" style="position: static !important; border: 1px solid #00ffcc; background: transparent;">✕</button>
-        </div>
-
-        <div class="bm-content-scroll" style="padding: 20px;">
-            <!-- The list of specific tickets will load here vertically -->
-            <div id="subCouponList" style="display: flex; flex-direction: column; gap: 12px;">
-                <!-- Generated by JS -->
-            </div>
-        </div>
-    </div>
-</div>
-<!-- MY COUPONS INVENTORY MODAL -->
-<!-- MY COUPONS INVENTORY (ALTE STYLE) -->
-<div id="couponInventoryModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 accent-mint" style="width: 95%; max-width: 600px; height: auto; max-height: 85vh;">
-        <div class="bm-scanline-overlay"></div>
-
-        <!-- Header -->
-        <div style="background: rgba(0, 255, 204, 0.05); padding: 25px; border-bottom: 1px solid #00ffcc; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
-            <div>
-                <div class="title-mint" style="font-family:'Montserrat'; font-size: 22px; font-weight: 900;">COUPON_VAULT</div>
-                <div style="font-family:monospace; font-size: 10px; color:#aaa;">STATUS: SECURE | REWARDS: READY</div>
-            </div>
-            <button class="close-pop" onclick="closeModal('couponInventoryModal')" style="border-radius:0; border:1px solid #00ffcc; background:transparent; position:static !important; width:40px; height:40px;">✕</button>
-        </div>
-
-        <!-- List Container -->
-        <div class="bm-content-scroll" style="padding: 20px; z-index: 105; position: relative;">
-            <div style="display: flex; flex-direction: column; gap: 15px;">
-                
-                <!-- Item 1: Coins -->
-                <div class="v4-badge-item" style="display: flex; flex-direction: row; justify-content: space-between; padding: 15px 20px; align-items: center;">
-                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-                    <div style="text-align: left;">
-                        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #fff;">COINS DISCOUNTS</div>
-                        <div style="font-size: 10px; color: #aaa;">Tichete pentru pachete de monede</div>
-                    </div>
-                    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d" 
-                         style="height: 50px; cursor:pointer;" onclick="openSubCoupon('coins')">
-                </div>
-
-                <!-- Item 2: Diamonds -->
-                <div class="v4-badge-item" style="display: flex; flex-direction: row; justify-content: space-between; padding: 15px 20px; align-items: center;">
-                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-                    <div style="text-align: left;">
-                        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #fff;">DIAMOND DISCOUNTS</div>
-                        <div style="font-size: 10px; color: #aaa;">Tichete pentru diamante</div>
-                    </div>
-                    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FDiamonds%20Reduction%20cupon%20.png?alt=media&token=7fbf7d4f-78e1-4ea1-934e-619016889b84" 
-                         style="height: 50px; cursor:pointer;" onclick="openSubCoupon('diamonds')">
-                </div>
-
-                <!-- Item 3: Texts -->
-                <div class="v4-badge-item" style="display: flex; flex-direction: row; justify-content: space-between; padding: 15px 20px; align-items: center;">
-                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-                    <div style="text-align: left;">
-                        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #fff;">TEXT DISCOUNTS</div>
-                        <div style="font-size: 10px; color: #aaa;">Reduceri la culori nume</div>
-                    </div>
-                    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f" 
-                         style="height: 50px; cursor:pointer;" onclick="openSubCoupon('texts')">
-                </div>
-
-                <!-- Item 4: Frames -->
-                <div class="v4-badge-item" style="display: flex; flex-direction: row; justify-content: space-between; padding: 15px 20px; align-items: center;">
-                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-                    <div style="text-align: left;">
-                        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #fff;">FRAME DISCOUNTS</div>
-                        <div style="font-size: 10px; color: #aaa;">Reduceri la rame profil</div>
-                    </div>
-                    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FFrame%20discount%20cupon%20.png?alt=media&token=c49a5fb2-06e8-4df5-bcf3-ed37afd1cdef" 
-                         style="height: 50px; cursor:pointer;" onclick="openSubCoupon('frames')">
-                </div>
-
-                <!-- Item 5: Banners -->
-                <div class="v4-badge-item" style="display: flex; flex-direction: row; justify-content: space-between; padding: 15px 20px; align-items: center;">
-                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-                    <div style="text-align: left;">
-                        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #fff;">BANNER DISCOUNTS</div>
-                        <div style="font-size: 10px; color: #aaa;">Reduceri la chat banners</div>
-                    </div>
-                    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBanner%20discount%20cupon%20.png?alt=media&token=e75ab8ee-5278-496c-9938-d1796bda02e0" 
-                         style="height: 50px; cursor:pointer;" onclick="openSubCoupon('banners')">
-                </div>
-
-                <!-- Item 6: Black Market (Elite) -->
-                <div class="v4-badge-item" style="display: flex; flex-direction: row; justify-content: space-between; padding: 15px 20px; align-items: center; border-color: #ffd700 !important;">
-                    <div class="bm-bracket br-tl" style="border-color:#ffd700;"></div><div class="bm-bracket br-tr" style="border-color:#ffd700;"></div>
-                    <div class="bm-bracket br-bl" style="border-color:#ffd700;"></div><div class="bm-bracket br-br" style="border-color:#ffd700;"></div>
-                    <div style="text-align: left;">
-                        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #ffd700;">ELITE DISCOUNTS</div>
-                        <div style="font-size: 10px; color: #aaa;">Black Market Vouchers</div>
-                    </div>
-                    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d" 
-                         style="height: 50px; cursor:pointer; filter: drop-shadow(0 0 10px #ffd700);" onclick="openSubCoupon('blackmarket')">
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div style="background: #000; padding: 15px 25px; font-family: monospace; font-size: 9px; color: #004433; border-top: 1px solid rgba(0, 255, 204, 0.1);">
-            > ARCHIVE_ACCESS: GRANTED...<br>
-            > DECRYPTING_LOCAL_STORAGE... TRUE
-        </div>
-    </div>
-</div>
-</div>
-
-<!-- MYSTERY SHOP GRID MODAL -->
-<div id="mysteryShopModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 accent-mystery" style="width: 95%; max-width: 900px; height: 85vh;">
-        <div class="bm-scanline-overlay"></div>
-        <div style="background: rgba(255, 106, 0, 0.05); padding: 25px; border-bottom: 1px solid #ff6a00; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
-<div class="title-mystery" style="font-family:'Montserrat'; font-size: 24px; font-weight: 900;">
-    MYSTERY_VAULT 
-    <span id="mysteryResetTimer" class="v4-timer-pill">REFRESH: 00:00</span>
-</div>
-            <button class="close-pop" onclick="closeModal('mysteryShopModal')" style="border-color: #ff6a00; background: transparent; position: static !important;">✕</button>
-        </div>
-        <div class="bm-content-scroll">
-            <div id="mysteryBoxList" class="bm-grid-v4">
-                <!-- Items injected by JS -->
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- BOX SELECTION MODAL (FIXED WITH X BTN) -->
-<div id="boxDetailModal" class="account-modal-overlay">
-    <div class="shop-modal-v4" id="boxDetailAccent" style="width: 95%; max-width: 450px;">
-        <div class="bm-scanline-overlay"></div>
-        
-        <!-- CLOSE BUTTON (X) -->
-        <button class="close-pop" onclick="closeModal('boxDetailModal')" style="z-index: 120; border: 1px solid currentColor;">✕</button>
-
-        <div class="bm-content-scroll" style="padding: 40px 30px 30px; text-align: center;">
-            <div class="v4-badge-item" style="border: none; background: transparent; padding: 0;">
-                <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-                
-                <img id="detailBoxImg" src="" style="width: 180px; margin-bottom: 20px; filter: drop-shadow(0 0 25px currentColor);">
-                <h2 id="detailBoxName" style="font-family:'Montserrat'; font-weight: 900; margin-bottom: 15px; font-size: 24px;">BOX_NAME</h2>
-                
-                <!-- VIEW PRIZES BUTTON -->
-                <button class="btn-view-prizes" onclick="openPrizeView()">
-                    <i class="fas fa-eye"></i> Vezi Recompense
-                </button>
-                
-                <div style="display: flex; justify-content: center; gap: 10px; margin: 30px 0 20px;">
-                    <button class="qty-btn active" onclick="setBoxQty(1)">1x</button>
-                    <button class="qty-btn" onclick="setBoxQty(3)">3x</button>
-                    <button class="qty-btn" onclick="setBoxQty('max')">MAX</button>
-
-                </div>
-
-<!-- Insert this below the buttons div -->
-<div id="boxQtyInfo" style="font-family:'Orbitron'; font-size: 11px; color: #ff6a00; margin-bottom: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 5px #ff6a00; height: 15px;"></div>
-
-                <div id="boxTotalDisplay" style="font-family:'Orbitron'; font-size: 20px; color:#fff; margin-bottom: 25px; font-weight: 900;">
-                    Total: 0 <img src="https://iili.io/fhc1SKQ.png" width="18">
-                </div>
-
-                <button class="bm-price-btn-v4" id="boxBuyBtn" onclick="initiateBoxPurchase()" style="width: 100%; height: 50px; font-size: 14px;">EXECUTE_PURCHASE</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="prizeListModal" class="account-modal-overlay">
-    <div class="prize-view-container">
-        <!-- THE SCANLINES -->
-        <div class="bm-scanline-overlay"></div>
-
-        <!-- HEADER -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; z-index: 10; position: relative;">
-            <div style="text-align: left;">
-                <h2 style="font-family:'Montserrat'; font-weight: 900; color:#fff; font-size: 24px; margin: 0;">PROBABILITY_LOG</h2>
-                <p style="font-family:'Courier New'; font-size: 11px; color: var(--primary); margin-top: 5px;">> SCANNING VAULT CONTENTS... [ENCRYPTION: LEVEL 5]</p>
-            </div>
-            <button class="close-pop" onclick="closeModal('prizeListModal')" style="position: static !important; border: 1px solid rgba(255,255,255,0.2);">✕</button>
-        </div>
-
-        <!-- THE 5 VERTICAL CARDS -->
-        <div class="aaa-loot-grid" id="prizeTableBody">
-            <!-- JS INJECTS CONTENT HERE -->
-        </div>
-
-        <div class="modal-deco-line"></div>
-        <p style="font-family: monospace; font-size: 9px; color: #444; margin-top: 15px; text-align: center;">SECURE_PROTOCOL_v4.2 // ALL ODDS ARE FINAL</p>
-    </div>
-</div>
-
-<!-- UNBOXING OVERLAY SCREEN -->
-<div id="unboxingOverlay">
-    <div style="font-family:'Orbitron'; color:#fff; font-size:14px; margin-bottom:40px; letter-spacing:3px;">INCOMING DATA STREAM...</div>
-    <img id="unboxingBoxImg" src="" class="unboxing-box-img box-shake" onclick="revealReward()">
-    <div style="font-family:'Courier New'; color:#ff6a00; margin-top:30px; font-weight:bold;">[ CLICK TO DECRYPT ]</div>
-</div>
 <!-- ULTIMATE QUICK-NAV HUD -->
 <div class="quick-nav-dock">
     <div id="navHud" class="nav-hud-window">
@@ -7003,16 +5785,6 @@ body {
             <i class="fas fa-paint-brush"></i> Atelier
 
         </button>
-
-
-<button class="btn-nav-mystery" onclick="scrollToZone('zone-mystery')">
-    <i class="fas fa-box-open"></i> Mystery Boxes
-</button>
-
-<!-- Insert this between Mystery and Black Market buttons -->
-<button class="btn-nav-deals" onclick="scrollToZone('zone-deals')">
-    <i class="fas fa-bolt"></i> Flash Deals
-</button>
 
         <!-- BLACK MARKET -->
         <button class="btn-nav-toxic" onclick="scrollToZone('zone-terminal')">
@@ -7442,9 +6214,6 @@ body {
 <!-- SECTION 3: THE ATELIER -->
 <section id="zone-atelier" class="shop-zone">
 
-
-
-
 <!-- Separator: Vault -> Atelier (Gold la Pink) -->
 <div class="hr-conduit sep-vault-atelier">
     <div class="conduit-line"></div>
@@ -7489,108 +6258,7 @@ body {
             <span>ALTE</span>
         </div>
     </div>
-
-
 </section>
-
-
-<section id="zone-mystery" class="shop-zone">
-
-
-<div class="hr-conduit sep-vault-atelier" id="sep-atelier-mystery" style="--start-color: #d63384; --end-color: #ff6a00;">
-    <div class="conduit-line"></div>
-    
-    <!-- ADD TWO PARTICLES FOR A BETTER EFFECT -->
-    <div class="conduit-particle"></div>
-    <div class="conduit-particle" style="animation-delay: 2s;"></div>
-
-    <div class="conduit-node" style="border-color: #ff6a00; box-shadow: 0 0 20px #ff6a00;">
-        <i class="fas fa-dice" style="color: #ff6a00;"></i>
-    </div>
-</div>
-    <!-- NEW BACKGROUND LAYERS -->
-    <div class="mystery-liquid-bg"></div>
-    <div class="mystery-embers"></div>
-
-    <h1 class="metallic-title" style="background: linear-gradient(180deg, #fff 0%, #ff6a00 100%); -webkit-background-clip: text;">Gambling Zone</h1>
-    <p class="shop-desc">Testează-ți norocul cu cutiile noastre misterioase.</p>
-
-    <div class="bm-terminal-container" style="border-color: #ff6a00; box-shadow: 0 0 40px rgba(255, 106, 0, 0.1);">
-        <!-- ... existing content ... -->
-        <div style="text-align: center;">
-            <button class="btn-terminal-toxic" style="border-color: #ff6a00; color: #ff6a00; background: rgba(255, 106, 0, 0.05);" onclick="openMysteryShop()">
-                <i class="fas fa-box-open"></i>
-                <span>OPEN MYSTERY SHOP</span>
-            </button>
-        </div>
-    </div>
-</section>
-
-
-<section id="zone-deals" class="shop-zone">
-
-
-   <div class="deals-bg-wrapper">
-        <div class="deals-fog"></div>
-        <div class="deals-grid-anim"></div>
-        <div class="deals-scanner"></div>
-    </div>
-    <!-- Transition Separator -->
-    <div class="hr-conduit sep-mystery-terminal" style="--start-color: #ff6a00; --end-color: #00ffff;">
-        <div class="conduit-line"></div>
-        <div class="conduit-particle"></div>
-        <div class="conduit-node" style="border-color: #00ffff; box-shadow: 0 0 20px #00ffff;">
-            <i class="fas fa-bolt" style="color: #00ffff;"></i>
-        </div>
-    </div>
-
-    <h1 class="metallic-title" style="background: linear-gradient(180deg, #fff 0%, #00ffff 100%); -webkit-background-clip: text;">Flash Deals</h1>
-    <p class="shop-desc">Sistem compromis: Prețuri reduse detectate în rețea.</p>
-
-    <!-- THE DEALS GRID -->
-    <div class="deals-container-v4">
-        <div id="dealsResetTimer" class="v4-timer-pill" style="border-color:#00ffff; color:#00ffff; margin-bottom:20px; display:block; width:fit-content; margin-left:auto; margin-right:auto;">REFRESH: 00:00</div>
-        
-        <div id="dealsGrid" class="aaa-loot-grid" style="grid-template-columns: repeat(3, 1fr);">
-            <!-- 3 SICK CARDS LOAD HERE -->
-        </div>
-<!-- ... rest of Flash Deals Grid above ... -->
-    </div> <!-- End of deals-container-v4 -->
-
-    <!-- --- NEW: COUPON TERMINAL SECTION --- -->
-    <div class="coupon-terminal-v4">
-        <div class="modal-deco-line" style="margin: 40px 0;"></div>
-        
-        <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/1a4b7a9f-2002-40d9-b071-5b2cc3823892-Photoroom.png?alt=media&token=ab624a41-4d96-4c34-b167-30caafa63965" 
-             class="coupon-hero-img">
-
-        <h2 class="metallic-title" style="font-size: 24px; margin-top: -10px;">Coupon Center</h2>
-        <p class="shop-desc" style="margin-bottom: 25px;">Introdu codul de securitate pentru a revendica recompensele.</p>
-
-        <div class="coupon-input-wrapper">
-            <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-            <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-            
-            <input type="text" id="couponInput" class="v4-terminal-input" 
-                   placeholder="ENTER_PROMO_CODE..." 
-                   style="border-color: #00ffcc !important; text-transform: uppercase;">
-            
-            <button class="btn-buy-deal" id="btnRedeem" onclick="redeemCoupon()" 
-                    style="margin-top: 20px; background: #00ffcc !important; color: #000;">
-                VALIDATE_CREDENTIALS
-            </button>
-        </div>
-    </div>
-
-<!-- Sub butonul de VALIDATE_CREDENTIALS existent -->
-<div style="margin-top: 25px; border-top: 1px solid rgba(0, 255, 204, 0.1); padding-top: 20px;">
-    <button class="btn-hologram" style="border-color: #00ffcc; color: #00ffcc; font-size: 11px; padding: 10px 25px;" onclick="openCouponInventory()">
-        <i class="fas fa-ticket-alt"></i> CUPOANELE MELE
-    </button>
-</div>
-</section>
-
-
 
     <!-- SECTION 4: THE TERMINAL (Black Market) -->
     <section id="zone-terminal" class="shop-zone">
@@ -8318,7 +6986,7 @@ body {
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signOut, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, query,setDoc , orderBy, getDocs, doc, getDoc, updateDoc, onSnapshot,writeBatch,limit, serverTimestamp, arrayUnion, increment,addDoc,where,runTransaction  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, query,setDoc , orderBy, getDocs, doc, getDoc, updateDoc, onSnapshot,writeBatch,limit, serverTimestamp, arrayUnion, increment,addDoc,where  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // NEW IMPORTS FOR IMAGE UPLOAD:
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
@@ -11310,43 +9978,38 @@ document.addEventListener('mousedown', (e) => {
 });
 
 
+// --- AUTO-ADAPTIVE NAV SENSOR (CLEAN & FAST) ---
 function initAdaptiveNav() {
     const trigger = document.querySelector('.nav-trigger-reactor');
+    // Dacă nu există butonul reactor, oprim funcția imediat
     if (!trigger) return; 
 
     const sections = {
         'zone-hero': 'state-hero',
         'zone-vault': 'state-vault',
         'zone-atelier': 'state-atelier',
-        'zone-mystery': 'state-mystery',
-        'zone-deals': 'state-deals',      // Minty Green
-        'zone-terminal': 'state-terminal' // Toxic Green
+        'zone-terminal': 'state-terminal'
     };
 
     const observerOptions = {
         root: null,
-        threshold: 0.3, // Lowered slightly to trigger faster
-        rootMargin: "-10% 0px -10% 0px" // Focuses the "sensor" on the middle of the screen
+        threshold: 0.4 
     };
 
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                // FORCE REMOVE all known state classes
-                Object.values(sections).forEach(cls => {
-                    trigger.classList.remove(cls);
-                });
+                // Curățăm clasele vechi
+                Object.values(sections).forEach(cls => trigger.classList.remove(cls));
                 
-                // Add the new one
+                // Aplicăm clasa nouă
                 const newClass = sections[entry.target.id];
-                if (newClass) {
-                    trigger.classList.add(newClass);
-                    console.log("Nav Protocol Switched to:", newClass); // Debug check
-                }
+                if (newClass) trigger.classList.add(newClass);
             }
         });
     }, observerOptions);
 
+    // Pornim observatorul doar pentru ID-urile care există în pagină
     Object.keys(sections).forEach(id => {
         const el = document.getElementById(id);
         if (el) observer.observe(el);
@@ -11361,679 +10024,17 @@ if (document.readyState === 'loading') {
 }
 
 
-const BOXES_DB = [
-    { 
-        id: 'box_basic', 
-        name: 'Basic Box', 
-        price: 1000, 
-        color: '#ff6a00', 
-        stockRange: [25, 100], 
-        img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%201.png?alt=media&token=29742b82-3e51-408c-948e-c3bae712e2ca', 
-        imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%202.png?alt=media&token=93a488b5-9ed7-4ab0-9333-3a67ca37fe3c',
-        rewards: [
-            { tier: 'COMMON', label: '250-750', icon: 'https://iili.io/fhc1SKQ.png', chance: 60, style: 'r-common' },
-            { tier: 'UNCOMMON', label: '1-3', icon: 'https://iili.io/fv5bmtj.png', chance: 25, style: 'r-silver' },
-            { tier: 'RARE', label: '500-1500', icon: 'https://iili.io/fhc1SKQ.png', chance: 10, style: 'r-rare' },
-            { tier: 'EPIC', label: '3-5', icon: 'https://iili.io/fv5bmtj.png', chance: 4.5, style: 'r-epic' },
-            { tier: 'LEGENDARY', label: 'BADGE', icon: 'https://i.ibb.co/4pGm9S2/user-placeholder.png', chance: 2,style: 'r-gold' }
-        ]
-    }, 
-
-
-
-    { id: 'box_gold', name: 'Gold Box', price: 5000, color: '#ffd700', stockRange: [10, 50], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FGold%20box%20closed.png?alt=media&token=ef29b342-4564-4379-b1ff-9b44eb926d5c', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FGold%20box%20Open.png?alt=media&token=815a539a-8fd8-495e-b0e6-790f7927352b' },
-    { id: 'box_titanium', name: 'Titanium Box', price: 7500, color: '#00e5ff', stockRange: [8, 30], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Close.png?alt=media&token=e7bbc3f0-9ab6-46c2-a8d5-e5f76d4aed71', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Open.png?alt=media&token=43e6e8fc-6228-438f-97b3-0cbf7d5012ce' },
-    { id: 'box_void', name: 'Void Box', price: 15000, color: '#7000ff', stockRange: [5, 15], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20close.png?alt=media&token=7da7421a-caf5-4a8a-a368-02393550bbe8', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20open.png?alt=media&token=39eb8f91-2c77-4bea-9337-ebf5ea391dc3' },
-    { id: 'box_celestial', name: 'Celestial Box', price: 25000, color: '#ffffff', stockRange: [5, 10], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20chest%20close%20%20(2).png?alt=media&token=b23d04ee-ce8c-43d7-b2a8-315255e62ca6', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20Chest%20Open%20.png?alt=media&token=68f031ce-57e2-44b2-b9e0-32453d4d1f10' }
-];
-
-
-// --- IMAGE PRELOADER ENGINE ---
-function preloadMysteryImages() {
-    console.log("System: Starting image preloading...");
-    
-    // Colectăm toate link-urile de imagini din baza de date
-    const imagesToPreload = [];
-    BOXES_DB.forEach(box => {
-        imagesToPreload.push(box.img);      // Imaginea închisă
-        imagesToPreload.push(box.imgOpen);  // Imaginea deschisă
-    });
-
-    // Adăugăm și monedele/diamantele pentru siguranță
-    imagesToPreload.push("https://iili.io/fhc1SKQ.png");
-    imagesToPreload.push("https://iili.io/fv5bmtj.png");
-
-    // Executăm preîncărcarea
-    imagesToPreload.forEach(url => {
-        const img = new Image();
-        img.src = url;
-    });
-}
-
-// Lansăm preîncărcarea imediat
-preloadMysteryImages();
-let lastPurchasedQty = 0; // This will store the actual number of boxes paid for
-let globalStock = {};
-let selectedBox = null;
-let selectedQty = 1;
-// ADAUGĂ ACEASTA PENTRU A REPARA EROAREA DIN CONSOLĂ
-let countdownInterval = null;
-
-
-// --- UPDATED REAL-TIME STOCK SYNC ---
-function initMysteryStockSync() {
-    onSnapshot(doc(db, "system", "mystery_box_stock"), async (snap) => {
-        const now = Date.now();
-        const RESET_MS = 60000; // 1 Minute
-
-        if (!snap.exists() || (now - (snap.data().lastReset || 0) > RESET_MS)) {
-            // Logic to restock if expired
-            const newStock = {};
-            BOXES_DB.forEach(box => {
-                const [min, max] = box.stockRange;
-                newStock[box.id] = Math.floor(Math.random() * (max - min + 1) + min);
-            });
-            await setDoc(doc(db, "system", "mystery_box_stock"), { counts: newStock, lastReset: Date.now() });
-        } else {
-            // Update the local variable with new data from Firebase
-            globalStock = snap.data().counts;
-
-            // --- THE REAL-TIME UI FIX ---
-            // 1. Refresh the main grid if the shop is open
-            if (document.getElementById('mysteryShopModal').classList.contains('active')) {
-                renderMysteryShopItems();
-            }
-
-            // 2. Refresh the detail modal if the user is currently looking at a specific box
-            if (document.getElementById('boxDetailModal').classList.contains('active') && selectedBox) {
-                const currentStock = globalStock[selectedBox.id] || 0;
-                
-                // Adjust quantity if stock dropped below what the user selected
-                if (selectedQty > currentStock && currentStock > 0) {
-                    selectedQty = currentStock;
-                } else if (currentStock <= 0) {
-                    selectedQty = 0;
-                }
-                
-                updateBoxTotal();
-            }
-
-            // Timer update logic
-            const lastReset = snap.data().lastReset;
-            if (countdownInterval) clearInterval(countdownInterval);
-            countdownInterval = setInterval(() => {
-                const timeLeft = Math.max(0, RESET_MS - (Date.now() - lastReset));
-                const m = Math.floor(timeLeft / 60000);
-                const s = Math.floor((timeLeft % 60000) / 1000);
-                const timerEl = document.getElementById('mysteryResetTimer');
-                if (timerEl) {
-                    timerEl.innerText = `REFRESH: ${m}:${s < 10 ? '0' : ''}${s}`;
-                }
-                if (timeLeft <= 0) clearInterval(countdownInterval);
-            }, 1000);
-        }
-    });
-}
-
-window.openMysteryShop = () => {
-    if(!auth.currentUser) return alert("Loghează-te!");
-    renderMysteryShopItems();
-    document.getElementById('mysteryShopModal').classList.add('active');
-};
-
-function renderMysteryShopItems() {
-    const list = document.getElementById('mysteryBoxList');
-    if(!list) return;
-    list.innerHTML = '';
-    BOXES_DB.forEach(box => {
-        const count = globalStock[box.id] || 0;
-        const isOut = count <= 0;
-        const specialClass = box.id === 'box_celestial' ? 'm-celestial' : '';
-        const card = document.createElement('div');
-        card.className = `mystery-card-v4 ${specialClass}`;
-        if(isOut) card.style.pointerEvents = 'none';
-
-        card.innerHTML = `
-            ${isOut ? `<div class="stock-out-overlay"><i class="fas fa-lock" style="color:#ff4757; font-size:30px; margin-bottom:10px;"></i><div class="stock-out-text">STOC EPUIZAT</div></div>` : ''}
-            <div class="stock-badge" style="color:${box.color}">STOC: ${count}</div>
-            <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-            <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-            <img src="${box.img}" class="mb-main-img" style="filter: drop-shadow(0 0 15px ${box.color === '#ffffff' ? 'rgba(112,0,255,0.6)' : box.color});">
-            <div style="font-family:'Montserrat'; font-weight:900; color:#fff; font-size:14px; margin-top:10px;">${box.name.toUpperCase()}</div>
-            <div style="color:${box.color}; font-family:'Orbitron'; font-size:12px; margin:15px 0; font-weight:900; display:flex; align-items:center; justify-content:center; gap:5px;">
-                ${box.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="14" style="height:14px !important;">
-            </div>
-            <button class="bm-price-btn-v4" style="background:${box.color} !important; color:#000;">SELECTEAZĂ</button>
-        `;
-        card.onclick = () => openBoxDetail(box);
-        list.appendChild(card);
-    });
-}
-
-function openBoxDetail(box) {
-    selectedBox = box;
-    selectedQty = 1;
-    const modal = document.getElementById('boxDetailModal');
-    document.getElementById('boxDetailAccent').style.borderColor = box.color;
-    document.getElementById('detailBoxImg').src = box.img;
-    const nameEl = document.getElementById('detailBoxName');
-    nameEl.innerText = box.name.toUpperCase();
-    nameEl.style.color = box.color;
-    updateBoxTotal();
-    modal.classList.add('active');
-
-// Add this at the bottom of openBoxDetail function
-document.getElementById('boxQtyInfo').innerText = `> CUMPERI 1 CUTIE`;
-}
-
-window.openPrizeView = () => {
-    if(!selectedBox || !selectedBox.rewards) return;
-    
-    const container = document.getElementById('prizeTableBody');
-    container.innerHTML = ""; 
-
-    const tierClasses = ['tier-common', 'tier-uncommon', 'tier-rare', 'tier-epic', 'tier-legendary'];
-
-    selectedBox.rewards.forEach((r, index) => {
-        const isLegendary = (r.tier === 'LEGENDARY');
-        const cardClass = tierClasses[index] || 'tier-common';
-        const card = document.createElement('div');
-        card.className = `aaa-card ${cardClass}`;
-        
-      // This goes inside your .forEach loop in openPrizeView
-let displayValue = r.label;
-let coinIcon = `<img src="${r.icon}" style="width:16px; height:16px; margin-left:8px;">`;
-
-card.innerHTML = `
-    <div class="aaa-card-content">
-        <div class="aaa-card-title">${r.tier}</div>
-        
-        ${isLegendary ? 
-            `<div id="badgeShuffleSlot"></div>` : 
-            `<img src="${r.icon}" class="aaa-card-img">`
-        }
-
-        <div style="width: 100%;">
-            <div class="aaa-card-value">
-                ${isLegendary ? 'RANDOM BADGE' : r.label}
-                ${isLegendary ? '' : coinIcon}
-            </div>
-            <div class="aaa-card-chance">${r.chance}% CHANCE</div>
-        </div>
-    </div>
-`;
-        container.appendChild(card);
-
-        // Start Shuffle if Legendary
-        if(isLegendary) startBadgeShuffle();
-    });
-    
-    document.getElementById('prizeListModal').classList.add('active');
-};
-
-// --- LEGENDARY BADGE SHUFFLE ENGINE ---
-function startBadgeShuffle() {
-    const slot = document.getElementById('badgeShuffleSlot');
-    if(!slot) return;
-
-    let iterations = 0;
-    const maxIterations = 50000; // Runs essentially forever while modal is open
-
-    const shuffle = setInterval(() => {
-        if (!document.getElementById('prizeListModal').classList.contains('active')) {
-            clearInterval(shuffle);
-            return;
-        }
-
-        const randomBadge = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
-        
-        slot.innerHTML = `
-            <div class="badge-reel-item">
-                <span style="background:${randomBadge.color}; padding: 5px 10px; border-radius: 4px; font-family:'Orbitron'; font-size:10px; color:#000; font-weight:900; white-space:nowrap;">
-                    <i class="fas ${randomBadge.icon}"></i> ${randomBadge.text}
-                </span>
-            </div>
-        `;
-        
-        iterations++;
-    }, 800); // Changes every 0.8 seconds for a "live" look
-}
-
-window.setBoxQty = (q) => {
-    const btns = document.querySelectorAll('.qty-btn');
-    btns.forEach(b => b.classList.remove('active'));
-    
-    const currentStock = globalStock[selectedBox.id] || 0;
-    const userCoins = window.currentUserData?.coins || 0;
-
-    if(q === 'max') {
-        // Calculate: How many can I afford vs how many are in stock
-        const affordable = Math.floor(userCoins / selectedBox.price);
-        selectedQty = Math.min(affordable, currentStock); 
-        
-        if(selectedQty < 1) selectedQty = 1;
-        
-        // Highlight the MAX button
-        const maxBtn = Array.from(btns).find(b => b.innerText === 'MAX');
-        if(maxBtn) maxBtn.classList.add('active');
-    } else {
-        // Check if selection is higher than stock
-        selectedQty = Math.min(q, currentStock);
-        if(selectedQty < 1) selectedQty = 1;
-        
-        if(event) event.currentTarget.classList.add('active');
+  // RENOVATION PERCENTAGE SIMULATOR
+let count = 0;
+const percentEl = document.getElementById('renoPercent');
+const renoInterval = setInterval(() => {
+    count += Math.floor(Math.random() * 3);
+    if (count > 99) {
+        count = 99; // Keep it at 99 to simulate "forever updating"
+        clearInterval(renoInterval);
     }
-
-    // UPDATE THE DYNAMIC TEXT
-    const infoEl = document.getElementById('boxQtyInfo');
-    if(infoEl) {
-        // If selection is 1, use singular "CUTIE", otherwise plural "CUTII"
-        const word = selectedQty === 1 ? "CUTIE" : "CUTII";
-        infoEl.innerText = `> CUMPERI ${selectedQty.toLocaleString()} ${word}`;
-    }
-
-    updateBoxTotal();
-};
-
-function updateBoxTotal() {
-    if(!selectedBox) return;
-    const total = selectedBox.price * selectedQty;
-    const currentStock = globalStock[selectedBox.id] || 0;
-    
-    // Update the total display
-    document.getElementById('boxTotalDisplay').innerHTML = `
-        <div style="font-size: 10px; color: ${selectedBox.color}; margin-bottom: 5px; opacity: 0.8;">DISPONIBIL: ${currentStock}</div>
-        Total: ${total.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="18" style="height:18px !important; vertical-align:middle;">
-    `;
-
-    // Disable purchase button if stock is 0
-    const buyBtn = document.getElementById('boxBuyBtn');
-    if (currentStock <= 0) {
-        buyBtn.innerText = "STOC EPUIZAT";
-        buyBtn.style.opacity = "0.5";
-        buyBtn.disabled = true;
-    } else {
-        buyBtn.innerText = "AUTHORIZE_PURCHASE";
-        buyBtn.style.opacity = "1";
-        buyBtn.disabled = false;
-    }
-}
-
-window.initiateBoxPurchase = async () => {
-    if(!selectedBox) return;
-    const total = selectedBox.price * selectedQty;
-    const qtyToBuy = selectedQty; // Capture current selection immediately
-    
-    const userRef = doc(db, "accounts", auth.currentUser.uid);
-    const stockRef = doc(db, "system", "mystery_box_stock");
-
-    try {
-        await runTransaction(db, async (transaction) => {
-            const userSnap = await transaction.get(userRef);
-            const stockSnap = await transaction.get(stockRef);
-            if (userSnap.data().coins < total) throw "Fonduri insuficiente!";
-            if (stockSnap.data().counts[selectedBox.id] < qtyToBuy) throw "Stoc epuizat!";
-            
-            transaction.update(userRef, { coins: increment(-total) });
-            const updatedCounts = { ...stockSnap.data().counts };
-            updatedCounts[selectedBox.id] -= qtyToBuy;
-            transaction.update(stockRef, { counts: updatedCounts });
-        });
-
-        // --- SUCCESS: SAVE THE QTY TO THE SAFE VARIABLE ---
-        lastPurchasedQty = qtyToBuy; 
-
-        await logTransaction(-total, "COINS", "Gamble", `Bought ${qtyToBuy}x ${selectedBox.name}`);
-        closeModal('boxDetailModal');
-        closeModal('mysteryShopModal');
-        startUnboxingSequence();
-    } catch (e) { showCustomAlert(e, "EROARE"); }
-};
-
-
-
-function startUnboxingSequence() {
-    const overlay = document.getElementById('unboxingOverlay');
-    const boxImg = document.getElementById('unboxingBoxImg');
-    boxImg.src = selectedBox.img;
-    boxImg.classList.add('box-shake');
-    boxImg.classList.remove('open');
-    boxImg.style.color = selectedBox.color;
-    overlay.style.display = 'flex';
-}
-
-window.revealReward = async () => {
-    const boxImg = document.getElementById('unboxingBoxImg');
-    const lockedQty = parseInt(lastPurchasedQty); 
-    const lockedBox = JSON.parse(JSON.stringify(selectedBox));
-
-    if(!lockedBox || isNaN(lockedQty) || lockedQty <= 0) {
-        document.getElementById('unboxingOverlay').style.display = 'none';
-        return;
-    }
-
-    // Animation
-    boxImg.classList.remove('box-shake');
-    boxImg.src = lockedBox.imgOpen;
-    boxImg.classList.add('open');
-
-    setTimeout(async () => {
-        document.getElementById('unboxingOverlay').style.display = 'none';
-        
-        let winCoins = 0;
-        let winDiamonds = 0;
-        let wonBadge = null;
-
-        // Roll for each box
-        for (let i = 0; i < lockedQty; i++) {
-            const roll = Math.random() * 100;
-            if (roll <= 2 && !wonBadge) {
-                wonBadge = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
-            } else if (roll <= 5) {
-                winDiamonds += Math.floor(Math.random() * 3) + 3; // Epic
-            } else if (roll <= 15) {
-                winCoins += Math.floor(Math.random() * 1001) + 500; // Rare
-            } else if (roll <= 40) {
-                winDiamonds += Math.floor(Math.random() * 3) + 1; // Uncommon
-            } else {
-                winCoins += Math.floor(Math.random() * 501) + 250; // Common
-            }
-        }
-
-        // Database Sync
-        try {
-            const userRef = doc(db, "accounts", auth.currentUser.uid);
-            const updates = { coins: increment(winCoins), diamonds: increment(winDiamonds) };
-            if(wonBadge) updates.ownedBadges = arrayUnion(wonBadge.id);
-            await updateDoc(userRef, updates);
-        } catch(e) { console.error(e); }
-
-        // --- THE NEXT-LEVEL RESULT MODAL ---
-        const modal = document.getElementById('rewardModal');
-        modal.querySelector('h2').innerText = "DECRYPT COMPLETE";
-        modal.querySelector('h2').style.color = "#00ff88";
-
-        let resultHTML = `<div style="text-align:center; padding:10px;">`;
-        
-        if(winCoins > 0) {
-            resultHTML += `
-                <div class="reward-line" style="color:#ffd700;">
-                    <img src="https://iili.io/fhc1SKQ.png" style="width:40px; height:40px;">
-                    +${winCoins.toLocaleString()}
-                </div>`;
-        }
-        
-        if(winDiamonds > 0) {
-            resultHTML += `
-                <div class="reward-line" style="color:#00ff88;">
-                    <img src="https://iili.io/fv5bmtj.png" style="width:35px; height:35px;">
-                    +${winDiamonds}
-                </div>`;
-        }
-
-        if(wonBadge) {
-            resultHTML += `
-                <div style="margin-top:25px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
-                    <div style="font-family:'Orbitron'; font-size:9px; color:#aaa; letter-spacing:2px; margin-bottom:10px;">UNIQUE ITEM RECOVERED</div>
-                    <span class="shop-badge-preview" style="background:${wonBadge.color}; color:#000; padding:10px 20px; font-size:14px; border-radius:8px;">
-                        <i class="fas ${wonBadge.icon}"></i> ${wonBadge.text}
-                    </span>
-                </div>`;
-        }
-        
-        resultHTML += `</div>`;
-
-        modal.querySelector('p').innerHTML = resultHTML;
-        modal.querySelector('.reward-coins-box').style.display = 'none';
-        modal.classList.add('active');
-
-        lastPurchasedQty = 0;
-    }, 1200);
-};
-
-// Update the modal to show the quantity so the user knows it worked
-function showRewardModal(amount, boxName, qty) {
-    const modal = document.getElementById('rewardModal');
-    modal.querySelector('h2').innerText = "🎰 REZULTAT GAMBLE";
-    modal.querySelector('p').innerText = `Ai deschis ${qty}x ${boxName} și ai găsit:`;
-    
-    const amountSpan = modal.querySelector('.reward-coins-box span');
-    if (amountSpan) {
-        amountSpan.innerText = amount.toLocaleString();
-    }
-    
-    modal.classList.add('active');
-}
-initMysteryStockSync();
-
-
-let dealsCountdownInterval = null; // To prevent multiple timers
-let isUpdatingDeals = false; // To prevent write-loops
-
-async function initFlashDeals() {
-    onSnapshot(doc(db, "system", "flash_deals"), async (snap) => {
-        const now = Date.now();
-        const REFRESH_MS = 60000; // 1 Minute
-
-        // 1. Check if we need to generate new deals
-        // Added a 2-second buffer to prevent "instant" re-triggering
-        if (!snap.exists() || (now - (snap.data().lastUpdate || 0) > REFRESH_MS + 2000)) {
-            
-            if (isUpdatingDeals) return; // Already writing, stop
-            isUpdatingDeals = true;
-
-            const allItems = [
-                ...BANNERS_DB.map(i => ({...i, category: 'banners'})),
-                ...TEXTS_DB.map(i => ({...i, category: 'texts'})),
-                ...FRAMES_DB.map(i => ({...i, category: 'frames'}))
-            ];
-            
-            const selectedDeals = [];
-            const usedIndexes = new Set();
-            
-            while(selectedDeals.length < 3) {
-                let idx = Math.floor(Math.random() * allItems.length);
-                if(!usedIndexes.has(idx)) {
-                    const item = allItems[idx];
-                    const discountPct = Math.floor(Math.random() * 41) + 30; // 30-70%
-                    const newPrice = Math.floor(item.price * (1 - discountPct/100));
-                    selectedDeals.push({ ...item, discount: discountPct, salePrice: newPrice });
-                    usedIndexes.add(idx);
-                }
-            }
-
-            try {
-                await setDoc(doc(db, "system", "flash_deals"), { 
-                    items: selectedDeals, 
-                    lastUpdate: Date.now() 
-                });
-            } catch(e) { console.error("Update deals error:", e); }
-            
-            isUpdatingDeals = false;
-        } else {
-
-
-
-            // 2. Render and start Countdown
-            renderFlashDeals(snap.data().items);
-            
-            const lastUpdate = snap.data().lastUpdate;
-            
-            // CLEAR OLD TIMER BEFORE STARTING NEW ONE
-            if (dealsCountdownInterval) clearInterval(dealsCountdownInterval);
-            
-            dealsCountdownInterval = setInterval(() => {
-                const remaining = Math.max(0, REFRESH_MS - (Date.now() - lastUpdate));
-                const m = Math.floor(remaining / 60000);
-                const s = Math.floor((remaining % 60000) / 1000);
-                
-                const timerEl = document.getElementById('dealsResetTimer');
-                if (timerEl) {
-                    timerEl.innerText = `REFRESH: ${m}:${s < 10 ? '0':''}${s}`;
-                }
-
-                // If timer hits 0, the next onSnapshot trigger will handle the refresh
-                if (remaining <= 0) clearInterval(dealsCountdownInterval);
-            }, 1000);
-        }
-    });
-}
-function renderFlashDeals(items) {
-    const grid = document.getElementById('dealsGrid');
-    if(!grid) return;
-    grid.innerHTML = '';
-
-    // Get current user data to check ownership
-    const userData = window.currentUserData || {};
-
-    items.forEach(item => {
-        const card = document.createElement('div');
-        card.className = `aaa-card deal-card`;
-        
-        // 1. Ownership Logic
-        const ownedField = item.category === 'banners' ? 'ownedBanners' : (item.category === 'texts' ? 'ownedTexts' : 'ownedFrames');
-        const isOwned = (userData[ownedField] || []).includes(item.id);
-
-        // 2. Item specific preview logic
-        let previewHtml = '';
-        if(item.category === 'banners') previewHtml = `<div class="${item.cssClass}" style="padding:10px; border-radius:5px; font-size:10px; width:100%;">BANNER</div>`;
-        if(item.category === 'texts') previewHtml = `<div class="${item.cssClass}" style="font-weight:900; font-size:16px;">TEXT COLOR</div>`;
-        if(item.category === 'frames') previewHtml = `<img src="${item.img}" style="height:60px; width:auto; filter: drop-shadow(0 0 10px #00ffff);">`;
-
-        card.innerHTML = `
-            <div class="discount-badge">-${item.discount}%</div>
-            <div class="aaa-card-content">
-                <div class="aaa-card-title">${item.category.slice(0, -1)}</div>
-                
-                <div style="height:65px; display:flex; align-items:center; width:100%; justify-content:center;">${previewHtml}</div>
-
-                <div style="width: 100%;">
-                    <div class="old-price-container">${item.price.toLocaleString()} Coins</div><br>
-                    <div class="aaa-card-value" style="border-color: #00ff88 !important; margin-bottom: 10px;">
-                        ${item.salePrice.toLocaleString()} 
-                        <img src="https://iili.io/fhc1SKQ.png" style="width:16px; margin-left:8px;">
-                    </div>
-                    
-                    ${isOwned ? 
-                        `<button class="btn-buy-deal is-owned" disabled>ALREADY OWNED</button>` : 
-                        `<button class="btn-buy-deal" onclick="buyFlashDeal('${item.id}', ${item.salePrice}, '${item.category}')">CLAIM DEAL</button>`
-                    }
-                </div>
-            </div>
-        `;
-        grid.appendChild(card);
-    });
-}
-
-window.buyFlashDeal = async (id, price, category) => {
-    if(!auth.currentUser) return alert("Logat!");
-    
-    const userRef = doc(db, "accounts", auth.currentUser.uid);
-    const userSnap = await getDoc(userRef);
-    const userData = userSnap.data();
-
-    // Mapping fields
-    const ownedField = category === 'banners' ? 'ownedBanners' : (category === 'texts' ? 'ownedTexts' : 'ownedFrames');
-    
-    if(userData[ownedField]?.includes(id)) return showCustomAlert("Ai deja acest obiect!", "INFO");
-    if((userData.coins || 0) < price) return showCustomAlert("Bani insuficienți!", "EROARE");
-
-    const confirmed = await showCustomConfirm(`Cumperi acest deal special pentru ${price} Coins?`, "CONFIRMĂ DEAL");
-    if(!confirmed) return;
-
-    try {
-        await updateDoc(userRef, {
-            coins: increment(-price),
-            [ownedField]: arrayUnion(id)
-        });
-        await logTransaction(-price, "COINS", "Flash Sale", `Bought Sale Item: ${id}`);
-        showCustomAlert("Obiect cumpărat la preț redus!", "SUCCES");
-    } catch(e) { console.error(e); }
-};
-
-// Start the engine
-initFlashDeals();
-
-
-
-window.redeemCoupon = async () => {
-    const code = document.getElementById('couponInput').value.trim().toUpperCase();
-    if(!code) return showCustomAlert("Te rugăm să introduci un cod valid.", "SISTEM_ERROR");
-
-    // UI FEEDBACK
-    const btn = document.getElementById('btnRedeem');
-    btn.innerText = "AUTHENTICATING...";
-    btn.disabled = true;
-
-    // Logic for Firebase will go here next
-    setTimeout(() => {
-        showCustomAlert("Codul '" + code + "' nu este valid sau a expirat.", "ACCESS_DENIED");
-        btn.innerText = "VALIDATE_CREDENTIALS";
-        btn.disabled = false;
-    }, 1500);
-};
-
-
-
-window.openCouponInventory = () => {
-    if(!auth.currentUser) return showCustomAlert("Loghează-te pentru a vedea cupoanele!", "EROARE");
-    document.getElementById('couponInventoryModal').classList.add('active');
-};
-window.openSubCoupon = (type) => {
-    // 1. DATA MAP (Images you provided)
-    const categoryInfo = {
-        coins: { title: "COINS_REDUCTION", img: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d" },
-        diamonds: { title: "DIAMOND_REDUCTION", img: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FDiamonds%20Reduction%20cupon%20.png?alt=media&token=7fbf7d4f-78e1-4ea1-934e-619016889b84" },
-        texts: { title: "TEXT_REDUCTION", img: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f" },
-        frames: { title: "FRAME_REDUCTION", img: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FFrame%20discount%20cupon%20.png?alt=media&token=c49a5fb2-06e8-4df5-bcf3-ed37afd1cdef" },
-        banners: { title: "BANNER_REDUCTION", img: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBanner%20discount%20cupon%20.png?alt=media&token=e75ab8ee-5278-496c-9938-d1796bda02e0" },
-        blackmarket: { title: "ELITE_ACCESS", img: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d" }
-    };
-
-    const info = categoryInfo[type];
-    if(!info) return;
-
-    // 2. Setup Modal UI
-    document.getElementById('subCouponTitle').innerText = info.title;
-    document.getElementById('subCouponIcon').src = info.img;
-    document.getElementById('couponInventoryModal').classList.remove('active');
-    document.getElementById('subCouponModal').classList.add('active');
-
-    // 3. Logic: Get coupons from user data
-    // Assuming your Firebase user doc has an object like: myCoupons: { coins: [{id, val, code}], frames: [] }
-    const listContainer = document.getElementById('subCouponList');
-    listContainer.innerHTML = '';
-    
-    const userCoupons = (window.currentUserData?.myCoupons?.[type]) || [];
-
-    if(userCoupons.length === 0) {
-        listContainer.innerHTML = `<div class="empty-coupons">NU EXISTĂ TICHTE ACTIVE ÎN ACEASTĂ CATEGORIE</div>`;
-        return;
-    }
-
-// ... inside openSubCoupon loop ...
-userCoupons.forEach(coupon => {
-    const ticket = document.createElement('div');
-    ticket.className = 'v4-badge-item'; // Use the same class as Servicii Extra
-    ticket.style.cssText = "display:flex; flex-direction:row; justify-content:space-between; align-items:center; padding:15px 20px; border-color: rgba(0,255,204,0.3) !important;";
-    
-    ticket.innerHTML = `
-        <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-        <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-        <div style="text-align: left;">
-            <div style="font-family:'Montserrat'; font-weight:900; font-size:20px; color:#00ffcc;">-${coupon.val}%</div>
-            <div style="font-family:monospace; font-size:10px; color:#555;">CODE: #${coupon.code}</div>
-        </div>
-        <button class="bm-price-btn-v4" onclick="activateCoupon('${coupon.id}', '${type}')">ACTIVATE</button>
-    `;
-    listContainer.appendChild(ticket);
-});
-};
-
-function activateCoupon(id, category) {
-    showCustomAlert("Tichet selectat! Reducerea se va aplica la următorul " + category + " cumpărat.", "SUCCES");
-    closeModal('subCouponModal');
-}
+    if(percentEl) percentEl.innerText = count;
+}, 200);
 </script>
 </body>
 </html>
