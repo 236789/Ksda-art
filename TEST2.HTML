@@ -11857,22 +11857,22 @@ rewards: [
 
 
 // Replace the box_void entry in your BOXES_DB array with this:
-{ 
-    id: 'box_void', 
-    name: 'Void Box', 
-    price: 15000, 
-    color: '#7000ff', 
-    stockRange: [5, 15], 
-    img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20close.png?alt=media&token=7da7421a-caf5-4a8a-a368-02393550bbe8', 
-    imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20open.png?alt=media&token=39eb8f91-2c77-4bea-9337-ebf5ea391dc3',
-    rewards: [
-        { tier: 'EPIC', label: '75 DIAMONDS', icon: 'https://iili.io/fv5bmtj.png', chance: 60, style: 'tier-epic' },
-        { tier: 'LEGENDARY', label: 'EXCLUSIVE FRAME', icon: '', chance: 25, style: 'tier-legendary' },
-        { tier: 'MYTHIC', label: '75.000 COINS', icon: 'https://iili.io/fhc1SKQ.png', chance: 10, style: 'tier-mythic' },
-        { tier: 'EXOTIC', label: 'BM VOUCHER', icon: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d', chance: 4, style: 'tier-exotic' },
-        { tier: 'ABYSSAL', label: 'SINGULARITY', icon: '', chance: 1, style: 'tier-abyssal' }
-    ]
-},
+  { 
+        id: 'box_void', 
+        name: 'Void Box', 
+        price: 15000, 
+        color: '#7000ff', 
+        stockRange: [5, 15], 
+        img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20close.png?alt=media&token=7da7421a-caf5-4a8a-a368-02393550bbe8', 
+        imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FVoid%20Chest%20open.png?alt=media&token=39eb8f91-2c77-4bea-9337-ebf5ea391dc3',
+        rewards: [
+            { tier: 'ABYSSAL', label: 'SINGULARITY', icon: '', chance: 0.5, style: 'tier-abyssal' },
+            { tier: 'EXOTIC', label: 'BM VOUCHER', icon: '', chance: 4.5, style: 'tier-exotic' },
+            { tier: 'LEGENDARY', label: 'EXCLUSIVE FRAME', icon: '', chance: 5, style: 'tier-legendary' },
+            { tier: 'MYTHIC', label: '25.000 COINS', icon: 'https://iili.io/fhc1SKQ.png', chance: 10, style: 'tier-mythic' },
+            { tier: 'EPIC', label: '75 DIAMONDS', icon: 'https://iili.io/fv5bmtj.png', chance: 80, style: 'tier-epic' }
+        ]
+    },
     { id: 'box_celestial', name: 'Celestial Box', price: 25000, color: '#ffffff', stockRange: [5, 10], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20chest%20close%20%20(2).png?alt=media&token=b23d04ee-ce8c-43d7-b2a8-315255e62ca6', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20Chest%20Open%20.png?alt=media&token=68f031ce-57e2-44b2-b9e0-32453d4d1f10' }
 ];
 
@@ -12033,6 +12033,7 @@ window.openPrizeView = () => {
     const container = document.getElementById('prizeTableBody');
     container.innerHTML = ""; 
 
+
     // Helper for images within the log
     const TICKET_IMGS = {
         badges: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
@@ -12043,56 +12044,51 @@ window.openPrizeView = () => {
         blackmarket: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d'
     };
 
-    selectedBox.rewards.forEach((r) => {
+    selectedBox.rewards.forEach((r, idx) => {
         const card = document.createElement('div');
         card.className = `aaa-card ${r.style}`;
         
-        let visualHtml = `<img src="${r.icon}" class="aaa-card-img">`;
-        
-        // --- LOGIC FOR SPECIFIC VISUALS ---
+        let visualHtml = "";
+        const slotID = `slot_${idx}_${Math.floor(Math.random()*1000)}`;
+
         if(r.label === 'EXCLUSIVE FRAME') {
-            visualHtml = `<div id="exFrameShuffleSlot"></div>`;
+            visualHtml = `<div id="${slotID}" style="min-height:70px; display:flex; align-items:center; justify-content:center;"></div>`;
+            const exPool = FRAMES_DB.filter(f => f.exclusive);
             setTimeout(() => {
-                const slot = document.getElementById('exFrameShuffleSlot');
-                const exPool = FRAMES_DB.filter(f => f.exclusive);
-                setInterval(() => {
+                const el = document.getElementById(slotID);
+                if(el) setInterval(() => {
                     if (!document.getElementById('prizeListModal').classList.contains('active')) return;
                     const f = exPool[Math.floor(Math.random() * exPool.length)];
-                    if(slot) slot.innerHTML = `<img src="${f.img}" style="height:55px; filter:drop-shadow(0 0 10px #7000ff);">`;
+                    el.innerHTML = `<img src="${f.img}" style="height:55px; filter:drop-shadow(0 0 10px #7000ff);">`;
                 }, 600);
-            }, 50);
+            }, 100);
         } 
-        else if(r.label === 'COSMETIC VOUCHER') {
-            visualHtml = `<div id="ticketShuffleSlot"></div>`;
-            setTimeout(() => startTicketShuffle(), 50);
-        }
-        else if(r.label === 'CURRENCY VOUCHER') {
-            // Platinum strictly shows Coin Voucher image
-            visualHtml = `<img src="${TICKET_IMGS.coins}" style="height:60px; filter: drop-shadow(0 0 10px #ffd700);">`;
-        }
-        else if(r.label === 'BM VOUCHER') {
-            // Void strictly shows BM Voucher image
-            visualHtml = `<img src="${TICKET_IMGS.blackmarket}" style="height:60px; filter: drop-shadow(0 0 10px #00ff88);">`;
+        else if(r.label === 'RANDOM BADGE') {
+            visualHtml = `<div id="${slotID}" style="min-height:70px; display:flex; align-items:center; justify-content:center;"></div>`;
+            setTimeout(() => {
+                const el = document.getElementById(slotID);
+                if(el) setInterval(() => {
+                    if (!document.getElementById('prizeListModal').classList.contains('active')) return;
+                    const b = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
+                    el.innerHTML = `<span class="shop-badge-preview" style="background:${b.color}; color:#000; font-size:9px;">${b.text}</span>`;
+                }, 600);
+            }, 100);
         }
         else if(r.label === 'SINGULARITY') {
-            visualHtml = `<span class="shop-badge-preview badge-singularity"><i class="fas fa-atom"></i> SINGULARITY</span>`;
-        }
-        else if(r.label === 'MILIARDAR') {
-            visualHtml = `<span class="shop-badge-preview" style="background:linear-gradient(45deg, #eef2f3, #8e9eab); color:#000; padding:10px 20px; font-weight:900;">MILIARDAR</span>`;
+            visualHtml = `<span class="shop-badge-preview badge-singularity" style="padding:10px 15px;"><i class="fas fa-atom"></i> SINGULARITY</span>`;
+        } else {
+            visualHtml = `<img src="${r.icon}" class="aaa-card-img" style="height:50px;">`;
         }
 
         card.innerHTML = `
             <div class="aaa-card-content">
                 <div class="aaa-card-title">${r.tier}</div>
-                <div style="height:70px; display:flex; align-items:center; justify-content:center; width:100%;">${visualHtml}</div>
+                <div style="height:80px; display:flex; align-items:center; justify-content:center; width:100%;">${visualHtml}</div>
                 <div style="width: 100%;">
-                    <div class="aaa-card-value">
-                        ${r.label}
-                    </div>
+                    <div class="aaa-card-value">${r.label}</div>
                     <div class="aaa-card-chance">${r.chance}% CHANCE</div>
                 </div>
-            </div>
-        `;
+            </div>`;
         container.appendChild(card);
     });
     document.getElementById('prizeListModal').classList.add('active');
@@ -12275,34 +12271,32 @@ window.revealReward = async () => {
     setTimeout(async () => {
         document.getElementById('unboxingOverlay').style.display = 'none';
         
-        // 1. Initialise accumulated results
+        // Colectăm TOATE câștigurile într-un mod care nu se suprascrie
         let results = { 
             winCoins: 0, 
             winDiamonds: 0, 
-            wonBadge: null, 
-            wonFrame: null, 
-            wonTicket: null, 
+            wonBadges: [], // Folosim array pentru a colecta tot
+            wonFrames: [], 
+            wonTickets: [], 
             requiresChoice: false 
         };
 
-        // 2. RUN THE MATH ENGINE (All Chests)
         for (let i = 0; i < lockedQty; i++) {
             const roll = Math.random() * 100;
 
-if (lockedBox.id === 'box_void') {
-    if (roll <= 1) { 
-        results.wonBadge = BADGES_DB.find(b => b.id === 'b_singularity');
-    } else if (roll <= 5) { 
-        // FIXED: Strictly Black Market Voucher
-        results.wonTicket = { category: 'blackmarket', tier: 'EXOTIC ITEM UNLOCKED', name: 'FREE BLACK MARKET ACCESS' };
-    } else if (roll <= 15) { 
-        results.winCoins += 75000;
-    } else if (roll <= 40) { 
-        results.requiresChoice = true; 
-    } else { 
-        results.winDiamonds += 75; 
-    }
-} 
+            if (lockedBox.id === 'box_void') {
+                if (roll <= 0.5) { // 0.5% real
+                    results.wonBadges.push(BADGES_DB.find(b => b.id === 'b_singularity'));
+                } else if (roll <= 5.0) { // +4.5% = 5% cumulat
+                    results.wonTickets.push({ category: 'blackmarket', tier: 'EXOTIC ITEM UNLOCKED', name: 'FREE BLACK MARKET ACCESS' });
+                } else if (roll <= 10.0) { // +5% = 10% cumulat
+                    results.requiresChoice = true; 
+                } else if (roll <= 20.0) { // +10% = 20% cumulat
+                    results.winCoins += 25000;
+                } else {
+                    results.winDiamonds += 75; 
+                }
+            } 
 else if (lockedBox.id === 'box_platinum') {
     if (roll <= 1) { 
         // FIXED: Strictly Coins Voucher (No diamonds, no BM)
@@ -12725,55 +12719,36 @@ window.showFinalBoxReward = async (res, box) => {
     const modal = document.getElementById('rewardModal');
     const titleEl = modal.querySelector('h2');
     const container = modal.querySelector('p');
-    const coinsBox = modal.querySelector('.reward-coins-box');
+    modal.querySelector('.reward-coins-box').style.display = 'none';
 
-    // Default styling
-    coinsBox.style.display = 'none';
-    titleEl.innerText = "DECRYPTION_SUCCESS";
-    titleEl.style.color = "#00ffcc";
-
-    // Customize for Void
-    if(box.id === 'box_void') {
-        titleEl.innerText = "VOID_BREACH_SUCCESS";
-        titleEl.style.color = "#7000ff";
-    }
+    titleEl.innerText = box.id === 'box_void' ? "VOID_BREACH_SUCCESS" : "DECRYPTION_SUCCESS";
+    titleEl.style.color = box.id === 'box_void' ? "#7000ff" : "#00ffcc";
 
     let html = `<div style="display:flex; flex-direction:column; gap:12px; align-items:center; width:100%;">`;
 
-    // 1. Tickets
-    if(res.wonTicket) {
-        html += `<div style="border: 1px solid #ffd700; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 12px; width: 100%;">
-                    <div style="font-family:'Orbitron'; font-size:10px; color:#ffd700; font-weight:900; margin-bottom:10px;">${res.wonTicket.tier}</div>
-                    <div style="font-weight:900; color:#fff;">${res.wonTicket.name}</div>
-                </div>`;
+    // Afișăm toate badge-urile câștigate
+    if(res.wonBadges && res.wonBadges.length > 0) {
+        res.wonBadges.forEach(b => {
+            html += `<div style="border:1px solid #7000ff; padding:10px; border-radius:12px; background:rgba(0,0,0,0.5); width:100%;">
+                <span class="shop-badge-preview ${b.animClass || ''}" style="background:${b.color}; color:#000; padding:5px 10px; font-weight:900;">
+                    <i class="fas ${b.icon}"></i> ${b.text}
+                </span>
+            </div>`;
+        });
     }
 
-    // 2. Badges
-    if(res.wonBadge) {
-        const isSing = res.wonBadge.id === 'b_singularity';
-        html += `<div style="border: 1px solid ${isSing ? '#7000ff' : '#ffd700'}; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; width: 100%;">
-                    <div style="font-family:'Orbitron'; font-size:10px; color:${isSing ? '#7000ff' : '#ffd700'}; font-weight:900; margin-bottom:10px;">UNIQUE DROP</div>
-                    <span class="shop-badge-preview ${res.wonBadge.animClass || ''}" style="background:${res.wonBadge.color}; color:#000; padding:8px 15px; border-radius:4px; font-weight:900;">
-                        <i class="fas ${res.wonBadge.icon}"></i> ${res.wonBadge.text}
-                    </span>
-                </div>`;
-    }
-
-    // 3. Frames
     if(res.wonFrame) {
-        html += `<div style="border: 1px solid #ffd700; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; width: 100%;">
-                    <div style="font-family:'Orbitron'; font-size:10px; color:#ffd700; margin-bottom:10px;">LEGENDARY FRAME</div>
-                    <div class="frame-preview-box" style="margin:0 auto;">
-                        <img src="${window.currentUserData?.image || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" class="frame-preview-user">
-                        <img src="${res.wonFrame.img}" class="frame-preview-img">
-                    </div>
-                    <div style="font-weight:900; color:#fff; margin-top:10px; font-size:12px;">${res.wonFrame.name}</div>
-                </div>`;
+        html += `<div style="border:1px solid #ffd700; padding:10px; border-radius:12px; background:rgba(0,0,0,0.5); width:100%;">
+            <div class="frame-preview-box" style="margin:0 auto; width:50px; height:50px;">
+                <img src="${window.currentUserData?.image || ''}" class="frame-preview-user">
+                <img src="${res.wonFrame.img}" class="frame-preview-img">
+            </div>
+            <div style="font-weight:900; color:#fff; margin-top:5px; font-size:11px;">${res.wonFrame.name}</div>
+        </div>`;
     }
 
-    // 4. Currencies
-    if(res.winCoins > 0) html += `<div class="reward-line" style="color:#ffd700;"><img src="https://iili.io/fhc1SKQ.png" style="width:30px;"> +${res.winCoins.toLocaleString()}</div>`;
-    if(res.winDiamonds > 0) html += `<div class="reward-line" style="color:#00ff88;"><img src="https://iili.io/fv5bmtj.png" style="width:25px;"> +${res.winDiamonds}</div>`;
+    if(res.winCoins > 0) html += `<div class="reward-line" style="color:#ffd700; font-size:18px;"><img src="https://iili.io/fhc1SKQ.png" style="width:25px;"> +${res.winCoins.toLocaleString()}</div>`;
+    if(res.winDiamonds > 0) html += `<div class="reward-line" style="color:#00ff88; font-size:18px;"><img src="https://iili.io/fv5bmtj.png" style="width:20px;"> +${res.winDiamonds}</div>`;
 
     html += `</div>`;
     container.innerHTML = html;
