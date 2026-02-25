@@ -1,4 +1,5 @@
 
+
   
 
 
@@ -9846,35 +9847,32 @@ window.buyBadge = async (badgeId, price) => {
     const confirmed = await showCustomConfirm(confirmMsg, "CONFIRMĂ");
     if(!confirmed) return;
 
-    // 2. IMMEDIATE STATE LOCK (Prevents multi-claim exploit)
+    // 2. IMMEDIATE STATE LOCK
+    // We capture the code then kill the global state immediately to prevent double-claiming
     let ticketCodeToUse = null;
     if(isFree) {
-        ticketCodeToUse = window.activeCosmeticTicket.id; // Capture the code
-        window.activeCosmeticTicket = null; // KILL the free state immediately!
+        ticketCodeToUse = window.activeCosmeticTicket.id;
+        window.activeCosmeticTicket = null; // Important: Prevents multi-free-buys in same session
     }
 
     const userRef = doc(db, "accounts", auth.currentUser.uid);
     
     try {
-        // 3. GET FRESH DATA
         const userSnap = await getDoc(userRef);
         const userData = userSnap.data();
 
-        // 4. VALIDATION (If not free, check coins)
         if(!isFree && (userData.coins || 0) < price) {
             return await showCustomAlert("Nu ai destule monede!", "EROARE");
         }
 
         if(isFree && ticketCodeToUse) {
-            // --- FIX FOR ISSUE 2: VOUCHER DELETION ---
+            // --- FIX: VOUCHER DELETION LOGIC ---
+            const currentVouchers = (userData.myCoupons && userData.myCoupons.badges) ? userData.myCoupons.badges : [];
             
-            // A. Get current array safely
-            const currentBadges = (userData.myCoupons && userData.myCoupons.badges) ? userData.myCoupons.badges : [];
-            
-            // B. Filter out the specific ticket used
-            const updatedVouchers = currentBadges.filter(t => t.code !== ticketCodeToUse);
+            // Filter out the used ticket
+            const updatedVouchers = currentVouchers.filter(t => t.code !== ticketCodeToUse);
 
-            // C. Update Database (Remove Voucher + Add Badge)
+            // Update Database: Add Badge AND Update the Voucher List
             await updateDoc(userRef, { 
                 ownedBadges: arrayUnion(badgeId),
                 'myCoupons.badges': updatedVouchers 
@@ -9891,13 +9889,14 @@ window.buyBadge = async (badgeId, price) => {
             await showCustomAlert("Insignă cumpărată!", "SUCCES");
         }
 
-        // 5. REFRESH UI (Removes 'CLAIM FREE' buttons)
+        // 3. REFRESH UI
         checkShopQuest('badge');
-        openBadgeShop(); 
+        openBadgeShop(); // This will re-render buttons as "BUY" instead of "CLAIM FREE"
 
     } catch(e) { 
         console.error("Purchase Error:", e);
         showCustomAlert("Eroare la procesare. Reîncearcă.", "EROARE");
+        // Optional: restore ticket state if db fails
     } 
 };
 
