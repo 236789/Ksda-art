@@ -7062,48 +7062,61 @@ body {
     border: 1px solid rgba(255,255,255,0.4) !important;
 }
 
-
-/* --- PREVENT HORIZONTAL SCROLL & FIX GRID --- */
+/* --- ULTIMATE INVENTORY SCALE FIX --- */
 #inventoryModal .cosmetics-card-v6 {
-    overflow-x: hidden !important; /* Force kill horizontal scroll */
+    overflow-x: hidden !important;
 }
 
 #inventoryList {
     display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important; /* Strict 2 columns */
-    gap: 12px !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* Forces 2 columns */
+    gap: 10px !important;
     padding: 10px !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    overflow-x: hidden !important;
 }
 
-/* Fix Card Uniformity */
 #inventoryList .item-card-v6 {
-    width: 100% !important;
-    box-sizing: border-box !important;
+    background: rgba(13, 25, 41, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding: 12px 8px !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: space-between !important;
-    padding: 15px 10px !important;
-    margin: 0 !important;
-    min-height: 150px !important; /* Ensure all cards are equal height */
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 120px !important; /* Shorter cards */
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
-/* Ensure Badge Preview doesn't push card width */
+/* Force standard size for ALL badge previews */
 #inventoryList .item-preview-box {
+    height: 50px !important; 
     width: 100% !important;
     display: flex !important;
-    justify-content: center !important;
     align-items: center !important;
-    min-height: 65px !important;
-    margin-bottom: 5px !important;
+    justify-content: center !important;
+    margin-bottom: 10px !important;
 }
 
-/* Style standard badges in inventory so they aren't plain text */
-#inventoryList .shop-badge-preview {
+/* Shrink Singularity and standard badges to fit */
+#inventoryList .shop-badge-preview, 
+#inventoryList .badge-singularity {
+    font-size: 8px !important; /* Smaller text */
+    padding: 4px 8px !important; /* Tighter padding */
+    max-width: 90% !important; /* Prevents card push */
+    white-space: nowrap !important;
+    transform: scale(0.9); /* Subtle downscale */
+}
+
+/* Compact Buttons */
+#inventoryList .btn-equip-v6 {
+    height: 30px !important;
     font-size: 9px !important;
-    white-space: nowrap;
+    padding: 0 !important;
+    border-radius: 5px !important;
+    width: 90% !important;
+    margin: 0 auto !important;
 }
   </style>
 </head>
@@ -10244,44 +10257,43 @@ window.openInventory = async (type = 'badges') => {
 
     list.innerHTML = '';
     
-    if(type === 'badges') {
-        const ownedIds = data.ownedBadges || [];
-        const equipped = data.equippedBadge?.id || null;
-        
-        if(ownedIds.length === 0) list.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">No badges found.</p>';
-        
-        ownedIds.forEach(id => {
-            const badge = BADGES_DB.find(b => b.id === id);
-            if(badge) {
-                const isEquipped = (id === equipped);
-                const isAnimated = badge.animClass ? true : false;
-                const badgeClass = isAnimated ? badge.animClass : 'shop-badge-preview';
-                
-                // FORCE THE GIF: Animated badges keep their CSS, standard ones get the DB color.
-                const inlineStyle = isAnimated 
-                    ? "color: #fff !important; text-shadow: 2px 2px 5px #000 !important; border: 1px solid #fff !important; padding: 6px 12px !important;" 
-                    : `background: ${badge.color} !important; color: #000 !important; font-weight: 900 !important; padding: 6px 12px !important;`;
+ if(type === 'badges') {
+    const ownedIds = data.ownedBadges || [];
+    const equipped = data.equippedBadge?.id || null;
+    if(ownedIds.length === 0) list.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">No items.</p>';
+    
+    ownedIds.forEach(id => {
+         const badge = BADGES_DB.find(b => b.id === id);
+         if(badge) {
+            const isEquipped = (id === equipped);
+            const isAnimated = badge.animClass ? true : false;
+            const badgeClass = isAnimated ? badge.animClass : 'shop-badge-preview';
+            
+            // Logic: Animated stays white/GIF, standard gets color.
+            const inlineStyle = isAnimated 
+                ? "color: #fff !important; text-shadow: 0 0 8px #000; border: 1px solid rgba(255,255,255,0.5);" 
+                : `background: ${badge.color} !important; color: #000 !important; font-weight: 900;`;
 
-                list.innerHTML += `
-                    <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
-                        <div class="item-preview-box">
-                            <span class="${badgeClass}" style="${inlineStyle}">
-                                <i class="fas ${badge.icon}"></i> ${badge.text}
-                            </span>
-                        </div>
-                        <div style="margin-top:auto; width: 100%;">
-                            ${isEquipped 
-                                ? `<button class="btn-equip-v6 is-equipped" style="background: rgba(0, 255, 136, 0.1); color: #00ff88;">EQUIPPED</button>` 
-                                : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">EQUIP</button>`
-                            }
-                        </div>
-                    </div>`;
-            }
-        });
-        if(equipped && actionArea) {
-            actionArea.innerHTML = `<button class="unequip-btn-v6" style="margin-bottom:15px; background: rgba(255,71,87,0.1);" onclick="unequipItem('badge')">REMOVE CURRENT BADGE</button>`;
-        }
-    } 
+            list.innerHTML += `
+                <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
+                    <div class="item-preview-box">
+                        <span class="${badgeClass}" style="${inlineStyle}">
+                            <i class="fas ${badge.icon}"></i> ${badge.text}
+                        </span>
+                    </div>
+                    ${isEquipped 
+                        ? `<button class="btn-equip-v6 is-equipped" style="opacity: 0.5;">EQUIPPED</button>` 
+                        : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">EQUIP</button>`
+                    }
+                </div>`;
+         }
+    });
+    
+    const actionArea = document.getElementById('inventoryActions');
+    if(equipped && actionArea) {
+        actionArea.innerHTML = `<button class="unequip-btn-v6" style="margin-bottom:10px; height: 35px; font-size: 10px;" onclick="unequipItem('badge')">REMOVE BADGE</button>`;
+    }
+}
     // --- CATEGORY: BADGES (Singularity GIF Fix Included) ---
     else if (type === 'badges') {
         const ownedIds = data.ownedBadges || [];
