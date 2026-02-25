@@ -6952,7 +6952,7 @@ const TEXTS_DB = [
 function getCosmeticBadge(equippedBadge) {
     if (!equippedBadge) return "";
     
-    // Updated list to include Singularity
+    // THE FULL LIST OF ANIMATED/GOD-TIER IDS
     const godTierIds = [
         'b_wheel_god', 
         'b_spin_god', 
@@ -6961,20 +6961,25 @@ function getCosmeticBadge(equippedBadge) {
         'b_cyber_ghost', 
         'b_demon_slayer', 
         'b_void_master', 
-        'b_singularity' // <--- ADDED THIS
+        'b_singularity',   // <--- GIF BADGE
+        'b_dragon_anim',   // Animated Dragon
+        'b_radar_anim',    // Animated Radar
+        'b_glitch_anim',   // Animated Glitch
+        'b_king_anim'      // Animated King
     ];
 
     if (godTierIds.includes(equippedBadge.id)) {
-        // Special Animated Style
+        // Special Animated Style Logic
         let className = `badge-${equippedBadge.id}`;
         
-        // Legacy ID fix to ensure Quantum God matches new style
+        // Legacy fix for the original Quantum God ID
         if(equippedBadge.id === 'b_wheel_god') className = 'badge-wheel-god';
         
-        return ` <span class="${className}"><i class="fas ${equippedBadge.icon}"></i> ${equippedBadge.text}</span>`;
+        // Return with NO inline background (to let the GIF show) and forced white text
+        return ` <span class="${className}" style="color: #fff !important; text-shadow: 0 0 8px #000 !important;"><i class="fas ${equippedBadge.icon}"></i> ${equippedBadge.text}</span>`;
     }
 
-    // Default style for standard solid-color badges
+    // Default style for standard solid-color badges (Black text on colored background)
     return ` <span class="cosmetic-badge" style="background:${equippedBadge.color} !important; color:#000 !important; border:none; box-shadow:0 0 5px ${equippedBadge.color}; font-weight:900;"><i class="fas ${equippedBadge.icon}"></i> ${equippedBadge.text}</span>`;
 }
     // DOM ELEMENTS
@@ -10002,7 +10007,7 @@ window.openUserProfile = async (uid) => {
             openDonationHistory(uid, pName, ownerImg);
         };
 
-        // 6. Badges (Staff & Cosmetics)
+    // --- 6. Badges (Staff & Cosmetics) ---
         const bBox = document.getElementById('viewUserBadges');
         let bHtml = "";
         
@@ -10011,21 +10016,39 @@ window.openUserProfile = async (uid) => {
         else if(email === 'kevin.trinity2020@gmail.com') bHtml += `<div><span class="admin-badge">ADMIN</span></div>`;
 
         if (data.equippedBadge) {
-            const godTierBadges = ['b_wheel_god', 'b_spin_god', 'b_immortal', 'b_celestial', 'b_cyber_ghost', 'b_demon_slayer', 'b_void_master'];
+            // UPDATED: Added b_singularity and your other animated IDs to this list
+            const godTierBadges = [
+                'b_wheel_god', 'b_spin_god', 'b_immortal', 'b_celestial', 
+                'b_cyber_ghost', 'b_demon_slayer', 'b_void_master', 
+                'b_singularity', 'b_dragon_anim', 'b_radar_anim', 
+                'b_glitch_anim', 'b_king_anim'
+            ];
             
             if (godTierBadges.includes(data.equippedBadge.id)) {
                 let className = `badge-${data.equippedBadge.id}`;
                 if(data.equippedBadge.id === 'b_wheel_god') className = 'badge-wheel-god';
                 
-                bHtml += `<div style="margin-top:5px;"><span class="${className}"><i class="fas ${data.equippedBadge.icon}"></i> ${data.equippedBadge.text}</span></div>`;
+                // THE FIX: Force white text and shadow so it shows over the GIF
+                bHtml += `
+                    <div style="margin-top:5px;">
+                        <span class="${className}" style="color: #fff !important; text-shadow: 0 0 8px #000 !important; border: 1px solid rgba(255,255,255,0.5) !important;">
+                            <i class="fas ${data.equippedBadge.icon}"></i> ${data.equippedBadge.text}
+                        </span>
+                    </div>`;
             } else {
-                bHtml += `<div style="margin-top:5px;"><span class="cosmetic-badge" style="background:${data.equippedBadge.color}; color:#000; box-shadow:0 0 5px ${data.equippedBadge.color}; border:none;"><i class="fas ${data.equippedBadge.icon}"></i> ${data.equippedBadge.text}</span></div>`;
+                // Standard Badges
+                bHtml += `
+                    <div style="margin-top:5px;">
+                        <span class="cosmetic-badge" style="background:${data.equippedBadge.color} !important; color:#000 !important; box-shadow:0 0 5px ${data.equippedBadge.color}; border:none; font-weight:900;">
+                            <i class="fas ${data.equippedBadge.icon}"></i> ${data.equippedBadge.text}
+                        </span>
+                    </div>`;
             }
         }
         bBox.innerHTML = bHtml;
 
     } catch(e) { console.error(e); }
-};
+    };
 
     closeViewProfile.onclick = () => viewProfileModal.classList.remove('active');
 
