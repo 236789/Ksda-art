@@ -1,0 +1,6630 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6DWPJ4T2C"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-B6DWPJ4T2C');
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trivia KSDA</title>
+  <meta name="description" content="Pagina noua KSDA">
+  <link rel="icon" type="image/png" href="https://iili.io/fXks1Dv.png">
+
+  <!-- Fonts: Orbitron (UI/Gaming) & Poppins (Text) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* --- VARIABLES & THEME --- */
+    :root {
+      --bg-dark: #050b14;
+      --primary: #29f3ff;
+      --primary-dim: rgba(41, 243, 255, 0.15);
+      --secondary: #7000ff;
+      --text-main: #ffffff;
+      --text-muted: #a5b1c2;
+      --glass-bg: rgba(13, 25, 41, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glow-shadow: 0 0 20px rgba(41, 243, 255, 0.3);
+      --card-radius: 24px;
+      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      --discord-color: #5865F2;
+      --gold: #ffd700;
+      --error: #ff4757;
+    }
+
+    * { box-sizing: border-box; outline: none; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: var(--bg-dark);
+      background-image: 
+        linear-gradient(to bottom, rgba(5, 11, 20, 0.85), var(--bg-dark)),
+        url('https://i.makeagif.com/media/3-03-2021/otrneG.gif');
+      background-position: center;
+      background-size: cover;
+      background-attachment: fixed;
+      font-family: 'Poppins', sans-serif;
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #1f3a52; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+    /* ORBITRON pe toate elementele UI */
+    h1, h2, h3, .logo, .stat-number, .btn, .bubbleBtn, #sideMenu a, .metallic-title-big, .login-btn-header, .side-menu-login-btn, .pop-user, .streak-txt, .coins-count, .btn-tasks { 
+        font-family: 'Orbitron', sans-serif; 
+    }
+    
+    /* --- BANNED SCREEN STYLES --- */
+    #bannedOverlay {
+        display: none;
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(10, 0, 0, 0.98);
+        z-index: 10000;
+        flex-direction: column; justify-content: center; align-items: center;
+        text-align: center; padding: 20px;
+    }
+    
+    .ban-icon { font-size: 80px; color: #ff4757; margin-bottom: 20px; animation: pulseRed 2s infinite; }
+    @keyframes pulseRed { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
+    
+    .ban-title { font-family: 'Orbitron'; font-size: 32px; color: #ff4757; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+    .ban-details { background: rgba(255, 0, 0, 0.1); border: 1px solid #ff4757; padding: 30px; border-radius: 20px; max-width: 500px; width: 100%; }
+    .ban-info-label { color: #888; font-size: 12px; text-transform: uppercase; margin-bottom: 5px; display: block; }
+    .ban-info-val { color: #fff; font-size: 18px; font-weight: 600; margin-bottom: 20px; display: block; }
+
+    /* --- COOKIE POPUP STYLES --- */
+    .cookie-wrapper {
+        position: fixed; bottom: 20px; right: 20px; left: 20px;
+        background: rgba(8, 16, 27, 0.95);
+        border: 1px solid var(--primary);
+        backdrop-filter: blur(10px);
+        padding: 20px;
+        border-radius: 16px;
+        z-index: 9990;
+        display: none;
+        flex-direction: row; align-items: center; justify-content: space-between;
+        gap: 20px;
+        box-shadow: 0 0 25px rgba(41, 243, 255, 0.15);
+        max-width: 900px;
+        margin: 0 auto;
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(100px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .cookie-content { flex: 1; }
+    .cookie-title { font-family: 'Orbitron', sans-serif; font-weight: 700; color: var(--primary); margin-bottom: 5px; font-size: 14px; text-transform: uppercase; }
+    .cookie-text { font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.5; }
+    
+    .cookie-btn {
+        background: var(--primary); color: #000;
+        font-family: 'Orbitron', sans-serif; font-weight: 700;
+        border: none; padding: 10px 24px; border-radius: 50px;
+        cursor: pointer; transition: 0.3s;
+        text-transform: uppercase; font-size: 12px;
+        white-space: nowrap;
+    }
+    .cookie-btn:hover { background: #fff; box-shadow: 0 0 15px var(--primary); }
+
+    /* --- ACCOUNT POPUP MODAL STYLES --- */
+    .account-modal-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+        display: none; justify-content: center; align-items: center;
+        z-index: 11000; backdrop-filter: blur(10px);
+    }
+    .account-modal-overlay.active { display: flex; }
+
+    .account-card {
+        background: #08101b; border: 1px solid var(--primary);
+        width: 90%; max-width: 380px; border-radius: 30px;
+        padding: 40px 25px; text-align: center; position: relative;
+        box-shadow: 0 0 50px rgba(41, 243, 255, 0.3);
+        animation: jumpIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    /* --- NEW EDIT PROFILE INPUTS --- */
+    .edit-profile-form { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+    .edit-label { font-size: 10px; color: var(--primary); text-align: left; text-transform: uppercase; margin-bottom: 2px; margin-left: 5px; }
+    .edit-input { 
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); 
+        color: #fff; padding: 10px; border-radius: 12px; width: 100%; font-family: 'Poppins'; font-size: 12px;
+    }
+    .edit-input:focus { border-color: var(--primary); }
+    .btn-save-profile { 
+        background: var(--primary); color: #000; font-family: 'Orbitron'; font-weight: 700;
+        border: none; padding: 10px; border-radius: 12px; cursor: pointer; margin-top: 10px;
+    }
+
+    @keyframes jumpIn {
+        0% { transform: scale(0.3) translateY(100px); opacity: 0; }
+        100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .close-pop { position: absolute; top: 15px; right: 20px; color: #fff; cursor: pointer; font-size: 24px; background: none; border: none; opacity: 0.5; transition: 0.3s; }
+    .close-pop:hover { opacity: 1; transform: scale(1.1); color: var(--primary); }
+    
+    .pop-img { width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--primary); margin-bottom: 12px; box-shadow: 0 0 20px var(--primary-dim); object-fit: cover; }
+    .pop-user { font-size: 18px; color: #fff; margin: 0; letter-spacing: 1px; }
+    .pop-mail { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
+
+    .streak-box {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: rgba(255, 69, 0, 0.1); border-radius: 50px;
+        padding: 6px 16px; margin-bottom: 15px; border: 1px solid rgba(255, 69, 0, 0.2);
+    }
+    .streak-box i { color: #ff4500; font-size: 18px; animation: fireBurn 1.5s infinite; }
+    @keyframes fireBurn { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.5) drop-shadow(0 0 5px #ff4500); } }
+    .streak-txt { font-weight: 800; color: #ff4500; font-size: 13px; }
+
+    /* KSDA PUNCTE STYLE */
+    .coins-section {
+        display: flex; flex-direction: column; align-items: center; gap: 5px;
+        margin-bottom: 25px; background: rgba(255, 255, 255, 0.03);
+        padding: 12px; border-radius: 20px; border: 1px solid var(--glass-border);
+    }
+    .coins-label { font-family: 'Orbitron'; font-size: 10px; color: var(--primary); text-transform: uppercase; }
+    .coins-display { display: flex; align-items: center; gap: 10px; }
+    /* FIXED COIN ICON SIZE */
+    .coins-icon-img { width: 30px !important; height: 30px !important; object-fit: contain; }
+    .coins-count { font-size: 20px; font-weight: 900; color: #fff; }
+
+    .btn-tasks {
+        background: rgba(41, 243, 255, 0.05); border: 1px solid var(--primary); color: var(--primary);
+        padding: 16px; border-radius: 18px; text-decoration: none; display: flex;
+        flex-direction: column; align-items: center; gap: 5px; transition: 0.3s; margin-bottom: 15px; width: 100%; border: none; cursor: pointer;
+    }
+    .btn-tasks:hover { background: var(--primary); color: #000; box-shadow: 0 0 20px var(--primary-dim); transform: translateY(-2px); }
+    .tasks-title { font-family: 'Orbitron'; font-weight: 800; font-size: 14px; text-transform: uppercase; }
+    .tasks-desc { font-family: 'Poppins'; font-size: 10px; opacity: 0.8; font-weight: 400; line-height: 1.3; color: inherit; }
+
+    /* --- UPDATED ACCOUNT BUTTONS --- */
+    .btn-row-pop { display: flex; gap: 10px; justify-content: center; align-items: center; margin-bottom: 20px; }
+
+    .btn-edit-profile, .btn-cosmetics {
+        background: transparent; border: 1.5px solid var(--primary); color: var(--primary);
+        padding: 10px 20px; border-radius: 50px; font-size: 11px; cursor: pointer;
+        display: flex; align-items: center; gap: 8px; transition: 0.3s; font-family: 'Orbitron'; text-transform: uppercase; font-weight: 700;
+    }
+    .btn-cosmetics { border-color: #d63384; color: #d63384; }
+    .btn-edit-profile:hover { background: var(--primary); color: #000; }
+    .btn-cosmetics:hover { background: #d63384; color: #fff; }
+
+    .btn-logout-pop {
+        background: transparent; border: 1.5px solid #ff4757; color: #ff4757;
+        padding: 10px 25px; border-radius: 12px; font-family: 'Orbitron'; font-weight: 700;
+        cursor: pointer; transition: 0.3s; font-size: 12px; text-transform: uppercase;
+    }
+    .btn-logout-pop:hover { background: #ff4757; color: #fff; box-shadow: 0 0 15px rgba(255, 71, 87, 0.4); }
+
+    /* COSMETICS MODALS */
+    .shop-modal-card { background: #08101b; border: 1px solid #d63384; width: 100%; max-width: 600px; border-radius: 30px; padding: 30px; text-align: center; position: relative; animation: jumpIn 0.5s forwards; display: flex; flex-direction: column; max-height: 85vh; }
+    .badges-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; max-height: 400px; overflow-y: auto; padding: 10px; }
+    .shop-badge-item { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 10px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: space-between; transition: 0.2s; }
+    .shop-badge-preview { display: inline-block; padding: 3px 6px; border-radius: 4px; font-family: 'Orbitron'; font-size: 9px; font-weight: 800; text-transform: uppercase; margin-bottom: 8px; border: 1px solid currentColor; }
+    .equip-btn { background: #2ecc71; color: #000; border: none; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; cursor: pointer; margin-top: 5px; font-family: 'Orbitron'; width: 100%; }
+    .unequip-all-btn { background: rgba(255, 71, 87, 0.1); border: 1px solid #ff4757; color: #ff4757; width: 100%; padding: 12px; border-radius: 20px; font-family: 'Orbitron'; font-weight: 700; margin-top: 20px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    
+    /* CLOSE BTN STYLE */
+    .close-modal-btn { position: absolute; top: 20px; right: 20px; color: #fff; cursor: pointer; font-size: 30px; background: none; border: none; opacity: 0.7; transition: 0.3s; z-index: 100; }
+    .close-modal-btn:hover { opacity: 1; transform: scale(1.1); }
+
+    /* REWARD MODAL (WELCOME BONUS) */
+    .reward-modal {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+        display: none; justify-content: center; align-items: center;
+        z-index: 12000; padding: 20px;
+    }
+    .reward-modal.active { display: flex; }
+    
+    .reward-card {
+        background: #08101b; 
+        border: 2px solid #ffd700; 
+        border-radius: 35px;
+        padding: 40px 20px; text-align: center; max-width: 420px; width: 100%;
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.15);
+        animation: jumpIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    .reward-card h2 { font-family: 'Orbitron'; color: #fff; font-size: 24px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+    .reward-card p { font-family: 'Poppins'; font-size: 15px; color: #fff; line-height: 1.5; margin-bottom: 25px; }
+    .reward-coins-box { font-size: 50px; font-weight: 900; color: #ffd700; margin: 20px 0; display: flex; align-items: center; justify-content: center; gap: 15px; font-family: 'Orbitron'; }
+    
+    .super-btn {
+        background: #00ffff; 
+        color: #000;
+        font-family: 'Orbitron';
+        font-weight: 900;
+        border: none;
+        padding: 15px 50px;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 16px;
+        text-transform: uppercase;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+        transition: 0.3s;
+        display: inline-block;
+        margin-top: 10px;
+    }
+    .super-btn:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(0, 255, 255, 0.9); }
+
+    /* --- HEADER & HERO --- */
+    .header-container { position: fixed; top: 0; left: 0; right: 0; padding: 20px; z-index: 1000; display: flex; justify-content: center; }
+    header { width: 100%; max-width: 1200px; display: flex; align-items: center; justify-content: space-between; padding: 10px 30px; background: rgba(5, 11, 20, 0.6); border: 1px solid var(--glass-border); border-radius: 100px; backdrop-filter: blur(16px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .logo { font-weight: 900; font-size: 24px; letter-spacing: 1px; background: linear-gradient(90deg, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; text-decoration: none; }
+    nav { display: flex; gap: 32px; align-items: center; }
+    nav a { color: var(--text-muted); text-decoration: none; font-size: 13px; font-weight: 600; transition: var(--transition); position: relative; }
+    nav a:hover { color: var(--primary); }
+    .login-btn-header { background: transparent; border: 1.5px solid var(--primary); color: var(--primary); padding: 8px 20px; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+    .user-avatar-small { width: 24px; height: 24px; border-radius: 50%; border: 1px solid #fff; display: none; }
+    .hamburger { display: none; background: none; border: none; color: #fff; font-size: 26px; cursor: pointer; }
+
+    /* --- SIDE MENU --- */
+    #sideMenu { position: fixed; inset: 0; left: auto; width: 320px; background: #08101b; border-left: 1px solid var(--glass-border); z-index: 2000; padding: 40px 30px; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1); display: flex; flex-direction: column; }
+    #sideMenu.open { transform: translateX(0); }
+    .menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .closeBtn { font-size: 42px; background: none; border: none; color: #fff; cursor: pointer; }
+    .menu-links { display: flex; flex-direction: column; gap: 35px; }
+    .menu-links a { color: #fff; text-decoration: none; font-size: 24px; font-weight: 600; transition: 0.3s; }
+    .side-menu-login-btn { background: rgba(41, 243, 255, 0.1); border: 1px solid var(--primary); color: var(--primary); width: 100%; padding: 15px; margin-top: 20px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; gap: 10px; }
+
+    /* --- FOOTER --- */
+    footer { background: #02050a; border-top: 1px solid var(--glass-border); padding: 60px 20px 30px; text-align: center; }
+    .footer-links { display: flex; justify-content: center; gap: 30px; margin: 30px 0; flex-wrap: wrap; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 15px; transition: 0.2s; font-weight: 500; }
+    .footer-links a:hover { color: var(--primary); }
+    .copyright { color: #556; font-size: 13px; margin-top: 40px; }
+    .made-by-wrapper { margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+    .made-by-text { font-size: 15px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.5px; }
+    .footer-pfp-img { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--primary); transition: var(--transition); box-shadow: 0 0 15px rgba(41, 243, 255, 0.2); }
+    .footer-pfp-img:hover { transform: scale(1.1) rotate(3deg); box-shadow: 0 0 25px var(--primary); }
+    .discord-link { margin-top: 10px; transition: var(--transition); display: flex; justify-content: center; align-items: center; }
+    .discord-logo { width: 45px; height: auto; filter: drop-shadow(0 0 8px rgba(88, 101, 242, 0.3)); }
+    .discord-link:hover .discord-logo { transform: scale(1.2); filter: drop-shadow(0 0 15px var(--discord-color)) brightness(1.2); }
+
+    @media (max-width: 768px) {
+      nav { display: none; }
+      .hamburger { display: block; }
+    }
+
+    /* Stil pentru notificarea roșie (Badge) */
+.notif-badge { position: absolute; left: -15px; top: 50%; transform: translateY(-50%); background: #ff4757; color: white; font-size: 11px; font-weight: 900; width: 28px; height: 28px; border-radius: 50%; display: none; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(255, 71, 87, 0.6); border: 2px solid #fff; z-index: 20; font-family: 'Orbitron', sans-serif; animation: pulseBadge 1.5s infinite; }
+@keyframes pulseBadge { 0% { transform: translateY(-50%) scale(1); } 50% { transform: translateY(-50%) scale(1.1); box-shadow: 0 0 20px #ff4757; } 100% { transform: translateY(-50%) scale(1); } }
+.hero-btns .btn-cyber { position: relative; overflow: visible !important; }
+
+/* --- CUSTOM CHAT BANNERS (STYLES) --- */
+/* Include all banner styles from original code here if needed, keeping short for brevity, but they are essential for cosmetics */
+    .bubble-galaxy { background: linear-gradient(135deg, #1a0b2e, #5000ca); color: #fff; border: 1px solid rgba(255,255,255,0.4); }
+    /* ... (Rest of banner styles assumed present for brevity) ... */
+
+/* --- FRAMES STYLES --- */
+    
+    /* Wrapper in Account Modal */
+    .profile-frame-wrapper {
+        position: relative;
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 15px auto;
+        display: flex; justify-content: center; align-items: center;
+    }
+
+    /* The actual user Avatar */
+    .pop-img-inner {
+        width: 100%; height: 100%; border-radius: 50%;
+        object-fit: cover; border: 2px solid rgba(255,255,255,0.1);
+        z-index: 1;
+        box-shadow: 0 0 20px var(--primary-dim);
+    }
+
+    /* The Frame Overlay */
+    .pop-frame-overlay {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 145%; height: 145%; /* Default scale */
+        z-index: 2; pointer-events: none;
+        filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
+    }
+
+    /* Preview inside Inventory */
+    .frame-preview-box {
+        position: relative; width: 60px; height: 60px;
+        margin: 10px auto; display: flex; justify-content: center; align-items: center;
+    }
+    .frame-preview-user {
+        width: 100%; height: 100%; border-radius: 50%; object-fit: cover; z-index: 1;
+    }
+    .frame-preview-img {
+        position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2; width: 145%; height: 145%;
+    }
+    
+    /* MAIN CONTAINER FOR BLANK PAGE */
+    .blank-main-container {
+        padding-top: 140px;
+        padding-bottom: 80px;
+        min-height: 80vh;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-left: 20px;
+        padding-right: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+
+/* --- CUSTOM CHAT BANNERS (STYLES) --- */
+    /* 1. GALAXY */
+/* 1. GALAXY (FIXED) */
+    .bubble-galaxy {
+        background: linear-gradient(135deg, #1a0b2e, #5000ca) !important; /* Added !important */
+        background-image: url('https://i.giphy.com/media/U3qYN8S0j3bpK/giphy.webp') !important; /* Added !important */
+        background-size: cover !important;
+        background-position: center !important;
+        color: #fff !important;
+        border: 1px solid rgba(255, 255, 255, 0.4) !important;
+        box-shadow: 0 0 15px rgba(138, 43, 226, 0.6) !important;
+        text-shadow: 0 0 3px #000;
+        font-weight: 600;
+    }
+    /* 2. TOXIC */
+    .bubble-toxic {
+        background: repeating-linear-gradient(45deg, #000, #000 10px, #1b3a08 10px, #1b3a08 20px) !important;
+        border: 2px solid #39ff14 !important;
+        color: #39ff14 !important;
+        box-shadow: 0 0 10px #39ff14, inset 0 0 20px #39ff14 !important;
+        font-family: 'Orbitron', sans-serif; letter-spacing: 1px; text-shadow: 0 0 5px #000;
+    }
+    /* 3. FIRE */
+    .bubble-fire {
+        background: linear-gradient(to bottom, #500000, #a00000) !important;
+        border: 2px solid #ff4500 !important;
+        color: #ffd700 !important;
+        box-shadow: 0 -5px 10px rgba(255, 69, 0, 0.5) !important;
+        animation: firePulse 2s infinite;
+    }
+    @keyframes firePulse { 0% { box-shadow: 0 0 5px #ff4500; } 50% { box-shadow: 0 0 20px #ff4500; } 100% { box-shadow: 0 0 5px #ff4500; } }
+    /* 4. RAINBOW */
+    .bubble-rainbow {
+        background: linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3) !important;
+        background-size: 1800% 1800% !important;
+        animation: rainbowAnim 4s ease infinite;
+        color: #fff !important; border: 2px solid #fff !important; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
+    @keyframes rainbowAnim { 0%{background-position:0% 82%} 50%{background-position:100% 19%} 100%{background-position:0% 82%} }
+    /* 5. GOLD */
+    .bubble-gold {
+        background: linear-gradient(45deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c) !important;
+        color: #000 !important; border: 1px solid #ffd700 !important; font-weight: 900;
+        text-shadow: 0 1px 0 rgba(255,255,255,0.4); box-shadow: 0 0 15px rgba(255, 215, 0, 0.6) !important;
+    }
+    /* 6. NEON */
+    .bubble-neon {
+        background: rgba(0, 0, 0, 0.8) !important; border: 2px solid #0ff !important; color: #0ff !important;
+        box-shadow: 0 0 10px #0ff, inset 0 0 10px #0ff !important; text-shadow: 0 0 5px #0ff;
+    }
+    /* 7. GHOST */
+    .bubble-ghost {
+        background: rgba(255, 255, 255, 0.05) !important; backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.2) !important; color: #ccc !important; font-style: italic;
+    }
+
+
+
+
+        /* --- NEW ADDED BANNERS --- */
+
+/* 8. HEARTS (Pink with cute hearts) */
+.bubble-hearts {
+    background: radial-gradient(circle, #ff9a9e 0%, #fecfef 99%, #fecfef 100%) !important;
+    border: 2px solid #ff69b4 !important;
+    color: #c71585 !important;
+    font-weight: bold;
+    box-shadow: 0 0 15px rgba(255, 105, 180, 0.6) !important;
+}
+.bubble-hearts::after {
+    content: ' ❤️'; 
+}
+
+/* 9. BLOODMOON (Red blood effects) */
+.bubble-blood {
+    background: #2b0000 !important;
+    background-image: linear-gradient(0deg, transparent 24%, rgba(255, 0, 0, .3) 25%, rgba(255, 0, 0, .3) 26%, transparent 27%, transparent 74%, rgba(255, 0, 0, .3) 75%, rgba(255, 0, 0, .3) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 0, 0, .3) 25%, rgba(255, 0, 0, .3) 26%, transparent 27%, transparent 74%, rgba(255, 0, 0, .3) 75%, rgba(255, 0, 0, .3) 76%, transparent 77%, transparent) !important;
+    border: 2px solid #8a0303 !important;
+    color: #ff0000 !important;
+    box-shadow: 0 0 20px #8a0303, inset 0 0 20px #000 !important;
+    text-shadow: 0 0 5px #ff0000;
+    font-family: 'Orbitron', sans-serif;
+}
+
+/* 10. CARTOON (Comic book style) */
+.bubble-comic {
+    background: #fff !important;
+    border: 3px solid #000 !important;
+    color: #000 !important;
+    box-shadow: 5px 5px 0px #000 !important;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-family: 'Courier New', sans-serif;
+}
+
+/* 11. SPECTRUM (Full Rainbow Gradient) */
+.bubble-spectrum {
+    background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet) !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+    font-weight: bold;
+}
+
+/* 12. ICE (Frozen) */
+.bubble-ice {
+    background: linear-gradient(to bottom, #e3fdfd, #cbf1f5) !important;
+    border: 1px solid #a6e3e9 !important;
+    color: #006994 !important;
+    box-shadow: 0 0 10px #71c7ec !important;
+    text-shadow: 0 0 2px #fff;
+}
+
+/* 13. MATRIX (Hacker code) */
+.bubble-matrix {
+    background: #000 !important;
+    color: #0f0 !important;
+    border: 1px solid #0f0 !important;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+/* 14. MIDAS (Solid Gold) */
+.bubble-midas {
+    background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%),
+                radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%) !important;
+    color: #4a3b0f !important;
+    border: 1px solid #ffd700 !important;
+    font-weight: 900;
+}
+
+/* 15. VOID (Pitch Black) */
+.bubble-void {
+    background: #000 !important;
+    color: #fff !important;
+    border: 1px solid #333 !important;
+    box-shadow: 0 0 15px #000 !important;
+}
+
+/* 16. GLITCH */
+.bubble-glitch {
+    background: #222 !important;
+    color: #fff !important;
+    border-left: 3px solid #f0f;
+    border-right: 3px solid #0ff;
+    font-family: 'Orbitron';
+}
+
+/* 17. NATURE (Forest) */
+.bubble-nature {
+    background: #134e5e; 
+    background: linear-gradient(to right, #134e5e, #71b280) !important;
+    color: #fff !important;
+    border: 1px solid #71b280 !important;
+}
+
+/* 18. OCEAN (Deep Sea) */
+.bubble-ocean {
+    background: linear-gradient(to bottom, #00c6ff, #0072ff) !important;
+    color: #fff !important;
+    border-radius: 20px 20px 20px 0 !important;
+}
+
+/* 19. SUNSET (Vaporwave) */
+.bubble-sunset {
+    background: linear-gradient(to right, #ff512f, #dd2476) !important;
+    color: #fff !important;
+    font-style: italic;
+}
+
+/* 20. ELECTRIC (Lightning) */
+.bubble-electric {
+    background: #2c3e50 !important;
+    border: 2px solid #f1c40f !important;
+    color: #f1c40f !important;
+    box-shadow: 0 0 10px #f1c40f !important;
+    animation: flash 3s infinite;
+}
+@keyframes flash { 0%, 90%, 100% { opacity: 1; } 92%, 98% { opacity: 0.8; border-color: #fff; } }
+
+/* 21. CANDY (Sweet stripes) */
+.bubble-candy {
+    background: repeating-linear-gradient(45deg, #ffb6c1, #ffb6c1 10px, #fff 10px, #fff 20px) !important;
+    color: #d63384 !important;
+    border: 2px solid #ffb6c1 !important;
+    font-weight: 800;
+    text-shadow: 1px 1px 0 #fff;
+}
+
+/* 22. BLUEPRINT (Tech) */
+.bubble-blueprint {
+    background: #0d47a1 !important;
+    background-image: radial-gradient(#ffffff 1px, transparent 1px) !important;
+    background-size: 10px 10px !important;
+    color: #fff !important;
+    font-family: 'Courier New', monospace;
+    border: 1px dashed #fff !important;
+}
+
+/* 23. GRAFFITI */
+.bubble-graffiti {
+    background: #111 !important;
+    color: #ff00de !important;
+    border-bottom: 3px solid #00ff00 !important;
+    font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif !important;
+    font-weight: 900;
+}
+
+/* 24. POLICE (Siren) */
+.bubble-police {
+    background: linear-gradient(90deg, #0000ff 50%, #ff0000 50%) !important;
+    color: #fff !important;
+    font-weight: bold;
+    opacity: 0.9;
+}
+
+/* 25. ANGEL (Holy) */
+.bubble-angel {
+    background: #fff !important;
+    border: 2px solid #ffd700 !important;
+    color: #daa520 !important;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* 26. DEMON */
+.bubble-demon {
+    background: #000 !important;
+    border: 2px solid #660000 !important;
+    color: #cc0000 !important;
+    font-family: 'Orbitron';
+}
+
+/* 27. PIXEL (8-Bit) */
+.bubble-pixel {
+    background: #fff !important;
+    border: 4px solid #000 !important;
+    border-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='10' height='10' viewBox='0 0 10 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h2v2H0zM2 2h2v2H2zM4 4h2v2H4zM6 6h2v2H6zM8 8h2v2H8z' fill='%23000'/%3E%3C/svg%3E") 2 repeat !important;
+    font-family: 'Courier New', monospace;
+    color: #000 !important;
+}
+
+/* 28. STEAMPUNK */
+.bubble-steampunk {
+    background: #2b1d0e !important;
+    color: #cd7f32 !important;
+    border: 2px solid #cd7f32 !important;
+}
+
+/* 29. RADIOACTIVE */
+.bubble-radioactive {
+    background: #e6ff00 !important;
+    color: #000 !important;
+    border: 2px dashed #000 !important;
+    font-weight: 800;
+}
+
+/* 30. ROYAL */
+.bubble-royal {
+    background: #4b0082 !important;
+    color: #ffd700 !important;
+    border: 2px double #ffd700 !important;
+}
+
+/* 31. MILITARY */
+.bubble-military {
+    background: #556b2f !important;
+    color: #fff !important;
+    border: 2px solid #000 !important;
+}
+
+/* 32. HONEY */
+.bubble-honey {
+    background: #f1c40f !important;
+    color: #d35400 !important;
+    border: 1px solid #d35400 !important;
+}
+
+
+    /* --- ANIMATED / FX BANNERS --- */
+
+/* 1. RGB HYPER (Moving Rainbow) */
+.bubble-anim-chroma {
+    background: linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3) !important;
+    background-size: 400% 400% !important;
+    animation: gradientMove 3s ease infinite !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+    font-weight: 800;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+@keyframes gradientMove { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+
+/* 2. SHINY HOLO (Metallic Reflection) */
+.bubble-anim-holo {
+    background: linear-gradient(135deg, #333 30%, #fff 50%, #333 70%) !important;
+    background-size: 200% 200% !important;
+    animation: shineSweep 3s linear infinite !important;
+    color: #fff !important;
+    border: 1px solid #aaa !important;
+    font-weight: bold;
+}
+@keyframes shineSweep { 0% {background-position: 200% 0;} 100% {background-position: -200% 0;} }
+
+/* 3. BLOOD PULSE (Living Bloodmoon) */
+.bubble-anim-blood {
+    background: #4a0000 !important;
+    color: #ff0000 !important;
+    border: 1px solid #ff0000 !important;
+    box-shadow: 0 0 0 rgba(255, 0, 0, 0.4);
+    animation: bloodPulse 1.5s infinite !important;
+    font-family: 'Orbitron';
+}
+@keyframes bloodPulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); transform: scale(1); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); transform: scale(1.02); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); transform: scale(1); }
+}
+
+/* 4. GLITCH CHAOS (Shaking Text) */
+.bubble-anim-glitch {
+    background: #000 !important;
+    color: #0f0 !important;
+    border: 1px solid #0f0 !important;
+    position: relative;
+    animation: glitchShake 0.3s infinite !important;
+    font-family: monospace;
+}
+@keyframes glitchShake {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0, 0); }
+}
+
+/* 5. LIGHTNING STORM (Flashing) */
+.bubble-anim-storm {
+    background: #1a1a1a !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+    animation: stormFlash 4s infinite !important;
+}
+@keyframes stormFlash {
+    0%, 90%, 100% { background: #1a1a1a; color: #fff; box-shadow: none; }
+    92% { background: #fff; color: #000; box-shadow: 0 0 20px #fff; }
+    94% { background: #1a1a1a; color: #fff; }
+    96% { background: #fff; color: #000; box-shadow: 0 0 20px #fff; }
+}
+
+/* 6. NEON BREATHE (Glowing Pink) */
+.bubble-anim-neon {
+    background: transparent !important;
+    border: 2px solid #ff00ff !important;
+    color: #ff00ff !important;
+    box-shadow: 0 0 5px #ff00ff, inset 0 0 5px #ff00ff !important;
+    animation: neonGlow 2s ease-in-out infinite alternate !important;
+}
+@keyframes neonGlow {
+    from { box-shadow: 0 0 5px #ff00ff, inset 0 0 5px #ff00ff; }
+    to { box-shadow: 0 0 20px #ff00ff, inset 0 0 20px #ff00ff; text-shadow: 0 0 10px #ff00ff; }
+}
+
+/* 7. TOXIC SLIME (Oozing) */
+.bubble-anim-slime {
+    background: #000 !important;
+    border: 2px solid #32CD32 !important;
+    color: #32CD32 !important;
+    background-image: linear-gradient(180deg, transparent 50%, #32CD32 50%);
+    background-size: 100% 200%;
+    animation: slimeDrip 3s linear infinite;
+    font-weight: 800;
+}
+@keyframes slimeDrip { 0% { background-position: 0% 0%; } 100% { background-position: 0% 100%; } }
+
+/* 8. DISCO (Rapid Color Change) */
+.bubble-anim-disco {
+    background: #fff;
+    color: #000;
+    font-weight: 900;
+    animation: discoParty 1s infinite;
+    border: 2px solid #000;
+}
+@keyframes discoParty {
+    0% { background: #ff0000; border-color: #00ff00; }
+    25% { background: #00ff00; border-color: #0000ff; }
+    50% { background: #0000ff; border-color: #ffff00; }
+    75% { background: #ffff00; border-color: #ff0000; }
+    100% { background: #ff0000; border-color: #00ff00; }
+}
+
+/* 9. FIREWORKS (Sparkling) */
+.bubble-anim-sparkle {
+    background: #0a0a2a !important;
+    color: gold !important;
+    border: 1px solid gold !important;
+    background-image: radial-gradient(white 15%, transparent 16%), radial-gradient(white 15%, transparent 16%);
+    background-size: 20px 20px;
+    background-position: 0 0, 10px 10px;
+    animation: sparkleAnim 1s linear infinite;
+}
+@keyframes sparkleAnim { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+/* 10. GHOST FADE (Spooky) */
+.bubble-anim-ghost {
+    background: rgba(255,255,255,0.1) !important;
+    border: 1px solid rgba(255,255,255,0.3) !important;
+    color: #fff !important;
+    animation: ghostFloat 3s ease-in-out infinite;
+}
+@keyframes ghostFloat {
+    0% { transform: translateY(0); opacity: 1; }
+    50% { transform: translateY(-5px); opacity: 0.6; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+/* 11. GOLD RUSH (Moving Gold Gradient) */
+.bubble-anim-gold {
+    background: linear-gradient(45deg, #a67c00 0%, #ffc60b 25%, #ffea87 50%, #ffc60b 75%, #a67c00 100%) !important;
+    background-size: 200% auto !important;
+    color: #553300 !important;
+    border: 2px solid #ffd700 !important;
+    animation: gradientMove 2s linear infinite !important; /* Reusing gradientMove */
+    font-weight: bold;
+}
+
+/* 12. LOVER HEARTBEAT (Cute) */
+.bubble-anim-love {
+    background: #ffecf2 !important;
+    border: 2px solid #ff69b4 !important;
+    color: #d63384 !important;
+    animation: heartBeatBorder 1s infinite;
+}
+
+
+
+/* --- TRIVIA STYLES --- */
+    .trivia-wrapper { width: 100%; max-width: 800px; text-align: center; margin-top: 20px; }
+    
+    /* Big Metallic Text */
+    .trivia-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 48px;
+        font-weight: 900;
+        text-transform: uppercase;
+        background: linear-gradient(to bottom, #ffffff 0%, #a2cfff 40%, #ffffff 50%, #537bad 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 10px rgba(41, 243, 255, 0.5));
+        margin-bottom: 10px;
+    }
+
+    /* Description */
+    .trivia-desc { color: #a5b1c2; font-size: 14px; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto; }
+
+    /* The "Chat-like" Box */
+/* Find this existing class and UPDATE it */
+    .trivia-box {
+        background: #08101b;
+        border: 1px solid var(--primary);
+        border-radius: 20px;
+        padding: 30px;
+        min-height: 500px; /* INCREASE THIS from 400px to 500px for breathing room */
+        position: relative;
+        box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; /* THIS CENTERS THE LOGIN WALL VERTICALLY */
+        overflow: hidden;
+    }
+
+    /* Also update this one to ensure screens fill the box */
+    .trivia-screen { 
+        display: none; 
+        width: 100%; 
+        height: 100%; /* ADD THIS */
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: center; /* ADD THIS */
+        animation: fadeIn 0.4s ease; 
+    }
+    .trivia-screen.active { display: flex; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+    /* Buttons Grid */
+    .mode-grid, .cat-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; width: 100%; }
+    
+    .game-btn {
+        background: rgba(41, 243, 255, 0.05);
+        border: 1px solid var(--primary);
+        color: #fff;
+        padding: 20px;
+        border-radius: 15px;
+        width: 140px;
+        height: 140px;
+        cursor: pointer;
+        transition: 0.3s;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; 
+    }
+    .game-btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 20px var(--primary); transform: scale(1.05); }
+    .game-btn i { font-size: 32px; margin-bottom: 5px; }
+    .game-btn.locked { opacity: 0.5; cursor: not-allowed; border-color: #555; }
+    .game-btn.locked:hover { background: transparent; color: #fff; transform: none; box-shadow: none; }
+
+    /* Question Styles */
+    .question-text { font-size: 18px; font-weight: 600; margin-bottom: 25px; line-height: 1.5; color: #fff; }
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; }
+    .option-btn {
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+        padding: 15px; border-radius: 10px; color: #ccc; cursor: pointer;
+        text-align: left; transition: 0.2s; font-size: 13px;
+    }
+    .option-btn:hover { border-color: var(--primary); color: #fff; background: rgba(41, 243, 255, 0.1); }
+    
+    .option-btn.correct { background: #2ecc71 !important; color: #000 !important; border-color: #2ecc71 !important; }
+    .option-btn.wrong { background: #ff4757 !important; color: #fff !important; border-color: #ff4757 !important; }
+
+    /* Timer Bar */
+    .timer-container { width: 100%; height: 6px; background: #222; border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
+    .timer-bar { height: 100%; background: var(--primary); width: 100%; transition: width 1s linear; }
+
+    /* Results */
+    .result-pfp { width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 15px; }
+    .stat-row { display: flex; gap: 30px; margin: 20px 0; font-family: 'Orbitron'; }
+    .stat-box { text-align: center; }
+    .stat-val { font-size: 24px; font-weight: 900; }
+    .val-green { color: #2ecc71; }
+    .val-red { color: #ff4757; }
+
+
+/* Add this anywhere in your CSS */
+.btn-outline {
+    background: transparent; 
+    border: 1.5px solid var(--primary); 
+    color: var(--primary);
+    padding: 8px 20px; 
+    border-radius: 50px; 
+    font-weight: 700; 
+    font-size: 12px;
+    text-transform: uppercase; 
+    cursor: pointer; 
+    transition: 0.3s;
+    margin-top: 30px; /* Spacing */
+}
+.btn-outline:hover { background: var(--primary); color: #000; }
+
+
+/* --- LOGIN WALL REDESIGN --- */
+.login-wall-card {
+    text-align: center;
+    width: 100%; 
+    max-width: 450px; /* Slightly narrower like the screenshot */
+    background: #02050a;
+    border: 1px solid #29f3ff; /* Cyan Border */
+    border-radius: 20px;
+    padding: 60px 30px;
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.15), inset 0 0 20px rgba(41, 243, 255, 0.05); /* Outer and Inner Glow */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 auto; /* Center in parent */
+}
+
+.lock-icon { 
+    font-size: 60px; 
+    color: #29f3ff; 
+    margin-bottom: 30px; 
+    filter: drop-shadow(0 0 15px #29f3ff); /* Glowing Lock */
+    animation: floatLock 3s ease-in-out infinite;
+}
+
+@keyframes floatLock {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.login-wall-title { 
+    font-family: 'Orbitron', sans-serif; 
+    font-size: 26px; 
+    color: #fff; 
+    margin-bottom: 10px; 
+    text-transform: uppercase; 
+    letter-spacing: 2px; 
+}
+
+.login-wall-desc { 
+    font-family: 'Poppins', sans-serif; 
+    font-size: 14px; 
+    color: #a5b1c2; 
+    margin-bottom: 40px; 
+    line-height: 1.6;
+}
+
+/* Ensure the Google button is centered and styled */
+.google-btn-wall {
+    background: #ffffff; 
+    color: #000000;
+    font-family: 'Poppins', sans-serif; 
+    font-weight: 600;
+    border: none; 
+    padding: 12px 35px; 
+    border-radius: 50px;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer; 
+    transition: all 0.3s ease;
+    font-size: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+.google-btn-wall:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.4); 
+}
+
+/* --- QUESTION IMAGE FIX --- */
+.question-img-wrapper {
+    width: 100%; 
+    max-width: 500px; /* Bigger max width */
+    height: 300px;    /* Taller fixed height */
+    margin: 0 auto 25px auto; /* Centered with bottom margin */
+    border-radius: 15px; 
+    overflow: hidden;
+    border: 2px solid var(--primary); 
+    display: none; /* JS will toggle this to 'flex' */
+    background: #000; /* Black background behind image */
+    justify-content: center;
+    align-items: center;
+}
+
+.question-img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: contain; /* Ensures the whole image is visible without cropping */
+}
+
+
+/* --- MULTIPLAYER STYLES --- */
+  
+/* --- 2x2 GRID COSMETICS REVAMP --- */
+.cosmetics-selection-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 10px; }
+.cosmetic-select-btn { 
+    background: rgba(255, 255, 255, 0.05); border: 1px solid var(--primary); border-radius: 20px; 
+    aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+    color: #fff; cursor: pointer; transition: 0.3s; text-align: center; padding: 10px; 
+}
+.cosmetic-select-btn:hover { background: var(--primary); color: #000; transform: translateY(-5px); }
+.cosmetic-select-btn i { font-size: 28px; margin-bottom: 10px; }
+
+/* --- SICK TEXT ANIMATION ENGINE v2 --- */
+@keyframes hue-rotate { from { filter: hue-rotate(0deg); } to { filter: hue-rotate(360deg); } }
+@keyframes shimmer-fast { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+@keyframes pulse-intense { 0%, 100% { text-shadow: 0 0 10px currentColor, 0 0 20px currentColor; transform: scale(1); } 50% { text-shadow: 0 0 30px currentColor, 0 0 50px currentColor; transform: scale(1.05); } }
+@keyframes glitch-shiver { 0% { text-shadow: 2px 0 #ff0, -2px 0 #f0f; transform: translate(0); } 20% { text-shadow: -2px 0 #0ff, 2px 0 #f00; transform: translate(-1px, 1px); } 40% { text-shadow: 2px 0 #0f0, -2px 0 #00f; transform: translate(1px, -1px); } 100% { transform: translate(0); } }
+@keyframes liquid-flow { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+@keyframes flicker-light { 0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; } 20%, 22%, 24%, 55% { opacity: 0.2; } }
+
+/* ELEMENTAL & NATURE */
+.t-fire { background: linear-gradient(to top, #ff0, #f80, #f40, #f00); -webkit-background-clip: text; color: transparent; animation: hue-rotate 3s infinite alternate; font-weight: 800; }
+.t-ice { color: #00e5ff; text-shadow: 0 0 15px #fff, 0 0 25px #00e5ff; animation: pulse-intense 3s infinite; }
+.t-toxic { color: #adff2f; text-shadow: 0 0 10px #adff2f; animation: glitch-shiver 0.5s infinite; }
+.t-water { background: linear-gradient(90deg, #00d2ff, #3a7bd5, #00d2ff); background-size: 200% auto; -webkit-background-clip: text; color: transparent; animation: shimmer-fast 4s linear infinite; }
+.t-nature { color: #2ecc71; text-shadow: 0 0 5px #000, 0 0 15px #27ae60; }
+.t-storm { color: #fff; text-shadow: 0 0 10px #fff, 0 0 20px #7000ff; animation: flicker-light 2s infinite; }
+
+/* CYBER & TECH */
+.t-glitch { color: #fff; animation: glitch-shiver 0.2s infinite; }
+.t-matrix { color: #00ff41; text-shadow: 0 0 10px #00ff41; font-family: 'Courier New', monospace; animation: flicker-light 4s infinite; }
+.t-neon-pink { color: #ff00ff; text-shadow: 0 0 20px #ff00ff; animation: pulse-intense 2s infinite; }
+.t-neon-blue { color: #00ffff; text-shadow: 0 0 20px #00ffff; animation: pulse-intense 2.5s infinite; }
+.t-overload { color: #ff4500; text-shadow: 2px 2px #000; animation: flicker-light 0.1s infinite; }
+
+/* LUXURY & METALS */
+.t-gold-anim { background: linear-gradient(45deg, #ffd700, #fff, #ffd700, #b8860b); background-size: 200% auto; -webkit-background-clip: text; color: transparent; animation: shimmer-fast 3s linear infinite; }
+.t-diamond { background: linear-gradient(135deg, #fff, #e0f7fa, #80deea, #fff); background-size: 200% auto; -webkit-background-clip: text; color: transparent; animation: shimmer-fast 2s linear infinite; }
+.t-ruby { color: #e91e63; text-shadow: 0 0 15px #e91e63; animation: pulse-intense 3s infinite; }
+.t-platinum { color: #e5e4e2; text-shadow: 0 0 10px #fff; animation: shimmer-fast 5s infinite; }
+
+/* SPACE & COSMIC */
+.t-nebula { background: linear-gradient(90deg, #6a11cb, #2575fc, #ff00c8); background-size: 300% auto; -webkit-background-clip: text; color: transparent; animation: liquid-flow 5s linear infinite; }
+.t-galaxy { background: url('https://i.giphy.com/media/U3qYN8S0j3bpK/giphy.webp'); -webkit-background-clip: text; color: transparent; background-size: cover; filter: brightness(1.5); }
+.t-void { color: #000; text-shadow: 0 0 5px #7000ff, 0 0 15px #29f3ff; }
+
+/* DARK & HORROR */
+.t-blood { color: #f00; text-shadow: 3px 3px 5px #000; animation: flicker-light 3s infinite; }
+.t-ghost { color: rgba(255,255,255,0.5); text-shadow: 0 0 10px #fff; animation: liquid-flow 10s infinite; font-style: italic; }
+/* --- COSMETICS GRID REVAMP --- */
+
+
+/* --- 1. Lobby List Actualizat --- */
+.lobby-container { 
+    width: 100%; 
+    max-height: 300px; 
+    overflow-y: auto; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 12px; 
+    margin: 20px 0; 
+}
+.lobby-player {
+    display: flex; 
+    align-items: center; 
+    gap: 15px;
+    background: rgba(41, 243, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 20px; 
+    border-radius: 100px; /* Stil pastilă */
+    animation: slideUp 0.3s ease;
+    min-height: 60px;
+}
+.lobby-pfp { 
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%; 
+    border: 2px solid var(--primary); 
+    object-fit: cover; 
+    flex-shrink: 0;
+}
+.lobby-name { 
+    font-family: 'Orbitron'; 
+    font-size: 14px; 
+    color: #fff; 
+    font-weight: 800;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+/* --- 2. Voting Screen (FORȚAT 2 COLOANE) --- */
+/* --- CATEGORII LAYOUT (FORȚAT 2 COLOANE) --- */
+.cat-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* 2 coloane egale */
+    gap: 12px !important;
+    width: 100%;
+    padding: 5px;
+}
+
+.cat-grid .game-btn {
+    width: 100% !important;
+    height: auto !important; 
+    min-height: 110px !important; /* Crescut puțin pentru a face loc la 3+ voturi */
+    padding: 15px 5px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    position: relative;
+    border-radius: 16px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(41, 243, 255, 0.15) !important;
+    transition: 0.3s all ease;
+}
+
+/* Stil pentru Iconițele din Butoane */
+.cat-grid .game-btn i {
+    font-size: 22px !important;
+    margin-bottom: 2px;
+    filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));
+}
+
+/* Stil pentru Textul Categoriilor */
+.cat-grid .game-btn span {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #fff;
+    text-align: center;
+}
+
+/* Containerul de Voturi (Fix pentru 3+ poze) */
+.vote-avatars {
+    display: flex !important;
+    flex-wrap: wrap !important; /* Permite pozelor să treacă pe rândul 2 în interiorul butonului */
+    justify-content: center !important;
+    gap: 3px !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+    min-height: 22px;
+}
+
+.mini-vote-pfp {
+    width: 20px !important;
+    height: 20px !important;
+    border-radius: 50% !important;
+    border: 1.5px solid #fff !important;
+    background: #000;
+    flex-shrink: 0;
+}
+
+/* --- 3. Leaderboard (Top Răspunsuri) Fix Banners & Layout --- */
+.lb-row {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 15px !important;
+    margin-bottom: 10px !important;
+    min-height: 70px !important;
+    border-radius: 15px !important;
+    background: rgba(13, 25, 41, 0.9); /* Fundal fallback */
+    border: 1px solid rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Forțează bannerul să fie vizibil dacă există clasă de tip bubble/anim */
+.lb-row[class*="bubble-"], .lb-row[class*="anim-"] {
+    background-image: inherit !important;
+    background: inherit !important;
+    border: 1px solid rgba(255,255,255,0.3) !important;
+}
+
+.lb-row > div:first-child {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0; /* Important pentru text truncation */
+}
+
+.user-name-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.display-name {
+    font-size: 15px !important;
+    font-weight: 900 !important;
+    font-family: 'Orbitron', sans-serif;
+    color: #fff;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 100%;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+}
+
+.picked-answer-text {
+    font-size: 10px !important;
+    font-weight: 600;
+    background: rgba(0,0,0,0.4);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 3px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 140px;
+}
+
+.lb-time {
+    min-width: 85px !important;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    text-align: right;
+    margin-left: 10px;
+}
+
+.lb-time div:first-child {
+    font-size: 18px !important; /* Punctele (+10) */
+    font-weight: 900 !important;
+    font-family: 'Orbitron', sans-serif;
+}
+
+.lb-time div:last-child {
+    font-size: 9px !important; /* Secundele (1.2s) */
+    opacity: 0.8;
+    color: #fff;
+    margin-top: 2px;
+}
+
+/* Ajustări speciale pentru ecrane foarte mici (mobil îngust) */
+@media (max-width: 480px) {
+    .profile-frame-wrapper {
+        width: 45px !important;
+        height: 45px !important;
+        min-width: 45px !important;
+    }
+    .display-name { font-size: 13px !important; }
+    .picked-answer-text { max-width: 110px; }
+    .lb-time { min-width: 75px !important; }
+    .lb-time div:first-child { font-size: 16px !important; }
+}
+
+
+
+/* --- NEW DUAL CURRENCY BOXES --- */
+.currency-wrapper { display: flex; gap: 12px; justify-content: center; margin-bottom: 25px; padding: 0 5px; }
+.currency-card { flex: 1; background: rgba(5, 11, 20, 0.6); border-radius: 18px; padding: 12px 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 2px solid transparent; }
+.card-ksda { box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); animation: goldGlow 3s infinite alternate; }
+.card-diamonds { box-shadow: 0 0 15px rgba(0, 255, 136, 0.1); animation: emeraldGlow 3s infinite alternate-reverse; }
+@keyframes goldGlow { 0% { border-color: rgba(255, 215, 0, 0.2); } 100% { border-color: rgba(255, 215, 0, 0.8); box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); } }
+@keyframes emeraldGlow { 0% { border-color: rgba(0, 255, 136, 0.2); } 100% { border-color: rgba(0, 255, 136, 0.8); box-shadow: 0 0 15px rgba(0, 255, 136, 0.5); } }
+.currency-icon { width: 32px !important; height: 32px !important; object-fit: contain; margin-bottom: 5px; }
+.currency-value { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #fff; }
+
+/* --- PREMIUM POP-UPS & GLOW --- */
+.modern-pop-card { background: #08101b; width: 100%; max-width: 400px; border-radius: 45px; padding: 50px 30px; text-align: center; position: relative; border: 2px solid rgba(255, 255, 255, 0.05); animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+@keyframes popIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.pop-fire { border-color: #ff4500; box-shadow: 0 0 40px rgba(255, 69, 0, 0.25); }
+.pop-red { border-color: #ff4757; box-shadow: 0 0 40px rgba(255, 71, 87, 0.2); }
+.modern-pop-card h2 { font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px; margin-bottom: 10px; font-size: 24px; }
+.pop-fire h2 { color: #ff4500; }
+.pop-red h2 { color: #ff4757; }
+.pop-streak-display { display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 35px; font-family: 'Orbitron'; }
+.streak-num { font-size: 65px; font-weight: 900; line-height: 1; }
+.streak-num.old { color: #500; opacity: 0.6; font-size: 45px; } 
+.streak-num.new { color: #ff8c00; text-shadow: 0 0 20px #ff4500, 0 0 40px #ff0000; animation: firePulse 1.5s infinite alternate; }
+.streak-num.missed { color: #ff4757; text-shadow: 0 0 20px #ff4757; }
+.pop-reward-pill { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 30px; padding: 15px 25px; display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
+.pop-btn-cyan { background: #00ffff; color: #000; font-family: 'Orbitron'; font-weight: 900; border: none; padding: 18px 60px; border-radius: 50px; cursor: pointer; text-transform: uppercase; font-size: 15px; box-shadow: 0 0 25px rgba(0, 255, 255, 0.5); margin-top: 20px; transition: 0.3s; position: relative; z-index: 99; }
+#flyingDiamond { position: fixed; width: 55px; z-index: 40000; pointer-events: none; display: none; }
+
+/* --- EXACT ACCOUNT MODAL V2 (Centred & Animated) --- */
+.account-card-v2 {
+    background: #08101b; 
+    border: 1px solid var(--primary);
+    width: 95%; max-width: 380px; 
+    border-radius: 30px; padding: 25px 20px;
+    text-align: center; position: relative;
+    box-shadow: 0 0 50px rgba(41, 243, 255, 0.3);
+    animation: jumpIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    max-height: 85vh; overflow-y: auto;
+    display: flex; flex-direction: column; align-items: center;
+    scrollbar-width: none; -ms-overflow-style: none;
+}
+.account-card-v2::-webkit-scrollbar { display: none; }
+
+/* Top Buttons Centering */
+.btn-row-pop-v2 { 
+    display: flex; flex-direction: column; 
+    gap: 10px; width: 100%; margin-bottom: 20px; 
+}
+
+.btn-edit-profile-v2, .btn-cosmetics-v2 {
+    background: transparent; border: 1.5px solid var(--primary); color: var(--primary);
+    padding: 10px 20px; border-radius: 50px; font-size: 11px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; /* Centered Text */
+    gap: 8px; transition: 0.3s; font-family: 'Orbitron'; text-transform: uppercase; font-weight: 700;
+}
+.btn-cosmetics-v2 { border-color: #d63384; color: #d63384; }
+.btn-edit-profile-v2:hover { background: var(--primary); color: #000; }
+.btn-cosmetics-v2:hover { background: #d63384; color: #fff; }
+
+/* Currency Section */
+.currency-wrapper-v2 { display: flex; gap: 10px; width: 100%; margin-bottom: 20px; }
+.currency-card-v2 {
+    flex: 1; border-radius: 18px; padding: 15px 10px;
+    display: flex; flex-direction: row !important; align-items: center;
+    justify-content: center; gap: 10px; background: rgba(5, 11, 20, 0.6);
+    border: 2px solid transparent; transition: 0.3s;
+}
+.card-ksda-v2 { animation: goldGlow 3s infinite alternate; }
+.card-diamonds-v2 { animation: emeraldGlow 3s infinite alternate-reverse; }
+
+@keyframes goldGlow {
+    0% { border-color: rgba(255, 215, 0, 0.2); box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); }
+    100% { border-color: rgba(255, 215, 0, 0.8); box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+}
+@keyframes emeraldGlow {
+    0% { border-color: rgba(0, 255, 136, 0.2); box-shadow: 0 0 5px rgba(0, 255, 136, 0.2); }
+    100% { border-color: rgba(0, 255, 136, 0.8); box-shadow: 0 0 15px rgba(0, 255, 136, 0.5); }
+}
+
+/* Action Grid (Squares) */
+.pop-btns-row-top-v2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; margin-bottom: 12px; }
+.btn-action-small-v2 {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 8px; padding: 15px 5px; border-radius: 20px; text-decoration: none;
+    background: rgba(255, 255, 255, 0.03); border: 1.5px solid transparent; transition: 0.3s;
+}
+.btn-action-small-v2.cyan { border-color: var(--primary); color: var(--primary); }
+.btn-action-small-v2.red { border-color: #ff4757; color: #ff4757; }
+.btn-action-small-v2:hover { transform: translateY(-3px); background: rgba(255,255,255,0.08); }
+.btn-action-small-v2 i { font-size: 24px; }
+.btn-action-small-v2 span { font-family: 'Orbitron'; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+
+/* Invite Button */
+.invite-btn-special-v2 {
+    background: rgba(41, 243, 255, 0.05); border: 1.5px solid #00ff88 !important; color: #00ff88 !important;
+    padding: 16px; border-radius: 18px; cursor: pointer; transition: 0.3s; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 5px;
+}
+.invite-btn-special-v2:hover { background: rgba(0, 255, 136, 0.1); transform: scale(1.02); }
+
+/* Toast Notification (Optional but good) */
+#toastBox-v2 { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 99999; pointer-events: none; }
+.custom-toast-v2 { background: rgba(8, 16, 27, 0.95); border: 1px solid #00ff88; color: #fff; padding: 12px 30px; border-radius: 50px; font-family: 'Orbitron'; font-size: 13px; box-shadow: 0 0 20px rgba(0, 255, 136, 0.4); animation: slideUpFade 0.4s ease-out; }
+
+
+
+/* --- SHARE / REFERRAL MODAL STYLES --- */
+#shareModal-v2 .account-card-v2 {
+    border-color: #00ff88;
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+}
+
+.ref-link-box-v2 {
+    background: rgba(0,0,0,0.3);
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    word-break: break-all;
+    font-family: monospace;
+    border: 1px dashed #00ff88;
+    color: #00ff88;
+    font-size: 12px;
+    text-align: center;
+}
+
+.copy-btn-v2 {
+    background: #00ff88;
+    color: #000;
+    font-family: 'Orbitron';
+    font-weight: 900;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 14px;
+    text-transform: uppercase;
+    box-shadow: 0 0 20px rgba(0,255,136,0.4);
+    transition: 0.3s;
+}
+.copy-btn-v2:hover { transform: scale(1.05); box-shadow: 0 0 30px #00ff88; }
+
+
+
+
+/* --- 1. THE OVERLAY (FORCED FLEX CENTERING) --- */
+#authModal.account-modal-overlay {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.94);
+    backdrop-filter: blur(10px);
+    z-index: 9999999; 
+    display: none; /* JS MUST SET TO 'flex' */
+    justify-content: center; 
+    align-items: center;     
+}
+
+/* --- 2. THE CARD (RESTORED GIF & CORRECT SIZE) --- */
+.auth-card {
+    width: min(440px, 95vw);
+    background: url('https://i.makeagif.com/media/3-03-2021/otrneG.gif') center/cover no-repeat;
+    border: 2px solid var(--primary);
+    border-radius: 30px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(41, 243, 255, 0.4);
+    margin: auto; 
+
+}
+
+/* Dark layer over GIF for text contrast */
+.auth-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 11, 20, 0.9); 
+    z-index: 0;
+}
+
+.auth-content {
+    position: relative;
+    z-index: 1;
+    padding: 40px;
+}
+
+/* --- 3. THE "SUBTITLE" STYLE (Used for Subtitle & "Sau") --- */
+.auth-subtitle, .auth-divider-sau {
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: #fff;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+    position: relative;
+}
+
+/* THE ANIMATED BAR (Shared by both) */
+.auth-subtitle::after, .auth-divider-sau::after {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 1px;
+    margin-top: 10px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    position: relative;
+    overflow: hidden;
+}
+
+/* THE SCANNING LIGHT ANIMATION */
+.auth-subtitle::before, .auth-divider-sau::before {
+    content: '';
+    position: absolute;
+    bottom: -1px; /* Align with the bar */
+    left: -100%;
+    width: 50%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #fff, transparent);
+    z-index: 2;
+    animation: scannerLoop 3s infinite linear;
+}
+
+@keyframes scannerLoop {
+    0% { left: -100%; }
+    100% { left: 200%; }
+}
+
+/* --- 4. HOLOGRAPHIC GOOGLE BUTTON (HOLLOW ICON) --- */
+.google-holo-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 16px;
+    border-radius: 15px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    gap: 15px;
+    font-family: 'Orbitron';
+    font-weight: 900;
+    color: white;
+    font-size: 11px;
+    transition: 0.4s;
+}
+
+.google-holo-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, #38bdf8, #a855f7, #22c55e, #38bdf8);
+    background-size: 300% 100%;
+    opacity: 0.2;
+}
+
+.google-holo-btn:hover::before { 
+    opacity: 0.5; 
+    animation: holoMove 3s linear infinite; 
+}
+
+.google-holo-btn i {
+    font-size: 20px;
+    color: transparent;
+    -webkit-text-stroke: 1px white;
+    z-index: 1;
+}
+
+.google-holo-btn span { z-index: 1; letter-spacing: 1px; }
+
+@keyframes holoMove { to { background-position: 300% 0%; } }
+
+/* --- 5. TABS & INPUTS FIX --- */
+.auth-tabs { display: flex; justify-content: center; gap: 40px; margin-bottom: 25px; }
+.auth-tabs h2 { font-family: 'Orbitron'; font-size: 16px; cursor: pointer; color: var(--text-muted); margin: 0; }
+.auth-tabs h2.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+.input-group { margin-bottom: 15px; text-align: left; }
+.input-group label { font-family: 'Orbitron'; font-size: 9px; color: var(--primary); display: block; margin-bottom: 5px; }
+.ksda-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(41,243,255,0.2); padding: 12px; border-radius: 10px; color: white; outline: none; }
+
+
+/* Add this to your CSS */
+.auth-card .close-pop {
+    z-index: 100; /* Forces it above the GIF background and content */
+    position: absolute; /* Ensures it sticks to the corner */
+    cursor: pointer;
+}
+
+
+
+/* --- THE ULTIMATE BLUE METAL ENGINE --- */
+.btn-ksda-fire {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(10px, 4vw, 14px); /* Scaled for card fit */
+    font-weight: 900;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 12px 30px;
+    border-radius: 100px;
+    white-space: nowrap;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: 0.4s all;
+    border: 2px solid transparent;
+    
+    /* Animated Border */
+    background-image: linear-gradient(var(--bg-dark), var(--bg-dark)), 
+                      linear-gradient(to right, #0055ff 0%, #ffffff 50%, #29f3ff 100%);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    background-size: 200% 100%;
+    animation: borderFlow 4s linear infinite;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    margin-top: 15px;
+}
+
+/* Liquid Text Animation */
+.btn-ksda-fire span {
+    background: linear-gradient(90deg, 
+        #0055ff 0%, 
+        #29f3ff 35%, 
+        #ffffff 50%, 
+        #29f3ff 65%, 
+        #0055ff 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: textFlow 3s linear infinite;
+    letter-spacing: 1px;
+}
+
+.btn-ksda-fire:hover {
+    transform: scale(1.05) translateY(-3px);
+    box-shadow: 0 0 25px rgba(41, 243, 255, 0.4);
+    filter: brightness(1.2);
+}
+
+/* Notification Badge Compatibility */
+.btn-ksda-fire .notif-badge {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    left: auto;
+    transform: none;
+}
+
+
+
+
+/* --- COMPACT DASHBOARD MODAL v5 (Height Fixed) --- */
+.account-card-v5 {
+    width: min(380px, 95vw);
+    max-height: 85vh; /* Limit height */
+    
+    /* Background remains on the card */
+    background: url('https://i.makeagif.com/media/3-03-2021/otrneG.gif') center/cover no-repeat;
+    border: 2px solid var(--primary);
+    border-radius: 30px;
+    position: relative;
+    box-shadow: 0 0 50px rgba(41, 243, 255, 0.3);
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    
+    /* NEW: This prevents the whole card from scrolling */
+    overflow: hidden; 
+    display: flex;
+    flex-direction: column;
+}
+.account-card-v5::-webkit-scrollbar { display: none; }
+
+.account-card-v5::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 11, 20, 0.96);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.modal-content-v5 {
+    position: relative;
+    z-index: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    
+    /* NEW: Scrolling happens ONLY here now */
+    overflow-y: auto; 
+    flex: 1; 
+
+    /* Hide Scrollbar while keeping functionality */
+    -ms-overflow-style: none; 
+    scrollbar-width: none; 
+}
+.modal-content-v5::-webkit-scrollbar { display: none; }
+
+/* NAME ZONE - SHARP & GLOWING */
+.name-wrapper-v5 {
+    margin: 2px 0; /* Reduced margin */
+    width: 100%;
+    text-align: center;
+    overflow: visible !important;
+}
+
+/* COSMETICS & EDIT PROFILE - STYLED PILLS */
+.utility-row-v5 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px; /* Tighter gap */
+    width: 100%;
+    margin-bottom: 10px; /* Reduced margin */
+}
+
+.btn-util-v5 {
+    padding: 8px; /* Smaller buttons */
+    border-radius: 50px;
+    font-family: 'Orbitron';
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: 0.3s;
+}
+
+.btn-cosmo-v5 { background: rgba(214, 51, 132, 0.1); border-color: #d63384; color: #ff85c2; }
+.btn-edit-v5 { background: rgba(41, 243, 255, 0.1); border-color: var(--primary); color: var(--primary); }
+.btn-util-v5:hover { filter: brightness(1.2); transform: scale(1.03); box-shadow: 0 0 15px currentColor; }
+
+/* THE 4 SQUARE BUTTONS ROW */
+.grid-4-v5 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    width: 100%;
+    margin: 10px 0;
+}
+
+.square-btn-v5 {
+    aspect-ratio: 1 / 1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 4px;
+}
+
+.square-btn-v5 i, .square-btn-v5 img { font-size: 18px; margin-bottom: 4px; transition: 0.3s; }
+.square-btn-v5 span { font-family: 'Orbitron'; font-size: 7px; font-weight: 800; color: #fff; text-transform: uppercase; }
+
+/* 4 Distinct Styles */
+.sq-tasks { border-color: rgba(41, 243, 255, 0.3); } .sq-tasks i { color: var(--primary); }
+.sq-rewards { border-color: rgba(255, 71, 87, 0.3); } 
+.sq-rank { border-color: rgba(0, 255, 136, 0.3); } .sq-rank i { color: #00ff88; }
+.sq-shop { border-color: rgba(255, 215, 0, 0.3); } .sq-shop i { color: #ffd700; }
+
+.square-btn-v5:hover {
+    transform: translateY(-3px) scale(1.05);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #fff;
+}
+
+/* CURRENCY HOLO PILLS */
+.holo-pill-v5 {
+    flex: 1;
+    background: rgba(5, 11, 20, 0.6);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 8px; /* Smaller padding */
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+    overflow: hidden;
+}
+.holo-pill-v5::after {
+    content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: scannerLoop 3s infinite linear;
+}
+
+
+/* --- LOGOUT BUTTON v5 --- */
+.btn-logout-v5 {
+    background: rgba(255, 71, 87, 0.05); /* Subtle red glow */
+    border: 1.5px solid rgba(255, 71, 87, 0.4);
+    color: #ff4757;
+    padding: 8px 25px; /* Smaller padding */
+    border-radius: 50px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+    letter-spacing: 1px;
+}
+
+.btn-logout-v5:hover {
+    background: #ff4757;
+    color: #fff;
+    box-shadow: 0 0 20px rgba(255, 71, 87, 0.4);
+    transform: translateY(-2px);
+}
+/* Universal Close Button Fix */
+.close-pop {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 9999 !important; /* Forces it to the very top */
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer !important;
+    pointer-events: auto !important; /* Ensures it registers clicks */
+    transition: 0.3s;
+}
+
+.close-pop:hover {
+    background: #ff4757;
+    border-color: #ff4757;
+    transform: rotate(90deg);
+}
+
+
+
+
+
+/* --- 8-BUTTON HOLO DASHBOARD GRID --- */
+.grid-8-v6 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 buttons per row */
+    gap: 8px;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.sq-holo-btn {
+    aspect-ratio: 1 / 1;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    transition: 0.3s;
+    padding: 5px;
+}
+
+/* The Google-Style Holographic Shine */
+.sq-holo-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background-size: 200% 100%;
+    opacity: 0;
+    transition: 0.5s;
+}
+
+.sq-holo-btn:hover::before {
+    opacity: 1;
+    animation: holoMove 2s linear infinite;
+}
+
+.sq-holo-btn:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary);
+    background: rgba(41, 243, 255, 0.05);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.sq-holo-btn i, .sq-holo-btn img {
+    font-size: 18px;
+    margin-bottom: 6px;
+    z-index: 1;
+}
+
+.sq-holo-btn span {
+    font-family: 'Orbitron';
+    font-size: 7px;
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    z-index: 1;
+    letter-spacing: 0.5px;
+}
+
+/* Unique Icon Colors */
+.c-blue { color: var(--primary); }
+.c-green { color: #00ff88; }
+.c-gold { color: #ffd700; }
+.c-purple { color: #bf55ec; }
+.c-red { color: #ff4757; }
+.c-orange { color: #ff9f43; }
+
+/* FIX: Close Button Layering */
+#accountModal .close-pop {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 1001 !important;
+    cursor: pointer;
+    pointer-events: auto !important;
+}
+
+/* --- FIX ACCOUNT MODAL SPACING --- */
+
+/* 1. Move PFP down & Reduce bottom gap */
+.profile-frame-wrapper {
+    margin-top: 35px !important;    /* Pushes image down from the top edge */
+    margin-bottom: 5px !important;  /* Reduces space between Image and Name */
+}
+
+/* 2. Tighten the Name container */
+.name-wrapper-v5 {
+    margin-top: 0 !important;       /* Removes extra space above name */
+    margin-bottom: 5px !important;
+}
+
+/* --- COSMETICS SYSTEM v6 (MATCHING ACCOUNT DASHBOARD) --- */
+
+/* 1. The Main Modal Container (Used for both Selection & Inventory) */
+.cosmetics-card-v6 {
+    width: min(400px, 95vw);
+    height: auto;
+    max-height: 85vh; /* Prevents overflow on mobile */
+    background: url('https://i.makeagif.com/media/3-03-2021/otrneG.gif') center/cover no-repeat;
+    border: 2px solid #d63384; /* Signature Pink Border */
+    border-radius: 35px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(214, 51, 132, 0.25);
+    display: flex;
+    flex-direction: column;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Dark Glass Overlay */
+.cosmetics-card-v6::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 11, 20, 0.94); /* Dark transparency */
+    z-index: 0;
+    backdrop-filter: blur(5px);
+}
+
+.cosmo-content-v6 {
+    position: relative;
+    z-index: 1;
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden; /* Contains the scrollable list */
+}
+
+/* Headers */
+.cosmo-header {
+    text-align: center;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+.cosmo-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 20px;
+    background: linear-gradient(90deg, #fff, #d63384, #fff);
+    background-size: 200% auto;
+    animation: shineText 3s linear infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* --- SELECTION MENU (The 4 Categories) --- */
+.cosmo-grid-select {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.select-btn-v6 {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 25px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.select-btn-v6:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.select-btn-v6 i { font-size: 24px; filter: drop-shadow(0 0 8px currentColor); }
+.select-btn-v6 span { font-family: 'Orbitron'; font-size: 10px; font-weight: 800; color: #fff; letter-spacing: 1px; }
+
+/* Category Colors */
+.c-badge { color: #d63384; border-color: #d63384; }
+.c-frame { color: #bf55ec; border-color: #bf55ec; }
+.c-banner { color: #00e5ff; border-color: #00e5ff; }
+.c-text { color: #ffd700; border-color: #ffd700; }
+
+/* --- INVENTORY LIST (The Items) --- */
+.inventory-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px; /* Space for scrollbar */
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 items per row */
+    gap: 10px;
+    padding-bottom: 10px;
+}
+
+/* Custom Scrollbar */
+.inventory-scroll-area::-webkit-scrollbar { width: 4px; }
+.inventory-scroll-area::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+.inventory-scroll-area::-webkit-scrollbar-thumb { background: #d63384; border-radius: 10px; }
+
+/* THE ITEM CARD */
+.item-card-v6 {
+    background: rgba(13, 25, 41, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 15px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    transition: 0.3s;
+    min-height: 140px;
+    position: relative;
+}
+
+.item-card-v6:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    background: rgba(13, 25, 41, 0.9);
+}
+
+.item-card-v6.equipped {
+    border-color: #00ff88;
+    background: rgba(0, 255, 136, 0.05);
+    box-shadow: inset 0 0 15px rgba(0, 255, 136, 0.1);
+}
+
+/* Item Visuals */
+.item-preview-box {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* Badge Preview */
+.badge-render { font-family: 'Orbitron'; font-size: 9px; font-weight: 800; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; }
+
+/* Frame Preview */
+.frame-render-box { position: relative; width: 50px; height: 50px; }
+.fr- user-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.fr-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 145%; height: 145%; pointer-events: none; }
+
+/* Banner Preview */
+.banner-render { width: 100%; padding: 8px; border-radius: 8px; font-size: 9px; text-align: center; font-weight: 700; }
+
+/* Text Preview */
+.text-render { font-family: 'Orbitron'; font-size: 12px; font-weight: 900; }
+
+/* Equip Button */
+.btn-equip-v6 {
+    width: 100%;
+    padding: 8px;
+    border-radius: 50px;
+    border: none;
+    font-family: 'Orbitron';
+    font-size: 9px;
+    font-weight: 800;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: 0.2s;
+}
+
+.btn-equip-v6.do-equip { background: var(--primary); color: #000; }
+.btn-equip-v6.do-equip:hover { background: #fff; box-shadow: 0 0 10px var(--primary); }
+
+.btn-equip-v6.is-equipped { background: rgba(0, 255, 136, 0.2); color: #00ff88; border: 1px solid #00ff88; cursor: default; }
+
+/* Navigation Buttons */
+.nav-btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-shrink: 0;
+}
+
+.btn-nav-v6 {
+    flex: 1;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 10px;
+    border-radius: 12px;
+    font-family: 'Orbitron';
+    font-size: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.btn-nav-v6:hover { border-color: #fff; background: rgba(255,255,255,0.05); }
+.btn-nav-back { border-color: #ff4757; color: #ff4757; }
+.btn-nav-back:hover { background: #ff4757; color: #fff; }
+
+.unequip-btn-v6 { 
+    width: 100%; 
+    margin-top: 5px;        /* Keep it high */
+    margin-bottom: 15px;    /* Space between button and items */
+    background: rgba(255,71,87,0.1); 
+    border: 1px solid #ff4757; 
+    color: #ff4757; 
+    padding: 8px; 
+    border-radius: 10px; 
+    font-family: 'Orbitron'; 
+    font-size: 10px; 
+    cursor: pointer; 
+}
+.unequip-btn-v6:hover { background: #ff4757; color: #fff; }
+
+
+
+/* ONBOARDING CUSTOM STYLES */
+.onboarding-card {
+    min-height: 550px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.onb-step {
+    display: none;
+    width: 100%;
+    animation: fadeIn 0.4s ease;
+}
+
+.onb-step.active {
+    display: block;
+}
+
+/* PROGRESS BAR */
+.onboarding-progress-container {
+    width: 100%;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.onboarding-progress-bar {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    width: 20%; /* Controlled by JS */
+    background: var(--primary);
+    box-shadow: 0 0 10px var(--primary);
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.onb-dots {
+    position: absolute;
+    top: -8px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.onb-dot {
+    width: 20px; height: 20px;
+    background: #08101b;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: #555;
+    transition: 0.3s;
+}
+
+.onb-dot.active {
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 0 10px var(--primary-dim);
+}
+
+/* GENDER BUTTONS */
+.onb-gender-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.gender-opt {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 15px 5px;
+    border-radius: 15px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 8px;
+    cursor: pointer; transition: 0.3s;
+}
+
+.gender-opt i { font-size: 20px; }
+.gender-opt span { font-family: 'Orbitron'; font-size: 8px; font-weight: 800; }
+
+.gender-opt.selected.g-male { border-color: #0082c8; background: rgba(0, 130, 200, 0.2); color: #0082c8; }
+.gender-opt.selected.g-female { border-color: #ff69b4; background: rgba(255, 105, 180, 0.2); color: #ff69b4; }
+.gender-opt.selected.g-dino { border-color: #00ff88; background: rgba(0, 255, 136, 0.2); color: #00ff88; }
+
+/* SOCIAL ROW */
+.onb-social-row {
+    display: flex; align-items: center; gap: 15px;
+    margin-bottom: 10px;
+}
+.onb-social-row i { font-size: 20px; width: 25px; text-align: center; }
+
+.upload-icon-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: 0.3s;
+}
+.welcome-pfp-wrapper:hover .upload-icon-overlay { opacity: 1; }
+
+
+
+/* STIL ONBOARDING V5 (Glow & GIF) */
+.onboarding-card-v5 {
+    width: min(450px, 95vw);
+    min-height: 580px !important;
+    background: url('https://i.makeagif.com/media/3-03-2021/otrneG.gif') center/cover no-repeat;
+    border: 2px solid var(--primary);
+    border-radius: 35px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 60px rgba(41, 243, 255, 0.3);
+}
+
+.onboarding-card-v5::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 11, 20, 0.96); /* Glass overlay mai opac pentru citit */
+    z-index: 0;
+}
+
+.onb-content-v5 {
+    position: relative;
+    z-index: 1;
+    padding: 30px 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.onb-step {
+    display: none;
+    width: 100%;
+    animation: fadeIn 0.4s ease;
+}
+
+.onb-step.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* PROGRESS BAR */
+.onboarding-progress-container {
+    width: 100%; height: 4px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px; margin-bottom: 35px; position: relative;
+}
+.onboarding-progress-bar {
+    position: absolute; left: 0; top: 0;
+    height: 100%; width: 20%;
+    background: var(--primary);
+    box-shadow: 0 0 15px var(--primary);
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.onb-dots {
+    position: absolute; top: -8px; left: 0; width: 100%;
+    display: flex; justify-content: space-between;
+}
+.onb-dot {
+    width: 20px; height: 20px;
+    background: #050b14; border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 50%; font-size: 9px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    color: #555; font-family: 'Orbitron';
+}
+.onb-dot.active { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 10px var(--primary-dim); }
+
+/* GENDER & SOCIALS */
+.onb-gender-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+.gender-opt {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+    padding: 15px 5px; border-radius: 15px; cursor: pointer; transition: 0.3s;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.gender-opt.selected { border-color: var(--primary); background: var(--primary-dim); color: #fff; }
+.onb-social-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; width: 100%; }
+.onb-social-row i { width: 25px; text-align: center; font-size: 18px; }
+
+
+
+/* --- SICK SOCIAL BUTTONS GRID --- */
+.social-holo-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.social-btn-holo {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 15px;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+}
+
+.social-btn-holo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: 0.4s;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+}
+
+.social-btn-holo:hover::before { opacity: 1; }
+.social-btn-holo:hover { transform: translateY(-5px); border-color: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+
+/* Specific Social Brand Glows */
+.s-tiktok:hover { color: #00f2ea; border-color: #ff0050; box-shadow: 0 0 20px rgba(0, 242, 234, 0.3); }
+.s-insta:hover { color: #e1306c; border-color: #f77737; box-shadow: 0 0 20px rgba(225, 48, 108, 0.3); }
+.s-fb:hover { color: #1877f2; border-color: #1877f2; box-shadow: 0 0 20px rgba(24, 119, 242, 0.3); }
+.s-discord:hover { color: #5865f2; border-color: #5865f2; box-shadow: 0 0 20px rgba(88, 101, 242, 0.3); }
+
+/* Input Reveal Styling */
+.social-reveal-box {
+    display: none; /* Controlled by JS */
+    animation: slideDownFade 0.4s ease forwards;
+    margin-bottom: 12px;
+}
+
+.social-reveal-box label {
+    font-family: 'Orbitron';
+    font-size: 9px;
+    color: var(--primary);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+@keyframes slideDownFade {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+
+/* --- EXTRA SELECTOR BAR --- */
+.extra-selector-bar {
+    max-height: 0;
+    overflow: hidden;
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: rgba(0,0,0,0.3);
+    border-radius: 15px;
+    margin-top: 10px;
+}
+.extra-selector-bar.active {
+    max-height: 100px;
+    padding: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.extra-selector-content {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+/* MINI OPTIONS STYLE */
+.mini-opt {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.02);
+    color: #fff;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 18px;
+}
+.mini-opt:hover { transform: scale(1.1) translateY(-3px); border-color: var(--primary); }
+
+/* EXTRA ROW (Când sunt deja salvate) */
+.active-extra-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+.added-social-pill {
+    background: rgba(41, 243, 255, 0.1);
+    border: 1px solid var(--primary);
+    padding: 5px 12px;
+    border-radius: 50px;
+    font-size: 10px;
+    font-family: 'Orbitron';
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    animation: welcomeJump 0.4s ease;
+    cursor: pointer;
+}
+
+/* Brand Colors */
+.s-plus { border-color: #00ff88; color: #00ff88; }
+.s-plus:hover { background: rgba(0, 255, 136, 0.1); box-shadow: 0 0 15px rgba(0, 255, 136, 0.4); }
+.s-yt:hover { color: #ff0000; border-color: #ff0000; }
+.s-reddit:hover { color: #ff4500; border-color: #ff4500; }
+.s-of:hover { color: #00aff0; border-color: #00aff0; }
+.s-twitch:hover { color: #9146ff; border-color: #9146ff; }
+.s-snap:hover { color: #fffc00; border-color: #fffc00; }
+
+
+
+/* Stil pentru iconița OnlyFans personalizată */
+.of-custom-icon {
+    width: 22px; /* Dimensiune matching cu FontAwesome */
+    height: auto;
+    filter: brightness(0) invert(1); /* O face albă default */
+    transition: 0.3s;
+}
+
+.s-of:hover .of-custom-icon {
+    filter: none; /* Revine la culorile originale sau rămâne albastru prin hover-ul butonului */
+}
+
+/* Efectul de Hover OnlyFans */
+.s-of:hover { 
+    color: #00aff0; 
+    border-color: #00aff0; 
+    box-shadow: 0 0 15px rgba(0, 175, 240, 0.4); 
+}
+
+/* Restul stilurilor de grid 5x2 */
+.social-holo-grid-v2 {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.social-btn-holo {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 15px 5px;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex; justify-content: center; align-items: center;
+}
+
+.social-btn-holo:hover {
+    transform: translateY(-5px) scale(1.1);
+    border-color: #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+/* Culori Brand */
+.s-wa:hover { color: #25d366; border-color: #25d366; box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
+.s-tiktok:hover { color: #00f2ea; border-color: #ff0050; }
+.s-insta:hover { color: #e1306c; border-color: #f77737; }
+.s-fb:hover { color: #1877f2; border-color: #1877f2; }
+.s-discord:hover { color: #5865f2; border-color: #5865f2; }
+.s-yt:hover { color: #ff0000; border-color: #ff0000; }
+.s-reddit:hover { color: #ff4500; border-color: #ff4500; }
+.s-twitch:hover { color: #9146ff; border-color: #9146ff; }
+.s-snap:hover { color: #fffc00; border-color: #fffc00; }
+
+.social-reveal-box {
+    display: none;
+    animation: slideUpFade 0.4s ease forwards;
+    padding: 12px;
+    background: rgba(255,255,255,0.02);
+    border-left: 3px solid var(--primary);
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+
+
+/* --- JIGSAW PUZZLE STYLES --- */
+    .puzzle-main-wrapper {
+        width: 100%;
+        max-width: 1200px; /* Wider for PC layout */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+/* --- UPGRADED JIGSAW ENGINE CSS --- */
+.jigsaw-arena {
+    display: none; /* Toggled by JS */
+    width: 100%;
+    height: 600px;
+    background: #050b14;
+    border: 2px solid var(--primary);
+    border-radius: 20px;
+    box-shadow: 0 0 40px rgba(41, 243, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+    user-select: none; /* Prevents text highlighting */
+    touch-action: auto !important; 
+}
+
+/* PC LAYOUT (Grid) */
+@media (min-width: 900px) {
+    .jigsaw-arena { 
+        grid-template-columns: 200px 1fr 200px; 
+        gap: 10px; 
+        padding: 20px; 
+    }
+}
+
+.zone-left, .zone-pieces {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+}
+
+/* TRAY STYLES */
+.zone-pieces { 
+    overflow-y: auto; 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 5px; 
+    justify-content: center; 
+    align-content: flex-start; 
+    padding: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) #000;
+}
+
+/* BOARD STYLES */
+.zone-board {
+    position: relative; /* Anchor for absolute pieces */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
+    overflow: hidden; 
+    border-radius: 12px;
+    touch-action: auto !important; 
+
+}
+
+/* THE GRID (Visual Anchor) */
+.drop-target-grid {
+    display: grid; /* Grid cols/rows set via JS */
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    border: 1px solid rgba(255,255,255,0.1);
+    position: relative; 
+}
+
+.grid-guide-cell {
+    border: 1px dashed rgba(255,255,255,0.08);
+    box-sizing: border-box;
+    pointer-events: none; /* Clicks pass through to board */
+}
+
+/* --- THE PIECES (PERFORMANCE OPTIMIZED) --- */
+.jig-piece {
+    position: absolute; /* Default state on board */
+    cursor: grab;
+    z-index: 10;
+    box-sizing: border-box;
+    border: 1px solid rgba(255,255,255,0.2);
+    background-repeat: no-repeat;
+    
+    /* PERFORMANCE MAGIC */
+    touch-action: none; 
+    will-change: left, top; /* Tells browser to optimize coordinate changes */
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), left 0.1s, top 0.1s; /* Smooth snap */
+}
+
+.jig-piece:active { cursor: grabbing; }
+
+/* State: In Tray (Static flow) */
+.jig-piece.in-tray {
+    position: relative !important; /* Must be relative to flow in sidebar */
+    top: auto !important; 
+    left: auto !important;
+    transform: scale(0.8);
+    margin: 2px;
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    transition: all 0.3s ease;
+}
+
+/* State: Dragging (High Z, NO LAG) */
+.jig-piece.is-dragging {
+    z-index: 1000 !important;
+    border-color: var(--primary);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    transform: scale(1.1);
+    transition: none !important; /* CRITICAL: Removes lag during drag */
+}
+
+/* State: Hovering Correct Spot (Magnet) */
+.jig-piece.magnet-active {
+    border-color: #00ff88 !important;
+    box-shadow: 0 0 25px #00ff88 !important;
+    transform: scale(1.05);
+}
+
+/* State: Locked (Finished) */
+.jig-piece.locked {
+    z-index: 1;
+    cursor: default;
+    pointer-events: none; /* Prevent clicking again */
+    border: none; /* Seamless join */
+    box-shadow: none;
+    transform: scale(1);
+    filter: brightness(1.0);
+    transition: all 0.3s ease;
+}
+
+/* Win Animation */
+.win-glow { animation: winPulse 2s infinite; border-color: #00ff88 !important; }
+@keyframes winPulse { 0% { box-shadow: 0 0 20px #00ff88; } 50% { box-shadow: 0 0 60px #00ff88; } 100% { box-shadow: 0 0 20px #00ff88; } }
+
+/* Mobile Layout Override */
+@media (max-width: 899px) {
+    .jigsaw-arena { display: none; flex-direction: column; height: 85vh; } /* Flex for mobile */
+    
+    .zone-left { 
+        height: 60px; 
+        width: 100%; 
+        display: flex; 
+        flex-direction: row;
+        align-items: center; 
+        justify-content: space-between; 
+        padding: 0 15px; 
+    }
+    
+.mini-preview {
+    width: 100%;
+    height: 100%; /* Fill the box */
+    max-height: 150px; /* Limit height on mobile */
+    object-fit: contain; /* SHOWS FULL IMAGE (No cropping) */
+    border: 2px solid #555;
+    border-radius: 10px;
+    background: #000; /* Black background for non-square images */
+}    
+    .zone-board { 
+        flex: 1; 
+        width: 100%; 
+        overflow: hidden; 
+        margin: 5px 0;
+    }
+    
+    .zone-pieces { 
+        height: 120px; 
+        width: 100%; 
+        flex-direction: row; 
+        flex-wrap: nowrap; /* Horizontal scroll */
+        overflow-x: auto; 
+        overflow-y: hidden; 
+        justify-content: flex-start; 
+        align-items: center;
+        border-top: 2px solid var(--primary);
+        background: #02050a;
+    }
+}
+    .zone-pieces::-webkit-scrollbar { width: 5px; background: #000; }
+    .zone-pieces::-webkit-scrollbar-thumb { background: var(--primary); }
+
+/* --- UPDATED JIGSAW STYLES --- */
+    .jigsaw-arena {
+        display: none;
+        width: 100%;
+        height: 600px;
+        background: #02050a;
+        border: 2px solid var(--primary);
+        border-radius: 20px;
+        box-shadow: 0 0 40px rgba(41, 243, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    @media (min-width: 900px) {
+        .jigsaw-arena { grid-template-columns: 200px 1fr 200px; gap: 10px; padding: 20px; }
+    }
+
+.zone-left, .zone-pieces {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+}
+
+.zone-pieces { 
+    overflow-y: auto; 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 5px; 
+    justify-content: center; 
+    align-content: flex-start; 
+    padding: 10px;
+}
+.zone-board {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
+    overflow: hidden; 
+    border-radius: 12px;
+}
+
+    .drop-target-grid {
+        display: grid;
+        box-shadow: 0 0 30px rgba(0,0,0,1);
+        /* Visual Guide Lines for the Grid */
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    /* Make the grid cells visible so user knows where to drop */
+    .grid-guide-cell {
+        border: 1px dashed rgba(255,255,255,0.15);
+        pointer-events: none; /* Let clicks pass through */
+    }
+
+    /* --- PIECE STYLES --- */
+    .jig-piece {
+        position: absolute;
+        cursor: grab;
+        z-index: 10;
+        border: 1px solid rgba(41, 243, 255, 0.4);
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+        transition: transform 0.1s;
+        background-repeat: no-repeat;
+    }
+    
+    .jig-piece.in-tray {
+        position: relative;
+        transform: scale(0.9);
+        top: auto !important; left: auto !important;
+        margin: 5px;
+    }
+
+    .jig-piece:active { 
+        cursor: grabbing; 
+        z-index: 1000; 
+        transform: scale(1.1); 
+        border-color: #fff;
+        box-shadow: 0 0 25px var(--primary); 
+    }
+
+    /* --- 1. MAGNET GLOW (While dragging over correct spot) --- */
+    .jig-piece.hover-correct {
+        border-color: #00ff88 !important;
+        box-shadow: 0 0 30px #00ff88, inset 0 0 10px #00ff88 !important;
+        transform: scale(1.15);
+    }
+
+    /* --- 2. LOCKED STATE --- */
+    .jig-piece.locked {
+        z-index: 5;
+        cursor: default;
+        pointer-events: none;
+        border: none; /* Seamless join */
+        box-shadow: none;
+        filter: brightness(1.0);
+        /* Slight transition to smooth the snap */
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    }
+
+    /* --- 3. SNAP ANIMATION (The Flash) --- */
+    @keyframes cyberSnap {
+        0% { filter: brightness(2) drop-shadow(0 0 10px #00ff88); transform: scale(1.1); }
+        50% { filter: brightness(1.5); transform: scale(1.05); }
+        100% { filter: brightness(1); transform: scale(1); }
+    }
+    .snap-anim { animation: cyberSnap 0.5s ease-out forwards; }
+
+    /* --- 4. WIN ANIMATION (Whole Board) --- */
+    @keyframes boardWin {
+        0% { box-shadow: 0 0 0 var(--primary); filter: brightness(1); }
+        50% { box-shadow: 0 0 100px #00ff88; filter: brightness(1.5) hue-rotate(90deg); }
+        100% { box-shadow: 0 0 50px var(--primary); filter: brightness(1); }
+    }
+    .win-glow { animation: boardWin 2s ease-in-out infinite; border-color: #00ff88 !important; }
+
+    /* --- MOBILE LAYOUT OVERRIDES --- */
+    @media (max-width: 899px) {
+        .jigsaw-arena {
+            display: none; /* Toggled via JS to 'flex' */
+            flex-direction: column;
+            height: 80vh; /* Taller on mobile */
+        }
+        
+        .zone-left {
+            flex-direction: row;
+            height: 80px;
+            width: 100%;
+            border-right: none;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            justify-content: space-between;
+        }
+        .mini-preview { width: 60px; height: 60px; margin-right: 10px; }
+        
+        .zone-board {
+            flex: 1; /* Takes most space */
+            width: 100%;
+        }
+
+        .zone-pieces {
+            height: 120px;
+            width: 100%;
+            border-left: none;
+            border-top: 2px solid var(--primary);
+            flex-direction: row;
+            flex-wrap: nowrap; /* Horizontal scroll */
+            overflow-x: auto;
+            overflow-y: hidden;
+            align-items: center;
+            justify-content: flex-start;
+        }
+    }
+
+    /* Menu Styles (Reused from previous) */
+    .puzzle-menu { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 15px; }
+    .puzzle-menu-btn {
+        width: 100%; padding: 20px; background: rgba(41, 243, 255, 0.05); border: 1px solid var(--primary);
+        color: #fff; font-family: 'Orbitron'; font-weight: 800; cursor: pointer; border-radius: 15px;
+        display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s;
+    }
+    .puzzle-menu-btn:hover { background: var(--primary); color: #000; }
+    #customImgInput { display: none; }
+
+/* --- JIGSAW ARENA (Responsive) --- */
+    .jigsaw-arena {
+        display: none; /* Toggled by JS */
+        width: 100%;
+        height: 600px;
+        background: #02050a;
+        border: 2px solid var(--primary);
+        border-radius: 20px;
+        box-shadow: 0 0 40px rgba(41, 243, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    @media (min-width: 900px) {
+        .jigsaw-arena { grid-template-columns: 200px 1fr 200px; gap: 10px; padding: 20px; }
+    }
+
+    /* PANELS */
+    .zone-left, .zone-pieces {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .zone-pieces { 
+        overflow-y: auto; 
+        display: flex; 
+        flex-wrap: wrap; 
+        gap: 5px; 
+        justify-content: center; 
+        align-content: flex-start; 
+        padding: 10px;
+    }
+
+    .zone-board {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle, #151515 0%, #000 100%);
+        overflow: hidden; 
+    }
+
+    /* THE GRID (Visual Guide) */
+    .drop-target-grid {
+        display: grid;
+        box-shadow: 0 0 30px #000;
+        border: 1px solid rgba(255,255,255,0.1);
+        position: relative; /* Anchor for pieces */
+    }
+    
+    .grid-guide-cell {
+        border: 1px dashed rgba(255,255,255,0.1);
+        box-sizing: border-box;
+    }
+
+    /* --- PIECES --- */
+    .jig-piece {
+        position: absolute;
+        cursor: grab;
+        z-index: 10;
+        /* Visuals */
+        border: 1px solid rgba(41, 243, 255, 0.3);
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+        background-repeat: no-repeat;
+        /* PERFORMANCE FIX: Only animate transform when NOT dragging */
+        transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    /* When dragging, remove transition to kill lag */
+    .jig-piece.is-dragging {
+        transition: none !important;
+        cursor: grabbing;
+        z-index: 1000;
+        box-shadow: 0 0 25px var(--primary);
+        border-color: #fff;
+        opacity: 0.9;
+    }
+
+    .jig-piece.in-tray {
+        position: relative; /* Flow normally in sidebar */
+        transform: scale(0.85);
+        top: auto !important; 
+        left: auto !important;
+        margin: 2px;
+    }
+
+    /* LOCKED STATE (Permanent) */
+    .jig-piece.locked {
+        z-index: 5;
+        cursor: default;
+        pointer-events: none; /* CANNOT BE CLICKED AGAIN */
+        border: none; /* Seamless image */
+        box-shadow: none;
+        transition: all 0.3s;
+        filter: brightness(1.0);
+    }
+
+    /* FLASH ANIMATION ON CONNECT */
+    @keyframes snapFlash {
+        0% { filter: brightness(2.5) drop-shadow(0 0 20px #fff); z-index: 20; }
+        100% { filter: brightness(1); z-index: 5; }
+    }
+    .snap-anim { animation: snapFlash 0.4s ease-out forwards; }
+    
+    /* WIN GLOW */
+    .win-glow {
+        animation: borderPulse 2s infinite;
+        border-color: #00ff88 !important;
+    }
+    @keyframes borderPulse { 0% { box-shadow: 0 0 10px #00ff88; } 50% { box-shadow: 0 0 40px #00ff88; } 100% { box-shadow: 0 0 10px #00ff88; } }
+
+
+
+/* --- FIXED JIGSAW & PREVIEW CSS --- */
+.jigsaw-arena {
+    display: none; 
+    width: 100%;
+    height: 600px; /* PC Height */
+    background: #050b14;
+    border: 2px solid var(--primary);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    touch-action: none; /* CRITICAL: Allows dragging on mobile */
+}
+
+/* FIX PREVIEW IMAGE */
+.zone-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.mini-preview {
+    width: 100%;
+    height: auto;
+    max-height: 150px; /* Limits height so it doesn't overflow */
+    object-fit: contain; /* Prevents stretching/distortion */
+    background: #000;
+    border: 1px solid #333;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* PIECE LOGIC */
+.jig-piece {
+    position: absolute; 
+    cursor: grab;
+    z-index: 100;
+    background-repeat: no-repeat;
+    box-sizing: border-box;
+    touch-action: none; /* REQUIRED for touch dragging */
+}
+
+/* TRAY STATE */
+.jig-piece.in-tray {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    margin: 5px;
+    transform: scale(0.9);
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    float: left; /* Helps them stack nicely */
+}
+
+/* DRAGGING STATE */
+.jig-piece.is-dragging {
+    z-index: 9999 !important; /* Always on top */
+    cursor: grabbing;
+    transition: none !important; /* NO LAG while moving */
+    transform: scale(1.1);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    border: 2px solid var(--primary);
+}
+
+/* MOBILE ADJUSTMENTS */
+@media (max-width: 899px) {
+    .jigsaw-arena { 
+        height: 85vh; 
+        display: none; 
+        flex-direction: column; 
+    }
+    .zone-left {
+        flex-direction: row;
+        justify-content: space-between;
+        height: auto;
+        padding: 5px;
+    }
+    .mini-preview {
+        width: 80px; /* Fixed small size for mobile */
+        height: 80px;
+        margin-bottom: 0;
+    }
+}
+
+
+
+/* --- JIGSAW ENGINE REPAIR --- */
+.jigsaw-arena {
+    display: none; 
+    width: 100%;
+    height: 600px;
+    background: #050b14;
+    border: 2px solid var(--primary);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    touch-action: none !important; /* Forces drag to work on mobile */
+}
+
+/* PC GRID */
+@media (min-width: 900px) {
+    .jigsaw-arena { 
+        display: none; /* JS toggles this to grid */
+        grid-template-columns: 200px 1fr 200px; 
+        gap: 10px; 
+        padding: 20px; 
+    }
+}
+
+/* MOBILE FLEX */
+@media (max-width: 899px) {
+    .jigsaw-arena { 
+        height: 85vh !important; 
+        flex-direction: column; 
+    }
+    .zone-left {
+        flex-direction: row !important;
+        height: 100px !important;
+        padding: 5px !important;
+        justify-content: space-between !important;
+    }
+    .zone-board {
+        flex: 1;
+        width: 100%;
+        overflow: hidden; 
+    }
+    .zone-pieces {
+        height: 120px !important;
+        width: 100%;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        flex-wrap: nowrap !important;
+        display: flex !important;
+        align-items: center;
+        justify-content: flex-start;
+    }
+}
+
+/* FIX PREVIEW IMAGE */
+.mini-preview {
+    width: 100%;
+    height: 100%;
+    max-height: 140px; 
+    object-fit: contain !important; /* Fixes the bugged stretching */
+    background: #000;
+    border: 1px solid #333;
+    border-radius: 8px;
+}
+
+/* PIECE LOGIC */
+.jig-piece {
+    position: absolute; 
+    cursor: grab;
+    z-index: 100;
+    background-repeat: no-repeat;
+    box-sizing: border-box;
+    touch-action: none !important; /* MANDATORY FOR DRAG */
+}
+
+/* TRAY STATE */
+.jig-piece.in-tray {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    margin: 5px;
+    transform: scale(0.9);
+    border: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    flex-shrink: 0; /* Prevents squishing in tray */
+}
+
+/* DRAGGING STATE */
+.jig-piece.is-dragging {
+    z-index: 99999 !important; /* Ultra high to never vanish behind things */
+    cursor: grabbing;
+    transition: none !important; /* ZERO LAG */
+    transform: scale(1.1);
+    box-shadow: 0 0 25px #00ff88;
+    border: 2px solid #fff;
+}
+
+
+
+/* ADD THIS TO YOUR CSS */
+.jig-piece.is-dragging {
+    z-index: 999999 !important; /* Ensure it is above EVERYTHING */
+    pointer-events: none; /* Allows the mouse to "see through" the piece to the grid below */
+    cursor: grabbing;
+    transform: scale(1.1);
+    box-shadow: 0 0 25px #00ff88;
+    border: 2px solid #fff;
+    will-change: left, top; /* Performance optimization */
+}
+
+/* Ensure the grid doesn't hide pieces */
+.zone-board {
+    overflow: visible !important; 
+    z-index: 1;
+}
+.drop-target-grid {
+    z-index: 5;
+    position: relative;
+}
+
+
+/* Updated Tray Styles */
+.zone-pieces { 
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important; /* 3 Pieces per row */
+    gap: 10px; 
+    padding: 15px;
+    overflow-y: auto !important; 
+    align-content: flex-start;
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* PC Specific */
+@media (min-width: 900px) {
+    .jigsaw-arena { 
+        grid-template-columns: 250px 1fr 320px; /* Wider tray area */
+    }
+}
+
+@media (max-width: 899px) {
+    .zone-pieces {
+        height: 180px !important; /* Adjust height so it's not taking over the whole screen */
+        width: 100%;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        overflow-y: auto !important;
+        /* This allows the page to scroll once the tray hits top/bottom */
+        overscroll-behavior: contain; 
+        touch-action: pan-y !important; 
+    }
+}
+.jig-piece.in-tray {
+    width: 100% !important; /* Fill the grid cell */
+    height: auto;
+    aspect-ratio: 1/1;
+    position: relative !important;
+    transform: scale(1);
+    margin: 0;
+}
+
+
+
+/* --- FIXED LAYOUT --- */
+@media (min-width: 900px) {
+    .jigsaw-arena { 
+        display: grid !important;
+        /* Restored to original 3-column proportions to remove the huge gap */
+        grid-template-columns: 200px 1fr 280px !important; 
+        gap: 15px; 
+        padding: 20px; 
+    }
+}
+
+/* --- TRAY PIECE GIVER (3 per row) --- */
+.zone-pieces { 
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important; 
+    gap: 8px; 
+    padding: 10px;
+    overflow-y: auto !important; 
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    align-content: flex-start;
+}
+
+/* Piece appearance in tray */
+.jig-piece.in-tray {
+    width: 100% !important;
+    height: auto;
+    aspect-ratio: 1/1;
+    position: relative !important;
+    transform: scale(1);
+    margin: 0;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* --- BOARD FIX --- */
+.drop-target-grid {
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.2);
+    /* This ensures the background image stays centered */
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+
+
+/* --- JIGSAW ARENA HIDDEN BY DEFAULT --- */
+.jigsaw-arena {
+    display: none !important; /* Force hide until JS says otherwise */
+    width: 100%;
+    height: 600px;
+    background: #050b14;
+    border: 2px solid var(--primary);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    touch-action: none;
+}
+
+/* PC GRID LAYOUT (Only active when JS removes display:none) */
+.jigsaw-arena.active-grid {
+    display: grid !important;
+    grid-template-columns: 220px 1fr 300px !important; 
+    gap: 10px; 
+    padding: 15px;
+}
+
+/* MOBILE FLEX LAYOUT */
+@media (max-width: 899px) {
+    .jigsaw-arena.active-grid { 
+        display: flex !important;
+        flex-direction: column;
+        height: 85vh; 
+    }
+}
+
+/* --- THE PIECE TRAY (3 COLUMNS) --- */
+.zone-pieces {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    grid-auto-rows: min-content;
+    gap: 10px;
+    padding: 15px;
+    overflow-y: auto !important;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 12px;
+}
+
+/* Piece in tray behavior */
+.jig-piece.in-tray {
+    position: relative !important;
+    width: 100% !important;
+    height: auto;
+    aspect-ratio: 1/1;
+    margin: 0;
+    top: auto !important;
+    left: auto !important;
+    transform: scale(0.9);
+}
+
+.mini-preview {
+    width: 100%;
+    height: 120px;
+    object-fit: contain;
+    background: #000;
+    border: 1px solid #333;
+    border-radius: 8px;
+}
+
+
+
+
+
+/* --- CYBER JIGSAW ENGINE v2.0 (HOLOGRAPHIC THEME) --- */
+
+/* 1. THE ARENA CONTAINER */
+.jigsaw-arena {
+    display: none; /* Toggled by JS */
+    width: 100%;
+    height: 650px; /* Slightly taller for UI breathing room */
+    
+    /* Dark Sci-Fi Background with Grid */
+    background-color: #02050a;
+    background-image: 
+        linear-gradient(rgba(41, 243, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(41, 243, 255, 0.05) 1px, transparent 1px),
+        radial-gradient(circle at center, rgba(41, 243, 255, 0.1) 0%, transparent 70%);
+    background-size: 40px 40px, 40px 40px, 100% 100%;
+    
+    border: 1px solid var(--primary);
+    box-shadow: 
+        0 0 20px rgba(41, 243, 255, 0.1),
+        inset 0 0 50px rgba(0, 0, 0, 0.8);
+    
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    touch-action: none;
+    font-family: 'Orbitron', sans-serif;
+}
+
+/* PC LAYOUT */
+@media (min-width: 900px) {
+    .jigsaw-arena { 
+        display: none; 
+        grid-template-columns: 240px 1fr 280px; 
+        gap: 20px; 
+        padding: 25px; 
+    }
+}
+
+/* 2. LEFT PANEL (Preview & Stats) */
+.zone-left {
+    background: rgba(13, 25, 41, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    backdrop-filter: blur(5px);
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.mini-preview {
+    width: 100%;
+    height: auto;
+    max-height: 160px;
+    object-fit: contain;
+    border-radius: 8px;
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 15px rgba(41, 243, 255, 0.2);
+    margin-bottom: 15px;
+    background: #000;
+}
+
+.jigsaw-stat {
+    font-size: 14px;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+    text-shadow: 0 0 5px var(--primary);
+}
+
+/* Save & Exit Button Styling */
+.btn-puzzle-exit {
+    background: rgba(255, 71, 87, 0.1);
+    border: 1px solid #ff4757;
+    color: #ff4757;
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'Orbitron';
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+.btn-puzzle-exit:hover {
+    background: #ff4757;
+    color: #fff;
+    box-shadow: 0 0 15px #ff4757;
+}
+
+/* 3. MIDDLE PANEL (The Board) */
+.zone-board {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 16px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    overflow: visible !important; /* Allow pieces to fly over */
+}
+
+/* The Grid Guide */
+.drop-target-grid {
+    position: relative;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    background-color: rgba(0, 0, 0, 0.8); /* Dark background behind pieces */
+    transition: box-shadow 0.5s;
+}
+
+/* Winning Glow Animation */
+.win-glow {
+    animation: successPulse 2s infinite;
+    border-color: #00ff88 !important;
+}
+@keyframes successPulse {
+    0% { box-shadow: 0 0 20px #00ff88; }
+    50% { box-shadow: 0 0 60px #00ff88, 0 0 10px #fff; }
+    100% { box-shadow: 0 0 20px #00ff88; }
+}
+
+/* 4. RIGHT PANEL (The Tray) */
+.zone-pieces {
+    background: rgba(13, 25, 41, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 15px;
+    overflow-y: auto;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* 2 Columns is cleaner */
+    grid-auto-rows: max-content;
+    gap: 12px;
+    align-content: flex-start;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+/* Custom Scrollbar for Tray */
+.zone-pieces::-webkit-scrollbar { width: 6px; }
+.zone-pieces::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+.zone-pieces::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+
+/* 5. THE PIECES */
+.jig-piece {
+    position: absolute;
+    cursor: grab;
+    z-index: 100;
+    
+    /* Visuals */
+    background-repeat: no-repeat;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Thin light border */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+    
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-radius: 4px; /* Slight rounded corners for digital chip look */
+}
+
+/* Piece Inside Tray */
+.jig-piece.in-tray {
+    position: relative !important;
+    width: 100% !important;
+    height: auto;
+    aspect-ratio: 1/1;
+    top: auto !important;
+    left: auto !important;
+    margin: 0;
+    transform: scale(0.95);
+    border-color: rgba(41, 243, 255, 0.4);
+}
+.jig-piece.in-tray:hover {
+    border-color: #fff;
+    transform: scale(1.0);
+    box-shadow: 0 0 15px var(--primary);
+}
+
+/* Dragging State - The "Hologram" Pickup Effect */
+.jig-piece.is-dragging {
+    z-index: 99999 !important;
+    cursor: grabbing;
+    transition: none !important; /* Zero lag */
+    
+    transform: scale(1.15) rotate(2deg); /* Slight tilt */
+    border: 2px solid #fff;
+    box-shadow: 
+        0 15px 30px rgba(0,0,0,0.5),
+        0 0 20px var(--primary); /* Neon Glow */
+    opacity: 0.95;
+}
+
+/* Locked State (Snapped) */
+.jig-piece.locked {
+    z-index: 5;
+    cursor: default;
+    pointer-events: none;
+    border: none; /* Seamless join */
+    border-right: 1px solid rgba(255,255,255,0.05); /* Very subtle grid lines */
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-radius: 0;
+    box-shadow: none;
+    filter: brightness(1.1); /* Make completed parts slightly brighter */
+    transition: all 0.3s;
+}
+
+/* Snap Flash Animation */
+@keyframes cyberSnap {
+    0% { filter: brightness(3) drop-shadow(0 0 15px #fff); z-index: 20; transform: scale(1.1); }
+    100% { filter: brightness(1.1); z-index: 5; transform: scale(1); }
+}
+.snap-anim { animation: cyberSnap 0.4s ease-out forwards; }
+
+
+/* 6. MOBILE RESPONSIVENESS */
+@media (max-width: 899px) {
+    .jigsaw-arena {
+        height: 85vh !important;
+        display: none; /* Toggled to flex */
+        flex-direction: column;
+        border: none;
+        background: #000;
+        padding: 0;
+    }
+    
+    .zone-left {
+        flex-direction: row;
+        height: 70px;
+        width: 100%;
+        padding: 5px 15px;
+        justify-content: space-between;
+        background: #08101b;
+        border-radius: 0;
+        border-bottom: 1px solid var(--primary);
+    }
+    
+    .mini-preview {
+        width: 60px;
+        height: 60px;
+        margin: 0;
+    }
+    
+    .btn-puzzle-exit {
+        width: auto;
+        padding: 5px 15px;
+    }
+
+    .zone-board {
+        flex: 1;
+        width: 100%;
+        border-radius: 0;
+        border: none;
+        background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
+    }
+
+    .zone-pieces {
+        height: 130px !important;
+        width: 100%;
+        border-radius: 0;
+        border-top: 2px solid var(--primary);
+        
+        display: flex !important; /* Horizontal Scroll */
+        grid-template-columns: none !important;
+        
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 10px;
+        padding: 10px;
+        background: #050b14;
+    }
+    
+    .jig-piece.in-tray {
+        min-width: 80px; /* Fixed size in mobile tray */
+        height: 80px;
+        margin: 0;
+    }
+}
+
+
+/* --- CYBER MENU REDESIGN v3 (HYPER HUD) --- */
+
+/* 1. THE CONTAINER (Darker, Sleeker) */
+.puzzle-menu {
+    width: 100%;
+    max-width: 480px;
+    background: linear-gradient(180deg, rgba(5, 11, 20, 0.95) 0%, rgba(13, 25, 41, 0.9) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(41, 243, 255, 0.3); /* Top highlight */
+    border-radius: 24px;
+    padding: 45px 35px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    position: relative;
+    box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.9),
+        inset 0 0 100px rgba(0, 0, 0, 0.8);
+    overflow: visible; /* Allow buttons to glow outside */
+    animation: jumpIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Decorative Corner brackets for the menu */
+.puzzle-menu::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; right: -1px;
+    width: 30px; height: 30px;
+    border-bottom: 2px solid var(--primary);
+    border-right: 2px solid var(--primary);
+    border-radius: 0 0 24px 0;
+}
+
+/* 2. THE HYPER BUTTONS */
+.btn-hyper {
+    position: relative;
+    width: 100%;
+    height: 70px; /* Taller for impact */
+    background: rgba(255, 255, 255, 0.02);
+    border: none;
+    
+    /* Complex Shape: Cut corners top-left and bottom-right */
+    clip-path: polygon(
+        15px 0, 100% 0, 
+        100% calc(100% - 15px), calc(100% - 15px) 100%, 
+        0 100%, 0 15px
+    );
+    
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Spacing for text vs tech-bit */
+    padding: 0 30px;
+    
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    overflow: hidden;
+}
+
+/* The "Tech Line" Border at bottom */
+.btn-hyper::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: 0.3s;
+}
+
+/* Hover Background Slide */
+.btn-hyper::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    transform: translateX(-100%);
+    transition: 0.4s;
+    z-index: -1;
+}
+
+/* Icon & Text Wrapper */
+.btn-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 2;
+    transition: 0.3s;
+}
+
+/* The "Tech Tag" on the right side */
+.tech-tag {
+    font-size: 9px;
+    opacity: 0.5;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: 0.3s;
+}
+
+/* --- HOVER EFFECTS --- */
+.btn-hyper:hover {
+    background: rgba(255, 255, 255, 0.06);
+    padding-left: 40px; /* Slide text right */
+}
+.btn-hyper:hover::after { transform: translateX(100%); }
+.btn-hyper:hover .btn-content { transform: scale(1.05); }
+.btn-hyper:hover .tech-tag { opacity: 1; border-color: currentColor; background: rgba(255,255,255,0.1); }
+
+/* --- COLOR VARIANTS (THE GLOW UP) --- */
+
+/* 1. PINK (Resume) */
+.hyper-pink { border-left: 4px solid #d63384; }
+.hyper-pink:hover { 
+    box-shadow: inset 20px 0 40px rgba(214, 51, 132, 0.2); 
+    text-shadow: 0 0 15px #d63384;
+}
+.hyper-pink:hover::before { background: #d63384; height: 100%; opacity: 0.1; } /* Fill effect */
+.hyper-pink .tech-tag { color: #ff85c2; }
+
+/* 2. CYAN (Random) */
+.hyper-cyan { border-left: 4px solid var(--primary); }
+.hyper-cyan:hover { 
+    box-shadow: inset 20px 0 40px rgba(41, 243, 255, 0.2); 
+    text-shadow: 0 0 15px var(--primary);
+}
+.hyper-cyan:hover::before { background: var(--primary); height: 100%; opacity: 0.1; }
+.hyper-cyan .tech-tag { color: var(--primary); }
+
+/* 3. GREEN (Upload) */
+.hyper-green { border-left: 4px solid #00ff88; }
+.hyper-green:hover { 
+    box-shadow: inset 20px 0 40px rgba(0, 255, 136, 0.2); 
+    text-shadow: 0 0 15px #00ff88;
+}
+.hyper-green:hover::before { background: #00ff88; height: 100%; opacity: 0.1; }
+.hyper-green .tech-tag { color: #00ff88; }
+
+/* Mobile Adjustment */
+@media (max-width: 768px) {
+    .puzzle-menu { padding: 30px 20px; }
+    .btn-hyper { height: 60px; font-size: 13px; }
+}
+
+
+/* --- 1. FLYING COIN ANIMATION --- */
+.fly-coin-visual {
+    position: fixed;
+    width: 50px;
+    height: 50px;
+    background-image: url('https://iili.io/fhc1SKQ.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 999999;
+    pointer-events: none;
+    filter: drop-shadow(0 0 15px #ffd700);
+    transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.coin-popup-text {
+    position: fixed;
+    color: #ffd700;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 20px;
+    z-index: 999999;
+    text-shadow: 2px 2px 0px #000;
+    pointer-events: none;
+    animation: floatUpFade 0.8s forwards;
+}
+
+@keyframes floatUpFade {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-80px) scale(1.5); opacity: 0; }
+}
+
+/* --- 2. MENU BUTTON ENTRANCE ANIMATIONS --- */
+/* This makes them slide in nicely */
+.puzzle-menu .btn-hyper {
+    opacity: 0;
+    animation: btnSlideIn 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+/* Stagger the delay so they load 1-by-1 */
+.puzzle-menu .btn-hyper:nth-child(1) { animation-delay: 0.1s; }
+.puzzle-menu .btn-hyper:nth-child(2) { animation-delay: 0.2s; }
+.puzzle-menu .btn-hyper:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes btnSlideIn {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+
+
+/* Add this to your CSS */
+
+/* Initial state: Hidden and shifted left */
+.puzzle-menu .btn-hyper {
+    opacity: 0;
+    transform: translateX(-30px);
+    animation: cyberSlideIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+/* Stagger the animations so they load one by one */
+.puzzle-menu .btn-hyper:nth-child(1) { animation-delay: 0.1s; }
+.puzzle-menu .btn-hyper:nth-child(2) { animation-delay: 0.2s; }
+.puzzle-menu .btn-hyper:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes cyberSlideIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+
+
+/* --- 1. TRAY PIECES FIX (Square & Smaller) --- */
+.zone-pieces {
+    /* Use auto-fill to pack them tight */
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)) !important;
+    grid-auto-rows: min-content; /* Prevent stretching */
+    gap: 8px;
+    padding: 15px;
+    align-content: start;
+}
+
+.jig-piece.in-tray {
+    position: relative !important;
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important; /* FORCES SQUARE SHAPE */
+    height: auto !important;
+    margin: 0;
+    top: auto !important; left: auto !important;
+    transform: scale(1);
+    box-shadow: 0 0 5px #000;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* --- UPDATED CYBER TIMER HUD --- */
+.timer-hud-container {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 20px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 100;
+}
+
+.cyber-bar-track {
+    width: 100%;
+    height: 35px; /* Taller to fit icons */
+    background: rgba(255, 255, 255, 0.05); /* Glassy Transparent */
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(41, 243, 255, 0.2);
+    border-radius: 50px;
+    position: relative;
+    overflow: visible; /* Let icons stick out slightly */
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+}
+
+.cyber-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+    border-radius: 50px;
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.6);
+    transition: width 1s linear;
+    position: relative;
+}
+
+/* The "Liquid" Shimmer Effect */
+.cyber-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: liquidShimmer 2s infinite linear;
+}
+
+@keyframes liquidShimmer {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+}
+
+/* REWARD ICONS ON THE BAR */
+.milestones-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.timer-milestone {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 10;
+    transition: 0.3s;
+}
+
+.timer-milestone img {
+    width: 24px;
+    height: 24px;
+    filter: drop-shadow(0 0 5px rgba(0,0,0,0.8));
+}
+
+/* Vertical tick marks */
+.timer-milestone::before {
+    content: '';
+    width: 2px;
+    height: 15px;
+    background: rgba(255,255,255,0.5);
+    margin-bottom: 2px;
+}
+
+.milestone-lost {
+    opacity: 0.2;
+    filter: grayscale(1);
+    transform: translate(-50%, -50%) scale(0.8);
+}
+
+/* The Digital Timer Text */
+.cyber-timer-digits {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    color: #fff;
+    margin-top: 5px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px rgba(41, 243, 255, 0.5);
+    transition: all 0.3s;
+}
+
+/* --- PANIC MODE (Low Time) --- */
+.panic-mode .cyber-bar-fill {
+    background: #ff0000 !important;
+    box-shadow: 0 0 20px #ff0000 !important;
+}
+
+.panic-mode .cyber-timer-digits {
+    color: #ff0000 !important;
+    text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000 !important;
+    animation: panicShake 0.5s infinite;
+}
+
+.panic-mode .cyber-bar-track {
+    border-color: #ff0000;
+    animation: borderFlash 0.5s infinite alternate;
+}
+
+@keyframes panicShake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+@keyframes borderFlash {
+    from { box-shadow: 0 0 5px #ff0000; }
+    to { box-shadow: 0 0 25px #ff0000; }
+}
+
+/* --- GAME OVER OVERLAY --- */
+.game-over-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 100000;
+    display: none; /* Flex when active */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.go-title {
+    font-family: 'Orbitron';
+    font-size: 40px;
+    color: #ff4757;
+    font-weight: 900;
+    margin-bottom: 10px;
+    text-shadow: 0 0 20px #ff4757;
+}
+
+
+
+/* --- THE CYBER-LIQUID HUD --- */
+.timer-hud-container {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: 650px;
+    margin: 0 auto 25px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 100;
+}
+
+/* The Glassy Tube */
+.cyber-bar-track {
+    width: 100%;
+    height: 40px; 
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px); /* Glass effect */
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(41, 243, 255, 0.2);
+    border-radius: 100px;
+    position: relative;
+    overflow: hidden; /* Clips the liquid */
+    box-shadow: 
+        inset 0 0 20px rgba(0,0,0,0.4),
+        0 0 15px rgba(41, 243, 255, 0.1);
+}
+
+/* The Liquid Fill */
+.cyber-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #0055ff, #29f3ff, #00ff88);
+    background-size: 200% 100%;
+    border-radius: 100px;
+    transition: width 1s linear;
+    position: relative;
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.5);
+    animation: liquidFlow 3s linear infinite;
+}
+
+/* Moving shimmer on top of the liquid */
+.cyber-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(
+        90deg, 
+        transparent 0%, 
+        rgba(255,255,255,0.2) 50%, 
+        transparent 100%
+    );
+    animation: shimmerSweep 2s infinite;
+}
+
+@keyframes liquidFlow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+@keyframes shimmerSweep {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Milestone Markers */
+.milestones-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.timer-milestone {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.timer-milestone img {
+    width: 28px;
+    height: 28px;
+    filter: drop-shadow(0 0 8px rgba(0,0,0,0.8));
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* When the bar passes the icon and you "lose" it */
+.milestone-lost {
+    opacity: 0.15;
+    filter: grayscale(1) blur(1px);
+    transform: scale(0.7);
+}
+
+.timer-milestone.active-reward img {
+    filter: drop-shadow(0 0 12px #ffd700);
+    animation: pulseReward 1.5s infinite alternate;
+}
+
+@keyframes pulseReward {
+    from { transform: scale(1); }
+    to { transform: scale(1.2); }
+}
+
+/* The Clock */
+.cyber-timer-digits {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: #fff;
+    margin-top: 8px;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(41, 243, 255, 0.8);
+}
+
+
+
+/* --- NEW CYBER HUD V2 --- */
+.timer-hud-v2 {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: 650px;
+    margin: 40px auto 10px auto; /* Lowered it down */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 100;
+}
+
+/* The Outer Glass Tube */
+.glass-track {
+    width: 100%;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 2px solid rgba(41, 243, 255, 0.3); /* Cyber Outline */
+    border-radius: 50px;
+    position: relative;
+    padding: 4px; /* Space for the liquid */
+    box-shadow: 
+        0 0 20px rgba(0, 0, 0, 0.5),
+        inset 0 0 15px rgba(41, 243, 255, 0.1);
+    overflow: visible;
+}
+
+/* The Liquid Energy */
+.liquid-fill {
+    height: 100%;
+    width: 100%; /* Default */
+    border-radius: 50px;
+    position: relative;
+    transition: width 1s linear, background 0.5s ease; /* Smooth color change */
+    
+    /* Dynamic Background - Default Blue */
+    background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+    box-shadow: 0 0 15px currentColor;
+}
+
+/* Shimmer overlay for liquid look */
+.liquid-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(
+        90deg, 
+        transparent 0%, 
+        rgba(255,255,255,0.3) 50%, 
+        transparent 100%
+    );
+    border-radius: 50px;
+    animation: flowShimmer 2s infinite;
+}
+
+@keyframes flowShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Loot Markers inside the track */
+.loot-zone {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.loot-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Vertical Outlined Bars for Loot */
+.loot-marker::before {
+    content: '';
+    width: 2px;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.2);
+    border-left: 1px solid rgba(0,0,0,0.5);
+}
+/* Micșorăm puțin iconițele pentru a încăpea 6 pe Hard */
+.loot-marker img {
+    width: 22px; /* Redus de la 26px */
+    height: 22px;
+    position: absolute;
+    top: -30px; 
+    filter: drop-shadow(0 0 8px rgba(0,0,0,0.8));
+    transition: 0.3s ease;
+}
+
+/* Efect de strălucire când bară e aproape de ele */
+.loot-marker:not(.lost) img {
+    animation: rewardGlow 2s infinite alternate;
+}
+
+@keyframes rewardGlow {
+    from { filter: drop-shadow(0 0 2px rgba(255,215,0,0.4)); }
+    to { filter: drop-shadow(0 0 10px rgba(255,215,0,0.8)); transform: scale(1.1); }
+}
+
+/* Timer Text */
+.cyber-clock {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: #fff;
+    margin-top: 15px;
+    letter-spacing: 4px;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+
+
+/* Gallery Button Variant */
+.hyper-purple { border-left: 4px solid #bf55ec; }
+.hyper-purple:hover { 
+    box-shadow: inset 20px 0 40px rgba(191, 85, 236, 0.2); 
+    text-shadow: 0 0 15px #bf55ec;
+}
+.hyper-purple:hover::before { background: #bf55ec; height: 100%; opacity: 0.1; }
+.hyper-purple .tech-tag { color: #bf55ec; }
+
+/* Hall of Fame Modal */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+    padding: 10px;
+}
+
+.gallery-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 15px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.gallery-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+    background: rgba(41, 243, 255, 0.05);
+}
+
+.gallery-img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+
+.gallery-user { font-size: 11px; font-weight: 800; color: var(--primary); display: block; }
+.gallery-time { font-size: 10px; opacity: 0.6; font-family: 'Orbitron'; }
+
+
+
+/* --- MYSTERY BOX & ROULETTE STYLES --- */
+#mysteryOverlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 20000; backdrop-filter: blur(15px);
+}
+
+.box-shaker {
+    width: 250px; cursor: pointer; transition: 0.3s;
+    animation: boxIdleShake 2s infinite ease-in-out;
+}
+@keyframes boxIdleShake {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(-5deg) scale(1.05); }
+    75% { transform: rotate(5deg) scale(1.05); }
+}
+.box-opening { animation: boxBurst 0.5s forwards; }
+@keyframes boxBurst { 0% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.4); filter: brightness(3); } 100% { transform: scale(0); opacity: 0; } }
+
+/* The Straight Line Roulette */
+.roulette-wrapper {
+    width: 100%; max-width: 500px; height: 120px;
+    background: #02050a; border: 2px solid var(--primary);
+    border-radius: 15px; position: relative; overflow: hidden;
+    display: none; margin-top: 30px; box-shadow: 0 0 30px rgba(41,243,255,0.2);
+}
+.roulette-needle {
+    position: absolute; left: 50%; top: 0; bottom: 0; width: 4px;
+    background: #fff; z-index: 100; transform: translateX(-50%);
+    box-shadow: 0 0 15px #fff;
+}
+.roulette-strip {
+    display: flex; position: absolute; left: 0; top: 0; height: 100%;
+    transition: transform 5s cubic-bezier(0.1, 0, 0.1, 1);
+    will-change: transform;
+}
+.roulette-item {
+    min-width: 120px; height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 5px;
+    border-right: 1px solid rgba(255,255,255,0.1); font-family: 'Orbitron';
+}
+.r-badge { background: linear-gradient(180deg, #1a1a1a, #d6338422); }
+.r-frame { background: linear-gradient(180deg, #1a1a1a, #bf55ec22); }
+.r-coin { background: linear-gradient(180deg, #1a1a1a, #ffd70022); }
+
+
+/* CYBER ROULETTE HUD v3 */
+.roulette-wrapper {
+    width: 100%;
+    max-width: 600px;
+    height: 150px;
+    background: #02050a;
+    border: 3px solid #fbc02d; /* Gold border from wheel */
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    margin-top: 30px;
+    box-shadow: 0 0 30px rgba(251, 192, 45, 0.2);
+}
+
+.roulette-strip {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+}
+
+.roulette-item {
+    min-width: 120px;
+    height: 120px;
+    margin: 15px 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.1);
+    box-sizing: border-box;
+    transition: 0.3s;
+    position: relative;
+}
+
+/* Colors based on your spin wheel image */
+.r-teal { background: linear-gradient(135deg, #00c2cb, #008a91); border-color: #00ffff; }
+.r-red { background: linear-gradient(135deg, #d32f2f, #7b1fa2); border-color: #ff1744; }
+.r-purple { background: linear-gradient(135deg, #7b1fa2, #4a148c); border-color: #aa00ff; }
+.r-gold { background: linear-gradient(135deg, #fbc02d, #f57c00); border-color: #fff176; }
+.r-green { background: linear-gradient(135deg, #2ecc71, #27ae60); border-color: #00ff88; }
+.r-blue { background: linear-gradient(135deg, #3f51b5, #1a237e); border-color: #536dfe; }
+.r-dark { background: linear-gradient(135deg, #424242, #212121); border-color: #9e9e9e; }
+
+.roulette-item img {
+    width: 70px;
+    height: 70px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+    z-index: 2;
+}
+
+.roulette-item span {
+    font-family: 'Orbitron';
+    font-size: 9px;
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    margin-top: 5px;
+    text-shadow: 1px 1px 2px #000;
+}
+
+.roulette-needle {
+    position: absolute;
+    left: 50%;
+    top: -5px;
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 25px solid #fbc02d; /* Triangle like the wheel pointer */
+    z-index: 100;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 0 10px #fbc02d);
+}
+
+
+
+.gallery-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.gallery-card:hover {
+    transform: scale(1.05) translateY(-5px);
+    border-color: var(--primary);
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.3);
+}
+
+.gallery-user {
+    text-shadow: 0 0 10px #000;
+    font-weight: 900;
+}
+
+
+/* --- FIX 1: Allow page scrolling while keeping game functional --- */
+.jigsaw-arena {
+    display: none; 
+    width: 100%;
+    height: 600px;
+    background: #050b14;
+    border: 2px solid var(--primary);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+    /* Changed to allow vertical page swiping */
+    touch-action: pan-y !important; 
+}
+
+/* --- FIX 2: Better mobile tray sizing --- */
+@media (max-width: 899px) {
+    .zone-pieces {
+        height: 140px !important; 
+        width: 100%;
+        display: grid !important;
+        /* 4 smaller pieces per row on mobile to save space */
+        grid-template-columns: repeat(4, 1fr) !important;
+        overflow-y: auto !important;
+        touch-action: pan-y !important; 
+        background: rgba(0, 0, 0, 0.5) !important;
+    }
+
+    .jig-piece.in-tray {
+        width: 60px !important; /* Fixed size so they aren't huge */
+        height: 60px !important;
+        aspect-ratio: 1/1;
+        margin: 5px auto !important;
+    }
+}
+
+/* --- FIX 3: Ensure board pieces fill the screen width --- */
+.zone-board {
+    touch-action: none !important; /* Only the board area blocks scrolling */
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Ensure pieces being dragged stay on top of everything */
+.jig-piece.is-dragging {
+    z-index: 999999 !important;
+    touch-action: none !important;
+}
+
+
+
+/* --- AUDIO FLOATING BUTTON --- */
+.audio-fab {
+    position: fixed;
+    bottom: 20px;
+    left: 20px; /* Bottom Left corner */
+    width: 60px;
+    height: 60px;
+    background: rgba(5, 11, 20, 0.8);
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 9999;
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.3);
+    transition: 0.3s;
+    overflow: hidden;
+}
+
+.audio-fab:hover {
+    transform: scale(1.1) rotate(10deg);
+    box-shadow: 0 0 30px var(--primary);
+    background: var(--primary);
+}
+
+.audio-fab:hover i { color: #000; }
+
+.audio-fab i {
+    font-size: 24px;
+    color: var(--primary);
+    transition: 0.3s;
+}
+
+/* Pulse animation when music is playing */
+.audio-fab.playing {
+    animation: boomboxPulse 1.5s infinite;
+}
+
+@keyframes boomboxPulse {
+    0% { box-shadow: 0 0 10px var(--primary); transform: scale(1); }
+    50% { box-shadow: 0 0 30px var(--primary), 0 0 50px var(--secondary); transform: scale(1.05); }
+    100% { box-shadow: 0 0 10px var(--primary); transform: scale(1); }
+}
+
+/* --- AUDIO SETTINGS MODAL --- */
+.audio-modal-card {
+    background: #08101b;
+    border: 2px solid var(--primary);
+    width: 320px;
+    border-radius: 20px;
+    padding: 25px;
+    position: relative;
+    box-shadow: 0 0 50px rgba(41, 243, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Visualizer (Fake Bars) */
+.visualizer-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 50px;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.viz-bar {
+    width: 6px;
+    background: var(--primary);
+    border-radius: 4px;
+    animation: wave 1s ease-in-out infinite;
+}
+
+/* Stagger animations for wave effect */
+.viz-bar:nth-child(1) { height: 20%; animation-duration: 0.8s; }
+.viz-bar:nth-child(2) { height: 40%; animation-duration: 1.2s; }
+.viz-bar:nth-child(3) { height: 80%; animation-duration: 0.5s; }
+.viz-bar:nth-child(4) { height: 50%; animation-duration: 1.0s; }
+.viz-bar:nth-child(5) { height: 90%; animation-duration: 0.7s; }
+.viz-bar:nth-child(6) { height: 30%; animation-duration: 1.1s; }
+.viz-bar:nth-child(7) { height: 60%; animation-duration: 0.9s; }
+
+.visualizer-container.paused .viz-bar {
+    animation: none;
+    height: 5px !important;
+    transition: 0.3s;
+}
+
+@keyframes wave {
+    0%, 100% { height: 10%; background: var(--secondary); }
+    50% { height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); }
+}
+
+/* Controls */
+.track-info {
+    text-align: center;
+    font-family: 'Orbitron';
+    font-size: 11px;
+    color: #fff;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.player-controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.ctrl-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex; align-items: center; justify-content: center;
+}
+.ctrl-btn:hover { background: var(--primary); color: #000; }
+
+/* Sliders */
+.volume-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: #aaa;
+    font-family: 'Orbitron';
+}
+
+.volume-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 5px;
+    outline: none;
+}
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--primary);
+}
+
+
+
+/* --- FIX 1: MISSED MILESTONE VISUALS --- */
+.loot-marker.lost img {
+    filter: grayscale(100%) brightness(0.3); /* Grey and dark */
+    opacity: 0.5;
+}
+
+/* The Animated Red X */
+.loot-marker.lost::after {
+    content: '✕'; /* Unicode X */
+    position: absolute;
+    top: -35px; /* Position over the icon */
+    left: 50%;
+    transform: translateX(-50%) scale(0); /* Start hidden */
+    color: #ff4757;
+    font-size: 24px;
+    font-weight: 900;
+    text-shadow: 0 0 10px #ff4757;
+    animation: stompX 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes stompX {
+    0% { transform: translateX(-50%) scale(5); opacity: 0; }
+    70% { transform: translateX(-50%) scale(1); opacity: 1; }
+    80% { transform: translateX(-50%) scale(1.2); }
+    100% { transform: translateX(-50%) scale(1); }
+}
+
+/* --- FIX 3: GALLERY SCROLL BUG --- */
+/* This forces the list to scroll INSIDE the modal instead of cutting off */
+.inventory-scroll-area {
+    flex: 1;
+    min-height: 0; /* Critical for Flexbox scrolling */
+    overflow-y: auto !important;
+    padding-bottom: 20px;
+    width: 100%;
+}
+
+/* Ensure the modal content wrapper fills height but doesn't overflow parent */
+.cosmo-content-v6 {
+    height: 100%;
+    max-height: 80vh; 
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* Gallery Layout Fix */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr) !important; /* Two columns for better visibility */
+    gap: 15px;
+    padding: 10px;
+}
+
+.gallery-card {
+    background: rgba(13, 25, 41, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 140px; /* Uniform height */
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.gallery-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.gallery-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* This prevents the image from looking "cut" or stretched */
+    display: block;
+}
+
+.gallery-user {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    padding: 10px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #fff;
+    text-align: center;
+}
+
+
+/* Corner Mode for Tutorial */
+.bot-corner-mode {
+    justify-content: flex-end !important;
+    align-items: flex-end !important;
+    padding: 20px !important;
+    pointer-events: none !important; /* Allow clicking the puzzle buttons behind */
+}
+.bot-corner-mode #botTextBubble, 
+.bot-corner-mode #mainBotVisual {
+    pointer-events: auto !important; /* Keep bot interactive */
+}
+
+@media (min-width: 900px) {
+    .bot-corner-mode #mainBotVisual { height: 250px !important; }
+    .bot-corner-mode #botTextBubble { max-width: 250px !important; }
+}
+
+@media (max-width: 899px) {
+    .bot-corner-mode #mainBotVisual { height: 120px !important; }
+    .bot-corner-mode #botTextBubble { max-width: 160px !important; font-size: 10px !important; }
+}
+
+.tutorial-highlight {
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.7), 0 0 20px var(--primary) !important;
+    z-index: 999999 !important;
+    position: relative !important;
+}
+
+
+
+/* Fixed Neon Buttons */
+.tut-choice-btn {
+    background: rgba(41, 243, 255, 0.1);
+    border: 2px solid var(--primary);
+    color: #fff;
+    padding: 12px;
+    border-radius: 12px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer !important;
+    width: 100%;
+    text-transform: uppercase;
+    transition: 0.3s;
+    display: block;
+}
+
+.tut-choice-btn:hover {
+    background: var(--primary);
+    color: #000;
+    box-shadow: 0 0 15px var(--primary);
+}
+
+
+/* Ensure the bubble can hold both animated text and buttons */
+#botTutorialOverlay #botTextBubble {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+}
+
+#tutText {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+#tutBtnArea {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+
+/* FIXED MOBILE HUD */
+@media (max-width: 768px) {
+    /* Kevin robot size on mobile */
+    #mainBotVisual {
+        height: 150px !important; 
+    }
+    
+    /* Move text bubble higher so it doesn't block the Collect button */
+    #botTextBubble {
+        font-size: 11px !important;
+        padding: 12px !important;
+        max-width: 180px !important;
+        position: relative;
+        bottom: 20px;
+    }
+
+    /* Make roulette container fit mobile screens */
+    .roulette-wrapper {
+        height: 110px !important;
+        max-width: 95vw !important;
+    }
+    .roulette-item {
+        min-width: 100px !important;
+        height: 100px !important;
+    }
+    .roulette-item img {
+        width: 45px !important;
+        height: 45px !important;
+    }
+}
+
+/* Ensure Kevin is NEVER blocking clicks to buttons behind him */
+#botTutorialOverlay {
+    pointer-events: none !important;
+}
+#botTextBubble, #mainBotVisual, .tut-choice-btn, #kevinHelpBtn {
+    pointer-events: auto !important; /* Only these parts are clickable */
+}
+
+
+
+
+/* --- FIX 1: Smaller Floating Buttons --- */
+.audio-fab {
+    width: 45px !important;  /* Reduced from 60px */
+    height: 45px !important;
+    bottom: 15px !important;
+    left: 15px !important;
+}
+.audio-fab i { font-size: 18px !important; }
+
+#kevinHelpBtn {
+    width: 40px !important;  /* Reduced from 50px */
+    height: 40px !important;
+    bottom: 70px !important; /* Adjusted position */
+    left: 17px !important;
+}
+
+/* --- FIX 2: Compact Bot Corner Mode --- */
+.bot-corner-mode #botTextBubble {
+    max-width: 180px !important; /* Much narrower */
+    padding: 10px !important;    /* Tighter padding */
+    border-radius: 15px !important;
+    margin-bottom: 5px !important;
+    gap: 5px !important;
+}
+
+.bot-corner-mode #tutText {
+    font-size: 11px !important; /* Smaller text in corner */
+    line-height: 1.3 !important;
+}
+
+.bot-corner-mode #mainBotVisual {
+    height: 140px !important; /* Smaller robot in corner */
+}
+
+/* Make sure buttons inside the bubble aren't huge */
+.tut-choice-btn {
+    padding: 6px !important;
+    font-size: 9px !important;
+}
+
+/* --- COMPACT KEVIN HUD FOR CORNER MODE --- */
+.bot-corner-mode #botTextBubble {
+    max-width: 190px !important;    /* Slightly wider so text doesn't stack vertically as much */
+    padding: 10px !important;       /* Reduced from 20px */
+    gap: 6px !important;            /* Reduced from 15px */
+    margin-bottom: 2px !important;  /* Move closer to Kevin's head */
+    min-height: auto !important;    /* Remove the tall minimum height */
+    border-radius: 16px !important;
+}
+
+.bot-corner-mode #tutText {
+    font-size: 11px !important;     /* Smaller text */
+    line-height: 1.3 !important;    /* Tighter lines */
+    margin-bottom: 0 !important;
+}
+
+/* Make the button inside the bubble much shorter */
+.bot-corner-mode .tut-choice-btn {
+    padding: 6px 10px !important;   /* Thinner button */
+    font-size: 9px !important;      /* Smaller button text */
+    border-width: 1px !important;   /* Thinner border */
+    border-radius: 8px !important;
+}
+
+/* Make the robot itself smaller in the corner */
+.bot-corner-mode #mainBotVisual {
+    height: 130px !important;       /* Smaller robot */
+}
+
+/* --- SMALLER FLOATING BUTTONS --- */
+.audio-fab {
+    width: 48px !important;         /* Reduced from 60px */
+    height: 48px !important;
+    bottom: 15px !important;
+    left: 15px !important;
+}
+.audio-fab i { font-size: 18px !important; }
+
+#kevinHelpBtn {
+    width: 42px !important;         /* Reduced from 50px */
+    height: 42px !important;
+    bottom: 75px !important;        /* Adjusted position to sit above music */
+    left: 18px !important;
+}
+  </style>
+</head>
+<body>
+
+
+
+<!-- BANNED OVERLAY -->
+<div id="bannedOverlay">
+    <i class="fas fa-ban ban-icon"></i>
+    <h1 class="ban-title">ACCES INTERZIS</h1>
+    <div class="ban-details">
+        <span class="ban-info-label">Statut Cont:</span>
+        <span class="ban-info-val" style="color:#ff4757;">BANAT PERMANENT</span>
+        <span class="ban-info-label">Motiv:</span>
+        <span class="ban-info-val" id="globalBanReason">Încălcare regulament comunitate</span>
+        <p style="font-size:12px; color:#999; margin:0;">Adresa ta IP (<span id="globalBanIp">...</span>) a fost blocată.</p>
+    </div>
+</div>
+<!-- COOKIE POPUP -->
+<div id="cookieConsent" class="cookie-wrapper">
+    <div class="cookie-content">
+        <div class="cookie-title">🍪 Cookie-uri & GDPR</div>
+        <p class="cookie-text">Folosim cookie-uri pentru a-ți oferi cea mai bună experiență pe KSDA și pentru analize. Continuând navigarea, ești de acord cu utilizarea acestora.</p>
+    </div>
+    <button id="acceptCookiesBtn" class="cookie-btn">Sunt de acord</button>
+</div>
+
+<!-- REWARD MODAL (WELCOME BONUS) -->
+<div id="rewardModal" class="reward-modal">
+    <div class="reward-card">
+        <h2><span style="font-size: 24px;">🎉</span> BUN VENIT!</h2>
+        <p>Hey, mersi că te-ai logat! Uite aici 250 KSDA monede cadou, strânge-le cu grijă! 😉</p>
+        <div class="reward-coins-box">
+            <img src="https://iili.io/fhc1SKQ.png" alt="Coin" style="width: 50px;">
+            <span>250</span>
+        </div>
+        <p style="color: #ffd700; font-weight: 800; font-family: 'Orbitron'; font-size: 12px; letter-spacing: 2px;">KSDA COINS</p>
+        <button class="super-btn" onclick="document.getElementById('rewardModal').classList.remove('active')">SUPER!</button>
+    </div>
+</div>
+
+<!-- QUEST REWARD MODAL (Actualizat pentru monede + diamante) -->
+<div id="questRewardModal" class="reward-modal">
+    <div class="reward-card">
+        <h2 id="winTitle">🏆 PUZZLE COMPLET!</h2>
+        <p id="winMessage">Felicitări! Ai salvat următoarele recompense:</p>
+        
+        <div style="display: flex; justify-content: center; gap: 20px; margin: 20px 0;">
+            <!-- Box Monede -->
+            <div class="reward-coins-box" style="flex-direction: column; font-size: 30px;">
+                <img src="https://iili.io/fhc1SKQ.png" alt="Coin" style="width: 40px;">
+                <span id="earnedCoinsText">0</span>
+                <small style="font-size: 10px; color: #ffd700;">KSDA COINS</small>
+            </div>
+
+            <!-- Box Diamante (Se va afișa doar dacă câștigi > 0) -->
+            <div id="diamondWinBox" class="reward-coins-box" style="flex-direction: column; font-size: 30px; color: #00ff88; display: none;">
+                <img src="https://iili.io/fv5bmtj.png" alt="Diamond" style="width: 40px;">
+                <span id="earnedDiamondsText">0</span>
+                <small style="font-size: 10px; color: #00ff88;">DIAMONDS</small>
+            </div>
+
+
+
+
+<!-- EDIT PROFILE MODAL (NEW) -->
+<div id="editProfileModal" class="account-modal-overlay">
+    <div class="account-card">
+        <button id="closeEditProfile" class="close-pop">✕</button>
+        <h3 style="font-family:'Orbitron'; color:var(--primary);">EDITEAZĂ PROFIL</h3>
+        <div class="edit-profile-form">
+            <div>
+                <label class="edit-label">Data Nașterii</label>
+                <input type="date" id="editBirth" class="edit-input">
+            </div>
+            <div>
+                <label class="edit-label">Despre Tine (Bio)</label>
+                <textarea id="editBio" class="edit-input" rows="3" placeholder="Scrie ceva despre tine..."></textarea>
+            </div>
+            <div>
+                <label class="edit-label">Link TikTok</label>
+                <input type="text" id="editTikTok" class="edit-input" placeholder="https://tiktok.com/@user">
+            </div>
+            <button id="saveProfileBtn" class="btn-save-profile">SALVEAZĂ</button>
+        </div>
+    </div>
+</div>
+
+<!-- COSMETICS SELECTION HUB v6 -->
+<div id="cosmeticsSelectModal" class="account-modal-overlay">
+    <div class="cosmetics-card-v6">
+        <!-- Close Button -->
+        <button class="close-pop" onclick="document.getElementById('cosmeticsSelectModal').classList.remove('active'); document.getElementById('accountModal').classList.add('active');">✕</button>
+        
+        <div class="cosmo-content-v6">
+            <div class="cosmo-header">
+                <div class="cosmo-title">SHOP & STYLE</div>
+                <div style="font-size: 10px; color: #aaa; margin-top: 5px;">Alege categoria de personalizare</div>
+            </div>
+
+            <!-- PREVIEW BOX REMOVED AS REQUESTED -->
+
+<div class="cosmo-grid-select" id="masterCategoryGrid">
+    <!-- Master-ul va pune butoanele aici automat -->
+</div>
+        </div>
+    </div>
+</div>
+ 
+
+
+<!-- REWARD STREAK MODAL (FIRE) -->
+<div id="streakRewardModal" class="reward-modal">
+    <div class="modern-pop-card pop-fire">
+        <div style="font-size: 35px; margin-bottom: 10px;">🔥</div>
+        <h2>QUEST MASTER!</h2>
+        <div class="pop-streak-display">
+            <span id="streakOld" class="streak-num old">0</span>
+            <i class="fas fa-chevron-right" style="color: #ff4500; font-size: 24px;"></i>
+            <span id="streakNew" class="streak-num new">1</span>
+        </div>
+        <div class="pop-reward-pill">
+            <img src="https://iili.io/fv5bmtj.png" id="sourceDiamond" style="width: 45px; filter: drop-shadow(0 0 10px #00ff88);">
+            <div style="text-align: left;">
+                <div style="color: #00ff88; font-weight: 900; font-family: 'Orbitron'; font-size: 18px;">+1 DIAMOND</div>
+                <div style="color: #fff; font-size: 10px; opacity: 0.4; font-family: 'Orbitron';">STREAK SCORE UP</div>
+            </div>
+        </div>
+        <button class="pop-btn-cyan" id="claimStreakBtn">Super!</button>
+    </div>
+</div>
+
+<!-- MISSED STREAK MODAL (RED) -->
+<div id="streakMissedModal" class="reward-modal">
+    <div class="modern-pop-card pop-red">
+        <div style="font-size: 35px; margin-bottom: 10px;">🌑</div>
+        <h2 style="color: #ff4757;">STREAK PIERDUT!</h2>
+        <div class="pop-streak-display">
+            <span id="streakOldMissed" class="streak-num missed">0</span>
+        </div>
+        <button class="pop-btn-cyan" style="background: #222; color: #fff; box-shadow: none; border: 1px solid #444;" onclick="document.getElementById('streakMissedModal').classList.remove('active')">Am înțeles</button>
+    </div>
+</div>
+<img src="https://iili.io/fv5bmtj.png" id="flyingDiamond">
+
+
+<!-- INVENTORY MODAL v6 -->
+<div id="inventoryModal" class="account-modal-overlay">
+    <div class="cosmetics-card-v6">
+        <!-- ADD THIS LINE BELOW -->
+        <button class="close-pop" onclick="document.getElementById('inventoryModal').classList.remove('active')">✕</button>
+        
+        <div class="cosmo-content-v6">
+            <div class="cosmo-header">
+                <div class="cosmo-title" id="inventoryTitle">INVENTAR</div>
+                <div style="font-size: 10px; color: #aaa; margin-top: 5px;">Obiectele tale deblocate</div>
+            </div>
+
+            <!-- DYNAMIC LIST -->
+            <div id="inventoryActions"></div> 
+            <div id="inventoryList" class="inventory-scroll-area">
+                <!-- Items load here -->
+            </div>
+
+            <!-- NAVIGATION -->
+            <div class="nav-btn-row">
+                <button class="btn-nav-v6 btn-nav-back" onclick="document.getElementById('inventoryModal').classList.remove('active'); document.getElementById('cosmeticsSelectModal').classList.add('active');">
+                    <i class="fas fa-arrow-left"></i> ÎNAPOI
+                </button>
+                <button class="btn-nav-v6" onclick="document.getElementById('inventoryModal').classList.remove('active')">
+                    ÎNCHIDE
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- SHARE LINK MODAL -->
+<div id="shareModal-v2" class="account-modal-overlay">
+    <div class="account-card-v2">
+        <button class="close-pop" onclick="document.getElementById('shareModal-v2').classList.remove('active')">✕</button>
+        <h2 style="color: #00ff88; font-family:'Orbitron'; font-size: 20px; margin-top: 10px;">INVITĂ UN PRIETEN</h2>
+        <p style="color: #fff; margin-bottom: 20px; font-size: 13px; font-family: 'Poppins';">
+            Trimite acest link prietenului tău. Când își face cont, amândoi primiți <span style="color:#ffd700; font-weight:bold;">1000 KSDA Coins</span>!
+        </p>
+        
+        <div id="refLinkDisplay-v2" class="ref-link-box-v2">
+            ...generare link...
+        </div>
+
+        <button class="copy-btn-v2" onclick="copyRefLinkV2()">
+            <i class="fas fa-copy"></i> COPIAZĂ LINK
+        </button>
+    </div>
+</div>
+
+
+
+    
+    <!-- AUTH MODAL (Hidden by default, centered via CSS class) -->
+    <div id="authModal" class="account-modal-overlay" style="display: none;">
+        <div class="auth-card">
+            <!-- Close Button Restored -->
+            <button class="close-pop" onclick="document.getElementById('authModal').style.display='none'">✕</button>
+            
+            <div class="auth-content">
+                <div class="auth-tabs">
+                    <h2 id="tabLogin" onclick="switchAuthTab('login')" class="active">LOGIN</h2>
+                    <h2 id="tabSignup" onclick="switchAuthTab('signup')">SIGN UP</h2>
+                </div>
+
+                <img src="https://iili.io/fXvBEiB.png" style="height:45px; display:block; margin: 0 auto 10px;" alt="KSDA">
+                <div class="auth-subtitle">BENEFICIAZĂ DE TOATE SERVICIILE KSDA</div>
+
+                <!-- Login Form -->
+                <div id="formLogin">
+                    <div class="input-group">
+                        <label>EMAIL ADDRESS</label>
+                        <input type="email" id="loginEmail" placeholder="email@example.com" class="ksda-input">
+                    </div>
+                    <div class="input-group">
+                        <label>PASSWORD</label>
+                        <input type="password" id="loginPass" placeholder="••••••••" class="ksda-input">
+                    </div>
+                    <button class="btn-ksda-fire" style="width: 100%;" onclick="handleEmailLogin()">
+                        <span>LOG IN </span>
+                    </button>
+                </div>
+
+                <!-- Sign Up Form -->
+                <div id="formSignup" style="display: none;">
+                    <div class="input-group">
+                        <label>USERNAME</label>
+                        <input type="text" id="signUser" placeholder="Numele tău" class="ksda-input">
+                    </div>
+                    <div class="input-group">
+                        <label>EMAIL</label>
+                        <input type="email" id="signEmail" placeholder="email@example.com" class="ksda-input">
+                    </div>
+                    <div class="input-group">
+                        <label>PASSWORD</label>
+                        <input type="password" id="signPass" placeholder="Min. 6 caractere" class="ksda-input">
+                    </div>
+                    <button class="btn-ksda-fire" style="width: 100%;" onclick="handleEmailSignUp()">
+                        <span>CREATE ACCOUNT</span>
+                    </button>
+                </div>
+
+                <!-- Divider -->
+                <div class="auth-divider-sau" style="margin-top: 25px;">Sau</div>
+
+                <!-- Google Button -->
+                <button class="google-holo-btn" onclick="handleGoogleLogin()">
+                    <i class="fab fa-google"></i>
+                    <span>CONTINUĂ CU GOOGLE</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+<div id="accountModal" class="account-modal-overlay">
+    <div class="account-card-v5">
+        
+        <!-- CLOSE BUTTON -->
+        <button id="closeAccountPop" class="close-pop">✕</button>
+        
+        <div class="modal-content-v5">
+            
+            <!-- HEADER: PFP & INFO -->
+            <div class="profile-frame-wrapper" style="width: 90px; height: 90px;">
+                <img id="popUserImg" src="" class="pop-img-inner">
+                <img id="popUserFrame" src="" class="pop-frame-overlay" style="display: none;">
+            </div>
+
+            <div class="name-wrapper-v5">
+                <h3 id="popUserName">Utilizator</h3>
+            </div>
+            
+            <p id="popUserEmail" style="font-size: 10px; opacity: 0.4; margin-bottom: 12px;">user@email.com</p>
+
+            <div class="streak-box" style="padding: 4px 15px; margin-bottom: 15px;">
+                <i class="fas fa-fire"></i>
+                <span class="streak-txt">Streak: 0</span>
+            </div>
+
+            <!-- PRIMARY UTILITIES -->
+            <div class="utility-row-v5">
+                <button id="openCosmeticsBtn" class="btn-util-v5 btn-cosmo-v5">
+                    <i class="fas fa-palette"></i> Cosmetics
+                </button>
+                <button id="openEditProfileBtn" class="btn-util-v5 btn-edit-v5">
+                    <i class="fas fa-user-edit"></i> Edit Profile
+                </button>
+            </div>
+
+            <!-- HOLOGRAPHIC CURRENCIES -->
+            <div style="display: flex; gap: 10px; width: 100%;">
+                <div class="holo-pill-v5" style="border-color: rgba(255, 215, 0, 0.3);">
+                    <img src="https://iili.io/fhc1SKQ.png" width="22">
+                    <span id="popUserCoins" style="color:#ffd700; font-family:'Orbitron'; font-weight:900; font-size:16px;">0</span>
+                </div>
+                <div class="holo-pill-v5" style="border-color: rgba(0, 255, 136, 0.3);">
+                    <img src="https://iili.io/fv5bmtj.png" width="20">
+                    <span id="popUserDiamonds" style="color:#00ff88; font-family:'Orbitron'; font-weight:900; font-size:16px;">0</span>
+                </div>
+            </div>
+
+ <!-- 4. THE 8-BUTTON HOLO DASHBOARD -->
+            <div class="grid-8-v6">
+                <!-- Row 1 -->
+                <a href="DailyTasks.html" class="sq-holo-btn">
+                    <i class="fas fa-tasks c-blue"></i>
+                    <span>Tasks</span>
+                </a>
+                <a href="DailyRewards.html" class="sq-holo-btn">
+                    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Pressents%2FMega%20Pressents%20_upscayl_5x_upscayl-standard-4x.png?alt=media&token=dd59f713-d721-4f6a-8b81-5e77615ca182" width="20">
+                    <span>Rewards</span>
+                </a>
+                <a href="Topksdacoins.html" class="sq-holo-btn">
+                    <i class="fas fa-trophy c-green"></i>
+                    <span>Rank</span>
+                </a>
+                <a href="shop.html" class="sq-holo-btn">
+                    <i class="fas fa-shopping-cart c-gold"></i>
+                    <span>Shop</span>
+                </a>
+                <!-- Row 2 -->
+                <a href="Wall.html" class="sq-holo-btn">
+                    <i class="fas fa-comments c-purple"></i>
+                    <span>Wall</span>
+                </a>
+                <a href="GamingCenter.html" class="sq-holo-btn">
+                    <i class="fas fa-gamepad c-orange"></i>
+                    <span>Games</span>
+                </a>
+                <a href="UpdateLogs.html" class="sq-holo-btn">
+                    <i class="fas fa-history c-blue"></i>
+                    <span>Logs</span>
+                </a>
+                <a href="Vot.html" class="sq-holo-btn">
+                    <i class="fas fa-vote-yea c-red"></i>
+                    <span>Votes</span>
+                </a>
+            </div>
+
+            <!-- INVITE & LOGOUT -->
+            <div style="width: 100%; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                <button id="inviteFriendBtn" class="btn-ksda-fire" style="width: 100%; padding: 12px; font-size: 11px;">
+                    <span><i class="fas fa-user-plus"></i> INVITĂ UN PRIETEN</span>
+                </button>
+            </div>
+
+<!-- Inside modal-content-v5, at the very bottom -->
+<button id="popLogoutBtn" class="btn-logout-v5">
+    <i class="fas fa-power-off"></i> Logout System
+</button>
+
+        </div>
+    </div>
+</div>
+
+
+<div id="toastBox-v2"></div>
+<div id="siteContent">
+
+<!-- CHAT BOT -->
+
+
+<!-- Navigation -->
+<div class="header-container">
+    <header>
+<a href="index.html" class="logo">
+    <img src="https://iili.io/fXvBEiB.png" alt="KSDA Logo" style="height: 40px; vertical-align: middle;">
+</a>        <nav>
+            <a href="index.html">Acasă</a>
+            <a href="#services">Servicii</a>
+            <a href="despre_noi.html">Despre Noi</a>
+            <a href="help.html">Susține-ne</a>
+            <button id="headerLoginBtn" class="login-btn-header">
+                <img id="headerUserImg" src="" class="user-avatar-small">
+                <span id="headerLoginText">LOGIN</span>
+            </button>
+        </nav>
+        <button id="menuBtn" class="hamburger">☰</button>
+        </header>
+    </div>
+
+<!-- SIDE MENU -->
+<aside id="sideMenu">
+    <div class="menu-header">
+<div class="logo menu-logo">
+    <img src="https://iili.io/fXvBEiB.png" alt="KSDA Logo" style="height: 50px;">
+</div>        <button id="closeMenu" class="closeBtn">✕</button>
+        </div>
+        <div class="menu-divider"></div>
+        <div class="menu-links">
+        <a href="index.html">Acasă</a>
+        <a href="#services">Servicii</a>
+        <a href="despre_noi.html">Despre Noi</a>
+        <a href="help.html" class="cyan-link">Susține-ne</a>
+
+<button id="mobileLoginBtn" class="side-menu-login-btn">
+        <i class="fas fa-sign-in-alt"></i> Autentificare
+    </button>
+
+    </div>
+</aside>
+
+<main class="blank-main-container">
+  
+</main>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-content">
+    <div class="logo" style="font-size: 24px; margin-bottom: 10px;">KSDA</div>
+    <div class="footer-links">
+        <a href="#">Termeni și Condiții</a>
+        <a href="#">Politica de Confidențialitate</a>
+        <a href="contact.html">Contact</a>
+        <a href="help.html">Susține-ne</a>
+    </div> 
+    <div class="made-by-wrapper">
+        <span class="made-by-text">Website made by Lost Soul/Nica emmanuel</span>
+        <a href="https://www.tiktok.com/@lost_soul_zzz" target="_blank">
+            <img src="https://iili.io/f1ddIfe.png" alt="Lost Soul Profile" class="footer-pfp-img">
+        </a>
+        <a href="https://discord.com/users/1063511180376817755" target="_blank" class="discord-link">
+            <img src="https://logo.svgcdn.com/logos/discord.svg" alt="Discord" class="discord-logo">
+        </a>
+    </div>
+    <p class="copyright">&copy; 2024 KSDAPromovari. Toate drepturile rezervate.</p>
+    </div>
+</footer>
+</div>
+
+  <script>
+    // MENIU LATERAL
+    const menuBtn = document.getElementById('menuBtn');
+    const sideMenu = document.getElementById('sideMenu');
+    const closeMenu = document.getElementById('closeMenu');
+    const menuLinks = document.querySelectorAll('#sideMenu a');
+
+    menuBtn.addEventListener('click', () => sideMenu.classList.add('open'));
+    closeMenu.addEventListener('click', () => sideMenu.classList.remove('open'));
+    menuLinks.forEach(link => link.addEventListener('click', () => sideMenu.classList.remove('open')));
+
+
+
+
+  </script>
+ <!-- FIREBASE GLOBAL LOGIC -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { 
+    getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, 
+    increment, arrayUnion, serverTimestamp, deleteField,
+    collection, query, orderBy, limit, getDocs, addDoc,where // <--- ADAUGĂ-LE PE ACESTEA
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDoH80kffNrzFAcyRqsTVdifs-whUhwH9A",
+      authDomain: "ksda-7546f.firebaseapp.com",
+      projectId: "ksda-7546f",
+      storageBucket: "ksda-7546f.firebasestorage.app",
+      messagingSenderId: "306437513808",
+      appId: "1:306437513808:web:28479810e3fdf71b32e755"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+// --- INVITE SYSTEM LOGIC ---
+
+// 1. Open Modal and Generate Link
+const inviteBtn = document.getElementById('inviteFriendBtn');
+if (inviteBtn) {
+    inviteBtn.onclick = () => {
+        if (!auth.currentUser) {
+            window.showToast("Loghează-te pentru a invita prieteni!");
+            return;
+        }
+        
+        // Generate the unique link using the current user's ID
+        const myUid = auth.currentUser.uid;
+        const link = `${window.location.origin}/index.html?ref=${myUid}`;
+        
+        // Show the link in the box
+        document.getElementById('refLinkDisplay-v2').innerText = link;
+        
+        // Close Account Modal, Open Share Modal
+        document.getElementById('accountModal').classList.remove('active');
+        document.getElementById('shareModal-v2').classList.add('active');
+    };
+}
+
+// 2. Copy to Clipboard Function
+window.copyRefLinkV2 = () => {
+    const linkText = document.getElementById('refLinkDisplay-v2').innerText;
+    
+    if (linkText.includes("...generare...")) return;
+
+    navigator.clipboard.writeText(linkText).then(() => {
+        // Show the success toast we created earlier
+        window.showToast("Link copiat cu succes! 🤝");
+        
+        // Optional: Close modal after copy
+        setTimeout(() => {
+            document.getElementById('shareModal-v2').classList.remove('active');
+        }, 1500);
+    }).catch(err => {
+        console.error('Copy failed', err);
+    });
+};
+
+
+// Add this helper function inside your main module script
+window.spawnCoinReward = (x, y) => {
+    // 1. VISUALS
+    const coin = document.createElement('div');
+    coin.className = 'fly-coin-visual';
+    coin.style.left = x + 'px';
+    coin.style.top = y + 'px';
+    
+    const text = document.createElement('div');
+    text.className = 'coin-popup-text';
+    text.innerText = "+25";
+    text.style.left = (x + 20) + 'px';
+    text.style.top = (y - 40) + 'px';
+
+    document.body.appendChild(coin);
+    document.body.appendChild(text);
+
+    // Target the user profile button
+    const target = document.getElementById('headerLoginBtn') || document.body;
+    const rect = target.getBoundingClientRect();
+
+    // Animate
+    setTimeout(() => {
+        coin.style.left = (rect.left + 20) + 'px';
+        coin.style.top = (rect.top + 20) + 'px';
+        coin.style.opacity = '0';
+        coin.style.transform = 'scale(0.5)';
+    }, 50);
+
+    // Cleanup
+    setTimeout(() => { coin.remove(); text.remove(); }, 800);
+
+    // 2. FIREBASE UPDATE (The Important Part)
+    if (auth.currentUser) {
+        const userRef = doc(db, "accounts", auth.currentUser.uid);
+        // We use the 'increment' that is already imported at the top of your script
+        updateDoc(userRef, {
+            coins: increment(25)
+        }).catch(err => console.error("Coin Error:", err));
+    }
+};
+
+
+// --- AUTH MODAL FUNCTIONS ---
+
+// 1. Function to OPEN the modal (Fixes positioning)
+window.openAuthModal = function() {
+    const modal = document.getElementById('authModal');
+    if(modal) {
+        modal.style.display = 'flex'; // This activates the CSS centering
+    }
+};
+
+// 2. Function to CLOSE the modal (Fixes X button)
+window.closeAuthModal = function() {
+    const modal = document.getElementById('authModal');
+    if(modal) {
+        modal.style.display = 'none';
+    }
+};
+
+// 3. Function to SWITCH TABS (Login <-> Signup)
+window.switchAuthTab = function(type) {
+    const loginForm = document.getElementById('formLogin');
+    const signupForm = document.getElementById('formSignup');
+    const tabLogin = document.getElementById('tabLogin');
+    const tabSignup = document.getElementById('tabSignup');
+
+    if (type === 'login') {
+        loginForm.style.display = 'block';
+        signupForm.style.display = 'none';
+        
+        // Style Active Tab
+        tabLogin.style.color = 'var(--primary)';
+        tabLogin.style.textShadow = '0 0 10px var(--primary)';
+        
+        // Style Inactive Tab
+        tabSignup.style.color = 'var(--text-muted)';
+        tabSignup.style.textShadow = 'none';
+    } else {
+        loginForm.style.display = 'none';
+        signupForm.style.display = 'block';
+        
+        // Style Active Tab
+        tabSignup.style.color = 'var(--primary)';
+        tabSignup.style.textShadow = '0 0 10px var(--primary)';
+        
+        // Style Inactive Tab
+        tabLogin.style.color = 'var(--text-muted)';
+        tabLogin.style.textShadow = 'none';
+    }
+};
+
+// 4. FIREBASE AUTH HANDLERS (Connects the inputs to Firebase)
+
+// Email Login
+window.handleEmailLogin = async function() {
+    const email = document.getElementById('loginEmail').value;
+    const pass = document.getElementById('loginPass').value;
+    
+    if(!email || !pass) {
+        alert("Te rog introdu email și parola!");
+        return;
+    }
+
+    try {
+        // Uses the Firebase auth you already imported
+        await signInWithEmailAndPassword(auth, email, pass);
+        closeAuthModal(); // Close modal on success
+    } catch (e) {
+        alert("Eroare la logare: " + e.message);
+    }
+};
+
+// Email Sign Up
+window.handleEmailSignUp = async function() {
+    const user = document.getElementById('signUser').value;
+    const email = document.getElementById('signEmail').value;
+    const pass = document.getElementById('signPass').value;
+
+    if(!user || !email || !pass) {
+        alert("Completează toate câmpurile!");
+        return;
+    }
+
+    try {
+        const result = await createUserWithEmailAndPassword(auth, email, pass);
+        // Set the username
+        await updateProfile(result.user, { displayName: user });
+        // Call your existing setup function
+        await finalizeUserSetup(result.user, user);
+        closeAuthModal();
+    } catch (e) {
+        alert("Eroare la înregistrare: " + e.message);
+    }
+};
+
+// Google Login
+window.handleGoogleLogin = async function() {
+    try {
+        const result = await signInWithPopup(auth, provider);
+        await finalizeUserSetup(result.user);
+        closeAuthModal();
+    } catch (e) {
+        console.error(e);
+        alert("Eroare Google Login");
+    }
+};
+
+// 5. ATTACH TO BUTTONS (Redirect to index.html)
+const headerBtn = document.getElementById('headerLoginBtn');
+if(headerBtn) {
+    headerBtn.onclick = () => {
+        if (!auth.currentUser) {
+            // Send logged-out users to index.html
+            window.location.href = "index.html"; 
+        } else {
+            // Logged-in users still see their dashboard
+            document.getElementById('accountModal').classList.add('active');
+        }
+    };
+}
+ 
+// Mobile side menu button redirect
+const mobileBtn = document.getElementById('mobileLoginBtn');
+if(mobileBtn) {
+    mobileBtn.onclick = () => {
+        if (!auth.currentUser) {
+            // Close side menu and redirect 
+            document.getElementById('sideMenu').classList.remove('open');
+            window.location.href = "index.html";
+        } else {
+            document.getElementById('sideMenu').classList.remove('open');
+            document.getElementById('accountModal').classList.add('active');
+        }
+    };
+}
+
+// 3. Transaction History (Already provided, but ensure it exists for rewards)
+async function logTransaction(amount, type, description, source, customUserId = null) {
+    const uid = customUserId || (auth.currentUser ? auth.currentUser.uid : null);
+    if (!uid) return;
+    try {
+        await addDoc(collection(db, "transactions"), {
+            userId: uid,
+            amount: amount,
+            type: type,
+            description: description,
+            source: source,
+            timestamp: serverTimestamp()
+        });
+    } catch (e) { console.error("Log Error:", e); }
+}
+window.logTransaction = logTransaction;
+
+    const headerLoginBtn = document.getElementById('headerLoginBtn');
+    const headerLoginText = document.getElementById('headerLoginText');
+    const headerUserImg = document.getElementById('headerUserImg');
+    const mobileLoginBtn = document.getElementById('mobileLoginBtn');
+
+    const accountModal = document.getElementById('accountModal');
+    const closeAccountPop = document.getElementById('closeAccountPop');
+    const rewardModal = document.getElementById('rewardModal');
+    const questRewardModal = document.getElementById('questRewardModal');
+
+    // --- NEW EDIT MODAL LOGIC ---
+    const editProfileModal = document.getElementById('editProfileModal');
+    const openEditProfileBtn = document.getElementById('openEditProfileBtn');
+    const closeEditProfile = document.getElementById('closeEditProfile');
+    const saveProfileBtn = document.getElementById('saveProfileBtn');
+    const editBirth = document.getElementById('editBirth');
+    const editBio = document.getElementById('editBio');
+    const editTikTok = document.getElementById('editTikTok');
+    
+    // --- NEW COSMETICS MODAL ---
+    const cosmeticsSelectModal = document.getElementById('cosmeticsSelectModal');
+    const openCosmeticsBtn = document.getElementById('openCosmeticsBtn');
+
+
+
+
+
+// ==========================================
+// KSDAPromovari — MASTER COSMETICS DATABASE
+// ==========================================
+
+window.GLOBAL_BADGES = [
+    { id: 'b_boss', text: 'BOSS DE BOSS', color: 'linear-gradient(45deg, #ffd700, #ffaa00)', price: 2000, icon: 'fa-crown' },
+    
+    // FIXED: Made lighter (Silver/Grey)
+    { id: 'b_smecher', text: 'ȘMECHER', color: 'linear-gradient(45deg, #bdc3c7, #2c3e50)', price: 1500, icon: 'fa-user-secret' },
+    
+    { id: 'b_vip', text: 'V.I.P', color: 'linear-gradient(45deg, #ff00cc, #333399)', price: 2000, icon: 'fa-gem' },
+    { id: 'b_rich', text: 'BOGAT', color: 'linear-gradient(45deg, #00ff00, #004400)', price: 1800, icon: 'fa-money-bill-wave' },
+    { id: 'b_king', text: 'REGE', color: 'linear-gradient(45deg, #e6b800, #fff)', price: 2000, icon: 'fa-chess-king' },
+    { id: 'b_queen', text: 'REGINĂ', color: 'linear-gradient(45deg, #ff69b4, #fff)', price: 2000, icon: 'fa-chess-queen' },
+    { id: 'b_toxic', text: 'TOXIC', color: 'linear-gradient(45deg, #ccff00, #000)', price: 1000, icon: 'fa-biohazard' },
+    { id: 'b_gamer', text: 'GAMER', color: 'linear-gradient(45deg, #00ffff, #ff00ff)', price: 1200, icon: 'fa-gamepad' },
+    { id: 'b_sigma', text: 'SIGMA', color: 'linear-gradient(45deg, #999, #ccc)', price: 1500, icon: 'fa-male' },
+    { id: 'b_alpha', text: 'ALPHA', color: 'linear-gradient(45deg, #ff0000, #ff4d4d)', price: 1500, icon: 'fa-wolf-pack-battalion' },
+    { id: 'b_hacker', text: 'HACKER', color: 'linear-gradient(45deg, #0f0, #000)', price: 1800, icon: 'fa-terminal' },
+    { id: 'b_dev', text: 'DEV FAKE', color: 'linear-gradient(45deg, #0000ff, #000)', price: 900, icon: 'fa-code' },
+    { id: 'b_admin', text: 'ADMIN FAKE', color: 'linear-gradient(45deg, #ff0000, #fff)', price: 1000, icon: 'fa-shield-alt' },
+    { id: 'b_mod', text: 'MOD FAKE', color: 'linear-gradient(45deg, #00ff00, #fff)', price: 1000, icon: 'fa-gavel' },
+    { id: 'b_angel', text: 'ÎNGER', color: 'linear-gradient(45deg, #fff, #ccffff)', price: 1500, icon: 'fa-feather' },
+    { id: 'b_devil', text: 'DIABOLIC', color: 'linear-gradient(45deg, #ff0000, #ff5e62)', price: 1500, icon: 'fa-fire' },
+    { id: 'b_lover', text: 'ÎNDRĂGOSTIT', color: 'linear-gradient(45deg, #ff69b4, #ff0000)', price: 1200, icon: 'fa-heart' },
+    { id: 'b_single', text: 'SINGUR', color: 'linear-gradient(45deg, #888, #ccc)', price: 800, icon: 'fa-heart-broken' },
+    { id: 'b_party', text: 'PARTY ANIMAL', color: 'linear-gradient(45deg, #ff00ff, #00ffff)', price: 1300, icon: 'fa-glass-cheers' },
+    { id: 'b_sleep', text: 'SOMNOROS', color: 'linear-gradient(45deg, #4b6cb7, #182848)', price: 800, icon: 'fa-bed' },
+    { id: 'b_gym', text: 'GYM RAT', color: 'linear-gradient(45deg, #444, #888)', price: 1100, icon: 'fa-dumbbell' },
+    { id: 'b_car', text: 'RACER', color: 'linear-gradient(45deg, #ff0000, #ffff00)', price: 1400, icon: 'fa-car' },
+    { id: 'b_music', text: 'DJ', color: 'linear-gradient(45deg, #00ff00, #0000ff)', price: 1200, icon: 'fa-headphones' },
+    { id: 'b_artist', text: 'ARTIST', color: 'linear-gradient(45deg, #ff00ff, #ffff00)', price: 1200, icon: 'fa-palette' },
+    { id: 'b_student', text: 'STUDENT', color: 'linear-gradient(45deg, #ddd, #fff)', price: 750, icon: 'fa-graduation-cap' },
+    
+    // FIXED: Made lighter (Light Brown/Cardboard)
+    { id: 'b_broke', text: 'SĂRAC', color: 'linear-gradient(45deg, #cd853f, #8b4513)', price: 750, icon: 'fa-coins' },
+    
+    { id: 'b_crypto', text: 'CRYPTO BRO', color: 'linear-gradient(45deg, #f7931a, #ffcc00)', price: 1600, icon: 'fa-bitcoin' },
+    { id: 'b_influencer', text: 'INFLUENCER', color: 'linear-gradient(45deg, #ff0055, #ffcc00)', price: 1900, icon: 'fa-camera' },
+    { id: 'b_tiktoker', text: 'TIKTOKER', color: 'linear-gradient(45deg, #e0e0e0, #00f2ea, #ff0050)', price: 1500, icon: 'fab fa-tiktok' },
+    
+    // FIXED: Made lighter (Cloudy Grey/Blue)
+    { id: 'b_sad', text: 'SAD BOY', color: 'linear-gradient(45deg, #93a5cf, #e4efe9)', price: 800, icon: 'fa-frown' },
+    
+    { id: 'b_happy', text: 'HAPPY', color: 'linear-gradient(45deg, #ffff00, #ffaa00)', price: 900, icon: 'fa-smile' },
+    { id: 'b_pro', text: 'PRO PLAYER', color: 'linear-gradient(45deg, #0000ff, #ffffff)', price: 1400, icon: 'fa-headset' },
+    { id: 'b_noob', text: 'NOOB', color: 'linear-gradient(45deg, #888, #fff)', price: 750, icon: 'fa-baby' },
+    { id: 'b_troll', text: 'TROLL', color: 'linear-gradient(45deg, #00aa00, #55ff55)', price: 1000, icon: 'fa-mask' },
+    { id: 'b_legend', text: 'LEGENDĂ', color: 'linear-gradient(45deg, #ffd700, #fff)', price: 2000, icon: 'fa-trophy' },
+    { id: 'b_ghost', text: 'GHOST', color: 'linear-gradient(45deg, #fff, #ccc)', price: 1100, icon: 'fa-ghost' },
+    { id: 'b_alien', text: 'ALIEN', color: 'linear-gradient(45deg, #00ff00, #ccffcc)', price: 1200, icon: 'fa-user-astronaut' },
+    { id: 'b_robot', text: 'ROBOT', color: 'linear-gradient(45deg, #ccc, #888)', price: 1100, icon: 'fa-robot' },
+    { id: 'b_cat', text: 'PISICĂ', color: 'linear-gradient(45deg, #ffcc99, #fff)', price: 900, icon: 'fa-cat' },
+    { id: 'b_dog', text: 'CÂINE', color: 'linear-gradient(45deg, #996633, #fff)', price: 900, icon: 'fa-dog' },
+    { id: 'b_fire', text: 'ON FIRE', color: 'linear-gradient(45deg, #ff0000, #ffff00)', price: 1300, icon: 'fa-fire-alt' },
+    { id: 'b_ice', text: 'ICE COLD', color: 'linear-gradient(45deg, #00ffff, #fff)', price: 1300, icon: 'fa-snowflake' },
+    { id: 'b_star', text: 'STAR', color: 'linear-gradient(45deg, #ffff00, #fff)', price: 1500, icon: 'fa-star' },
+    { id: 'b_moon', text: 'MOON CHILD', color: 'linear-gradient(45deg, #d3d3d3, #fff)', price: 1200, icon: 'fa-moon' },
+    { id: 'b_sun', text: 'SUNSHINE', color: 'linear-gradient(45deg, #ffaa00, #ffff00)', price: 1200, icon: 'fa-sun' },
+    { id: 'b_flower', text: 'FLOWER', color: 'linear-gradient(45deg, #ff00ff, #fff)', price: 800, icon: 'fa-flower' },
+    { id: 'b_coffee', text: 'COFFEE ADDICT', color: 'linear-gradient(45deg, #663300, #cc9900)', price: 900, icon: 'fa-coffee' },
+    { id: 'b_pizza', text: 'PIZZA LOVER', color: 'linear-gradient(45deg, #ffaa00, #ff0000)', price: 900, icon: 'fa-pizza-slice' },
+    { id: 'b_beer', text: 'BERAR', color: 'linear-gradient(45deg, #ffcc00, #fff)', price: 1000, icon: 'fa-beer' },
+    { id: 'b_420', text: '420', color: 'linear-gradient(45deg, #00ff00, #004400)', price: 1420, icon: 'fa-leaf' },
+    { id: 'b_caut', text: 'CAUT IUBITĂ', color: 'linear-gradient(45deg, #ff0066, #fff)', price: 1000, icon: 'fa-search-heart' },
+    
+    // FIXED: Made lighter red
+    { id: 'b_taken', text: 'LUAT', color: 'linear-gradient(45deg, #ff416c, #ff4b2b)', price: 1000, icon: 'fa-lock' },
+    
+    { id: 'b_ksda', text: 'KSDA FAN', color: 'linear-gradient(90deg, #29f3ff, #fff)', price: 750, icon: 'fa-heart' },
+    { id: 'b_og', text: 'O.G.', color: 'linear-gradient(45deg, #666, #fff)', price: 2000, icon: 'fa-user-tag' },
+    { id: 'b_sexy', text: 'SEXY', color: 'linear-gradient(45deg, #ff0055, #ff66aa)', price: 1600, icon: 'fa-fire' },
+    { id: 'b_lover69', text: 'LOVER 69', color: 'linear-gradient(45deg, #a4508b, #5f0a87)', price: 1690, icon: 'fa-heart' },
+    
+    // FIXED: Made lighter (Lighter Metallic Blue)
+    { id: 'b_67', text: 'STIL 67', color: 'linear-gradient(45deg, #48b1bf, #06beb6)', price: 1067, icon: 'fa-bolt' },
+    
+    { id: 'b_bombardier', text: 'BOMBARDIER', color: 'linear-gradient(45deg, #ffd700, #333)', price: 1900, icon: 'fa-bomb' },
+    { id: 'b_simp', text: 'SIMP', color: 'linear-gradient(45deg, #ffc0cb, #ff69b4)', price: 500, icon: 'fa-hand-holding-heart' },
+    { id: 'b_shaormar', text: 'SHAORMAR', color: 'linear-gradient(45deg, #ffd700, #8b4513)', price: 950, icon: 'fa-utensils' },
+    { id: 'b_pacanele', text: 'PĂCĂNELIST', color: 'linear-gradient(45deg, #00ff00, #ffd700, #ff0000)', price: 777, icon: 'fa-dice' },
+    
+    // FIXED: Made lighter (Purple to Light Purple)
+    { id: 'b_eboy', text: 'E-BOY', color: 'linear-gradient(45deg, #cc2b5e, #753a88)', price: 1300, icon: 'fa-user-ninja' },
+    
+    { id: 'b_egirl', text: 'E-GIRL', color: 'linear-gradient(45deg, #ffb6c1, #ff69b4)', price: 1300, icon: 'fa-cat' },
+    { id: 'b_vaper', text: 'VAPER', color: 'linear-gradient(45deg, #ffffff, #87ceeb)', price: 1100, icon: 'fa-smog' },
+    { id: 'b_pensionar', text: 'PENSIONAR', color: 'linear-gradient(45deg, #bdc3c7, #2c3e50)', price: 600, icon: 'fa-blind' },
+    { id: 'b_toxiclover', text: 'TOXIC LOVER', color: 'linear-gradient(45deg, #00ff00, #ff0000)', price: 1400, icon: 'fa-skull-crossbones' },
+    { id: 'b_main', text: 'MAIN CHARACTER', color: 'linear-gradient(45deg, #ff00ff, #00ffff, #ffff00)', price: 2500, icon: 'fa-star' },
+    { id: 'b_richaf', text: 'PREA BOGAT', color: 'linear-gradient(45deg, #006400, #ffd700)', price: 5000, icon: 'fa-money-bill-wave' },
+    
+    // FIXED: Made lighter (Teal/Steel)
+    { id: 'b_solo', text: 'LUP SINGURATIC', color: 'linear-gradient(45deg, #6190e8, #a7bfe8)', price: 1200, icon: 'fa-paw' },
+    
+    { id: 'b_clown', text: 'CLOWN', color: 'linear-gradient(45deg, #ff0000, #ffffff, #0000ff)', price: 400, icon: 'fa-clown-face' },
+    
+    // FIXED: Made lighter (Magenta)
+    { id: 'b_noderanja', text: 'NU DERANJA', color: 'linear-gradient(45deg, #ec008c, #fc6767)', price: 900, icon: 'fa-minus-circle' },
+    
+    { id: 'b_cartier', text: 'BOSS DE CARTIER', color: 'linear-gradient(45deg, #777, #ccc, #777)', price: 1600, icon: 'fa-building' },
+    { id: 'b_hustler', text: 'HUSTLER', color: 'linear-gradient(45deg, #555, #00ff00)', price: 1800, icon: 'fa-briefcase' },
+    { id: 'b_fraier', text: 'FRAIER', color: 'linear-gradient(45deg, #ffffff, #cccccc)', price: 100, icon: 'fa-poop' },
+    { id: 'b_god', text: 'ZEU', color: 'linear-gradient(45deg, #ffffff, #ffd700, #ffffff)', price: 3000, icon: 'fa-bolt' },
+    { id: 'b_p2w', text: 'PAY TO WIN', color: 'linear-gradient(45deg, #ffd700, #ff0000)', price: 4500, icon: 'fa-credit-card' },
+    { id: 'b_bunpat', text: 'BUN ÎN PAT', color: 'linear-gradient(45deg, #ff0055, #ff66aa)', price: 2100, icon: 'fa-bed' },
+    { id: 'b_capra', text: 'POZIȚIA CAPRĂ', color: 'linear-gradient(45deg, #800080, #ff00ff)', price: 1690, icon: 'fa-venus-mars' },
+    { id: 'b_donator', text: 'DONATOR SUPREM', color: 'linear-gradient(45deg, #00c6ff, #0072ff)', price: 3500, icon: 'fa-hand-holding-usd' },
+    { id: 'b_balena', text: 'BALENĂ', color: 'linear-gradient(45deg, #1e3c72, #2a5298)', price: 8000, icon: 'fa-fish' },
+    { id: 'b_sugar', text: 'SUGAR DADDY', color: 'linear-gradient(45deg, #ffd700, #333)', price: 5500, icon: 'fa-wallet' },
+    { id: 'b_amant', text: 'AMANT IDEAL', color: 'linear-gradient(45deg, #9d50bb, #6e48aa)', price: 1800, icon: 'fa-mask' },
+    { id: 'b_ispita', text: 'ISPITĂ', color: 'linear-gradient(45deg, #ff416c, #ff4b2b)', price: 1700, icon: 'fa-apple-alt' },
+    
+    // FIXED: Made lighter (Bright Purple)
+    { id: 'b_peste', text: 'PEȘTE', color: 'linear-gradient(45deg, #c471ed, #f64f59)', price: 2500, icon: 'fa-hat-cowboy' },
+    
+    // FIXED: Made lighter (Red/Orange)
+    { id: 'b_interlop', text: 'INTERLOP', color: 'linear-gradient(45deg, #ff6a00, #ee0979)', price: 2200, icon: 'fa-user-ninja' },
+    
+    { id: 'b_valutist', text: 'VALUTIST', color: 'linear-gradient(45deg, #11998e, #38ef7d)', price: 1900, icon: 'fa-money-bill' },
+    { id: 'b_combina', text: 'COMBINATOR', color: 'linear-gradient(45deg, #f093fb, #f5576c)', price: 1400, icon: 'fa-comments' },
+    { id: 'b_sifon', text: 'SIFON', color: 'linear-gradient(45deg, #ffffff, #00bfff)', price: 200, icon: 'fa-bullhorn' },
+    { id: 'b_norocos', text: 'LUCKY BASTARD', color: 'linear-gradient(45deg, #134e5e, #71b280)', price: 777, icon: 'fa-clover' },
+    { id: 'b_miliardar', text: 'MILIARDAR', color: 'linear-gradient(45deg, #eef2f3, #8e9eab)', price: 9999, icon: 'fa-university' },
+    { id: 'b_afk', text: 'AFK PRO', color: 'linear-gradient(45deg, #bdc3c7, #2c3e50)', price: 500, icon: 'fa-clock' },
+    
+    // FIXED: Made lighter (White/Light Grey)
+    { id: 'b_nolife', text: 'NO LIFE', color: 'linear-gradient(45deg, #E0EAFC, #CFDEF3)', price: 1200, icon: 'fa-ghost' },
+    
+    { id: 'b_vitezoman', text: 'VITEZOMAN', color: 'linear-gradient(45deg, #f85032, #e73827)', price: 1500, icon: 'fa-tachometer-alt' },
+    { id: 'b_instigator', text: 'INSTIGATOR', color: 'linear-gradient(45deg, #ff9966, #ff5e62)', price: 1100, icon: 'fa-fire' },
+    { id: 'b_vedeta', text: 'VEDETĂ', color: 'linear-gradient(45deg, #fdbb2d, #b21f1f, #1a2a6c)', price: 3000, icon: 'fa-camera-retro' }, 
+    { id: 'b_bisericos', text: 'SFINȚIȘOR', color: 'linear-gradient(45deg, #fff, #ffd700)', price: 3333, icon: 'fa-cross' },
+    { id: 'b_escroc', text: 'ESCROC SENTIMENTAL', color: 'linear-gradient(45deg, #2C3E50, #FD746C)', price: 1669, icon: 'fa-user-tie' },
+];
+ 
+
+window.GLOBAL_BANNERS = [
+     // --- BASIC / STATIC (850 – 1500) ---
+    { id: 'bub_galaxy',    name: 'GALAXY',   cssClass: 'bubble-galaxy',    price: 1300, desc: 'Spațial' },
+    { id: 'bub_toxic',     name: 'TOXIC',    cssClass: 'bubble-toxic',     price: 1200, desc: 'Radioactiv' },
+    { id: 'bub_fire',      name: 'INFERNO',  cssClass: 'bubble-fire',      price: 1150, desc: 'Clasici' },
+    { id: 'bub_midas',     name: 'MIDAS',    cssClass: 'bubble-midas',     price: 1500, desc: 'Solid Gold' },
+    { id: 'bub_void',      name: 'VOID',     cssClass: 'bubble-void',      price: 900,  desc: 'Pitch Black' },
+    { id: 'bub_comic',     name: 'CARTOON',  cssClass: 'bubble-comic',     price: 1250, desc: 'Bandă Desenată' },
+    { id: 'bub_hearts',    name: 'LOVE',     cssClass: 'bubble-hearts',    price: 950,  desc: 'Hearts Static' },
+    { id: 'bub_pixel',     name: '8-BIT',    cssClass: 'bubble-pixel',     price: 1400, desc: 'Retro Game' },
+    { id: 'bub_graffiti',  name: 'GRAFFITI', cssClass: 'bubble-graffiti',  price: 1450, desc: 'Street Art' },
+    { id: 'bub_ice',       name: 'FROZEN',   cssClass: 'bubble-ice',       price: 1100, desc: 'Înghețat' },
+    { id: 'bub_ocean',     name: 'OCEAN',    cssClass: 'bubble-ocean',     price: 1200, desc: 'Deep Blue' },
+    { id: 'bub_nature',    name: 'FOREST',   cssClass: 'bubble-nature',    price: 900,  desc: 'Eco Friendly' },
+    { id: 'bub_candy',     name: 'CANDY',    cssClass: 'bubble-candy',     price: 950,  desc: 'Dulce' },
+    { id: 'bub_military',  name: 'ARMY',     cssClass: 'bubble-military',  price: 1250, desc: 'Camo' },
+    { id: 'bub_blueprint', name: 'TECH',     cssClass: 'bubble-blueprint', price: 1350, desc: 'Schită' },
+
+    // --- ANIMATED (1500 – 2000) ---
+    { id: 'anim_chroma',   name: 'HYPER RGB',   cssClass: 'bubble-anim-chroma',   price: 2000, desc: 'Moving Rainbow' },
+    { id: 'anim_holo',     name: 'HOLOGRAPHIC', cssClass: 'bubble-anim-holo',     price: 1950, desc: 'Shiny Metal' },
+    { id: 'anim_blood',    name: 'BLOOD PULSE', cssClass: 'bubble-anim-blood',    price: 1850, desc: 'Pulsing Red' },
+    { id: 'anim_glitch',   name: 'SYS_ERROR',   cssClass: 'bubble-anim-glitch',   price: 1900, desc: 'Shaking Text' },
+    { id: 'anim_storm',    name: 'LIGHTNING',   cssClass: 'bubble-anim-storm',    price: 1800, desc: 'Flashing Storm' },
+    { id: 'anim_neon',     name: 'NEON PULSE',  cssClass: 'bubble-anim-neon',     price: 1750, desc: 'Glowing Pink' },
+    { id: 'anim_slime',    name: 'TOXIC DRIP',  cssClass: 'bubble-anim-slime',    price: 1700, desc: 'Moving Slime' },
+    { id: 'anim_disco',    name: 'DISCO',       cssClass: 'bubble-anim-disco',    price: 1900, desc: 'Epilepsy Warning' },
+    { id: 'anim_gold',     name: 'GOLD RUSH',   cssClass: 'bubble-anim-gold',     price: 2000, desc: 'Shimmering Gold' },
+    { id: 'anim_ghost',    name: 'POLTERGEIST', cssClass: 'bubble-anim-ghost',    price: 1600, desc: 'Floating Fade' },
+    { id: 'anim_love',     name: 'HEARTBEAT',   cssClass: 'bubble-anim-love',     price: 1550, desc: 'Pulsing Hearts' },
+    { id: 'anim_sparkle',  name: 'STARDUST',    cssClass: 'bubble-anim-sparkle',  price: 1700, desc: 'Twinkling' },
+    { id: 'bub_void_pulse', name: 'VOID PULSE', cssClass: 'bubble-pulse-void', price: 3500, desc: 'Efect de respirație mov' },
+    { id: 'bub_emerald', name: 'EMERALD SHARD', cssClass: 'bubble-emerald-shard', price: 3000, desc: 'Formă de cristal tăiat' },
+];
+
+
+window.GLOBAL_FRAMES = [
+ { id: 'fr_gold', name: 'GOLDEN GUARDIAN', price: 2000, img: 'https://i.ibb.co/5xBTcv2f/c2feac12-d32a-48f7-8514-eee47faf2e7e-removalai-preview.png' },
+    { id: 'fr_red', name: 'CRIMSON CORE', price: 1400, img: 'https://i.ibb.co/5hmPh8LP/db5713a5-198a-4634-9f18-21026b81b198-removalai-preview.png' },
+
+    { id: 'fr_neon_purp', name: 'NEON VIOLET', price: 1800, img: 'https://i.ibb.co/20QskpYb/e4277974-c1b1-4414-b825-4c0c0c6ccb8b-removalai-preview.png' },
+    { id: 'fr_dark_aura', name: 'DARK AURA', price: 1900, img: 'https://i.ibb.co/kgSSg8hW/37b47041-b7ef-437a-a264-031171530c1e-removalai-preview.png' },
+    { id: 'fr_mystic', name: 'MYSTIC CIRCLE', price: 1500, img: 'https://i.ibb.co/DHzYt8nd/71f83e00-005a-461a-824a-db1e29e43e9c-removalai-preview.png' },
+    { id: 'fr_fire_ring', name: 'RING OF FIRE', price: 1850, img: 'https://i.ibb.co/H5DZj1s/34d1af1c-6476-4a3e-8efd-0232c94b3278-removalai-preview.png' },
+    { id: 'fr_royal_g', name: 'ROYAL GOLD', price: 2100, img: 'https://i.ibb.co/r2GNxXXz/c125fcf5-4433-4436-9fb1-8d5860204293-removalai-preview.png' },
+    { id: 'fr_frost', name: 'FROSTBITE', price: 1750, img: 'https://i.ibb.co/398WGGqJ/8aed2529-6551-449d-b7af-6cf96ae067fa-removalai-preview.png' },
+    { id: 'fr_nature', name: 'NATURE SPIRIT', price: 1450, img: 'https://i.ibb.co/1thwZB8P/b7360758-db43-49c8-a3a6-00b3583f1bf5-removalai-preview.png' },
+    { id: 'fr_void', name: 'VOID WALKER', price: 2200, img: 'https://i.ibb.co/bj7YrZnW/81555995-ad54-4259-87ba-90abe6f689c0-removalai-preview.png' },
+    { id: 'fr_plasma', name: 'PLASMA ARC', price: 1950, img: 'https://i.ibb.co/nMh3fG5Y/d9fe1206-dac5-494a-94bc-da8cc7ab923a-removalai-preview.png' },
+    { id: 'fr_sun_god', name: 'SUN GOD', price: 2500, img: 'https://i.ibb.co/ks025DfV/97d743be-cad5-4a3d-ad58-33cb1ed6e200-removalai-preview.png' },
+    { id: 'fr_toxic', name: 'TOXIC WASTE', price: 1550, img: 'https://i.ibb.co/nMYYr8ZB/ec739473-cde1-4ced-b48c-b118141735e9-removalai-preview.png' },
+    { id: 'fr_angel', name: 'HOLY HALO', price: 2050, img: 'https://i.ibb.co/sxY83fg/905457b0-80b0-4304-bed4-2d88781faf29-removalai-preview.png' },
+    { id: 'fr_demon', name: 'DEMON HORNS', price: 2400, img: 'https://i.ibb.co/mrgzLPff/136567cc-46ed-4849-ad44-01d07290dbfd-removalai-preview.png' },
+    { id: 'fr_love', name: 'LOVE HEARTS', price: 1000, img: 'https://i.ibb.co/KPXxCnC/2076f0c9-aac4-431c-b708-d99ad87b4bf3-removalai-preview.png' },
+    { id: 'fr_diamond', name: 'DIAMOND', price: 2300, img: 'https://i.ibb.co/ks6v3qHr/169811e4-7ab8-44dd-bb0e-83009093dcd9-removalai-preview.png' },
+    { id: 'fr_mech', name: 'MECHA', price: 1600, img: 'https://i.ibb.co/Vpx0fnbP/3decd472-3a37-4d3c-95fa-f9fefab8ee78-removalai-preview.png' },
+    { id: 'fr_glitch', name: 'GLITCH ERROR', price: 1850, img: 'https://i.ibb.co/fzWVhtv2/2bffa166-2107-4bef-b744-3cc7c8e04593-removalai-preview.png' },
+    { id: 'fr_vintage', name: 'VINTAGE', price: 850, img: 'https://i.ibb.co/0ymk5P5K/060318de-c831-456c-8bd5-48361a2910eb-removalai-preview.png' },
+    { id: 'fr_galaxy', name: 'GALAXY', price: 2250, img: 'https://i.ibb.co/qL909PLy/2640f988-a425-4589-ba5a-1f780d24916a-removalai-preview.png' },
+
+];
+
+window.GLOBAL_TEXTS = [
+// --- ELEMENTAL (1,000 - 2,500) ---
+    { id: 't_fire_1', name: 'FLACĂRĂ VIE', cssClass: 't-fire', price: 2200 },
+    { id: 't_ice_1', name: 'GHEAȚĂ ETERNĂ', cssClass: 't-ice', price: 2100 },
+    { id: 't_toxic_1', name: 'ACID TOXIC', cssClass: 't-toxic', price: 1800 },
+    { id: 't_water_1', name: 'VALURI OCEAN', cssClass: 't-water', price: 1500 },
+    { id: 't_storm_1', name: 'FULGER', cssClass: 't-storm', price: 2500 },
+    { id: 't_magma', name: 'MAGMA FLOW', cssClass: 'bubble-fire', price: 2400 },
+    { id: 't_poison', name: 'POISON DART', cssClass: 'bubble-toxic', price: 1900 },
+    { id: 't_earth', name: 'TERRA', cssClass: 't-nature', price: 1200 },
+    { id: 't_wind', name: 'VÂNT DE EST', cssClass: 't-ghost', price: 1300 },
+    { id: 't_plasma', name: 'PLASMA ARC', cssClass: 'bubble-anim-storm', price: 2500 },
+
+    // --- CYBER & TECH (1,500 - 3,500) ---
+    { id: 't_glitch_1', name: 'ERROR SYSTEM', cssClass: 't-glitch', price: 3000 },
+    { id: 't_matrix_1', name: 'NEO MATRIX', cssClass: 't-matrix', price: 2800 },
+    { id: 't_neon_p', name: 'CYBER PINK', cssClass: 't-neon-pink', price: 2000 },
+    { id: 't_neon_b', name: 'CYBER BLUE', cssClass: 't-neon-blue', price: 2000 },
+    { id: 't_over', name: 'OVERLOAD', cssClass: 't-overload', price: 3500 },
+    { id: 't_hacker', name: 'MAIN_FRAME', cssClass: 'bubble-matrix', price: 3200 },
+    { id: 't_code', name: 'SOURCE CODE', cssClass: 'bubble-anim-glitch', price: 3400 },
+    { id: 't_synth', name: 'SYNTHWAVE', cssClass: 'bubble-sunset', price: 1800 },
+    { id: 't_binary', name: 'BINARY', cssClass: 't-matrix', price: 1500 },
+    { id: 't_circuit', name: 'CIRCUIT', cssClass: 'bubble-blueprint', price: 1700 },
+
+    // --- LUXURY (3,000 - 5,000) ---
+    { id: 't_gold_1', name: 'AUR PUR', cssClass: 't-gold-anim', price: 4500 },
+    { id: 't_diamond_1', name: 'DIAMANT', cssClass: 't-diamond', price: 5000 },
+    { id: 't_ruby_1', name: 'RUBIN', cssClass: 't-ruby', price: 4200 },
+    { id: 't_plat_1', name: 'PLATINĂ', cssClass: 't-platinum', price: 3800 },
+    { id: 't_royal_1', name: 'REGEASCĂ', cssClass: 'bubble-royal', price: 4800 },
+    { id: 't_emerald', name: 'SMARALD', cssClass: 'bubble-anim-slime', price: 3100 },
+    { id: 't_sapphire', name: 'SAFIRE', cssClass: 't-neon-blue', price: 3300 },
+    { id: 't_onyx', name: 'ONYX SHINE', cssClass: 'bubble-void', price: 3000 },
+    { id: 't_luxury_v2', name: 'ELITE GOLD', cssClass: 'bubble-gold', price: 4700 },
+    { id: 't_pearl', name: 'PERLĂ', cssClass: 't-ghost', price: 3200 },
+
+    // --- COSMIC (2,500 - 4,500) ---
+    { id: 't_neb_1', name: 'NEBULA', cssClass: 't-nebula', price: 4000 },
+    { id: 't_gal_1', name: 'GALAXY', cssClass: 't-galaxy', price: 4500 },
+    { id: 't_void_1', name: 'THE VOID', cssClass: 't-void', price: 3500 },
+    { id: 't_pulsar', name: 'PULSAR', cssClass: 'bubble-anim-sparkle', price: 3800 },
+    { id: 't_starlight', name: 'STARLIGHT', cssClass: 'text-ice', price: 2600 },
+    { id: 't_eclipse', name: 'ECLIPSE', cssClass: 'bubble-void', price: 2900 },
+    { id: 't_comet', name: 'COMETĂ', cssClass: 'bubble-anim-holo', price: 3700 },
+    { id: 't_supernova', name: 'SUPERNOVA', cssClass: 'bubble-anim-chroma', price: 4400 },
+    { id: 't_constel', name: 'ORION', cssClass: 'bubble-galaxy', price: 2500 },
+    { id: 't_martian', name: 'MARTE', cssClass: 'bubble-blood', price: 2700 },
+
+    // --- DARK & UNIQUE (1,500 - 4,000) ---
+    { id: 't_blood_1', name: 'SÂNGE', cssClass: 't-blood', price: 3000 },
+    { id: 't_ghost_1', name: 'SPIRIT', cssClass: 't-ghost', price: 2000 },
+    { id: 't_shadow', name: 'UMBRĂ', cssClass: 'bubble-void', price: 1500 },
+    { id: 't_curse', name: 'BLESTEM', cssClass: 't-toxic', price: 2800 },
+    { id: 't_vampire', name: 'DRACULA', cssClass: 'bubble-blood', price: 3200 },
+    { id: 't_demon', name: 'DEMONIC', cssClass: 'bubble-fire', price: 3500 },
+    { id: 't_reaper', name: 'MOARTEA', cssClass: 't-void', price: 4000 },
+    { id: 't_zombie', name: 'UNDEAD', cssClass: 'bubble-toxic', price: 1800 },
+    { id: 't_phantom', name: 'FANTOMĂ', cssClass: 'bubble-anim-ghost', price: 2500 },
+    { id: 't_skeleton', name: 'OSOS', cssClass: 't-ghost', price: 1600 },
+
+    // --- FUN & VIBRANT (1,000 - 3,000) ---
+    { id: 't_rain_1', name: 'RAINBOW', cssClass: 'text-rainbow', price: 2500 },
+    { id: 't_candy_1', name: 'CANDY', cssClass: 'bubble-candy', price: 1200 },
+    { id: 't_love_1', name: 'LOVE', cssClass: 'bubble-hearts', price: 1500 },
+    { id: 't_disco', name: 'DISCO', cssClass: 'bubble-anim-disco', price: 3000 },
+    { id: 't_graff', name: 'GRAFFITI', cssClass: 'bubble-graffiti', price: 1800 },
+    { id: 't_comic', name: 'CARTOON', cssClass: 'bubble-comic', price: 1400 },
+    { id: 't_pixel', name: '8-BIT', cssClass: 'bubble-pixel', price: 1600 },
+    { id: 't_bubble', name: 'GUMĂ', cssClass: 'bubble-anim-love', price: 1100 },
+    { id: 't_lemon', name: 'LĂMÂIE', cssClass: 't-fire', price: 1000 },
+    { id: 't_mint', name: 'MENTĂ', cssClass: 't-toxic', price: 1000 },
+
+    // --- ELITE SERIES (4,000 - 5,000) ---
+    { id: 't_hero', name: 'SUPER EROU', cssClass: 'bubble-anim-chroma', price: 4500 },
+    { id: 't_villain', name: 'ANTI EROU', cssClass: 'bubble-anim-blood', price: 4500 },
+    { id: 't_god', name: 'ZEU', cssClass: 'bubble-anim-gold', price: 5000 },
+    { id: 't_angel', name: 'ÎNGER', cssClass: 'bubble-anim-sparkle', price: 4800 },
+    { id: 't_hologram', name: 'HOLOGRAMĂ', cssClass: 'bubble-anim-holo', price: 4200 },
+    { id: 't_storm_god', name: 'THOR', cssClass: 'bubble-anim-storm', price: 4900 },
+    { id: 't_cyber_king', name: 'NEO-REGE', cssClass: 't-overload', price: 4100 },
+    { id: 't_void_king', name: 'REGE VOID', cssClass: 'bubble-void', price: 4300 },
+    { id: 't_infinity', name: 'INFINIT', cssClass: 'text-rainbow', price: 5000 },
+    { id: 't_ultimate', name: 'ULTIMAT', cssClass: 'bubble-anim-gold', price: 5000 },
+
+    // --- BUDGET VARIATIONS (1,000 - 1,500) ---
+    { id: 't_blue_p', name: 'BLUE PULSE', cssClass: 't-neon-blue', price: 1500 },
+    { id: 't_red_p', name: 'RED PULSE', cssClass: 't-fire', price: 1500 },
+    { id: 't_green_p', name: 'GREEN PULSE', cssClass: 't-toxic', price: 1500 },
+    { id: 't_simple_g', name: 'AUR IEFTIN', cssClass: 't-gold-anim', price: 1400 },
+    { id: 't_simple_s', name: 'ARGINT', cssClass: 't-platinum', price: 1200 },
+    { id: 't_carbon', name: 'CARBON', cssClass: 'bubble-void', price: 1100 },
+    { id: 't_zebra', name: 'ZEBRA', cssClass: 'bubble-comic', price: 1000 },
+    { id: 't_tiger', name: 'TIGRU', cssClass: 't-fire', price: 1200 },
+    { id: 't_army', name: 'MILITAR', cssClass: 'bubble-military', price: 1300 },
+    { id: 't_lava', name: 'LAVĂ', cssClass: 'bubble-fire', price: 1400 },
+
+    { id: 't_hacker', name: 'MATRIX CODE', cssClass: 't-hacker-green', price: 2500 },
+    { id: 't_lava', name: 'LAVA FLOW', cssClass: 't-lava-flow', price: 4000 },
+    { id: 't_ice', name: 'DIAMOND ICE', cssClass: 't-diamond-ice', price: 3500 },
+];
+// --- CATEGORII NOI ---
+window.GLOBAL_SOUNDS = [
+    { id: 'snd_welcome_1', name: 'CYBER LOGIN', price: 1500, url: 'link_catre_sunet.mp3' },
+];
+
+window.GLOBAL_PROFILE_BANNERS = [
+    { id: 'p_banner_neon', name: 'NEON NIGHTS', price: 3000, img: 'link_catre_imagine.jpg' },
+];
+
+console.log("💎 Cosmetics Master Database Loaded Successfully.");
+
+
+
+// --- CONFIGURAȚIA GLOBALĂ A CATEGORIILOR ---
+// Dacă adaugi o categorie aici, ea apare pe toate cele 30+ pagini instant
+window.COSMETIC_CATEGORIES = [
+    { id: 'badges', label: 'BADGES', icon: 'fa-certificate', db: window.GLOBAL_BADGES },
+    { id: 'frames', label: 'RAME', icon: 'fa-crop-alt', db: window.GLOBAL_FRAMES },
+    { id: 'banners', label: 'BANNERE', icon: 'fa-image', db: window.GLOBAL_BANNERS },
+    { id: 'texts', label: 'TEXT', icon: 'fa-font', db: window.GLOBAL_TEXTS },
+    { id: 'sounds', label: 'SOUNDS', icon: 'fa-volume-up', db: window.GLOBAL_SOUNDS },
+    { id: 'profile_banners', label: 'BG PROFIL', icon: 'fa-id-card', db: window.GLOBAL_PROFILE_BANNERS }
+];
+
+// Găsește orice obiect după ID (foarte util pe paginile de profil/wall)
+window.getCosmetic = (id) => window.ALL_COSMETICS.find(item => item.id === id);
+
+// Rezolvă problema cu cele 30+ pagini:
+// Le spune paginilor vechi unde sunt datele noi fără să schimbi codul lor intern
+window.initOldDatabases = () => {
+    window.BADGES_DB = window.GLOBAL_BADGES;
+    window.BANNERS_DB = window.GLOBAL_BANNERS;
+    window.FRAMES_DB = window.GLOBAL_FRAMES;
+    window.TEXTS_DB = window.GLOBAL_TEXTS;
+};
+
+
+
+// FUNCȚIA MAGICĂ: Desenează butoanele de categorii în modalul de selecție
+window.renderGlobalCategories = (containerId) => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    // Generăm HTML-ul pentru butoane folosind lista de mai sus
+    container.innerHTML = window.COSMETIC_CATEGORIES.map(cat => `
+        <div class="select-btn-v6" onclick="openInventory('${cat.id}')">
+            <i class="fas ${cat.icon}"></i>
+            <span>${cat.label}</span>
+        </div>
+    `).join('');
+};
+
+window.equipText = async (id, cssClass) => {
+    try {
+        await updateDoc(doc(db, "accounts", auth.currentUser.uid), { 
+            equippedText: { id, cssClass } 
+        });
+        alert("Text echipat!");
+        window.openInventory('texts');
+    } catch(e) { alert("Eroare: " + e.message); }
+};
+
+    async function getIP() {
+        try {
+            const res = await fetch('https://api.ipify.org?format=json');
+            const data = await res.json();
+            return data.ip;
+        } catch(e) { return "Necunoscut"; }
+    }
+
+
+
+
+
+// 1. GLOBAL BAN CHECK (OPTIMIZED)
+    async function checkGlobalBan() {
+        // Check local storage first to save Firebase Reads
+        if (sessionStorage.getItem('isBanned') === 'false') {
+            return; // User is safe, do not read from database
+        }
+
+        try {
+            const res = await fetch('https://api.ipify.org?format=json');
+            const data = await res.json();
+            const userIP = data.ip;
+
+            // Check Firebase
+            const banRef = doc(db, "banned_ips", userIP);
+            const banSnap = await getDoc(banRef);
+
+            if (banSnap.exists()) {
+                // User is banned
+                const banData = banSnap.data();
+                sessionStorage.setItem('isBanned', 'true'); // Remember status
+                
+                if(document.getElementById('siteContent')) document.getElementById('siteContent').style.display = 'none';
+                if(document.getElementById('bannedOverlay')) {
+                    document.getElementById('bannedOverlay').style.display = 'flex';
+                    document.getElementById('globalBanReason').innerText = banData.reason || "Nespecificat";
+                    document.getElementById('globalBanIp').innerText = userIP;
+                }
+                document.body.style.overflow = 'hidden';
+            } else {
+                // User is NOT banned - save this so we don't pay for reads again this session
+                sessionStorage.setItem('isBanned', 'false');
+            }
+        } catch (e) {
+            console.error("Eroare verificare ban:", e);
+        }
+    }
+    checkGlobalBan();
+
+    // LOGICA QUEST KEVIN BOT (15 MESAJE)
+    window.trackKevinQuest = async () => {
+        if (!auth.currentUser) return;
+        const userRef = doc(db, "accounts", auth.currentUser.uid);
+        
+        try {
+            // Pas 1: Incrementează numărul de mesaje în baza de date
+            await updateDoc(userRef, { kevinMessagesToday: increment(1) });
+            
+            // Pas 2: Verifică dacă a ajuns la 15 și dacă quest-ul nu a fost deja completat azi
+            const snap = await getDoc(userRef);
+            if (snap.exists()) {
+                const data = snap.data();
+                const count = data.kevinMessagesToday || 0;
+                const completed = data.completedQuests || [];
+                
+                if (count === 15 && !completed.includes('kevin_talk_15')) {
+                    // Pas 3: Oferă recompensa (350 monede)
+                    await updateDoc(userRef, {
+                        coins: increment(350),
+                        completedQuests: arrayUnion('kevin_talk_15')
+                    });
+                    
+                    // Pas 4: Afișează Pop-up-ul cu noul stil (Yellow border + Cyan btn)
+                    questRewardModal.classList.add('active');
+                }
+            }
+        } catch(e) { console.error("Eroare tracking quest:", e); }
+    };
+
+    // --- 2. ONLINE STATUS TRACKING (THROTTLED) ---
+    let lastStatusUpdate = 0;
+    const UPDATE_INTERVAL = 3 * 60 * 1000; // Update only every 3 minutes
+
+    async function updateOnlineStatus() {
+        if (!auth.currentUser) return;
+        const now = Date.now();
+        
+        if (now - lastStatusUpdate > UPDATE_INTERVAL) {
+            lastStatusUpdate = now;
+            try {
+                await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
+                    isOnline: true,
+                    lastActive: serverTimestamp()
+                });
+                console.log("Status Online Actualizat");
+            } catch(e) { console.error("Status update error", e); }
+        }
+    }
+
+    // Attach listeners
+    window.addEventListener('scroll', updateOnlineStatus);
+    window.addEventListener('click', updateOnlineStatus);
+    window.addEventListener('mousemove', updateOnlineStatus);
+
+    // --- LOGIN LOGIC ---
+    async function handleLoginFlow() {
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const user = result.user;
+            const ip = await getIP();
+            const userRef = doc(db, "accounts", user.uid);
+            const snap = await getDoc(userRef);
+
+            if(!snap.exists()) {
+                await setDoc(userRef, {
+                    uid: user.uid,
+                    username: user.displayName,
+                    email: user.email,
+                    image: user.photoURL,
+                    coins: 250,
+                    streak: 0,
+                    ip: ip,
+                    joinedAt: new Date(),
+                    kevinMessagesToday: 0,
+                    completedQuests: []
+                });
+                rewardModal.classList.add('active');
+            } else {
+                await setDoc(userRef, { ip: ip, image: user.photoURL }, { merge: true });
+            }
+            updateOnlineStatus(); // Force update on login
+        } catch(e) { console.error(e); }
+    }
+
+// Search for this block further down and replace it too:
+headerLoginBtn.onclick = () => {
+    if (!auth.currentUser) {
+        window.location.href = "index.html";
+    } else {
+        accountModal.classList.add('active');
+    }
+}; 
+
+if(mobileLoginBtn) {
+    mobileLoginBtn.onclick = () => {
+        if (!auth.currentUser) {
+            sideMenu.classList.remove('open'); 
+            window.location.href = "index.html";
+        } else {
+            sideMenu.classList.remove('open');
+            accountModal.classList.add('active');
+        }
+    };
+}
+    closeAccountPop.onclick = () => accountModal.classList.remove('active');
+    document.getElementById('popLogoutBtn').onclick = () => {
+        signOut(auth).then(() => accountModal.classList.remove('active'));
+    };
+
+    // --- COSMETICS LOGIC ---
+    openCosmeticsBtn.onclick = () => {
+        accountModal.classList.remove('active');
+        cosmeticsSelectModal.classList.add('active');
+    }
+
+window.openInventory = async (type = 'badges') => {
+    // 1. Generăm butoanele de sus (din Master)
+    window.renderGlobalCategories('masterCategoryGrid');
+
+    const list = document.getElementById('inventoryList');
+    const actionContainer = document.getElementById('inventoryActions');
+    list.innerHTML = '<div style="color:#aaa;">Se încarcă...</div>';
+    actionContainer.innerHTML = ''; 
+
+    // 2. Luăm datele utilizatorului și baza de date corectă din Master
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const data = userSnap.data();
+    
+    // Găsim configurația categoriei în Master
+    const catConfig = window.COSMETIC_CATEGORIES.find(c => c.id === type);
+    if(!catConfig) { list.innerHTML = "Categorie invalidă."; return; }
+
+    // Listele de ID-uri deținute de user (ex: ownedBadges, ownedFrames, etc)
+    // Mapăm tipul la câmpul din Firebase (badges -> ownedBadges)
+    const ownedField = "owned" + type.charAt(0).toUpperCase() + type.slice(1);
+    const equippedField = "equipped" + type.charAt(0).toUpperCase() + type.slice(1).slice(0,-1); // badges -> equippedBadge
+    
+    const ownedIds = data[ownedField] || [];
+    const equippedId = data[equippedField]?.id || null;
+
+    list.innerHTML = '';
+
+    if(ownedIds.length === 0) {
+        list.innerHTML = `<p style="width:100%; text-align:center; color:#aaa;">Nu ai obiecte în categoria ${catConfig.label}.</p>`;
+        return;
+    }
+
+    // 3. Randare Universală
+    ownedIds.forEach(id => {
+        const item = catConfig.db.find(i => i.id === id);
+        if(!item) return;
+
+        const isEquipped = (id === equippedId);
+        const card = document.createElement('div');
+        card.className = 'shop-badge-item';
+
+        // Logica vizuală în funcție de tip
+        let visualHtml = "";
+        if(type === 'badges') {
+            visualHtml = `<span class="shop-badge-preview ${item.animClass || ''}" style="background:${item.color}; color:#000; border:none; box-shadow:0 0 10px ${item.color};"><i class="fas ${item.icon}"></i> ${item.text}</span>`;
+        } else if(type === 'frames') {
+            const scale = item.scale || 1.45;
+            visualHtml = `<div class="frame-preview-box"><img src="${data.image || auth.currentUser.photoURL}" class="frame-preview-user"><img src="${item.img}" class="frame-preview-img" style="width:${scale*100}%; height:${scale*100}%;"></div>`;
+        } else if(type === 'banners') {
+            visualHtml = `<div class="${item.cssClass}" style="padding:5px; border-radius:5px; font-size:10px; width:100%;">PREVIEW</div><div style="font-size:11px; margin-top:5px;">${item.name}</div>`;
+        } else if(type === 'texts') {
+            visualHtml = `<div class="${item.cssClass}" style="font-size:14px; font-weight:800; margin-bottom:10px;">${data.username}</div>`;
+        } else if(type === 'sounds') {
+            visualHtml = `<i class="fas fa-volume-up" style="font-size:24px; color:var(--primary);"></i><div style="font-size:11px;">${item.name}</div>`;
+        } else if(type === 'profile_banners') {
+            visualHtml = `<img src="${item.img}" style="width:100%; height:40px; object-fit:cover; border-radius:5px;"><div style="font-size:11px;">${item.name}</div>`;
+        }
+
+        card.innerHTML = `
+            ${visualHtml}
+            ${isEquipped 
+                ? `<button class="equip-btn" style="background:#555; cursor:default;">ECHIPAT</button>`
+                : `<button class="equip-btn" onclick="universalEquip('${type}', '${item.id}')">ECHIPEAZĂ</button>`
+            }
+        `;
+        list.appendChild(card);
+    });
+
+    // Buton de dezactivare
+    if(equippedId) {
+        const unequipBtn = document.createElement('button');
+        unequipBtn.className = 'unequip-all-btn';
+        unequipBtn.innerHTML = `<i class="fas fa-ban"></i> SCOATE ${type.toUpperCase().slice(0,-1)}`;
+        unequipBtn.onclick = () => universalEquip(type, null);
+        actionContainer.appendChild(unequipBtn);
+    }
+};
+
+// FUNCȚIA DE ECHIPARE UNIVERSALĂ (Pune-o sub openInventory)
+window.universalEquip = async (type, itemId) => {
+    if(!auth.currentUser) return;
+    const equippedField = "equipped" + type.charAt(0).toUpperCase() + type.slice(1).slice(0,-1);
+    
+    let updateData = {};
+    if(itemId === null) {
+        updateData[equippedField] = null;
+    } else {
+        const item = window.getCosmetic(itemId);
+        updateData[equippedField] = item;
+    }
+
+    try {
+        await updateDoc(doc(db, "accounts", auth.currentUser.uid), updateData);
+        window.openInventory(type);
+    } catch(e) { console.error(e); }
+};
+
+window.equipFrame = async (id, imgUrl, scale = 1.45) => {
+        try {
+            await updateDoc(doc(db, "accounts", auth.currentUser.uid), { equippedFrame: { id, img: imgUrl, scale: scale } });
+            window.openInventory('frames');
+        } catch(e) { alert("Eroare: " + e.message); }
+    };
+
+    // Add this new function for Equipping Banners
+    window.equipBanner = async (id, cssClass) => {
+        try {
+            await updateDoc(doc(db, "accounts", auth.currentUser.uid), { 
+                equippedBanner: { id, cssClass } 
+            });
+            window.openInventory('banners');
+        } catch(e) { alert("Eroare: " + e.message); }
+    };
+    window.equipBadge = async (id, text, color, icon) => {
+        try {
+            await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
+                equippedBadge: { id, text, color, icon }
+            });
+            window.openInventory(); 
+        } catch(e) { alert("Eroare: " + e.message); }
+    };
+
+    // --- EDIT PROFILE HANDLERS ---
+    openEditProfileBtn.onclick = async () => {
+        accountModal.classList.remove('active'); 
+        editProfileModal.classList.add('active'); 
+        
+        if(auth.currentUser) {
+            const snap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+            if(snap.exists()) {
+                const data = snap.data();
+                editBirth.value = data.birthDate || "";
+                editBio.value = data.bio || "";
+                editTikTok.value = data.tiktokLink || "";
+            }
+        }
+    };
+
+    closeEditProfile.onclick = () => {
+        editProfileModal.classList.remove('active');
+        accountModal.classList.add('active'); 
+    };
+
+    saveProfileBtn.onclick = async () => {
+        if(!auth.currentUser) return;
+        
+        const birth = editBirth.value;
+        const bio = editBio.value.trim();
+        const tiktok = editTikTok.value.trim();
+
+        try {
+            await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
+                birthDate: birth,
+                bio: bio,
+                tiktokLink: tiktok
+            });
+            alert("Profil salvat cu succes!");
+            editProfileModal.classList.remove('active');
+            accountModal.classList.add('active');
+        } catch(e) {
+            alert("Eroare la salvare: " + e.message);
+        }
+    };
+
+
+
+onAuthStateChanged(auth, user => {
+    if (user) {
+        const userRef = doc(db, "accounts", user.uid);
+
+        // 1. UI Updates for Logged In User
+        headerLoginText.innerText = "ACCOUNT";
+        headerUserImg.src = user.photoURL;
+        headerUserImg.style.display = "block";
+        
+        if(mobileLoginBtn) {
+            mobileLoginBtn.innerHTML = '<i class="fas fa-user-circle"></i> Cont';
+        }
+
+
+
+        // 2. Listen for Global Metadata (Notifications)
+        onSnapshot(doc(db, "site_metadata", "counters"), (metaSnap) => {
+            const totalGlobal = metaSnap.data()?.totalNews || 0;
+
+            // 3. Listen for User Data LIVE
+            onSnapshot(userRef, async (uSnap) => {
+                if(!uSnap.exists()) return;
+                const data = uSnap.data();
+                
+                // --- A. QUEST RESET & STREAK LOSS LOGIC ---
+                if (typeof resetUserQuests === "function") {
+                    await resetUserQuests(userRef, data);
+                }
+
+                // --- B. 6/6 QUEST COMPLETION REWARD (THE FIRE MODAL) ---
+                const activeIds = data.activeDailyQuests || [];
+                const completedIds = data.completedQuests || [];
+                const finishedCount = activeIds.filter(id => completedIds.includes(id)).length;
+
+                // Check if all 6 quests are done and not already awarded for this block
+                if (activeIds.length === 6 && finishedCount === 6 && data.lastResetBlock !== "FORCE_RESET") {
+                    if (data.lastStreakAwardedBlock !== data.lastResetBlock) {
+                        if (!isAwardingInProgress) {
+                            isAwardingInProgress = true;
+
+                            const oldStr = data.streak || 0;
+                            
+                            // Update Firebase: Give +1 Streak and +1 Diamond
+                            await updateDoc(userRef, {
+                                streak: increment(1),
+                                diamonds: increment(1),
+                                lastStreakAwardedBlock: data.lastResetBlock
+                            });
+
+                            // Show the FIRE Modal
+                            const rewardModal = document.getElementById('streakRewardModal');
+                            if (rewardModal) {
+                                document.getElementById('streakOld').innerText = oldStr;
+                                document.getElementById('streakNew').innerText = oldStr + 1;
+                                rewardModal.classList.add('active');
+                            }
+                            
+                            setTimeout(() => { isAwardingInProgress = false; }, 3000);
+                        }
+                    }
+                }
+
+                // --- C. AVATAR & FRAME LOGIC ---
+                document.getElementById('popUserImg').src = data.image || user.photoURL;
+                const popFrame = document.getElementById('popUserFrame');
+                if(popFrame) {
+                    if (data.equippedFrame && data.equippedFrame.img) {
+                        popFrame.src = data.equippedFrame.img;
+                        popFrame.style.display = "block";
+                        const scale = data.equippedFrame.scale || 1.45;
+                        const sizePct = scale * 100;
+                        popFrame.style.width = `${sizePct}%`;
+                        popFrame.style.height = `${sizePct}%`;
+                    } else {
+                        popFrame.style.display = "none";
+                    }
+                }
+
+                // --- D. NAME CUSTOMIZATION ---
+                let rawName = data.username || user.displayName;
+                if(user.email === 'nicaemmanuel433qe@gmail.com') rawName = "Lost Soul";
+
+                const popNameEl = document.getElementById('popUserName');
+                if (data.equippedText && data.equippedText.cssClass) {
+                    popNameEl.innerHTML = `<span class="${data.equippedText.cssClass}">${rawName}</span>`;
+                } else {
+                    popNameEl.innerText = rawName;
+                }
+
+                // --- E. STACKED BADGES (Staff + Cosmetic) ---
+                const popBadgeBox = document.getElementById('popUserBadges');
+                if(popBadgeBox) {
+                    let staffHtml = "";
+                    const email = data.email || "";
+                    
+                    if(email === 'nicaemmanuel433qe@gmail.com') staffHtml = `<div><span class="owner-badge"><i class="fas fa-crown"></i> WEBSITE OWNER</span></div>`;
+                    else if(email === 'kevin.trinity2020@gmail.com') staffHtml = `<div><span class="admin-badge">ADMIN</span></div>`;
+                    else if(['mary.bughi@gmail.com', 'emmanuel.nica83@gmail.com'].includes(email)) staffHtml = `<div><span class="mod-badge">MODERATOR</span></div>`;
+                    else if(['norbyims@gmail.com', 'promovarideafaceri7@gmail.com', 'violetaflorentinadima@gmail.com', 'biggycelmic.115@gmail.com'].includes(email)) staffHtml = `<div><span class="helper-badge">HELPER</span></div>`;
+                    
+                    let cosmeticHtml = "";
+                    if(data.equippedBadge) {
+                        cosmeticHtml = `<div style="margin-top:5px;"><span class="cosmetic-badge" style="background:${data.equippedBadge.color}; color:#000; border:none; box-shadow:0 0 5px ${data.equippedBadge.color};"><i class="fas ${data.equippedBadge.icon}"></i> ${data.equippedBadge.text}</span></div>`;
+                    }
+                    popBadgeBox.innerHTML = staffHtml + cosmeticHtml;
+                }
+
+                // --- F. DUAL CURRENCY & STREAK UI ---
+                document.getElementById('popUserEmail').innerText = data.email;
+                
+                // Use formatCurrency (e.g., 1000 -> 1k)
+                document.getElementById('popUserCoins').innerText = formatCurrency(data.coins || 0);
+                const diamondEl = document.getElementById('popUserDiamonds');
+                if(diamondEl) diamondEl.innerText = formatCurrency(data.diamonds || 0);
+
+                const streakTxt = document.querySelector('.streak-txt');
+                if(streakTxt) streakTxt.innerText = `Daily Streak: ${data.streak || 0}`;
+
+                // --- G. NOTIFICATION BADGE LOGIC ---
+                const userVazute = data.lastSeenNewsCount || 0;
+                const noutatiNoi = totalGlobal - userVazute;
+                const heroBadge = document.getElementById('heroNotifBadge');
+                const headerBadge = document.getElementById('headerNotifBadge');
+
+                [heroBadge, headerBadge].forEach(badge => {
+                    if (badge) {
+                        if (noutatiNoi > 0) {
+                            badge.innerText = `+${noutatiNoi}`;
+                            badge.style.display = 'flex';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                });
+            });
+        });
+
+        updateOnlineStatus(); // Start tracking online presence
+    } else {
+        // LOGGED OUT STATE
+        headerLoginText.innerText = "LOGIN";
+        headerUserImg.style.display = "none";
+        
+        if(mobileLoginBtn) {
+            mobileLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Autentificare';
+        }
+
+
+    } 
+});
+
+
+function formatCurrency(num) {
+    if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+    return num || 0;
+}
+
+async function resetUserQuests(userRef, snapData) {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("en-CA", { timeZone: "Europe/Bucharest" });
+    const hours = parseInt(now.toLocaleTimeString("en-GB", { timeZone: "Europe/Bucharest", hour: '2-digit' }));
+    const block = hours < 12 ? 'AM' : 'PM';
+    const resetKey = `${dateStr}-${block}`;
+
+    if (snapData.lastResetBlock && snapData.lastResetBlock !== resetKey) {
+        let finalStreak = snapData.streak || 0;
+        if (snapData.lastStreakAwardedBlock !== snapData.lastResetBlock) {
+            window.runAdaptiveStreakAnimation(finalStreak);
+            finalStreak = 0;
+        }
+        await updateDoc(userRef, {
+            streak: finalStreak, lastResetBlock: resetKey,
+            messagesSentToday: 0, wallRepliesToday: 0, wallReactionsToday: 0,
+            kevinMessagesToday: 0, newsVisitedToday: 0, feedbackGivenToday: 0,
+            galleryLikesToday: 0, galleryCommentsToday: 0,
+            triviaSingleCorrectToday: 0, triviaMultiCorrectToday: 0,
+            completedQuests: (snapData.completedQuests || []).filter(id => id==='social3'||id==='review')
+        });
+    } else if (!snapData.lastResetBlock) {
+        await updateDoc(userRef, { lastResetBlock: resetKey });
+    }
+}
+
+window.runAdaptiveStreakAnimation = (startValue) => {
+    const missedModal = document.getElementById('streakMissedModal');
+    const missedTxt = document.getElementById('streakOldMissed');
+    let temp = startValue;
+    missedTxt.innerText = temp;
+    missedModal.classList.add('active');
+    function step() {
+        if (temp > 0) {
+            temp--; missedTxt.innerText = temp;
+            let delay = (temp > 20) ? 40 : (temp > 10 ? 100 : 400);
+            setTimeout(step, delay);
+        }
+    }
+    setTimeout(step, 800);
+};
+
+window.flyDiamond = () => {
+    const flyer = document.getElementById('flyingDiamond');
+    const source = document.getElementById('sourceDiamond');
+    const target = document.getElementById('headerLoginBtn') || document.getElementById('menuBtn');
+    const sRect = source.getBoundingClientRect();
+    const tRect = target.getBoundingClientRect();
+    flyer.style.display = 'block'; flyer.style.top = sRect.top + 'px'; flyer.style.left = sRect.left + 'px'; flyer.style.opacity = '1';
+    setTimeout(() => {
+        flyer.style.transition = 'all 1s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+        flyer.style.top = (tRect.top + 5) + 'px'; flyer.style.left = (tRect.left + 5) + 'px';
+        flyer.style.transform = 'scale(0) rotate(720deg)'; flyer.style.opacity = '0';
+    }, 100);
+    setTimeout(() => { flyer.style.display = 'none'; document.getElementById('streakRewardModal').classList.remove('active'); }, 1100);
+};
+document.getElementById('claimStreakBtn').onclick = window.flyDiamond;
+
+  </script>
+</body>
+</html>
