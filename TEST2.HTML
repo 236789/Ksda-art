@@ -10258,48 +10258,55 @@ window.openInventory = async (type = 'badges') => {
         }
         
 else if(type === 'badges') {
-            const ownedIds = data.ownedBadges || [];
-            const equipped = data.equippedBadge?.id || null;
-            
-            if(ownedIds.length === 0) {
-                list.innerHTML = '<div style="color:#aaa; width:100%; text-align:center; padding:40px; font-family:Orbitron; font-size:11px;">DATAFRAME_EMPTY: NO_BADGES_RECORDED</div>';
-            }
-            
-            ownedIds.forEach(id => {
-                 const badge = BADGES_DB.find(b => b.id === id);
-                 if(badge) {
-                    const isEquipped = (id === equipped);
-                    
-                    // --- SPECIAL BADGE CHECK ---
-                    const specialBadges = ['b_wheel_god', 'b_immortal', 'b_celestial', 'b_cyber_ghost', 'b_demon_slayer', 'b_void_master', 'b_singularity'];
-                    const isSpecial = specialBadges.includes(badge.id);
-                    
-                    // Logic: If special, use CSS class. If normal, use DB colors.
-                    const badgeClass = badge.id === 'b_singularity' ? 'badge-singularity' : (isSpecial ? `badge-${badge.id}` : 'shop-badge-preview');
-                    const inlineStyle = isSpecial ? "" : `background:${badge.color} !important; color:#000 !important; font-weight:900; box-shadow: 0 0 10px ${badge.color}; border:none;`;
+    const ownedIds = data.ownedBadges || [];
+    const equipped = data.equippedBadge?.id || null;
+    
+    // THE LIST: Add 'b_singularity' here so the system knows it's animated!
+    const godTierBadges = ['b_wheel_god', 'b_spin_god', 'b_immortal', 'b_celestial', 'b_cyber_ghost', 'b_demon_slayer', 'b_void_master', 'b_singularity'];
 
-                    list.innerHTML += `
-                        <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
-                            <div class="item-preview-box" style="overflow:visible !important;">
-                                <span class="${badgeClass}" style="${inlineStyle}">
-                                    <i class="fas ${badge.icon}"></i> ${badge.text}
-                                </span>
-                            </div>
-                            <div style="font-weight:900; font-size:11px; margin-bottom:10px; color:#fff; font-family:'Orbitron'; text-transform:uppercase;">
-                                ${badge.text}
-                            </div>
-                            ${isEquipped 
-                                ? `<button class="btn-equip-v6 is-equipped">LINK_ACTIVE</button>` 
-                                : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">ESTABLISH_MOUNT</button>`
-                            }
-                        </div>`;
-                 }
-            });
-             if(equipped) {
-                const actionArea = document.getElementById('inventoryActions');
-                if(actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('badge')">TERMINATE_LINK_SESSION</button>`;
-             }
+    if(ownedIds.length === 0) list.innerHTML = '<p style="width:100%; text-align:center; color:#aaa; font-family:Orbitron; padding:20px;">Nu ai insigne.</p>';
+    
+    ownedIds.forEach(id => {
+        const badge = BADGES_DB.find(b => b.id === id);
+        if(badge) {
+            const isEquipped = (id === equipped);
+            const isGodTier = godTierBadges.includes(badge.id);
+            
+            let badgeDisplayHtml = '';
+            
+            if (isGodTier) {
+                // For Singularity, we use its specific class, others use the badge-ID format
+                let className = (badge.id === 'b_singularity') ? 'badge-singularity' : `badge-${badge.id}`;
+                
+                // Quantum God ID Fix for consistency
+                if(badge.id === 'b_wheel_god') className = 'badge-wheel-god';
+
+                badgeDisplayHtml = `<span class="${className}" style="font-size:9px; padding:4px 10px; margin-bottom:10px; border-radius:50px; display:inline-flex; align-items:center; gap:5px;"><i class="fas ${badge.icon}"></i> ${badge.text}</span>`;
+            } else {
+                // Standard Badges: They keep the inline color and black text
+                badgeDisplayHtml = `<span class="shop-badge-preview" style="background:${badge.color}; color:#000; border:none; box-shadow:0 0 5px ${badge.color};"><i class="fas ${badge.icon}"></i> ${badge.text}</span>`;
+            }
+
+            list.innerHTML += `
+                <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
+                    <div class="item-preview-box" style="overflow:visible !important; min-height:50px;">
+                        ${badgeDisplayHtml}
+                    </div>
+                    <div style="font-weight:900; font-size:11px; margin-bottom:10px; color:#fff; font-family:'Orbitron'; text-transform:uppercase;">
+                        ${badge.text}
+                    </div>
+                    ${isEquipped 
+                        ? `<button class="btn-equip-v6 is-equipped">ACTIVE_LINK</button>` 
+                        : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">INITIALIZE</button>`
+                    }
+                </div>`;
         }
+    });
+    if(equipped) {
+         const actionArea = document.getElementById('inventoryActions');
+         if(actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('badge')">TERMINATE_SESSION</button>`;
+    }
+}
         else if (type === 'banners') {
             const ownedIds = data.ownedBanners || [];
             const equipped = data.equippedBanner?.id || null;
