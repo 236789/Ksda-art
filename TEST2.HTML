@@ -9840,7 +9840,7 @@ window.openBadgeShop = async () => {
 
 window.buyBadge = async (badgeId, price) => {
     const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'badges';
-    const confirmMsg = isFree ? "Folosești VOUCHER-UL GRATUIT pentru această insignă?" : `Cumperi insigna pentru ${price} monede?`;
+    const confirmMsg = isFree ? "Folosești VOUCHER-UL GRATUIT?" : `Cumperi insigna pentru ${price} monede?`;
 
     const confirmed = await showCustomConfirm(confirmMsg, "CONFIRMĂ");
     if(!confirmed) return;
@@ -9860,15 +9860,15 @@ window.buyBadge = async (badgeId, price) => {
                 'myCoupons.badges': updatedVouchers 
             });
             window.activeCosmeticTicket = null;
-            await showCustomAlert("Voucher folosit cu succes!", "SUCCES");
+            await showCustomAlert("Voucher folosit cu succes! Pagina se va reîncărca.", "SUCCES");
         } else {
             await updateDoc(userRef, { coins: increment(-price), ownedBadges: arrayUnion(badgeId) });
             await logTransaction(-price, "COINS", "Shop", "Bought Badge: " + badgeId);
-            await showCustomAlert("Insignă cumpărată!", "SUCCES");
+            await showCustomAlert("Achiziție reușită! Pagina se va reîncărca.", "SUCCES");
         }
 
-        // REFRESH SHOP INSTANTLY WITHOUT CLOSING
-        openBadgeShop(); 
+        // FORCE REFRESH to clear all free buttons immediately
+        location.reload(); 
 
     } catch(e) { console.error(e); }
 };
