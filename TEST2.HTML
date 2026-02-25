@@ -12365,16 +12365,28 @@ window.openSubCoupon = (type) => {
 };
 
 window.activateCoupon = (id, category) => {
-    window.activeCosmeticTicket = { id, category };
+    console.log("Direct Activation Triggered for:", category, "ID:", id);
+
+    // 1. Stabilim sesiunea de "Free Item"
+    window.activeCosmeticTicket = { id: id, category: category };
+    
+    // 2. Închidem modalele de cupoane
     closeModal('subCouponModal');
+    closeModal('couponInventoryModal');
     
-    showCustomAlert(`Tichetul a fost activat! Magazinul se va deschide acum, iar următorul obiect din categoria ${category.toUpperCase()} este GRATUIT.`, "TICHET ACTIVAT");
+    // 3. Notificăm utilizatorul
+    showCustomAlert(
+        `Tichetul a fost activat cu succes!<br><br>Următorul obiect ales din categoria <b>${category.toUpperCase()}</b> va fi <span style="color:#00ff88; font-weight:900;">GRATUIT</span>.`, 
+        "GRATUIT"
+    );
     
-    // Open the correct shop automatically
+    // 4. Deschidem magazinul corespunzător
+    // Notă: Când aceste funcții se execută, ele vor vedea window.activeCosmeticTicket și vor scrie "GRATUIT" la preț
     if(category === 'badges') openBadgeShop();
     if(category === 'frames') openFrameShop();
     if(category === 'banners') openBannerShop();
     if(category === 'texts') openTextShop();
+    if(category === 'blackmarket') openBlackMarket();
 };
 </script>
 </body>
