@@ -5255,6 +5255,31 @@ body {
     font-size: 9px;
     filter: drop-shadow(0 0 3px #fff);
 }
+
+/* --- SINGULARITY FIX: PRIORITY 1 --- */
+.badge-singularity {
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/desc%C4%83rcare.gif?alt=media&token=f0045bb9-4176-4e6a-92e2-25be1eea9bae') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    color: #ffffff !important;
+    font-size: 9px !important;
+    padding: 5px 12px !important;
+    border-radius: 4px !important;
+    box-shadow: 0 0 15px rgba(112, 0, 255, 0.6) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px;
+}
+
+/* Kill the horizontal scrollbar in inventory */
+#inventoryModal .cosmetics-card-v6 {
+    overflow-x: hidden !important;
+}
+#inventoryList {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 10px !important;
+}
   </style>
 
 </head>
@@ -7338,44 +7363,56 @@ window.openInventory = async (type = 'badges') => {
              actionContainer.appendChild(unequipBtn);
         }
     }
-    // --- BADGES ---
+// --- BADGES ---
     else if(type === 'badges') {
         const ownedIds = data.ownedBadges || [];
         const equipped = data.equippedBadge?.id || null;
         
-        // List of special animated badges
-        const godTierBadges = ['b_wheel_god', 'b_spin_god', 'b_immortal', 'b_celestial', 'b_cyber_ghost', 'b_demon_slayer', 'b_void_master'];
+        // 1. ADD SINGULARITY TO THE SPECIAL LIST
+        const godTierBadges = ['b_wheel_god', 'b_spin_god', 'b_immortal', 'b_celestial', 'b_cyber_ghost', 'b_demon_slayer', 'b_void_master', 'b_singularity'];
 
         if(ownedIds.length === 0) list.innerHTML = '<p style="width:100%; text-align:center; color:#aaa;">Nu ai insigne.</p>';
+        
         ownedIds.forEach(id => {
             const badge = BADGES_DB.find(b => b.id === id);
             if(badge) {
                 const isEquipped = (id === equipped);
-                const isGodTier = godTierBadges.includes(badge.id);
+                const isSpecial = godTierBadges.includes(badge.id) || badge.animClass;
                 
-                let badgeDisplayHtml = '';
+                // 2. LOGIC: If animated, use its class and FORCE white text. If standard, use DB color.
+                const badgeClass = badge.animClass ? badge.animClass : (isSpecial ? `badge-${badge.id}` : 'shop-badge-preview');
                 
-                if (isGodTier) {
-                    // Uses specific CSS classes (badge-b_wheel_god, badge-b_immortal, etc.)
-                    // Styles are defined in CSS to handle colors/animations
-                    badgeDisplayHtml = `<span class="badge-${badge.id}" style="font-size:10px; padding:6px 12px; margin-bottom:10px; border-radius:50px; display:inline-flex; align-items:center; gap:5px; border: 1.5px solid currentColor;"><i class="fas ${badge.icon}"></i> ${badge.text}</span>`;
-                } else {
-                    // Standard Style
-                    badgeDisplayHtml = `<span class="shop-badge-preview" style="background:${badge.color}; color:#000;"><i class="fas ${badge.icon}"></i> ${badge.text}</span>`;
-                }
+                // CRITICAL: The !important below stops your other CSS from killing the GIF
+                const inlineStyle = isSpecial 
+                    ? "color: #ffffff !important; text-shadow: 2px 2px 4px #000 !important; border: 1px solid #fff !important; background-color: transparent !important;" 
+                    : `background: ${badge.color} !important; color: #000 !important; font-weight: 900 !important;`;
 
                 list.innerHTML += `
-                    <div class="shop-badge-item">
-                        ${badgeDisplayHtml}
-                        ${isEquipped ? `<button class="equip-btn" style="background:#555;">ECHIPAT</button>` : `<button class="equip-btn" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">ECHIPEAZĂ</button>`}
+                    <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}" style="min-height: 110px; display: flex; flex-direction: column; justify-content: center;">
+                        <div class="item-preview-box" style="height: 50px; margin-bottom: 5px;">
+                            <span class="${badgeClass}" style="${inlineStyle}">
+                                <i class="fas ${badge.icon}"></i> ${badge.text}
+                            </span>
+                        </div>
+                        <div style="width: 100%;">
+                            ${isEquipped 
+                                ? `<button class="equip-btn" style="background: rgba(255,255,255,0.1); color: #fff; cursor: default; opacity: 0.5;">ECHIPAT</button>` 
+                                : `<button class="equip-btn" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">ECHIPEAZĂ</button>`
+                            }
+                        </div>
                     </div>`;
             }
         });
+
         if(equipped) {
              const unequipBtn = document.createElement('button');
              unequipBtn.className = 'unequip-all-btn';
+             unequipBtn.style.marginTop = "15px";
              unequipBtn.innerHTML = '<i class="fas fa-ban"></i> DEZ-ECHIPEAZĂ';
-             unequipBtn.onclick = async () => { await updateDoc(doc(db, "accounts", auth.currentUser.uid), { equippedBadge: null }); window.openInventory('badges'); };
+             unequipBtn.onclick = async () => { 
+                await updateDoc(doc(db, "accounts", auth.currentUser.uid), { equippedBadge: null }); 
+                window.openInventory('badges'); 
+             };
              actionContainer.appendChild(unequipBtn);
         }
     }
