@@ -7027,21 +7027,6 @@ body {
 }
 
 
-/* --- FIX VIZIBILITATE BADGE INVENTAR --- */
-#inventoryList .shop-badge-preview {
-    color: #000 !important; /* Forțăm textul să fie negru pentru contrast pe galben/verde/auriu */
-    border: none !important;
-    padding: 6px 12px !important;
-    border-radius: 4px !important;
-    display: inline-flex !important;
-    align-items: center;
-    gap: 6px;
-    font-family: 'Orbitron', sans-serif !important;
-    font-weight: 900 !important;
-    text-transform: uppercase;
-    /* Adăugăm o umbră mică pentru a face textul să "sară" în evidență */
-    text-shadow: none !important; 
-}
 
 /* Fix pentru badge-urile care au animații tip 'glitch' sau 'singularity' */
 #inventoryList .badge-singularity {
@@ -7074,6 +7059,27 @@ body {
     align-items: center;
     min-height: 70px !important;
     overflow: visible !important;
+}
+
+
+/* Ensure Singularity text pops in inventory */
+#inventoryList .badge-singularity {
+    color: #ffffff !important;
+    text-shadow: 2px 2px 4px #000, 0 0 10px #000 !important;
+    background-size: cover !important;
+    border: 1px solid rgba(255,255,255,0.4) !important;
+}
+
+/* Fix standard badge text readability in inventory */
+#inventoryList .shop-badge-preview {
+    color: #000;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-weight: 900;
+    font-size: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
 }
 
   </style>
@@ -10254,32 +10260,37 @@ else if(type === 'badges') {
          if(badge) {
             const isEquipped = (id === equipped);
             
-            // Check if this is a special animated badge (like Singularity)
-            // If it has an animClass, we use that. If not, we use the standard preview with its color.
-            const badgeClass = badge.animClass ? `${badge.animClass}` : 'shop-badge-preview';
-            const inlineStyle = badge.animClass ? "" : `background:${badge.color} !important; color:#000 !important; font-weight:900;`;
+            // Check if it's a special animated badge (like Singularity or b_dragon_anim)
+            const hasAnim = badge.animClass ? true : false;
+            
+            // If it has an animation class, use it. Otherwise, use standard preview.
+            const badgeClass = badge.animClass ? badge.animClass : 'shop-badge-preview';
+            
+            // If it's animated, we don't apply an inline background (it's in the CSS).
+            // If it's standard, we apply the color from the DB.
+            const inlineStyle = hasAnim ? "" : `background:${badge.color}; color:#000; font-weight:900;`;
 
             list.innerHTML += `
                 <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
-                    <div class="item-preview-box">
+                    <div class="item-preview-box" style="min-height:70px;">
                         <span class="${badgeClass}" style="${inlineStyle}">
                             <i class="fas ${badge.icon}"></i> ${badge.text}
                         </span>
                     </div>
-                    <div style="font-weight:700; font-size:11px; margin-top:10px; color:#fff; font-family:'Orbitron';">${badge.text}</div>
+                    <div style="font-weight:700; font-size:11px; margin-top:10px; color:#fff;">${badge.text}</div>
                     ${isEquipped 
-                        ? `<button class="btn-equip-v6 is-equipped">EQUIPPED</button>` 
-                        : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">EQUIP BADGE</button>`
+                        ? `<button class="equip-btn" style="background:#555; cursor:default;">ECHIPAT</button>` 
+                        : `<button class="equip-btn" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">ECHIPEAZĂ</button>`
                     }
                 </div>`;
          }
     });
-
-    // Cleanup: Remove old "Scoate Insigna" if it's messing up the grid and use the action area
+    // Action area for unequipping
     const actionArea = document.getElementById('inventoryActions');
     if(equipped && actionArea) {
-        actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('badge')">DETACH CURRENT BADGE</button>`;
+        actionArea.innerHTML = `<button class="unequip-btn-v6" style="margin-bottom:20px;" onclick="unequipItem('badge')">Scoate Insigna</button>`;
     }
+
 }
         else if (type === 'banners') {
             const ownedIds = data.ownedBanners || [];
