@@ -12364,6 +12364,7 @@ window.openSubCoupon = (type) => {
     });
 };
 
+// FUNCȚIA 1: Pentru activare directă (Cea pe care ai postat-o tu)
 window.activateCoupon = (id, category) => {
     console.log("Direct Activation Triggered for:", category, "ID:", id);
 
@@ -12376,17 +12377,29 @@ window.activateCoupon = (id, category) => {
     
     // 3. Notificăm utilizatorul
     showCustomAlert(
-        `Tichetul a fost activat cu succes!<br><br>Următorul obiect ales din categoria <b>${category.toUpperCase()}</b> va fi <span style="color:#00ff88; font-weight:900;">GRATUIT</span>.`, 
+        `Tichetul a fost activat!<br><br>Următorul obiect ales din categoria <b>${category.toUpperCase()}</b> va fi <span style="color:#00ff88; font-weight:900;">GRATUIT</span>.`, 
         "GRATUIT"
     );
     
     // 4. Deschidem magazinul corespunzător
-    // Notă: Când aceste funcții se execută, ele vor vedea window.activeCosmeticTicket și vor scrie "GRATUIT" la preț
     if(category === 'badges') openBadgeShop();
     if(category === 'frames') openFrameShop();
     if(category === 'banners') openBannerShop();
     if(category === 'texts') openTextShop();
-    if(category === 'blackmarket') openBlackMarket();
+};
+
+// FUNCȚIA 2: Pentru tichetele care merg în Terminal (Coins/Diamonds)
+// Asta rezolvă eroarea "activateCouponCode is not defined"
+window.activateCouponCode = (code) => {
+    console.log("Transferring code to terminal:", code);
+    const input = document.getElementById('couponInput');
+    if (input) {
+        input.value = code;
+        closeModal('subCouponModal');
+        closeModal('couponInventoryModal');
+        scrollToZone('zone-deals'); // Mergem la secțiunea terminalului
+        showCustomAlert("Codul a fost introdus în Terminal.<br>Apasă <b>VALIDATE_CREDENTIALS</b>!", "SISTEM GATA");
+    }
 };
 </script>
 </body>
