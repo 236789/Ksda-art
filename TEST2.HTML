@@ -5182,6 +5182,9 @@ body {
     border-radius: 4px;
 }
 
+
+
+
 /* Ajustare Hover: acum butoanele se mișcă spre DREAPTA */
 .btn-nav-terminal:hover, .btn-nav-vault:hover, .btn-nav-atelier:hover, .btn-nav-toxic:hover {
     transform: translateX(8px); 
@@ -6125,25 +6128,16 @@ body {
     margin-top: 12px;
 }
 
-/* Enable scrolling for the Probability Log */
+/* --- GOD-TIER AAA PRIZE HUD --- */
 .prize-view-container {
-    max-height: 90vh; /* Limits height to 90% of the screen */
-    overflow-y: auto;  /* Enables vertical scrolling */
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-    scrollbar-width: thin;
-    scrollbar-color: var(--primary) #02050a;
-}
-
-/* Custom "Tech" Scrollbar for the Log */
-.prize-view-container::-webkit-scrollbar {
-    width: 6px;
-}
-.prize-view-container::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 10px;
-    box-shadow: 0 0 10px var(--primary);
+    width: min(1000px, 95vw);
+    background: #02050a;
+    border-radius: 20px;
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 100px rgba(0,0,0,1);
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 /* THE GRID SYSTEM (PC: 5 Columns | Mobile: 2 Columns) */
@@ -7516,15 +7510,15 @@ body {
 /* 1. VAULT (Blue/Cyan) */
 .btn-nav-vault { 
     background: rgba(41, 243, 255, 0.05); 
-    border: 1px solid #29f3ff; 
-    color: #29f3ff; 
+    border: 1px solid #ffd700; 
+    color: #ffd700; 
     font-family:'Orbitron'; font-weight:900; text-transform:uppercase; 
     position:relative; overflow:hidden; display:flex; align-items:center; gap:10px; 
     transition:0.3s; padding: 10px 12px; font-size: 9px; letter-spacing: 1px; border-radius: 4px; 
 }
 .btn-nav-vault:hover { 
     transform: translateX(8px); 
-    background: #29f3ff; 
+    background: #ffd700; 
     color: #000; 
     box-shadow: 0 0 20px rgba(41, 243, 255, 0.6);
     border-color: #fff;
@@ -8243,194 +8237,776 @@ nav a[href="shop.html"] {
 
 
 
-/* --- SICK PREVIEW PLAY BUTTON --- */
-.btn-preview-audio {
-    width: 45px; height: 45px;
+/* --- ELITE INVENTORY BUTTON (Full Width) --- */
+.select-btn-v6.c-elite { 
+    grid-column: span 2; /* Spans full width in 2-col grid */
+    border-color: #ff0000; 
+    background: linear-gradient(180deg, rgba(255,0,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
+}
+.select-btn-v6.c-elite i { color: #ff0000; filter: drop-shadow(0 0 10px #ff0000); }
+.select-btn-v6.c-elite span { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
+.select-btn-v6.c-elite:hover { 
+    background: rgba(255,0,0,0.2); 
+    transform: translateY(-5px); 
+    box-shadow: 0 0 25px rgba(255, 0, 0, 0.5); 
+}
+
+/* =========================================
+   ULTIMATE PROFILE BANNERS (GOD MODE)
+   ========================================= */
+
+/* BASE CONTAINER - THE SCI-FI WINDOW */
+.p-ban-preview {
+    width: 100%;
+    height: 80px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    position: relative;
+    overflow: hidden;
+    background: #000;
+    /* High-tech glass border */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    z-index: 1;
+}
+
+/* HOVER EFFECT: Lift & Intensify */
+.p-ban-preview:hover {
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,1);
+    z-index: 10;
+}
+
+/* UNIVERSAL SCANLINE (TV EFFECT) */
+.p-ban-preview::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* ==========================
+   1. CYBER GRID (Tactical Green)
+   ========================== */
+.p-ban-cyber {
+    background: #02080a;
+    border: 1px solid #00ff88;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+}
+
+/* The Moving 3D Grid */
+.p-ban-cyber::before {
+    content: '';
+    position: absolute;
+    width: 200%; height: 200%;
+    top: -50%; left: -50%;
+    background-image: 
+        linear-gradient(rgba(0, 255, 136, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.3) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: perspective(300px) rotateX(60deg);
+    animation: cyberGridMove 5s linear infinite;
+}
+
+/* The Radar Sweep */
+.p-ban-cyber .overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 40%, rgba(0, 255, 136, 0.5) 50%, transparent 60%);
+    animation: radarSweep 3s infinite linear;
+}
+
+@keyframes cyberGridMove { from { background-position: 0 0; } to { background-position: 0 40px; } }
+@keyframes radarSweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+
+/* ==========================
+   2. MAGMA FLOW (Volcanic)
+   ========================== */
+.p-ban-magma {
+    background: #1a0500;
+    border: 1px solid #ff4500;
+    box-shadow: 0 0 15px rgba(255, 69, 0, 0.3);
+}
+
+/* Moving Lava Layers */
+.p-ban-magma::before {
+    content: '';
+    position: absolute; inset: -50%;
+    background: radial-gradient(circle, #ff0000, #ff8c00, #330000);
+    background-size: 200% 200%;
+    filter: blur(20px);
+    animation: magmaFlow 6s ease infinite alternate;
+}
+
+/* Floating Embers */
+.p-ban-magma::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(#fff 1px, transparent 1px);
+    background-size: 30px 30px;
+    animation: embersRise 4s linear infinite;
+    opacity: 0.6;
+}
+
+@keyframes magmaFlow { 0% { transform: translate(-10%, -10%); } 100% { transform: translate(10%, 10%); } }
+@keyframes embersRise { from { background-position: 0 0; } to { background-position: 0 -60px; } }
+
+
+/* ==========================
+   3. DEEP VOID (Singularity)
+   ========================== */
+.p-ban-void {
+    background: #000;
+    border: 1px solid #7000ff;
+    box-shadow: 0 0 20px rgba(112, 0, 255, 0.4);
+}
+
+/* Rotating Black Hole Accretion Disk */
+.p-ban-void::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 200%; height: 200%;
+    transform: translate(-50%, -50%);
+    background: conic-gradient(from 0deg, #000, #4b0082, #9400d3, #000);
+    animation: voidSpin 4s linear infinite;
     border-radius: 50%;
-    background: rgba(255, 0, 0, 0.1);
-    border: 2px solid #ff0000;
-    color: #ff0000;
+    opacity: 0.7;
+}
+
+/* Central Event Horizon */
+.p-ban-void .overlay {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px; height: 40px;
+    background: #000;
+    border-radius: 50%;
+    box-shadow: 0 0 15px #7000ff, 0 0 30px #fff;
+    z-index: 2;
+}
+
+@keyframes voidSpin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+
+/* ==========================
+   4. GOLD RUSH (Luxury)
+   ========================== */
+.p-ban-gold {
+    background: #1a1a00;
+    border: 1px solid #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+    overflow: hidden;
+}
+
+/* Liquid Gold Wave */
+.p-ban-gold::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(120deg, #b8860b, #ffd700, #fff, #ffd700, #b8860b);
+    background-size: 200% 200%;
+    animation: goldShimmer 3s linear infinite;
+}
+
+/* Sparkles */
+.p-ban-gold::after {
+    content: '✦';
+    position: absolute;
+    color: #fff;
+    font-size: 20px;
+    animation: sparkleMove 2s infinite;
+    text-shadow: 0 0 5px #fff;
+}
+
+@keyframes goldShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+@keyframes sparkleMove { 
+    0% { top: 10%; left: 10%; opacity: 0; transform: scale(0); } 
+    50% { opacity: 1; transform: scale(1); } 
+    100% { top: 80%; left: 80%; opacity: 0; transform: scale(0); } 
+}
+
+
+/* ==========================
+   5. MATRIX CODE (Hacker)
+   ========================== */
+.p-ban-matrix {
+    background: #000;
+    border: 1px solid #00ff00;
+    font-family: 'Courier New', monospace;
+    color: #00ff00;
+    overflow: hidden;
+}
+
+/* Code Rain Effect */
+.p-ban-matrix::before {
+    content: "10 01 11 00 10 10 01 11 00 10 10 01 11 00 10 10 01 11 00 10";
+    position: absolute; top: -100%; left: 0;
+    width: 100%;
+    font-size: 14px;
+    line-height: 14px;
+    word-break: break-all;
+    text-shadow: 0 0 5px #00ff00;
+    animation: matrixRain 3s linear infinite;
+    opacity: 0.7;
+}
+
+/* Second Layer for Depth */
+.p-ban-matrix::after {
+    content: "01 10 00 11 01 01 10 00 11 01 01 10 00 11 01 01 10 00 11 01";
+    position: absolute; top: -100%; left: 5px;
+    width: 100%;
+    font-size: 10px;
+    color: #003300;
+    animation: matrixRain 5s linear infinite reverse;
+    z-index: 0;
+}
+
+@keyframes matrixRain { from { top: -100%; } to { top: 100%; } }
+
+
+/* ==========================
+   6. NEON CITY (Vaporwave)
+   ========================== */
+.p-ban-neon {
+    background: linear-gradient(180deg, #2b002b 0%, #000044 100%);
+    border: 1px solid #ff00ff;
+    border-bottom: 3px solid #00ffff;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+}
+
+/* Retro Sun */
+.p-ban-neon::before {
+    content: '';
+    position: absolute;
+    bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    width: 60px; height: 60px;
+    background: linear-gradient(to top, #ff00ff, #ffcc00);
+    border-radius: 50%;
+    box-shadow: 0 0 20px #ff00ff;
+    /* Create lines in sun */
+    mask-image: linear-gradient(to bottom, black 50%, transparent 50%, black 55%, transparent 55%, black 60%, transparent 60%);
+}
+
+/* Moving Grid Floor */
+.p-ban-neon::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 30px;
+    background-image: 
+        linear-gradient(0deg, transparent 24%, rgba(0, 255, 255, .5) 25%, rgba(0, 255, 255, .5) 26%, transparent 27%, transparent),
+        linear-gradient(90deg, transparent 24%, rgba(0, 255, 255, .5) 25%, rgba(0, 255, 255, .5) 26%, transparent 27%, transparent);
+    background-size: 40px 10px;
+    transform: perspective(100px) rotateX(60deg);
+    animation: vaporGrid 1s linear infinite;
+}
+
+@keyframes vaporGrid { from { background-position: 0 0; } to { background-position: 0 20px; } }
+
+/* --- AUDIO PLAYER BUTTON --- */
+.audio-play-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 0, 0, 0.2);
+    border: 1px solid #ff0000;
+    color: #fff;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: 0.3s;
-    font-size: 18px;
+    font-size: 16px;
+}
+.audio-play-btn:hover { background: #ff0000; box-shadow: 0 0 15px #ff0000; }
+.audio-play-btn.playing { background: #fff; color: #ff0000; border-color: #fff; animation: pulse 1s infinite; }
+
+
+/* ==========================
+   7. ANIME FANBOY (Pink/Cyan Energy)
+   ========================== */
+.p-ban-anime {
+    /* The Background GIF */
+    background: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/anime-mix.gif?alt=media&token=eed3db7d-e99f-4a5c-b7ee-15b6b51f20e8') center/cover no-repeat;
+    /* Inner shadow to make text readable */
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.7), 0 0 20px rgba(255, 0, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
+    overflow: hidden;
 }
-.btn-preview-audio:hover {
-    background: #ff0000; color: #fff;
-    box-shadow: 0 0 15px #ff0000;
+
+/* Rotating Neon Border */
+.p-ban-anime::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(
+        from 0deg, 
+        transparent, 
+        #ff00ff, /* Pink */
+        #00ffff, /* Cyan */
+        transparent 30%
+    );
+    animation: rotateAura 2.5s linear infinite; /* Fast rotation */
+    z-index: 0;
 }
-.btn-preview-audio.playing {
-    animation: audioPulse 1.5s infinite;
+
+/* Inner Mask to show only the border */
+.p-ban-anime::after {
+    content: '';
+    position: absolute;
+    inset: 3px; /* Border Thickness */
+    background: inherit; /* Keeps the GIF visible inside */
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    z-index: 1;
 }
-@keyframes audioPulse {
-    0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
-    100% { box-shadow: 0 0 0 15px rgba(255, 0, 0, 0); }
+
+/* ==========================
+   8. THUNDER GOD (Electric Blue)
+   ========================== */
+.p-ban-thunder {
+    /* The Background GIF (Lightning) */
+    background: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') center/cover no-repeat;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.6), 0 0 25px rgba(0, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Rotating Electric Border */
+.p-ban-thunder::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(
+        from 0deg, 
+        transparent, 
+        #ffffff, /* White Spark */
+        #00e5ff, /* Electric Blue */
+        transparent 40%
+    );
+    animation: rotateAura 1.5s linear infinite; /* Super fast spin */
+    z-index: 0;
+}
+
+/* Inner Mask */
+.p-ban-thunder::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: inherit;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    z-index: 1;
+}
+
+/* Ensure the animation keyframe exists */
+@keyframes rotateAura { 
+    from { transform: rotate(0deg); } 
+    to { transform: rotate(360deg); } 
+}
+
+
+
+/* =========================================
+   GOD-TIER PROFILE BANNERS (NEW ADDITIONS)
+   ========================================= */
+
+/* 10. RGB OVERLOAD (Fast Rainbow Spin) */
+.p-ban-rgb {
+    background: #000;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+.p-ban-rgb::before {
+    content: ''; position: absolute; inset: -100%;
+    background: conic-gradient(red, orange, yellow, green, blue, indigo, violet, red);
+    animation: rotateAura 1.5s linear infinite; /* FAST SPIN */
+    z-index: 0;
+}
+.p-ban-rgb::after {
+    content: ''; position: absolute; inset: 4px;
+    background: #111; border-radius: 8px; z-index: 1;
+}
+
+/* 11. DEATH SQUAD (Red/Black Smoke) */
+.p-ban-death {
+    background: radial-gradient(circle, #300, #000);
+    border: 1px solid #ff0000;
+    box-shadow: 0 0 25px #ff0000;
+    position: relative; overflow: hidden;
+}
+.p-ban-death::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: repeating-linear-gradient(45deg, #200, #200 10px, #000 10px, #000 20px);
+    animation: cyberGridMove 10s linear infinite;
+    opacity: 0.5;
+}
+
+/* 12. FROZEN CORE (Ice Blue Breathing) */
+.p-ban-frozen {
+    background: #001;
+    border: 1px solid #00ffff;
+    box-shadow: 0 0 15px #00ffff, inset 0 0 20px #00ffff;
+    animation: flash 3s infinite; /* Breathing effect */
+}
+.p-ban-frozen::after {
+    content: '❄️'; font-size: 50px; position: absolute; right: -10px; bottom: -10px; opacity: 0.2;
+}
+
+/* 13. TOXIC HAZE (Green/Purple Biohazard) */
+.p-ban-toxic {
+    background: #050;
+    border-left: 3px solid #00ff00;
+    border-right: 3px solid #8a2be2;
+    box-shadow: 0 0 20px #00ff00;
+    position: relative; overflow: hidden;
+}
+.p-ban-toxic::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.4), transparent);
+    transform: skewX(-20deg);
+    animation: radarSweep 2s infinite linear;
+}
+
+/* 14. MIDAS TOUCH (Sparkling Gold) */
+.p-ban-midas {
+    background: radial-gradient(ellipse at center, #ffd700 0%, #332200 100%);
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 30px #ffd700;
+    overflow: hidden; position: relative;
+}
+.p-ban-midas::before {
+    content: ''; position: absolute; inset: -50%;
+    background: conic-gradient(from 0deg, transparent, white, transparent 30%);
+    animation: rotateAura 3s linear infinite;
+    opacity: 0.5;
+}
+
+/* 15. BLUE FLAME (Ghost Rider Vibe) */
+.p-ban-bluefire {
+    background: url('https://media.giphy.com/media/3bc8pP1rVdfgN1uoMV/giphy.gif') center/cover;
+    border: 1px solid #00e5ff;
+    box-shadow: inset 0 0 40px #000, 0 0 20px #00e5ff;
+}
+
+/* 16. GLITCH ERROR (Distorted) */
+.p-ban-glitch {
+    background: #000;
+    border: 1px dashed #fff;
+    font-family: monospace;
+    position: relative; overflow: hidden;
+}
+.p-ban-glitch::before {
+    content: "ERROR 404"; position: absolute; top: 20%; left: 20%;
+    font-size: 30px; color: rgba(255,255,255,0.1); font-weight: 900;
+    animation: glitchShake 0.2s infinite;
+}
+
+/* 17. NEBULA STORM (Cosmic Purple) */
+.p-ban-nebula {
+    background: url('https://media.giphy.com/media/eJmUEoeU1K4d4IUbpS/giphy.gif') center/cover;
+    border: 1px solid #9900ff;
+    box-shadow: 0 0 25px #9900ff;
+}
+
+/* 18. AKATSUKI (Anime Clouds) */
+.p-ban-akatsuki {
+    background: #000;
+    border: 2px solid #a00000;
+    box-shadow: 0 0 20px #a00000;
+    position: relative; overflow: hidden;
+}
+.p-ban-akatsuki::before {
+    content: '☁️'; color: #a00000; font-size: 40px; position: absolute; left: -20px; animation: floatRight 5s linear infinite;
+}
+.p-ban-akatsuki::after {
+    content: '☁️'; color: #a00000; font-size: 30px; position: absolute; left: -50px; top: 30px; animation: floatRight 7s linear infinite;
+}
+@keyframes floatRight { from { left: -50px; } to { left: 100%; } }
+
+/* 19. HYPER SPEED (Racing) */
+.p-ban-hyper {
+    background: #000;
+    border-top: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    position: relative; overflow: hidden;
+}
+.p-ban-hyper::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.2) 20px, rgba(255,255,255,0.2) 40px);
+    animation: radarSweep 0.2s infinite linear; /* Super fast */
+}
+
+/* 20. MONEY MAKER (Falling Cash GIF) */
+.p-ban-cash {
+    background: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmo2ZHl0NXEyNzcxcG13b3VuNWw5cnV6bWhyZGV5NGRxOGk1NmdteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BfFFYPSVYr9UR6EtEL/giphy.gif') center/cover;
+    border: 2px solid #00ff00;
+    box-shadow: 0 0 20px #00ff00;
 }
 
 
 /* =========================================
-   DIVINE CELESTIAL JACKPOT CSS
+   NEW GOD-TIER PROFILE BANNERS
    ========================================= */
 
-/* 1. PC Layout: Make the card span the full grid width */
-@media (min-width: 1024px) {
-    .aaa-loot-grid .m-celestial {
-        grid-column: 1 / -1 !important; /* Spans across all columns */
-        height: 350px !important;       /* Taller card */
-        margin-top: 20px;
-    }
-
-    .m-celestial .aaa-card-content {
-        flex-direction: row !important; /* Image on left, text on right */
-        justify-content: space-around !important;
-        padding: 0 60px !important;
-    }
+/* 1. SOLAR FLARE (Pure CSS - Intense Heat) */
+.p-ban-solar {
+    background: radial-gradient(circle at center, #ff8c00, #ff0000, #000);
+    border: 1px solid #ffaa00;
+    box-shadow: 0 0 20px #ff4500;
+}
+.p-ban-solar::before {
+    content: ''; position: absolute; inset: -50%;
+    background: conic-gradient(from 0deg, transparent, #fff, #ff4500, transparent 40%);
+    animation: rotateAura 2s linear infinite;
+    opacity: 0.4;
 }
 
-/* 2. Angelic Visual Theme */
-.m-celestial {
-    --r-color: #ffffff;
-    --r-bg: radial-gradient(circle at center, #222 0%, #000 100%);
-    box-shadow: 0 0 50px rgba(255, 255, 255, 0.2), inset 0 0 30px rgba(255, 255, 255, 0.1) !important;
+/* 2. PLASMA LEAK (Pure CSS - Flowing Energy) */
+.p-ban-plasma-flow {
+    background: #050014;
+    border: 1px solid #bf55ec;
+}
+.p-ban-plasma-flow::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, #7000ff, #ff00ff, #00ffff, #7000ff);
+    background-size: 400% 400%;
+    animation: gradientMove 4s ease infinite;
+    opacity: 0.6;
+    mask-image: radial-gradient(circle, black 20%, transparent 70%);
 }
 
-/* Intense Rotating White/Gold Border */
-.m-celestial::before {
-    background: conic-gradient(from 0deg, transparent, #ffffff, #ffd700, #ffffff, transparent 50%) !important;
-    animation: rotateAura 1.5s linear infinite !important;
+/* 3. TOXIC WASTE (GIF Integrated) */
+.p-ban-toxic-elite {
+    background: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aXpoemxmbHByMjc1cGxxNDFpbm5kc2xjNTZmb3ZuYzNlMHhxa2NidyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/KH4QT4rqnnka04884l/giphy.gif') center/cover;
+    border: 2px solid #00ff88;
+    box-shadow: inset 0 0 40px #000, 0 0 15px #00ff88;
 }
 
-/* Inner Glow/Sun effect */
-.m-celestial::after {
-    background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%) !important;
+/* 4. MAGMA LORD (GIF Integrated) */
+.p-ban-magma-elite {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcnY0Mjlwb24zd2d6cDl2cnMzcjRmczEzZmQ0MXplc2g5YWhqNXhxYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/auKRHcLuzy6ME/giphy.gif') center/cover;
+    border: 1px solid #ff4500;
+    box-shadow: 0 0 25px rgba(255, 69, 0, 0.5);
 }
 
-.m-celestial .aaa-card-title {
-    font-size: 22px !important;
-    letter-spacing: 8px !important;
+/* 5. MONEY RAIN ELITE (GIF Integrated) */
+.p-ban-cash-elite {
+    background: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmo2ZHl0NXEyNzcxcG13b3VuNWw5cnV6bWhyZGV5NGRxOGk1NmdteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BfFFYPSVYr9UR6EtEL/giphy.gif') center/cover;
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+}
+
+/* 6. DIVINE LIGHT (GIF Integrated) */
+.p-ban-divine {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGEwM2FtNHU4OXM4dXVoYXRzNDdtc2Nha3h6OWhxYTR2aW5mOGkxMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3ov9k1173PdfJWRsoE/giphy.gif') center/cover;
+    border: 1px solid #fff;
+    box-shadow: 0 0 20px #fff;
+}
+
+/* 7. NEBULA GOD (GIF Integrated) */
+.p-ban-nebula-elite {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMHBqOWp4d3IwOWFkZW9uOWx3dzllbGY4eTBhazV1N2xpc3V1YjQ0YiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bPZdEfOgBh1de/giphy.gif') center/cover;
+    border: 1px solid #7000ff;
+    box-shadow: 0 0 30px #7000ff;
+}
+
+/* 8. CYBERPUNK GLITCH (GIF Integrated) */
+.p-ban-cyber-elite {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXk4cmRtNWd3azBxeWtteGtoa3V3MjV3cWFmNmhzeXhjaWhxanN0MSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/26FPKhUtNG3TW74f6/giphy.gif') center/cover;
+    border: 1px solid #00ffff;
+    filter: hue-rotate(45deg);
+}
+
+/* 9. DIAMOND ICE (GIF Integrated) */
+.p-ban-ice-elite {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGEwM2FtNHU4OXM4dXVoYXRzNDdtc2Nha3h6OWhxYTR2aW5mOGkxMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3og0IyRiAsl1Pczi6Y/giphy.gif') center/cover;
+    border: 2px solid #b9f2ff;
+    box-shadow: 0 0 20px #00e5ff;
+}
+
+
+/* FIX: Modal Scrolling & Card Sizing */
+.bm-modal-v4, .shop-modal-v4 {
+    max-height: 85vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.bm-content-scroll {
+    overflow-y: auto !important;
+    flex: 1 !important;
+    padding-bottom: 30px !important;
+    scrollbar-width: thin;
+}
+
+/* Compact Audio Rows */
+#introShopList .bm-offer-card-v4 {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    min-height: auto !important;
+    padding: 12px 20px !important;
+    aspect-ratio: auto !important;
+}
+
+/* Audio Button Animation */
+.audio-play-btn.playing i {
+    animation: pulse 1s infinite;
+    color: #ff0000;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+
+/* --- RED TERMINAL SCROLLBAR (FIX) --- */
+#introShopModal .bm-content-scroll, 
+#pBannerShopModal .bm-content-scroll,
+#eliteInventoryModal .bm-content-scroll {
+    max-height: 60vh !important; /* Limits height to force scrolling */
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: #ff0000 #02080a;
+    padding-right: 10px;
+}
+
+/* Chrome, Edge, and Safari Scrollbar styling */
+#introShopModal .bm-content-scroll::-webkit-scrollbar,
+#pBannerShopModal .bm-content-scroll::-webkit-scrollbar,
+#eliteInventoryModal .bm-content-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+#introShopModal .bm-content-scroll::-webkit-scrollbar-track,
+#pBannerShopModal .bm-content-scroll::-webkit-scrollbar-track,
+#eliteInventoryModal .bm-content-scroll::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+#introShopModal .bm-content-scroll::-webkit-scrollbar-thumb,
+#pBannerShopModal .bm-content-scroll::-webkit-scrollbar-thumb,
+#eliteInventoryModal .bm-content-scroll::-webkit-scrollbar-thumb {
+    background: #ff0000 !important; /* THE RED COLOR */
+    box-shadow: 0 0 12px #ff0000;
+    border-radius: 10px;
+}
+
+/* Fix: Make Intros look compact and horizontal */
+#introShopList .bm-offer-card-v4 {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    min-height: auto !important;
+    padding: 12px 20px !important;
+    margin-bottom: 10px;
+}
+
+
+
+/* --- OMEGA TIER (ELECTRIC SILVER) --- */
+.tier-omega { 
+    --r-color: #e0e0e0; 
+    --r-bg: linear-gradient(180deg, #1a1a1a 0%, #000 100%); 
+}
+.tier-omega::before {
+    animation: rotateAura 2s linear infinite !important;
+    background: conic-gradient(from 0deg, transparent, #fff, #29f3ff, transparent 40%) !important;
+}
+.tier-omega .aaa-card-title { color: #fff; text-shadow: 0 0 10px #29f3ff, 0 0 20px #fff; }
+
+/* --- CELESTIAL TIER (HEAVENLY RADIANCE) --- */
+.tier-celestial { 
+    --r-color: #ffd700; 
+    --r-bg: radial-gradient(circle at center, #fff 0%, #050b14 100%); 
+}
+.tier-celestial::before {
+    animation: rotateAura 1s linear infinite !important;
+    background: conic-gradient(from 0deg, #fff, #ffd700, #fff, #29f3ff, #fff); /* Holy rainbow */
+}
+.tier-celestial .aaa-card-title { 
+    color: #fff; 
+    font-size: 14px;
+    text-shadow: 0 0 20px #ffd700, 0 0 40px #fff;
+    animation: pulse-intense 1s infinite;
+}
+
+/* --- NEW CELESTIAL ASSETS STYLES --- */
+.badge-celestial-god {
+    background: linear-gradient(45deg, #fff, #ffd700) !important;
+    color: #000 !important;
+    border: 2px solid #fff !important;
+    box-shadow: 0 0 20px #fff, 0 0 40px #ffd700 !important;
+}
+.bubble-celestial-heaven {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGEwM2FtNHU4OXM4dXVoYXRzNDdtc2Nha3h6OWhxYTR2aW5mOGkxMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3og0IyRiAsl1Pczi6Y/giphy.gif') center !important;
+    background-size: cover !important;
+    border: 3px solid #fff !important;
     color: #fff !important;
-    text-shadow: 0 0 15px #fff, 0 0 30px #ffd700 !important;
-}
-
-
-@media (max-width: 768px) {
-    .aaa-loot-grid {
-        /* Reduce gap to save vertical space */
-        gap: 15px !important; 
-        padding: 10px !important;
-    }
-
-    .aaa-card {
-        /* Slightly shorter cards on mobile to see more at once */
-        min-height: 220px !important; 
-        height: auto !important;
-    }
-    
-    .aaa-card-content {
-        padding: 15px !important;
-        gap: 10px !important; /* Tighter internal spacing */
-    }
-
-    .aaa-card-img {
-        height: 50px !important; /* Smaller icons on mobile */
-    }
-}
-
-/* --- SCRATCH TICKET SYSTEM --- */
-#scratcherOverlay {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-    z-index: 70000; flex-direction: column; justify-content: center; align-items: center;
-    backdrop-filter: blur(20px);
-}
-
-.scratcher-container {
-    position: relative; width: 320px; height: 450px;
-    background: #111; border-radius: 20px; overflow: hidden;
-    box-shadow: 0 0 50px rgba(0,0,0,1);
-    border: 2px solid var(--ticket-color);
-    animation: ticketSlideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes ticketSlideIn { from { transform: translateY(100px) scale(0.8); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-
-/* Theme Colors */
-.ticket-coins { --ticket-color: #ffd700; --ticket-glow: rgba(255, 215, 0, 0.4); }
-.ticket-diamonds { --ticket-color: #00ff88; --ticket-glow: rgba(0, 255, 136, 0.4); }
-
-.ticket-header {
-    height: 80px; display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(to bottom, var(--ticket-color), transparent);
-    font-family: 'Montserrat'; font-weight: 900; color: #000; letter-spacing: 2px;
-}
-
-.scratch-area {
-    position: relative; width: 260px; height: 160px; margin: 40px auto;
-    background: #000; border: 4px solid #222; border-radius: 10px;
-}
-
-#scratchCanvas {
-    position: absolute; top: 0; left: 0; cursor: crosshair; touch-action: none;
-    border-radius: 6px;
-}
-
-.reveal-content {
-    width: 100%; height: 100%; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-}
-
-.percentage-text {
-    font-family: 'Montserrat'; font-weight: 900; font-size: 54px;
-    background: linear-gradient(to bottom, #fff, var(--ticket-color));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 10px var(--ticket-color));
-}
-
-.apply-btn {
-    display: none; width: 80%; margin: 20px auto; padding: 15px;
-    border: none; border-radius: 10px; font-family: 'Orbitron';
-    font-weight: 900; font-size: 14px; cursor: pointer;
-    background: var(--ticket-color); color: #000;
-    box-shadow: 0 0 20px var(--ticket-glow);
-    animation: pulse 1.5s infinite;
-}
-
-/* Discount Badge for Shop */
-.shop-discount-badge {
-    position: absolute; top: 10px; left: 10px;
-    background: #ff4757; color: #fff; padding: 4px 10px;
-    font-family: 'Orbitron'; font-weight: 900; font-size: 10px;
-    border-radius: 4px; z-index: 5;
-}
-
-.old-price-cross {
-    text-decoration: line-through; color: #ff4757; font-size: 11px;
-    display: block; margin-bottom: 2px;
+    font-weight: 900;
+    text-shadow: 0 0 10px #ffd700;
 }
 
   </style>
 </head>
 <body>
 
-<div id="scratcherOverlay">
-    <div id="ticketCard" class="scratcher-container">
-        <div class="ticket-header" id="ticketTitle">LUCKY VOUCHER</div>
+<!-- PROFILE INTRO SHOP MODAL -->
+<div id="introShopModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 600px;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 0, 0, 0.1); padding: 25px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#ff0000;">AUDIO_MODULES</div>
+            <button class="close-pop" onclick="closeModal('introShopModal')" style="position:static !important; border:1px solid #ff0000; background:transparent;">✕</button>
+        </div>
+        <div class="bm-content-scroll" id="introShopList" style="padding: 20px; display: flex; flex-direction: column; gap: 15px;"></div>
+    </div>
+</div>
+
+<!-- PROFILE BANNER SHOP MODAL -->
+<div id="pBannerShopModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 700px; height: 80vh;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-bottom: 1px solid #fff; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#fff;">VISUAL_OVERLAYS</div>
+            <button class="close-pop" onclick="closeModal('pBannerShopModal')" style="position:static !important; border:1px solid #fff; background:transparent;">✕</button>
+        </div>
+        <div class="bm-content-scroll" id="pBannerShopList" style="padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;"></div>
+    </div>
+</div>
+
+<!-- ELITE INVENTORY MODAL -->
+<div id="eliteInventoryModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 600px; height: 80vh;">
+        <div class="bm-scanline-overlay"></div>
         
-        <div style="text-align:center; padding: 20px 10px 0;">
-            <p style="font-size:11px; color:#aaa; font-family:Orbitron;">RAZĂ PENTRU REVELARE</p>
+        <!-- Header -->
+        <div style="background: rgba(255, 0, 0, 0.1); padding: 20px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div class="title-rw" style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#ff0000;">ELITE_STORAGE</div>
+            <button class="close-pop" onclick="document.getElementById('eliteInventoryModal').classList.remove('active'); document.getElementById('cosmeticsSelectModal').classList.add('active');" style="border:1px solid #ff0000; background:transparent; position:static !important;">✕</button>
         </div>
 
-        <div class="scratch-area">
-            <div class="reveal-content">
-                <div id="revealedPercent" class="percentage-text">0%</div>
-                <div style="color:#fff; font-family:Orbitron; font-size:10px;">REDUCERE</div>
-            </div>
-            <canvas id="scratchCanvas"></canvas>
+        <!-- Sub-Nav -->
+        <div style="display: flex; gap: 10px; padding: 15px; border-bottom: 1px solid rgba(255,0,0,0.2);">
+            <button class="btn-nav-v6" id="invTabBanners" onclick="openEliteInventory('banners')" style="border-color:#ff0000;">BANNERS</button>
+            <button class="btn-nav-v6" id="invTabIntros" onclick="openEliteInventory('intros')" style="border-color:#ff0000;">INTROS</button>
         </div>
 
-        <button id="applyReductionBtn" class="apply-btn" onclick="applyScratchedDiscount()">APLICĂ REDUCEREA</button>
-        
-        <div style="text-align:center; padding:10px;">
-            <p style="font-size:9px; color:#555; font-family:monospace;">SECURE_VOUCHER_v4.0</p>
+        <!-- List -->
+        <div class="bm-content-scroll" id="eliteInventoryList" style="padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <!-- JS Injected Content -->
         </div>
     </div>
 </div>
@@ -8480,7 +9056,7 @@ nav a[href="shop.html"] {
     </div>
 </div>
 
-<!-- SUB-MODAL 1: ELITE COSMETICS -->
+<!-- SUB-MODAL 1: ELITE COSMETICS (FIXED) -->
 <div id="eliteCosmeticsModal" class="account-modal-overlay">
     <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 800px; height: 80vh;">
         <div class="bm-scanline-overlay"></div>
@@ -8489,65 +9065,50 @@ nav a[href="shop.html"] {
                 <div style="font-family:'Montserrat'; font-size: 22px; font-weight: 900; color:#ff0000;">ELITE_COSMETICS</div>
                 <div style="font-family:monospace; font-size: 10px; color:#aaa;">TYPE: ANIMATED_ASSETS | ACCESS: VIP</div>
             </div>
+            <!-- Back Button Logic -->
             <button class="close-pop" onclick="closeModal('eliteCosmeticsModal'); document.getElementById('eliteShopModal').classList.add('active');" style="border:1px solid #ff0000; background:transparent; position:static !important;">✕</button>
         </div>
 
         <div class="bm-content-scroll" style="padding: 20px;">
-<!-- UPDATE ÎN MODALUL PROFILE PRESTIGE EXISTENT -->
-<div class="bm-grid-v4">
-    <div class="bm-offer-card-v4" onclick="openProfileIntroShop()">
-        <i class="fas fa-play-circle" style="color:#ff0000; font-size:30px;"></i>
-        <div class="bm-title-v4">PROFILE INTROS</div>
-        <div class="bm-desc-v4">Sunet care se aude când cineva îți vizitează profilul.</div>
-        <button class="bm-price-btn-v4">DESCHIDE</button>
-    </div>
-    <div class="bm-offer-card-v4" onclick="openProfileBannerShop()">
-        <i class="fas fa-image" style="color:#fff; font-size:30px;"></i>
-        <div class="bm-title-v4">PROFILE BANNERS</div>
-        <div class="bm-desc-v4">Fundal animat sau stilizat pentru cardul tău de profil.</div>
-        <button class="bm-price-btn-v4">DESCHIDE</button>
-    </div>
-</div>
+            <div class="bm-grid-v4">
+                
+                <!-- 1. ELITE BADGES -->
+                <div class="bm-offer-card-v4" onclick="openEliteCategory('badges')">
+                    <i class="fas fa-certificate" style="color:#ff0000; font-size:35px; margin-bottom:15px; filter:drop-shadow(0 0 10px #ff0000);"></i>
+                    <div class="bm-title-v4">ELITE BADGES</div>
+                    <div class="bm-desc-v4">Insigne animate (GIF) și efecte God-Mode.</div>
+                    <button class="bm-price-btn-v4" style="background:#ff0000 !important; color:#fff !important;">DESCHIDE</button>
+                </div>
 
-<!-- MODAL NOU: INTRO SHOP -->
-<div id="introShopModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 500px;">
-        <div class="bm-scanline-overlay"></div>
-        <div style="background: rgba(255, 0, 0, 0.1); padding: 25px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#ff0000;">AUDIO_MODULES</div>
-            <button class="close-pop" onclick="closeModal('introShopModal')" style="position:static !important; border:1px solid #ff0000; background:transparent;">✕</button>
-        </div>
-        <div class="bm-content-scroll" id="introList" style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
-            <!-- JS Inject -->
-        </div>
-    </div>
-</div>
+                <!-- 2. ELITE BANNERS -->
+                <div class="bm-offer-card-v4" onclick="openEliteCategory('banners')">
+                    <i class="fas fa-layer-group" style="color:#fff; font-size:35px; margin-bottom:15px; filter:drop-shadow(0 0 10px #fff);"></i>
+                    <div class="bm-title-v4">ELITE BANNERS</div>
+                    <div class="bm-desc-v4">Fundaluri de chat animate și reactive.</div>
+                    <button class="bm-price-btn-v4" style="background:#ff0000 !important; color:#fff !important;">DESCHIDE</button>
+                </div>
 
-<!-- MODAL NOU: BANNER SHOP -->
-<div id="pBannerShopModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 600px; height: 80vh;">
-        <div class="bm-scanline-overlay"></div>
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-bottom: 1px solid #fff; display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#fff;">VISUAL_OVERLAYS</div>
-            <button class="close-pop" onclick="closeModal('pBannerShopModal')" style="position:static !important; border:1px solid #fff; background:transparent;">✕</button>
-        </div>
-        <div class="bm-content-scroll" id="pBannerList" style="padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-            <!-- JS Inject -->
-        </div>
-    </div>
-</div>
+                <!-- 3. ANIMATED FRAMES -->
+                <div class="bm-offer-card-v4" onclick="openEliteCategory('frames')">
+                    <i class="fas fa-crop-alt" style="color:#ff0000; font-size:35px; margin-bottom:15px; filter:drop-shadow(0 0 10px #ff0000);"></i>
+                    <div class="bm-title-v4">ANIMATED FRAMES</div>
+                    <div class="bm-desc-v4">Rame de profil cu efecte vizuale avansate.</div>
+                    <button class="bm-price-btn-v4" style="background:#ff0000 !important; color:#fff !important;">DESCHIDE</button>
+                </div>
+
+            </div>
         </div>
     </div>
 </div>
 
-<!-- SUB-MODAL 2: PROFILE PRESTIGE -->
+<!-- SUB-MODAL 2: PROFILE PRESTIGE (UPDATED) -->
 <div id="profilePrestigeModal" class="account-modal-overlay">
     <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 800px; height: 80vh;">
         <div class="bm-scanline-overlay"></div>
         <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-bottom: 1px solid #fff; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
             <div>
                 <div style="font-family:'Montserrat'; font-size: 22px; font-weight: 900; color:#fff;">PROFILE_PRESTIGE</div>
-                <div style="font-family:monospace; font-size: 10px; color:#ff0000;">MODULE: USER_INTERFACE | STATUS: ENCRYPTED</div>
+                <div style="font-family:monospace; font-size: 10px; color:#ff0000;">MODULE: USER_INTERFACE | STATUS: ONLINE</div>
             </div>
             <button class="close-pop" onclick="closeModal('profilePrestigeModal'); document.getElementById('eliteShopModal').classList.add('active');" style="border:1px solid #fff; background:transparent; position:static !important;">✕</button>
         </div>
@@ -8555,26 +9116,22 @@ nav a[href="shop.html"] {
         <div class="bm-content-scroll" style="padding: 20px;">
             <div class="bm-grid-v4">
                 
-                <!-- Profile Intros - NOW ACTIVE -->
+                <!-- PROFILE INTROS -->
                 <div class="bm-offer-card-v4" onclick="openProfileIntroShop()">
-                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
                     <i class="fas fa-play-circle" style="color:#ff0000; font-size:30px;"></i>
                     <div class="bm-title-v4">PROFILE INTROS</div>
-                    <div class="bm-desc-v4">Animații și sunete la intrarea pe profilul tău.</div>
-                    <button class="bm-price-btn-v4">DESCHIDE</button>
+                    <div class="bm-desc-v4">Sunet care se aude când cineva îți vizitează profilul.</div>
+                    <button class="bm-price-btn-v4" style="background:#ff0000 !important; color:#fff;">DESCHIDE</button>
                 </div>
 
-                <!-- Profile Banners - NOW ACTIVE -->
+                <!-- PROFILE BANNERS -->
                 <div class="bm-offer-card-v4" onclick="openProfileBannerShop()">
-                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
                     <i class="fas fa-image" style="color:#fff; font-size:30px;"></i>
                     <div class="bm-title-v4">PROFILE BANNERS</div>
-                    <div class="bm-desc-v4">Imagini de fundal personalizate pentru profil.</div>
-                    <button class="bm-price-btn-v4">DESCHIDE</button>
+                    <div class="bm-desc-v4">Fundal animat sau stilizat pentru cardul tău de profil.</div>
+                    <button class="bm-price-btn-v4" style="background:#fff !important; color:#000;">DESCHIDE</button>
                 </div>
-                
+
             </div>
         </div>
     </div>
@@ -10184,32 +10741,27 @@ nav a[href="shop.html"] {
 
             <!-- PREVIEW BOX REMOVED AS REQUESTED -->
 
-<!-- CATEGORY GRID -->
 <div class="cosmo-grid-select">
+    <!-- Existing 4 Buttons -->
     <div class="select-btn-v6 c-badge" onclick="openInventory('badges'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-certificate"></i>
-        <span>BADGES</span>
+        <i class="fas fa-certificate"></i><span>BADGES</span>
     </div>
     <div class="select-btn-v6 c-frame" onclick="openInventory('frames'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-crop-alt"></i>
-        <span>RAME</span>
+        <i class="fas fa-crop-alt"></i><span>RAME</span>
     </div>
     <div class="select-btn-v6 c-banner" onclick="openInventory('banners'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-image"></i>
-        <span>BANNERE</span>
+        <i class="fas fa-image"></i><span>BANNERE</span>
     </div>
     <div class="select-btn-v6 c-text" onclick="openInventory('texts'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-font"></i>
-        <span>TEXT</span>
+        <i class="fas fa-font"></i><span>TEXT</span>
     </div>
-</div>
 
-    <!-- ADAUGĂ ASTA LA FINALUL GRIDULUI (îl facem 2x3 sau lași așa) -->
-    <div class="select-btn-v6" style="grid-column: span 2; border-color: #ff0000; color: #ff0000;" 
-         onclick="openEliteInventory(); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
+    <!-- NEW ELITE BUTTON (Space below) -->
+    <div class="select-btn-v6 c-elite" onclick="openEliteInventory('banners')">
         <i class="fas fa-crown"></i>
         <span>ELITE</span>
     </div>
+</div>
         </div>
     </div>
 </div>
@@ -10613,6 +11165,169 @@ window.showCustomConfirm = (msg, title = "CONFIRMARE") => {
     { id: 'eb_hub', text: 'TheHub', price: 100, isElite: true, animClass: 'badge-the-hub', isHub: true },
 
 ];
+
+
+
+
+const PROFILE_BANNERS_DB = [
+    // --- CLASSICS ---
+    { id: 'pban_cyber', name: 'CYBER GRID', price: 5000, cssClass: 'p-ban-cyber' },
+    { id: 'pban_magma', name: 'MAGMA FLOW', price: 7500, cssClass: 'p-ban-magma' },
+    { id: 'pban_void',  name: 'DEEP VOID',  price: 10000, cssClass: 'p-ban-void' },
+    { id: 'pban_gold',  name: 'GOLD RUSH',  price: 15000, cssClass: 'p-ban-gold' },
+    { id: 'pban_matrix',name: 'MATRIX CODE',price: 12000, cssClass: 'p-ban-matrix' },
+    { id: 'pban_neon',  name: 'NEON CITY',  price: 3000,  cssClass: 'p-ban-neon' },
+
+    // --- SICK CSS ANIMATED ---
+    { id: 'pban_solar', name: 'SOLAR FLARE', price: 20000, cssClass: 'p-ban-solar' },
+    { id: 'pban_plasma_flow', name: 'PLASMA ENERGY', price: 18000, cssClass: 'p-ban-plasma-flow' },
+    
+    // --- ELITE GIF SERIES (NEW) ---
+    { id: 'pban_toxic_el', name: 'TOXIC WASTE ELITE', price: 25000, cssClass: 'p-ban-toxic-elite' },
+    { id: 'pban_magma_el', name: 'MAGMA LORD ELITE', price: 25000, cssClass: 'p-ban-magma-elite' },
+    { id: 'pban_cash_el',  name: 'MONEY RAIN ELITE', price: 50000, cssClass: 'p-ban-cash-elite' },
+    { id: 'pban_divine_el',name: 'DIVINE ETHER',    price: 35000, cssClass: 'p-ban-divine' },
+    { id: 'pban_nebula_el',name: 'NEBULA GOD',      price: 30000, cssClass: 'p-ban-nebula-elite' },
+    { id: 'pban_cyber_el', name: 'CYBERPUNK ELITE', price: 22000, cssClass: 'p-ban-cyber-elite' },
+    { id: 'pban_ice_el',   name: 'FROZEN CORE',     price: 24000, cssClass: 'p-ban-ice-elite' },
+    
+    // --- GIF ANIMATED ---
+    { id: 'pban_anime',   name: 'ANIME FANBOY', price: 8000, cssClass: 'p-ban-anime' },
+    { id: 'pban_thunder', name: 'THUNDER GOD',  price: 9000, cssClass: 'p-ban-thunder' },
+    { id: 'pban_phantom', name: 'PHANTOM',      price: 8500, cssClass: 'p-ban-phantom' },
+    
+    // --- NEW INSANE ADDITIONS ---
+    { id: 'pban_rgb',      name: 'RGB OVERLOAD', price: 20000, cssClass: 'p-ban-rgb' },
+    { id: 'pban_death',    name: 'DEATH SQUAD',  price: 18000, cssClass: 'p-ban-death' },
+    { id: 'pban_frozen',   name: 'FROZEN CORE',  price: 12500, cssClass: 'p-ban-frozen' },
+    { id: 'pban_toxic',    name: 'TOXIC HAZE',   price: 11000, cssClass: 'p-ban-toxic' },
+    { id: 'pban_midas',    name: 'MIDAS TOUCH',  price: 25000, cssClass: 'p-ban-midas' },
+    { id: 'pban_bluefire', name: 'BLUE FLAME',   price: 14000, cssClass: 'p-ban-bluefire' },
+    { id: 'pban_glitch',   name: 'SYSTEM FAIL',  price: 13000, cssClass: 'p-ban-glitch' },
+    { id: 'pban_nebula',   name: 'NEBULA STORM', price: 16000, cssClass: 'p-ban-nebula' },
+    { id: 'pban_akatsuki', name: 'RED CLOUDS',   price: 17500, cssClass: 'p-ban-akatsuki' },
+    { id: 'pban_hyper',    name: 'HYPER SPEED',  price: 15500, cssClass: 'p-ban-hyper' },
+    { id: 'pban_cash',     name: 'MONEY MAKER',  price: 30000, cssClass: 'p-ban-cash' }
+];
+
+const PROFILE_INTROS_DB = [
+    { 
+        id: 'intro_fato', 
+        name: 'Haide fato știu că vrei', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Video%20Project.m4a?alt=media&token=7e4eb9d9-4b30-4b3a-8e47-a7ae7d0b9dd6' 
+    },
+    { 
+        id: 'intro_bug_mafia', 
+        name: 'B.U.G. Mafia - Cine E Cu Noi', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FB.U.G.%20Mafia%20-%20Cine%20E%20Cu%20Noi%20(feat.%20Nico)%20(Prod.%20Tata%20Vlad)%20(Videoclip).mp3?alt=media&token=fc20492a-1a3c-446d-9fd5-3e1913778614' 
+    },
+    { 
+        id: 'intro_aur_vass', 
+        name: 'Copilul de Aur & Laura Vass - Buzele tale', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FCopilul%20de%20Aur%20%20Laura%20Vass%20%20Buzele%20tale%2C%20doua%20petale%20%20%23PovesteDeCartier%20%20Special%20Guest%20M.Merisan.mp3?alt=media&token=02f5dbcf-ae26-4545-8c36-f1069f0b35a0' 
+    },
+    { 
+        id: 'intro_crazy_frog', 
+        name: 'Crazy Frog - Axel F', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FCrazy%20Frog%20-%20Axel%20F%20turned%2020%20years%20old%20%20%23fyp%20%23music%20%23musica%20%23edm%20%23dancemusic%20%23crazyfrog%20%23memories.mp3?alt=media&token=70124cc9-c453-48af-a041-52e54aeab46b' 
+    },
+    { 
+        id: 'intro_made_in_ro', 
+        name: 'Ionut Cercel - Made in Romania', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FIonut%20Cercel%20-%20Made%20in%20Romania.mp3?alt=media&token=66a09af4-e300-4f78-9220-de05325c0eae' 
+    },
+    { 
+        id: 'intro_narcisa', 
+        name: 'Narcisa - Dai din buci ca la turci', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNARCISA%20-%20DAI%20DIN%20BUCI%20CA%20LA%20TURCI%20-%20DANS%20CRISTINA%20PUCEAN.mp3?alt=media&token=86223ee7-2bdc-477b-a7c3-116965051881' 
+    },
+    { 
+        id: 'intro_nek', 
+        name: 'Nek - Cate una, cate doua', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNEK%20-%20Cate%20una%2C%20cate%20doua%20-OFFICIAL%20VIDEO.mp3?alt=media&token=97853258-96e0-4eac-bad7-238b4fe4774f' 
+    },
+    { 
+        id: 'intro_guta_gigolo', 
+        name: 'Nicolae Guta - Gigolo', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNicolae%20Guta%20-%20GIGOLO.mp3?alt=media&token=f1effc9b-d02c-45a9-ac33-2ce1bd7868b9' 
+    },
+    { 
+        id: 'intro_guta_pahare', 
+        name: 'Nicolae Guta - Noi bem spargem pahare', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNicolae%20Guta%20-%20Noi%20bem%20spargem%20pahare.mp3?alt=media&token=a87afc4d-8590-476c-895b-203a172b4f77' 
+    },
+    { 
+        id: 'intro_guta_mafia', 
+        name: 'Nicolae Guta - Vine Mafia', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNicolae%20Guta%20-%20Vine%20mafia.mp3?alt=media&token=e3ab3fbb-bb5b-47fb-b0eb-cec5152c9ded' 
+    },
+    { 
+        id: 'intro_guta_aj', 
+        name: 'Nicolae Guta & Play AJ - Tu esti fata de oras', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNicolae%20Guta%20si%20Play%20Aj%20-%20Tu%20esti%20fata%20de%20oras.mp3?alt=media&token=0ee882d8-fd7d-4e3a-91c5-254457502f31' 
+    },
+    { 
+        id: 'intro_puya_fresh', 
+        name: 'Puya - Fresh', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FPuya%20-%20Fresh.mp3?alt=media&token=1124ff3a-9307-4e29-8dba-7fdfb3cb6a2d' 
+    },
+    { 
+        id: 'intro_puya_om', 
+        name: 'Puya - Om bogat, om sarac', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FPuya-Om%20bogat%2Com%20sarac.mp3?alt=media&token=649d3f0a-60af-43d4-b0c8-b4e3861c8756' 
+    },
+    { 
+        id: 'intro_susanu', 
+        name: 'Susanu - La lautari', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FSusanu%20-%20La%20lautari.mp3?alt=media&token=a6c9bb80-8b9c-4508-b4fb-3747369ad4c4' 
+    },
+    { 
+        id: 'intro_theo_rose', 
+        name: 'Theo Rose - A venit politia', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FTheo%20Rose%20-%20A%20venit%20poli%C8%9Bia%20%20From%20Candidatul%20perfect%20The%20Movie.mp3?alt=media&token=2fd9e5d3-9d27-48e0-9b37-2fab5972d954' 
+    },
+    { 
+        id: 'intro_vocea_bagabontilor', 
+        name: 'Vocea Bagabontilor - Latraii', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FVOCEA%20BAGABONTILOR%20%EF%BE%92%20L%C4%82TR%C4%82II%20%20OFICIAL%20VIDEO.mp3?alt=media&token=77c4801b-4b9b-4809-b0e3-bf8a9c8f3724' 
+    },
+    { 
+        id: 'intro_vijelie', 
+        name: 'Vali Vijelie - Sa iubesti doua femei', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FVali%20Vijelie%20-%20Sa%20iubesti%20doua%20femei.mp3?alt=media&token=28ae2f76-0734-4e4c-9119-f945b7d6483b' 
+    },
+    { 
+        id: 'intro_zamfir', 
+        name: 'Zamfir de la Baia Mare - Mamaliga cu carnat', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FZamfir%20de%20la%20Baia%20Mare%20-%20Mamaliga%20cu%20carnat%20%5Bvideoclip%20oficial%5D.mp3?alt=media&token=a7314651-f676-4c8d-9ade-bde7f53b5fef' 
+    },
+    { 
+        id: 'intro_un_leu', 
+        name: 'Imi dai si mie un leu?', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2F%C3%8Emi%20dai%20%C8%99i%20mie%20un%20leu_.mp3?alt=media&token=96072279-0567-496d-b8d1-8798c6e5f5436' 
+    }
+];
+
+
 const BANNERS_DB = [
     // --- BASIC / STATIC (850 – 1500) ---
     { id: 'bub_galaxy',    name: 'GALAXY',   cssClass: 'bubble-galaxy',    price: 1300, desc: 'Spațial' },
@@ -10692,23 +11407,8 @@ const BANNERS_DB = [
 
 
 
-const PROFILE_INTROS_DB = [
-    { 
-        id: 'intro_fato', 
-        name: 'Haide fato stiu ca vrei', 
-        price: 5000, 
-        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Video%20Project.m4a?alt=media&token=7352c200-31a5-45a5-b9d5-fce043460c6a' 
-    }
-];
 
-const PROFILE_BANNERS_DB = [
-    { id: 'pban_cyber', name: 'CYBER GRID', price: 3000, style: 'linear-gradient(rgba(0,255,136,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,136,0.1) 1px, transparent 1px)', bgSize: '30px 30px', bgColor: '#02080a' },
-    { id: 'pban_nebula', name: 'PURPLE NEBULA', price: 4500, style: 'url("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMHBqOWp4d3IwOWFkZW9uOWx3dzllbGY4eTBhazV1N2xpc3V1YjQ0YiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bPZdEfOgBh1de/giphy.gif")' },
-    { id: 'pban_toxic', name: 'TOXIC WASTE', price: 3500, style: 'repeating-linear-gradient(45deg, #000, #000 10px, #1b3a08 10px, #1b3a08 20px)' },
-    { id: 'pban_fire', name: 'HELLFIRE', price: 4000, style: 'url("https://i.makeagif.com/media/3-03-2021/otrneG.gif")' },
-    { id: 'pban_synth', name: 'SYNTHWAVE SUNSET', price: 3800, style: 'linear-gradient(180deg, #ff00ff 0%, #7000ff 100%)' },
-    { id: 'pban_matrix', name: 'MATRIX FALL', price: 5000, style: 'url("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMDMzeGl5ZmlxaHRseHgydGg1bjh6eG0wajFjNXBtbGRsMnFxMnBueCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/EyiufcIwTdF35pNIFS/giphy.gif")' }
-];
+
 
 const FRAMES_DB = [
     { id: 'fr_gold', name: 'GOLDEN GUARDIAN', price: 2000, img: 'https://i.ibb.co/5xBTcv2f/c2feac12-d32a-48f7-8514-eee47faf2e7e-removalai-preview.png' },
@@ -11108,67 +11808,78 @@ switchCurrency('RON');
 // Initialize (Run this once on page load to set RON active)
 
 function renderShop() {
-    const grid = document.getElementById('rechargeGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
+    rechargeGrid.innerHTML = '';
     
+    // Config based on Coin vs Diamond mode
     const isCoins = currentShopMode === 'coins';
     const data = isCoins ? coinPackages : diamondPackages;
     const icon = isCoins ? "https://iili.io/fhc1SKQ.png" : "https://iili.io/fv5bmtj.png";
     const label = isCoins ? "Coins" : "Diamonds";
+    
+    // Determine the color class for the card
     const styleClass = isCoins ? 'pkg-coins' : 'pkg-diamonds';
 
-    // Siguranță: Verificăm dacă obiectul de discount există
-    const discounts = window.activeShopDiscounts || { coins: 0, diamonds: 0 };
-    const discountPct = isCoins ? discounts.coins : discounts.diamonds;
-
     data.forEach(p => {
-        const symbol = SYMBOLS[selectedCurrency] || 'RON';
-        const rate = RATES[selectedCurrency] || 1;
-        const basePrice = p.price / rate;
+        const convertedPrice = (p.price / RATES[selectedCurrency]).toFixed(2);
+        const symbol = SYMBOLS[selectedCurrency];
         
-        let finalPrice = basePrice;
-        let discountHtml = "";
-
-        if (discountPct > 0) {
-            finalPrice = basePrice * (1 - (discountPct / 100));
-            discountHtml = `
-                <div class="shop-discount-badge">-${discountPct}%</div>
-                <span class="old-price-cross">${symbol} ${basePrice.toFixed(2)}</span>
-            `;
-        }
-
         const card = document.createElement('div');
+        // ADDED vault-shine inside
         card.className = `package-card ${styleClass}`;
         card.innerHTML = `
-            ${discountHtml}
             <div class="vault-shine"></div>
             <img src="${icon}">
             <span class="package-count">${p.amount.toLocaleString()}</span>
             <span style="font-size:10px; color:#aaa; margin-bottom:5px;">${label}</span>
-            <span class="price-tag">${symbol} ${finalPrice.toFixed(2)}</span>
+            <span class="price-tag">${symbol} ${convertedPrice}</span>
         `;
         
         card.onclick = () => {
-            openNewPaymentModal(symbol, finalPrice.toFixed(2), p.amount.toLocaleString(), label, isCoins);
+            openNewPaymentModal(symbol, convertedPrice, p.amount.toLocaleString(), label, isCoins);
         };
-        grid.appendChild(card);
+        rechargeGrid.appendChild(card);
     });
 
-    // Păstrează butonul de calculator la final
-    const customCard = document.createElement('div');
-    customCard.className = `package-card ${styleClass}`;
-    customCard.innerHTML = `
+    // Custom Calculator Card
+    const custom = document.createElement('div');
+    custom.className = `package-card ${styleClass}`;
+    custom.innerHTML = `
         <div class="vault-shine"></div>
         <i class="fas fa-calculator" style="font-size:35px; color:${isCoins ? '#ffd700' : '#00ff88'}; margin-bottom:15px; position:relative; z-index:2;"></i>
         <span class="package-count">Custom</span>
-        <span class="price-tag">CALCULATOR</span>
+        <span class="price-tag" style="padding: 8px 15px;">Calculator<br><span style="font-size:10px; color:#aaa;">${selectedCurrency}</span></span>
     `;
-    customCard.onclick = () => {
-        document.getElementById('customModal').classList.add('active');
-        calculatePrice();
-    };
-    grid.appendChild(customCard);
+custom.onclick = () => { 
+            const card = document.getElementById('customCardGlass');
+            const title = document.getElementById('customTitle');
+            const inputLabel = document.getElementById('customInputLabel');
+            const input = document.getElementById('customInput');
+            
+            // 1. Reset Classes
+            card.classList.remove('pay-gold', 'pay-green');
+
+            // 2. Configure for Coins vs Diamonds
+            if(isCoins) {
+                card.classList.add('pay-gold');
+                title.innerText = "CALCULATOR COINS";
+                title.style.textShadow = "0 0 10px rgba(255, 215, 0, 0.5)"; // Gold Glow
+                inputLabel.innerText = "INTRODU NUMĂRUL DE COINS";
+                input.placeholder = "Min. 500";
+            } else {
+                card.classList.add('pay-green');
+                title.innerText = "CALCULATOR DIAMONDS";
+                title.style.textShadow = "0 0 10px rgba(0, 255, 136, 0.5)"; // Green Glow
+                inputLabel.innerText = "INTRODU NUMĂRUL DE DIAMANTE";
+                input.placeholder = "Min. 2";
+            } 
+            
+            // 3. Reset Values & Open
+            input.value = "";
+            document.getElementById('priceVal').innerText = "0.00 RON";
+            calculatePrice(); 
+            document.getElementById('customModal').classList.add('active'); 
+        }
+        rechargeGrid.appendChild(custom);
 }
 
 function openNewPaymentModal(symbol, price, amount, label, isCoins) {
@@ -11701,7 +12412,103 @@ window.processDonation = async () => {
 
 window.activeCosmeticTicket = null; // Stores { category: 'badges', id: 'TICK-123' }
 
+window.openEliteInventory = async (category = 'banners') => {
+    // Ensure correct modal visibility
+    document.getElementById('cosmeticsSelectModal').classList.remove('active');
+    document.getElementById('eliteInventoryModal').classList.add('active');
 
+    const list = document.getElementById('eliteInventoryList');
+    list.innerHTML = '<div style="color:#ff0000; text-align:center; grid-column:span 2; font-family:Orbitron;">> ACCESSING ENCRYPTED STORAGE...</div>';
+
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const data = userSnap.data();
+    list.innerHTML = '';
+    
+    // Tab Active Styles
+    document.getElementById('invTabBanners').style.background = category === 'banners' ? '#ff0000' : 'transparent';
+    document.getElementById('invTabIntros').style.background = category === 'intros' ? '#ff0000' : 'transparent';
+
+    if (category === 'banners') {
+        const owned = data.ownedProfileBanners || [];
+        const equippedId = data.equippedProfileBanner?.id;
+
+        if (owned.length === 0) list.innerHTML = "<div style='color:#555; grid-column:span 2; text-align:center; padding:20px;'>NO BANNERS OWNED</div>";
+
+        owned.forEach(id => {
+            const item = PROFILE_BANNERS_DB.find(x => x.id === id);
+            if (!item) return;
+            const isEq = (id === equippedId);
+            list.innerHTML += `
+                <div class="bm-offer-card-v4" style="${isEq ? 'border-color:#00ff88 !important;' : ''}">
+                    <div class="p-ban-preview ${item.cssClass}" style="height:50px; margin-bottom:10px;"></div>
+                    <div style="font-size:10px; color:#fff; margin-bottom:10px;">${item.name}</div>
+                    ${isEq 
+                        ? `<button class="bm-price-btn-v4" style="background:#ff4757 !important; color:#fff;" onclick="unequipProfileItem('banner')">UNEQUIP</button>`
+                        : `<button class="bm-price-btn-v4" onclick="equipProfileItem('banner', '${item.id}', '${item.cssClass}')">EQUIP</button>`
+                    }
+                </div>`;
+        });
+    } else {
+        const owned = data.ownedIntros || [];
+        const equippedId = data.equippedIntro?.id;
+
+        if (owned.length === 0) list.innerHTML = "<div style='color:#555; grid-column:span 2; text-align:center; padding:20px;'>NO INTROS OWNED</div>";
+
+        owned.forEach(id => {
+            const item = PROFILE_INTROS_DB.find(x => x.id === id);
+            if (!item) return;
+            const isEq = (id === equippedId);
+            list.innerHTML += `
+                <div class="bm-offer-card-v4" style="${isEq ? 'border-color:#00ff88 !important;' : ''}">
+                    <div class="audio-play-btn" style="margin:0 auto 10px;" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
+                    <div style="font-size:10px; color:#fff; margin-bottom:10px;">${item.name}</div>
+                    ${isEq 
+                        ? `<button class="bm-price-btn-v4" style="background:#ff4757 !important; color:#fff;" onclick="unequipProfileItem('intro')">UNEQUIP</button>`
+                        : `<button class="bm-price-btn-v4" onclick="equipProfileItem('intro', '${item.id}', '${item.audio}')">EQUIP</button>`
+                    }
+                </div>`;
+        });
+    }
+};
+
+window.unequipProfileItem = async (type) => {
+    try {
+        const field = type === 'banner' ? 'equippedProfileBanner' : 'equippedIntro';
+        await updateDoc(doc(db, "accounts", auth.currentUser.uid), { [field]: null });
+        
+        if(type === 'intro' && currentAudio) { currentAudio.pause(); currentAudio = null; }
+
+        await showCustomAlert(`${type.toUpperCase()} DEZECHIPAT!`, "REUȘIT");
+        
+        // Refresh specific view
+        if (document.getElementById('introShopModal').classList.contains('active')) {
+            openProfileIntroShop();
+        } else {
+            openEliteInventory(type === 'banner' ? 'banners' : 'intros');
+        }
+    } catch(e) { console.error(e); }
+};
+
+window.equipProfileItem = async (type, id, value) => {
+    try {
+        const field = type === 'banner' ? 'equippedProfileBanner' : 'equippedIntro';
+        // Stores { id: 'pban_cyber', cssClass: 'p-ban-cyber' } OR { id: 'intro_1', audio: 'url...' }
+        const obj = type === 'banner' ? { id, cssClass: value } : { id, audio: value };
+        
+        await updateDoc(doc(db, "accounts", auth.currentUser.uid), { [field]: obj });
+        alert("Echipat!");
+        openEliteInventory(type === 'banner' ? 'banners' : 'intros');
+    } catch(e) { console.error(e); }
+};
+
+window.unequipProfileItem = async (type) => {
+    try {
+        const field = type === 'banner' ? 'equippedProfileBanner' : 'equippedIntro';
+        await updateDoc(doc(db, "accounts", auth.currentUser.uid), { [field]: null });
+        alert("Dezechipat!");
+        openEliteInventory(type === 'banner' ? 'banners' : 'intros');
+    } catch(e) { console.error(e); }
+};
 
 window.openBadgeShop = async () => {
     if(!auth.currentUser) return alert("Loghează-te!");
@@ -13640,16 +14447,16 @@ rewards: [
     color: '#ffffff', 
     stockRange: [5, 10], 
     img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20chest%20close%20%20(2).png?alt=media&token=b23d04ee-ce8c-43d7-b2a8-315255e62ca6', 
-    imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20Chest%20Open.png?alt=media&token=68f031ce-57e2-44b2-b9e0-32453d4d1f10',
+    imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20Chest%20Open%20.png?alt=media&token=68f031ce-57e2-44b2-b9e0-32453d4d1f10',
     rewards: [
-        { tier: 'LEGENDARY', label: '20,000 COINS', icon: 'https://iili.io/fhc1SKQ.png', chance: 71.7, style: 'tier-legendary' },
+        { tier: 'LEGENDARY', label: '20,000 COINS', icon: 'https://iili.io/fhc1SKQ.png', chance: 70, style: 'tier-legendary' },
         { tier: 'MYTHIC', label: 'RANDOM ELITE BADGE', icon: '', chance: 15, style: 'tier-mythic' },
         { tier: 'EXOTIC', label: 'DIAMOND VOUCHER', icon: '', chance: 8, style: 'tier-exotic' },
-        { tier: 'OMEGA', label: 'RANDOM PROFILE INTRO', icon: '', chance: 5, style: 'tier-rare' },
+        { tier: 'OMEGA', label: 'RANDOM PROFILE INTRO', icon: '', chance: 5, style: 'tier-omega' },
         { tier: 'ABYSSAL', label: '500 DIAMONDS', icon: 'https://iili.io/fv5bmtj.png', chance: 0.2, style: 'tier-abyssal' },
-        { tier: 'CELESTIAL', label: '500,000 COINS', icon: 'https://iili.io/fhc1SKQ.png', chance: 0.1, style: 'm-celestial' }
+        { tier: 'CELESTIAL', label: 'FULL CELESTIAL SET', icon: '', chance: 0.5, style: 'tier-celestial' }
     ]
-},
+}
 ];
 
 
@@ -13816,7 +14623,6 @@ window.openPrizeView = () => {
         'FRAME VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FFrame%20discount%20cupon%20.png?alt=media&token=c49a5fb2-06e8-4df5-bcf3-ed37afd1cdef',
         'TEXT VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f',
         'CURRENCY VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d',
-        'DIAMOND VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FDiamonds%20Reduction%20cupon%20.png?alt=media&token=7fbf7d4f-78e1-4ea1-934e-619016889b84',
         'BM VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d'
     };
 
@@ -13826,6 +14632,7 @@ window.openPrizeView = () => {
         let visualHtml = "";
         const slotID = `shuf_${idx}_${Math.floor(Math.random()*999)}`;
 
+        // --- THE ANIMATION ENGINE ---
         if(r.label === 'RANDOM BADGE') {
             visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
             setTimeout(() => {
@@ -13833,30 +14640,8 @@ window.openPrizeView = () => {
                 if(el) setInterval(() => {
                     if (!document.getElementById('prizeListModal').classList.contains('active')) return;
                     const b = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
-                    el.innerHTML = `<span class="shop-badge-preview" style="background:${b.color} !important; color:#000 !important; font-size:8px;">${b.text}</span>`;
+                    el.innerHTML = `<span class="shop-badge-preview" style="background:${b.color} !important; color:#000 !important; font-size:9px;">${b.text}</span>`;
                 }, 600);
-            }, 100);
-        }
-        else if(r.label === 'RANDOM ELITE BADGE') {
-            visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
-            setTimeout(() => {
-                const el = document.getElementById(slotID);
-                if(el) setInterval(() => {
-                    if (!document.getElementById('prizeListModal').classList.contains('active')) return;
-                    const elites = BADGES_DB.filter(b => b.isElite);
-                    const b = elites[Math.floor(Math.random() * elites.length)];
-                    el.innerHTML = `<span class="${b.animClass} elite-gif-badge" style="font-size:7px; padding:4px 8px;">${b.text}</span>`;
-                }, 600);
-            }, 100);
-        }
-        else if(r.label === 'RANDOM PROFILE INTRO') {
-            visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
-            setTimeout(() => {
-                const el = document.getElementById(slotID);
-                if(el) setInterval(() => {
-                    if (!document.getElementById('prizeListModal').classList.contains('active')) return;
-                    el.innerHTML = `<i class="fas fa-play-circle" style="color:#00e5ff; font-size:35px; filter:drop-shadow(0 0 10px #00e5ff);"></i>`;
-                }, 400);
             }, 100);
         }
         else if(r.label === 'RANDOM FRAME' || r.label === 'EXCLUSIVE FRAME') {
@@ -13870,22 +14655,13 @@ window.openPrizeView = () => {
                 }, 600);
             }, 100);
         }
-else if(r.label === '500,000 COINS') {
-    visualHtml = `
-        <div style="display: flex; align-items: center; gap: 30px;">
-            <!-- Large Glowing Coin -->
-            <div style="position:relative;">
-                <img src="https://iili.io/fhc1SKQ.png" style="height:110px; width: auto; filter: drop-shadow(0 0 40px #fff) brightness(1.2);">
-                <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:150px; height:150px; background:radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%); z-index:-1; animation: pulse 1s infinite alternate;"></div>
-            </div>
-            
-            <!-- Jackpot Text (Visible clearly on Wide PC view) -->
-            <div style="text-align: left;" class="pc-only-jackpot-text">
-                <div style="font-family:'Montserrat'; font-weight:900; font-size:42px; color:#fff; text-shadow:0 0 20px #ffd700; line-height:1;">500,000</div>
-                <div style="font-family:'Orbitron'; font-size:14px; color:#ffd700; letter-spacing:5px; margin-top:5px;">COINS JACKPOT</div>
-            </div>
-        </div>`;
-}
+        else if(r.label === 'MILIARDAR') {
+            const b = BADGES_DB.find(x => x.id === 'b_miliardar');
+            visualHtml = `<span class="shop-badge-preview" style="background:${b.color} !important; color:#000 !important; font-weight:900;">${b.text}</span>`;
+        }
+        else if(r.label === 'SINGULARITY') {
+            visualHtml = `<span class="shop-badge-preview badge-singularity" style="padding:10px 15px;"><i class="fas fa-atom"></i> SINGULARITY</span>`;
+        }
         else if(VOUCHER_MAP[r.label]) {
             visualHtml = `<img src="${VOUCHER_MAP[r.label]}" style="height:55px; width:auto;">`;
         } else {
@@ -14113,21 +14889,24 @@ window.revealReward = async () => {
 
 
 
-// --- CELESTIAL BOX MATH ---
+// --- CELESTIAL BOX LOGIC ---
 else if (lockedBox.id === 'box_celestial') {
-    if (roll <= 0.1) { // 0.1% JACKPOT
-        results.winCoins += 500000;
-        results.isJackpot = true; // Flag for a special alert
-    } else if (roll <= 0.3) { // 0.2% ABYSSAL
+    if (roll <= 0.5) { // Celestial (0.5%)
+        results.wonBadges.push({ id: 'eb_celestial_god', text: 'CELESTIAL GOD', isElite: true, animClass: 'badge-celestial-god', icon: 'fa-sun' });
+        results.wonTickets.push({ category: 'banners', label: 'CELESTIAL BANNER' }); // We'll handle this as an unlock
+        results.winCelestialSet = true; // Special flag
+    } else if (roll <= 2.0) { // Abyssal (1.5%)
         results.winDiamonds += 500;
-    } else if (roll <= 5.3) { // 5% OMEGA
-        results.wonTickets.push({ category: 'texts', tier: 'OMEGA', label: 'RANDOM PROFILE INTRO' });
-    } else if (roll <= 13.3) { // 8% EXOTIC
+    } else if (roll <= 7.0) { // Omega (5%)
+        const intro = PROFILE_INTROS_DB[Math.floor(Math.random() * PROFILE_INTROS_DB.length)];
+        results.wonIntros = results.wonIntros || [];
+        results.wonIntros.push(intro.id);
+    } else if (roll <= 15.0) { // Exotic (8%)
         results.wonTickets.push({ category: 'diamonds', tier: 'EXOTIC', label: 'DIAMOND VOUCHER' });
-    } else if (roll <= 28.3) { // 15% MYTHIC
-        const elites = BADGES_DB.filter(b => b.isElite);
-        results.wonBadges.push(elites[Math.floor(Math.random() * elites.length)]);
-    } else { // 71.7% LEGENDARY
+    } else if (roll <= 30.0) { // Mythic (15%)
+        const eliteBadges = BADGES_DB.filter(b => b.isElite);
+        results.wonBadges.push(eliteBadges[Math.floor(Math.random() * eliteBadges.length)]);
+    } else { // Legendary (70%)
         results.winCoins += 20000;
     }
 }
@@ -14186,6 +14965,17 @@ else if (lockedBox.id === 'box_celestial') {
                 coins: increment(results.winCoins), 
                 diamonds: increment(results.winDiamonds) 
             };
+
+
+// Inside revealReward database update block:
+if(results.wonIntros && results.wonIntros.length > 0) {
+    batchUpdate.ownedIntros = arrayUnion(...results.wonIntros);
+}
+if(results.winCelestialSet) {
+    // Manually unlock the set items in DB
+    batchUpdate.ownedBanners = arrayUnion('eb_ban_celestial');
+    batchUpdate.ownedTexts = arrayUnion('t_celestial_king');
+}
             
             if(results.wonBadges.length > 0) {
                 batchUpdate.ownedBadges = arrayUnion(...results.wonBadges.map(b => b.id));
@@ -14209,11 +14999,6 @@ else if (lockedBox.id === 'box_celestial') {
         } else {
             showFinalBoxReward(results, lockedBox); 
         }
-
-if (results.isJackpot) {
-    // Play a special sound if you have one, or just show a massive alert
-    showCustomAlert("🎰 CELESTIAL JACKPOT!!! <br><br> Ai spart sistemul și ai câștigat <span style='color:#ffd700; font-size:20px;'>500,000 COINS</span>!", "SISTEM_CRITICAL_WIN");
-}
         
         lastPurchasedQty = 0;
     }, 1200);
@@ -14490,130 +15275,43 @@ window.openSubCoupon = (type) => {
     });
 };
 
-let currentScratchDiscount = 0;
-let currentScratchType = 'coins'; // 'coins' or 'diamonds'
+// FUNCȚIA 1: Pentru activare directă (Cea pe care ai postat-o tu)
+window.activateCoupon = (id, category) => {
+    console.log("Direct Activation Triggered for:", category, "ID:", id);
 
-// State for active discounts in the shop
-window.activeShopDiscounts = {
-    coins: 0,
-    diamonds: 0
+    // 1. Stabilim sesiunea de "Free Item"
+    window.activeCosmeticTicket = { id: id, category: category };
+    
+    // 2. Închidem modalele de cupoane
+    closeModal('subCouponModal');
+    closeModal('couponInventoryModal');
+    
+    // 3. Notificăm utilizatorul
+    showCustomAlert(
+        `Tichetul a fost activat!<br><br>Următorul obiect ales din categoria <b>${category.toUpperCase()}</b> va fi <span style="color:#00ff88; font-weight:900;">GRATUIT</span>.`, 
+        "GRATUIT"
+    );
+    
+    // 4. Deschidem magazinul corespunzător
+    if(category === 'badges') openBadgeShop();
+    if(category === 'frames') openFrameShop();
+    if(category === 'banners') openBannerShop();
+    if(category === 'texts') openTextShop();
 };
 
-// --- REDEEM TRIGGER (Updated) ---
+// FUNCȚIA 2: Pentru tichetele care merg în Terminal (Coins/Diamonds)
+// Asta rezolvă eroarea "activateCouponCode is not defined"
 window.activateCouponCode = (code) => {
-    const isCoinVoucher = code.includes("COIN") || code.toLowerCase().includes("coins");
-    const isDiamondVoucher = code.includes("DIAMOND") || code.toLowerCase().includes("diamonds");
-
-    if (isCoinVoucher || isDiamondVoucher) {
+    console.log("Transferring code to terminal:", code);
+    const input = document.getElementById('couponInput');
+    if (input) {
+        input.value = code;
         closeModal('subCouponModal');
         closeModal('couponInventoryModal');
-        initScratchTicket(isCoinVoucher ? 'coins' : 'diamonds');
-    } else {
-        // Original logic for normal codes
-        const input = document.getElementById('couponInput');
-        if (input) {
-            input.value = code;
-            closeModal('subCouponModal');
-            closeModal('couponInventoryModal');
-            showCustomAlert("Codul a fost introdus. Apasă VALIDATE!", "SISTEM GATA");
-        }
+        showCustomAlert("Codul a fost introdus în Terminal.<br>Apasă <b>VALIDATE_CREDENTIALS</b>!", "SISTEM GATA");
     }
 };
 
-// --- SCRATCH TICKET ENGINE ---
-function initScratchTicket(type) {
-    currentScratchType = type;
-    const overlay = document.getElementById('scratcherOverlay');
-    const card = document.getElementById('ticketCard');
-    const canvas = document.getElementById('scratchCanvas');
-    const ctx = canvas.getContext('2d');
-    const applyBtn = document.getElementById('applyReductionBtn');
-    
-    // Reset UI
-    overlay.style.display = 'flex';
-    applyBtn.style.display = 'none';
-    card.className = `scratcher-container ticket-${type}`;
-    document.getElementById('ticketTitle').innerText = `${type.toUpperCase()} VOUCHER`;
-
-    // Generate Random Discount (25% to 80%)
-    const possibleDiscounts = [25, 30, 35, 40, 50, 60, 70, 75, 80];
-    currentScratchDiscount = possibleDiscounts[Math.floor(Math.random() * possibleDiscounts.length)];
-    document.getElementById('revealedPercent').innerText = `${currentScratchDiscount}%`;
-
-    // Setup Canvas
-    canvas.width = 260;
-    canvas.height = 160;
-
-    // Draw Cover (Metallic Grey)
-    ctx.fillStyle = '#444';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Add "Scratch Me" texture
-    ctx.fillStyle = '#555';
-    for(let i=0; i<100; i++) {
-        ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 2, 2);
-    }
-
-    // Scratch Logic
-    let isDrawing = false;
-
-    function scratch(e) {
-        if (!isDrawing) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX || e.touches[0].clientX) - rect.left;
-        const y = (e.clientY || e.touches[0].clientY) - rect.top;
-
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.beginPath();
-        ctx.arc(x, y, 20, 0, Math.PI * 2);
-        ctx.fill();
-        
-        checkScratchCompletion();
-    }
-
-    function checkScratchCompletion() {
-        const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-        let transparent = 0;
-        for (let i = 0; i < pixels.length; i += 4) {
-            if (pixels[i + 3] === 0) transparent++;
-        }
-        
-        // If 40% scratched, reveal all
-        if (transparent / (canvas.width * canvas.height) > 0.4) {
-            canvas.style.transition = '1s';
-            canvas.style.opacity = '0';
-            setTimeout(() => {
-                canvas.style.display = 'none';
-                applyBtn.style.display = 'block';
-            }, 500);
-        }
-    }
-
-    canvas.addEventListener('mousedown', () => isDrawing = true);
-    canvas.addEventListener('touchstart', () => isDrawing = true);
-    window.addEventListener('mouseup', () => isDrawing = false);
-    window.addEventListener('touchend', () => isDrawing = false);
-    canvas.addEventListener('mousemove', scratch);
-    canvas.addEventListener('touchmove', scratch);
-}
-
-window.applyScratchedDiscount = () => {
-    // Save to global state
-    window.activeShopDiscounts[currentScratchType] = currentScratchDiscount;
-    
-    document.getElementById('scratcherOverlay').style.display = 'none';
-    
-    showCustomAlert(
-        `Cod de securitate aplicat! Ai deblocat o reducere de <b>${currentScratchDiscount}%</b> la toate pachetele de <b>${currentScratchType.toUpperCase()}</b>!`, 
-        "SISTEM ACTUALIZAT"
-    );
-
-    // Refresh the shop items
-    renderShop();
-    
-    // Auto-scroll to vault to show off the new prices
-    scrollToZone('zone-vault');
-};
 
 window.handleExclusiveFrameChoice = async () => {
     const userOwned = window.currentUserData.ownedFrames || [];
@@ -14652,14 +15350,28 @@ window.showFinalBoxReward = async (res, box) => {
     const modal = document.getElementById('rewardModal');
     const titleEl = modal.querySelector('h2');
     const container = modal.querySelector('p');
-    
     modal.querySelector('.reward-coins-box').style.display = 'none';
+
     titleEl.innerText = box.id === 'box_void' ? "VOID_BREACH_SUCCESS" : "DECRYPTION_SUCCESS";
     titleEl.style.color = box.id === 'box_void' ? "#7000ff" : "#00ffcc";
 
     let html = `<div style="display:flex; flex-direction:column; gap:15px; align-items:center; width:100%; max-height:400px; overflow-y:auto; padding:10px; scrollbar-width:none;">`;
 
-    // --- 1. BADGES ---
+    // --- 1. IMAGINI MANUALE PENTRU GRUPARE ---
+    const TICKET_IMGS = {
+        // Categoriile de Cosmetice (Verde)
+        badges: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
+        banners: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
+        frames: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
+        texts: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
+        // Curency (Gold)
+        coins: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d',
+        diamonds: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d',
+        // Black Market (Yellow Elite)
+        blackmarket: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d'
+    };
+
+    // --- 2. GRUPARE BADGE-URI ---
     const badgeMap = {};
     res.wonBadges.forEach(b => {
         if(!b) return;
@@ -14669,42 +15381,16 @@ window.showFinalBoxReward = async (res, box) => {
 
     Object.values(badgeMap).forEach(entry => {
         const b = entry.item;
-        let badgeStyleHtml = "";
-        if (b.id === 'b_singularity') {
-            badgeStyleHtml = `<span class="badge-singularity" style="padding:8px 15px; font-size:11px;"><i class="fas fa-atom"></i> SINGULARITY</span>`;
-        } else if (b.isElite) {
-            badgeStyleHtml = `<span class="${b.animClass} elite-gif-badge" style="font-size:10px; padding:6px 12px;">${b.text}</span>`;
-        } else {
-            badgeStyleHtml = `<span class="shop-badge-preview" style="background:${b.color} !important; color:#000 !important; padding:5px 10px; font-weight:900; border-radius:4px; font-size:11px; display:inline-block;">${b.text}</span>`;
-        }
         html += `
-            <div style="border:1px solid ${box.color || '#7000ff'}; padding:15px; border-radius:15px; background:rgba(0,0,0,0.4); width:95%; position:relative; text-align:center; display:flex; justify-content:center; align-items:center; min-height:60px;">
-                ${badgeStyleHtml}
-                ${entry.count > 1 ? `<span style="position:absolute; top:-10px; right:-5px; background:#ff4757; color:#fff; padding:2px 8px; border-radius:50px; font-family:'Orbitron'; font-size:12px; font-weight:900; border:2px solid #fff; z-index:10;">x${entry.count}</span>` : ''}
+            <div style="border:1px solid #7000ff; padding:12px; border-radius:12px; background:rgba(255,255,255,0.03); width:90%; position:relative; text-align:center;">
+                <span class="shop-badge-preview ${b.animClass || ''}" style="background:${b.color} !important; color:#000 !important; padding:5px 10px; font-weight:900; border-radius:4px; font-size:11px;">
+                    <i class="fas ${b.icon}"></i> ${b.text}
+                </span>
+                ${entry.count > 1 ? `<span style="position:absolute; top:-12px; right:-5px; background:#ff4757; color:#fff; padding:2px 10px; border-radius:50px; font-family:'Orbitron'; font-size:12px; font-weight:900; border:2px solid #fff;">x${entry.count}</span>` : ''}
             </div>`;
     });
 
-    // --- 2. VOUCHERS (FIXED IMAGES & TEXT) ---
-    const TICKET_DATA = {
-        diamonds: {
-            img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FDiamonds%20Reduction%20cupon%20.png?alt=media&token=7fbf7d4f-78e1-4ea1-934e-619016889b84',
-            label: 'DIAMOND VOUCHER'
-        },
-        coins: {
-            img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d',
-            label: 'COINS VOUCHER'
-        },
-        blackmarket: {
-            img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d',
-            label: 'ELITE VOUCHER'
-        },
-        // Generic Cosmetics (Badges, Banners, Frames, Texts)
-        default: {
-            img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
-            label: 'COSMETIC VOUCHER'
-        }
-    };
-
+    // --- 3. GRUPARE TICHETE (CU IMAGINI CORECTE) ---
     const ticketMap = {};
     res.wonTickets.forEach(t => {
         ticketMap[t.category] = (ticketMap[t.category] || { item: t, count: 0 });
@@ -14713,20 +15399,20 @@ window.showFinalBoxReward = async (res, box) => {
 
     Object.values(ticketMap).forEach(entry => {
         const t = entry.item;
-        // Use specific data if it exists, otherwise use the cosmetic default
-        const info = TICKET_DATA[t.category] || TICKET_DATA.default;
+        const imgUrl = TICKET_IMGS[t.category] || TICKET_IMGS.blackmarket;
+        const labelText = t.category === 'blackmarket' ? 'BM VOUCHER' : (t.category === 'coins' || t.category === 'diamonds' ? 'CURRENCY VOUCHER' : 'COSMETIC VOUCHER');
 
         html += `
-            <div style="border:1px solid #00ffcc; padding:10px; border-radius:12px; background:rgba(0,255,204,0.05); width:95%; display:flex; align-items:center; gap:15px; justify-content:center; position:relative;">
-                <img src="${info.img}" style="height:45px; width:auto; filter: drop-shadow(0 0 5px #00ffcc);">
-                <div style="font-family:'Orbitron'; font-size:10px; color:#fff; font-weight:800; text-align:left;">${info.label}<br><span style="color:#00ffcc; font-size:8px;">UNLOCKED</span></div>
-                ${entry.count > 1 ? `<span style="position:absolute; top:-10px; right:-5px; background:#00ffcc; color:#000; padding:2px 8px; border-radius:50px; font-family:'Orbitron'; font-size:12px; font-weight:900; border:2px solid #fff;">x${entry.count}</span>` : ''}
+            <div style="border:1px solid #00ffcc; padding:10px; border-radius:12px; background:rgba(0,255,204,0.05); width:90%; display:flex; align-items:center; gap:10px; justify-content:center; position:relative;">
+                <img src="${imgUrl}" style="height:40px; width:auto; filter:none;">
+                <div style="font-family:'Orbitron'; font-size:10px; color:#fff; font-weight:800;">${labelText} UNLOCKED</div>
+                ${entry.count > 1 ? `<span style="position:absolute; top:-12px; right:-5px; background:#00ffcc; color:#000; padding:2px 10px; border-radius:50px; font-family:'Orbitron'; font-size:12px; font-weight:900; border:2px solid #fff;">x${entry.count}</span>` : ''}
             </div>`;
     });
 
-    // --- 3. RAW CURRENCY ---
-    if(res.winCoins > 0) html += `<div class="reward-line" style="color:#ffd700; font-size:24px; font-weight:900; margin-top:10px;"><img src="https://iili.io/fhc1SKQ.png" style="height:30px; width:auto;"> +${res.winCoins.toLocaleString()}</div>`;
-    if(res.winDiamonds > 0) html += `<div class="reward-line" style="color:#00ff88; font-size:24px; font-weight:900;"><img src="https://iili.io/fv5bmtj.png" style="height:25px; width:auto;"> +${res.winDiamonds}</div>`;
+    // --- 4. VALUTĂ ---
+    if(res.winCoins > 0) html += `<div class="reward-line" style="color:#ffd700; font-size:22px; font-weight:900; margin-top:10px;"><img src="https://iili.io/fhc1SKQ.png" style="height:30px; width:auto;"> +${res.winCoins.toLocaleString()}</div>`;
+    if(res.winDiamonds > 0) html += `<div class="reward-line" style="color:#00ff88; font-size:22px; font-weight:900;"><img src="https://iili.io/fv5bmtj.png" style="height:25px; width:auto;"> +${res.winDiamonds}</div>`;
 
     html += `</div>`;
     container.innerHTML = html;
@@ -14832,105 +15518,171 @@ window.buyEliteItem = async (id, price, type) => {
 
 
 
-// --- PREVIEW AUDIO SYSTEM ---
-let currentPreview = null;
+
+
+let currentAudio = null;
+
 window.previewAudio = (url, btn) => {
-    if (currentPreview) {
-        currentPreview.pause();
-        document.querySelectorAll('.btn-preview-audio').forEach(b => b.classList.remove('playing', 'fa-stop'));
-        document.querySelectorAll('.btn-preview-audio i').forEach(i => { i.classList.add('fa-play'); i.classList.remove('fa-stop'); });
-        if (currentPreview.src === url) { currentPreview = null; return; }
+    // If clicking the SAME button that is already playing
+    if (currentAudio && currentAudio.src === url) {
+        if (!currentAudio.paused) {
+            currentAudio.pause();
+            btn.classList.remove('playing');
+            btn.innerHTML = '<i class="fas fa-play"></i>';
+            return;
+        } else {
+            currentAudio.play();
+            btn.classList.add('playing');
+            btn.innerHTML = '<i class="fas fa-pause"></i>';
+            return;
+        }
     }
-    currentPreview = new Audio(url);
-    currentPreview.play();
+
+    // If clicking a NEW button, stop the previous one
+    if (currentAudio) {
+        currentAudio.pause();
+        document.querySelectorAll('.audio-play-btn').forEach(b => {
+            b.classList.remove('playing');
+            b.innerHTML = '<i class="fas fa-play"></i>';
+        });
+    }
+
+    const audio = new Audio(url);
+    audio.play();
+    currentAudio = audio;
     btn.classList.add('playing');
-    const icon = btn.querySelector('i');
-    icon.classList.remove('fa-play');
-    icon.classList.add('fa-stop');
-    currentPreview.onended = () => {
+    btn.innerHTML = '<i class="fas fa-pause"></i>';
+
+    audio.onended = () => {
         btn.classList.remove('playing');
-        icon.classList.add('fa-play');
-        icon.classList.remove('fa-stop');
-        currentPreview = null;
+        btn.innerHTML = '<i class="fas fa-play"></i>';
+        currentAudio = null;
     };
 };
-
-// --- OPEN INTRO SHOP (FIXED) ---
-window.openProfileIntroShop = async () => {
-    const list = document.getElementById('introList');
-    const shopModal = document.getElementById('introShopModal');
-    
-    if(!list || !shopModal) return console.error("Intro elements not found");
-
-    // Close BOTH possible selection modals to be safe
-    document.getElementById('profilePrestigeModal').classList.remove('active');
-    document.getElementById('eliteCosmeticsModal').classList.remove('active');
-    
-    // Open the Intro Shop
-    shopModal.classList.add('active');
-    list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">> DECRYPTING AUDIO MODULES...</div>';
-    
-    // Safety check for user data
-    const userOwned = (window.currentUserData && window.currentUserData.ownedIntros) ? window.currentUserData.ownedIntros : [];
-
-    list.innerHTML = '';
-    PROFILE_INTROS_DB.forEach(item => {
-        const isOwned = userOwned.includes(item.id);
-        const card = document.createElement('div');
-        card.className = 'v4-badge-item';
-        card.style.display = 'flex';
-        card.style.justifyContent = 'space-between';
-        card.style.alignItems = 'center';
-        card.style.padding = '15px 20px';
-        card.style.marginBottom = '10px';
-
-        card.innerHTML = `
-            <div style="text-align:left;">
-                <div style="font-family:'Orbitron'; font-weight:800; font-size:14px; color:#fff;">${item.name}</div>
-                <div style="color:var(--gold); font-weight:800; font-size:12px; margin-top:5px;">${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="12"></div>
-            </div>
-            <div style="display:flex; gap:15px; align-items:center;">
-                <div class="btn-preview-audio" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
-                ${isOwned ? '<span class="owned-label" style="color:#00ff88; font-weight:900; font-family:Orbitron; font-size:10px;">DEȚINUT</span>' : 
-                `<button class="bm-price-btn-v4" style="min-width:80px;" onclick="buyPrestige('${item.id}', ${item.price}, 'intro')">CUMPĂRĂ</button>`}
-            </div>
-        `;
-        list.appendChild(card);
-    });
-};
-
-// --- OPEN BANNER SHOP (FIXED) ---
+// --- PROFILE BANNERS SHOP (UPDATED FOR ANIMATIONS) ---
 window.openProfileBannerShop = async () => {
-    const list = document.getElementById('pBannerList');
-    const shopModal = document.getElementById('pBannerShopModal');
-
-    if(!list || !shopModal) return console.error("Banner elements not found");
-
-    // Close BOTH possible selection modals to be safe
+    if(!auth.currentUser) return;
+    
+    // 1. Close the Menu
     document.getElementById('profilePrestigeModal').classList.remove('active');
-    document.getElementById('eliteCosmeticsModal').classList.remove('active');
     
-    // Open the Banner Shop
-    shopModal.classList.add('active');
-    list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">> LOADING VISUALS...</div>';
-    
-    const userOwned = (window.currentUserData && window.currentUserData.ownedPBanners) ? window.currentUserData.ownedPBanners : [];
+    // 2. Open the Shop
+    const modal = document.getElementById('pBannerShopModal');
+    const list = document.getElementById('pBannerShopList');
+    list.innerHTML = '<div style="color:#fff; text-align:center;">LOADING ASSETS...</div>';
+    modal.classList.add('active');
+
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const owned = userSnap.data().ownedProfileBanners || [];
 
     list.innerHTML = '';
     PROFILE_BANNERS_DB.forEach(item => {
-        const isOwned = userOwned.includes(item.id);
+        const isOwned = owned.includes(item.id);
         const card = document.createElement('div');
-        card.className = 'shop-badge-item';
+        card.className = 'bm-offer-card-v4';
+        card.style.padding = "15px";
+        
+        // --- NEW: Inject extra layer for complex animations (Cyber & Void) ---
+        let innerHtml = '';
+        if (item.id === 'pban_cyber' || item.id === 'pban_void') {
+            innerHtml = '<div class="overlay"></div>';
+        }
+
+card.innerHTML = `
+        <!-- The Preview Box -->
+        <div class="p-ban-preview ${item.cssClass}">
+            ${(item.id === 'pban_cyber' || item.id === 'pban_void') ? '<div class="overlay"></div>' : ''}
+        </div>
+        
+        <!-- Title and Buttons below -->
+        <div class="bm-title-v4" style="font-size:12px;">${item.name}</div>
+        
+        ${isOwned 
+            ? `<div style="color:#00ff88; font-weight:900; font-size:10px; margin-top:10px;">DEȚINUT</div>` 
+            : `<button class="bm-price-btn-v4" onclick="buyProfileItem('banner', '${item.id}', ${item.price})" style="background:#fff !important; color:#000; width:100%; margin-top:10px;">
+                 ${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" style="width:12px;">
+               </button>`
+        }
+    `;
+        list.appendChild(card);
+    });
+};
+
+// --- PROFILE INTROS SHOP (FIXED) ---
+window.openProfileIntroShop = async () => {
+    if(!auth.currentUser) return;
+
+    // 1. Close the Menu
+    document.getElementById('profilePrestigeModal').classList.remove('active');
+
+    // 2. Open the Shop
+    const modal = document.getElementById('introShopModal');
+    const list = document.getElementById('introShopList');
+    list.innerHTML = '<div style="color:#fff; text-align:center;">LOADING AUDIO...</div>';
+    modal.classList.add('active');
+
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const owned = userSnap.data().ownedIntros || [];
+
+    list.innerHTML = '';
+    PROFILE_INTROS_DB.forEach(item => {
+        const isOwned = owned.includes(item.id);
+        const card = document.createElement('div');
+        card.className = 'bm-offer-card-v4';
+        card.style.flexDirection = "row";
+        card.style.justifyContent = "space-between";
+        card.style.alignItems = "center";
+        card.style.padding = "15px";
+
         card.innerHTML = `
-            <div style="width:100%; height:60px; border-radius:10px; background:${item.bgColor || 'transparent'}; background-image:${item.style}; background-size:${item.bgSize || 'cover'}; border:1px solid rgba(255,255,255,0.1);"></div>
-            <div style="font-family:'Orbitron'; font-size:11px; margin:10px 0; color:#fff;">${item.name}</div>
-            <div class="shop-badge-price" style="margin-bottom:10px;">
-                ${isOwned ? '<span style="color:#00ff88; font-weight:900;">DEȚINUT</span>' : `${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="14">`}
+            <div style="display:flex; align-items:center; gap:15px;">
+                <div class="audio-play-btn" onclick="previewAudio('${item.audio}', this)">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div style="text-align:left;">
+                    <div class="bm-title-v4" style="margin:0; font-size:12px;">${item.name}</div>
+                    <div style="font-size:9px; color:#aaa;">Audio Track</div>
+                </div>
             </div>
-            ${isOwned ? '' : `<button class="bm-price-btn-v4" style="width:100%;" onclick="buyPrestige('${item.id}', ${item.price}, 'banner')">DEBLOCHEAZĂ</button>`}
+            
+            <div>
+                ${isOwned 
+                    ? `<div style="color:#00ff88; font-weight:900; font-size:10px;">DEȚINUT</div>` 
+                    : `<button class="bm-price-btn-v4" onclick="buyProfileItem('intro', '${item.id}', ${item.price})" style="background:#ff0000 !important; color:#fff; font-size:10px; padding:8px 15px;">
+                         ${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" style="width:10px;">
+                       </button>`
+                }
+            </div>
         `;
         list.appendChild(card);
     });
+};
+
+// --- BUY FUNCTION ---
+window.buyProfileItem = async (type, id, price) => {
+    if(!auth.currentUser) return;
+    
+    // Check Coins
+    const userRef = doc(db, "accounts", auth.currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    if((userSnap.data().coins || 0) < price) return showCustomAlert("Nu ai destui coins!", "SĂRĂCIE");
+
+    if(!(await showCustomConfirm(`Cumperi pentru ${price} Coins?`, "CONFIRMĂ"))) return;
+
+    const field = type === 'banner' ? 'ownedProfileBanners' : 'ownedIntros';
+
+    try {
+        await updateDoc(userRef, {
+            coins: increment(-price),
+            [field]: arrayUnion(id)
+        });
+        await logTransaction(-price, "COINS", "Elite Shop", `Bought ${type}: ${id}`);
+        showCustomAlert("Achiziție reușită!", "SUCCES");
+        
+        // Refresh
+        if(type === 'banner') openProfileBannerShop();
+        else openProfileIntroShop();
+    } catch(e) { console.error(e); }
 };
 </script>
 </body>
