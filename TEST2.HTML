@@ -8433,13 +8433,14 @@ nav a[href="shop.html"] {
                 <div style="font-family:'Montserrat'; font-size: 22px; font-weight: 900; color:#fff;">PROFILE_PRESTIGE</div>
                 <div style="font-family:monospace; font-size: 10px; color:#ff0000;">MODULE: USER_INTERFACE | STATUS: ENCRYPTED</div>
             </div>
+            <!-- Buton Închidere: Ne întoarce la Elite Shop principal -->
             <button class="close-pop" onclick="closeModal('profilePrestigeModal'); document.getElementById('eliteShopModal').classList.add('active');" style="border:1px solid #fff; background:transparent; position:static !important;">✕</button>
         </div>
 
         <div class="bm-content-scroll" style="padding: 20px;">
             <div class="bm-grid-v4">
                 
-                <!-- Profile Intros - NOW ACTIVE -->
+                <!-- Profile Intros -->
                 <div class="bm-offer-card-v4" onclick="openProfileIntroShop()">
                     <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
                     <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
@@ -8449,7 +8450,7 @@ nav a[href="shop.html"] {
                     <button class="bm-price-btn-v4">DESCHIDE</button>
                 </div>
 
-                <!-- Profile Banners - NOW ACTIVE -->
+                <!-- Profile Banners -->
                 <div class="bm-offer-card-v4" onclick="openProfileBannerShop()">
                     <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
                     <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
@@ -8458,38 +8459,35 @@ nav a[href="shop.html"] {
                     <div class="bm-desc-v4">Imagini de fundal personalizate pentru profil.</div>
                     <button class="bm-price-btn-v4">DESCHIDE</button>
                 </div>
-                
             </div>
         </div>
     </div>
 </div>
-</div>
 
+<!-- MODALELE DE SHOP (Sunt acum la același nivel, nu unul în altul) -->
 
-<!-- MODAL NOU: INTRO SHOP -->
 <div id="introShopModal" class="account-modal-overlay">
     <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 500px;">
         <div class="bm-scanline-overlay"></div>
         <div style="background: rgba(255, 0, 0, 0.1); padding: 25px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center;">
             <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#ff0000;">AUDIO_MODULES</div>
-            <button class="close-pop" onclick="closeModal('introShopModal')" style="position:static !important; border:1px solid #ff0000; background:transparent;">✕</button>
+            <button class="close-pop" onclick="closeModal('introShopModal'); document.getElementById('profilePrestigeModal').classList.add('active');" style="position:static !important; border:1px solid #ff0000; background:transparent;">✕</button>
         </div>
         <div class="bm-content-scroll" id="introList" style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
-            <!-- JS Inject -->
+            <!-- Produsele vor fi injectate aici -->
         </div>
     </div>
 </div>
 
-<!-- MODAL NOU: BANNER SHOP -->
 <div id="pBannerShopModal" class="account-modal-overlay">
     <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 600px; height: 80vh;">
         <div class="bm-scanline-overlay"></div>
         <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-bottom: 1px solid #fff; display: flex; justify-content: space-between; align-items: center;">
             <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#fff;">VISUAL_OVERLAYS</div>
-            <button class="close-pop" onclick="closeModal('pBannerShopModal')" style="position:static !important; border:1px solid #fff; background:transparent;">✕</button>
+            <button class="close-pop" onclick="closeModal('pBannerShopModal'); document.getElementById('profilePrestigeModal').classList.add('active');" style="position:static !important; border:1px solid #fff; background:transparent;">✕</button>
         </div>
         <div class="bm-content-scroll" id="pBannerList" style="padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-            <!-- JS Inject -->
+            <!-- Produsele vor fi injectate aici -->
         </div>
     </div>
 </div>
@@ -14748,19 +14746,18 @@ window.previewAudio = (url, btn) => {
     };
 };
 
-// --- FIX PENTRU PROFILE INTROS ---
+// --- DESCHIDE SHOP INTRO ---
 window.openProfileIntroShop = async () => {
-    if (!auth.currentUser) return showCustomAlert("Loghează-te pentru a accesa!", "EROARE");
-
-    // Deschidem modalul de destinație și îl închidem pe cel de prestige
-    const shopModal = document.getElementById('introShopModal');
-    const prestigeModal = document.getElementById('profilePrestigeModal');
+    if(!auth.currentUser) return showCustomAlert("Loghează-te!", "EROARE");
     
-    if(prestigeModal) prestigeModal.classList.remove('active');
-    shopModal.classList.add('active');
-
+    // Închidem modalul de Prestige
+    closeModal('profilePrestigeModal');
+    
     const list = document.getElementById('introList');
-    list.innerHTML = '<div style="color:#ff0000; text-align:center; padding:20px; font-family:Orbitron;">> LOADING_AUDIO_MODULES...</div>';
+    const shopModal = document.getElementById('introShopModal');
+    
+    shopModal.classList.add('active');
+    list.innerHTML = '<div style="color:red; font-family:Orbitron; text-align:center;">> DECRYPTING_AUDIO...</div>';
     
     try {
         const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
@@ -14768,8 +14765,8 @@ window.openProfileIntroShop = async () => {
         const owned = d.ownedIntros || [];
         const equipped = d.equippedIntro || null;
 
-        list.innerHTML = ''; // Curățăm textul de loading
-        
+        list.innerHTML = ''; // Reset list
+
         PROFILE_INTROS_DB.forEach(item => {
             const isOwned = owned.includes(item.id);
             const isEquipped = equipped === item.id;
@@ -14796,24 +14793,20 @@ window.openProfileIntroShop = async () => {
             `;
             list.appendChild(card);
         });
-    } catch (e) {
-        console.error(e);
-        list.innerHTML = '<div style="color:red;">Eroare la încărcare date.</div>';
-    }
+    } catch (e) { console.error(e); }
 };
 
-// --- FIX PENTRU PROFILE BANNERS ---
+// --- DESCHIDE SHOP BANNER ---
 window.openProfileBannerShop = async () => {
-    if (!auth.currentUser) return showCustomAlert("Loghează-te!", "EROARE");
+    if(!auth.currentUser) return showCustomAlert("Loghează-te!", "EROARE");
 
-    const shopModal = document.getElementById('pBannerShopModal');
-    const prestigeModal = document.getElementById('profilePrestigeModal');
+    closeModal('profilePrestigeModal');
     
-    if(prestigeModal) prestigeModal.classList.remove('active');
-    shopModal.classList.add('active');
-
     const list = document.getElementById('pBannerList');
-    list.innerHTML = '<div style="color:#fff; text-align:center; padding:20px; font-family:Orbitron; grid-column: span 2;">> SYNCING_VISUAL_DRIVERS...</div>';
+    const shopModal = document.getElementById('pBannerShopModal');
+    
+    shopModal.classList.add('active');
+    list.innerHTML = '<div style="color:#fff; font-family:Orbitron; text-align:center; grid-column: span 2;">> LOADING_BANNERS...</div>';
     
     try {
         const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
@@ -14843,9 +14836,7 @@ window.openProfileBannerShop = async () => {
             `;
             list.appendChild(card);
         });
-    } catch (e) {
-        console.error(e);
-    }
+    } catch (e) { console.error(e); }
 };
 
 // --- THE EQUIPMENT ENGINE ---
