@@ -5654,17 +5654,60 @@ body {
 .bubble-elite-bluefire { background: url('https://media.giphy.com/media/3bc8pP1rVdfgN1uoMV/giphy.gif') center !important; background-size: cover !important; border: 1px solid #00ffff !important; }
 .bubble-elite-destruction { background: url('https://media.giphy.com/media/nKDErGClW3lsRiZ3p9/giphy.gif') center !important; background-size: cover !important; border: 1px solid #ff4500 !important; }
 
-/* --- INVENTORY MODAL SCALING --- */
-#inventoryList .item-card-v6 { min-height: 120px !important; padding: 10px !important; }
-#inventoryList .item-preview-box { min-height: 55px !important; display: flex; align-items: center; justify-content: center; overflow: visible; }
+/* --- FIXED INVENTORY CARD & ELITE SCALING --- */
+#inventoryList .item-card-v6 {
+    min-height: 150px !important; /* Increased to prevent button overlap */
+    padding: 12px 8px !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+#inventoryList .item-preview-box {
+    min-height: 70px !important; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    overflow: visible;
+}
+
+/* Force all badges in inventory to be contained and correctly sized */
 #inventoryList .elite-gif-badge, 
 #inventoryList .shop-badge-preview,
-#inventoryList .badge-singularity { 
-    transform: scale(0.8) !important; /* Forces badges to be small in inventory */
-    white-space: nowrap; 
+#inventoryList .badge-singularity,
+#inventoryList .badge-wheel-god { 
+    transform: scale(0.85) !important; 
+    white-space: nowrap !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
 }
-/* Force GIF through white boxes in inventory */
-#inventoryList .elite-gif-badge { background-color: transparent !important; background-clip: border-box !important; -webkit-background-clip: border-box !important; }
+
+/* --- THE HAZARD BADGE BUG FIX --- */
+/* Removes the triangle shape and makes it look like a professional badge */
+.badge-warning-elite {
+    background-image: url('https://media.giphy.com/media/9JxkPTP3alOykb8PmQ/giphy.gif') !important;
+    border: 2px solid #ffcc00 !important;
+    box-shadow: 0 0 15px #ffcc00;
+    /* Remove clip-path to stop the triangle "bug" */
+    clip-path: none !important; 
+    width: auto !important;
+    height: auto !important;
+    padding: 4px 10px !important;
+    border-radius: 4px !important;
+}
+
+/* Ensure the "Unequip" button doesn't float over items */
+#inventoryActions {
+    width: 100%;
+    margin-bottom: 15px;
+    flex-shrink: 0;
+}
+
+.inventory-scroll-area {
+    padding-top: 5px;
+}
   </style>
 
 </head>
@@ -7764,6 +7807,7 @@ window.openInventory = async (type = 'badges') => {
         if(equipped) {
              const unequipBtn = document.createElement('button');
              unequipBtn.className = 'unequip-all-btn';
+     unequipBtn.style.margin = "0 0 15px 0"; // Added bottom margin
              unequipBtn.innerHTML = '<i class="fas fa-ban"></i> RESETEAZĂ CULOAREA';
              unequipBtn.onclick = async () => { await updateDoc(doc(db, "accounts", auth.currentUser.uid), { equippedText: null }); window.openInventory('texts'); };
              actionContainer.appendChild(unequipBtn);
