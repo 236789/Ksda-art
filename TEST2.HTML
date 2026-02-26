@@ -7758,160 +7758,181 @@ nav a[href="shop.html"] {
 
 
 
-/* --- LUXURY ELITE MODAL ENGINE --- */
+/* --- ULTIMATE LUXURY ELITE MODAL ENGINE (FIXED) --- */
 .elite-modal-luxury {
-    background: #000 !important; /* Pure black for luxury */
+    background: #000 !important;
     border: 1px solid #ff0000 !important;
     box-shadow: 0 0 100px rgba(255, 0, 0, 0.4) !important;
-    border-radius: 0 !important; /* Sharp corners for premium look */
+    border-radius: 0 !important;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
-.luxury-boutique-header {
-    text-align: center;
-    padding: 60px 20px 40px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
+/* Updated Title Style */
 .luxury-boutique-title {
     font-family: 'Montserrat', sans-serif !important;
     font-weight: 900;
-    font-size: clamp(24px, 5vw, 42px);
-    letter-spacing: 15px; /* Extremely wide for high-fashion feel */
+    font-size: clamp(18px, 4vw, 36px); /* Adaptive size */
+    letter-spacing: 8px; /* Slightly reduced for mobile compatibility */
     color: #fff;
     text-transform: uppercase;
-    text-shadow: 3px 3px 0px #ff0000;
+    text-shadow: 2px 2px 0px #ff0000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
 }
 
-/* The Pedestal Item Cards */
+.luxury-boutique-title i {
+    color: #ff0000;
+    font-size: 0.8em;
+    filter: drop-shadow(0 0 10px #ff0000);
+}
+
+/* FIXED RESPONSIVE GRID */
 .boutique-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 40px;
-    padding: 60px 40px;
+    /* 3 columns on PC, 1 column on Mobile */
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 25px;
+    padding: 40px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .luxury-pedestal {
-    background: linear-gradient(180deg, #111, #000);
-    border: 1px solid #333;
-    padding: 40px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid #222;
+    padding: 30px 15px;
     text-align: center;
-    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    position: relative;
-    overflow: hidden;
+    transition: 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%; /* Ensures all cards match height */
+}
+
+/* MOBILE FIXES (768px and below) */
+@media (max-width: 768px) {
+    .boutique-grid {
+        grid-template-columns: 1fr; /* Stack vertically on mobile */
+        padding: 20px;
+        gap: 20px;
+    }
+    
+    .luxury-boutique-title {
+        letter-spacing: 3px; /* Narrower for mobile screens */
+        padding: 0 10px;
+    }
+
+    .lux-close-btn {
+        top: 15px !important;
+        right: 15px !important;
+        width: 35px !important;
+        height: 35px !important;
+    }
 }
 
 .luxury-pedestal:hover {
     border-color: #ff0000;
-    transform: translateY(-15px);
-    box-shadow: 0 20px 40px rgba(255,0,0,0.2);
+    background: rgba(255, 0, 0, 0.05);
+    transform: translateY(-10px);
 }
 
-.luxury-pedestal i {
-    font-size: 60px;
+.pedestal-icon-lux {
+    font-size: 50px;
     color: #fff;
-    margin-bottom: 30px;
-    filter: drop-shadow(0 0 15px rgba(255,255,255,0.3));
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
 }
 
-.item-name-lux {
-    font-family: 'Montserrat', sans-serif !important;
-    font-weight: 800;
-    font-size: 14px;
-    letter-spacing: 3px;
-    color: #fff;
-    margin-bottom: 10px;
-}
-
-.item-status-lux {
-    font-size: 10px;
-    color: #ff0000;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-/* Clean Close Button */
 .lux-close-btn {
     position: absolute;
-    top: 30px;
-    right: 30px;
-    background: none;
+    top: 25px;
+    right: 25px;
+    background: #000;
     border: 1px solid #fff;
     color: #fff;
-    width: 45px;
-    height: 45px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     cursor: pointer;
-    z-index: 100;
-    transition: 0.3s;
+    z-index: 2000;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.lux-close-btn:hover {
-    background: #fff;
-    color: #000;
+    transition: 0.3s;
 }
   </style>
 </head>
 <body>
-
-<!-- ELITE BOUTIQUE MODAL (LUXURY RE-DESIGN) -->
+<!-- ELITE BOUTIQUE MODAL (FIXED LUXURY) -->
 <div id="eliteShopModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 elite-modal-luxury" style="width: 95%; max-width: 1000px; height: auto; max-height: 90vh;">
+    <div class="shop-modal-v4 elite-modal-luxury" style="width: 95%; max-width: 1100px; height: auto; max-height: 90vh;">
         
         <!-- Luxury Close Button -->
         <button class="lux-close-btn" onclick="closeModal('eliteShopModal')">✕</button>
 
         <!-- Header -->
-        <div class="luxury-boutique-header">
-            <h2 class="luxury-boutique-title">Boutique</h2>
-            <div style="font-family: 'Montserrat'; font-size: 10px; color: #666; letter-spacing: 5px; margin-top: 15px; font-weight: 700;">
+        <div class="luxury-boutique-header" style="padding: 50px 20px 30px; border-bottom: 1px solid #111;">
+            <h2 class="luxury-boutique-title">
+                <i class="fas fa-crown"></i> 
+                Elite Boutique 
+                <i class="fas fa-crown"></i>
+            </h2>
+            <div style="font-family: 'Montserrat'; font-size: 9px; color: #555; letter-spacing: 4px; margin-top: 15px; font-weight: 700; text-transform: uppercase;">
                 COLECȚIE PRIVATĂ • EDIȚIE LIMITATĂ
             </div>
         </div>
 
-        <!-- Content Area -->
+        <!-- Scrollable Content -->
         <div class="bm-content-scroll">
             <div class="boutique-grid">
                 
                 <!-- Pedestal 1 -->
                 <div class="luxury-pedestal">
-                    <i class="fas fa-crown"></i>
-                    <div class="item-name-lux">MYTHIC_REPRESENTATIVE</div>
-                    <div class="item-status-lux">Coming Soon</div>
-                    <div style="margin-top: 30px;">
-                         <button class="btn-ultra-red-white" style="width: 100%; font-size: 10px;">PRE-ORDER</button>
+                    <div>
+                        <i class="fas fa-crown pedestal-icon-lux"></i>
+                        <div class="item-name-lux">MYTHIC_RANK</div>
+                        <div class="item-status-lux">Coming Soon</div>
+                    </div>
+                    <div style="margin-top: 25px;">
+                         <button class="btn-ultra-red-white" style="width: 100%; padding: 12px; font-size: 10px;">PRE-ORDER</button>
                     </div>
                 </div>
 
                 <!-- Pedestal 2 -->
                 <div class="luxury-pedestal">
-                    <i class="fas fa-gem"></i>
-                    <div class="item-name-lux">ROYAL_VAULT_KEY</div>
-                    <div class="item-status-lux">Locked</div>
-                    <div style="margin-top: 30px;">
-                         <button class="btn-ultra-red-white" style="width: 100%; font-size: 10px;">CLASSIFIED</button>
+                    <div>
+                        <i class="fas fa-gem pedestal-icon-lux"></i>
+                        <div class="item-name-lux">VAULT_ACCESS_KEY</div>
+                        <div class="item-status-lux">Classified</div>
+                    </div>
+                    <div style="margin-top: 25px;">
+                         <button class="btn-ultra-red-white" style="width: 100%; padding: 12px; font-size: 10px; opacity: 0.5;">LOCKED</button>
                     </div>
                 </div>
 
                 <!-- Pedestal 3 -->
                 <div class="luxury-pedestal">
-                    <i class="fas fa-user-shield"></i>
-                    <div class="item-name-lux">ELITE_PROTECTOR</div>
-                    <div class="item-status-lux">Reserved</div>
-                    <div style="margin-top: 30px;">
-                         <button class="btn-ultra-red-white" style="width: 100%; font-size: 10px;">UNAVAILABLE</button>
+                    <div>
+                        <i class="fas fa-user-shield pedestal-icon-lux"></i>
+                        <div class="item-name-lux">ELITE_BADGE</div>
+                        <div class="item-status-lux">Reserved</div>
+                    </div>
+                    <div style="margin-top: 25px;">
+                         <button class="btn-ultra-red-white" style="width: 100%; padding: 12px; font-size: 10px;">UNAVAILABLE</button>
                     </div>
                 </div>
 
             </div>
         </div>
 
-        <!-- Footer -->
-        <div style="padding: 30px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05);">
-            <img src="https://iili.io/fXvBEiB.png" height="30" style="opacity: 0.5;">
+        <!-- Luxury Bottom Logo Area -->
+        <div style="padding: 20px; text-align: center; border-top: 1px solid #111; background: #050505;">
+            <img src="https://iili.io/fXvBEiB.png" height="25" style="opacity: 0.3; filter: grayscale(1);">
         </div>
     </div>
 </div>
