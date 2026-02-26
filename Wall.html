@@ -5649,85 +5649,104 @@ body {
 .bubble-elite-nebula2 { background: url('https://media.giphy.com/media/eJmUEoeU1K4d4IUbpS/giphy.gif') center !important; background-size: cover !important; border: 1px solid #7000ff !important; }
 .bubble-elite-bluefire { background: url('https://media.giphy.com/media/3bc8pP1rVdfgN1uoMV/giphy.gif') center !important; background-size: cover !important; border: 1px solid #00ffff !important; }
 .bubble-elite-destruction { background: url('https://media.giphy.com/media/nKDErGClW3lsRiZ3p9/giphy.gif') center !important; background-size: cover !important; border: 1px solid #ff4500 !important; }
-
 /* ============================================================
-   --- INVENTORY SYSTEM REPAIR (FIXES OVERLAP & BADGES) ---
+   --- ULTIMATE INVENTORY MODAL REPAIR (NO OVERLAY/BUG) ---
    ============================================================ */
 
-/* 1. Prevent the "DEZ-ECHIPEAZĂ" button from floating over items */
-#inventoryActions {
-    width: 100%;
-    padding: 0 10px;
-    margin-bottom: 20px; /* Space between button and grid */
-    flex-shrink: 0;
-    display: block;
+/* 1. Ensure the Modal Card is a strict column */
+#inventoryModal .cosmetics-card-v6 {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 85vh !important;
+    overflow: hidden !important;
 }
 
-/* 2. The Card Grid */
+/* 2. Fix the Unequip Button Area (Stays at the top) */
+#inventoryActions {
+    width: 100% !important;
+    padding: 10px 20px !important;
+    flex-shrink: 0 !important; /* Prevents it from being squashed */
+    background: rgba(5, 11, 20, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 10;
+}
+
+/* 3. The Scrollable Grid */
 #inventoryList.inventory-scroll-area {
+    flex: 1 !important; /* Takes all remaining space */
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
-    padding: 10px !important;
+    gap: 15px !important;
+    padding: 20px !important;
     overflow-y: auto !important;
-    align-content: start; /* Fixes vertical spacing */
+    align-content: start !important;
 }
 
-/* 3. The Individual Card */
+/* 4. Fix Individual Item Cards */
 #inventoryList .item-card-v6 {
     background: rgba(255, 255, 255, 0.03) !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: 20px !important;
     padding: 15px 10px !important;
-    min-height: 160px !important; /* Increased to fit everything */
+    min-height: 180px !important; /* Enough height for Elite Badges */
     display: flex !important;
     flex-direction: column !important;
     justify-content: space-between !important;
     align-items: center !important;
-    box-sizing: border-box !important;
+    transition: 0.3s;
 }
 
-/* 4. The Badge Container inside the card */
+/* 5. The Badge Preview Box (Forces centering) */
 #inventoryList .item-preview-box {
     width: 100% !important;
-    height: 60px !important;
+    height: 70px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    margin-bottom: 10px !important;
     overflow: visible !important;
 }
 
-/* 5. FORCE SCALE ALL BADGES IN INVENTORY */
+/* 6. ELITE BADGE SCALING (Prevents them from breaking the box) */
 #inventoryList .elite-gif-badge, 
 #inventoryList .shop-badge-preview,
 #inventoryList .badge-singularity,
 #inventoryList .badge-wheel-god,
-#inventoryList [class*="badge-b_"] { 
-    transform: scale(0.8) !important; /* Smaller fit */
+#inventoryList [class*="badge-b_"],
+#inventoryList .badge-god-thunder { 
+    transform: scale(0.85) !important; /* Shrink slightly to fit */
     white-space: nowrap !important;
     font-size: 9px !important;
-    padding: 4px 10px !important;
-    width: auto !important; /* Resets hardcoded widths */
-    height: auto !important; /* Resets hardcoded heights */
-    clip-path: none !important; /* KILLS THE TRIANGLE BUG */
+    padding: 6px 12px !important;
+    width: auto !important;
+    height: auto !important;
     display: inline-flex !important;
+    box-sizing: border-box !important;
 }
 
-/* --- SPECIFIC HAZARD BUG REMOVAL --- */
+/* 7. SPECIFIC FIX: THE HAZARD TRIANGLE BUG */
+/* The triangle clip-path looks bad in the inventory list, let's make it a nice rectangle there */
 #inventoryList .badge-warning-elite {
     clip-path: none !important; 
+    border-radius: 4px !important;
     width: auto !important;
     height: auto !important;
     aspect-ratio: auto !important;
-    border-radius: 4px !important;
-    padding: 5px 12px !important;
 }
 
-/* Fix for "The Hub" badge specifically in inventory */
-#inventoryList .badge-the-hub {
-    transform: scale(0.75) !important;
-    width: auto !important;
+/* 8. Fix the Bottom Navigation Buttons */
+#inventoryModal .nav-btn-row {
+    padding: 15px 20px !important;
+    background: rgba(5, 11, 20, 0.8);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0 !important;
+}
+
+/* 9. Clean Scrollbar for Inventory */
+#inventoryList::-webkit-scrollbar { width: 6px; }
+#inventoryList::-webkit-scrollbar-track { background: transparent; }
+#inventoryList::-webkit-scrollbar-thumb { 
+    background: var(--primary); 
+    border-radius: 10px;
 }
   </style>
 
