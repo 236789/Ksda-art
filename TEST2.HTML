@@ -8336,7 +8336,6 @@ nav a[href="shop.html"] {
     }
 }
 
-
 /* --- SCRATCH TICKET SYSTEM --- */
 #scratcherOverlay {
     display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
@@ -8407,10 +8406,10 @@ nav a[href="shop.html"] {
     text-decoration: line-through; color: #ff4757; font-size: 11px;
     display: block; margin-bottom: 2px;
 }
+
   </style>
 </head>
 <body>
-
 
 <div id="scratcherOverlay">
     <div id="ticketCard" class="scratcher-container">
@@ -11109,7 +11108,9 @@ switchCurrency('RON');
 // Initialize (Run this once on page load to set RON active)
 
 function renderShop() {
-    rechargeGrid.innerHTML = '';
+    const grid = document.getElementById('rechargeGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
     
     const isCoins = currentShopMode === 'coins';
     const data = isCoins ? coinPackages : diamondPackages;
@@ -11117,12 +11118,15 @@ function renderShop() {
     const label = isCoins ? "Coins" : "Diamonds";
     const styleClass = isCoins ? 'pkg-coins' : 'pkg-diamonds';
 
-    // Get Active Discount
-    const discountPct = isCoins ? window.activeShopDiscounts.coins : window.activeShopDiscounts.diamonds;
+    // Siguranță: Verificăm dacă obiectul de discount există
+    const discounts = window.activeShopDiscounts || { coins: 0, diamonds: 0 };
+    const discountPct = isCoins ? discounts.coins : discounts.diamonds;
 
     data.forEach(p => {
-        const symbol = SYMBOLS[selectedCurrency];
-        const basePrice = p.price / RATES[selectedCurrency];
+        const symbol = SYMBOLS[selectedCurrency] || 'RON';
+        const rate = RATES[selectedCurrency] || 1;
+        const basePrice = p.price / rate;
+        
         let finalPrice = basePrice;
         let discountHtml = "";
 
@@ -11148,20 +11152,23 @@ function renderShop() {
         card.onclick = () => {
             openNewPaymentModal(symbol, finalPrice.toFixed(2), p.amount.toLocaleString(), label, isCoins);
         };
-        rechargeGrid.appendChild(card);
+        grid.appendChild(card);
     });
 
-    // Custom Calculator Card logic remains same...
-    const custom = document.createElement('div');
-    custom.className = `package-card ${styleClass}`;
-    custom.innerHTML = `
+    // Păstrează butonul de calculator la final
+    const customCard = document.createElement('div');
+    customCard.className = `package-card ${styleClass}`;
+    customCard.innerHTML = `
         <div class="vault-shine"></div>
         <i class="fas fa-calculator" style="font-size:35px; color:${isCoins ? '#ffd700' : '#00ff88'}; margin-bottom:15px; position:relative; z-index:2;"></i>
         <span class="package-count">Custom</span>
-        <span class="price-tag" style="padding: 8px 15px;">Calculator</span>
+        <span class="price-tag">CALCULATOR</span>
     `;
-    custom.onclick = () => { /* logic stays same */ };
-    rechargeGrid.appendChild(custom);
+    customCard.onclick = () => {
+        document.getElementById('customModal').classList.add('active');
+        calculatePrice();
+    };
+    grid.appendChild(customCard);
 }
 
 function openNewPaymentModal(symbol, price, amount, label, isCoins) {
@@ -14483,30 +14490,6 @@ window.openSubCoupon = (type) => {
     });
 };
 
-// FUNCȚIA 1: Pentru activare directă (Cea pe care ai postat-o tu)
-window.activateCoupon = (id, category) => {
-    console.log("Direct Activation Triggered for:", category, "ID:", id);
-
-    // 1. Stabilim sesiunea de "Free Item"
-    window.activeCosmeticTicket = { id: id, category: category };
-    
-    // 2. Închidem modalele de cupoane
-    closeModal('subCouponModal');
-    closeModal('couponInventoryModal');
-    
-    // 3. Notificăm utilizatorul
-    showCustomAlert(
-        `Tichetul a fost activat!<br><br>Următorul obiect ales din categoria <b>${category.toUpperCase()}</b> va fi <span style="color:#00ff88; font-weight:900;">GRATUIT</span>.`, 
-        "GRATUIT"
-    );
-    
-    // 4. Deschidem magazinul corespunzător
-    if(category === 'badges') openBadgeShop();
-    if(category === 'frames') openFrameShop();
-    if(category === 'banners') openBannerShop();
-    if(category === 'texts') openTextShop();
-};
-
 let currentScratchDiscount = 0;
 let currentScratchType = 'coins'; // 'coins' or 'diamonds'
 
@@ -14631,7 +14614,6 @@ window.applyScratchedDiscount = () => {
     // Auto-scroll to vault to show off the new prices
     scrollToZone('zone-vault');
 };
-
 
 window.handleExclusiveFrameChoice = async () => {
     const userOwned = window.currentUserData.ownedFrames || [];
