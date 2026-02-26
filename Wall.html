@@ -6231,36 +6231,6 @@ body {
     border-color: #b9f2ff !important;
     box-shadow: inset 0 0 120px #000, 0 0 25px #00e5ff !important;
 }
-
-
-/* --- VIEW PROFILE SOCIAL DOCK --- */
-#viewSocialGrid .social-btn-holo {
-    pointer-events: auto;
-    text-decoration: none;
-    opacity: 1;
-    filter: none;
-}
-
-#viewSocialGrid .social-btn-holo:hover {
-    transform: translateY(-5px) scale(1.1);
-    box-shadow: 0 0 15px currentColor;
-}
-
-/* Ensure history buttons look like the Edit Profile ones but sized for 2 columns */
-.btn-util-v5 i {
-    font-size: 14px;
-}
-
-/* Fix for profile bio box in view mode */
-.view-bio {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 12px;
-    padding: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    color: #eee;
-    font-style: italic;
-    line-height: 1.4;
-}
   </style>
 
 </head>
@@ -6361,70 +6331,66 @@ body {
     </div>
 </div>
 
-<!-- GOD-TIER USER PROFILE VIEW (BOUTIQUE v6) -->
+<!-- VIEW USER PROFILE MODAL -->
 <div id="viewProfileModal" class="account-modal-overlay">
-    <div class="cosmetics-card-v6" id="viewProfileCard" style="max-width: 440px;">
-        <!-- The Reactor Engine (Rotating Border) -->
-        <div class="rw-border-anim" id="viewProfileReactor"></div>
-        
+    <div class="account-card">
         <button id="closeViewProfile" class="close-pop">✕</button>
         
-        <div class="cosmo-content-v6">
-            <!-- 1. AVATAR & FRAME SECTION -->
-            <div class="profile-frame-wrapper" style="margin-top: 20px; width: 100px; height: 100px;">
-                <img id="viewUserImg" src="" class="pop-img-inner">
-                <img id="viewUserFrame" src="" class="pop-frame-overlay" style="display: none;">
-            </div>
+        <!-- Avatar & Frame -->
+        <div class="profile-frame-wrapper">
+            <img id="viewUserImg" src="" class="pop-img-inner">
+            <img id="viewUserFrame" src="" class="pop-frame-overlay" style="display: none;">
+        </div>        
+        
+        <h3 id="viewUserName" class="pop-user" style="margin-bottom:2px;">User</h3>
 
-            <!-- 2. IDENTITY ZONE -->
-            <div class="name-wrapper-v5">
-                <h3 id="viewUserName" class="pop-user" style="font-size: 22px;">User</h3>
-                <div id="viewUserBadges" style="margin-top: 5px; display: flex; justify-content: center; gap: 5px; flex-wrap: wrap;"></div>
-            </div>
+        <!-- Badges -->
+        <div id="viewUserBadges" class="badge-stack-container"></div> 
 
-            <div style="display: flex; gap: 10px; margin: 10px 0;">
-                <div id="viewUserStatus" style="font-size: 9px; font-weight: 800; font-family: 'Orbitron'; letter-spacing: 1px;"></div>
-                <div id="viewUserStreak" class="streak-badge-profile" style="transform: scale(0.85);">
-                    <i class="fas fa-fire"></i> 0 DAYS
-                </div>
-            </div>
-
-            <!-- 3. HOLOGRAPHIC STATS -->
-            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 20px;">
-                <div class="holo-pill-v5" style="border-color: #ffd700;">
-                    <img src="https://iili.io/fhc1SKQ.png" width="20">
-                    <span id="viewUserCoins" style="color:#ffd700; font-family:'Orbitron'; font-weight:900; font-size:14px;">0</span>
-                </div>
-                <div class="holo-pill-v5" style="border-color: #00ff88;">
-                    <img src="https://iili.io/fv5bmtj.png" width="18">
-                    <span id="viewUserDiamonds" style="color:#00ff88; font-family:'Orbitron'; font-weight:900; font-size:14px;">0</span>
-                </div>
-            </div>
-
-            <!-- 4. BIO & LOCATION -->
-            <div id="viewUserBio" class="view-bio" style="width: 100%; text-align: center; margin-bottom: 15px; font-size: 12px; min-height: 40px;">...</div>
-            
-            <div id="viewUserLocation" style="font-size: 10px; color: var(--primary); font-family: 'Orbitron'; margin-bottom: 20px; opacity: 0.8;">
-                <i class="fas fa-map-marker-alt"></i> <span>UNKNOWN_LOC</span>
-            </div>
-
-            <!-- 5. DYNAMIC SOCIAL DOCK (Borrowed from Edit Menu) -->
-            <div style="width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; margin-bottom: 20px;">
-                <div class="social-holo-grid-v2" id="viewSocialGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
-                    <!-- Only linked socials will appear here -->
-                </div>
-            </div>
-
-            <!-- 6. HISTORY ACTIONS -->
-            <div class="utility-row-v5" style="width: 100%; margin-top: auto;">
-                <button id="viewUserInvites" class="btn-util-v5" style="border-color: #00ff88; color: #00ff88; background: rgba(0,255,136,0.05);">
-                    <i class="fas fa-user-plus"></i> INVITES: 0
-                </button>
-                <button id="viewUserDonated" class="btn-util-v5" style="border-color: #ffd700; color: #ffd700; background: rgba(255,215,0,0.05);">
-                    <i class="fas fa-hand-holding-usd"></i> DONATED
-                </button>
+        <!-- 1. STATUS & STREAK (Stacked) -->
+        <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:15px; align-items:center;">
+            <div id="viewUserStatus" style="font-size:10px; font-weight:bold; font-family:'Orbitron';"></div>
+            <!-- REVAMPED STREAK -->
+            <div id="viewUserStreak" class="streak-badge-profile">
+                <i class="fas fa-fire"></i> 0 DAYS STREAK
             </div>
         </div>
+
+        <!-- 2. COINS & DIAMONDS ROW -->
+        <div class="view-profile-row">
+            <!-- Coins -->
+            <div class="view-stat">
+                <img src="https://iili.io/fhc1SKQ.png" style="width:28px; margin-bottom:5px;">
+                <span id="viewUserCoins" class="view-stat-val">0</span>
+            </div>
+            <!-- Diamonds (New) -->
+            <div class="view-stat">
+                <img src="https://iili.io/fv5bmtj.png" style="width:28px; margin-bottom:5px;">
+                <span id="viewUserDiamonds" class="view-stat-val" style="color:#00ff88;">0</span>
+            </div>
+        </div>
+
+        <!-- Bio -->
+       <!-- Bio -->
+        <div id="viewUserBio" class="view-bio">Nu există descriere.</div>
+
+        <!-- STATS STACK (Vertical) -->
+        <div class="profile-stats-stack">
+            <!-- 3. Friends Invited -->
+            <div id="viewUserInvites" class="invite-stat">
+                <i class="fas fa-user-plus"></i> Friends Invited: 0
+            </div>
+
+            <!-- 4. Coins Donated -->
+            <div id="viewUserDonated" class="donate-stat">
+                <i class="fas fa-hand-holding-usd"></i> Coins Donated: 0
+            </div>
+        </div>
+
+        <!-- Birthdate -->
+        <div id="viewUserBirth" style="font-size:11px; color:#aaa; margin-bottom:10px;"></div>
+        <!-- TikTok -->
+        <a id="viewUserTikTok" href="#" target="_blank" class="tiktok-btn" style="display:none;"><i class="fab fa-tiktok"></i> Follow on TikTok</a>
     </div>
 </div>
 
@@ -11091,18 +11057,21 @@ window.stopProfileAudio = function() {
     }
 };
 
+// --- OPEN USER PROFILE (ALL FIXES INCLUDED) ---
 window.openUserProfile = async (uid) => {
-    closeAllMenus();
-    const modal = document.getElementById('viewProfileModal');
-    const card = document.getElementById('viewProfileCard');
-    const reactor = document.getElementById('viewProfileReactor');
-    const socialGrid = document.getElementById('viewSocialGrid');
+    closeAllMenus(); // Hide chat menus
     
-    // Reset Modal
-    card.className = 'cosmetics-card-v6'; 
-    card.style.background = ""; 
-    reactor.style.background = "";
-    socialGrid.innerHTML = "";
+    const modal = document.getElementById('viewProfileModal');
+    const card = modal.querySelector('.account-card');
+    
+    // 1. RESET MODAL STATE
+    card.className = 'account-card'; // Removes old banner classes
+    card.style.background = '#08101b'; // Default BG
+    document.getElementById('viewUserName').innerText = "Încărcare...";
+    document.getElementById('viewUserBadges').innerHTML = "";
+    document.getElementById('viewUserImg').src = "https://i.ibb.co/4pGm9S2/user-placeholder.png";
+    
+    // FORCE STOP PREVIOUS AUDIO
     window.stopProfileAudio(); 
 
     modal.classList.add('active');
@@ -11112,28 +11081,36 @@ window.openUserProfile = async (uid) => {
         if(!snap.exists()) return;
         const data = snap.data();
 
-        // --- 1. THEME & BANNERS ---
+        // --- A. APPLY PROFILE BANNER ---
         if (data.equippedProfileBanner && data.equippedProfileBanner.id) {
             card.classList.add('profile-banner-active', data.equippedProfileBanner.id);
-            // Match reactor color to banner theme
-            const bannerColors = { 'pban_cyber': '#00ff88', 'pban_magma': '#ff4500', 'pban_void': '#7000ff', 'pban_gold': '#ffd700' };
-            const themeColor = bannerColors[data.equippedProfileBanner.id] || 'var(--primary)';
-            reactor.style.background = `conic-gradient(from 0deg, transparent, ${themeColor}, transparent 30%)`;
-        } else {
-            reactor.style.background = `conic-gradient(from 0deg, transparent, var(--primary), transparent 30%)`;
+            if(data.equippedProfileBanner.style) {
+                let bgStyle = data.equippedProfileBanner.style;
+                if (bgStyle.includes('http') && !bgStyle.includes('url')) {
+                    card.style.backgroundImage = `url('${bgStyle}')`;
+                } else {
+                    card.style.background = bgStyle;
+                }
+            }
         }
 
-        // --- 2. AUDIO INTRO ---
+        // --- B. PLAY PROFILE INTRO ---
         if (data.equippedIntro && data.equippedIntro.audio) {
-            window.currentProfileAudio = new Audio(data.equippedIntro.audio);
-            window.currentProfileAudio.volume = 0.4;
-            window.currentProfileAudio.play().catch(e => console.log("Audio Blocked"));
+            try {
+                window.currentProfileAudio = new Audio(data.equippedIntro.audio);
+                window.currentProfileAudio.volume = 0.4;
+                window.currentProfileAudio.play().catch(e => console.log("Auto-play blocked:", e));
+            } catch (err) {
+                console.error("Intro Error:", err);
+            }
         }
 
-        // --- 3. IDENTITY & AVATAR ---
-        document.getElementById('viewUserImg').src = data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
+        // --- C. RENDER AVATAR & FRAME ---
+        const ownerImg = data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png"; 
+        document.getElementById('viewUserImg').src = ownerImg;
+        
         const viewFrame = document.getElementById('viewUserFrame');
-        if (data.equippedFrame?.img) {
+        if (data.equippedFrame && data.equippedFrame.img) {
             viewFrame.src = data.equippedFrame.img;
             viewFrame.style.display = 'block';
             const sc = data.equippedFrame.scale || 1.45;
@@ -11141,65 +11118,50 @@ window.openUserProfile = async (uid) => {
             viewFrame.style.height = (sc * 100) + "%";
         } else { viewFrame.style.display = 'none'; }
 
-        // Name & Badges
+        // --- D. RENDER NAME & BADGE ---
         let pName = data.username || "Anonim";
-        if(data.equippedText?.cssClass) pName = `<span class="${data.equippedText.cssClass}">${pName}</span>`;
+        if(data.equippedText && data.equippedText.cssClass) {
+            pName = `<span class="${data.equippedText.cssClass}">${pName}</span>`;
+        }
         document.getElementById('viewUserName').innerHTML = pName;
-        document.getElementById('viewUserBadges').innerHTML = data.equippedBadge ? getCosmeticBadge(data.equippedBadge) : "";
 
-        // --- 4. STATS & INFO ---
+        const bBox = document.getElementById('viewUserBadges');
+        if (data.equippedBadge) {
+            bBox.innerHTML = getCosmeticBadge(data.equippedBadge);
+        } else {
+            bBox.innerHTML = "";
+        }
+
+        // --- E. RENDER STATS & BIO ---
         const isOnline = checkIsOnline(data);
         document.getElementById('viewUserStatus').innerHTML = isOnline 
             ? '<span style="color:#00ff88;">● ONLINE</span>' : '<span style="color:#555;">● OFFLINE</span>';
 
         document.getElementById('viewUserCoins').innerText = formatCurrency(data.coins || 0);
         document.getElementById('viewUserDiamonds').innerText = formatCurrency(data.diamonds || 0);
-        document.getElementById('viewUserStreak').innerHTML = `<i class="fas fa-fire"></i> ${data.streak || 0} DAYS`;
-        document.getElementById('viewUserBio').innerText = data.bio || "Acest membru preferă misterul...";
-        document.getElementById('viewUserLocation').querySelector('span').innerText = data.location || "PLANET EARTH";
+        document.getElementById('viewUserStreak').innerHTML = `<i class="fas fa-fire"></i> ${data.streak || 0} DAYS STREAK`;
+        document.getElementById('viewUserBio').innerText = data.bio || "Membru KSDA fără descriere.";
 
-        // --- 5. SOCIAL ENGINE (The 5x2 Logic) ---
-        const s = data.socialLinks || {};
-        const platforms = [
-            { id: 'tiktok', icon: 'fab fa-tiktok', class: 's-tiktok', link: 'https://tiktok.com/@' },
-            { id: 'insta', icon: 'fab fa-instagram', class: 's-insta', link: 'https://instagram.com/' },
-            { id: 'fb', icon: 'fab fa-facebook-f', class: 's-fb', link: '' },
-            { id: 'discord', icon: 'fab fa-discord', class: 's-discord', link: '' },
-            { id: 'whatsapp', icon: 'fab fa-whatsapp', class: 's-wa', link: 'https://wa.me/' },
-            { id: 'youtube', icon: 'fab fa-youtube', class: 's-yt', link: '' },
-            { id: 'reddit', icon: 'fab fa-reddit-alien', class: 's-reddit', link: 'https://reddit.com/' },
-            { id: 'onlyfans', icon: 'fas fa-link', class: 's-of', isOF: true },
-            { id: 'twitch', icon: 'fab fa-twitch', class: 's-twitch', link: 'https://twitch.tv/' },
-            { id: 'snapchat', icon: 'fab fa-snapchat-ghost', class: 's-snap', link: 'https://snapchat.com/add/' }
-        ];
+        // --- F. RESTORED BUTTONS (INVITES & DONATIONS) ---
+        const invites = data.totalReferrals || 0;
+        const inviteEl = document.getElementById('viewUserInvites');
+        inviteEl.innerHTML = `<i class="fas fa-user-plus"></i> Friends Invited: ${invites}`;
+        // FIX: Re-attach click listener
+        inviteEl.onclick = () => {
+            const histModal = document.getElementById('referralHistoryModal');
+            if(histModal) histModal.style.zIndex = "13000";
+            openReferralHistory(uid, pName, ownerImg);
+        };
 
-        platforms.forEach(p => {
-            const userVal = s[p.id];
-            if (userVal && userVal.trim() !== "") {
-                const a = document.createElement('a');
-                a.className = `social-btn-holo ${p.class}`;
-                a.target = "_blank";
-                
-                // Construct link
-                let finalLink = userVal;
-                if (!userVal.startsWith('http') && p.link) finalLink = p.link + userVal.replace('@', '');
-                a.href = finalLink;
-
-                if (p.isOF) {
-                    a.innerHTML = `<img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/OnlyFans-Logo-Icon-White-PNG.png?alt=media&token=137f7805-4def-4602-84b6-ec495a08f6b2" class="of-custom-icon">`;
-                } else {
-                    a.innerHTML = `<i class="${p.icon}"></i>`;
-                }
-                socialGrid.appendChild(a);
-            }
-        });
-
-        // --- 6. ATTACH HISTORY LISTENERS ---
-        document.getElementById('viewUserInvites').onclick = () => openReferralHistory(uid, pName, data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png");
-        document.getElementById('viewUserInvites').innerHTML = `<i class="fas fa-user-plus"></i> INVITES: ${data.totalReferrals || 0}`;
-        
-        document.getElementById('viewUserDonated').onclick = () => openDonationHistory(uid, pName, data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png");
-        document.getElementById('viewUserDonated').innerHTML = `<i class="fas fa-hand-holding-usd"></i> DONATED: ${formatCurrency(data.totalCoinsDonated || 0)}`;
+        const donated = data.totalCoinsDonated || 0;
+        const donatedEl = document.getElementById('viewUserDonated');
+        donatedEl.innerHTML = `<i class="fas fa-hand-holding-usd"></i> Coins Donated: ${formatCurrency(donated)}`;
+        // FIX: Re-attach click listener
+        donatedEl.onclick = () => {
+            const histModal = document.getElementById('donationHistoryModal');
+            if(histModal) histModal.style.zIndex = "13000";
+            openDonationHistory(uid, pName, ownerImg);
+        };
 
     } catch(e) { console.error(e); }
 };
