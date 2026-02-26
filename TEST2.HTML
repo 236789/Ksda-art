@@ -7977,6 +7977,49 @@ nav a[href="shop.html"] {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
+
+
+/* --- GOD OF THUNDER BADGE --- */
+.badge-god-thunder {
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') !important;
+    background-size: cover;
+    color: #fff !important;
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #fff;
+    border: 2px solid #00ffff !important;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+    font-weight: 900 !important;
+    padding: 6px 12px !important;
+}
+
+/* --- ELITE BANNER: THUNDERSTORM --- */
+.bubble-elite-thunder {
+    background: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') center !important;
+    background-size: cover !important;
+    border: 2px solid #fff !important;
+    color: #fff !important;
+    font-weight: 800;
+    text-shadow: 2px 2px 5px #000;
+    box-shadow: 0 0 15px #00ffff !important;
+}
+
+/* --- ELITE BANNER: MATRIX --- */
+.bubble-elite-matrix {
+    background: #000 url('https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndnZpYmZ4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JnB0PWEmZXA9djFfaW50ZXJuYWxfZ2lmX2J5X2lkJmN0PWc/3o7TKVUn7iM8FMEU24/giphy.gif') !important;
+    background-size: cover !important;
+    color: #00ff41 !important;
+    border: 1px solid #00ff41 !important;
+    font-family: monospace;
+}
+
+/* --- ELITE FRAME ANIMATION --- */
+.item-card-v6.elite-animated-frame .item-preview-box {
+    position: relative;
+    border: 2px solid transparent;
+    background-image: linear-gradient(#08101b, #08101b), conic-gradient(from 0deg, #ff0000, #00ffff, #ff0000);
+    background-origin: border-box;
+    background-clip: content-box, border-box;
+    animation: rotateAura 2s linear infinite;
+}
   </style>
 </head>
 <body>
@@ -10088,14 +10131,17 @@ window.showCustomConfirm = (msg, title = "CONFIRMARE") => {
     animClass: 'badge-singularity' 
 },
 
-
-{ id: 'eb_thunder', text: 'GOD OF THUNDER', price: 50, isElite: true, animClass: 'badge-god-thunder', icon: 'fa-bolt' },
-{ id: 'eb_inferno', text: 'HELL RAISER', price: 45, isElite: true, animClass: 'bubble-fire', icon: 'fa-fire' },
-{ id: 'eb_void', text: 'VOID EMPEROR', price: 60, isElite: true, animClass: 'bubble-anim-ghost', icon: 'fa-eye' },
-{ id: 'eb_chroma', text: 'RGB OVERLORD', price: 40, isElite: true, animClass: 'bubble-anim-chroma', icon: 'fa-keyboard' },
-{ id: 'eb_glitch', text: 'SYSTEM ERROR', price: 35, isElite: true, animClass: 'badge-anim-glitch', icon: 'fa-microchip' },
-
-
+    // --- ELITE ANIMATED BADGES (10 ITEMS) ---
+    { id: 'eb_thunder', text: 'GOD OF THUNDER', price: 150, isElite: true, animClass: 'badge-god-thunder', icon: 'fa-bolt' },
+    { id: 'eb_inferno', text: 'INFERNO DRAGON', price: 120, isElite: true, animClass: 'badge-inferno', icon: 'fa-dragon' },
+    { id: 'eb_glitch', text: 'SYSTEM ERROR', price: 100, isElite: true, animClass: 'badge-anim-glitch', icon: 'fa-microchip' },
+    { id: 'eb_galaxy', text: 'GALAXY GUARDIAN', price: 180, isElite: true, animClass: 'badge-singularity', icon: 'fa-atom' },
+    { id: 'eb_void', text: 'VOID EATER', price: 200, isElite: true, animClass: 'badge-void-master', icon: 'fa-eye' },
+    { id: 'eb_matrix', text: 'THE ONE', price: 140, isElite: true, animClass: 'badge-matrix-code', icon: 'fa-terminal' },
+    { id: 'eb_gold', text: 'LEGENDARY GOLD', price: 250, isElite: true, animClass: 'badge-anim-gold', icon: 'fa-crown' },
+    { id: 'eb_cyber', text: 'NEON NINJA', price: 130, isElite: true, animClass: 'badge-neon-pulse', icon: 'fa-user-ninja' },
+    { id: 'eb_ice', text: 'FROZEN LICH', price: 110, isElite: true, animClass: 'badge-ice-shard', icon: 'fa-snowflake' },
+    { id: 'eb_toxic', text: 'BIOHAZARD', price: 90, isElite: true, animClass: 'badge-toxic-flow', icon: 'fa-biohazard' }
 ];
 
 const BANNERS_DB = [
@@ -10132,13 +10178,18 @@ const BANNERS_DB = [
     { id: 'bub_void_pulse', name: 'VOID PULSE', cssClass: 'bubble-pulse-void', price: 3500, desc: 'Efect de respirație mov' },
     { id: 'bub_emerald', name: 'EMERALD SHARD', cssClass: 'bubble-emerald-shard', price: 3000, desc: 'Formă de cristal tăiat' },
 
-{ id: 'eb_storm', name: 'THUNDERSTORM', cssClass: 'badge-god-thunder', price: 100, isElite: true, desc: 'Lightning background' },
-{ id: 'eb_matrix', name: 'MATRIX CODE', cssClass: 'bubble-matrix', price: 80, isElite: true, desc: 'Falling green code' },
-{ id: 'eb_supernova', name: 'SUPERNOVA', cssClass: 'bubble-anim-supernova', price: 120, isElite: true, desc: 'Exploding colors' },
-{ id: 'eb_bloodmoon', name: 'BLOOD MOON', cssClass: 'bubble-anim-blood', price: 90, isElite: true, desc: 'Pulsing crimson' },
-
+ // --- ELITE ANIMATED BANNERS (10 ITEMS) ---
+    { id: 'eb_ban_thunder', name: 'THUNDERSTORM', price: 300, isElite: true, cssClass: 'bubble-elite-thunder' },
+    { id: 'eb_ban_matrix', name: 'MATRIX RELOADED', price: 250, isElite: true, cssClass: 'bubble-elite-matrix' },
+    { id: 'eb_ban_lava', name: 'LAVA FLOW', price: 280, isElite: true, cssClass: 'bubble-elite-lava' },
+    { id: 'eb_ban_nebula', name: 'DEEP NEBULA', price: 350, isElite: true, cssClass: 'bubble-elite-nebula' },
+    { id: 'eb_ban_glitch', name: 'CYBER GLITCH', price: 220, isElite: true, cssClass: 'bubble-elite-glitch' },
+    { id: 'eb_ban_holy', name: 'ANGELIC LIGHT', price: 240, isElite: true, cssClass: 'bubble-elite-holy' },
+    { id: 'eb_ban_blood', name: 'BLOOD LUST', price: 260, isElite: true, cssClass: 'bubble-elite-blood' },
+    { id: 'eb_ban_emerald', name: 'EMERALD SHARD', price: 210, isElite: true, cssClass: 'bubble-elite-emerald' },
+    { id: 'eb_ban_gold', name: 'MIDAS TOUCH', price: 400, isElite: true, cssClass: 'bubble-elite-gold' },
+    { id: 'eb_ban_toxic', name: 'CORROSIVE', price: 190, isElite: true, cssClass: 'bubble-elite-toxic' }
 ];
-
 
 const FRAMES_DB = [
     { id: 'fr_gold', name: 'GOLDEN GUARDIAN', price: 2000, img: 'https://i.ibb.co/5xBTcv2f/c2feac12-d32a-48f7-8514-eee47faf2e7e-removalai-preview.png' },
@@ -14057,53 +14108,74 @@ window.openProfilePrestige = () => {
 };
 
 
-
 window.openEliteCategory = async (type) => {
-    // Reuse your Badge/Banner/Frame modals but only fill them with Elite items
-    let modalId, listId, db;
+    let modalId, listId, database, ownedField;
     
-    if (type === 'badges') { modalId = 'badgeShopModal'; listId = 'badgeList'; db = BADGES_DB; }
-    if (type === 'banners') { modalId = 'bannerShopModal'; listId = 'bannerList'; db = BANNERS_DB; }
-    if (type === 'frames') { modalId = 'frameShopModal'; listId = 'frameList'; db = FRAMES_DB; }
+    if (type === 'badges') { modalId = 'badgeShopModal'; listId = 'badgeList'; database = BADGES_DB; ownedField = 'ownedBadges'; }
+    if (type === 'banners') { modalId = 'bannerShopModal'; listId = 'bannerList'; database = BANNERS_DB; ownedField = 'ownedBanners'; }
+    if (type === 'frames') { modalId = 'frameShopModal'; listId = 'frameList'; database = FRAMES_DB; ownedField = 'ownedFrames'; }
 
-    const eliteItems = db.filter(item => item.isElite);
     const list = document.getElementById(listId);
-    list.innerHTML = '';
+    list.innerHTML = '<div style="color:#ff0000; font-family:Orbitron; padding:20px;">> DECRYPTING ELITE FILES...</div>';
     
     document.getElementById('eliteCosmeticsModal').classList.remove('active');
     document.getElementById(modalId).classList.add('active');
 
+    // Get fresh data
     const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
-    const owned = userSnap.data().ownedBadges || []; // Adjust based on type
+    const userData = userSnap.data();
+    const owned = userData[ownedField] || [];
+
+    const eliteItems = database.filter(item => item.isElite);
+    list.innerHTML = '';
 
     eliteItems.forEach(item => {
         const isOwned = owned.includes(item.id);
         const card = document.createElement('div');
         card.className = 'shop-badge-item';
         
-        // Elite items cost DIAMONDS usually, let's set that
+        // Define preview content
+        let preview = '';
+        if(type === 'badges') preview = `<span class="${item.animClass}" style="display:inline-block; padding:5px 10px; border-radius:4px;"><i class="fas ${item.icon}"></i> ${item.text}</span>`;
+        if(type === 'banners') preview = `<div class="${item.cssClass}" style="padding:10px; border-radius:10px; width:100%; font-size:10px;">ELITE SIGNAL</div>`;
+        if(type === 'frames') preview = `<div class="frame-preview-box"><img src="${userData.image || 'https://iili.io/fXvBEiB.png'}" style="border-radius:50%; width:50px;"><img src="${item.img}" class="frame-preview-img" style="position:absolute; width:75px;"></div>`;
+
         card.innerHTML = `
-            <div class="${item.animClass || item.cssClass}" style="padding:10px; border-radius:5px;">
-                ${item.text || item.name}
-            </div>
+            <div style="min-height:60px; display:flex; align-items:center; justify-content:center; width:100%;">${preview}</div>
+            <div style="font-family:Orbitron; font-size:11px; color:#fff; margin-top:10px;">${item.text || item.name}</div>
             <div class="shop-badge-price">
                 ${isOwned ? 'DEȚINUT' : `<img src="https://iili.io/fv5bmtj.png" width="15"> ${item.price}`}
             </div>
-            ${!isOwned ? `<button class="buy-badge-btn" onclick="buyEliteItem('${item.id}', ${item.price}, '${type}')">CUMPĂRĂ</button>` : ''}
+            ${isOwned ? `<span class="owned-label"><i class="fas fa-check"></i></span>` : 
+            `<button class="buy-badge-btn" style="background:#ff0000; color:#fff;" onclick="buyEliteItem('${item.id}', ${item.price}, '${type}')">UNLOCK</button>`}
         `;
         list.appendChild(card);
     });
 };
 
-// Purchase function for Elite Items (Uses Diamonds)
 window.buyEliteItem = async (id, price, type) => {
-    if ((window.currentUserData.diamonds || 0) < price) return showCustomAlert("Nu ai suficiente diamante!", "EROARE");
-    
-    const confirm = await showCustomConfirm(`Cumperi acest obiect de elită pentru ${price} diamante?`);
-    if(!confirm) return;
+    if (!auth.currentUser) return;
+    const userRef = doc(db, "accounts", auth.currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    const userData = userSnap.data();
 
-    // ... Standard Firebase Update logic here (similar to your buyBadge) ...
-    // Note: ensure you decrement 'diamonds' instead of 'coins'
+    if ((userData.diamonds || 0) < price) return showCustomAlert("Fonduri insuficiente (Diamante)!", "EROARE_ELITA");
+
+    const confirm = await showCustomConfirm(`Confirmi achiziția pentru ${price} diamante?`, "SECURIZARE_ELITĂ");
+    if (!confirm) return;
+
+    let ownedField = type === 'badges' ? 'ownedBadges' : (type === 'banners' ? 'ownedBanners' : 'ownedFrames');
+
+    try {
+        await updateDoc(userRef, {
+            diamonds: increment(-price),
+            [ownedField]: arrayUnion(id)
+        });
+        
+        await logTransaction(-price, "DIAMONDS", "Elite Boutique", `Bought Elite ${type}: ${id}`);
+        showCustomAlert("Element de elită sincronizat!", "SUCCES");
+        openEliteCategory(type); // Refresh current list
+    } catch(e) { console.error(e); }
 };
 </script>
 </body>
