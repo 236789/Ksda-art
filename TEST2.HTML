@@ -8231,6 +8231,32 @@ nav a[href="shop.html"] {
 .banner-flow-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMGVxMzF0aGp1MHBtdmJrOWI1dGI4cjN5bTI3aXVzNHZsNTVkazdnYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/O0zVNAjUC0m3jxiflK/giphy.gif') !important; background-size: cover; border: 1px solid #fff !important; color: #fff; }
 .banner-purp-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3Ym9sNDJjdmZtOGJtN3I4eGRlM3l5ZjM3NWxzNmJxYzI0cjU2cXdyMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Acs8DGposhkwulcZVo/giphy.gif') !important; background-size: cover; border: 1px solid #7000ff !important; color: #fff; }
 .banner-scan-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ2t6MjJwNnd6NDhpajFnbGdkdXBjbGE5Y3pyeHI4OW15dHg0eHQxeSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3oz8xxYsI0FyH7EmfS/giphy.gif') !important; background-size: cover; border: 1px solid #00ff88 !important; color: #00ff88; }
+
+
+
+/* --- SICK PREVIEW PLAY BUTTON --- */
+.btn-preview-audio {
+    width: 45px; height: 45px;
+    border-radius: 50%;
+    background: rgba(255, 0, 0, 0.1);
+    border: 2px solid #ff0000;
+    color: #ff0000;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: 0.3s;
+    font-size: 18px;
+    position: relative;
+}
+.btn-preview-audio:hover {
+    background: #ff0000; color: #fff;
+    box-shadow: 0 0 15px #ff0000;
+}
+.btn-preview-audio.playing {
+    animation: audioPulse 1.5s infinite;
+}
+@keyframes audioPulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+    100% { box-shadow: 0 0 0 15px rgba(255, 0, 0, 0); }
+}
   </style>
 </head>
 <body>
@@ -8293,21 +8319,47 @@ nav a[href="shop.html"] {
         </div>
 
         <div class="bm-content-scroll" style="padding: 20px;">
+<!-- UPDATE ÎN MODALUL PROFILE PRESTIGE EXISTENT -->
 <div class="bm-grid-v4">
-    <div class="bm-offer-card-v4" onclick="openEliteCategory('badges')">
-        <i class="fas fa-certificate" style="color:#ff0000; font-size:30px;"></i>
-        <div class="bm-title-v4">ANIMATED BADGES</div>
+    <div class="bm-offer-card-v4" onclick="openProfileIntroShop()">
+        <i class="fas fa-play-circle" style="color:#ff0000; font-size:30px;"></i>
+        <div class="bm-title-v4">PROFILE INTROS</div>
+        <div class="bm-desc-v4">Sunet care se aude când cineva îți vizitează profilul.</div>
         <button class="bm-price-btn-v4">DESCHIDE</button>
     </div>
-    <div class="bm-offer-card-v4" onclick="openEliteCategory('frames')">
-        <i class="fas fa-crop-alt" style="color:#fff; font-size:30px;"></i>
-        <div class="bm-title-v4">ANIMATED FRAMES</div>
+    <div class="bm-offer-card-v4" onclick="openProfileBannerShop()">
+        <i class="fas fa-image" style="color:#fff; font-size:30px;"></i>
+        <div class="bm-title-v4">PROFILE BANNERS</div>
+        <div class="bm-desc-v4">Fundal animat sau stilizat pentru cardul tău de profil.</div>
         <button class="bm-price-btn-v4">DESCHIDE</button>
     </div>
-    <div class="bm-offer-card-v4" onclick="openEliteCategory('banners')">
-        <i class="fas fa-comment-dots" style="color:#ff0000; font-size:30px;"></i>
-        <div class="bm-title-v4">ANIMATED BANNERS</div>
-        <button class="bm-price-btn-v4">DESCHIDE</button>
+</div>
+
+<!-- MODAL NOU: INTRO SHOP -->
+<div id="introShopModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 500px;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 0, 0, 0.1); padding: 25px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#ff0000;">AUDIO_MODULES</div>
+            <button class="close-pop" onclick="closeModal('introShopModal')" style="position:static !important; border:1px solid #ff0000; background:transparent;">✕</button>
+        </div>
+        <div class="bm-content-scroll" id="introList" style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+            <!-- JS Inject -->
+        </div>
+    </div>
+</div>
+
+<!-- MODAL NOU: BANNER SHOP -->
+<div id="pBannerShopModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 600px; height: 80vh;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-bottom: 1px solid #fff; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#fff;">VISUAL_OVERLAYS</div>
+            <button class="close-pop" onclick="closeModal('pBannerShopModal')" style="position:static !important; border:1px solid #fff; background:transparent;">✕</button>
+        </div>
+        <div class="bm-content-scroll" id="pBannerList" style="padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            <!-- JS Inject -->
+        </div>
     </div>
 </div>
         </div>
@@ -9969,6 +10021,13 @@ nav a[href="shop.html"] {
         <span>TEXT</span>
     </div>
 </div>
+
+    <!-- ADAUGĂ ASTA LA FINALUL GRIDULUI (îl facem 2x3 sau lași așa) -->
+    <div class="select-btn-v6" style="grid-column: span 2; border-color: #ff0000; color: #ff0000;" 
+         onclick="openEliteInventory(); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
+        <i class="fas fa-crown"></i>
+        <span>ELITE</span>
+    </div>
         </div>
     </div>
 </div>
@@ -10447,6 +10506,26 @@ const BANNERS_DB = [
     { id: 'eb_ban_emerald', name: 'EMERALD SHARD', price: 85, isElite: true, cssClass: 'bubble-emerald-shard' },
     { id: 'eb_ban_plasma', name: 'PLASMA COIL', price: 95, isElite: true, cssClass: 'bubble-anim-storm' }
 
+];
+
+
+
+const PROFILE_INTROS_DB = [
+    { 
+        id: 'intro_fato', 
+        name: 'Haide fato stiu ca vrei', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Video%20Project.m4a?alt=media&token=7352c200-31a5-45a5-b9d5-fce043460c6a' 
+    }
+];
+
+const PROFILE_BANNERS_DB = [
+    { id: 'pban_cyber', name: 'CYBER GRID', price: 3000, style: 'linear-gradient(rgba(0,255,136,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,136,0.1) 1px, transparent 1px)', bgSize: '30px 30px', bgColor: '#02080a' },
+    { id: 'pban_nebula', name: 'PURPLE NEBULA', price: 4500, style: 'url("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMHBqOWp4d3IwOWFkZW9uOWx3dzllbGY4eTBhazV1N2xpc3V1YjQ0YiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bPZdEfOgBh1de/giphy.gif")' },
+    { id: 'pban_toxic', name: 'TOXIC WASTE', price: 3500, style: 'repeating-linear-gradient(45deg, #000, #000 10px, #1b3a08 10px, #1b3a08 20px)' },
+    { id: 'pban_fire', name: 'HELLFIRE', price: 4000, style: 'url("https://i.makeagif.com/media/3-03-2021/otrneG.gif")' },
+    { id: 'pban_synth', name: 'SYNTHWAVE SUNSET', price: 3800, style: 'linear-gradient(180deg, #ff00ff 0%, #7000ff 100%)' },
+    { id: 'pban_matrix', name: 'MATRIX FALL', price: 5000, style: 'url("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMDMzeGl5ZmlxaHRseHgydGg1bjh6eG0wajFjNXBtbGRsMnFxMnBueCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/EyiufcIwTdF35pNIFS/giphy.gif")' }
 ];
 
 const FRAMES_DB = [
@@ -14406,6 +14485,173 @@ window.buyEliteItem = async (id, price, type) => {
         showCustomAlert("Element de elită sincronizat!", "SUCCES");
         openEliteCategory(type); // Refresh current list
     } catch(e) { console.error(e); }
+};
+
+
+
+// --- PREVIEW AUDIO SYSTEM ---
+let currentPreview = null;
+window.previewAudio = (url, btn) => {
+    if (currentPreview) {
+        currentPreview.pause();
+        document.querySelectorAll('.btn-preview-audio').forEach(b => b.classList.remove('playing', 'fa-stop'));
+        document.querySelectorAll('.btn-preview-audio i').forEach(i => { i.classList.add('fa-play'); i.classList.remove('fa-stop'); });
+        if (currentPreview.src === url) { currentPreview = null; return; }
+    }
+    currentPreview = new Audio(url);
+    currentPreview.play();
+    btn.classList.add('playing');
+    const icon = btn.querySelector('i');
+    icon.classList.remove('fa-play');
+    icon.classList.add('fa-stop');
+    currentPreview.onended = () => {
+        btn.classList.remove('playing');
+        icon.classList.add('fa-play');
+        icon.classList.remove('fa-stop');
+        currentPreview = null;
+    };
+};
+
+// --- OPEN INTRO SHOP ---
+window.openProfileIntroShop = async () => {
+    const list = document.getElementById('introList');
+    list.innerHTML = '';
+    document.getElementById('introShopModal').classList.add('active');
+    
+    const userOwned = window.currentUserData.ownedIntros || [];
+
+    PROFILE_INTROS_DB.forEach(item => {
+        const isOwned = userOwned.includes(item.id);
+        const card = document.createElement('div');
+        card.className = 'v4-badge-item';
+        card.style.display = 'flex';
+        card.style.justifyContent = 'space-between';
+        card.style.alignItems = 'center';
+        card.style.padding = '15px 20px';
+
+        card.innerHTML = `
+            <div style="text-align:left;">
+                <div style="font-family:'Orbitron'; font-weight:800; font-size:14px; color:#fff;">${item.name}</div>
+                <div style="color:var(--gold); font-weight:800; font-size:12px; margin-top:5px;">${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="12"></div>
+            </div>
+            <div style="display:flex; gap:15px; align-items:center;">
+                <div class="btn-preview-audio" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
+                ${isOwned ? '<span class="owned-label">DEȚINUT</span>' : 
+                `<button class="bm-price-btn-v4" onclick="buyPrestige('${item.id}', ${item.price}, 'intro')">CUMPĂRĂ</button>`}
+            </div>
+        `;
+        list.appendChild(card);
+    });
+};
+
+// --- OPEN BANNER SHOP ---
+window.openProfileBannerShop = async () => {
+    const list = document.getElementById('pBannerList');
+    list.innerHTML = '';
+    document.getElementById('pBannerShopModal').classList.add('active');
+    
+    const userOwned = window.currentUserData.ownedPBanners || [];
+
+    PROFILE_BANNERS_DB.forEach(item => {
+        const isOwned = userOwned.includes(item.id);
+        const card = document.createElement('div');
+        card.className = 'shop-badge-item';
+        card.innerHTML = `
+            <div style="width:100%; height:60px; border-radius:10px; background:${item.bgColor || 'transparent'}; background-image:${item.style}; background-size:${item.bgSize || 'cover'}; border:1px solid rgba(255,255,255,0.1);"></div>
+            <div style="font-family:'Orbitron'; font-size:11px; margin:10px 0;">${item.name}</div>
+            <div class="shop-badge-price">
+                ${isOwned ? 'DEȚINUT' : `${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="14">`}
+            </div>
+            ${isOwned ? '' : `<button class="buy-badge-btn" onclick="buyPrestige('${item.id}', ${item.price}, 'banner')">DEBLOCHEAZĂ</button>`}
+        `;
+        list.appendChild(card);
+    });
+};
+
+// --- BUY PRESTIGE SYSTEM ---
+window.buyPrestige = async (id, price, type) => {
+    if (!auth.currentUser) return;
+    if (window.currentUserData.coins < price) return showCustomAlert("Nu ai suficienți coins!", "EROARE");
+
+    const confirmed = await showCustomConfirm(`Cumperi acest modul de profil pentru ${price.toLocaleString()} monede?`, "CONFIRMĂ");
+    if (!confirmed) return;
+
+    const userRef = doc(db, "accounts", auth.currentUser.uid);
+    const field = (type === 'intro') ? 'ownedIntros' : 'ownedPBanners';
+
+    try {
+        await updateDoc(userRef, {
+            coins: increment(-price),
+            [field]: arrayUnion(id)
+        });
+        await logTransaction(-price, "COINS", "Shop", `Bought Profile ${type}: ${id}`);
+        showCustomAlert("Modul sincronizat cu succes!", "SUCCES");
+        if (type === 'intro') openProfileIntroShop(); else openProfileBannerShop();
+    } catch (e) { console.error(e); }
+};
+
+
+
+window.openEliteInventory = async () => {
+    const list = document.getElementById('inventoryList');
+    const actionArea = document.getElementById('inventoryActions');
+    list.innerHTML = '<div style="color:#aaa;">Se încarcă arhiva de elită...</div>';
+    
+    const userRef = doc(db, "accounts", auth.currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    const data = userSnap.data();
+
+    list.innerHTML = `
+        <div style="grid-column: span 2; margin-bottom: 20px;">
+            <div style="color:#ff0000; font-family:'Orbitron'; font-weight:900; font-size:12px; margin-bottom:10px;">MODULE DE ELITĂ DETECTATE</div>
+            <div style="height:1px; background:rgba(255,0,0,0.2); width:100%;"></div>
+        </div>
+    `;
+
+    // 1. Render Intros
+    const ownedIntros = data.ownedIntros || [];
+    ownedIntros.forEach(id => {
+        const item = PROFILE_INTROS_DB.find(i => i.id === id);
+        if (item) {
+            const isEquipped = data.equippedIntro === id;
+            list.innerHTML += `
+                <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}" style="border-color: #ff0000;">
+                    <div class="btn-preview-audio" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
+                    <div style="font-size:10px; margin-top:10px;">INTRO: ${item.name}</div>
+                    <button class="btn-equip-v6 ${isEquipped ? 'is-equipped' : 'do-equip'}" 
+                            onclick="equipElite('${item.id}', 'intro')">${isEquipped ? 'ACTIF' : 'ACTIVEAZĂ'}</button>
+                </div>`;
+        }
+    });
+
+    // 2. Render Banners
+    const ownedPBanners = data.ownedPBanners || [];
+    ownedPBanners.forEach(id => {
+        const item = PROFILE_BANNERS_DB.find(b => b.id === id);
+        if (item) {
+            const isEquipped = data.equippedProfileBanner === id;
+            list.innerHTML += `
+                <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}" style="border-color: #fff;">
+                    <div style="width:100%; height:40px; border-radius:5px; background:${item.bgColor || 'transparent'}; background-image:${item.style}; background-size:${item.bgSize || 'cover'};"></div>
+                    <div style="font-size:10px; margin-top:10px;">BANNER: ${item.name}</div>
+                    <button class="btn-equip-v6 ${isEquipped ? 'is-equipped' : 'do-equip'}" 
+                            onclick="equipElite('${item.id}', 'banner')">${isEquipped ? 'ACTIF' : 'ACTIVEAZĂ'}</button>
+                </div>`;
+        }
+    });
+};
+
+window.equipElite = async (id, type) => {
+    const field = (type === 'intro') ? 'equippedIntro' : 'equippedProfileBanner';
+    const userRef = doc(db, "accounts", auth.currentUser.uid);
+    
+    // Toggle logic: if already equipped, unequip. Else equip.
+    const current = window.currentUserData[field];
+    const newVal = (current === id) ? null : id;
+    
+    await updateDoc(userRef, { [field]: newVal });
+    showToast(newVal ? "Modul activat!" : "Modul dezactivat!", "success");
+    openEliteInventory();
 };
 </script>
 </body>
