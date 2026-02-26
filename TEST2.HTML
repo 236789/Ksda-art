@@ -7119,217 +7119,269 @@ body {
     margin: 0 auto !important;
 }
 
-
-/* --- ZONE: ELITE (LIQUID GOLD) --- */
+/* --- ZONE: ELITE (RED & WHITE THEME) --- */
 #zone-elite {
-    background: radial-gradient(circle at center, #1a1200 0%, #000000 100%);
+    background: #050000; /* Pitch Black */
     position: relative;
     overflow: hidden;
     padding-bottom: 100px;
-    border-top: 1px solid #332200;
+    border-top: 1px solid #330000;
 }
 
-/* 1. BACKGROUND: CHAMPAGNE RAYS */
+/* 1. BACKGROUND ANIMATION */
 .elite-bg-wrapper {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
 }
 
-.gold-rays {
-    position: absolute;
-    top: -50%; left: -50%; width: 200%; height: 200%;
-    /* Rotating golden light */
+.red-fog {
+    position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    /* Rotating Dark Red Rays */
     background: repeating-conic-gradient(
         from 0deg,
-        rgba(255, 215, 0, 0.05) 0deg,
-        rgba(255, 215, 0, 0.05) 10deg,
+        rgba(255, 0, 0, 0.05) 0deg,
+        rgba(255, 0, 0, 0.05) 10deg,
         transparent 10deg,
-        transparent 30deg
+        transparent 20deg
     );
     animation: rotateSlow 60s linear infinite;
-    mask-image: radial-gradient(circle, black 0%, transparent 70%);
+    mask-image: radial-gradient(circle, black 0%, transparent 80%);
 }
 
-.gold-dust {
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(circle, #ffd700 1px, transparent 1px);
-    background-size: 50px 50px;
-    opacity: 0.2;
-    animation: floatUp 15s linear infinite;
+.white-particles {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, #ffffff 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.15;
+    animation: floatUp 10s linear infinite;
 }
 
-/* --- 2. THE GOLDEN MONOLITH CARD --- */
-.elite-gold-card {
+/* --- 2. THE ULTRA CARD --- */
+.elite-card-ultra {
     position: relative;
     width: 320px;
-    height: 400px;
+    height: 420px;
     margin: 60px auto;
-    background: #050500;
+    background: #000;
     border-radius: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-    box-shadow: 0 0 60px rgba(255, 215, 0, 0.15);
-    transition: transform 0.4s ease;
+    display: flex; justify-content: center; align-items: center;
+    z-index: 1;
     overflow: hidden;
+    box-shadow: 0 0 80px rgba(255, 0, 0, 0.2);
+    transition: transform 0.3s ease;
 }
 
-.elite-gold-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 80px rgba(255, 215, 0, 0.3);
+.elite-card-ultra:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 100px rgba(255, 0, 0, 0.5);
 }
 
-/* The Liquid Border Animation */
-.gold-flow-border {
+/* THE ROTATING BORDER (RED & WHITE CHASE) */
+.rw-border-anim {
     position: absolute;
     top: -50%; left: -50%;
     width: 200%; height: 200%;
     background: conic-gradient(
         from 0deg,
         transparent 0deg,
-        transparent 90deg,
-        #ffd700 180deg,
-        #ffffff 220deg, /* Flash of white gold */
-        #ffd700 260deg,
+        #ff0000 90deg,      /* Red Tail */
+        transparent 180deg,
+        #ffffff 270deg,     /* White Tail */
         transparent 360deg
     );
-    animation: rotateBorder 4s linear infinite;
+    animation: rotateBorder 3s linear infinite; /* Fast spin */
     z-index: 0;
 }
 
-/* Inner Black Slab */
-.gold-card-inner {
+/* INNER CONTENT BOX */
+.ultra-content {
     position: absolute;
-    inset: 3px;
-    background: linear-gradient(180deg, #1a1200 0%, #000000 100%);
+    inset: 3px; /* Border Thickness */
+    background: linear-gradient(180deg, #150000 0%, #000000 100%);
     border-radius: 18px;
     z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
     text-align: center;
 }
 
-/* --- 3. ICONS & TEXT --- */
-.gold-icon-box {
-    width: 80px; height: 80px;
-    border: 1px solid #ffd700;
-    border-radius: 50%;
+.ultra-grid-bg {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(#330000 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.5; z-index: -1;
+}
+
+/* --- 3. REACTOR CORE --- */
+.elite-reactor-core {
+    position: relative;
+    width: 100px; height: 100px;
+    margin-bottom: 25px;
     display: flex; justify-content: center; align-items: center;
-    margin-bottom: 20px;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
-    animation: pulseGold 3s infinite;
 }
 
-.gold-icon-box i {
-    font-size: 35px;
-    color: #ffd700;
-    filter: drop-shadow(0 0 10px #ffd700);
+.ring-white {
+    position: absolute; width: 100%; height: 100%;
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: spinRight 15s linear infinite;
 }
 
-.gold-title {
+.ring-red {
+    position: absolute; width: 70%; height: 70%;
+    border: 2px solid #ff0000;
+    border-left: 2px solid transparent; border-right: 2px solid transparent;
+    border-radius: 50%;
+    animation: spinLeft 2s linear infinite;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+}
+
+.core-gem i {
+    font-size: 35px; color: #fff;
+    filter: drop-shadow(0 0 10px #fff);
+    animation: pulseCore 1s infinite alternate;
+}
+
+/* --- 4. TYPOGRAPHY --- */
+.ultra-title {
     font-family: 'Montserrat', sans-serif;
     font-weight: 900;
-    font-size: 24px;
+    font-size: 28px;
     color: #fff;
     letter-spacing: 2px;
     margin: 0;
+    text-shadow: 2px 2px 0px #ff0000;
 }
 
-.gold-divider {
-    width: 50px; height: 2px;
-    background: #ffd700;
-    margin: 15px 0;
-    box-shadow: 0 0 10px #ffd700;
+.ultra-status {
+    font-family: 'Courier New', monospace;
+    font-size: 10px; color: #ff0000;
+    margin-top: 5px;
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255, 0, 0, 0.1);
+    padding: 4px 10px; border-radius: 4px;
+    border: 1px solid #ff0000;
 }
 
-.gold-sub {
-    font-family: 'Poppins';
-    font-size: 11px;
-    color: #aa8800;
-    text-transform: uppercase;
-    margin-bottom: 30px;
+.blink-white {
+    width: 6px; height: 6px; background: #fff;
+    border-radius: 50%; box-shadow: 0 0 5px #fff;
+    animation: blink 0.5s infinite;
 }
 
-/* --- 4. THE SOLID GOLD BUTTON --- */
-.btn-solid-gold {
-    background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
-    border: none;
-    padding: 15px 40px;
-    border-radius: 50px;
-    color: #000;
-    font-family: 'Orbitron';
-    font-weight: 900;
-    font-size: 12px;
+.ultra-desc {
+    font-size: 11px; color: #aaa;
+    margin: 20px 0 30px; line-height: 1.6; max-width: 80%;
+}
+
+/* --- 5. THE BUTTON (High Contrast) --- */
+.btn-ultra-red-white {
+    background: #ff0000;
+    color: #fff;
+    font-family: 'Orbitron'; font-weight: 900; font-size: 12px;
     letter-spacing: 1px;
+    padding: 15px 40px;
+    border: 2px solid #fff;
+    text-transform: uppercase;
     cursor: pointer;
     transition: 0.3s;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
-    position: relative;
-    overflow: hidden;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+    /* Sci-Fi Cut */
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
 }
 
-.btn-solid-gold:hover {
+.btn-ultra-red-white:hover {
+    background: #fff;
+    color: #ff0000;
+    border-color: #ff0000;
+    box-shadow: 0 0 40px #fff;
     transform: scale(1.05);
-    box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
-    background: #fff; /* Flash White on hover */
 }
 
-/* --- 5. NAV BUTTON (GOLD) --- */
-.btn-nav-gold {
-    background: rgba(255, 215, 0, 0.05);
-    border: 1px solid #ffd700;
-    color: #ffd700;
-    font-family:'Orbitron'; font-weight:900; text-transform:uppercase;
-    padding: 10px 12px; border-radius: 4px;
-    display: flex; gap: 10px; align-items: center;
-    font-size: 9px; letter-spacing: 1px;
-    transition: 0.3s;
-}
-.btn-nav-gold:hover {
-    background: rgba(255, 215, 0, 0.2);
-    transform: translateX(8px);
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-}
+/* ANIMATIONS */
+@keyframes spinRight { 100% { transform: rotate(360deg); } }
+@keyframes spinLeft { 100% { transform: rotate(-360deg); } }
+@keyframes rotateBorder { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes pulseCore { from { transform: scale(1); opacity: 0.8; } to { transform: scale(1.2); opacity: 1; } }
+@keyframes floatUp { from { transform: translateY(0); opacity: 0; } 50% { opacity: 0.5; } to { transform: translateY(-50px); opacity: 0; } }
 
-/* --- MODAL ACCENT --- */
-.accent-gold {
-    background: #050500 !important;
-    border: 1px solid #ffd700 !important;
-    box-shadow: 0 0 60px rgba(255, 215, 0, 0.2), inset 0 0 100px rgba(255, 215, 0, 0.05) !important;
+
+.accent-rw {
+    background: #050000 !important;
+    border: 1px solid #ff0000 !important;
+    box-shadow: 0 0 50px rgba(255, 0, 0, 0.2), inset 0 0 100px rgba(255, 0, 0, 0.1) !important;
+}
+.accent-rw .bm-content-scroll::-webkit-scrollbar-thumb {
+    background: #ff0000;
+    box-shadow: 0 0 10px #ff0000;
 }
 
-.accent-gold .bm-content-scroll::-webkit-scrollbar-thumb {
-    background: #ffd700;
-    box-shadow: 0 0 10px #ffd700;
+
+/* --- ELITE NAV BUTTON (RED & WHITE THEME) --- */
+.btn-nav-elite { 
+    background: rgba(255, 0, 0, 0.05); 
+    border: 1px solid #ff0000; 
+    color: #ff0000; 
+    font-family:'Orbitron'; 
+    font-weight:900; 
+    text-transform:uppercase; 
+    position:relative; 
+    overflow:hidden; 
+    display:flex; 
+    align-items:center; 
+    gap:10px; 
+    transition:0.3s; 
+    padding: 10px 12px; 
+    font-size: 9px; 
+    letter-spacing: 1px; 
+    border-radius: 4px; 
 }
 
-/* Animations */
-@keyframes pulseGold { 0% { box-shadow: 0 0 10px rgba(255,215,0,0.2); } 50% { box-shadow: 0 0 30px rgba(255,215,0,0.5); } 100% { box-shadow: 0 0 10px rgba(255,215,0,0.2); } }
+.btn-nav-elite:hover { 
+    transform: translateX(8px); 
+    background: #ff0000; 
+    color: #fff; /* Turns White on hover */
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+    border-color: #fff;
+}
 
+/* White Laser Scan Effect */
+.btn-nav-elite::before {
+    content: ''; 
+    position: absolute; 
+    top: 0; left: -100%; 
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    animation: btnScan 3s infinite linear;
+}
+
+/* --- REACTOR STATE (RED GLOW) --- */
+.nav-trigger-reactor.state-elite {
+    border-color: #ff0000 !important;
+    box-shadow: 0 0 25px rgba(255, 0, 0, 0.6), inset 0 0 10px rgba(255, 0, 0, 0.2) !important;
+    background: #050000 !important; /* Pitch Black Background */
+}
+
+.nav-trigger-reactor.state-elite i { 
+    color: #ff0000 !important; 
+    filter: drop-shadow(0 0 8px #ff0000);
+}
   </style>
 </head>
 <body>
 
-
-<!-- ELITE BOUTIQUE MODAL (GOLD THEME) -->
+<!-- ELITE BOUTIQUE MODAL (RED & WHITE) -->
 <div id="eliteShopModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 accent-gold" style="width: 95%; max-width: 600px; height: auto; max-height: 85vh;">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 600px; height: auto; max-height: 85vh;">
         
         <div class="bm-scanline-overlay"></div>
 
-        <!-- Gold Header -->
-        <div style="background: rgba(255, 215, 0, 0.05); padding: 25px; border-bottom: 1px solid #ffd700; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+        <!-- Header -->
+        <div style="background: rgba(255, 0, 0, 0.1); padding: 25px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
             <div>
-                <div style="font-family:'Montserrat'; font-size: 22px; font-weight: 900; color: #ffd700; text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);">ELITE BOUTIQUE</div>
-                <div style="font-family:monospace; font-size: 10px; color:#aaa;">STATUS: GOLD MEMBER | TIER: 1</div>
+                <div style="font-family:'Montserrat'; font-size: 22px; font-weight: 900; color: #ff0000; text-shadow: 2px 2px 0px #fff;">ELITE BOUTIQUE</div>
+                <div style="font-family:monospace; font-size: 10px; color:#fff;">ACCESS: GRANTED | PROTOCOL: ZERO</div>
             </div>
-            <button class="close-pop" onclick="closeModal('eliteShopModal')" style="border-radius:0; border:1px solid #ffd700; background:transparent; position:static !important; width:40px; height:40px; cursor:pointer; color: #ffd700;">✕</button>
+            <button class="close-pop" onclick="closeModal('eliteShopModal')" style="border-radius:0; border:1px solid #fff; color: #fff; background:transparent; position:static !important; width:40px; height:40px; cursor:pointer;">✕</button>
         </div>
 
         <!-- Content -->
@@ -7337,23 +7389,23 @@ body {
             <div style="display: flex; flex-direction: column; gap: 15px;">
                 
                 <!-- PLACEHOLDER ITEM -->
-                <div class="v4-badge-item" style="display: flex; flex-direction: row; justify-content: space-between; padding: 20px; align-items: center; border-color: rgba(255, 215, 0, 0.2) !important;">
-                    <div class="bm-bracket br-tl" style="border-color: #ffd700;"></div><div class="bm-bracket br-tr" style="border-color: #ffd700;"></div>
-                    <div class="bm-bracket br-bl" style="border-color: #ffd700;"></div><div class="bm-bracket br-br" style="border-color: #ffd700;"></div>
+                <div class="v4-badge-item" style="display: flex; flex-direction: row; justify-content: space-between; padding: 20px; align-items: center; border-color: #ff0000 !important; background: rgba(255,0,0,0.02) !important;">
+                    <div class="bm-bracket br-tl" style="border-color: #fff;"></div><div class="bm-bracket br-tr" style="border-color: #fff;"></div>
+                    <div class="bm-bracket br-bl" style="border-color: #fff;"></div><div class="bm-bracket br-br" style="border-color: #fff;"></div>
                     
                     <div style="text-align: left;">
-                        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #ffd700;">PRESTIGE BADGES</div>
-                        <div style="font-size: 10px; color: #aaa;">Insigne aurite</div>
+                        <div style="font-family: 'Orbitron'; font-weight: 800; font-size: 14px; color: #fff;">CLASSIFIED ASSETS</div>
+                        <div style="font-size: 10px; color: #ff0000;">Conținut blocat momentan</div>
                     </div>
-                    <button class="bm-price-btn-v4" style="background: #ffd700 !important; color: #000 !important; border: none;">COMING SOON</button>
+                    <button class="bm-price-btn-v4" style="background: #ff0000 !important; color: #fff !important; border: 1px solid #fff;">LOCKED</button>
                 </div>
 
             </div>
         </div>
 
         <!-- Footer -->
-        <div style="background: #000; padding: 15px 25px; font-family: monospace; font-size: 9px; color: #8a6d00; border-top: 1px solid rgba(255, 215, 0, 0.1);">
-            > VERIFYING ASSETS...
+        <div style="background: #000; padding: 15px 25px; font-family: monospace; font-size: 9px; color: #ff0000; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+            > SECURE_CHANNEL_ESTABLISHED...
         </div>
     </div>
 </div>
@@ -7589,11 +7641,6 @@ body {
     <div id="navHud" class="nav-hud-window">
         <div style="font-family:'Courier New'; color:var(--primary); font-size:9px; margin-bottom:10px; opacity:0.6;">> LINKING TO SYSTEM SECTORS...</div>
         
-        <!-- TERMINAL -->
-        <button class="btn-nav-terminal" onclick="scrollToZone('zone-hero')">
-            <i class="fas fa-terminal"></i> Terminal principal
-        </button>
-
         <!-- VAULT -->
         <button class="btn-nav-vault" onclick="scrollToZone('zone-vault')">
             <i class="fas fa-vault"></i> The Vault
@@ -7610,7 +7657,8 @@ body {
     <i class="fas fa-box-open"></i> Mystery Boxes
 </button>
 
-<button class="btn-nav-gold" onclick="scrollToZone('zone-elite')">
+<!-- ELITE NAV BUTTON -->
+<button class="btn-nav-elite" onclick="scrollToZone('zone-elite')">
     <i class="fas fa-crown"></i> Elite Boutique
 </button>
 
@@ -8131,51 +8179,62 @@ body {
     </div>
 </section>
 
-
 <!-- =========================================
-     ZONE: ELITE BOUTIQUE (LIQUID GOLD)
+     ZONE: ELITE BOUTIQUE (RED & WHITE SUPREME)
      ========================================= -->
 <section id="zone-elite" class="shop-zone">
 
-    <!-- 1. SEPARATOR (Mystery Orange -> Luxury Gold) -->
-    <div class="hr-conduit sep-mystery-elite" style="--start-color: #ff6a00; --end-color: #ffd700;">
+    <!-- 1. SEPARATOR (Mystery Orange -> Neon Red) -->
+    <div class="hr-conduit sep-mystery-elite" style="--start-color: #ff6a00; --end-color: #ff0000;">
         <div class="conduit-line"></div>
         <div class="conduit-particle"></div>
-        <div class="conduit-node" style="border-color: #ffd700; box-shadow: 0 0 25px #ffd700;">
-            <i class="fas fa-crown" style="color: #ffd700;"></i>
+        <div class="conduit-node" style="border-color: #ff0000; box-shadow: 0 0 25px #ff0000;">
+            <i class="fas fa-gem" style="color: #ff0000;"></i>
         </div>
     </div>
 
-    <!-- 2. ANIMATED BACKGROUND (Champagne Rays) -->
+    <!-- 2. ANIMATED BACKGROUND (Red Fog & White Sparks) -->
     <div class="elite-bg-wrapper">
-        <div class="gold-rays"></div>
-        <div class="gold-dust"></div>
+        <div class="red-fog"></div>
+        <div class="white-particles"></div>
     </div>
 
     <!-- 3. TITLE -->
-    <h1 class="metallic-title" style="background: linear-gradient(180deg, #ffffff 20%, #ffd700 100%); -webkit-background-clip: text; position: relative; z-index: 2; filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));">
+    <h1 class="metallic-title" style="background: linear-gradient(180deg, #ffffff 20%, #ff0000 100%); -webkit-background-clip: text; position: relative; z-index: 2; text-shadow: 0 0 20px rgba(255, 0, 0, 0.6);">
         ELITE BOUTIQUE
     </h1>
-    <p class="shop-desc" style="position: relative; z-index: 2; color: #e6c200;">
-        Refinement. Opulence. Authority.
+    <p class="shop-desc" style="position: relative; z-index: 2; color: #ffcccc;">
+        Accesorii interzise. Exclusivitate totală.
     </p>
 
-    <!-- 4. THE GOLDEN MONOLITH CARD -->
-    <div class="elite-gold-card">
-        <!-- Liquid Border Animation -->
-        <div class="gold-flow-border"></div>
+    <!-- 4. THE RED & WHITE ULTRA CARD -->
+    <div class="elite-card-ultra">
+        <!-- The Rotating Laser Border -->
+        <div class="rw-border-anim"></div>
         
-        <div class="gold-card-inner">
-            <div class="gold-icon-box">
-                <i class="fas fa-crown"></i>
+        <div class="ultra-content">
+            <div class="ultra-grid-bg"></div>
+
+            <!-- The Reactor Core -->
+            <div class="elite-reactor-core">
+                <div class="ring-white"></div>
+                <div class="ring-red"></div>
+                <div class="core-gem">
+                    <i class="fas fa-crown"></i>
+                </div>
+            </div>
+
+            <h2 class="ultra-title">VIP <span style="color:#ff0000;">ONLY</span></h2>
+            <div class="ultra-status">
+                <span class="blink-white"></span> SECURITY LEVEL: MAX
             </div>
             
-            <h2 class="gold-title">VIP ACCESS</h2>
-            <div class="gold-divider"></div>
-            <p class="gold-sub">Pentru cei care au totul.</p>
+<!--             <p class="ultra-desc"> -->
+                Obiecte <span style="color:#ff0000; font-weight:900;">MYTHIC</span> disponibile acum.
+            </p>
 
-            <button class="btn-solid-gold" onclick="openEliteShop()">
-                ENTER BOUTIQUE
+            <button class="btn-ultra-red-white" onclick="openEliteShop()">
+                ACCESEAZĂ BOUTIQUE
             </button>
         </div>
     </div>
@@ -12161,7 +12220,7 @@ function initAdaptiveNav() {
         'zone-atelier': 'state-atelier',
         'zone-mystery': 'state-mystery',
 // Add to your initAdaptiveNav() list:
-'zone-elite': 'state-vault', // Use Vault state (Gold) for now, or create a new 'state-gold' if you want specific icon behavio
+'zone-elite': 'state-elite', // Use Vault state (Gold) for now, or create a new 'state-gold' if you want specific icon behavio
         'zone-deals': 'state-deals',      // Minty Green
         'zone-terminal': 'state-terminal' // Toxic Green
     };
