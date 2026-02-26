@@ -5182,6 +5182,9 @@ body {
     border-radius: 4px;
 }
 
+
+
+
 /* Ajustare Hover: acum butoanele se mișcă spre DREAPTA */
 .btn-nav-terminal:hover, .btn-nav-vault:hover, .btn-nav-atelier:hover, .btn-nav-toxic:hover {
     transform: translateX(8px); 
@@ -7507,15 +7510,15 @@ body {
 /* 1. VAULT (Blue/Cyan) */
 .btn-nav-vault { 
     background: rgba(41, 243, 255, 0.05); 
-    border: 1px solid #29f3ff; 
-    color: #29f3ff; 
+    border: 1px solid #ffd700; 
+    color: #ffd700; 
     font-family:'Orbitron'; font-weight:900; text-transform:uppercase; 
     position:relative; overflow:hidden; display:flex; align-items:center; gap:10px; 
     transition:0.3s; padding: 10px 12px; font-size: 9px; letter-spacing: 1px; border-radius: 4px; 
 }
 .btn-nav-vault:hover { 
     transform: translateX(8px); 
-    background: #29f3ff; 
+    background: #ffd700; 
     color: #000; 
     box-shadow: 0 0 20px rgba(41, 243, 255, 0.6);
     border-color: #fff;
@@ -8234,10 +8237,164 @@ nav a[href="shop.html"] {
 
 
 
+/* --- ELITE INVENTORY BUTTON (Full Width) --- */
+.select-btn-v6.c-elite { 
+    grid-column: span 2; /* Spans full width in 2-col grid */
+    border-color: #ff0000; 
+    background: linear-gradient(180deg, rgba(255,0,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
+}
+.select-btn-v6.c-elite i { color: #ff0000; filter: drop-shadow(0 0 10px #ff0000); }
+.select-btn-v6.c-elite span { color: #ff0000; text-shadow: 0 0 5px #ff0000; }
+.select-btn-v6.c-elite:hover { 
+    background: rgba(255,0,0,0.2); 
+    transform: translateY(-5px); 
+    box-shadow: 0 0 25px rgba(255, 0, 0, 0.5); 
+}
 
+/* --- SICK CSS PROFILE BANNERS (PREVIEWS) --- */
+.p-ban-preview {
+    width: 100%;
+    height: 80px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* 1. Cyber Grid (Green/Black) */
+.p-ban-cyber {
+    background-color: #000;
+    background-image: 
+        linear-gradient(rgba(0, 255, 136, 0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.2) 1px, transparent 1px);
+    background-size: 20px 20px;
+    animation: panGrid 10s linear infinite;
+}
+@keyframes panGrid { 0% { background-position: 0 0; } 100% { background-position: 20px 20px; } }
+
+/* 2. Magma (Red/Orange) */
+.p-ban-magma {
+    background: linear-gradient(45deg, #ff0000, #ff4500, #800000);
+    background-size: 200% 200%;
+    animation: gradientMove 3s ease infinite;
+}
+
+/* 3. Deep Void (Purple/Black) */
+.p-ban-void {
+    background: radial-gradient(circle at center, #4b0082 0%, #000 100%);
+    box-shadow: inset 0 0 20px #000;
+}
+.p-ban-void::after {
+    content: ''; position: absolute; inset:0; 
+    background-image: radial-gradient(white 1px, transparent 1px);
+    background-size: 15px 15px; opacity: 0.3;
+    animation: starsMove 20s linear infinite;
+}
+@keyframes starsMove { from { transform: scale(1); } to { transform: scale(1.5); opacity: 0; } }
+
+/* 4. Gold Rush (Luxury) */
+.p-ban-gold {
+    background: repeating-linear-gradient(
+        45deg,
+        #ffd700,
+        #ffd700 10px,
+        #b8860b 10px,
+        #b8860b 20px
+    );
+    animation: shineGold 20s linear infinite;
+}
+@keyframes shineGold { from { background-position: 0 0; } to { background-position: 100% 0; } }
+
+/* 5. Matrix (Code) */
+.p-ban-matrix {
+    background: #000;
+    color: #0f0;
+    font-family: monospace;
+    overflow: hidden;
+}
+.p-ban-matrix::before {
+    content: "10101010101010101010";
+    position: absolute; top: 0; left: 0;
+    word-break: break-all; opacity: 0.3;
+    font-size: 10px; line-height: 10px;
+}
+
+/* 6. Neon City (Cyan/Pink) */
+.p-ban-neon {
+    background: linear-gradient(180deg, #050b14 50%, #2b002b 100%);
+    border-bottom: 2px solid #00ffff;
+}
+.p-ban-neon::before {
+    content: ''; position: absolute; bottom: 0; width: 100%; height: 2px;
+    background: #ff00ff; box-shadow: 0 0 10px #ff00ff;
+}
+
+/* --- AUDIO PLAYER BUTTON --- */
+.audio-play-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 0, 0, 0.2);
+    border: 1px solid #ff0000;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: 0.3s;
+    font-size: 16px;
+}
+.audio-play-btn:hover { background: #ff0000; box-shadow: 0 0 15px #ff0000; }
+.audio-play-btn.playing { background: #fff; color: #ff0000; border-color: #fff; animation: pulse 1s infinite; }
   </style>
 </head>
 <body>
+
+<!-- PROFILE INTRO SHOP MODAL -->
+<div id="introShopModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 600px;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 0, 0, 0.1); padding: 25px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#ff0000;">AUDIO_MODULES</div>
+            <button class="close-pop" onclick="closeModal('introShopModal')" style="position:static !important; border:1px solid #ff0000; background:transparent;">✕</button>
+        </div>
+        <div class="bm-content-scroll" id="introShopList" style="padding: 20px; display: flex; flex-direction: column; gap: 15px;"></div>
+    </div>
+</div>
+
+<!-- PROFILE BANNER SHOP MODAL -->
+<div id="pBannerShopModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 700px; height: 80vh;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-bottom: 1px solid #fff; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#fff;">VISUAL_OVERLAYS</div>
+            <button class="close-pop" onclick="closeModal('pBannerShopModal')" style="position:static !important; border:1px solid #fff; background:transparent;">✕</button>
+        </div>
+        <div class="bm-content-scroll" id="pBannerShopList" style="padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;"></div>
+    </div>
+</div>
+
+<!-- ELITE INVENTORY MODAL -->
+<div id="eliteInventoryModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 600px; height: 80vh;">
+        <div class="bm-scanline-overlay"></div>
+        
+        <!-- Header -->
+        <div style="background: rgba(255, 0, 0, 0.1); padding: 20px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div class="title-rw" style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#ff0000;">ELITE_STORAGE</div>
+            <button class="close-pop" onclick="document.getElementById('eliteInventoryModal').classList.remove('active'); document.getElementById('cosmeticsSelectModal').classList.add('active');" style="border:1px solid #ff0000; background:transparent; position:static !important;">✕</button>
+        </div>
+
+        <!-- Sub-Nav -->
+        <div style="display: flex; gap: 10px; padding: 15px; border-bottom: 1px solid rgba(255,0,0,0.2);">
+            <button class="btn-nav-v6" id="invTabBanners" onclick="openEliteInventory('banners')" style="border-color:#ff0000;">BANNERS</button>
+            <button class="btn-nav-v6" id="invTabIntros" onclick="openEliteInventory('intros')" style="border-color:#ff0000;">INTROS</button>
+        </div>
+
+        <!-- List -->
+        <div class="bm-content-scroll" id="eliteInventoryList" style="padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <!-- JS Injected Content -->
+        </div>
+    </div>
+</div>
 
 <!-- MAIN ELITE BOUTIQUE MODAL -->
 <div id="eliteShopModal" class="account-modal-overlay">
@@ -8329,33 +8486,37 @@ nav a[href="shop.html"] {
     </div>
 </div>
 
-<!-- SUB-MODAL 2: PROFILE PRESTIGE -->
+<!-- SUB-MODAL 2: PROFILE PRESTIGE (UPDATED) -->
 <div id="profilePrestigeModal" class="account-modal-overlay">
     <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 800px; height: 80vh;">
         <div class="bm-scanline-overlay"></div>
         <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-bottom: 1px solid #fff; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
             <div>
                 <div style="font-family:'Montserrat'; font-size: 22px; font-weight: 900; color:#fff;">PROFILE_PRESTIGE</div>
-                <div style="font-family:monospace; font-size: 10px; color:#ff0000;">MODULE: USER_INTERFACE | STATUS: ENCRYPTED</div>
+                <div style="font-family:monospace; font-size: 10px; color:#ff0000;">MODULE: USER_INTERFACE | STATUS: ONLINE</div>
             </div>
             <button class="close-pop" onclick="closeModal('profilePrestigeModal'); document.getElementById('eliteShopModal').classList.add('active');" style="border:1px solid #fff; background:transparent; position:static !important;">✕</button>
         </div>
 
         <div class="bm-content-scroll" style="padding: 20px;">
             <div class="bm-grid-v4">
-                <!-- 2 Placeholder Categories -->
-                <div class="bm-offer-card-v4">
+                
+                <!-- PROFILE INTROS -->
+                <div class="bm-offer-card-v4" onclick="openProfileIntroShop()">
                     <i class="fas fa-play-circle" style="color:#ff0000; font-size:30px;"></i>
                     <div class="bm-title-v4">PROFILE INTROS</div>
-                    <div class="bm-desc-v4">Animații la intrarea pe profilul tău.</div>
-                    <button class="bm-price-btn-v4">ÎN CURÂND</button>
+                    <div class="bm-desc-v4">Sunet care se aude când cineva îți vizitează profilul.</div>
+                    <button class="bm-price-btn-v4" style="background:#ff0000 !important; color:#fff;">DESCHIDE</button>
                 </div>
-                <div class="bm-offer-card-v4">
+
+                <!-- PROFILE BANNERS -->
+                <div class="bm-offer-card-v4" onclick="openProfileBannerShop()">
                     <i class="fas fa-image" style="color:#fff; font-size:30px;"></i>
                     <div class="bm-title-v4">PROFILE BANNERS</div>
-                    <div class="bm-desc-v4">Imagini de fundal personalizate pentru profil.</div>
-                    <button class="bm-price-btn-v4">ÎN CURÂND</button>
+                    <div class="bm-desc-v4">Fundal animat sau stilizat pentru cardul tău de profil.</div>
+                    <button class="bm-price-btn-v4" style="background:#fff !important; color:#000;">DESCHIDE</button>
                 </div>
+
             </div>
         </div>
     </div>
@@ -9965,23 +10126,25 @@ nav a[href="shop.html"] {
 
             <!-- PREVIEW BOX REMOVED AS REQUESTED -->
 
-<!-- CATEGORY GRID -->
 <div class="cosmo-grid-select">
+    <!-- Existing 4 Buttons -->
     <div class="select-btn-v6 c-badge" onclick="openInventory('badges'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-certificate"></i>
-        <span>BADGES</span>
+        <i class="fas fa-certificate"></i><span>BADGES</span>
     </div>
     <div class="select-btn-v6 c-frame" onclick="openInventory('frames'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-crop-alt"></i>
-        <span>RAME</span>
+        <i class="fas fa-crop-alt"></i><span>RAME</span>
     </div>
     <div class="select-btn-v6 c-banner" onclick="openInventory('banners'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-image"></i>
-        <span>BANNERE</span>
+        <i class="fas fa-image"></i><span>BANNERE</span>
     </div>
     <div class="select-btn-v6 c-text" onclick="openInventory('texts'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-font"></i>
-        <span>TEXT</span>
+        <i class="fas fa-font"></i><span>TEXT</span>
+    </div>
+
+    <!-- NEW ELITE BUTTON (Space below) -->
+    <div class="select-btn-v6 c-elite" onclick="openEliteInventory('banners')">
+        <i class="fas fa-crown"></i>
+        <span>ELITE</span>
     </div>
 </div>
         </div>
@@ -10387,6 +10550,31 @@ window.showCustomConfirm = (msg, title = "CONFIRMARE") => {
     { id: 'eb_hub', text: 'TheHub', price: 100, isElite: true, animClass: 'badge-the-hub', isHub: true },
 
 ];
+
+
+
+
+// --- ELITE PROFILE DATABASES ---
+
+const PROFILE_BANNERS_DB = [
+    { id: 'pban_cyber', name: 'CYBER GRID', price: 5000, cssClass: 'p-ban-cyber' },
+    { id: 'pban_magma', name: 'MAGMA FLOW', price: 7500, cssClass: 'p-ban-magma' },
+    { id: 'pban_void',  name: 'DEEP VOID',  price: 10000, cssClass: 'p-ban-void' },
+    { id: 'pban_gold',  name: 'GOLD RUSH',  price: 15000, cssClass: 'p-ban-gold' },
+    { id: 'pban_matrix',name: 'MATRIX CODE',price: 12000, cssClass: 'p-ban-matrix' },
+    { id: 'pban_neon',  name: 'NEON CITY',  price: 3000,  cssClass: 'p-ban-neon' }
+];
+
+const PROFILE_INTROS_DB = [
+    { 
+        id: 'intro_fato', 
+        name: 'Haide fato știu că vrei', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Video%20Project.m4a?alt=media&token=7e4eb9d9-4b30-4b3a-8e47-a7ae7d0b9dd6' 
+    }
+];
+
+
 const BANNERS_DB = [
     // --- BASIC / STATIC (850 – 1500) ---
     { id: 'bub_galaxy',    name: 'GALAXY',   cssClass: 'bubble-galaxy',    price: 1300, desc: 'Spațial' },
@@ -11486,7 +11674,93 @@ window.processDonation = async () => {
 
 window.activeCosmeticTicket = null; // Stores { category: 'badges', id: 'TICK-123' }
 
+window.openEliteInventory = async (category = 'banners') => {
+    // 1. Close Cosmetic Select, Open Elite Inv
+    document.getElementById('cosmeticsSelectModal').classList.remove('active');
+    document.getElementById('eliteInventoryModal').classList.add('active');
 
+    const list = document.getElementById('eliteInventoryList');
+    list.innerHTML = 'Loading...';
+
+    // 2. Fetch Data
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const data = userSnap.data();
+
+    // 3. Render Based on Category
+    list.innerHTML = '';
+    
+    // UI Tab Active State
+    document.getElementById('invTabBanners').style.background = category === 'banners' ? '#ff0000' : 'transparent';
+    document.getElementById('invTabBanners').style.color = category === 'banners' ? '#fff' : '#ff0000';
+    document.getElementById('invTabIntros').style.background = category === 'intros' ? '#ff0000' : 'transparent';
+    document.getElementById('invTabIntros').style.color = category === 'intros' ? '#fff' : '#ff0000';
+
+    if (category === 'banners') {
+        const owned = data.ownedProfileBanners || [];
+        const equipped = data.equippedProfileBanner?.id;
+
+        if(owned.length === 0) list.innerHTML = "<div style='color:#aaa; grid-column:span 2; text-align:center;'>Nu ai bannere.</div>";
+
+        owned.forEach(id => {
+            const item = PROFILE_BANNERS_DB.find(x => x.id === id);
+            if(item) {
+                const isEq = (id === equipped);
+                list.innerHTML += `
+                    <div class="bm-offer-card-v4" style="padding:10px; ${isEq ? 'border-color:#00ff88 !important;' : ''}">
+                        <div class="p-ban-preview ${item.cssClass}" style="height:60px;"></div>
+                        <div style="font-size:10px; color:#fff; margin-bottom:10px;">${item.name}</div>
+                        ${isEq 
+                            ? `<button class="bm-price-btn-v4" style="background:transparent !important; color:#00ff88; border:1px solid #00ff88;" onclick="unequipProfileItem('banner')">UNEQUIP</button>`
+                            : `<button class="bm-price-btn-v4" onclick="equipProfileItem('banner', '${item.id}', '${item.cssClass}')">EQUIP</button>`
+                        }
+                    </div>`;
+            }
+        });
+    } 
+    else if (category === 'intros') {
+        const owned = data.ownedIntros || [];
+        const equipped = data.equippedIntro?.id;
+
+        if(owned.length === 0) list.innerHTML = "<div style='color:#aaa; grid-column:span 2; text-align:center;'>Nu ai intro-uri.</div>";
+
+        owned.forEach(id => {
+            const item = PROFILE_INTROS_DB.find(x => x.id === id);
+            if(item) {
+                const isEq = (id === equipped);
+                list.innerHTML += `
+                    <div class="bm-offer-card-v4" style="padding:10px; ${isEq ? 'border-color:#00ff88 !important;' : ''}">
+                        <div class="audio-play-btn" style="margin:0 auto 10px;" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
+                        <div style="font-size:10px; color:#fff; margin-bottom:10px;">${item.name}</div>
+                        ${isEq 
+                            ? `<button class="bm-price-btn-v4" style="background:transparent !important; color:#00ff88; border:1px solid #00ff88;" onclick="unequipProfileItem('intro')">UNEQUIP</button>`
+                            : `<button class="bm-price-btn-v4" onclick="equipProfileItem('intro', '${item.id}', '${item.audio}')">EQUIP</button>`
+                        }
+                    </div>`;
+            }
+        });
+    }
+};
+
+window.equipProfileItem = async (type, id, value) => {
+    try {
+        const field = type === 'banner' ? 'equippedProfileBanner' : 'equippedIntro';
+        // Stores { id: 'pban_cyber', cssClass: 'p-ban-cyber' } OR { id: 'intro_1', audio: 'url...' }
+        const obj = type === 'banner' ? { id, cssClass: value } : { id, audio: value };
+        
+        await updateDoc(doc(db, "accounts", auth.currentUser.uid), { [field]: obj });
+        alert("Echipat!");
+        openEliteInventory(type === 'banner' ? 'banners' : 'intros');
+    } catch(e) { console.error(e); }
+};
+
+window.unequipProfileItem = async (type) => {
+    try {
+        const field = type === 'banner' ? 'equippedProfileBanner' : 'equippedIntro';
+        await updateDoc(doc(db, "accounts", auth.currentUser.uid), { [field]: null });
+        alert("Dezechipat!");
+        openEliteInventory(type === 'banner' ? 'banners' : 'intros');
+    } catch(e) { console.error(e); }
+};
 
 window.openBadgeShop = async () => {
     if(!auth.currentUser) return alert("Loghează-te!");
@@ -14440,6 +14714,141 @@ window.buyEliteItem = async (id, price, type) => {
         await logTransaction(-price, "DIAMONDS", "Elite Boutique", `Bought Elite ${type}: ${id}`);
         showCustomAlert("Element de elită sincronizat!", "SUCCES");
         openEliteCategory(type); // Refresh current list
+    } catch(e) { console.error(e); }
+};
+
+
+
+// --- PROFILE BANNERS SHOP ---
+window.openProfileBannerShop = async () => {
+    if(!auth.currentUser) return;
+    const modal = document.getElementById('pBannerShopModal');
+    const list = document.getElementById('pBannerShopList');
+    list.innerHTML = 'Loading...';
+    modal.classList.add('active');
+
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const owned = userSnap.data().ownedProfileBanners || [];
+
+    list.innerHTML = '';
+    PROFILE_BANNERS_DB.forEach(item => {
+        const isOwned = owned.includes(item.id);
+        const card = document.createElement('div');
+        card.className = 'bm-offer-card-v4'; // Reusing Elite Card style
+        card.style.padding = "15px";
+        
+        card.innerHTML = `
+            <div class="p-ban-preview ${item.cssClass}"></div>
+            <div class="bm-title-v4" style="font-size:12px;">${item.name}</div>
+            ${isOwned 
+                ? `<div style="color:#00ff88; font-weight:900; font-size:10px; margin-top:10px;">DEȚINUT</div>` 
+                : `<button class="bm-price-btn-v4" onclick="buyProfileItem('banner', '${item.id}', ${item.price})" style="background:#fff !important; color:#000; width:100%; margin-top:10px;">
+                     ${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" style="width:12px;">
+                   </button>`
+            }
+        `;
+        list.appendChild(card);
+    });
+};
+
+// --- PROFILE INTROS SHOP ---
+let currentAudio = null;
+
+window.previewAudio = (url, btn) => {
+    // Stop current
+    if(currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+        document.querySelectorAll('.audio-play-btn').forEach(b => {
+            b.classList.remove('playing');
+            b.innerHTML = '<i class="fas fa-play"></i>';
+        });
+    }
+
+    // Play new
+    if(url) {
+        const audio = new Audio(url);
+        audio.play();
+        currentAudio = audio;
+        btn.classList.add('playing');
+        btn.innerHTML = '<i class="fas fa-pause"></i>';
+        
+        audio.onended = () => {
+            btn.classList.remove('playing');
+            btn.innerHTML = '<i class="fas fa-play"></i>';
+            currentAudio = null;
+        };
+    }
+};
+
+window.openProfileIntroShop = async () => {
+    if(!auth.currentUser) return;
+    const modal = document.getElementById('introShopModal');
+    const list = document.getElementById('introShopList');
+    list.innerHTML = 'Loading...';
+    modal.classList.add('active');
+
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const owned = userSnap.data().ownedIntros || [];
+
+    list.innerHTML = '';
+    PROFILE_INTROS_DB.forEach(item => {
+        const isOwned = owned.includes(item.id);
+        const card = document.createElement('div');
+        card.className = 'bm-offer-card-v4';
+        card.style.flexDirection = "row";
+        card.style.justifyContent = "space-between";
+        card.style.alignItems = "center";
+        card.style.padding = "15px";
+
+        card.innerHTML = `
+            <div style="display:flex; align-items:center; gap:15px;">
+                <div class="audio-play-btn" onclick="previewAudio('${item.audio}', this)">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div style="text-align:left;">
+                    <div class="bm-title-v4" style="margin:0; font-size:12px;">${item.name}</div>
+                    <div style="font-size:9px; color:#aaa;">Audio Track</div>
+                </div>
+            </div>
+            
+            <div>
+                ${isOwned 
+                    ? `<div style="color:#00ff88; font-weight:900; font-size:10px;">DEȚINUT</div>` 
+                    : `<button class="bm-price-btn-v4" onclick="buyProfileItem('intro', '${item.id}', ${item.price})" style="background:#ff0000 !important; color:#fff; font-size:10px; padding:8px 15px;">
+                         ${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" style="width:10px;">
+                       </button>`
+                }
+            </div>
+        `;
+        list.appendChild(card);
+    });
+};
+
+// --- BUY FUNCTION ---
+window.buyProfileItem = async (type, id, price) => {
+    if(!auth.currentUser) return;
+    
+    // Check Coins
+    const userRef = doc(db, "accounts", auth.currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    if((userSnap.data().coins || 0) < price) return showCustomAlert("Nu ai destui coins!", "SĂRĂCIE");
+
+    if(!(await showCustomConfirm(`Cumperi pentru ${price} Coins?`, "CONFIRMĂ"))) return;
+
+    const field = type === 'banner' ? 'ownedProfileBanners' : 'ownedIntros';
+
+    try {
+        await updateDoc(userRef, {
+            coins: increment(-price),
+            [field]: arrayUnion(id)
+        });
+        await logTransaction(-price, "COINS", "Elite Shop", `Bought ${type}: ${id}`);
+        showCustomAlert("Achiziție reușită!", "SUCCES");
+        
+        // Refresh
+        if(type === 'banner') openProfileBannerShop();
+        else openProfileIntroShop();
     } catch(e) { console.error(e); }
 };
 </script>
