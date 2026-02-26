@@ -8234,29 +8234,7 @@ nav a[href="shop.html"] {
 
 
 
-/* --- SICK PREVIEW PLAY BUTTON --- */
-.btn-preview-audio {
-    width: 45px; height: 45px;
-    border-radius: 50%;
-    background: rgba(255, 0, 0, 0.1);
-    border: 2px solid #ff0000;
-    color: #ff0000;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: 0.3s;
-    font-size: 18px;
-    position: relative;
-}
-.btn-preview-audio:hover {
-    background: #ff0000; color: #fff;
-    box-shadow: 0 0 15px #ff0000;
-}
-.btn-preview-audio.playing {
-    animation: audioPulse 1.5s infinite;
-}
-@keyframes audioPulse {
-    0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
-    100% { box-shadow: 0 0 0 15px rgba(255, 0, 0, 0); }
-}
+
   </style>
 </head>
 <body>
@@ -8380,27 +8358,19 @@ nav a[href="shop.html"] {
 
         <div class="bm-content-scroll" style="padding: 20px;">
             <div class="bm-grid-v4">
-                
-                <!-- Profile Intros - NOW ACTIVE -->
-                <div class="bm-offer-card-v4" onclick="openProfileIntroShop()">
-                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                <!-- 2 Placeholder Categories -->
+                <div class="bm-offer-card-v4">
                     <i class="fas fa-play-circle" style="color:#ff0000; font-size:30px;"></i>
                     <div class="bm-title-v4">PROFILE INTROS</div>
-                    <div class="bm-desc-v4">Animații și sunete la intrarea pe profilul tău.</div>
-                    <button class="bm-price-btn-v4">DESCHIDE</button>
+                    <div class="bm-desc-v4">Animații la intrarea pe profilul tău.</div>
+                    <button class="bm-price-btn-v4">ÎN CURÂND</button>
                 </div>
-
-                <!-- Profile Banners - NOW ACTIVE -->
-                <div class="bm-offer-card-v4" onclick="openProfileBannerShop()">
-                    <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                    <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                <div class="bm-offer-card-v4">
                     <i class="fas fa-image" style="color:#fff; font-size:30px;"></i>
                     <div class="bm-title-v4">PROFILE BANNERS</div>
                     <div class="bm-desc-v4">Imagini de fundal personalizate pentru profil.</div>
-                    <button class="bm-price-btn-v4">DESCHIDE</button>
+                    <button class="bm-price-btn-v4">ÎN CURÂND</button>
                 </div>
-                
             </div>
         </div>
     </div>
@@ -10029,13 +9999,6 @@ nav a[href="shop.html"] {
         <span>TEXT</span>
     </div>
 </div>
-
-    <!-- ADAUGĂ ASTA LA FINALUL GRIDULUI (îl facem 2x3 sau lași așa) -->
-    <div class="select-btn-v6" style="grid-column: span 2; border-color: #ff0000; color: #ff0000;" 
-         onclick="openEliteInventory(); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-crown"></i>
-        <span>ELITE</span>
-    </div>
         </div>
     </div>
 </div>
@@ -14493,109 +14456,6 @@ window.buyEliteItem = async (id, price, type) => {
         showCustomAlert("Element de elită sincronizat!", "SUCCES");
         openEliteCategory(type); // Refresh current list
     } catch(e) { console.error(e); }
-};
-
-
-
-// --- PREVIEW AUDIO SYSTEM ---
-let currentPreview = null;
-window.previewAudio = (url, btn) => {
-    if (currentPreview) {
-        currentPreview.pause();
-        document.querySelectorAll('.btn-preview-audio').forEach(b => b.classList.remove('playing', 'fa-stop'));
-        document.querySelectorAll('.btn-preview-audio i').forEach(i => { i.classList.add('fa-play'); i.classList.remove('fa-stop'); });
-        if (currentPreview.src === url) { currentPreview = null; return; }
-    }
-    currentPreview = new Audio(url);
-    currentPreview.play();
-    btn.classList.add('playing');
-    const icon = btn.querySelector('i');
-    icon.classList.remove('fa-play');
-    icon.classList.add('fa-stop');
-    currentPreview.onended = () => {
-        btn.classList.remove('playing');
-        icon.classList.add('fa-play');
-        icon.classList.remove('fa-stop');
-        currentPreview = null;
-    };
-};
-
-// --- OPEN INTRO SHOP (FIXED) ---
-window.openProfileIntroShop = async () => {
-    const list = document.getElementById('introList');
-    const shopModal = document.getElementById('introShopModal');
-    
-    if(!list || !shopModal) return console.error("Intro elements not found");
-
-    // Close BOTH possible selection modals to be safe
-    document.getElementById('profilePrestigeModal').classList.remove('active');
-    document.getElementById('eliteCosmeticsModal').classList.remove('active');
-    
-    // Open the Intro Shop
-    shopModal.classList.add('active');
-    list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">> DECRYPTING AUDIO MODULES...</div>';
-    
-    // Safety check for user data
-    const userOwned = (window.currentUserData && window.currentUserData.ownedIntros) ? window.currentUserData.ownedIntros : [];
-
-    list.innerHTML = '';
-    PROFILE_INTROS_DB.forEach(item => {
-        const isOwned = userOwned.includes(item.id);
-        const card = document.createElement('div');
-        card.className = 'v4-badge-item';
-        card.style.display = 'flex';
-        card.style.justifyContent = 'space-between';
-        card.style.alignItems = 'center';
-        card.style.padding = '15px 20px';
-        card.style.marginBottom = '10px';
-
-        card.innerHTML = `
-            <div style="text-align:left;">
-                <div style="font-family:'Orbitron'; font-weight:800; font-size:14px; color:#fff;">${item.name}</div>
-                <div style="color:var(--gold); font-weight:800; font-size:12px; margin-top:5px;">${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="12"></div>
-            </div>
-            <div style="display:flex; gap:15px; align-items:center;">
-                <div class="btn-preview-audio" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
-                ${isOwned ? '<span class="owned-label" style="color:#00ff88; font-weight:900; font-family:Orbitron; font-size:10px;">DEȚINUT</span>' : 
-                `<button class="bm-price-btn-v4" style="min-width:80px;" onclick="buyPrestige('${item.id}', ${item.price}, 'intro')">CUMPĂRĂ</button>`}
-            </div>
-        `;
-        list.appendChild(card);
-    });
-};
-
-// --- OPEN BANNER SHOP (FIXED) ---
-window.openProfileBannerShop = async () => {
-    const list = document.getElementById('pBannerList');
-    const shopModal = document.getElementById('pBannerShopModal');
-
-    if(!list || !shopModal) return console.error("Banner elements not found");
-
-    // Close BOTH possible selection modals to be safe
-    document.getElementById('profilePrestigeModal').classList.remove('active');
-    document.getElementById('eliteCosmeticsModal').classList.remove('active');
-    
-    // Open the Banner Shop
-    shopModal.classList.add('active');
-    list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">> LOADING VISUALS...</div>';
-    
-    const userOwned = (window.currentUserData && window.currentUserData.ownedPBanners) ? window.currentUserData.ownedPBanners : [];
-
-    list.innerHTML = '';
-    PROFILE_BANNERS_DB.forEach(item => {
-        const isOwned = userOwned.includes(item.id);
-        const card = document.createElement('div');
-        card.className = 'shop-badge-item';
-        card.innerHTML = `
-            <div style="width:100%; height:60px; border-radius:10px; background:${item.bgColor || 'transparent'}; background-image:${item.style}; background-size:${item.bgSize || 'cover'}; border:1px solid rgba(255,255,255,0.1);"></div>
-            <div style="font-family:'Orbitron'; font-size:11px; margin:10px 0; color:#fff;">${item.name}</div>
-            <div class="shop-badge-price" style="margin-bottom:10px;">
-                ${isOwned ? '<span style="color:#00ff88; font-weight:900;">DEȚINUT</span>' : `${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="14">`}
-            </div>
-            ${isOwned ? '' : `<button class="bm-price-btn-v4" style="width:100%;" onclick="buyPrestige('${item.id}', ${item.price}, 'banner')">DEBLOCHEAZĂ</button>`}
-        `;
-        list.appendChild(card);
-    });
 };
 </script>
 </body>
