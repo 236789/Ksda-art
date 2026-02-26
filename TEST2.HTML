@@ -14658,9 +14658,8 @@ window.openPrizeView = () => {
     const VOUCHER_MAP = {
         'BADGE VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
         'COSMETIC VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
+        'DIAMOND VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FDiamonds%20Reduction%20cupon%20.png?alt=media&token=7fbf7d4f-78e1-4ea1-934e-619016889b84',
         'BANNER VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBanner%20discount%20cupon%20.png?alt=media&token=e75ab8ee-5278-496c-9938-d1796bda02e0',
-        'FRAME VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FFrame%20discount%20cupon%20.png?alt=media&token=c49a5fb2-06e8-4df5-bcf3-ed37afd1cdef',
-        'TEXT VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f',
         'CURRENCY VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d',
         'BM VOUCHER': 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d'
     };
@@ -14671,40 +14670,30 @@ window.openPrizeView = () => {
         let visualHtml = "";
         const slotID = `shuf_${idx}_${Math.floor(Math.random()*999)}`;
 
-        // --- THE ANIMATION ENGINE ---
-        if(r.label === 'RANDOM BADGE') {
+        // 1. Logică Shuffle pentru Elite Badges
+        if(r.label === 'RANDOM ELITE BADGE') {
             visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
             setTimeout(() => {
                 const el = document.getElementById(slotID);
+                const elitePool = BADGES_DB.filter(b => b.isElite);
                 if(el) setInterval(() => {
                     if (!document.getElementById('prizeListModal').classList.contains('active')) return;
-                    const b = BADGES_DB[Math.floor(Math.random() * BADGES_DB.length)];
-                    el.innerHTML = `<span class="shop-badge-preview" style="background:${b.color} !important; color:#000 !important; font-size:9px;">${b.text}</span>`;
+                    const b = elitePool[Math.floor(Math.random() * elitePool.length)];
+                    el.innerHTML = `<span class="${b.animClass}" style="font-size:9px; padding: 5px 10px; border-radius: 4px; border: 1px solid white;">${b.text}</span>`;
                 }, 600);
             }, 100);
         }
-        else if(r.label === 'RANDOM FRAME' || r.label === 'EXCLUSIVE FRAME') {
-            visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
-            setTimeout(() => {
-                const el = document.getElementById(slotID);
-                if(el) setInterval(() => {
-                    if (!document.getElementById('prizeListModal').classList.contains('active')) return;
-                    const f = FRAMES_DB[Math.floor(Math.random() * FRAMES_DB.length)];
-                    el.innerHTML = `<img src="${f.img}" style="height:55px; filter:drop-shadow(0 0 10px gold);">`;
-                }, 600);
-            }, 100);
+        // 2. Logică Iconiță Speaker pentru Profile Intro
+        else if(r.label === 'RANDOM PROFILE INTRO') {
+            visualHtml = `<i class="fas fa-volume-up" style="font-size: 40px; color: #00ffff; filter: drop-shadow(0 0 10px #00ffff);"></i>`;
         }
-        else if(r.label === 'MILIARDAR') {
-            const b = BADGES_DB.find(x => x.id === 'b_miliardar');
-            visualHtml = `<span class="shop-badge-preview" style="background:${b.color} !important; color:#000 !important; font-weight:900;">${b.text}</span>`;
-        }
-        else if(r.label === 'SINGULARITY') {
-            visualHtml = `<span class="shop-badge-preview badge-singularity" style="padding:10px 15px;"><i class="fas fa-atom"></i> SINGULARITY</span>`;
-        }
+        // 3. Logică Imagini Vouchere
         else if(VOUCHER_MAP[r.label]) {
-            visualHtml = `<img src="${VOUCHER_MAP[r.label]}" style="height:55px; width:auto;">`;
-        } else {
-            visualHtml = `<img src="${r.icon}" class="aaa-card-img" style="height:50px;">`;
+            visualHtml = `<img src="${VOUCHER_MAP[r.label]}" style="height:55px; width:auto; filter: drop-shadow(0 0 10px white);">`;
+        }
+        // 4. Celelalte (Coins/Diamonds)
+        else {
+            visualHtml = `<img src="${r.icon || 'https://iili.io/fhc1SKQ.png'}" class="aaa-card-img" style="height:50px;">`;
         }
 
         card.innerHTML = `
