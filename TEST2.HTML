@@ -13634,10 +13634,12 @@ let countdownInterval = null;
 
 
 // --- UPDATED REAL-TIME STOCK SYNC ---
+// --- UPDATED REAL-TIME STOCK SYNC (3 HOURS) ---
 function initMysteryStockSync() {
     onSnapshot(doc(db, "system", "mystery_box_stock"), async (snap) => {
         const now = Date.now();
-        const RESET_MS = 60000; // 1 Minute
+        // MODIFICAT: 3 ore în milisecunde (3 * 60 * 60 * 1000)
+        const RESET_MS = 10800000; 
 
         if (!snap.exists() || (now - (snap.data().lastReset || 0) > RESET_MS)) {
             // Logic to restock if expired
@@ -13652,35 +13654,36 @@ function initMysteryStockSync() {
             globalStock = snap.data().counts;
 
             // --- THE REAL-TIME UI FIX ---
-            // 1. Refresh the main grid if the shop is open
             if (document.getElementById('mysteryShopModal').classList.contains('active')) {
                 renderMysteryShopItems();
             }
 
-            // 2. Refresh the detail modal if the user is currently looking at a specific box
             if (document.getElementById('boxDetailModal').classList.contains('active') && selectedBox) {
                 const currentStock = globalStock[selectedBox.id] || 0;
-                
-                // Adjust quantity if stock dropped below what the user selected
                 if (selectedQty > currentStock && currentStock > 0) {
                     selectedQty = currentStock;
                 } else if (currentStock <= 0) {
                     selectedQty = 0;
                 }
-                
                 updateBoxTotal();
             }
 
             // Timer update logic
             const lastReset = snap.data().lastReset;
             if (countdownInterval) clearInterval(countdownInterval);
+            
             countdownInterval = setInterval(() => {
                 const timeLeft = Math.max(0, RESET_MS - (Date.now() - lastReset));
-                const m = Math.floor(timeLeft / 60000);
+                
+                // CALCULARE ORE, MINUTE, SECUNDE
+                const h = Math.floor(timeLeft / 3600000);
+                const m = Math.floor((timeLeft % 3600000) / 60000);
                 const s = Math.floor((timeLeft % 60000) / 1000);
+
                 const timerEl = document.getElementById('mysteryResetTimer');
                 if (timerEl) {
-                    timerEl.innerText = `REFRESH: ${m}:${s < 10 ? '0' : ''}${s}`;
+                    // Afișăm formatul REFRESH: H:MM:SS
+                    timerEl.innerText = `REFRESH: ${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
                 }
                 if (timeLeft <= 0) clearInterval(countdownInterval);
             }, 1000);
@@ -14193,16 +14196,14 @@ initMysteryStockSync();
 let dealsCountdownInterval = null; // To prevent multiple timers
 let isUpdatingDeals = false; // To prevent write-loops
 
+// --- UPDATED FLASH DEALS (EVERY DAY) ---
 async function initFlashDeals() {
     onSnapshot(doc(db, "system", "flash_deals"), async (snap) => {
         const now = Date.now();
-        const REFRESH_MS = 60000; // 1 Minute
+        const REFRESH_MS = 24 * 60 * 60 * 1000; // 24 Hours in Milliseconds
 
-        // 1. Check if we need to generate new deals
-        // Added a 2-second buffer to prevent "instant" re-triggering
-        if (!snap.exists() || (now - (snap.data().lastUpdate || 0) > REFRESH_MS + 2000)) {
-            
-            if (isUpdatingDeals) return; // Already writing, stop
+        if (!snap.exists() || (now - (snap.data().lastUpdate || 0) > REFRESH_MS)) {
+            if (isUpdatingDeals) return;
             isUpdatingDeals = true;
 
             const allItems = [
@@ -14213,49 +14214,38 @@ async function initFlashDeals() {
             
             const selectedDeals = [];
             const usedIndexes = new Set();
-            
             while(selectedDeals.length < 3) {
                 let idx = Math.floor(Math.random() * allItems.length);
                 if(!usedIndexes.has(idx)) {
                     const item = allItems[idx];
-                    const discountPct = Math.floor(Math.random() * 41) + 30; // 30-70%
-                    const newPrice = Math.floor(item.price * (1 - discountPct/100));
-                    selectedDeals.push({ ...item, discount: discountPct, salePrice: newPrice });
+                    const discountPct = Math.floor(Math.random() * 41) + 30;
+                    selectedDeals.push({ ...item, discount: discountPct, salePrice: Math.floor(item.price * (1 - discountPct/100)) });
                     usedIndexes.add(idx);
                 }
             }
 
             try {
-                await setDoc(doc(db, "system", "flash_deals"), { 
-                    items: selectedDeals, 
-                    lastUpdate: Date.now() 
-                });
-            } catch(e) { console.error("Update deals error:", e); }
-            
+                await setDoc(doc(db, "system", "flash_deals"), { items: selectedDeals, lastUpdate: Date.now() });
+            } catch(e) { console.error(e); }
             isUpdatingDeals = false;
         } else {
-
-
-
-            // 2. Render and start Countdown
             renderFlashDeals(snap.data().items);
-            
             const lastUpdate = snap.data().lastUpdate;
             
-            // CLEAR OLD TIMER BEFORE STARTING NEW ONE
             if (dealsCountdownInterval) clearInterval(dealsCountdownInterval);
             
             dealsCountdownInterval = setInterval(() => {
                 const remaining = Math.max(0, REFRESH_MS - (Date.now() - lastUpdate));
-                const m = Math.floor(remaining / 60000);
+                
+                // Calculate Hours, Minutes, Seconds
+                const h = Math.floor(remaining / 3600000);
+                const m = Math.floor((remaining % 3600000) / 60000);
                 const s = Math.floor((remaining % 60000) / 1000);
                 
                 const timerEl = document.getElementById('dealsResetTimer');
                 if (timerEl) {
-                    timerEl.innerText = `REFRESH: ${m}:${s < 10 ? '0':''}${s}`;
+                    timerEl.innerText = `NEXT DEALS IN: ${h}h ${m}m ${s}s`;
                 }
-
-                // If timer hits 0, the next onSnapshot trigger will handle the refresh
                 if (remaining <= 0) clearInterval(dealsCountdownInterval);
             }, 1000);
         }
