@@ -14523,15 +14523,19 @@ window.previewAudio = (url, btn) => {
 // --- OPEN INTRO SHOP (FIXED) ---
 window.openProfileIntroShop = async () => {
     const list = document.getElementById('introList');
-    if(!list) return;
+    const shopModal = document.getElementById('introShopModal');
     
-    // 1. Hide the selection menu so the new shop is visible
+    if(!list || !shopModal) return console.error("Intro elements not found");
+
+    // Close BOTH possible selection modals to be safe
     document.getElementById('profilePrestigeModal').classList.remove('active');
+    document.getElementById('eliteCosmeticsModal').classList.remove('active');
     
-    list.innerHTML = '<div style="color:#aaa; text-align:center;">Se încarcă modulele audio...</div>';
-    document.getElementById('introShopModal').classList.add('active');
+    // Open the Intro Shop
+    shopModal.classList.add('active');
+    list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">> DECRYPTING AUDIO MODULES...</div>';
     
-    // 2. Safety check: Ensure window.currentUserData exists to prevent crashes
+    // Safety check for user data
     const userOwned = (window.currentUserData && window.currentUserData.ownedIntros) ? window.currentUserData.ownedIntros : [];
 
     list.innerHTML = '';
@@ -14543,6 +14547,7 @@ window.openProfileIntroShop = async () => {
         card.style.justifyContent = 'space-between';
         card.style.alignItems = 'center';
         card.style.padding = '15px 20px';
+        card.style.marginBottom = '10px';
 
         card.innerHTML = `
             <div style="text-align:left;">
@@ -14551,8 +14556,8 @@ window.openProfileIntroShop = async () => {
             </div>
             <div style="display:flex; gap:15px; align-items:center;">
                 <div class="btn-preview-audio" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
-                ${isOwned ? '<span class="owned-label" style="color:#00ff88; font-weight:900;">DEȚINUT</span>' : 
-                `<button class="bm-price-btn-v4" onclick="buyPrestige('${item.id}', ${item.price}, 'intro')">CUMPĂRĂ</button>`}
+                ${isOwned ? '<span class="owned-label" style="color:#00ff88; font-weight:900; font-family:Orbitron; font-size:10px;">DEȚINUT</span>' : 
+                `<button class="bm-price-btn-v4" style="min-width:80px;" onclick="buyPrestige('${item.id}', ${item.price}, 'intro')">CUMPĂRĂ</button>`}
             </div>
         `;
         list.appendChild(card);
@@ -14562,28 +14567,32 @@ window.openProfileIntroShop = async () => {
 // --- OPEN BANNER SHOP (FIXED) ---
 window.openProfileBannerShop = async () => {
     const list = document.getElementById('pBannerList');
-    if(!list) return;
+    const shopModal = document.getElementById('pBannerShopModal');
 
-    // 1. Hide the selection menu
+    if(!list || !shopModal) return console.error("Banner elements not found");
+
+    // Close BOTH possible selection modals to be safe
     document.getElementById('profilePrestigeModal').classList.remove('active');
+    document.getElementById('eliteCosmeticsModal').classList.remove('active');
     
-    list.innerHTML = '';
-    document.getElementById('pBannerShopModal').classList.add('active');
+    // Open the Banner Shop
+    shopModal.classList.add('active');
+    list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">> LOADING VISUALS...</div>';
     
-    // 2. Safety check
     const userOwned = (window.currentUserData && window.currentUserData.ownedPBanners) ? window.currentUserData.ownedPBanners : [];
 
+    list.innerHTML = '';
     PROFILE_BANNERS_DB.forEach(item => {
         const isOwned = userOwned.includes(item.id);
         const card = document.createElement('div');
         card.className = 'shop-badge-item';
         card.innerHTML = `
             <div style="width:100%; height:60px; border-radius:10px; background:${item.bgColor || 'transparent'}; background-image:${item.style}; background-size:${item.bgSize || 'cover'}; border:1px solid rgba(255,255,255,0.1);"></div>
-            <div style="font-family:'Orbitron'; font-size:11px; margin:10px 0;">${item.name}</div>
-            <div class="shop-badge-price">
-                ${isOwned ? '<span style="color:#00ff88;">DEȚINUT</span>' : `${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="14">`}
+            <div style="font-family:'Orbitron'; font-size:11px; margin:10px 0; color:#fff;">${item.name}</div>
+            <div class="shop-badge-price" style="margin-bottom:10px;">
+                ${isOwned ? '<span style="color:#00ff88; font-weight:900;">DEȚINUT</span>' : `${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="14">`}
             </div>
-            ${isOwned ? '' : `<button class="buy-badge-btn" onclick="buyPrestige('${item.id}', ${item.price}, 'banner')">DEBLOCHEAZĂ</button>`}
+            ${isOwned ? '' : `<button class="bm-price-btn-v4" style="width:100%;" onclick="buyPrestige('${item.id}', ${item.price}, 'banner')">DEBLOCHEAZĂ</button>`}
         `;
         list.appendChild(card);
     });
