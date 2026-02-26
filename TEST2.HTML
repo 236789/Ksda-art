@@ -14704,37 +14704,7 @@ window.buyEliteItem = async (id, price, type) => {
 
 
 
-// --- PROFILE BANNERS SHOP ---
-window.openProfileBannerShop = async () => {
-    if(!auth.currentUser) return;
-    const modal = document.getElementById('pBannerShopModal');
-    const list = document.getElementById('pBannerShopList');
-    list.innerHTML = 'Loading...';
-    modal.classList.add('active');
 
-    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
-    const owned = userSnap.data().ownedProfileBanners || [];
-
-    list.innerHTML = '';
-    PROFILE_BANNERS_DB.forEach(item => {
-        const isOwned = owned.includes(item.id);
-        const card = document.createElement('div');
-        card.className = 'bm-offer-card-v4'; // Reusing Elite Card style
-        card.style.padding = "15px";
-        
-        card.innerHTML = `
-            <div class="p-ban-preview ${item.cssClass}"></div>
-            <div class="bm-title-v4" style="font-size:12px;">${item.name}</div>
-            ${isOwned 
-                ? `<div style="color:#00ff88; font-weight:900; font-size:10px; margin-top:10px;">DEȚINUT</div>` 
-                : `<button class="bm-price-btn-v4" onclick="buyProfileItem('banner', '${item.id}', ${item.price})" style="background:#fff !important; color:#000; width:100%; margin-top:10px;">
-                     ${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" style="width:12px;">
-                   </button>`
-            }
-        `;
-        list.appendChild(card);
-    });
-};
 
 // --- PROFILE INTROS SHOP ---
 let currentAudio = null;
@@ -14766,11 +14736,54 @@ window.previewAudio = (url, btn) => {
     }
 };
 
+// --- PROFILE BANNERS SHOP (FIXED) ---
+window.openProfileBannerShop = async () => {
+    if(!auth.currentUser) return;
+    
+    // 1. Close the Menu
+    document.getElementById('profilePrestigeModal').classList.remove('active');
+    
+    // 2. Open the Shop
+    const modal = document.getElementById('pBannerShopModal');
+    const list = document.getElementById('pBannerShopList');
+    list.innerHTML = '<div style="color:#fff; text-align:center;">LOADING ASSETS...</div>';
+    modal.classList.add('active');
+
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const owned = userSnap.data().ownedProfileBanners || [];
+
+    list.innerHTML = '';
+    PROFILE_BANNERS_DB.forEach(item => {
+        const isOwned = owned.includes(item.id);
+        const card = document.createElement('div');
+        card.className = 'bm-offer-card-v4';
+        card.style.padding = "15px";
+        
+        card.innerHTML = `
+            <div class="p-ban-preview ${item.cssClass}"></div>
+            <div class="bm-title-v4" style="font-size:12px;">${item.name}</div>
+            ${isOwned 
+                ? `<div style="color:#00ff88; font-weight:900; font-size:10px; margin-top:10px;">DEȚINUT</div>` 
+                : `<button class="bm-price-btn-v4" onclick="buyProfileItem('banner', '${item.id}', ${item.price})" style="background:#fff !important; color:#000; width:100%; margin-top:10px;">
+                     ${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" style="width:12px;">
+                   </button>`
+            }
+        `;
+        list.appendChild(card);
+    });
+};
+
+// --- PROFILE INTROS SHOP (FIXED) ---
 window.openProfileIntroShop = async () => {
     if(!auth.currentUser) return;
+
+    // 1. Close the Menu
+    document.getElementById('profilePrestigeModal').classList.remove('active');
+
+    // 2. Open the Shop
     const modal = document.getElementById('introShopModal');
     const list = document.getElementById('introShopList');
-    list.innerHTML = 'Loading...';
+    list.innerHTML = '<div style="color:#fff; text-align:center;">LOADING AUDIO...</div>';
     modal.classList.add('active');
 
     const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
