@@ -8914,6 +8914,51 @@ nav a[href="shop.html"] {
     margin-bottom: 10px;
 }
 
+
+
+/* --- OMEGA TIER (ELECTRIC SILVER) --- */
+.tier-omega { 
+    --r-color: #e0e0e0; 
+    --r-bg: linear-gradient(180deg, #1a1a1a 0%, #000 100%); 
+}
+.tier-omega::before {
+    animation: rotateAura 2s linear infinite !important;
+    background: conic-gradient(from 0deg, transparent, #fff, #29f3ff, transparent 40%) !important;
+}
+.tier-omega .aaa-card-title { color: #fff; text-shadow: 0 0 10px #29f3ff, 0 0 20px #fff; }
+
+/* --- CELESTIAL TIER (HEAVENLY RADIANCE) --- */
+.tier-celestial { 
+    --r-color: #ffd700; 
+    --r-bg: radial-gradient(circle at center, #fff 0%, #050b14 100%); 
+}
+.tier-celestial::before {
+    animation: rotateAura 1s linear infinite !important;
+    background: conic-gradient(from 0deg, #fff, #ffd700, #fff, #29f3ff, #fff); /* Holy rainbow */
+}
+.tier-celestial .aaa-card-title { 
+    color: #fff; 
+    font-size: 14px;
+    text-shadow: 0 0 20px #ffd700, 0 0 40px #fff;
+    animation: pulse-intense 1s infinite;
+}
+
+/* --- NEW CELESTIAL ASSETS STYLES --- */
+.badge-celestial-god {
+    background: linear-gradient(45deg, #fff, #ffd700) !important;
+    color: #000 !important;
+    border: 2px solid #fff !important;
+    box-shadow: 0 0 20px #fff, 0 0 40px #ffd700 !important;
+}
+.bubble-celestial-heaven {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGEwM2FtNHU4OXM4dXVoYXRzNDdtc2Nha3h6OWhxYTR2aW5mOGkxMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3og0IyRiAsl1Pczi6Y/giphy.gif') center !important;
+    background-size: cover !important;
+    border: 3px solid #fff !important;
+    color: #fff !important;
+    font-weight: 900;
+    text-shadow: 0 0 10px #ffd700;
+}
+
   </style>
 </head>
 <body>
@@ -14395,7 +14440,23 @@ rewards: [
         { tier: 'ABYSSAL', label: 'SINGULARITY', icon: '', chance: 0.5, style: 'tier-abyssal' }
     ]
 },
-    { id: 'box_celestial', name: 'Celestial Box', price: 25000, color: '#ffffff', stockRange: [5, 10], img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20chest%20close%20%20(2).png?alt=media&token=b23d04ee-ce8c-43d7-b2a8-315255e62ca6', imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20Chest%20Open%20.png?alt=media&token=68f031ce-57e2-44b2-b9e0-32453d4d1f10' }
+{ 
+    id: 'box_celestial', 
+    name: 'Celestial Box', 
+    price: 25000, 
+    color: '#ffffff', 
+    stockRange: [5, 10], 
+    img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20chest%20close%20%20(2).png?alt=media&token=b23d04ee-ce8c-43d7-b2a8-315255e62ca6', 
+    imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FCelestial%20Chest%20Open%20.png?alt=media&token=68f031ce-57e2-44b2-b9e0-32453d4d1f10',
+    rewards: [
+        { tier: 'LEGENDARY', label: '20,000 COINS', icon: 'https://iili.io/fhc1SKQ.png', chance: 70, style: 'tier-legendary' },
+        { tier: 'MYTHIC', label: 'RANDOM ELITE BADGE', icon: '', chance: 15, style: 'tier-mythic' },
+        { tier: 'EXOTIC', label: 'DIAMOND VOUCHER', icon: '', chance: 8, style: 'tier-exotic' },
+        { tier: 'OMEGA', label: 'RANDOM PROFILE INTRO', icon: '', chance: 5, style: 'tier-omega' },
+        { tier: 'ABYSSAL', label: '500 DIAMONDS', icon: 'https://iili.io/fv5bmtj.png', chance: 0.2, style: 'tier-abyssal' },
+        { tier: 'CELESTIAL', label: 'FULL CELESTIAL SET', icon: '', chance: 0.5, style: 'tier-celestial' }
+    ]
+}
 ];
 
 
@@ -14825,6 +14886,30 @@ window.revealReward = async () => {
                     results.winCoins += 12500; // AS SHOWN IN LOG
                 }
             } 
+
+
+
+// --- CELESTIAL BOX LOGIC ---
+else if (lockedBox.id === 'box_celestial') {
+    if (roll <= 0.5) { // Celestial (0.5%)
+        results.wonBadges.push({ id: 'eb_celestial_god', text: 'CELESTIAL GOD', isElite: true, animClass: 'badge-celestial-god', icon: 'fa-sun' });
+        results.wonTickets.push({ category: 'banners', label: 'CELESTIAL BANNER' }); // We'll handle this as an unlock
+        results.winCelestialSet = true; // Special flag
+    } else if (roll <= 2.0) { // Abyssal (1.5%)
+        results.winDiamonds += 500;
+    } else if (roll <= 7.0) { // Omega (5%)
+        const intro = PROFILE_INTROS_DB[Math.floor(Math.random() * PROFILE_INTROS_DB.length)];
+        results.wonIntros = results.wonIntros || [];
+        results.wonIntros.push(intro.id);
+    } else if (roll <= 15.0) { // Exotic (8%)
+        results.wonTickets.push({ category: 'diamonds', tier: 'EXOTIC', label: 'DIAMOND VOUCHER' });
+    } else if (roll <= 30.0) { // Mythic (15%)
+        const eliteBadges = BADGES_DB.filter(b => b.isElite);
+        results.wonBadges.push(eliteBadges[Math.floor(Math.random() * eliteBadges.length)]);
+    } else { // Legendary (70%)
+        results.winCoins += 20000;
+    }
+}
             // --- PLATINUM BOX LOGIC ---
             else if (lockedBox.id === 'box_platinum') {
                 if (roll <= 1) { // Exotic (1%)
@@ -14880,6 +14965,17 @@ window.revealReward = async () => {
                 coins: increment(results.winCoins), 
                 diamonds: increment(results.winDiamonds) 
             };
+
+
+// Inside revealReward database update block:
+if(results.wonIntros && results.wonIntros.length > 0) {
+    batchUpdate.ownedIntros = arrayUnion(...results.wonIntros);
+}
+if(results.winCelestialSet) {
+    // Manually unlock the set items in DB
+    batchUpdate.ownedBanners = arrayUnion('eb_ban_celestial');
+    batchUpdate.ownedTexts = arrayUnion('t_celestial_king');
+}
             
             if(results.wonBadges.length > 0) {
                 batchUpdate.ownedBadges = arrayUnion(...results.wonBadges.map(b => b.id));
