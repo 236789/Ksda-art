@@ -10805,7 +10805,7 @@ window.equipText = async (id, cssClass) => {
             equippedText: { id, cssClass } 
         });
         alert("Text echipat!"); 
-        openInventory('texts');
+        openInventory('texts'); // Refresh the text inventory tab
     } catch(e) { alert("Eroare: " + e.message); }
 };
 
@@ -11179,6 +11179,34 @@ window.openInventory = async (type = 'badges') => {
         actionArea.innerHTML = `<button class="unequip-btn-v6" style="margin-bottom:10px; height: 35px; font-size: 10px;" onclick="unequipItem('badge')">REMOVE BADGE</button>`;
     }
 }
+
+
+
+else if (type === 'texts') {
+        const ownedIds = data.ownedTexts || [];
+        const equipped = data.equippedText?.id || null;
+        if (ownedIds.length === 0) list.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">No texts.</p>';
+
+        ownedIds.forEach(id => {
+            const item = TEXTS_DB.find(t => t.id === id);
+            if (item) {
+                const isEquipped = (id === equipped);
+                list.innerHTML += `
+                    <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
+                        <div class="item-preview-box">
+                            <div class="${item.cssClass}" style="font-weight:900; font-size:14px;">NAME PREVIEW</div>
+                        </div>
+                        <div style="font-weight:700; font-size:11px; margin-bottom:10px; color:#fff; font-family:'Orbitron'; text-transform:uppercase;">${item.name}</div>
+                        ${isEquipped 
+                            ? `<button class="btn-equip-v6 is-equipped">EQUIPPED</button>` 
+                            : `<button class="btn-equip-v6 do-equip" onclick="equipText('${item.id}', '${item.cssClass}')">EQUIP</button>`
+                        }
+                    </div>`;
+            }
+        });
+        if (equipped && actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('text')">REMOVE TEXT COLOR</button>`;
+    }
+
     // --- CATEGORY: BADGES (Singularity GIF Fix Included) ---
     else if (type === 'badges') {
         const ownedIds = data.ownedBadges || [];
@@ -11255,6 +11283,11 @@ window.openInventory = async (type = 'badges') => {
         }
     }
 
+
+
+
+
+
     // --- CATEGORY: FRAMES ---
     else if (type === 'frames') {
         const ownedIds = data.ownedFrames || [];
@@ -11289,6 +11322,10 @@ window.openInventory = async (type = 'badges') => {
             actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('frame')">REMOVE_VISUAL_SHIELD</button>`;
         }
     }
+
+
+
+
 };
 
 
