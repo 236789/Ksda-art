@@ -8336,11 +8336,104 @@ nav a[href="shop.html"] {
     }
 }
 
+/* --- SCRATCH TICKET SYSTEM --- */
+#scratcherOverlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+    z-index: 70000; flex-direction: column; justify-content: center; align-items: center;
+    backdrop-filter: blur(20px);
+}
 
+.scratcher-container {
+    position: relative; width: 320px; height: 450px;
+    background: #111; border-radius: 20px; overflow: hidden;
+    box-shadow: 0 0 50px rgba(0,0,0,1);
+    border: 2px solid var(--ticket-color);
+    animation: ticketSlideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes ticketSlideIn { from { transform: translateY(100px) scale(0.8); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+
+/* Theme Colors */
+.ticket-coins { --ticket-color: #ffd700; --ticket-glow: rgba(255, 215, 0, 0.4); }
+.ticket-diamonds { --ticket-color: #00ff88; --ticket-glow: rgba(0, 255, 136, 0.4); }
+
+.ticket-header {
+    height: 80px; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(to bottom, var(--ticket-color), transparent);
+    font-family: 'Montserrat'; font-weight: 900; color: #000; letter-spacing: 2px;
+}
+
+.scratch-area {
+    position: relative; width: 260px; height: 160px; margin: 40px auto;
+    background: #000; border: 4px solid #222; border-radius: 10px;
+}
+
+#scratchCanvas {
+    position: absolute; top: 0; left: 0; cursor: crosshair; touch-action: none;
+    border-radius: 6px;
+}
+
+.reveal-content {
+    width: 100%; height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+}
+
+.percentage-text {
+    font-family: 'Montserrat'; font-weight: 900; font-size: 54px;
+    background: linear-gradient(to bottom, #fff, var(--ticket-color));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px var(--ticket-color));
+}
+
+.apply-btn {
+    display: none; width: 80%; margin: 20px auto; padding: 15px;
+    border: none; border-radius: 10px; font-family: 'Orbitron';
+    font-weight: 900; font-size: 14px; cursor: pointer;
+    background: var(--ticket-color); color: #000;
+    box-shadow: 0 0 20px var(--ticket-glow);
+    animation: pulse 1.5s infinite;
+}
+
+/* Discount Badge for Shop */
+.shop-discount-badge {
+    position: absolute; top: 10px; left: 10px;
+    background: #ff4757; color: #fff; padding: 4px 10px;
+    font-family: 'Orbitron'; font-weight: 900; font-size: 10px;
+    border-radius: 4px; z-index: 5;
+}
+
+.old-price-cross {
+    text-decoration: line-through; color: #ff4757; font-size: 11px;
+    display: block; margin-bottom: 2px;
+}
 
   </style>
 </head>
 <body>
+
+<div id="scratcherOverlay">
+    <div id="ticketCard" class="scratcher-container">
+        <div class="ticket-header" id="ticketTitle">LUCKY VOUCHER</div>
+        
+        <div style="text-align:center; padding: 20px 10px 0;">
+            <p style="font-size:11px; color:#aaa; font-family:Orbitron;">RAZĂ PENTRU REVELARE</p>
+        </div>
+
+        <div class="scratch-area">
+            <div class="reveal-content">
+                <div id="revealedPercent" class="percentage-text">0%</div>
+                <div style="color:#fff; font-family:Orbitron; font-size:10px;">REDUCERE</div>
+            </div>
+            <canvas id="scratchCanvas"></canvas>
+        </div>
+
+        <button id="applyReductionBtn" class="apply-btn" onclick="applyScratchedDiscount()">APLICĂ REDUCEREA</button>
+        
+        <div style="text-align:center; padding:10px;">
+            <p style="font-size:9px; color:#555; font-family:monospace;">SECURE_VOUCHER_v4.0</p>
+        </div>
+    </div>
+</div>
 
 <!-- MAIN ELITE BOUTIQUE MODAL -->
 <div id="eliteShopModal" class="account-modal-overlay">
@@ -8400,26 +8493,49 @@ nav a[href="shop.html"] {
         </div>
 
         <div class="bm-content-scroll" style="padding: 20px;">
-<!-- Inside eliteCosmeticsModal -->
+<!-- UPDATE ÎN MODALUL PROFILE PRESTIGE EXISTENT -->
 <div class="bm-grid-v4">
-    <div class="bm-offer-card-v4" onclick="openEliteCategory('badges')">
-        <i class="fas fa-certificate" style="color:#d63384; font-size:30px;"></i>
-        <div class="bm-title-v4">ELITE BADGES</div>
-        <button class="bm-price-btn-v4">OPEN</button>
+    <div class="bm-offer-card-v4" onclick="openProfileIntroShop()">
+        <i class="fas fa-play-circle" style="color:#ff0000; font-size:30px;"></i>
+        <div class="bm-title-v4">PROFILE INTROS</div>
+        <div class="bm-desc-v4">Sunet care se aude când cineva îți vizitează profilul.</div>
+        <button class="bm-price-btn-v4">DESCHIDE</button>
     </div>
-    <div class="bm-offer-card-v4" onclick="openEliteCategory('frames')">
-        <i class="fas fa-crop-alt" style="color:#bf55ec; font-size:30px;"></i>
-        <div class="bm-title-v4">ELITE FRAMES</div>
-        <button class="bm-price-btn-v4">OPEN</button>
-    </div>
-    <div class="bm-offer-card-v4" onclick="openEliteCategory('banners')">
-        <i class="fas fa-image" style="color:#00e5ff; font-size:30px;"></i>
-        <div class="bm-title-v4">ELITE BANNERS</div>
-        <button class="bm-price-btn-v4">OPEN</button>
+    <div class="bm-offer-card-v4" onclick="openProfileBannerShop()">
+        <i class="fas fa-image" style="color:#fff; font-size:30px;"></i>
+        <div class="bm-title-v4">PROFILE BANNERS</div>
+        <div class="bm-desc-v4">Fundal animat sau stilizat pentru cardul tău de profil.</div>
+        <button class="bm-price-btn-v4">DESCHIDE</button>
     </div>
 </div>
 
+<!-- MODAL NOU: INTRO SHOP -->
+<div id="introShopModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 500px;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 0, 0, 0.1); padding: 25px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#ff0000;">AUDIO_MODULES</div>
+            <button class="close-pop" onclick="closeModal('introShopModal')" style="position:static !important; border:1px solid #ff0000; background:transparent;">✕</button>
+        </div>
+        <div class="bm-content-scroll" id="introList" style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+            <!-- JS Inject -->
+        </div>
+    </div>
+</div>
 
+<!-- MODAL NOU: BANNER SHOP -->
+<div id="pBannerShopModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 600px; height: 80vh;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-bottom: 1px solid #fff; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#fff;">VISUAL_OVERLAYS</div>
+            <button class="close-pop" onclick="closeModal('pBannerShopModal')" style="position:static !important; border:1px solid #fff; background:transparent;">✕</button>
+        </div>
+        <div class="bm-content-scroll" id="pBannerList" style="padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            <!-- JS Inject -->
+        </div>
+    </div>
+</div>
         </div>
     </div>
 </div>
@@ -8433,14 +8549,13 @@ nav a[href="shop.html"] {
                 <div style="font-family:'Montserrat'; font-size: 22px; font-weight: 900; color:#fff;">PROFILE_PRESTIGE</div>
                 <div style="font-family:monospace; font-size: 10px; color:#ff0000;">MODULE: USER_INTERFACE | STATUS: ENCRYPTED</div>
             </div>
-            <!-- Buton Închidere: Ne întoarce la Elite Shop principal -->
             <button class="close-pop" onclick="closeModal('profilePrestigeModal'); document.getElementById('eliteShopModal').classList.add('active');" style="border:1px solid #fff; background:transparent; position:static !important;">✕</button>
         </div>
 
         <div class="bm-content-scroll" style="padding: 20px;">
             <div class="bm-grid-v4">
                 
-                <!-- Profile Intros -->
+                <!-- Profile Intros - NOW ACTIVE -->
                 <div class="bm-offer-card-v4" onclick="openProfileIntroShop()">
                     <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
                     <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
@@ -8450,7 +8565,7 @@ nav a[href="shop.html"] {
                     <button class="bm-price-btn-v4">DESCHIDE</button>
                 </div>
 
-                <!-- Profile Banners -->
+                <!-- Profile Banners - NOW ACTIVE -->
                 <div class="bm-offer-card-v4" onclick="openProfileBannerShop()">
                     <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
                     <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
@@ -8459,37 +8574,11 @@ nav a[href="shop.html"] {
                     <div class="bm-desc-v4">Imagini de fundal personalizate pentru profil.</div>
                     <button class="bm-price-btn-v4">DESCHIDE</button>
                 </div>
+                
             </div>
         </div>
     </div>
 </div>
-
-<!-- MODALELE DE SHOP (Sunt acum la același nivel, nu unul în altul) -->
-
-<div id="introShopModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 500px;">
-        <div class="bm-scanline-overlay"></div>
-        <div style="background: rgba(255, 0, 0, 0.1); padding: 25px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#ff0000;">AUDIO_MODULES</div>
-            <button class="close-pop" onclick="closeModal('introShopModal'); document.getElementById('profilePrestigeModal').classList.add('active');" style="position:static !important; border:1px solid #ff0000; background:transparent;">✕</button>
-        </div>
-        <div class="bm-content-scroll" id="introList" style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
-            <!-- Produsele vor fi injectate aici -->
-        </div>
-    </div>
-</div>
-
-<div id="pBannerShopModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 600px; height: 80vh;">
-        <div class="bm-scanline-overlay"></div>
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-bottom: 1px solid #fff; display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#fff;">VISUAL_OVERLAYS</div>
-            <button class="close-pop" onclick="closeModal('pBannerShopModal'); document.getElementById('profilePrestigeModal').classList.add('active');" style="position:static !important; border:1px solid #fff; background:transparent;">✕</button>
-        </div>
-        <div class="bm-content-scroll" id="pBannerList" style="padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-            <!-- Produsele vor fi injectate aici -->
-        </div>
-    </div>
 </div>
 
 
@@ -10151,21 +10240,6 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstati
 const storage = getStorage(app); // Initialize Storage
 
 
-// Probability weights: 
-// 0-3: Common (85% chance)
-// 4-5: Rare (13% chance) 
-// 6: Ultra Rare (2% chance)
-const CURRENCY_WEIGHTS = [
-    0,0,0,0,0,0, // P1
-    1,1,1,1,     // P2
-    2,2,2,       // P3
-    3,3,3,       // P4
-    4,           // P5 (Rare)
-    5,           // P6 (Very Rare)
-    6            // P7 (Ultra Rare/Jackpot)
-];
-window.activeCurrencyTicket = null;
-
   // Pune asta pe fiecare pagină (ex: pe pagina Shop pui: trackVisit("Shop"))
 async function trackVisit(pageName) {
     const statsRef = doc(db, "page_stats", pageName);
@@ -11034,91 +11108,67 @@ switchCurrency('RON');
 // Initialize (Run this once on page load to set RON active)
 
 function renderShop() {
-    rechargeGrid.innerHTML = '';
+    const grid = document.getElementById('rechargeGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    
     const isCoins = currentShopMode === 'coins';
     const data = isCoins ? coinPackages : diamondPackages;
     const icon = isCoins ? "https://iili.io/fhc1SKQ.png" : "https://iili.io/fv5bmtj.png";
     const label = isCoins ? "Coins" : "Diamonds";
     const styleClass = isCoins ? 'pkg-coins' : 'pkg-diamonds';
 
-    data.forEach((p, index) => {
-        const convertedPrice = (p.price / RATES[selectedCurrency]).toFixed(2);
-        const symbol = SYMBOLS[selectedCurrency];
+    // Siguranță: Verificăm dacă obiectul de discount există
+    const discounts = window.activeShopDiscounts || { coins: 0, diamonds: 0 };
+    const discountPct = isCoins ? discounts.coins : discounts.diamonds;
+
+    data.forEach(p => {
+        const symbol = SYMBOLS[selectedCurrency] || 'RON';
+        const rate = RATES[selectedCurrency] || 1;
+        const basePrice = p.price / rate;
         
-        // CHECK: Is this the specific lucky package?
-        const isFree = window.activeCurrencyTicket && 
-                       window.activeCurrencyTicket.category === currentShopMode && 
-                       window.activeCurrencyTicket.packageIndex === index;
+        let finalPrice = basePrice;
+        let discountHtml = "";
+
+        if (discountPct > 0) {
+            finalPrice = basePrice * (1 - (discountPct / 100));
+            discountHtml = `
+                <div class="shop-discount-badge">-${discountPct}%</div>
+                <span class="old-price-cross">${symbol} ${basePrice.toFixed(2)}</span>
+            `;
+        }
 
         const card = document.createElement('div');
         card.className = `package-card ${styleClass}`;
-        
-        // Green glow for the free item
-        if(isFree) {
-            card.style.borderColor = "#00ff88";
-            card.style.boxShadow = "0 0 30px rgba(0, 255, 136, 0.4)";
-        }
-
         card.innerHTML = `
+            ${discountHtml}
             <div class="vault-shine"></div>
             <img src="${icon}">
             <span class="package-count">${p.amount.toLocaleString()}</span>
             <span style="font-size:10px; color:#aaa; margin-bottom:5px;">${label}</span>
-            <span class="price-tag" style="${isFree ? 'background:#00ff88 !important; color:#000 !important; font-weight:900;' : ''}">
-                ${isFree ? 'REIVINDICĂ GRATUIT' : symbol + ' ' + convertedPrice}
-            </span>
+            <span class="price-tag">${symbol} ${finalPrice.toFixed(2)}</span>
         `;
         
         card.onclick = () => {
-            if (isFree) {
-                claimFreeCurrency(p.amount, label);
-            } else {
-                openNewPaymentModal(symbol, convertedPrice, p.amount.toLocaleString(), label, isCoins);
-            }
+            openNewPaymentModal(symbol, finalPrice.toFixed(2), p.amount.toLocaleString(), label, isCoins);
         };
-        rechargeGrid.appendChild(card);
+        grid.appendChild(card);
     });
 
-    // Custom Calculator Card
-    const custom = document.createElement('div');
-    custom.className = `package-card ${styleClass}`;
-    custom.innerHTML = `
+    // Păstrează butonul de calculator la final
+    const customCard = document.createElement('div');
+    customCard.className = `package-card ${styleClass}`;
+    customCard.innerHTML = `
         <div class="vault-shine"></div>
         <i class="fas fa-calculator" style="font-size:35px; color:${isCoins ? '#ffd700' : '#00ff88'}; margin-bottom:15px; position:relative; z-index:2;"></i>
         <span class="package-count">Custom</span>
-        <span class="price-tag" style="padding: 8px 15px;">Calculator<br><span style="font-size:10px; color:#aaa;">${selectedCurrency}</span></span>
+        <span class="price-tag">CALCULATOR</span>
     `;
-custom.onclick = () => { 
-            const card = document.getElementById('customCardGlass');
-            const title = document.getElementById('customTitle');
-            const inputLabel = document.getElementById('customInputLabel');
-            const input = document.getElementById('customInput');
-            
-            // 1. Reset Classes
-            card.classList.remove('pay-gold', 'pay-green');
-
-            // 2. Configure for Coins vs Diamonds
-            if(isCoins) {
-                card.classList.add('pay-gold');
-                title.innerText = "CALCULATOR COINS";
-                title.style.textShadow = "0 0 10px rgba(255, 215, 0, 0.5)"; // Gold Glow
-                inputLabel.innerText = "INTRODU NUMĂRUL DE COINS";
-                input.placeholder = "Min. 500";
-            } else {
-                card.classList.add('pay-green');
-                title.innerText = "CALCULATOR DIAMONDS";
-                title.style.textShadow = "0 0 10px rgba(0, 255, 136, 0.5)"; // Green Glow
-                inputLabel.innerText = "INTRODU NUMĂRUL DE DIAMANTE";
-                input.placeholder = "Min. 2";
-            } 
-            
-            // 3. Reset Values & Open
-            input.value = "";
-            document.getElementById('priceVal').innerText = "0.00 RON";
-            calculatePrice(); 
-            document.getElementById('customModal').classList.add('active'); 
-        }
-        rechargeGrid.appendChild(custom);
+    customCard.onclick = () => {
+        document.getElementById('customModal').classList.add('active');
+        calculatePrice();
+    };
+    grid.appendChild(customCard);
 }
 
 function openNewPaymentModal(symbol, price, amount, label, isCoins) {
@@ -13516,7 +13566,7 @@ const BOXES_DB = [
         name: 'Basic Box', 
         price: 1000, 
         color: '#ff6a00', 
-        stockRange: [100, 300], 
+        stockRange: [25, 100], 
         img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%201.png?alt=media&token=29742b82-3e51-408c-948e-c3bae712e2ca', 
         imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%202.png?alt=media&token=93a488b5-9ed7-4ab0-9333-3a67ca37fe3c',
         rewards: [
@@ -13535,7 +13585,7 @@ const BOXES_DB = [
         name: 'Gold Box', 
         price: 5000, 
         color: '#ffd700', 
-        stockRange: [50, 100], 
+        stockRange: [10, 50], 
         img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FGold%20box%20closed.png?alt=media&token=ef29b342-4564-4379-b1ff-9b44eb926d5c', 
         imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FGold%20box%20Open.png?alt=media&token=815a539a-8fd8-495e-b0e6-790f7927352b',
 rewards: [
@@ -13552,7 +13602,7 @@ rewards: [
     name: 'Platinum Box', 
     price: 12500, 
     color: '#e5e4e2', 
-        stockRange: [25, 65],  // INCREASED: Was [10, 25]
+    stockRange: [10, 25], 
     img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Close.png?alt=media&token=e7bbc3f0-9ab6-46c2-a8d5-e5f76d4aed71', 
     imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Open.png?alt=media&token=43e6e8fc-6228-438f-97b3-0cbf7d5012ce0',
     rewards: [
@@ -13637,10 +13687,11 @@ let lastLockedBox = null;
 let countdownInterval = null;
 
 
+// --- UPDATED REAL-TIME STOCK SYNC ---
 function initMysteryStockSync() {
     onSnapshot(doc(db, "system", "mystery_box_stock"), async (snap) => {
         const now = Date.now();
-        const RESET_MS = 3600000; // Set to 1 Hour (60 * 60 * 1000)
+        const RESET_MS = 60000; // 1 Minute
 
         if (!snap.exists() || (now - (snap.data().lastReset || 0) > RESET_MS)) {
             // Logic to restock if expired
@@ -13679,16 +13730,11 @@ function initMysteryStockSync() {
             if (countdownInterval) clearInterval(countdownInterval);
             countdownInterval = setInterval(() => {
                 const timeLeft = Math.max(0, RESET_MS - (Date.now() - lastReset));
-                
-                // Calculate Hours, Minutes, and Seconds
-                const h = Math.floor(timeLeft / 3600000);
-                const m = Math.floor((timeLeft % 3600000) / 60000);
+                const m = Math.floor(timeLeft / 60000);
                 const s = Math.floor((timeLeft % 60000) / 1000);
-
                 const timerEl = document.getElementById('mysteryResetTimer');
                 if (timerEl) {
-                    // Formats as HH:MM:SS
-                    timerEl.innerText = `REFRESH: ${h < 10 ? '0' : ''}${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+                    timerEl.innerText = `REFRESH: ${m}:${s < 10 ? '0' : ''}${s}`;
                 }
                 if (timeLeft <= 0) clearInterval(countdownInterval);
             }, 1000);
@@ -13791,15 +13837,6 @@ window.openPrizeView = () => {
                 }, 600);
             }, 100);
         }
-
-
-/* ADD THESE TWO BLOCKS HERE */
-else if(r.label === 'MILIARDAR') {
-    visualHtml = `<span class="badge-b_miliardar">MILIARDAR</span>`;
-}
-else if(r.label === 'SINGULARITY') {
-    visualHtml = `<span class="badge-singularity" style="transform: scale(1.2);"><i class="fas fa-atom"></i> SINGULARITY</span>`;
-}
         else if(r.label === 'RANDOM ELITE BADGE') {
             visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
             setTimeout(() => {
@@ -14204,11 +14241,13 @@ let isUpdatingDeals = false; // To prevent write-loops
 async function initFlashDeals() {
     onSnapshot(doc(db, "system", "flash_deals"), async (snap) => {
         const now = Date.now();
-        // 24 de ore în milisecunde (24 * 60 * 60 * 1000)
-        const REFRESH_MS = 86400000; 
+        const REFRESH_MS = 60000; // 1 Minute
 
-        if (!snap.exists() || (now - (snap.data().lastUpdate || 0) > REFRESH_MS)) {
-            if (isUpdatingDeals) return;
+        // 1. Check if we need to generate new deals
+        // Added a 2-second buffer to prevent "instant" re-triggering
+        if (!snap.exists() || (now - (snap.data().lastUpdate || 0) > REFRESH_MS + 2000)) {
+            
+            if (isUpdatingDeals) return; // Already writing, stop
             isUpdatingDeals = true;
 
             const allItems = [
@@ -14219,38 +14258,49 @@ async function initFlashDeals() {
             
             const selectedDeals = [];
             const usedIndexes = new Set();
+            
             while(selectedDeals.length < 3) {
                 let idx = Math.floor(Math.random() * allItems.length);
                 if(!usedIndexes.has(idx)) {
                     const item = allItems[idx];
-                    const discountPct = Math.floor(Math.random() * 41) + 30;
-                    selectedDeals.push({ ...item, discount: discountPct, salePrice: Math.floor(item.price * (1 - discountPct/100)) });
+                    const discountPct = Math.floor(Math.random() * 41) + 30; // 30-70%
+                    const newPrice = Math.floor(item.price * (1 - discountPct/100));
+                    selectedDeals.push({ ...item, discount: discountPct, salePrice: newPrice });
                     usedIndexes.add(idx);
                 }
             }
 
             try {
-                await setDoc(doc(db, "system", "flash_deals"), { items: selectedDeals, lastUpdate: Date.now() });
-            } catch(e) { console.error(e); }
+                await setDoc(doc(db, "system", "flash_deals"), { 
+                    items: selectedDeals, 
+                    lastUpdate: Date.now() 
+                });
+            } catch(e) { console.error("Update deals error:", e); }
+            
             isUpdatingDeals = false;
         } else {
+
+
+
+            // 2. Render and start Countdown
             renderFlashDeals(snap.data().items);
+            
             const lastUpdate = snap.data().lastUpdate;
             
+            // CLEAR OLD TIMER BEFORE STARTING NEW ONE
             if (dealsCountdownInterval) clearInterval(dealsCountdownInterval);
             
             dealsCountdownInterval = setInterval(() => {
                 const remaining = Math.max(0, REFRESH_MS - (Date.now() - lastUpdate));
-                
-                const h = Math.floor(remaining / 3600000);
-                const m = Math.floor((remaining % 3600000) / 60000);
+                const m = Math.floor(remaining / 60000);
                 const s = Math.floor((remaining % 60000) / 1000);
                 
                 const timerEl = document.getElementById('dealsResetTimer');
                 if (timerEl) {
-                    // Va arăta de ex: NEXT DEALS IN: 23h 10m 05s
-                    timerEl.innerText = `NEXT DEALS IN: ${h}h ${m}m ${s}s`;
+                    timerEl.innerText = `REFRESH: ${m}:${s < 10 ? '0':''}${s}`;
                 }
+
+                // If timer hits 0, the next onSnapshot trigger will handle the refresh
                 if (remaining <= 0) clearInterval(dealsCountdownInterval);
             }, 1000);
         }
@@ -14336,16 +14386,19 @@ initFlashDeals();
 
 window.redeemCoupon = async () => {
     const code = document.getElementById('couponInput').value.trim().toUpperCase();
-    if(!code) return showCustomAlert("Introdu un cod de securitate.", "SISTEM_ERROR");
+    if(!code) return showCustomAlert("Te rugăm să introduci un cod valid.", "SISTEM_ERROR");
+
+    console.log("Validating manual code entry:", code);
 
     const btn = document.getElementById('btnRedeem');
-    btn.innerText = "DECRYPTING...";
+    btn.innerText = "AUTHENTICATING...";
     btn.disabled = true;
 
-    // Check which category this code belongs to
+    // Check inventory categories
     const categories = ['coins', 'diamonds', 'texts', 'frames', 'banners', 'badges', 'blackmarket'];
     let foundCategory = null;
 
+    // Search for the code in user's data
     for (const cat of categories) {
         const hasIt = window.currentUserData?.myCoupons?.[cat]?.some(c => c.code === code || c.id === code);
         if(hasIt) {
@@ -14356,40 +14409,25 @@ window.redeemCoupon = async () => {
 
     setTimeout(async () => {
         if (foundCategory) {
-            // Handle standard cosmetics
-            if (['texts', 'frames', 'banners', 'badges'].includes(foundCategory)) {
-                window.activeCosmeticTicket = { id: code, category: foundCategory };
-                await showCustomAlert(`Voucher activat! Alege orice obiect din ${foundCategory.toUpperCase()} - este GRATUIT.`, "ACCESS_GRANTED");
-                scrollToZone('zone-atelier');
-            } 
-            // Handle Coins & Diamonds (The Weighted System)
-            else if (['coins', 'diamonds'].includes(foundCategory)) {
-                
-                // The Roll
-                const luckyIndex = CURRENCY_WEIGHTS[Math.floor(Math.random() * CURRENCY_WEIGHTS.length)];
-                
-                window.activeCurrencyTicket = { 
-                    id: code, 
-                    category: foundCategory, 
-                    packageIndex: luckyIndex 
-                };
-
-                const amount = foundCategory === 'coins' ? coinPackages[luckyIndex].amount : diamondPackages[luckyIndex].amount;
-                
-                await showCustomAlert(`BINGO! Sistemul a cedat. Pachetul de <b style="color:#00ffcc;">${amount.toLocaleString()} ${foundCategory}</b> este acum GRATUIT în Vault!`, "CURRENCY_BREACH");
-                
-                // Force shop to switch to the correct tab and scroll
-                switchShopCategory(foundCategory);
-                scrollToZone('zone-vault');
-            }
+            console.log("Match found! Category:", foundCategory);
+            // SET THE GLOBAL TICKET SESSION
+            window.activeCosmeticTicket = { id: code, category: foundCategory };
+            
+            await showCustomAlert(`Cod validat! Tichetul pentru categoria ${foundCategory.toUpperCase()} este acum ACTIV. Următorul obiect este GRATUIT.`, "ACCESS GRANTED");
+            
+            // Redirect to the right shop
+            if(foundCategory === 'badges') openBadgeShop();
+            if(foundCategory === 'frames') openFrameShop();
+            if(foundCategory === 'banners') openBannerShop();
+            if(foundCategory === 'texts') openTextShop();
             
             document.getElementById('couponInput').value = "";
         } else {
-            showCustomAlert("Acest cod nu a fost găsit în baza ta de date locală.", "ACCESS_DENIED");
+            console.warn("No match found for code:", code);
+            showCustomAlert("Codul '" + code + "' nu este valid în inventarul tău.", "ACCESS_DENIED");
         }
         btn.innerText = "VALIDATE_CREDENTIALS";
         btn.disabled = false;
-        renderShop(); // Refresh to show the green button
     }, 1200);
 };
 
@@ -14446,49 +14484,136 @@ window.openSubCoupon = (type) => {
                     <div style="font-family:monospace; font-size:10px; color:#555;">CODE: #${coupon.code}</div>
                 </div>
             </div>
-<button class="bm-price-btn-v4" onclick="document.getElementById('couponInput').value='${coupon.code}'; redeemCoupon();">ACTIVATE</button>
+            <button class="bm-price-btn-v4" onclick="activateCouponCode('${coupon.code}')">ACTIVATE</button>
         `;
         listContainer.appendChild(ticket);
     });
 };
 
-// FUNCȚIA 1: Pentru activare directă (Cea pe care ai postat-o tu)
-window.activateCoupon = (id, category) => {
-    console.log("Direct Activation Triggered for:", category, "ID:", id);
+let currentScratchDiscount = 0;
+let currentScratchType = 'coins'; // 'coins' or 'diamonds'
 
-    // 1. Stabilim sesiunea de "Free Item"
-    window.activeCosmeticTicket = { id: id, category: category };
-    
-    // 2. Închidem modalele de cupoane
-    closeModal('subCouponModal');
-    closeModal('couponInventoryModal');
-    
-    // 3. Notificăm utilizatorul
-    showCustomAlert(
-        `Tichetul a fost activat!<br><br>Următorul obiect ales din categoria <b>${category.toUpperCase()}</b> va fi <span style="color:#00ff88; font-weight:900;">GRATUIT</span>.`, 
-        "GRATUIT"
-    );
-    
-    // 4. Deschidem magazinul corespunzător
-    if(category === 'badges') openBadgeShop();
-    if(category === 'frames') openFrameShop();
-    if(category === 'banners') openBannerShop();
-    if(category === 'texts') openTextShop();
+// State for active discounts in the shop
+window.activeShopDiscounts = {
+    coins: 0,
+    diamonds: 0
 };
 
-// FUNCȚIA 2: Pentru tichetele care merg în Terminal (Coins/Diamonds)
-// Asta rezolvă eroarea "activateCouponCode is not defined"
+// --- REDEEM TRIGGER (Updated) ---
 window.activateCouponCode = (code) => {
-    console.log("Transferring code to terminal:", code);
-    const input = document.getElementById('couponInput');
-    if (input) {
-        input.value = code;
+    const isCoinVoucher = code.includes("COIN") || code.toLowerCase().includes("coins");
+    const isDiamondVoucher = code.includes("DIAMOND") || code.toLowerCase().includes("diamonds");
+
+    if (isCoinVoucher || isDiamondVoucher) {
         closeModal('subCouponModal');
         closeModal('couponInventoryModal');
-        showCustomAlert("Codul a fost introdus în Terminal.<br>Apasă <b>VALIDATE_CREDENTIALS</b>!", "SISTEM GATA");
+        initScratchTicket(isCoinVoucher ? 'coins' : 'diamonds');
+    } else {
+        // Original logic for normal codes
+        const input = document.getElementById('couponInput');
+        if (input) {
+            input.value = code;
+            closeModal('subCouponModal');
+            closeModal('couponInventoryModal');
+            showCustomAlert("Codul a fost introdus. Apasă VALIDATE!", "SISTEM GATA");
+        }
     }
 };
 
+// --- SCRATCH TICKET ENGINE ---
+function initScratchTicket(type) {
+    currentScratchType = type;
+    const overlay = document.getElementById('scratcherOverlay');
+    const card = document.getElementById('ticketCard');
+    const canvas = document.getElementById('scratchCanvas');
+    const ctx = canvas.getContext('2d');
+    const applyBtn = document.getElementById('applyReductionBtn');
+    
+    // Reset UI
+    overlay.style.display = 'flex';
+    applyBtn.style.display = 'none';
+    card.className = `scratcher-container ticket-${type}`;
+    document.getElementById('ticketTitle').innerText = `${type.toUpperCase()} VOUCHER`;
+
+    // Generate Random Discount (25% to 80%)
+    const possibleDiscounts = [25, 30, 35, 40, 50, 60, 70, 75, 80];
+    currentScratchDiscount = possibleDiscounts[Math.floor(Math.random() * possibleDiscounts.length)];
+    document.getElementById('revealedPercent').innerText = `${currentScratchDiscount}%`;
+
+    // Setup Canvas
+    canvas.width = 260;
+    canvas.height = 160;
+
+    // Draw Cover (Metallic Grey)
+    ctx.fillStyle = '#444';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Add "Scratch Me" texture
+    ctx.fillStyle = '#555';
+    for(let i=0; i<100; i++) {
+        ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 2, 2);
+    }
+
+    // Scratch Logic
+    let isDrawing = false;
+
+    function scratch(e) {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(x, y, 20, 0, Math.PI * 2);
+        ctx.fill();
+        
+        checkScratchCompletion();
+    }
+
+    function checkScratchCompletion() {
+        const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        let transparent = 0;
+        for (let i = 0; i < pixels.length; i += 4) {
+            if (pixels[i + 3] === 0) transparent++;
+        }
+        
+        // If 40% scratched, reveal all
+        if (transparent / (canvas.width * canvas.height) > 0.4) {
+            canvas.style.transition = '1s';
+            canvas.style.opacity = '0';
+            setTimeout(() => {
+                canvas.style.display = 'none';
+                applyBtn.style.display = 'block';
+            }, 500);
+        }
+    }
+
+    canvas.addEventListener('mousedown', () => isDrawing = true);
+    canvas.addEventListener('touchstart', () => isDrawing = true);
+    window.addEventListener('mouseup', () => isDrawing = false);
+    window.addEventListener('touchend', () => isDrawing = false);
+    canvas.addEventListener('mousemove', scratch);
+    canvas.addEventListener('touchmove', scratch);
+}
+
+window.applyScratchedDiscount = () => {
+    // Save to global state
+    window.activeShopDiscounts[currentScratchType] = currentScratchDiscount;
+    
+    document.getElementById('scratcherOverlay').style.display = 'none';
+    
+    showCustomAlert(
+        `Cod de securitate aplicat! Ai deblocat o reducere de <b>${currentScratchDiscount}%</b> la toate pachetele de <b>${currentScratchType.toUpperCase()}</b>!`, 
+        "SISTEM ACTUALIZAT"
+    );
+
+    // Refresh the shop items
+    renderShop();
+    
+    // Auto-scroll to vault to show off the new prices
+    scrollToZone('zone-vault');
+};
 
 window.handleExclusiveFrameChoice = async () => {
     const userOwned = window.currentUserData.ownedFrames || [];
@@ -14632,60 +14757,44 @@ window.openProfilePrestige = () => {
 };
 
 window.openEliteCategory = async (type) => {
-    if (!auth.currentUser) return alert("Loghează-te!");
+    let modalId, listId, database, ownedField;
     
-    let modalId, listId, database, ownedField, titleText;
-    
-    if (type === 'badges') { 
-        modalId = 'badgeShopModal'; listId = 'badgeList'; database = BADGES_DB; ownedField = 'ownedBadges'; titleText = "ELITE BADGES";
-    } else if (type === 'banners') { 
-        modalId = 'bannerShopModal'; listId = 'bannerList'; database = BANNERS_DB; ownedField = 'ownedBanners'; titleText = "ELITE BANNERS";
-    } else if (type === 'frames') { 
-        modalId = 'frameShopModal'; listId = 'frameList'; database = FRAMES_DB; ownedField = 'ownedFrames'; titleText = "ELITE FRAMES";
-    }
+    if (type === 'badges') { modalId = 'badgeShopModal'; listId = 'badgeList'; database = BADGES_DB; ownedField = 'ownedBadges'; }
+    if (type === 'banners') { modalId = 'bannerShopModal'; listId = 'bannerList'; database = BANNERS_DB; ownedField = 'ownedBanners'; }
+    if (type === 'frames') { modalId = 'frameShopModal'; listId = 'frameList'; database = FRAMES_DB; ownedField = 'ownedFrames'; }
 
     const list = document.getElementById(listId);
-    list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">> DECRYPTING ELITE DATA...</div>';
+    list.innerHTML = '';
     
-    // IMPORTANT: Close the sub-menu first to avoid z-index bugs
     document.getElementById('eliteCosmeticsModal').classList.remove('active');
     document.getElementById(modalId).classList.add('active');
-
-    // Update Title to show it's the Elite version
-    const titleEl = document.querySelector(`#${modalId} .title-${type}`);
-    if(titleEl) titleEl.innerText = titleText;
 
     const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
     const userData = userSnap.data();
     const owned = userData[ownedField] || [];
-    const userPic = userData.image || auth.currentUser.photoURL;
 
-    // Filter only elite items
     const eliteItems = database.filter(item => item.isElite);
 
-    list.innerHTML = '';
     eliteItems.forEach(item => {
         const isOwned = owned.includes(item.id);
         const card = document.createElement('div');
         card.className = 'shop-badge-item';
         
         let visualHtml = '';
-        if(type === 'badges') {
+        
+        if(item.isHub) {
+            visualHtml = `<span class="${item.animClass} shop-badge-preview"><span class="hub-text-white">The</span><span class="hub-text-orange">Hub</span></span>`;
+        } else if(type === 'badges') {
+            // Handle badges with no text (like Warning)
             const content = item.isNoText ? '' : `<i class="fas ${item.icon}"></i> ${item.text}`;
             visualHtml = `<span class="${item.animClass || 'shop-badge-preview'} elite-gif-badge">${content}</span>`;
         } else if(type === 'banners') {
-            visualHtml = `<div class="${item.cssClass}" style="padding:15px; border-radius:10px; width:100%; text-align:center; font-weight:800; font-size:10px;">ELITE SIGNAL</div>`;
-        } else if(type === 'frames') {
-            visualHtml = `
-                <div class="frame-preview-box">
-                    <img src="${userPic}" class="frame-preview-user">
-                    <img src="${item.img}" class="frame-preview-img">
-                </div>`;
+            visualHtml = `<div class="${item.cssClass}" style="padding:15px; border-radius:10px; width:100%; text-align:center; font-weight:800;">ELITE BANNER</div>`;
         }
 
         card.innerHTML = `
             <div style="min-height:70px; display:flex; align-items:center; justify-content:center; width:100%; overflow:visible;">${visualHtml}</div>
-            <div style="font-family:Orbitron; font-size:11px; color:#fff; margin-top:10px;">${item.text || item.name}</div>
+            <div style="font-family:Orbitron; font-size:11px; color:#fff; margin-top:10px;">${item.text || item.name || 'CLASSIFIED'}</div>
             <div class="shop-badge-price">
                 ${isOwned ? 'DEȚINUT' : `<img src="https://iili.io/fv5bmtj.png" width="15"> ${item.price}`}
             </div>
@@ -14746,192 +14855,82 @@ window.previewAudio = (url, btn) => {
     };
 };
 
-// --- DESCHIDE SHOP INTRO ---
+// --- OPEN INTRO SHOP (FIXED) ---
 window.openProfileIntroShop = async () => {
-    if(!auth.currentUser) return showCustomAlert("Loghează-te!", "EROARE");
-    
-    // Închidem modalul de Prestige
-    closeModal('profilePrestigeModal');
-    
     const list = document.getElementById('introList');
     const shopModal = document.getElementById('introShopModal');
     
-    shopModal.classList.add('active');
-    list.innerHTML = '<div style="color:red; font-family:Orbitron; text-align:center;">> DECRYPTING_AUDIO...</div>';
+    if(!list || !shopModal) return console.error("Intro elements not found");
+
+    // Close BOTH possible selection modals to be safe
+    document.getElementById('profilePrestigeModal').classList.remove('active');
+    document.getElementById('eliteCosmeticsModal').classList.remove('active');
     
-    try {
-        const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
-        const d = userSnap.data();
-        const owned = d.ownedIntros || [];
-        const equipped = d.equippedIntro || null;
+    // Open the Intro Shop
+    shopModal.classList.add('active');
+    list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">> DECRYPTING AUDIO MODULES...</div>';
+    
+    // Safety check for user data
+    const userOwned = (window.currentUserData && window.currentUserData.ownedIntros) ? window.currentUserData.ownedIntros : [];
 
-        list.innerHTML = ''; // Reset list
+    list.innerHTML = '';
+    PROFILE_INTROS_DB.forEach(item => {
+        const isOwned = userOwned.includes(item.id);
+        const card = document.createElement('div');
+        card.className = 'v4-badge-item';
+        card.style.display = 'flex';
+        card.style.justifyContent = 'space-between';
+        card.style.alignItems = 'center';
+        card.style.padding = '15px 20px';
+        card.style.marginBottom = '10px';
 
-        PROFILE_INTROS_DB.forEach(item => {
-            const isOwned = owned.includes(item.id);
-            const isEquipped = equipped === item.id;
-            const card = document.createElement('div');
-            card.className = 'v4-badge-item';
-            card.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:15px 20px; margin-bottom:10px; position:relative;";
-
-            card.innerHTML = `
-                <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-                <div style="text-align:left;">
-                    <div style="font-family:'Orbitron'; font-weight:800; font-size:12px; color:#fff;">${item.name}</div>
-                    <div style="color:var(--gold); font-weight:800; font-size:11px; margin-top:5px;">${isOwned ? 'DEȚINUT' : item.price.toLocaleString() + ' 🪙'}</div>
-                </div>
-                <div style="display:flex; gap:12px; align-items:center;">
-                    <div class="btn-preview-audio" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
-                    ${!isOwned ? 
-                        `<button class="bm-price-btn-v4" style="min-width:80px; font-size:10px;" onclick="buyPrestige('${item.id}', ${item.price}, 'intro')">CUMPĂRĂ</button>` :
-                        (isEquipped ? 
-                            `<span style="color:#00ff88; font-size:10px; font-weight:900;">ECHIPAT</span>` : 
-                            `<button class="bm-price-btn-v4" style="min-width:80px; background:#00ff88 !important; color:#000;" onclick="equipPrestige('${item.id}', 'intro')">EQUIP</button>`)
-                    }
-                </div>
-            `;
-            list.appendChild(card);
-        });
-    } catch (e) { console.error(e); }
+        card.innerHTML = `
+            <div style="text-align:left;">
+                <div style="font-family:'Orbitron'; font-weight:800; font-size:14px; color:#fff;">${item.name}</div>
+                <div style="color:var(--gold); font-weight:800; font-size:12px; margin-top:5px;">${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="12"></div>
+            </div>
+            <div style="display:flex; gap:15px; align-items:center;">
+                <div class="btn-preview-audio" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
+                ${isOwned ? '<span class="owned-label" style="color:#00ff88; font-weight:900; font-family:Orbitron; font-size:10px;">DEȚINUT</span>' : 
+                `<button class="bm-price-btn-v4" style="min-width:80px;" onclick="buyPrestige('${item.id}', ${item.price}, 'intro')">CUMPĂRĂ</button>`}
+            </div>
+        `;
+        list.appendChild(card);
+    });
 };
 
-// --- DESCHIDE SHOP BANNER ---
+// --- OPEN BANNER SHOP (FIXED) ---
 window.openProfileBannerShop = async () => {
-    if(!auth.currentUser) return showCustomAlert("Loghează-te!", "EROARE");
-
-    closeModal('profilePrestigeModal');
-    
     const list = document.getElementById('pBannerList');
     const shopModal = document.getElementById('pBannerShopModal');
+
+    if(!list || !shopModal) return console.error("Banner elements not found");
+
+    // Close BOTH possible selection modals to be safe
+    document.getElementById('profilePrestigeModal').classList.remove('active');
+    document.getElementById('eliteCosmeticsModal').classList.remove('active');
     
+    // Open the Banner Shop
     shopModal.classList.add('active');
-    list.innerHTML = '<div style="color:#fff; font-family:Orbitron; text-align:center; grid-column: span 2;">> LOADING_BANNERS...</div>';
+    list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">> LOADING VISUALS...</div>';
     
-    try {
-        const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
-        const d = userSnap.data();
-        const owned = d.ownedPBanners || [];
-        const equipped = d.equippedPBanner || null;
+    const userOwned = (window.currentUserData && window.currentUserData.ownedPBanners) ? window.currentUserData.ownedPBanners : [];
 
-        list.innerHTML = '';
-
-        PROFILE_BANNERS_DB.forEach(item => {
-            const isOwned = owned.includes(item.id);
-            const isEquipped = equipped === item.id;
-            const card = document.createElement('div');
-            card.className = 'shop-badge-item';
-            card.innerHTML = `
-                <div style="width:100%; height:50px; border-radius:8px; background:${item.bgColor || '#000'}; background-image:${item.style}; background-size:cover; border:1px solid rgba(255,255,255,0.1);"></div>
-                <div style="font-family:'Orbitron'; font-size:10px; margin:10px 0; color:#fff;">${item.name}</div>
-                <div class="shop-badge-price" style="margin-bottom:10px;">
-                    ${isOwned ? 'DEȚINUT' : item.price.toLocaleString() + ' 🪙'}
-                </div>
-                ${!isOwned ? 
-                    `<button class="bm-price-btn-v4" style="width:100%; font-size:10px;" onclick="buyPrestige('${item.id}', ${item.price}, 'banner')">CUMPĂRĂ</button>` :
-                    (isEquipped ? 
-                        `<span style="color:#00ff88; font-weight:900; font-size:10px;">ECHIPAT</span>` : 
-                        `<button class="bm-price-btn-v4" style="width:100%; background:#00ff88 !important; color:#000; font-size:10px;" onclick="equipPrestige('${item.id}', 'banner')">EQUIP</button>`)
-                }
-            `;
-            list.appendChild(card);
-        });
-    } catch (e) { console.error(e); }
-};
-
-// --- THE EQUIPMENT ENGINE ---
-window.equipPrestige = async (id, type) => {
-    const field = (type === 'intro') ? 'equippedIntro' : 'equippedPBanner';
-    try {
-        await updateDoc(doc(db, "accounts", auth.currentUser.uid), { [field]: id });
-        showCustomAlert("Element echipat cu succes!", "PROFIL ACTUALIZAT");
-        if (type === 'intro') openProfileIntroShop();
-        else openProfileBannerShop();
-    } catch (e) { console.error(e); }
-};
-
-
-window.claimFreeCurrency = async (amount, type) => {
-    if (!auth.currentUser || !window.activeCurrencyTicket) return;
-
-    const ticketId = window.activeCurrencyTicket.id;
-    const category = window.activeCurrencyTicket.category; // 'coins' or 'diamonds'
-
-    if(!(await showCustomConfirm(`Vrei să revendici ${amount.toLocaleString()} ${type} acum? Voucherul va fi consumat.`))) return;
-
-    const userRef = doc(db, "accounts", auth.currentUser.uid);
-
-    try {
-        await runTransaction(db, async (transaction) => {
-            const userSnap = await transaction.get(userRef);
-            const userData = userSnap.data();
-
-            // 1. Find and Remove Voucher
-            let vouchers = (userData.myCoupons && userData.myCoupons[category]) ? [...userData.myCoupons[category]] : [];
-            const vIdx = vouchers.findIndex(v => v.id === ticketId || v.code === ticketId);
-            
-            if (vIdx === -1) throw new Error("Voucherul a expirat sau a fost deja folosit!");
-            
-            vouchers.splice(vIdx, 1);
-
-            // 2. Prepare Updates
-            const updates = { [`myCoupons.${category}`]: vouchers };
-            if (category === 'coins') updates.coins = increment(amount);
-            else updates.diamonds = increment(amount);
-
-            transaction.update(userRef, updates);
-        });
-
-        // 3. Cleanup Local State
-        window.activeCurrencyTicket = null;
-        
-        await logTransaction(amount, category.toUpperCase(), "Gamble", `Won ${amount} from Mystery Box Ticket`);
-        await showCustomAlert(`Transfer reușit! Ai primit ${amount.toLocaleString()} ${type}.`, "DEPOZIT FINALIZAT");
-        
-        renderShop();
-
-    } catch (e) {
-        showCustomAlert(e.message, "EROARE");
-        window.activeCurrencyTicket = null;
-        renderShop();
-    }
-};
-
-window.buyPrestige = async (id, price, type) => {
-    if (!auth.currentUser) return alert("Loghează-te!");
-    
-    const userRef = doc(db, "accounts", auth.currentUser.uid);
-    const userSnap = await getDoc(userRef);
-    const userData = userSnap.data();
-
-    // 1. Check if enough coins
-    if ((userData.coins || 0) < price) {
-        return showCustomAlert("Fonduri insuficiente! Ai nevoie de " + price.toLocaleString() + " monede.", "EROARE");
-    }
-
-    const confirm = await showCustomConfirm(`Cumperi acest modul de prestigiu pentru ${price.toLocaleString()} coins?`, "CONFIRMĂ ACHIZIȚIA");
-    if (!confirm) return;
-
-    // 2. Determine target field
-    let ownedField = (type === 'intro') ? 'ownedIntros' : 'ownedPBanners';
-
-    try {
-        await updateDoc(userRef, {
-            coins: increment(-price),
-            [ownedField]: arrayUnion(id)
-        });
-
-        await logTransaction(-price, "COINS", "Elite Boutique", `Bought Prestige ${type}: ${id}`);
-        await showCustomAlert("Modul achiziționat și deblocat!", "SUCCES");
-
-        // Refresh the current shop view
-        if (type === 'intro') openProfileIntroShop();
-        else openProfileBannerShop();
-
-    } catch (e) {
-        console.error(e);
-        showCustomAlert("Eroare la procesarea tranzacției.", "FAIL");
-    }
+    list.innerHTML = '';
+    PROFILE_BANNERS_DB.forEach(item => {
+        const isOwned = userOwned.includes(item.id);
+        const card = document.createElement('div');
+        card.className = 'shop-badge-item';
+        card.innerHTML = `
+            <div style="width:100%; height:60px; border-radius:10px; background:${item.bgColor || 'transparent'}; background-image:${item.style}; background-size:${item.bgSize || 'cover'}; border:1px solid rgba(255,255,255,0.1);"></div>
+            <div style="font-family:'Orbitron'; font-size:11px; margin:10px 0; color:#fff;">${item.name}</div>
+            <div class="shop-badge-price" style="margin-bottom:10px;">
+                ${isOwned ? '<span style="color:#00ff88; font-weight:900;">DEȚINUT</span>' : `${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="14">`}
+            </div>
+            ${isOwned ? '' : `<button class="bm-price-btn-v4" style="width:100%;" onclick="buyPrestige('${item.id}', ${item.price}, 'banner')">DEBLOCHEAZĂ</button>`}
+        `;
+        list.appendChild(card);
+    });
 };
 </script>
 </body>
