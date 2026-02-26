@@ -7922,6 +7922,61 @@ nav a[href="shop.html"] {
         font-size: 40px !important;
     }
 }
+
+
+
+/* --- ELITE ANIMATION ENGINE --- */
+
+/* 1. GIF Background for Badges/Banners */
+.elite-gif-bg {
+    background-size: cover !important;
+    background-position: center !important;
+    -webkit-background-clip: text !important; /* For text with GIF inside */
+    background-clip: text !important;
+}
+
+/* 2. God of Thunder Special Styling */
+.badge-god-thunder {
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd');
+    background-size: cover;
+    color: #fff !important;
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #fff;
+    border: 2px solid #00ffff !important;
+    box-shadow: 0 0 15px #00ffff;
+    font-weight: 900;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 3. Animated Borders for Elite Frames */
+@keyframes eliteBorderSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.elite-frame-wrapper {
+    position: relative;
+    padding: 5px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.elite-frame-outline {
+    position: absolute;
+    inset: -50%;
+    background: conic-gradient(from 0deg, transparent, #ff0000, #00ffff, #ff0000);
+    animation: eliteBorderSpin 3s linear infinite;
+    z-index: 0;
+}
+
+/* 4. Text Effects */
+.t-elite-shimmer {
+    background: linear-gradient(90deg, #fff, #ff0000, #fff);
+    background-size: 200% auto;
+    animation: text-shimmer 2s linear infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
   </style>
 </head>
 <body>
@@ -7984,27 +8039,23 @@ nav a[href="shop.html"] {
         </div>
 
         <div class="bm-content-scroll" style="padding: 20px;">
-            <div class="bm-grid-v4">
-                <!-- 3 Placeholder Categories -->
-                <div class="bm-offer-card-v4">
-                    <i class="fas fa-certificate" style="color:#ff0000; font-size:30px;"></i>
-                    <div class="bm-title-v4">ANIMATED BADGES</div>
-                    <div class="bm-desc-v4">Insigne cu efecte vizuale unice.</div>
-                    <button class="bm-price-btn-v4">ÎN CURÂND</button>
-                </div>
-                <div class="bm-offer-card-v4">
-                    <i class="fas fa-crop-alt" style="color:#fff; font-size:30px;"></i>
-                    <div class="bm-title-v4">ANIMATED FRAMES</div>
-                    <div class="bm-desc-v4">Rame de profil în mișcare.</div>
-                    <button class="bm-price-btn-v4">ÎN CURÂND</button>
-                </div>
-                <div class="bm-offer-card-v4">
-                    <i class="fas fa-comment-dots" style="color:#ff0000; font-size:30px;"></i>
-                    <div class="bm-title-v4">ANIMATED BANNERS</div>
-                    <div class="bm-desc-v4">Bule de chat animate premium.</div>
-                    <button class="bm-price-btn-v4">ÎN CURÂND</button>
-                </div>
-            </div>
+<div class="bm-grid-v4">
+    <div class="bm-offer-card-v4" onclick="openEliteCategory('badges')">
+        <i class="fas fa-certificate" style="color:#ff0000; font-size:30px;"></i>
+        <div class="bm-title-v4">ANIMATED BADGES</div>
+        <button class="bm-price-btn-v4">DESCHIDE</button>
+    </div>
+    <div class="bm-offer-card-v4" onclick="openEliteCategory('frames')">
+        <i class="fas fa-crop-alt" style="color:#fff; font-size:30px;"></i>
+        <div class="bm-title-v4">ANIMATED FRAMES</div>
+        <button class="bm-price-btn-v4">DESCHIDE</button>
+    </div>
+    <div class="bm-offer-card-v4" onclick="openEliteCategory('banners')">
+        <i class="fas fa-comment-dots" style="color:#ff0000; font-size:30px;"></i>
+        <div class="bm-title-v4">ANIMATED BANNERS</div>
+        <button class="bm-price-btn-v4">DESCHIDE</button>
+    </div>
+</div>
         </div>
     </div>
 </div>
@@ -10038,6 +10089,13 @@ window.showCustomConfirm = (msg, title = "CONFIRMARE") => {
 },
 
 
+{ id: 'eb_thunder', text: 'GOD OF THUNDER', price: 50, isElite: true, animClass: 'badge-god-thunder', icon: 'fa-bolt' },
+{ id: 'eb_inferno', text: 'HELL RAISER', price: 45, isElite: true, animClass: 'bubble-fire', icon: 'fa-fire' },
+{ id: 'eb_void', text: 'VOID EMPEROR', price: 60, isElite: true, animClass: 'bubble-anim-ghost', icon: 'fa-eye' },
+{ id: 'eb_chroma', text: 'RGB OVERLORD', price: 40, isElite: true, animClass: 'bubble-anim-chroma', icon: 'fa-keyboard' },
+{ id: 'eb_glitch', text: 'SYSTEM ERROR', price: 35, isElite: true, animClass: 'badge-anim-glitch', icon: 'fa-microchip' },
+
+
 ];
 
 const BANNERS_DB = [
@@ -10074,7 +10132,10 @@ const BANNERS_DB = [
     { id: 'bub_void_pulse', name: 'VOID PULSE', cssClass: 'bubble-pulse-void', price: 3500, desc: 'Efect de respirație mov' },
     { id: 'bub_emerald', name: 'EMERALD SHARD', cssClass: 'bubble-emerald-shard', price: 3000, desc: 'Formă de cristal tăiat' },
 
-
+{ id: 'eb_storm', name: 'THUNDERSTORM', cssClass: 'badge-god-thunder', price: 100, isElite: true, desc: 'Lightning background' },
+{ id: 'eb_matrix', name: 'MATRIX CODE', cssClass: 'bubble-matrix', price: 80, isElite: true, desc: 'Falling green code' },
+{ id: 'eb_supernova', name: 'SUPERNOVA', cssClass: 'bubble-anim-supernova', price: 120, isElite: true, desc: 'Exploding colors' },
+{ id: 'eb_bloodmoon', name: 'BLOOD MOON', cssClass: 'bubble-anim-blood', price: 90, isElite: true, desc: 'Pulsing crimson' },
 
 ];
 
@@ -11105,7 +11166,7 @@ window.openBadgeShop = async () => {
         </div>
     `;
 
-BADGES_DB.forEach(badge => {
+BADGES_DB.filter(badge => !badge.isElite).forEach(badge => {
         const isOwned = owned.includes(badge.id);
         const item = document.createElement('div');
         item.className = 'shop-badge-item';
@@ -11580,7 +11641,7 @@ window.openBannerShop = async () => {
         </div>
     `;
 
-    BANNERS_DB.forEach(item => {
+BANNERS_DB.filter(item => !item.isElite).forEach(item => {
         const isOwned = owned.includes(item.id);
         const card = document.createElement('div');
         card.className = 'shop-badge-item';
@@ -13993,6 +14054,56 @@ window.openProfilePrestige = () => {
     document.getElementById('eliteShopModal').classList.remove('active');
     // Open the Prestige sub-modal
     document.getElementById('profilePrestigeModal').classList.add('active');
+};
+
+
+
+window.openEliteCategory = async (type) => {
+    // Reuse your Badge/Banner/Frame modals but only fill them with Elite items
+    let modalId, listId, db;
+    
+    if (type === 'badges') { modalId = 'badgeShopModal'; listId = 'badgeList'; db = BADGES_DB; }
+    if (type === 'banners') { modalId = 'bannerShopModal'; listId = 'bannerList'; db = BANNERS_DB; }
+    if (type === 'frames') { modalId = 'frameShopModal'; listId = 'frameList'; db = FRAMES_DB; }
+
+    const eliteItems = db.filter(item => item.isElite);
+    const list = document.getElementById(listId);
+    list.innerHTML = '';
+    
+    document.getElementById('eliteCosmeticsModal').classList.remove('active');
+    document.getElementById(modalId).classList.add('active');
+
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const owned = userSnap.data().ownedBadges || []; // Adjust based on type
+
+    eliteItems.forEach(item => {
+        const isOwned = owned.includes(item.id);
+        const card = document.createElement('div');
+        card.className = 'shop-badge-item';
+        
+        // Elite items cost DIAMONDS usually, let's set that
+        card.innerHTML = `
+            <div class="${item.animClass || item.cssClass}" style="padding:10px; border-radius:5px;">
+                ${item.text || item.name}
+            </div>
+            <div class="shop-badge-price">
+                ${isOwned ? 'DEȚINUT' : `<img src="https://iili.io/fv5bmtj.png" width="15"> ${item.price}`}
+            </div>
+            ${!isOwned ? `<button class="buy-badge-btn" onclick="buyEliteItem('${item.id}', ${item.price}, '${type}')">CUMPĂRĂ</button>` : ''}
+        `;
+        list.appendChild(card);
+    });
+};
+
+// Purchase function for Elite Items (Uses Diamonds)
+window.buyEliteItem = async (id, price, type) => {
+    if ((window.currentUserData.diamonds || 0) < price) return showCustomAlert("Nu ai suficiente diamante!", "EROARE");
+    
+    const confirm = await showCustomConfirm(`Cumperi acest obiect de elită pentru ${price} diamante?`);
+    if(!confirm) return;
+
+    // ... Standard Firebase Update logic here (similar to your buyBadge) ...
+    // Note: ensure you decrement 'diamonds' instead of 'coins'
 };
 </script>
 </body>
