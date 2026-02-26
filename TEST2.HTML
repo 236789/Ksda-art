@@ -8419,33 +8419,7 @@ nav a[href="shop.html"] {
     </div>
 </div>
 
-<!-- MODAL NOU: INTRO SHOP -->
-<div id="introShopModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 500px;">
-        <div class="bm-scanline-overlay"></div>
-        <div style="background: rgba(255, 0, 0, 0.1); padding: 25px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#ff0000;">AUDIO_MODULES</div>
-            <button class="close-pop" onclick="closeModal('introShopModal')" style="position:static !important; border:1px solid #ff0000; background:transparent;">✕</button>
-        </div>
-        <div class="bm-content-scroll" id="introList" style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
-            <!-- JS Inject -->
-        </div>
-    </div>
-</div>
 
-<!-- MODAL NOU: BANNER SHOP -->
-<div id="pBannerShopModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 600px; height: 80vh;">
-        <div class="bm-scanline-overlay"></div>
-        <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-bottom: 1px solid #fff; display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#fff;">VISUAL_OVERLAYS</div>
-            <button class="close-pop" onclick="closeModal('pBannerShopModal')" style="position:static !important; border:1px solid #fff; background:transparent;">✕</button>
-        </div>
-        <div class="bm-content-scroll" id="pBannerList" style="padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-            <!-- JS Inject -->
-        </div>
-    </div>
-</div>
         </div>
     </div>
 </div>
@@ -8489,6 +8463,35 @@ nav a[href="shop.html"] {
         </div>
     </div>
 </div>
+</div>
+
+
+<!-- MODAL NOU: INTRO SHOP -->
+<div id="introShopModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 500px;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 0, 0, 0.1); padding: 25px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#ff0000;">AUDIO_MODULES</div>
+            <button class="close-pop" onclick="closeModal('introShopModal')" style="position:static !important; border:1px solid #ff0000; background:transparent;">✕</button>
+        </div>
+        <div class="bm-content-scroll" id="introList" style="padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+            <!-- JS Inject -->
+        </div>
+    </div>
+</div>
+
+<!-- MODAL NOU: BANNER SHOP -->
+<div id="pBannerShopModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 600px; height: 80vh;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-bottom: 1px solid #fff; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#fff;">VISUAL_OVERLAYS</div>
+            <button class="close-pop" onclick="closeModal('pBannerShopModal')" style="position:static !important; border:1px solid #fff; background:transparent;">✕</button>
+        </div>
+        <div class="bm-content-scroll" id="pBannerList" style="padding: 20px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            <!-- JS Inject -->
+        </div>
+    </div>
 </div>
 
 
@@ -14745,78 +14748,104 @@ window.previewAudio = (url, btn) => {
     };
 };
 
-// --- UPDATED INTRO SHOP ---
+// --- FIX PENTRU PROFILE INTROS ---
 window.openProfileIntroShop = async () => {
-    document.getElementById('profilePrestigeModal').classList.remove('active');
-    const list = document.getElementById('introList');
+    if (!auth.currentUser) return showCustomAlert("Loghează-te pentru a accesa!", "EROARE");
+
+    // Deschidem modalul de destinație și îl închidem pe cel de prestige
     const shopModal = document.getElementById('introShopModal');
-    shopModal.classList.add('active');
-    list.innerHTML = '';
+    const prestigeModal = document.getElementById('profilePrestigeModal');
     
-    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
-    const d = userSnap.data();
-    const owned = d.ownedIntros || [];
-    const equipped = d.equippedIntro || null;
+    if(prestigeModal) prestigeModal.classList.remove('active');
+    shopModal.classList.add('active');
 
-    PROFILE_INTROS_DB.forEach(item => {
-        const isOwned = owned.includes(item.id);
-        const isEquipped = equipped === item.id;
-        const card = document.createElement('div');
-        card.className = 'v4-badge-item';
-        card.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:15px 20px; margin-bottom:10px;";
+    const list = document.getElementById('introList');
+    list.innerHTML = '<div style="color:#ff0000; text-align:center; padding:20px; font-family:Orbitron;">> LOADING_AUDIO_MODULES...</div>';
+    
+    try {
+        const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+        const d = userSnap.data();
+        const owned = d.ownedIntros || [];
+        const equipped = d.equippedIntro || null;
 
-        card.innerHTML = `
-            <div style="text-align:left;">
-                <div style="font-family:'Orbitron'; font-weight:800; font-size:12px; color:#fff;">${item.name}</div>
-                <div style="color:var(--gold); font-weight:800; font-size:11px; margin-top:5px;">${isOwned ? 'DEȚINUT' : item.price.toLocaleString() + ' 🪙'}</div>
-            </div>
-            <div style="display:flex; gap:12px; align-items:center;">
-                <div class="btn-preview-audio" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
-                ${!isOwned ? 
-                    `<button class="bm-price-btn-v4" style="min-width:80px; font-size:10px;" onclick="buyPrestige('${item.id}', ${item.price}, 'intro')">CUMPĂRĂ</button>` :
-                    (isEquipped ? 
-                        `<span style="color:#00ff88; font-size:10px; font-weight:900;">ECHIPAT</span>` : 
-                        `<button class="bm-price-btn-v4" style="min-width:80px; background:#00ff88 !important; color:#000;" onclick="equipPrestige('${item.id}', 'intro')">EQUIP</button>`)
-                }
-            </div>
-        `;
-        list.appendChild(card);
-    });
+        list.innerHTML = ''; // Curățăm textul de loading
+        
+        PROFILE_INTROS_DB.forEach(item => {
+            const isOwned = owned.includes(item.id);
+            const isEquipped = equipped === item.id;
+            const card = document.createElement('div');
+            card.className = 'v4-badge-item';
+            card.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:15px 20px; margin-bottom:10px; position:relative;";
+
+            card.innerHTML = `
+                <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                <div style="text-align:left;">
+                    <div style="font-family:'Orbitron'; font-weight:800; font-size:12px; color:#fff;">${item.name}</div>
+                    <div style="color:var(--gold); font-weight:800; font-size:11px; margin-top:5px;">${isOwned ? 'DEȚINUT' : item.price.toLocaleString() + ' 🪙'}</div>
+                </div>
+                <div style="display:flex; gap:12px; align-items:center;">
+                    <div class="btn-preview-audio" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
+                    ${!isOwned ? 
+                        `<button class="bm-price-btn-v4" style="min-width:80px; font-size:10px;" onclick="buyPrestige('${item.id}', ${item.price}, 'intro')">CUMPĂRĂ</button>` :
+                        (isEquipped ? 
+                            `<span style="color:#00ff88; font-size:10px; font-weight:900;">ECHIPAT</span>` : 
+                            `<button class="bm-price-btn-v4" style="min-width:80px; background:#00ff88 !important; color:#000;" onclick="equipPrestige('${item.id}', 'intro')">EQUIP</button>`)
+                    }
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    } catch (e) {
+        console.error(e);
+        list.innerHTML = '<div style="color:red;">Eroare la încărcare date.</div>';
+    }
 };
 
-// --- UPDATED BANNER SHOP ---
+// --- FIX PENTRU PROFILE BANNERS ---
 window.openProfileBannerShop = async () => {
-    document.getElementById('profilePrestigeModal').classList.remove('active');
-    const list = document.getElementById('pBannerList');
-    const shopModal = document.getElementById('pBannerShopModal');
-    shopModal.classList.add('active');
-    list.innerHTML = '';
-    
-    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
-    const d = userSnap.data();
-    const owned = d.ownedPBanners || [];
-    const equipped = d.equippedPBanner || null;
+    if (!auth.currentUser) return showCustomAlert("Loghează-te!", "EROARE");
 
-    PROFILE_BANNERS_DB.forEach(item => {
-        const isOwned = owned.includes(item.id);
-        const isEquipped = equipped === item.id;
-        const card = document.createElement('div');
-        card.className = 'shop-badge-item';
-        card.innerHTML = `
-            <div style="width:100%; height:50px; border-radius:8px; background:${item.bgColor || '#000'}; background-image:${item.style}; background-size:cover; border:1px solid rgba(255,255,255,0.1);"></div>
-            <div style="font-family:'Orbitron'; font-size:10px; margin:10px 0; color:#fff;">${item.name}</div>
-            <div class="shop-badge-price" style="margin-bottom:10px;">
-                ${isOwned ? 'DEȚINUT' : item.price.toLocaleString() + ' 🪙'}
-            </div>
-            ${!isOwned ? 
-                `<button class="bm-price-btn-v4" style="width:100%; font-size:10px;" onclick="buyPrestige('${item.id}', ${item.price}, 'banner')">CUMPĂRĂ</button>` :
-                (isEquipped ? 
-                    `<span style="color:#00ff88; font-weight:900; font-size:10px;">ECHIPAT</span>` : 
-                    `<button class="bm-price-btn-v4" style="width:100%; background:#00ff88 !important; color:#000; font-size:10px;" onclick="equipPrestige('${item.id}', 'banner')">EQUIP</button>`)
-            }
-        `;
-        list.appendChild(card);
-    });
+    const shopModal = document.getElementById('pBannerShopModal');
+    const prestigeModal = document.getElementById('profilePrestigeModal');
+    
+    if(prestigeModal) prestigeModal.classList.remove('active');
+    shopModal.classList.add('active');
+
+    const list = document.getElementById('pBannerList');
+    list.innerHTML = '<div style="color:#fff; text-align:center; padding:20px; font-family:Orbitron; grid-column: span 2;">> SYNCING_VISUAL_DRIVERS...</div>';
+    
+    try {
+        const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+        const d = userSnap.data();
+        const owned = d.ownedPBanners || [];
+        const equipped = d.equippedPBanner || null;
+
+        list.innerHTML = '';
+
+        PROFILE_BANNERS_DB.forEach(item => {
+            const isOwned = owned.includes(item.id);
+            const isEquipped = equipped === item.id;
+            const card = document.createElement('div');
+            card.className = 'shop-badge-item';
+            card.innerHTML = `
+                <div style="width:100%; height:50px; border-radius:8px; background:${item.bgColor || '#000'}; background-image:${item.style}; background-size:cover; border:1px solid rgba(255,255,255,0.1);"></div>
+                <div style="font-family:'Orbitron'; font-size:10px; margin:10px 0; color:#fff;">${item.name}</div>
+                <div class="shop-badge-price" style="margin-bottom:10px;">
+                    ${isOwned ? 'DEȚINUT' : item.price.toLocaleString() + ' 🪙'}
+                </div>
+                ${!isOwned ? 
+                    `<button class="bm-price-btn-v4" style="width:100%; font-size:10px;" onclick="buyPrestige('${item.id}', ${item.price}, 'banner')">CUMPĂRĂ</button>` :
+                    (isEquipped ? 
+                        `<span style="color:#00ff88; font-weight:900; font-size:10px;">ECHIPAT</span>` : 
+                        `<button class="bm-price-btn-v4" style="width:100%; background:#00ff88 !important; color:#000; font-size:10px;" onclick="equipPrestige('${item.id}', 'banner')">EQUIP</button>`)
+                }
+            `;
+            list.appendChild(card);
+        });
+    } catch (e) {
+        console.error(e);
+    }
 };
 
 // --- THE EQUIPMENT ENGINE ---
