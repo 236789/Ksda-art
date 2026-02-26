@@ -6125,16 +6125,25 @@ body {
     margin-top: 12px;
 }
 
-/* --- GOD-TIER AAA PRIZE HUD --- */
+/* Enable scrolling for the Probability Log */
 .prize-view-container {
-    width: min(1000px, 95vw);
-    background: #02050a;
-    border-radius: 20px;
-    padding: 30px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 0 100px rgba(0,0,0,1);
-    border: 1px solid rgba(255,255,255,0.1);
+    max-height: 90vh; /* Limits height to 90% of the screen */
+    overflow-y: auto;  /* Enables vertical scrolling */
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) #02050a;
+}
+
+/* Custom "Tech" Scrollbar for the Log */
+.prize-view-container::-webkit-scrollbar {
+    width: 6px;
+}
+.prize-view-container::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+    box-shadow: 0 0 10px var(--primary);
 }
 
 /* THE GRID SYSTEM (PC: 5 Columns | Mobile: 2 Columns) */
@@ -8301,6 +8310,30 @@ nav a[href="shop.html"] {
     letter-spacing: 8px !important;
     color: #fff !important;
     text-shadow: 0 0 15px #fff, 0 0 30px #ffd700 !important;
+}
+
+
+@media (max-width: 768px) {
+    .aaa-loot-grid {
+        /* Reduce gap to save vertical space */
+        gap: 15px !important; 
+        padding: 10px !important;
+    }
+
+    .aaa-card {
+        /* Slightly shorter cards on mobile to see more at once */
+        min-height: 220px !important; 
+        height: auto !important;
+    }
+    
+    .aaa-card-content {
+        padding: 15px !important;
+        gap: 10px !important; /* Tighter internal spacing */
+    }
+
+    .aaa-card-img {
+        height: 50px !important; /* Smaller icons on mobile */
+    }
 }
   </style>
 </head>
