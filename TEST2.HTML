@@ -13512,7 +13512,7 @@ const BOXES_DB = [
         name: 'Basic Box', 
         price: 1000, 
         color: '#ff6a00', 
-        stockRange: [25, 100], 
+        stockRange: [100, 300], 
         img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%201.png?alt=media&token=29742b82-3e51-408c-948e-c3bae712e2ca', 
         imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2Fmystery%20box%202.png?alt=media&token=93a488b5-9ed7-4ab0-9333-3a67ca37fe3c',
         rewards: [
@@ -13531,7 +13531,7 @@ const BOXES_DB = [
         name: 'Gold Box', 
         price: 5000, 
         color: '#ffd700', 
-        stockRange: [10, 50], 
+        stockRange: [50, 100], 
         img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FGold%20box%20closed.png?alt=media&token=ef29b342-4564-4379-b1ff-9b44eb926d5c', 
         imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FGold%20box%20Open.png?alt=media&token=815a539a-8fd8-495e-b0e6-790f7927352b',
 rewards: [
@@ -13548,7 +13548,7 @@ rewards: [
     name: 'Platinum Box', 
     price: 12500, 
     color: '#e5e4e2', 
-    stockRange: [10, 25], 
+        stockRange: [25, 65],  // INCREASED: Was [10, 25]
     img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Close.png?alt=media&token=e7bbc3f0-9ab6-46c2-a8d5-e5f76d4aed71', 
     imgOpen: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/mysterybox%2FTitanium%20Chest%20Open.png?alt=media&token=43e6e8fc-6228-438f-97b3-0cbf7d5012ce0',
     rewards: [
@@ -13633,13 +13633,10 @@ let lastLockedBox = null;
 let countdownInterval = null;
 
 
-// --- UPDATED REAL-TIME STOCK SYNC ---
-// --- UPDATED REAL-TIME STOCK SYNC (3 HOURS) ---
 function initMysteryStockSync() {
     onSnapshot(doc(db, "system", "mystery_box_stock"), async (snap) => {
         const now = Date.now();
-        // MODIFICAT: 3 ore în milisecunde (3 * 60 * 60 * 1000)
-        const RESET_MS = 10800000; 
+        const RESET_MS = 3600000; // Set to 1 Hour (60 * 60 * 1000)
 
         if (!snap.exists() || (now - (snap.data().lastReset || 0) > RESET_MS)) {
             // Logic to restock if expired
@@ -13654,36 +13651,40 @@ function initMysteryStockSync() {
             globalStock = snap.data().counts;
 
             // --- THE REAL-TIME UI FIX ---
+            // 1. Refresh the main grid if the shop is open
             if (document.getElementById('mysteryShopModal').classList.contains('active')) {
                 renderMysteryShopItems();
             }
 
+            // 2. Refresh the detail modal if the user is currently looking at a specific box
             if (document.getElementById('boxDetailModal').classList.contains('active') && selectedBox) {
                 const currentStock = globalStock[selectedBox.id] || 0;
+                
+                // Adjust quantity if stock dropped below what the user selected
                 if (selectedQty > currentStock && currentStock > 0) {
                     selectedQty = currentStock;
                 } else if (currentStock <= 0) {
                     selectedQty = 0;
                 }
+                
                 updateBoxTotal();
             }
 
             // Timer update logic
             const lastReset = snap.data().lastReset;
             if (countdownInterval) clearInterval(countdownInterval);
-            
             countdownInterval = setInterval(() => {
                 const timeLeft = Math.max(0, RESET_MS - (Date.now() - lastReset));
                 
-                // CALCULARE ORE, MINUTE, SECUNDE
+                // Calculate Hours, Minutes, and Seconds
                 const h = Math.floor(timeLeft / 3600000);
                 const m = Math.floor((timeLeft % 3600000) / 60000);
                 const s = Math.floor((timeLeft % 60000) / 1000);
 
                 const timerEl = document.getElementById('mysteryResetTimer');
                 if (timerEl) {
-                    // Afișăm formatul REFRESH: H:MM:SS
-                    timerEl.innerText = `REFRESH: ${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+                    // Formats as HH:MM:SS
+                    timerEl.innerText = `REFRESH: ${h < 10 ? '0' : ''}${h}:${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
                 }
                 if (timeLeft <= 0) clearInterval(countdownInterval);
             }, 1000);
@@ -14196,11 +14197,11 @@ initMysteryStockSync();
 let dealsCountdownInterval = null; // To prevent multiple timers
 let isUpdatingDeals = false; // To prevent write-loops
 
-// --- UPDATED FLASH DEALS (EVERY DAY) ---
 async function initFlashDeals() {
     onSnapshot(doc(db, "system", "flash_deals"), async (snap) => {
         const now = Date.now();
-        const REFRESH_MS = 24 * 60 * 60 * 1000; // 24 Hours in Milliseconds
+        // 24 de ore în milisecunde (24 * 60 * 60 * 1000)
+        const REFRESH_MS = 86400000; 
 
         if (!snap.exists() || (now - (snap.data().lastUpdate || 0) > REFRESH_MS)) {
             if (isUpdatingDeals) return;
@@ -14237,13 +14238,13 @@ async function initFlashDeals() {
             dealsCountdownInterval = setInterval(() => {
                 const remaining = Math.max(0, REFRESH_MS - (Date.now() - lastUpdate));
                 
-                // Calculate Hours, Minutes, Seconds
                 const h = Math.floor(remaining / 3600000);
                 const m = Math.floor((remaining % 3600000) / 60000);
                 const s = Math.floor((remaining % 60000) / 1000);
                 
                 const timerEl = document.getElementById('dealsResetTimer');
                 if (timerEl) {
+                    // Va arăta de ex: NEXT DEALS IN: 23h 10m 05s
                     timerEl.innerText = `NEXT DEALS IN: ${h}h ${m}m ${s}s`;
                 }
                 if (remaining <= 0) clearInterval(dealsCountdownInterval);
