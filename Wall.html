@@ -6263,6 +6263,554 @@ body {
     padding: 15px; border-radius: 15px; text-align: center;
     display: flex; flex-direction: column; align-items: center; justify-content: space-between;
 }
+
+
+
+/* ==========================
+   1. CYBER GRID (Tactical Green)
+   ========================== */
+.p-ban-cyber {
+    background: #02080a;
+    border: 1px solid #00ff88;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+}
+
+/* The Moving 3D Grid */
+.p-ban-cyber::before {
+    content: '';
+    position: absolute;
+    width: 200%; height: 200%;
+    top: -50%; left: -50%;
+    background-image: 
+        linear-gradient(rgba(0, 255, 136, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.3) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: perspective(300px) rotateX(60deg);
+    animation: cyberGridMove 5s linear infinite;
+}
+
+/* The Radar Sweep */
+.p-ban-cyber .overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 40%, rgba(0, 255, 136, 0.5) 50%, transparent 60%);
+    animation: radarSweep 3s infinite linear;
+}
+
+@keyframes cyberGridMove { from { background-position: 0 0; } to { background-position: 0 40px; } }
+@keyframes radarSweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+
+/* ==========================
+   2. MAGMA FLOW (Volcanic)
+   ========================== */
+.p-ban-magma {
+    background: #1a0500;
+    border: 1px solid #ff4500;
+    box-shadow: 0 0 15px rgba(255, 69, 0, 0.3);
+}
+
+/* Moving Lava Layers */
+.p-ban-magma::before {
+    content: '';
+    position: absolute; inset: -50%;
+    background: radial-gradient(circle, #ff0000, #ff8c00, #330000);
+    background-size: 200% 200%;
+    filter: blur(20px);
+    animation: magmaFlow 6s ease infinite alternate;
+}
+
+/* Floating Embers */
+.p-ban-magma::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(#fff 1px, transparent 1px);
+    background-size: 30px 30px;
+    animation: embersRise 4s linear infinite;
+    opacity: 0.6;
+}
+
+@keyframes magmaFlow { 0% { transform: translate(-10%, -10%); } 100% { transform: translate(10%, 10%); } }
+@keyframes embersRise { from { background-position: 0 0; } to { background-position: 0 -60px; } }
+
+
+/* ==========================
+   3. DEEP VOID (Singularity)
+   ========================== */
+.p-ban-void {
+    background: #000;
+    border: 1px solid #7000ff;
+    box-shadow: 0 0 20px rgba(112, 0, 255, 0.4);
+}
+
+/* Rotating Black Hole Accretion Disk */
+.p-ban-void::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 200%; height: 200%;
+    transform: translate(-50%, -50%);
+    background: conic-gradient(from 0deg, #000, #4b0082, #9400d3, #000);
+    animation: voidSpin 4s linear infinite;
+    border-radius: 50%;
+    opacity: 0.7;
+}
+
+/* Central Event Horizon */
+.p-ban-void .overlay {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px; height: 40px;
+    background: #000;
+    border-radius: 50%;
+    box-shadow: 0 0 15px #7000ff, 0 0 30px #fff;
+    z-index: 2;
+}
+
+@keyframes voidSpin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+
+/* ==========================
+   4. GOLD RUSH (Luxury)
+   ========================== */
+.p-ban-gold {
+    background: #1a1a00;
+    border: 1px solid #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+    overflow: hidden;
+}
+
+/* Liquid Gold Wave */
+.p-ban-gold::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(120deg, #b8860b, #ffd700, #fff, #ffd700, #b8860b);
+    background-size: 200% 200%;
+    animation: goldShimmer 3s linear infinite;
+}
+
+/* Sparkles */
+.p-ban-gold::after {
+    content: '✦';
+    position: absolute;
+    color: #fff;
+    font-size: 20px;
+    animation: sparkleMove 2s infinite;
+    text-shadow: 0 0 5px #fff;
+}
+
+@keyframes goldShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+@keyframes sparkleMove { 
+    0% { top: 10%; left: 10%; opacity: 0; transform: scale(0); } 
+    50% { opacity: 1; transform: scale(1); } 
+    100% { top: 80%; left: 80%; opacity: 0; transform: scale(0); } 
+}
+
+
+/* ==========================
+   5. MATRIX CODE (Hacker)
+   ========================== */
+.p-ban-matrix {
+    background: #000;
+    border: 1px solid #00ff00;
+    font-family: 'Courier New', monospace;
+    color: #00ff00;
+    overflow: hidden;
+}
+
+/* Code Rain Effect */
+.p-ban-matrix::before {
+    content: "10 01 11 00 10 10 01 11 00 10 10 01 11 00 10 10 01 11 00 10";
+    position: absolute; top: -100%; left: 0;
+    width: 100%;
+    font-size: 14px;
+    line-height: 14px;
+    word-break: break-all;
+    text-shadow: 0 0 5px #00ff00;
+    animation: matrixRain 3s linear infinite;
+    opacity: 0.7;
+}
+
+/* Second Layer for Depth */
+.p-ban-matrix::after {
+    content: "01 10 00 11 01 01 10 00 11 01 01 10 00 11 01 01 10 00 11 01";
+    position: absolute; top: -100%; left: 5px;
+    width: 100%;
+    font-size: 10px;
+    color: #003300;
+    animation: matrixRain 5s linear infinite reverse;
+    z-index: 0;
+}
+
+@keyframes matrixRain { from { top: -100%; } to { top: 100%; } }
+
+
+/* ==========================
+   6. NEON CITY (Vaporwave)
+   ========================== */
+.p-ban-neon {
+    background: linear-gradient(180deg, #2b002b 0%, #000044 100%);
+    border: 1px solid #ff00ff;
+    border-bottom: 3px solid #00ffff;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+}
+
+/* Retro Sun */
+.p-ban-neon::before {
+    content: '';
+    position: absolute;
+    bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    width: 60px; height: 60px;
+    background: linear-gradient(to top, #ff00ff, #ffcc00);
+    border-radius: 50%;
+    box-shadow: 0 0 20px #ff00ff;
+    /* Create lines in sun */
+    mask-image: linear-gradient(to bottom, black 50%, transparent 50%, black 55%, transparent 55%, black 60%, transparent 60%);
+}
+
+/* Moving Grid Floor */
+.p-ban-neon::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 30px;
+    background-image: 
+        linear-gradient(0deg, transparent 24%, rgba(0, 255, 255, .5) 25%, rgba(0, 255, 255, .5) 26%, transparent 27%, transparent),
+        linear-gradient(90deg, transparent 24%, rgba(0, 255, 255, .5) 25%, rgba(0, 255, 255, .5) 26%, transparent 27%, transparent);
+    background-size: 40px 10px;
+    transform: perspective(100px) rotateX(60deg);
+    animation: vaporGrid 1s linear infinite;
+}
+
+@keyframes vaporGrid { from { background-position: 0 0; } to { background-position: 0 20px; } }
+
+/* --- AUDIO PLAYER BUTTON --- */
+.audio-play-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 0, 0, 0.2);
+    border: 1px solid #ff0000;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: 0.3s;
+    font-size: 16px;
+}
+.audio-play-btn:hover { background: #ff0000; box-shadow: 0 0 15px #ff0000; }
+.audio-play-btn.playing { background: #fff; color: #ff0000; border-color: #fff; animation: pulse 1s infinite; }
+
+
+/* ==========================
+   7. ANIME FANBOY (Pink/Cyan Energy)
+   ========================== */
+.p-ban-anime {
+    /* The Background GIF */
+    background: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/anime-mix.gif?alt=media&token=eed3db7d-e99f-4a5c-b7ee-15b6b51f20e8') center/cover no-repeat;
+    /* Inner shadow to make text readable */
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.7), 0 0 20px rgba(255, 0, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Rotating Neon Border */
+.p-ban-anime::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(
+        from 0deg, 
+        transparent, 
+        #ff00ff, /* Pink */
+        #00ffff, /* Cyan */
+        transparent 30%
+    );
+    animation: rotateAura 2.5s linear infinite; /* Fast rotation */
+    z-index: 0;
+}
+
+/* Inner Mask to show only the border */
+.p-ban-anime::after {
+    content: '';
+    position: absolute;
+    inset: 3px; /* Border Thickness */
+    background: inherit; /* Keeps the GIF visible inside */
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    z-index: 1;
+}
+
+/* ==========================
+   8. THUNDER GOD (Electric Blue)
+   ========================== */
+.p-ban-thunder {
+    /* The Background GIF (Lightning) */
+    background: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') center/cover no-repeat;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.6), 0 0 25px rgba(0, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Rotating Electric Border */
+.p-ban-thunder::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(
+        from 0deg, 
+        transparent, 
+        #ffffff, /* White Spark */
+        #00e5ff, /* Electric Blue */
+        transparent 40%
+    );
+    animation: rotateAura 1.5s linear infinite; /* Super fast spin */
+    z-index: 0;
+}
+
+/* Inner Mask */
+.p-ban-thunder::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: inherit;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    z-index: 1;
+}
+
+/* Ensure the animation keyframe exists */
+@keyframes rotateAura { 
+    from { transform: rotate(0deg); } 
+    to { transform: rotate(360deg); } 
+}
+
+
+
+/* =========================================
+   GOD-TIER PROFILE BANNERS (NEW ADDITIONS)
+   ========================================= */
+
+/* 10. RGB OVERLOAD (Fast Rainbow Spin) */
+.p-ban-rgb {
+    background: #000;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+.p-ban-rgb::before {
+    content: ''; position: absolute; inset: -100%;
+    background: conic-gradient(red, orange, yellow, green, blue, indigo, violet, red);
+    animation: rotateAura 1.5s linear infinite; /* FAST SPIN */
+    z-index: 0;
+}
+.p-ban-rgb::after {
+    content: ''; position: absolute; inset: 4px;
+    background: #111; border-radius: 8px; z-index: 1;
+}
+
+/* 11. DEATH SQUAD (Red/Black Smoke) */
+.p-ban-death {
+    background: radial-gradient(circle, #300, #000);
+    border: 1px solid #ff0000;
+    box-shadow: 0 0 25px #ff0000;
+    position: relative; overflow: hidden;
+}
+.p-ban-death::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: repeating-linear-gradient(45deg, #200, #200 10px, #000 10px, #000 20px);
+    animation: cyberGridMove 10s linear infinite;
+    opacity: 0.5;
+}
+
+/* 12. FROZEN CORE (Ice Blue Breathing) */
+.p-ban-frozen {
+    background: #001;
+    border: 1px solid #00ffff;
+    box-shadow: 0 0 15px #00ffff, inset 0 0 20px #00ffff;
+    animation: flash 3s infinite; /* Breathing effect */
+}
+.p-ban-frozen::after {
+    content: '❄️'; font-size: 50px; position: absolute; right: -10px; bottom: -10px; opacity: 0.2;
+}
+
+/* 13. TOXIC HAZE (Green/Purple Biohazard) */
+.p-ban-toxic {
+    background: #050;
+    border-left: 3px solid #00ff00;
+    border-right: 3px solid #8a2be2;
+    box-shadow: 0 0 20px #00ff00;
+    position: relative; overflow: hidden;
+}
+.p-ban-toxic::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.4), transparent);
+    transform: skewX(-20deg);
+    animation: radarSweep 2s infinite linear;
+}
+
+/* 14. MIDAS TOUCH (Sparkling Gold) */
+.p-ban-midas {
+    background: radial-gradient(ellipse at center, #ffd700 0%, #332200 100%);
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 30px #ffd700;
+    overflow: hidden; position: relative;
+}
+.p-ban-midas::before {
+    content: ''; position: absolute; inset: -50%;
+    background: conic-gradient(from 0deg, transparent, white, transparent 30%);
+    animation: rotateAura 3s linear infinite;
+    opacity: 0.5;
+}
+
+/* 15. BLUE FLAME (Ghost Rider Vibe) */
+.p-ban-bluefire {
+    background: url('https://media.giphy.com/media/3bc8pP1rVdfgN1uoMV/giphy.gif') center/cover;
+    border: 1px solid #00e5ff;
+    box-shadow: inset 0 0 40px #000, 0 0 20px #00e5ff;
+}
+
+/* 16. GLITCH ERROR (Distorted) */
+.p-ban-glitch {
+    background: #000;
+    border: 1px dashed #fff;
+    font-family: monospace;
+    position: relative; overflow: hidden;
+}
+.p-ban-glitch::before {
+    content: "ERROR 404"; position: absolute; top: 20%; left: 20%;
+    font-size: 30px; color: rgba(255,255,255,0.1); font-weight: 900;
+    animation: glitchShake 0.2s infinite;
+}
+
+/* 17. NEBULA STORM (Cosmic Purple) */
+.p-ban-nebula {
+    background: url('https://media.giphy.com/media/eJmUEoeU1K4d4IUbpS/giphy.gif') center/cover;
+    border: 1px solid #9900ff;
+    box-shadow: 0 0 25px #9900ff;
+}
+
+/* 18. AKATSUKI (Anime Clouds) */
+.p-ban-akatsuki {
+    background: #000;
+    border: 2px solid #a00000;
+    box-shadow: 0 0 20px #a00000;
+    position: relative; overflow: hidden;
+}
+.p-ban-akatsuki::before {
+    content: '☁️'; color: #a00000; font-size: 40px; position: absolute; left: -20px; animation: floatRight 5s linear infinite;
+}
+.p-ban-akatsuki::after {
+    content: '☁️'; color: #a00000; font-size: 30px; position: absolute; left: -50px; top: 30px; animation: floatRight 7s linear infinite;
+}
+@keyframes floatRight { from { left: -50px; } to { left: 100%; } }
+
+/* 19. HYPER SPEED (Racing) */
+.p-ban-hyper {
+    background: #000;
+    border-top: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    position: relative; overflow: hidden;
+}
+.p-ban-hyper::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.2) 20px, rgba(255,255,255,0.2) 40px);
+    animation: radarSweep 0.2s infinite linear; /* Super fast */
+}
+
+/* 20. MONEY MAKER (Falling Cash GIF) */
+.p-ban-cash {
+    background: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmo2ZHl0NXEyNzcxcG13b3VuNWw5cnV6bWhyZGV5NGRxOGk1NmdteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BfFFYPSVYr9UR6EtEL/giphy.gif') center/cover;
+    border: 2px solid #00ff00;
+    box-shadow: 0 0 20px #00ff00;
+}
+
+
+/* =========================================
+   NEW GOD-TIER PROFILE BANNERS
+   ========================================= */
+
+/* 1. SOLAR FLARE (Pure CSS - Intense Heat) */
+.p-ban-solar {
+    background: radial-gradient(circle at center, #ff8c00, #ff0000, #000);
+    border: 1px solid #ffaa00;
+    box-shadow: 0 0 20px #ff4500;
+}
+.p-ban-solar::before {
+    content: ''; position: absolute; inset: -50%;
+    background: conic-gradient(from 0deg, transparent, #fff, #ff4500, transparent 40%);
+    animation: rotateAura 2s linear infinite;
+    opacity: 0.4;
+}
+
+/* 2. PLASMA LEAK (Pure CSS - Flowing Energy) */
+.p-ban-plasma-flow {
+    background: #050014;
+    border: 1px solid #bf55ec;
+}
+.p-ban-plasma-flow::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, #7000ff, #ff00ff, #00ffff, #7000ff);
+    background-size: 400% 400%;
+    animation: gradientMove 4s ease infinite;
+    opacity: 0.6;
+    mask-image: radial-gradient(circle, black 20%, transparent 70%);
+}
+
+/* 3. TOXIC WASTE (GIF Integrated) */
+.p-ban-toxic-elite {
+    background: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aXpoemxmbHByMjc1cGxxNDFpbm5kc2xjNTZmb3ZuYzNlMHhxa2NidyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/KH4QT4rqnnka04884l/giphy.gif') center/cover;
+    border: 2px solid #00ff88;
+    box-shadow: inset 0 0 40px #000, 0 0 15px #00ff88;
+}
+
+/* 4. MAGMA LORD (GIF Integrated) */
+.p-ban-magma-elite {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcnY0Mjlwb24zd2d6cDl2cnMzcjRmczEzZmQ0MXplc2g5YWhqNXhxYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/auKRHcLuzy6ME/giphy.gif') center/cover;
+    border: 1px solid #ff4500;
+    box-shadow: 0 0 25px rgba(255, 69, 0, 0.5);
+}
+
+/* 5. MONEY RAIN ELITE (GIF Integrated) */
+.p-ban-cash-elite {
+    background: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmo2ZHl0NXEyNzcxcG13b3VuNWw5cnV6bWhyZGV5NGRxOGk1NmdteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BfFFYPSVYr9UR6EtEL/giphy.gif') center/cover;
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+}
+
+/* 6. DIVINE LIGHT (GIF Integrated) */
+.p-ban-divine {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGEwM2FtNHU4OXM4dXVoYXRzNDdtc2Nha3h6OWhxYTR2aW5mOGkxMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3ov9k1173PdfJWRsoE/giphy.gif') center/cover;
+    border: 1px solid #fff;
+    box-shadow: 0 0 20px #fff;
+}
+
+/* 7. NEBULA GOD (GIF Integrated) */
+.p-ban-nebula-elite {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMHBqOWp4d3IwOWFkZW9uOWx3dzllbGY4eTBhazV1N2xpc3V1YjQ0YiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bPZdEfOgBh1de/giphy.gif') center/cover;
+    border: 1px solid #7000ff;
+    box-shadow: 0 0 30px #7000ff;
+}
+
+/* 8. CYBERPUNK GLITCH (GIF Integrated) */
+.p-ban-cyber-elite {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXk4cmRtNWd3azBxeWtteGtoa3V3MjV3cWFmNmhzeXhjaWhxanN0MSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/26FPKhUtNG3TW74f6/giphy.gif') center/cover;
+    border: 1px solid #00ffff;
+    filter: hue-rotate(45deg);
+}
+
+/* 9. DIAMOND ICE (GIF Integrated) */
+.p-ban-ice-elite {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGEwM2FtNHU4OXM4dXVoYXRzNDdtc2Nha3h6OWhxYTR2aW5mOGkxMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3og0IyRiAsl1Pczi6Y/giphy.gif') center/cover;
+    border: 2px solid #b9f2ff;
+    box-shadow: 0 0 20px #00e5ff;
+}
+
   </style>
 
 </head>
@@ -8034,7 +8582,8 @@ const TEXTS_DB = [
 ];
 
 
-// --- PASTE THIS AFTER 'const TEXTS_DB = [ ... ];' ---
+
+
 
 const PROFILE_BANNERS_DB = [
     // --- CLASSICS ---
@@ -8045,22 +8594,18 @@ const PROFILE_BANNERS_DB = [
     { id: 'pban_matrix',name: 'MATRIX CODE',price: 12000, cssClass: 'p-ban-matrix' },
     { id: 'pban_neon',  name: 'NEON CITY',  price: 3000,  cssClass: 'p-ban-neon' },
 
-
-  // --- SICK CSS ANIMATED ---
+    // --- SICK CSS ANIMATED ---
     { id: 'pban_solar', name: 'SOLAR FLARE', price: 20000, cssClass: 'p-ban-solar' },
     { id: 'pban_plasma_flow', name: 'PLASMA ENERGY', price: 18000, cssClass: 'p-ban-plasma-flow' },
-    { id: 'pban_rgb',      name: 'RGB OVERLOAD', price: 20000, cssClass: 'p-ban-rgb' },
-    { id: 'pban_death',    name: 'DEATH SQUAD',  price: 18000, cssClass: 'p-ban-death' },
-    { id: 'pban_glitch',   name: 'SYSTEM FAIL',  price: 13000, cssClass: 'p-ban-glitch' },
-
+    
     // --- ELITE GIF SERIES (NEW) ---
-    { id: 'pban_toxic_el', name: 'TOXIC WASTE ELITE', price: 25000, cssClass: 'pban_toxic_el' },
-    { id: 'pban_magma_el', name: 'MAGMA LORD ELITE', price: 25000, cssClass: 'pban_magma_el' },
-    { id: 'pban_cash_el',  name: 'MONEY RAIN ELITE', price: 50000, cssClass: 'pban_cash_el' },
-    { id: 'pban_divine_el',name: 'DIVINE ETHER',    price: 35000, cssClass: 'pban_divine_el' },
-    { id: 'pban_nebula_el',name: 'NEBULA GOD',      price: 30000, cssClass: 'pban_nebula_el' },
-    { id: 'pban_cyber_el', name: 'CYBERPUNK ELITE', price: 22000, cssClass: 'pban_cyber_el' },
-    { id: 'pban_ice_el',   name: 'FROZEN CORE',     price: 24000, cssClass: 'pban_ice_el' },
+    { id: 'pban_toxic_el', name: 'TOXIC WASTE ELITE', price: 25000, cssClass: 'p-ban-toxic-elite' },
+    { id: 'pban_magma_el', name: 'MAGMA LORD ELITE', price: 25000, cssClass: 'p-ban-magma-elite' },
+    { id: 'pban_cash_el',  name: 'MONEY RAIN ELITE', price: 50000, cssClass: 'p-ban-cash-elite' },
+    { id: 'pban_divine_el',name: 'DIVINE ETHER',    price: 35000, cssClass: 'p-ban-divine' },
+    { id: 'pban_nebula_el',name: 'NEBULA GOD',      price: 30000, cssClass: 'p-ban-nebula-elite' },
+    { id: 'pban_cyber_el', name: 'CYBERPUNK ELITE', price: 22000, cssClass: 'p-ban-cyber-elite' },
+    { id: 'pban_ice_el',   name: 'FROZEN CORE',     price: 24000, cssClass: 'p-ban-ice-elite' },
     
     // --- GIF ANIMATED ---
     { id: 'pban_anime',   name: 'ANIME FANBOY', price: 8000, cssClass: 'p-ban-anime' },
@@ -8080,14 +8625,125 @@ const PROFILE_BANNERS_DB = [
     { id: 'pban_hyper',    name: 'HYPER SPEED',  price: 15500, cssClass: 'p-ban-hyper' },
     { id: 'pban_cash',     name: 'MONEY MAKER',  price: 30000, cssClass: 'p-ban-cash' }
 ];
+
 const PROFILE_INTROS_DB = [
     { 
         id: 'intro_fato', 
         name: 'Haide fato știu că vrei', 
         price: 5000, 
         audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Video%20Project.m4a?alt=media&token=7e4eb9d9-4b30-4b3a-8e47-a7ae7d0b9dd6' 
+    },
+    { 
+        id: 'intro_bug_mafia', 
+        name: 'B.U.G. Mafia - Cine E Cu Noi', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FB.U.G.%20Mafia%20-%20Cine%20E%20Cu%20Noi%20(feat.%20Nico)%20(Prod.%20Tata%20Vlad)%20(Videoclip).mp3?alt=media&token=fc20492a-1a3c-446d-9fd5-3e1913778614' 
+    },
+    { 
+        id: 'intro_aur_vass', 
+        name: 'Copilul de Aur & Laura Vass - Buzele tale', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FCopilul%20de%20Aur%20%20Laura%20Vass%20%20Buzele%20tale%2C%20doua%20petale%20%20%23PovesteDeCartier%20%20Special%20Guest%20M.Merisan.mp3?alt=media&token=02f5dbcf-ae26-4545-8c36-f1069f0b35a0' 
+    },
+    { 
+        id: 'intro_crazy_frog', 
+        name: 'Crazy Frog - Axel F', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FCrazy%20Frog%20-%20Axel%20F%20turned%2020%20years%20old%20%20%23fyp%20%23music%20%23musica%20%23edm%20%23dancemusic%20%23crazyfrog%20%23memories.mp3?alt=media&token=70124cc9-c453-48af-a041-52e54aeab46b' 
+    },
+    { 
+        id: 'intro_made_in_ro', 
+        name: 'Ionut Cercel - Made in Romania', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FIonut%20Cercel%20-%20Made%20in%20Romania.mp3?alt=media&token=66a09af4-e300-4f78-9220-de05325c0eae' 
+    },
+    { 
+        id: 'intro_narcisa', 
+        name: 'Narcisa - Dai din buci ca la turci', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNARCISA%20-%20DAI%20DIN%20BUCI%20CA%20LA%20TURCI%20-%20DANS%20CRISTINA%20PUCEAN.mp3?alt=media&token=86223ee7-2bdc-477b-a7c3-116965051881' 
+    },
+    { 
+        id: 'intro_nek', 
+        name: 'Nek - Cate una, cate doua', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNEK%20-%20Cate%20una%2C%20cate%20doua%20-OFFICIAL%20VIDEO.mp3?alt=media&token=97853258-96e0-4eac-bad7-238b4fe4774f' 
+    },
+    { 
+        id: 'intro_guta_gigolo', 
+        name: 'Nicolae Guta - Gigolo', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNicolae%20Guta%20-%20GIGOLO.mp3?alt=media&token=f1effc9b-d02c-45a9-ac33-2ce1bd7868b9' 
+    },
+    { 
+        id: 'intro_guta_pahare', 
+        name: 'Nicolae Guta - Noi bem spargem pahare', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNicolae%20Guta%20-%20Noi%20bem%20spargem%20pahare.mp3?alt=media&token=a87afc4d-8590-476c-895b-203a172b4f77' 
+    },
+    { 
+        id: 'intro_guta_mafia', 
+        name: 'Nicolae Guta - Vine Mafia', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNicolae%20Guta%20-%20Vine%20mafia.mp3?alt=media&token=e3ab3fbb-bb5b-47fb-b0eb-cec5152c9ded' 
+    },
+    { 
+        id: 'intro_guta_aj', 
+        name: 'Nicolae Guta & Play AJ - Tu esti fata de oras', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNicolae%20Guta%20si%20Play%20Aj%20-%20Tu%20esti%20fata%20de%20oras.mp3?alt=media&token=0ee882d8-fd7d-4e3a-91c5-254457502f31' 
+    },
+    { 
+        id: 'intro_puya_fresh', 
+        name: 'Puya - Fresh', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FPuya%20-%20Fresh.mp3?alt=media&token=1124ff3a-9307-4e29-8dba-7fdfb3cb6a2d' 
+    },
+    { 
+        id: 'intro_puya_om', 
+        name: 'Puya - Om bogat, om sarac', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FPuya-Om%20bogat%2Com%20sarac.mp3?alt=media&token=649d3f0a-60af-43d4-b0c8-b4e3861c8756' 
+    },
+    { 
+        id: 'intro_susanu', 
+        name: 'Susanu - La lautari', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FSusanu%20-%20La%20lautari.mp3?alt=media&token=a6c9bb80-8b9c-4508-b4fb-3747369ad4c4' 
+    },
+    { 
+        id: 'intro_theo_rose', 
+        name: 'Theo Rose - A venit politia', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FTheo%20Rose%20-%20A%20venit%20poli%C8%9Bia%20%20From%20Candidatul%20perfect%20The%20Movie.mp3?alt=media&token=2fd9e5d3-9d27-48e0-9b37-2fab5972d954' 
+    },
+    { 
+        id: 'intro_vocea_bagabontilor', 
+        name: 'Vocea Bagabontilor - Latraii', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FVOCEA%20BAGABONTILOR%20%EF%BE%92%20L%C4%82TR%C4%82II%20%20OFICIAL%20VIDEO.mp3?alt=media&token=77c4801b-4b9b-4809-b0e3-bf8a9c8f3724' 
+    },
+    { 
+        id: 'intro_vijelie', 
+        name: 'Vali Vijelie - Sa iubesti doua femei', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FVali%20Vijelie%20-%20Sa%20iubesti%20doua%20femei.mp3?alt=media&token=28ae2f76-0734-4e4c-9119-f945b7d6483b' 
+    },
+    { 
+        id: 'intro_zamfir', 
+        name: 'Zamfir de la Baia Mare - Mamaliga cu carnat', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FZamfir%20de%20la%20Baia%20Mare%20-%20Mamaliga%20cu%20carnat%20%5Bvideoclip%20oficial%5D.mp3?alt=media&token=a7314651-f676-4c8d-9ade-bde7f53b5fef' 
+    },
+    { 
+        id: 'intro_un_leu', 
+        name: 'Imi dai si mie un leu?', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2F%C3%8Emi%20dai%20%C8%99i%20mie%20un%20leu_.mp3?alt=media&token=96072279-0567-496d-b8d1-8798c6e5f5436' 
     }
 ];
+
+
 function getCosmeticBadge(equippedBadge) {
     if (!equippedBadge) return "";
     const bData = BADGES_DB.find(b => b.id === equippedBadge.id);
