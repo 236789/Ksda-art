@@ -5781,24 +5781,139 @@ body {
 .banner-purp-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3Ym9sNDJjdmZtOGJtN3I4eGRlM3l5ZjM3NWxzNmJxYzI0cjU2cXdyMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Acs8DGposhkwulcZVo/giphy.gif') !important; background-size: cover; border: 1px solid #7000ff !important; color: #fff; }
 .banner-scan-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ2t6MjJwNnd6NDhpajFnbGdkdXBjbGE5Y3pyeHI4OW15dHg0eHQxeSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3oz8xxYsI0FyH7EmfS/giphy.gif') !important; background-size: cover; border: 1px solid #00ff88 !important; color: #00ff88; }
 
+/* =========================================
+   ULTIMATE PROFILE BANNERS (WALL EDITION)
+   ========================================= */
 
-/* --- DYNAMIC PROFILE BANNER STYLES --- */
-/* Base class applied to the modal card */
+/* --- 1. SHOP PREVIEW CARDS (The Animated Buttons) --- */
+.p-ban-preview {
+    width: 100%;
+    height: 80px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+    background: #000;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+    z-index: 1;
+}
+.p-ban-preview:hover { transform: scale(1.05); z-index: 10; }
+
+/* Universal Scanline Overlay */
+.p-ban-preview::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+    background-size: 100% 2px;
+    pointer-events: none; z-index: 5;
+}
+
+/* --- ANIMATED PREVIEW STYLES --- */
+
+/* CYBER */
+.p-ban-cyber { background: #02080a; border-color: #00ff88; box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
+.p-ban-cyber::before {
+    content: ''; position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
+    background-image: linear-gradient(rgba(0, 255, 136, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 136, 0.3) 1px, transparent 1px);
+    background-size: 40px 40px; transform: perspective(300px) rotateX(60deg);
+    animation: cyberGridMove 5s linear infinite;
+}
+
+/* MAGMA */
+.p-ban-magma { background: #1a0500; border-color: #ff4500; }
+.p-ban-magma::before {
+    content: ''; position: absolute; inset: -50%;
+    background: radial-gradient(circle, #ff0000, #ff8c00, #330000);
+    filter: blur(20px); animation: magmaFlow 6s ease infinite alternate;
+}
+
+/* VOID */
+.p-ban-void { background: #000; border-color: #7000ff; }
+.p-ban-void::before {
+    content: ''; position: absolute; top: 50%; left: 50%; width: 200%; height: 200%;
+    transform: translate(-50%, -50%);
+    background: conic-gradient(from 0deg, #000, #4b0082, #9400d3, #000);
+    animation: voidSpin 4s linear infinite; opacity: 0.7;
+}
+
+/* GOLD */
+.p-ban-gold { background: #1a1a00; border-color: #ffd700; }
+.p-ban-gold::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(120deg, #b8860b, #ffd700, #fff, #ffd700, #b8860b);
+    background-size: 200% 200%; animation: goldShimmer 3s linear infinite;
+}
+
+/* MATRIX */
+.p-ban-matrix { background: #000; border-color: #00ff00; font-family: monospace; color: #00ff00; }
+.p-ban-matrix::before {
+    content: "10 01 11 00 10 10 01 11"; position: absolute; top: -100%; left: 0; width: 100%;
+    animation: matrixRain 3s linear infinite; opacity: 0.7; font-size: 14px;
+}
+
+/* NEON */
+.p-ban-neon { background: linear-gradient(180deg, #2b002b 0%, #000044 100%); border-color: #00ffff; }
+.p-ban-neon::before {
+    content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 30px;
+    background-image: linear-gradient(0deg, transparent 24%, rgba(0, 255, 255, .5) 25%, transparent 26%);
+    background-size: 40px 10px; transform: perspective(100px) rotateX(60deg);
+    animation: vaporGrid 1s linear infinite;
+}
+
+/* --- NEW: ANIME FANBOY --- */
+.p-ban-anime {
+    background: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/anime-mix.gif?alt=media&token=eed3db7d-e99f-4a5c-b7ee-15b6b51f20e8') center/cover no-repeat;
+    border: 1px solid #ff00ff;
+    box-shadow: inset 0 0 30px #000, 0 0 15px #ff00ff;
+}
+.p-ban-anime::before {
+    content: ''; position: absolute; inset: -50%;
+    background: conic-gradient(from 0deg, transparent, #ff00ff, #00ffff, transparent 30%);
+    animation: rotateAura 2.5s linear infinite;
+    z-index: 0; opacity: 0.5;
+}
+
+/* --- NEW: THUNDER GOD --- */
+.p-ban-thunder {
+    background: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') center/cover no-repeat;
+    border: 1px solid #00e5ff;
+    box-shadow: inset 0 0 30px #000, 0 0 15px #00e5ff;
+}
+.p-ban-thunder::before {
+    content: ''; position: absolute; inset: -50%;
+    background: conic-gradient(from 0deg, transparent, #fff, #00e5ff, transparent 40%);
+    animation: rotateAura 1.5s linear infinite;
+    z-index: 0; opacity: 0.6;
+}
+
+/* Animations */
+@keyframes cyberGridMove { from { background-position: 0 0; } to { background-position: 0 40px; } }
+@keyframes magmaFlow { 0% { transform: translate(-10%, -10%); } 100% { transform: translate(10%, 10%); } }
+@keyframes voidSpin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes goldShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+@keyframes matrixRain { from { top: -100%; } to { top: 100%; } }
+@keyframes vaporGrid { from { background-position: 0 0; } to { background-position: 0 20px; } }
+@keyframes rotateAura { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+
+/* --- 2. ACTIVE PROFILE MODAL STYLES (Backgrounds) --- */
+/* This applies the style to the Account Card/View Profile Modal when equipped */
+
 .account-card.profile-banner-active {
     background-size: cover !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
     border: 1px solid rgba(255,255,255,0.2) !important;
-    box-shadow: inset 0 0 50px #000 !important;
+    box-shadow: inset 0 0 80px #000 !important; /* Heavy inner shadow for text readability */
 }
 
-/* Specific Banner Styles (Matching Shop DB) */
+/* STATIC / CSS GENERATED BACKGROUNDS */
 .account-card.pban_cyber {
     background-color: #000 !important;
-    background-image: 
-        linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px) !important;
+    background-image: linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px) !important;
     background-size: 30px 30px !important;
+    border-color: #00ff88 !important;
 }
 .account-card.pban_magma {
     background: linear-gradient(135deg, #400000, #200000) !important;
@@ -5815,11 +5930,20 @@ body {
 .account-card.pban_matrix {
     background-color: #000 !important;
     border-color: #00ff41 !important;
-    /* Optional: You can add a subtle matrix GIF background here if you want */
 }
 .account-card.pban_neon {
     background: linear-gradient(180deg, #050b14 0%, #1a001a 100%) !important;
     border-color: #00ffff !important;
+}
+
+/* GIF BACKGROUNDS */
+.account-card.pban_anime {
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/anime-mix.gif?alt=media&token=eed3db7d-e99f-4a5c-b7ee-15b6b51f20e8') !important;
+    border-color: #ff00ff !important;
+}
+.account-card.pban_thunder {
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') !important;
+    border-color: #00e5ff !important;
 }
 
 /* --- BADGE DISPLAY IN PROFILE --- */
@@ -5828,6 +5952,8 @@ body {
     margin-bottom: 10px;
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px;
 }
   </style>
 
@@ -7583,6 +7709,33 @@ const TEXTS_DB = [
     { id: 't_tiger', name: 'TIGRU', cssClass: 't-fire', price: 1200 },
     { id: 't_army', name: 'MILITAR', cssClass: 'bubble-military', price: 1300 },
     { id: 't_lava', name: 'LAVĂ', cssClass: 'bubble-fire', price: 1400 }
+];
+
+
+// --- PASTE THIS AFTER 'const TEXTS_DB = [ ... ];' ---
+
+const PROFILE_BANNERS_DB = [
+    { id: 'pban_cyber', name: 'CYBER GRID', price: 5000, cssClass: 'p-ban-cyber' },
+    { id: 'pban_magma', name: 'MAGMA FLOW', price: 7500, cssClass: 'p-ban-magma' },
+    { id: 'pban_void',  name: 'DEEP VOID',  price: 10000, cssClass: 'p-ban-void' },
+    { id: 'pban_gold',  name: 'GOLD RUSH',  price: 15000, cssClass: 'p-ban-gold' },
+    { id: 'pban_matrix',name: 'MATRIX CODE',price: 12000, cssClass: 'p-ban-matrix' },
+    { id: 'pban_neon',  name: 'NEON CITY',  price: 3000,  cssClass: 'p-ban-neon' },
+    
+    // --- NEW GIF BANNERS ---
+    { id: 'pban_anime',   name: 'ANIME FANBOY', price: 8000, cssClass: 'p-ban-anime' },
+    { id: 'pban_thunder', name: 'THUNDER GOD',  price: 9000, cssClass: 'p-ban-thunder' },
+    { id: 'pban_phantom', name: 'PHANTOM',      price: 8500, cssClass: 'p-ban-phantom' }
+];
+
+
+const PROFILE_INTROS_DB = [
+    { 
+        id: 'intro_fato', 
+        name: 'Haide fato știu că vrei', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Video%20Project.m4a?alt=media&token=7e4eb9d9-4b30-4b3a-8e47-a7ae7d0b9dd6' 
+    }
 ];
 function getCosmeticBadge(equippedBadge) {
     if (!equippedBadge) return "";
