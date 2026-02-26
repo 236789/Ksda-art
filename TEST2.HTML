@@ -7365,6 +7365,400 @@ body {
     color: #ff0000 !important; 
     filter: drop-shadow(0 0 8px #ff0000);
 }
+
+
+/* --- ZONE: THE ATELIER (SYNTHWAVE THEME) --- */
+#zone-atelier {
+    background: #090014; /* Deep Violet/Black Void */
+    position: relative;
+    overflow: hidden;
+    padding: 80px 20px;
+    border-bottom: 1px solid rgba(214, 51, 132, 0.2);
+    /* Remove the old background-image GIF here */
+}
+
+/* 1. WRAPPER */
+.atelier-bg-wrapper {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* 2. 3D MOVING GRID (The "Workshop" Floor) */
+.atelier-grid {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background-image: 
+        linear-gradient(rgba(214, 51, 132, 0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(214, 51, 132, 0.15) 1px, transparent 1px);
+    background-size: 60px 60px;
+    transform: perspective(500px) rotateX(60deg); /* 3D Tilt */
+    animation: atelierGridMove 10s linear infinite;
+    mask-image: radial-gradient(circle, black 30%, transparent 80%);
+}
+
+@keyframes atelierGridMove {
+    from { background-position: 0 0; }
+    to { background-position: 0 60px; } /* Moves "forward" */
+}
+
+/* 3. AMBIENT GLOW (Pink & Cyan Nebulas) */
+.atelier-glow {
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(circle at 20% 40%, rgba(191, 85, 236, 0.1) 0%, transparent 60%), /* Purple */
+        radial-gradient(circle at 80% 60%, rgba(0, 229, 255, 0.08) 0%, transparent 60%); /* Cyan */
+    filter: blur(50px);
+    animation: glowPulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes glowPulse {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+/* 4. FLOATING PARTICLES (Digital Dust) */
+.atelier-floaters {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, #fff 1px, transparent 1px);
+    background-size: 80px 80px;
+    opacity: 0.2;
+    animation: floatParticles 20s linear infinite;
+}
+
+@keyframes floatParticles {
+    from { background-position: 0 0; }
+    to { background-position: 0 -200px; }
+}
+
+/* Ensure Text & Buttons stay ABOVE the background */
+#zone-atelier .metallic-title,
+#zone-atelier .shop-desc,
+#zone-atelier .btn-hologram,
+#zone-atelier .shop-grid-v6 {
+    position: relative;
+    z-index: 2;
+}
+
+
+
+/* =========================================
+   TITLE OUTLINES (VIP STYLE ENGINE)
+   ========================================= */
+
+/* Base Style Upgrade for all Titles */
+.metallic-title, 
+.bm-glitch-text, 
+.toxic-title {
+    /* Ensures the outline is sharp */
+    font-weight: 900 !important;
+    letter-spacing: 1px !important;
+    /* This creates the "Hard Outline" effect like the VIP card */
+    filter: drop-shadow(2px 2px 0px var(--outline-color)); 
+}
+
+/* 1. THE VAULT (Gold Outline) */
+#zone-vault .metallic-title {
+    --outline-color: #ffffff;
+}
+
+/* 2. THE ATELIER (Pink/Magenta Outline) */
+#zone-atelier .metallic-title {
+    --outline-color: #ffffff;
+}
+
+/* 3. MYSTERY ZONE (Orange Outline) */
+#zone-mystery .metallic-title {
+    --outline-color: #ffffff;
+}
+
+/* 4. ELITE BOUTIQUE (Red Outline - Reinforcement) */
+#zone-elite .metallic-title {
+    --outline-color: #ffffff;
+}
+
+/* 5. FLASH DEALS (Cyan/Mint Outline) */
+#zone-deals .metallic-title {
+    --outline-color: #ffffff;
+}
+
+/* 6. BLACK MARKET (Toxic Green Outline) */
+#zone-terminal .bm-glitch-text,
+#zone-terminal .toxic-title {
+    --outline-color: #ffffff;
+    /* Optional: Black Market gets a slight glow on top of the outline */
+    filter: drop-shadow(2px 2px 0px #00ff88) drop-shadow(0 0 5px rgba(0, 255, 136, 0.5));
+}
+
+/* 7. COUPON CENTER (Inside Deals) */
+.coupon-terminal-v4 .metallic-title {
+    --outline-color: #ffffff; /* Mint */
+}
+
+
+/* --- UNIVERSAL SICK NAV BUTTON EFFECTS --- */
+
+/* 1. VAULT (Blue/Cyan) */
+.btn-nav-vault { 
+    background: rgba(41, 243, 255, 0.05); 
+    border: 1px solid #29f3ff; 
+    color: #29f3ff; 
+    font-family:'Orbitron'; font-weight:900; text-transform:uppercase; 
+    position:relative; overflow:hidden; display:flex; align-items:center; gap:10px; 
+    transition:0.3s; padding: 10px 12px; font-size: 9px; letter-spacing: 1px; border-radius: 4px; 
+}
+.btn-nav-vault:hover { 
+    transform: translateX(8px); 
+    background: #29f3ff; 
+    color: #000; 
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.6);
+    border-color: #fff;
+}
+
+/* 2. ATELIER (Pink) */
+.btn-nav-atelier { 
+    background: rgba(214, 51, 132, 0.05); 
+    border: 1px solid #d63384; 
+    color: #d63384; 
+    font-family:'Orbitron'; font-weight:900; text-transform:uppercase; 
+    position:relative; overflow:hidden; display:flex; align-items:center; gap:10px; 
+    transition:0.3s; padding: 10px 12px; font-size: 9px; letter-spacing: 1px; border-radius: 4px; 
+}
+.btn-nav-atelier:hover { 
+    transform: translateX(8px); 
+    background: #d63384; 
+    color: #fff; 
+    box-shadow: 0 0 20px rgba(214, 51, 132, 0.6);
+    border-color: #fff;
+}
+
+/* 3. MYSTERY (Orange) */
+.btn-nav-mystery { 
+    background: rgba(255, 106, 0, 0.05); 
+    border: 1px solid #ff6a00; 
+    color: #ff6a00; 
+    font-family:'Orbitron'; font-weight:900; text-transform:uppercase; 
+    position:relative; overflow:hidden; display:flex; align-items:center; gap:10px; 
+    transition:0.3s; padding: 10px 12px; font-size: 9px; letter-spacing: 1px; border-radius: 4px; 
+}
+.btn-nav-mystery:hover { 
+    transform: translateX(8px); 
+    background: #ff6a00; 
+    color: #fff; 
+    box-shadow: 0 0 20px rgba(255, 106, 0, 0.6);
+    border-color: #fff;
+}
+
+/* 4. FLASH DEALS (Mint) */
+.btn-nav-deals { 
+    background: rgba(0, 255, 204, 0.05); 
+    border: 1px solid #00ffcc; 
+    color: #00ffcc; 
+    font-family:'Orbitron'; font-weight:900; text-transform:uppercase; 
+    position:relative; overflow:hidden; display:flex; align-items:center; gap:10px; 
+    transition:0.3s; padding: 10px 12px; font-size: 9px; letter-spacing: 1px; border-radius: 4px; 
+}
+.btn-nav-deals:hover { 
+    transform: translateX(8px); 
+    background: #00ffcc; 
+    color: #000; 
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
+    border-color: #fff;
+}
+
+/* 5. BLACK MARKET (Toxic Green) */
+.btn-nav-toxic { 
+    background: rgba(0, 20, 10, 0.8); 
+    border: 1px solid #00ff88; 
+    color: #00ff88; 
+    font-family:'Orbitron'; font-weight:900; text-transform:uppercase; 
+    position:relative; overflow:hidden; display:flex; align-items:center; gap:10px; 
+    transition:0.3s; padding: 10px 12px; font-size: 9px; letter-spacing: 1px; border-radius: 4px; 
+}
+.btn-nav-toxic:hover { 
+    transform: translateX(8px); 
+    background: #00ff88; 
+    color: #02080a; 
+    box-shadow: 0 0 25px rgba(0, 255, 136, 0.8);
+    border-color: #fff;
+}
+
+/* 6. WHITE LASER SCAN (The "Sick" Streak) */
+.btn-nav-vault::before, 
+.btn-nav-atelier::before, 
+.btn-nav-mystery::before, 
+.btn-nav-elite::before, 
+.btn-nav-deals::before, 
+.btn-nav-toxic::before {
+    content: ''; 
+    position: absolute; 
+    top: 0; 
+    left: -150%; 
+    width: 80%; 
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    animation: btnScan 4s infinite linear;
+    z-index: 1;
+}
+
+/* Faster Laser on Hover */
+.nav-hud-window button:hover::before {
+    animation-duration: 1.5s;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+}
+
+
+/* ============================================================
+   GOD-MODE THEME ENGINE - FULL VERSION (NO CUTS)
+   ============================================================ */
+
+:root {
+    --theme-color: #29f3ff; /* Default Hero Cyan */
+    --theme-glow: rgba(41, 243, 255, 0.3);
+}
+
+/* --- DYNAMIC SCROLLBAR ENGINE (FIXED) --- */
+html::-webkit-scrollbar {
+    width: 10px;
+}
+html::-webkit-scrollbar-track {
+    background: #02050a;
+}
+
+html::-webkit-scrollbar-thumb {
+    background: var(--theme-color) !important;
+    border-radius: 10px !important;
+    border: 2px solid #02050a !important;
+    box-shadow: 0 0 15px var(--theme-color) !important;
+    background-clip: padding-box !important;
+}
+
+header {
+    border: 1px solid var(--theme-color) !important;
+    box-shadow: 0 0 25px var(--theme-glow), inset 0 0 10px var(--theme-glow) !important;
+    transition: border 0.5s ease, box-shadow 0.5s ease !important;
+}
+
+/* The Navigation Links in Header */
+nav a {
+    transition: all 0.4s ease !important;
+}
+nav a:hover, nav a.active {
+    color: var(--theme-color) !important;
+    text-shadow: 0 0 15px var(--theme-color) !important;
+}
+
+/* Specific fix for the 'SHOP' text in header */
+nav a[href="shop.html"] {
+    color: var(--theme-color) !important;
+    font-weight: 900 !important;
+}
+
+/* Header Login Button Glow */
+.login-btn-header {
+    border: 1.5px solid var(--theme-color) !important;
+    color: var(--theme-color) !important;
+    transition: 0.5s !important;
+}
+
+/* --- 3. DYNAMIC SIDE MENU (SOLID & REACTIVE) --- */
+#sideMenu {
+    /* FIX: Solid background so it's not transparent */
+    background: #050b14 !important; 
+    border-left: 4px solid var(--theme-color) !important;
+    box-shadow: -15px 0 50px rgba(0, 0, 0, 0.9) !important;
+    transition: border-color 0.5s ease !important;
+    opacity: 1 !important;
+}
+
+/* Side Menu Links */
+.menu-links a {
+    color: #ffffff !important;
+    transition: all 0.3s ease !important;
+}
+.menu-links a:hover {
+    color: var(--theme-color) !important;
+    text-shadow: 0 0 20px var(--theme-color) !important;
+    padding-left: 15px !important; /* The sick slide effect */
+}
+
+/* Specific fix for 'SHOP' text in Side Menu */
+.menu-links a[href="shop.html"] {
+    color: var(--theme-color) !important;
+}
+
+/* Side Menu Button */
+.side-menu-login-btn {
+    border: 2px solid var(--theme-color) !important;
+    color: var(--theme-color) !important;
+    background: rgba(255, 255, 255, 0.02) !important;
+    transition: 0.4s !important;
+}
+.side-menu-login-btn:hover {
+    background: var(--theme-color) !important;
+    color: #000000 !important;
+    box-shadow: 0 0 30px var(--theme-color) !important;
+}
+
+/* Side Menu Close Button */
+#sideMenu .closeBtn {
+    color: var(--theme-color) !important;
+}
+
+/* Mobile Hamburger Icon */
+.hamburger {
+    color: var(--theme-color) !important;
+    transition: 0.5s !important;
+}
+
+/* --- 4. QUICK NAV HUD (SICK EFFECTS FOR ALL) --- */
+.nav-hud-window button {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+/* Universal Hover Animation (Slide + Color Flip) */
+.nav-hud-window button:hover {
+    transform: translateX(10px) scale(1.02) !important;
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+}
+
+/* Individual HUD Button Theme Inversions */
+.btn-nav-vault:hover   { background: #ffd700 !important; color: #000 !important; box-shadow: 0 0 20px #ffd700; }
+.btn-nav-atelier:hover { background: #d63384 !important; color: #fff !important; box-shadow: 0 0 20px #d63384; }
+.btn-nav-mystery:hover { background: #ff6a00 !important; color: #fff !important; box-shadow: 0 0 20px #ff6a00; }
+.btn-nav-elite:hover   { background: #ff0000 !important; color: #fff !important; box-shadow: 0 0 20px #ff0000; }
+.btn-nav-deals:hover   { background: #00ffcc !important; color: #000 !important; box-shadow: 0 0 20px #00ffcc; }
+.btn-nav-toxic:hover   { background: #00ff88 !important; color: #000 !important; box-shadow: 0 0 20px #00ff88; }
+
+/* The White Laser streak for all HUD buttons */
+.btn-nav-vault::before, .btn-nav-atelier::before, .btn-nav-mystery::before, 
+.btn-nav-elite::before, .btn-nav-deals::before, .btn-nav-toxic::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -150%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    animation: btnScan 4s infinite linear;
+    z-index: 1;
+}
+
+/* Fast Laser on hover */
+.nav-hud-window button:hover::before {
+    animation-duration: 1.2s;
+}
+
+
+
+
   </style>
 </head>
 <body>
@@ -7377,9 +7771,12 @@ body {
 
         <!-- Header -->
         <div style="background: rgba(255, 0, 0, 0.1); padding: 25px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
-            <div>
-                <div style="font-family:'Montserrat'; font-size: 22px; font-weight: 900; color: #ff0000; text-shadow: 2px 2px 0px #fff;">ELITE BOUTIQUE</div>
-                <div style="font-family:monospace; font-size: 10px; color:#fff;">ACCESS: GRANTED | PROTOCOL: ZERO</div>
+<div>
+    <div style="font-family:'Montserrat'; font-size: 22px; font-weight: 900; color: #ff0000; text-shadow: 2px 2px 0px #fff;">
+        <i class="fas fa-crown" style="margin-right: 10px;"></i> ELITE BOUTIQUE
+    </div>
+    <div style="font-family:monospace; font-size: 10px; color:#fff;">ACCESS: GRANTED | PROTOCOL: ZERO</div>
+</div>
             </div>
             <button class="close-pop" onclick="closeModal('eliteShopModal')" style="border-radius:0; border:1px solid #fff; color: #fff; background:transparent; position:static !important; width:40px; height:40px; cursor:pointer;">✕</button>
         </div>
@@ -7971,7 +8368,7 @@ body {
                 <a href="index.html#services">Servicii</a>
                 <a href="despre_noi.html">Despre Noi</a>
                 <a href="help.html">Susține-ne</a>
-                <a href="shop.html" style="color: var(--primary);">Shop</a>
+<a href="shop.html" style="color: var(--theme-color) !important;">Shop</a>
                 <button id="headerLoginBtn" class="login-btn-header">
                     <img id="headerUserImg" src="" class="user-avatar-small" style="display:none;">
                     <span id="headerLoginText">LOGIN</span>
@@ -8095,7 +8492,12 @@ body {
 <!-- SECTION 3: THE ATELIER -->
 <section id="zone-atelier" class="shop-zone">
 
-
+<!-- ATELIER ANIMATED BACKGROUND -->
+<div class="atelier-bg-wrapper">
+    <div class="atelier-grid"></div> <!-- Moving 3D Floor -->
+    <div class="atelier-glow"></div> <!-- Ambient Neon Fog -->
+    <div class="atelier-floaters"></div> <!-- Floating Particles -->
+</div>
 
 
 <!-- Separator: Vault -> Atelier (Gold la Pink) -->
@@ -8182,6 +8584,9 @@ body {
 <!-- =========================================
      ZONE: ELITE BOUTIQUE (RED & WHITE SUPREME)
      ========================================= -->
+<!-- =========================================
+     ZONE: ELITE BOUTIQUE (RED & WHITE SUPREME)
+     ========================================= -->
 <section id="zone-elite" class="shop-zone">
 
     <!-- 1. SEPARATOR (Mystery Orange -> Neon Red) -->
@@ -8203,8 +8608,8 @@ body {
     <h1 class="metallic-title" style="background: linear-gradient(180deg, #ffffff 20%, #ff0000 100%); -webkit-background-clip: text; position: relative; z-index: 2; text-shadow: 0 0 20px rgba(255, 0, 0, 0.6);">
         ELITE BOUTIQUE
     </h1>
-    <p class="shop-desc" style="position: relative; z-index: 2; color: #ffcccc;">
-        Accesorii interzise. Exclusivitate totală.
+    <p class="shop-desc" style="position: relative; z-index: 2; color: #ffcccc; letter-spacing: 2px;">
+        DESIGN DE ÎNALTĂ CLASĂ • EXCLUSIVITATE TOTALĂ
     </p>
 
     <!-- 4. THE RED & WHITE ULTRA CARD -->
@@ -8225,15 +8630,14 @@ body {
             </div>
 
             <h2 class="ultra-title">VIP <span style="color:#ff0000;">ONLY</span></h2>
-            <div class="ultra-status">
-                <span class="blink-white"></span> SECURITY LEVEL: MAX
-            </div>
-            
-<!--             <p class="ultra-desc"> -->
-                Obiecte <span style="color:#ff0000; font-weight:900;">MYTHIC</span> disponibile acum.
+
+            <!-- LUXURY TEXT BLOCK -->
+            <p class="luxury-text">
+                Colecția <span>PREMIUM</span><br>
+                <small style="font-size: 10px; opacity: 0.7; font-weight: 400; letter-spacing: 2px;">Obiecte de lux în ediție exclusivă</small>
             </p>
 
-            <button class="btn-ultra-red-white" onclick="openEliteShop()">
+            <button class="btn-ultra-red-white" onclick="openEliteShop()" style="margin-top: 20px;">
                 ACCESEAZĂ BOUTIQUE
             </button>
         </div>
@@ -12212,42 +12616,59 @@ document.addEventListener('mousedown', (e) => {
 
 function initAdaptiveNav() {
     const trigger = document.querySelector('.nav-trigger-reactor');
-    if (!trigger) return; 
+    if (!trigger) return;
+
+    const root = document.documentElement;
 
     const sections = {
-        'zone-hero': 'state-hero',
-        'zone-vault': 'state-vault',
-        'zone-atelier': 'state-atelier',
-        'zone-mystery': 'state-mystery',
-// Add to your initAdaptiveNav() list:
-'zone-elite': 'state-elite', // Use Vault state (Gold) for now, or create a new 'state-gold' if you want specific icon behavio
-        'zone-deals': 'state-deals',      // Minty Green
-        'zone-terminal': 'state-terminal' // Toxic Green
+        'zone-hero':     { class: 'state-hero',     color: '#29f3ff' },
+        'zone-vault':    { class: 'state-vault',    color: '#ffd700' },
+        'zone-atelier':  { class: 'state-atelier',  color: '#d63384' },
+        'zone-mystery':  { class: 'state-mystery',  color: '#ff6a00' },
+        'zone-elite':    { class: 'state-elite',    color: '#ff0000' },
+        'zone-deals':    { class: 'state-deals',    color: '#00ffcc' },
+        'zone-terminal': { class: 'state-terminal', color: '#00ff88' }
     };
+
+    let currentState = null;
 
     const observerOptions = {
         root: null,
-        threshold: 0.3, // Lowered slightly to trigger faster
-        rootMargin: "-10% 0px -10% 0px" // Focuses the "sensor" on the middle of the screen
+        threshold: 0.15,
+        rootMargin: "-10% 0px -40% 0px"
     };
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                // FORCE REMOVE all known state classes
-                Object.values(sections).forEach(cls => {
-                    trigger.classList.remove(cls);
-                });
-                
-                // Add the new one
-                const newClass = sections[entry.target.id];
-                if (newClass) {
-                    trigger.classList.add(newClass);
-                    console.log("Nav Protocol Switched to:", newClass); // Debug check
-                }
-            }
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+
+        const config = sections[entry.target.id];
+        if (!config || currentState === config.class) return;
+
+        currentState = config.class;
+
+        // 1. Update reactor UI & html classes
+        Object.values(sections).forEach(s => {
+            trigger.classList.remove(s.class);
+            root.classList.remove(s.class);
         });
-    }, observerOptions);
+
+        trigger.classList.add(config.class);
+        root.classList.add(config.class);
+
+        // 2. UPDATE VARIABLE - Asta e partea importantă!
+        root.style.setProperty('--theme-color', config.color);
+        root.style.setProperty('--theme-glow', config.color + "44");
+
+        // 3. FORCE REPAINT HACK - Asta repară bug-ul de hover
+        // Schimbăm o valoare invizibilă a scrollbar-ului pentru o fracțiune de secundă
+        root.style.overflow = 'hidden';
+        root.offsetHeight; // Trigger reflow
+        root.style.overflow = 'auto';
+
+        console.log(`SYSTEM SYNC: ${entry.target.id} | COLOR: ${config.color}`);
+    });
+}, observerOptions);
 
     Object.keys(sections).forEach(id => {
         const el = document.getElementById(id);
