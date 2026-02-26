@@ -5617,6 +5617,54 @@ body {
 
 /* Force GIF visibility in inventory (Kills white boxes) */
 #inventoryList .elite-gif-badge { background-color: transparent !important; background-clip: border-box !important; -webkit-background-clip: border-box !important; }
+
+
+
+
+/* --- ELITE GIF ENGINE --- */
+.elite-gif-badge {
+    padding: 4px 10px !important;
+    border-radius: 4px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    background-size: cover !important;
+    background-position: center !important;
+    color: #fff !important;
+    text-shadow: 1px 1px 3px #000, 0 0 10px #000;
+    border: 1px solid rgba(255,255,255,0.4) !important;
+    font-size: 9px !important;
+}
+
+/* Specific Badge GIFs */
+.badge-god-thunder { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media') !important; }
+.badge-cyberpunk { background-image: url('https://media.giphy.com/media/26FPKhUtNG3TW74f6/giphy.gif') !important; color: #00ffff !important; border-color: #ff00ff !important; }
+.badge-hacker-elite { background-image: url('https://media.giphy.com/media/26FPKhUtNG3TW74f6/giphy.gif') !important; color: #00ff41 !important; border-color: #00ff41 !important; }
+.badge-abyss-elite { background-image: url('https://media.giphy.com/media/YqhIK6Gbor6CLeloBq/giphy.gif') !important; border-color: #7000ff !important; }
+.badge-godlike-elite { background-image: url('https://media.giphy.com/media/9JxkPTP3alOykb8PmQ/giphy.gif') !important; border-color: #ffd700 !important; }
+.badge-warning-elite { background-image: url('https://media.giphy.com/media/9JxkPTP3alOykb8PmQ/giphy.gif') !important; border-color: #ff0000 !important; }
+.badge-lightning-elite { background-image: url('https://media0.giphy.com/media/Ta1MVGKCG2GFq/giphy.gif') !important; }
+
+/* Banners (Missing Classes) */
+.bubble-elite-hacker2 { background: url('https://media.giphy.com/media/hun4DFmfnDId3lid5b/giphy.gif') center !important; background-size: cover !important; color: #00ff41 !important; border: 1px solid #00ff41 !important; }
+.bubble-elite-nebula2 { background: url('https://media.giphy.com/media/eJmUEoeU1K4d4IUbpS/giphy.gif') center !important; background-size: cover !important; border: 1px solid #7000ff !important; }
+.bubble-elite-bluefire { background: url('https://media.giphy.com/media/3bc8pP1rVdfgN1uoMV/giphy.gif') center !important; background-size: cover !important; border: 1px solid #00ffff !important; }
+.bubble-elite-destruction { background: url('https://media.giphy.com/media/nKDErGClW3lsRiZ3p9/giphy.gif') center !important; background-size: cover !important; border: 1px solid #ff4500 !important; }
+
+/* --- INVENTORY MODAL SCALING --- */
+#inventoryList .item-card-v6 { min-height: 120px !important; padding: 10px !important; }
+#inventoryList .item-preview-box { min-height: 55px !important; display: flex; align-items: center; justify-content: center; overflow: visible; }
+#inventoryList .elite-gif-badge, 
+#inventoryList .shop-badge-preview,
+#inventoryList .badge-singularity { 
+    transform: scale(0.8) !important; /* Forces badges to be small in inventory */
+    white-space: nowrap; 
+}
+/* Force GIF through white boxes in inventory */
+#inventoryList .elite-gif-badge { background-color: transparent !important; background-clip: border-box !important; -webkit-background-clip: border-box !important; }
   </style>
 
 </head>
@@ -7100,16 +7148,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-// Add these to BADGES_DB
-{ id: 'eb_hub', text: 'TheHub', price: 75, isElite: true, animClass: 'badge-the-hub', isHub: true },
-{ id: 'eb_thunder', text: 'GOD OF THUNDER', price: 70, isElite: true, animClass: 'badge-god-thunder', icon: 'fa-bolt' },
-{ id: 'eb_cyberpunk', text: 'CYBERPUNK', price: 65, isElite: true, animClass: 'badge-cyberpunk', icon: 'fa-microchip' },
-{ id: 'eb_hacker_new', text: 'HACKER', price: 60, isElite: true, animClass: 'badge-hacker-elite', icon: 'fa-terminal' },
-{ id: 'eb_abyss_new', text: 'ABYSS', price: 75, isElite: true, animClass: 'badge-abyss-elite', icon: 'fa-eye' },
-{ id: 'eb_godlike', text: 'GODLIKE', price: 75, isElite: true, animClass: 'badge-godlike-elite', icon: 'fa-bolt' },
-{ id: 'eb_warning', text: '', price: 50, isElite: true, animClass: 'badge-warning-elite', isNoText: true },
-{ id: 'eb_lightning_new', text: 'LIGHTNING', price: 65, isElite: true, animClass: 'badge-lightning-elite', icon: 'fa-bolt' },
+    // --- RESTORED ELITE ANIMATED BADGES ---
+    { id: 'eb_hub', text: 'TheHub', price: 150, isElite: true, animClass: 'badge-the-hub', isHub: true },
+    { id: 'eb_thunder', text: 'GOD OF THUNDER', price: 120, isElite: true, animClass: 'badge-god-thunder', icon: 'fa-bolt' },
+    { id: 'eb_money', text: 'MONEY KING', price: 100, isElite: true, animClass: 'badge-money-rain', icon: 'fa-dollar-sign' },
+    { id: 'eb_galaxy_v1', text: 'GALAXY ELITE', price: 180, isElite: true, animClass: 'badge-galaxy-1', icon: 'fa-star' },
+    { id: 'eb_nebula', text: 'NEBULA GOD', price: 200, isElite: true, animClass: 'badge-nebula', icon: 'fa-atom' },
+    { id: 'eb_deep', text: 'ABYSSAL', price: 130, isElite: true, animClass: 'badge-deep-sea', icon: 'fa-water' },
+    { id: 'eb_cyberpunk', text: 'CYBERPUNK', price: 45, isElite: true, animClass: 'badge-cyberpunk', icon: 'fa-microchip' },
+    { id: 'eb_hacker_new', text: 'HACKER', price: 35, isElite: true, animClass: 'badge-hacker-elite', icon: 'fa-terminal' },
+    { id: 'eb_abyss_new', text: 'ABYSS', price: 55, isElite: true, animClass: 'badge-abyss-elite', icon: 'fa-eye' },
+    { id: 'eb_godlike', text: 'GODLIKE', price: 75, isElite: true, animClass: 'badge-godlike-elite', icon: 'fa-bolt' },
+    { id: 'eb_warning', text: 'HAZARD', price: 50, isElite: true, animClass: 'badge-warning-elite', icon: 'fa-exclamation-triangle', isNoText: true },
+    { id: 'eb_lightning_new', text: 'LIGHTNING', price: 40, isElite: true, animClass: 'badge-lightning-elite', icon: 'fa-bolt' }
 ];
+
 
 
 
@@ -7198,14 +7251,16 @@ const BANNERS_DB = [
     { id: 'anim_aurora', name: 'AURORA BOREALIS', cssClass: 'bubble-anim-aurora', price: 99999 },
 
 
-// Add these to BANNERS_DB
-{ id: 'eb_ban_hacker2', name: 'HACKER V2', price: 75, isElite: true, cssClass: 'bubble-elite-hacker2' },
-{ id: 'eb_ban_nebula2', name: 'NEBULA SHIFT', price: 70, isElite: true, cssClass: 'bubble-elite-nebula2' },
-{ id: 'eb_ban_bluefire', name: 'BLUE INFERNO', price: 75, isElite: true, cssClass: 'bubble-elite-bluefire' },
-{ id: 'eb_ban_destruct', name: 'DESTRUCTION', price: 75, isElite: true, cssClass: 'bubble-elite-destruction' },
+    // --- RESTORED ELITE ANIMATED BANNERS ---
+    { id: 'eb_ban_money', name: 'CASH FLOW', price: 250, isElite: true, cssClass: 'badge-money-rain' },
+    { id: 'eb_ban_galaxy', name: 'VOID SPACE', price: 300, isElite: true, cssClass: 'badge-galaxy-2' },
+    { id: 'eb_ban_storm', name: 'STORM CELL', price: 280, isElite: true, cssClass: 'badge-god-thunder' },
+    { id: 'eb_ban_nebula', name: 'ORION CLOUD', price: 350, isElite: true, cssClass: 'badge-nebula' },
+    { id: 'eb_ban_hacker2', name: 'TERMINAL V2', price: 40, isElite: true, cssClass: 'bubble-elite-hacker2' },
+    { id: 'eb_ban_nebula2', name: 'NEBULA SHIFT', price: 50, isElite: true, cssClass: 'bubble-elite-nebula2' },
+    { id: 'eb_ban_bluefire', name: 'BLUE INFERNO', price: 65, isElite: true, cssClass: 'bubble-elite-bluefire' },
+    { id: 'eb_ban_destruct', name: 'DESTRUCTION', price: 70, isElite: true, cssClass: 'bubble-elite-destruction' }
 ];
-
-
 
 
 const TEXTS_DB = [
@@ -7314,18 +7369,19 @@ function getCosmeticBadge(equippedBadge) {
     if (bData.isHub) {
         return ` <span class="${bData.animClass} cosmetic-badge"><span class="hub-text-white">The</span><span class="hub-text-orange">Hub</span></span>`;
     }
-    // 2. Elite GIFs
+    // 2. Elite Animated GIF Badges
     if (bData.isElite) {
-        const content = bData.isNoText ? '' : `<i class="fas ${bData.icon}"></i> ${bData.text}`;
+        // Handle Hazard (No Text) vs others
+        const content = bData.isNoText ? `<i class="fas ${bData.icon}"></i>` : `<i class="fas ${bData.icon}"></i> ${bData.text}`;
         return ` <span class="${bData.animClass} elite-gif-badge">${content}</span>`;
     }
-    // 3. Special Static
-    const specials = ['b_wheel_god','b_immortal','b_celestial','b_cyber_ghost','b_demon_slayer','b_void_master','b_singularity'];
-    if (specials.includes(bData.id) || bData.animClass) {
+    // 3. Specials (Singularity, etc.)
+    const godTierBadges = ['b_wheel_god', 'b_immortal', 'b_celestial', 'b_cyber_ghost', 'b_demon_slayer', 'b_void_master', 'b_singularity'];
+    if (godTierBadges.includes(bData.id) || bData.animClass) {
         return ` <span class="${bData.animClass || 'badge-singularity'}"><i class="fas ${bData.icon}"></i> ${bData.text}</span>`;
     }
-    // 4. Normal
-    return ` <span class="cosmetic-badge" style="background:${bData.color} !important; color:#000 !important; box-shadow:0 0 5px ${bData.color}; font-weight:900;"><i class="fas ${bData.icon}"></i> ${bData.text}</span>`;
+    // 4. Standard Solid Color Badges
+    return ` <span class="cosmetic-badge" style="background:${bData.color} !important; color:#000 !important; border:none; box-shadow:0 0 5px ${bData.color}; font-weight:900;"><i class="fas ${bData.icon}"></i> ${bData.text}</span>`;
 }
     // DOM ELEMENTS
     const lockedView = document.getElementById('lockedView');
