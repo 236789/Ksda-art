@@ -8959,6 +8959,44 @@ nav a[href="shop.html"] {
     text-shadow: 0 0 10px #ffd700;
 }
 
+
+/* 1. Cardul Celestial pe tot ecranul pe PC */
+@media (min-width: 1024px) {
+    .tier-celestial {
+        grid-column: 1 / -1 !important; /* Ocupă toate coloanele de pe rând */
+        height: auto !important;
+        min-height: 250px !important;
+    }
+    .tier-celestial .aaa-card-img {
+        height: 100px !important; /* Facem imaginea mai vizibilă */
+    }
+}
+
+/* 2. REPARAȚIE MOBIL: Probabilty Log Modal */
+.prize-view-container {
+    max-height: 90vh !important; /* Limităm înălțimea la 90% din ecran */
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important; /* Containerul mamă nu are scroll */
+}
+
+/* Forțăm lista de premii să aibă scroll interior pe mobil */
+.aaa-loot-grid {
+    flex: 1 !important;
+    overflow-y: auto !important; /* Activa scroll-ul doar aici */
+    padding-bottom: 20px !important;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch; /* Scroll fluid pe iPhone */
+}
+
+/* Ajustare carduri pe mobil să nu fie prea înalte */
+@media (max-width: 768px) {
+    .aaa-card {
+        min-height: 150px !important; 
+        height: auto !important;
+    }
+}
+
   </style>
 </head>
 <body>
@@ -14452,10 +14490,11 @@ rewards: [
         { tier: 'LEGENDARY', label: '20,000 COINS', icon: 'https://iili.io/fhc1SKQ.png', chance: 70, style: 'tier-legendary' },
         { tier: 'MYTHIC', label: 'RANDOM ELITE BADGE', icon: '', chance: 15, style: 'tier-mythic' },
         { tier: 'EXOTIC', label: 'DIAMOND VOUCHER', icon: '', chance: 8, style: 'tier-exotic' },
-        { tier: 'OMEGA', label: 'RANDOM PROFILE INTRO', icon: '', chance: 5, style: 'tier-omega' },
+        { tier: 'OMEGA', label: 'RANDOM PROFILE INTRO', icon: '', chance: 6.7, style: 'tier-omega' }, // Am ajustat restul să dea 100%
         { tier: 'ABYSSAL', label: '500 DIAMONDS', icon: 'https://iili.io/fv5bmtj.png', chance: 0.2, style: 'tier-abyssal' },
-        { tier: 'CELESTIAL', label: 'FULL CELESTIAL SET', icon: '', chance: 0.5, style: 'tier-celestial' }
+        { tier: 'CELESTIAL', label: '500,000 COINS', icon: 'https://iili.io/fhc1SKQ.png', chance: 0.1, style: 'tier-celestial' }
     ]
+
 }
 ];
 
@@ -14891,11 +14930,9 @@ window.revealReward = async () => {
 
 // --- CELESTIAL BOX LOGIC ---
 else if (lockedBox.id === 'box_celestial') {
-    if (roll <= 0.5) { // Celestial (0.5%)
-        results.wonBadges.push({ id: 'eb_celestial_god', text: 'CELESTIAL GOD', isElite: true, animClass: 'badge-celestial-god', icon: 'fa-sun' });
-        results.wonTickets.push({ category: 'banners', label: 'CELESTIAL BANNER' }); // We'll handle this as an unlock
-        results.winCelestialSet = true; // Special flag
-    } else if (roll <= 2.0) { // Abyssal (1.5%)
+    if (roll <= 0.1) { // Șansa de 0.1% pentru 500k
+        results.winCoins += 500000;
+    } else if (roll <= 0.2) { // Abyssal (1.5%)
         results.winDiamonds += 500;
     } else if (roll <= 7.0) { // Omega (5%)
         const intro = PROFILE_INTROS_DB[Math.floor(Math.random() * PROFILE_INTROS_DB.length)];
