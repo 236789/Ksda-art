@@ -8252,84 +8252,263 @@ nav a[href="shop.html"] {
     box-shadow: 0 0 25px rgba(255, 0, 0, 0.5); 
 }
 
-/* --- SICK CSS PROFILE BANNERS (PREVIEWS) --- */
+/* =========================================
+   ULTIMATE PROFILE BANNERS (GOD MODE)
+   ========================================= */
+
+/* BASE CONTAINER - THE SCI-FI WINDOW */
 .p-ban-preview {
     width: 100%;
     height: 80px;
-    border-radius: 8px;
-    margin-bottom: 10px;
+    border-radius: 12px;
+    margin-bottom: 15px;
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.2);
-}
-
-/* 1. Cyber Grid (Green/Black) */
-.p-ban-cyber {
-    background-color: #000;
-    background-image: 
-        linear-gradient(rgba(0, 255, 136, 0.2) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 136, 0.2) 1px, transparent 1px);
-    background-size: 20px 20px;
-    animation: panGrid 10s linear infinite;
-}
-@keyframes panGrid { 0% { background-position: 0 0; } 100% { background-position: 20px 20px; } }
-
-/* 2. Magma (Red/Orange) */
-.p-ban-magma {
-    background: linear-gradient(45deg, #ff0000, #ff4500, #800000);
-    background-size: 200% 200%;
-    animation: gradientMove 3s ease infinite;
-}
-
-/* 3. Deep Void (Purple/Black) */
-.p-ban-void {
-    background: radial-gradient(circle at center, #4b0082 0%, #000 100%);
-    box-shadow: inset 0 0 20px #000;
-}
-.p-ban-void::after {
-    content: ''; position: absolute; inset:0; 
-    background-image: radial-gradient(white 1px, transparent 1px);
-    background-size: 15px 15px; opacity: 0.3;
-    animation: starsMove 20s linear infinite;
-}
-@keyframes starsMove { from { transform: scale(1); } to { transform: scale(1.5); opacity: 0; } }
-
-/* 4. Gold Rush (Luxury) */
-.p-ban-gold {
-    background: repeating-linear-gradient(
-        45deg,
-        #ffd700,
-        #ffd700 10px,
-        #b8860b 10px,
-        #b8860b 20px
-    );
-    animation: shineGold 20s linear infinite;
-}
-@keyframes shineGold { from { background-position: 0 0; } to { background-position: 100% 0; } }
-
-/* 5. Matrix (Code) */
-.p-ban-matrix {
     background: #000;
-    color: #0f0;
-    font-family: monospace;
+    /* High-tech glass border */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    z-index: 1;
+}
+
+/* HOVER EFFECT: Lift & Intensify */
+.p-ban-preview:hover {
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,1);
+    z-index: 10;
+}
+
+/* UNIVERSAL SCANLINE (TV EFFECT) */
+.p-ban-preview::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* ==========================
+   1. CYBER GRID (Tactical Green)
+   ========================== */
+.p-ban-cyber {
+    background: #02080a;
+    border: 1px solid #00ff88;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+}
+
+/* The Moving 3D Grid */
+.p-ban-cyber::before {
+    content: '';
+    position: absolute;
+    width: 200%; height: 200%;
+    top: -50%; left: -50%;
+    background-image: 
+        linear-gradient(rgba(0, 255, 136, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.3) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: perspective(300px) rotateX(60deg);
+    animation: cyberGridMove 5s linear infinite;
+}
+
+/* The Radar Sweep */
+.p-ban-cyber .overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 40%, rgba(0, 255, 136, 0.5) 50%, transparent 60%);
+    animation: radarSweep 3s infinite linear;
+}
+
+@keyframes cyberGridMove { from { background-position: 0 0; } to { background-position: 0 40px; } }
+@keyframes radarSweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+
+/* ==========================
+   2. MAGMA FLOW (Volcanic)
+   ========================== */
+.p-ban-magma {
+    background: #1a0500;
+    border: 1px solid #ff4500;
+    box-shadow: 0 0 15px rgba(255, 69, 0, 0.3);
+}
+
+/* Moving Lava Layers */
+.p-ban-magma::before {
+    content: '';
+    position: absolute; inset: -50%;
+    background: radial-gradient(circle, #ff0000, #ff8c00, #330000);
+    background-size: 200% 200%;
+    filter: blur(20px);
+    animation: magmaFlow 6s ease infinite alternate;
+}
+
+/* Floating Embers */
+.p-ban-magma::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(#fff 1px, transparent 1px);
+    background-size: 30px 30px;
+    animation: embersRise 4s linear infinite;
+    opacity: 0.6;
+}
+
+@keyframes magmaFlow { 0% { transform: translate(-10%, -10%); } 100% { transform: translate(10%, 10%); } }
+@keyframes embersRise { from { background-position: 0 0; } to { background-position: 0 -60px; } }
+
+
+/* ==========================
+   3. DEEP VOID (Singularity)
+   ========================== */
+.p-ban-void {
+    background: #000;
+    border: 1px solid #7000ff;
+    box-shadow: 0 0 20px rgba(112, 0, 255, 0.4);
+}
+
+/* Rotating Black Hole Accretion Disk */
+.p-ban-void::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 200%; height: 200%;
+    transform: translate(-50%, -50%);
+    background: conic-gradient(from 0deg, #000, #4b0082, #9400d3, #000);
+    animation: voidSpin 4s linear infinite;
+    border-radius: 50%;
+    opacity: 0.7;
+}
+
+/* Central Event Horizon */
+.p-ban-void .overlay {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px; height: 40px;
+    background: #000;
+    border-radius: 50%;
+    box-shadow: 0 0 15px #7000ff, 0 0 30px #fff;
+    z-index: 2;
+}
+
+@keyframes voidSpin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+
+/* ==========================
+   4. GOLD RUSH (Luxury)
+   ========================== */
+.p-ban-gold {
+    background: #1a1a00;
+    border: 1px solid #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
     overflow: hidden;
 }
-.p-ban-matrix::before {
-    content: "10101010101010101010";
-    position: absolute; top: 0; left: 0;
-    word-break: break-all; opacity: 0.3;
-    font-size: 10px; line-height: 10px;
+
+/* Liquid Gold Wave */
+.p-ban-gold::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(120deg, #b8860b, #ffd700, #fff, #ffd700, #b8860b);
+    background-size: 200% 200%;
+    animation: goldShimmer 3s linear infinite;
 }
 
-/* 6. Neon City (Cyan/Pink) */
+/* Sparkles */
+.p-ban-gold::after {
+    content: '✦';
+    position: absolute;
+    color: #fff;
+    font-size: 20px;
+    animation: sparkleMove 2s infinite;
+    text-shadow: 0 0 5px #fff;
+}
+
+@keyframes goldShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+@keyframes sparkleMove { 
+    0% { top: 10%; left: 10%; opacity: 0; transform: scale(0); } 
+    50% { opacity: 1; transform: scale(1); } 
+    100% { top: 80%; left: 80%; opacity: 0; transform: scale(0); } 
+}
+
+
+/* ==========================
+   5. MATRIX CODE (Hacker)
+   ========================== */
+.p-ban-matrix {
+    background: #000;
+    border: 1px solid #00ff00;
+    font-family: 'Courier New', monospace;
+    color: #00ff00;
+    overflow: hidden;
+}
+
+/* Code Rain Effect */
+.p-ban-matrix::before {
+    content: "10 01 11 00 10 10 01 11 00 10 10 01 11 00 10 10 01 11 00 10";
+    position: absolute; top: -100%; left: 0;
+    width: 100%;
+    font-size: 14px;
+    line-height: 14px;
+    word-break: break-all;
+    text-shadow: 0 0 5px #00ff00;
+    animation: matrixRain 3s linear infinite;
+    opacity: 0.7;
+}
+
+/* Second Layer for Depth */
+.p-ban-matrix::after {
+    content: "01 10 00 11 01 01 10 00 11 01 01 10 00 11 01 01 10 00 11 01";
+    position: absolute; top: -100%; left: 5px;
+    width: 100%;
+    font-size: 10px;
+    color: #003300;
+    animation: matrixRain 5s linear infinite reverse;
+    z-index: 0;
+}
+
+@keyframes matrixRain { from { top: -100%; } to { top: 100%; } }
+
+
+/* ==========================
+   6. NEON CITY (Vaporwave)
+   ========================== */
 .p-ban-neon {
-    background: linear-gradient(180deg, #050b14 50%, #2b002b 100%);
-    border-bottom: 2px solid #00ffff;
+    background: linear-gradient(180deg, #2b002b 0%, #000044 100%);
+    border: 1px solid #ff00ff;
+    border-bottom: 3px solid #00ffff;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
 }
+
+/* Retro Sun */
 .p-ban-neon::before {
-    content: ''; position: absolute; bottom: 0; width: 100%; height: 2px;
-    background: #ff00ff; box-shadow: 0 0 10px #ff00ff;
+    content: '';
+    position: absolute;
+    bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    width: 60px; height: 60px;
+    background: linear-gradient(to top, #ff00ff, #ffcc00);
+    border-radius: 50%;
+    box-shadow: 0 0 20px #ff00ff;
+    /* Create lines in sun */
+    mask-image: linear-gradient(to bottom, black 50%, transparent 50%, black 55%, transparent 55%, black 60%, transparent 60%);
 }
+
+/* Moving Grid Floor */
+.p-ban-neon::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 30px;
+    background-image: 
+        linear-gradient(0deg, transparent 24%, rgba(0, 255, 255, .5) 25%, rgba(0, 255, 255, .5) 26%, transparent 27%, transparent),
+        linear-gradient(90deg, transparent 24%, rgba(0, 255, 255, .5) 25%, rgba(0, 255, 255, .5) 26%, transparent 27%, transparent);
+    background-size: 40px 10px;
+    transform: perspective(100px) rotateX(60deg);
+    animation: vaporGrid 1s linear infinite;
+}
+
+@keyframes vaporGrid { from { background-position: 0 0; } to { background-position: 0 20px; } }
 
 /* --- AUDIO PLAYER BUTTON --- */
 .audio-play-btn {
@@ -8346,105 +8525,95 @@ nav a[href="shop.html"] {
 .audio-play-btn.playing { background: #fff; color: #ff0000; border-color: #fff; animation: pulse 1s infinite; }
 
 
-
-/* =========================================
-   🔥 SICK ANIMATED BANNERS ENGINE 🔥
-   ========================================= */
-
-/* BASE STYLE FOR ALL GIF BANNERS */
-[class*="banner-gif-"] {
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    color: #fff !important;
-    font-weight: 900 !important;
-    text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 0 0 5px rgba(0,0,0,0.8) !important;
-    border-width: 2px !important;
-    border-style: solid !important;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.8) !important;
-    transition: 0.3s !important;
+/* ==========================
+   7. ANIME FANBOY (Pink/Cyan Energy)
+   ========================== */
+.p-ban-anime {
+    /* The Background GIF */
+    background: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/anime-mix.gif?alt=media&token=eed3db7d-e99f-4a5c-b7ee-15b6b51f20e8') center/cover no-repeat;
+    /* Inner shadow to make text readable */
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.7), 0 0 20px rgba(255, 0, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
 }
 
-/* 1. MATRIX (Green Code Rain) */
-.banner-gif-matrix {
-    background-image: url('https://media.giphy.com/media/hun4DFmfnDId3lid5b/giphy.gif') !important;
-    border-color: #00ff41 !important;
-    color: #00ff41 !important;
-    font-family: 'Courier New', monospace !important;
-    box-shadow: 0 0 15px #00ff41 !important;
+/* Rotating Neon Border */
+.p-ban-anime::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(
+        from 0deg, 
+        transparent, 
+        #ff00ff, /* Pink */
+        #00ffff, /* Cyan */
+        transparent 30%
+    );
+    animation: rotateAura 2.5s linear infinite; /* Fast rotation */
+    z-index: 0;
 }
 
-/* 2. HELLFIRE (Realistic Fire) */
-.banner-gif-fire {
-    background-image: url('https://i.makeagif.com/media/3-03-2021/otrneG.gif') !important; /* Your hero bg */
-    border-color: #ff4500 !important;
-    color: #ffd700 !important;
-    box-shadow: 0 0 15px #ff4500 !important;
+/* Inner Mask to show only the border */
+.p-ban-anime::after {
+    content: '';
+    position: absolute;
+    inset: 3px; /* Border Thickness */
+    background: inherit; /* Keeps the GIF visible inside */
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    z-index: 1;
 }
 
-/* 3. NEON CITY (Synthwave/Retro) */
-.banner-gif-city {
-    background-image: url('https://media.giphy.com/media/7T1h3Uq3yP4g9a6QfI/giphy.gif') !important;
-    border-color: #ff00ff !important;
-    color: #00ffff !important;
-    box-shadow: 0 0 15px #ff00ff !important;
+/* ==========================
+   8. THUNDER GOD (Electric Blue)
+   ========================== */
+.p-ban-thunder {
+    /* The Background GIF (Lightning) */
+    background: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') center/cover no-repeat;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.6), 0 0 25px rgba(0, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
 }
 
-/* 4. LIGHTNING STORM (Thunder) */
-.banner-gif-storm {
-    background-image: url('https://media.giphy.com/media/o5aJqTnvQ3oM8/giphy.gif') !important;
-    border-color: #00e5ff !important;
-    color: #fff !important;
-    box-shadow: 0 0 15px #00e5ff !important;
+/* Rotating Electric Border */
+.p-ban-thunder::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(
+        from 0deg, 
+        transparent, 
+        #ffffff, /* White Spark */
+        #00e5ff, /* Electric Blue */
+        transparent 40%
+    );
+    animation: rotateAura 1.5s linear infinite; /* Super fast spin */
+    z-index: 0;
 }
 
-/* 5. GLITCH (Distortion) */
-.banner-gif-glitch {
-    background-image: url('https://media.giphy.com/media/3o7qE1YN7aQfIqi1n2/giphy.gif') !important;
-    border-color: #fff !important;
-    color: #fff !important;
-    font-family: monospace !important;
-    animation: glitchBorder 0.2s infinite !important;
-}
-@keyframes glitchBorder { 0% { border-color: #f0f; } 50% { border-color: #0ff; } 100% { border-color: #fff; } }
-
-/* 6. DEEP SPACE (Galaxy/Purple) */
-.banner-gif-space {
-    background-image: url('https://media.giphy.com/media/U3qYN8S0j3bpK/giphy.webp') !important;
-    border-color: #7000ff !important;
-    color: #e0b0ff !important;
-    box-shadow: 0 0 15px #7000ff !important;
+/* Inner Mask */
+.p-ban-thunder::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: inherit;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    z-index: 1;
 }
 
-/* 7. TOXIC WASTE (Radioactive Green) */
-.banner-gif-toxic {
-    background-image: url('https://media.giphy.com/media/3o7TKs69J0y0hU7vC8/giphy.gif') !important;
-    border-color: #39ff14 !important;
-    color: #39ff14 !important;
-    box-shadow: 0 0 15px #39ff14 !important;
+/* Ensure the animation keyframe exists */
+@keyframes rotateAura { 
+    from { transform: rotate(0deg); } 
+    to { transform: rotate(360deg); } 
 }
 
-/* 8. MONEY RAIN (Gold/Rich) */
-.banner-gif-money {
-    background-image: url('https://media.giphy.com/media/l0Ex6kAKAoFRsFh6M/giphy.gif') !important;
-    border-color: #ffd700 !important;
-    color: #ffd700 !important;
-    box-shadow: 0 0 15px #ffd700 !important;
-}
-
-/* 9. OCEAN DEPTHS (Blue Water) */
-.banner-gif-ocean {
-    background-image: url('https://media.giphy.com/media/3o6vXNLzXdW4sbxghy/giphy.gif') !important;
-    border-color: #0077be !important;
-    color: #fff !important;
-}
-
-/* 10. HYPER SPEED (Warp Drive) */
-.banner-gif-speed {
-    background-image: url('https://media.giphy.com/media/13CXg1r9F4P5pS/giphy.gif') !important;
-    border-color: #fff !important;
-    color: #00ffff !important;
-}
   </style>
 </head>
 <body>
@@ -10663,7 +10832,10 @@ const PROFILE_BANNERS_DB = [
     { id: 'pban_void',  name: 'DEEP VOID',  price: 10000, cssClass: 'p-ban-void' },
     { id: 'pban_gold',  name: 'GOLD RUSH',  price: 15000, cssClass: 'p-ban-gold' },
     { id: 'pban_matrix',name: 'MATRIX CODE',price: 12000, cssClass: 'p-ban-matrix' },
-    { id: 'pban_neon',  name: 'NEON CITY',  price: 3000,  cssClass: 'p-ban-neon' }
+    { id: 'pban_neon',  name: 'NEON CITY',  price: 3000,  cssClass: 'p-ban-neon' },
+    // --- NEW ADDITIONS ---
+    { id: 'pban_anime',   name: 'ANIME FANBOY', price: 8000, cssClass: 'p-ban-anime' },
+    { id: 'pban_thunder', name: 'THUNDER GOD',  price: 9000, cssClass: 'p-ban-thunder' }
 ];
 
 const PROFILE_INTROS_DB = [
@@ -10677,24 +10849,80 @@ const PROFILE_INTROS_DB = [
 
 
 const BANNERS_DB = [
-    // --- TIER 1: HIGH QUALITY ANIMATED (2000 - 3500) ---
-    { id: 'ban_fire',      name: 'HELLFIRE',    cssClass: 'banner-gif-fire',    price: 3500, desc: 'Flăcări Realiste' },
-    { id: 'ban_matrix',    name: 'MATRIX',      cssClass: 'banner-gif-matrix',  price: 3000, desc: 'Cod Digital' },
-    { id: 'ban_city',      name: 'NEON CITY',   cssClass: 'banner-gif-city',    price: 3200, desc: 'Synthwave Vibe' },
-    { id: 'ban_storm',     name: 'THUNDER',     cssClass: 'banner-gif-storm',   price: 2800, desc: 'Furtună Electrică' },
-    { id: 'ban_glitch',    name: 'SYS_ERROR',   cssClass: 'banner-gif-glitch',  price: 2500, desc: 'Eroare Sistem' },
-    
-    // --- TIER 2: ATMOSPHERIC (1500 - 2500) ---
-    { id: 'ban_space',     name: 'GALAXY',      cssClass: 'banner-gif-space',   price: 2400, desc: 'Nebuloasă Mov' },
-    { id: 'ban_toxic',     name: 'RADIOACTIVE', cssClass: 'banner-gif-toxic',   price: 2200, desc: 'Deșeuri Toxice' },
-    { id: 'ban_money',     name: 'RICH LIFE',   cssClass: 'banner-gif-money',   price: 4000, desc: 'Ploaie de Bani' },
-    { id: 'ban_ocean',     name: 'DEEP SEA',    cssClass: 'banner-gif-ocean',   price: 1800, desc: 'Ocean Adânc' },
-    { id: 'ban_speed',     name: 'WARP SPEED',  cssClass: 'banner-gif-speed',   price: 2000, desc: 'Viteză Lumină' },
+    // --- BASIC / STATIC (850 – 1500) ---
+    { id: 'bub_galaxy',    name: 'GALAXY',   cssClass: 'bubble-galaxy',    price: 1300, desc: 'Spațial' },
+    { id: 'bub_toxic',     name: 'TOXIC',    cssClass: 'bubble-toxic',     price: 1200, desc: 'Radioactiv' },
+    { id: 'bub_fire',      name: 'INFERNO',  cssClass: 'bubble-fire',      price: 1150, desc: 'Clasici' },
+    { id: 'bub_midas',     name: 'MIDAS',    cssClass: 'bubble-midas',     price: 1500, desc: 'Solid Gold' },
+    { id: 'bub_void',      name: 'VOID',     cssClass: 'bubble-void',      price: 900,  desc: 'Pitch Black' },
+    { id: 'bub_comic',     name: 'CARTOON',  cssClass: 'bubble-comic',     price: 1250, desc: 'Bandă Desenată' },
+    { id: 'bub_hearts',    name: 'LOVE',     cssClass: 'bubble-hearts',    price: 950,  desc: 'Hearts Static' },
+    { id: 'bub_pixel',     name: '8-BIT',    cssClass: 'bubble-pixel',     price: 1400, desc: 'Retro Game' },
+    { id: 'bub_graffiti',  name: 'GRAFFITI', cssClass: 'bubble-graffiti',  price: 1450, desc: 'Street Art' },
+    { id: 'bub_ice',       name: 'FROZEN',   cssClass: 'bubble-ice',       price: 1100, desc: 'Înghețat' },
+    { id: 'bub_ocean',     name: 'OCEAN',    cssClass: 'bubble-ocean',     price: 1200, desc: 'Deep Blue' },
+    { id: 'bub_nature',    name: 'FOREST',   cssClass: 'bubble-nature',    price: 900,  desc: 'Eco Friendly' },
+    { id: 'bub_candy',     name: 'CANDY',    cssClass: 'bubble-candy',     price: 950,  desc: 'Dulce' },
+    { id: 'bub_military',  name: 'ARMY',     cssClass: 'bubble-military',  price: 1250, desc: 'Camo' },
+    { id: 'bub_blueprint', name: 'TECH',     cssClass: 'bubble-blueprint', price: 1350, desc: 'Schită' },
 
-    // --- ELITE VARIANTS (Still kept for legacy support if needed) ---
+    // --- ANIMATED (1500 – 2000) ---
+    { id: 'anim_chroma',   name: 'HYPER RGB',   cssClass: 'bubble-anim-chroma',   price: 2000, desc: 'Moving Rainbow' },
+    { id: 'anim_holo',     name: 'HOLOGRAPHIC', cssClass: 'bubble-anim-holo',     price: 1950, desc: 'Shiny Metal' },
+    { id: 'anim_blood',    name: 'BLOOD PULSE', cssClass: 'bubble-anim-blood',    price: 1850, desc: 'Pulsing Red' },
+    { id: 'anim_glitch',   name: 'SYS_ERROR',   cssClass: 'bubble-anim-glitch',   price: 1900, desc: 'Shaking Text' },
+    { id: 'anim_storm',    name: 'LIGHTNING',   cssClass: 'bubble-anim-storm',    price: 1800, desc: 'Flashing Storm' },
+    { id: 'anim_neon',     name: 'NEON PULSE',  cssClass: 'bubble-anim-neon',     price: 1750, desc: 'Glowing Pink' },
+    { id: 'anim_slime',    name: 'TOXIC DRIP',  cssClass: 'bubble-anim-slime',    price: 1700, desc: 'Moving Slime' },
+    { id: 'anim_disco',    name: 'DISCO',       cssClass: 'bubble-anim-disco',    price: 1900, desc: 'Epilepsy Warning' },
+    { id: 'anim_gold',     name: 'GOLD RUSH',   cssClass: 'bubble-anim-gold',     price: 2000, desc: 'Shimmering Gold' },
+    { id: 'anim_ghost',    name: 'POLTERGEIST', cssClass: 'bubble-anim-ghost',    price: 1600, desc: 'Floating Fade' },
+    { id: 'anim_love',     name: 'HEARTBEAT',   cssClass: 'bubble-anim-love',     price: 1550, desc: 'Pulsing Hearts' },
+    { id: 'anim_sparkle',  name: 'STARDUST',    cssClass: 'bubble-anim-sparkle',  price: 1700, desc: 'Twinkling' },
+    { id: 'bub_void_pulse', name: 'VOID PULSE', cssClass: 'bubble-pulse-void', price: 3500, desc: 'Efect de respirație mov' },
+    { id: 'bub_emerald', name: 'EMERALD SHARD', cssClass: 'bubble-emerald-shard', price: 3000, desc: 'Formă de cristal tăiat' },
+  // -----------------
+    // BASIC BANNERS
+    // -----------------
+    { id: 'bub_galaxy', name: 'GALAXY', cssClass: 'bubble-galaxy', price: 1300, desc: 'Spațial' },
+    { id: 'bub_toxic', name: 'TOXIC', cssClass: 'bubble-toxic', price: 1200, desc: 'Radioactiv' },
+    { id: 'bub_fire', name: 'INFERNO', cssClass: 'bubble-fire', price: 1150, desc: 'Clasici' },
+    { id: 'bub_void', name: 'VOID', cssClass: 'bubble-void', price: 900, desc: 'Pitch Black' },
+    { id: 'bub_comic', name: 'CARTOON', cssClass: 'bubble-comic', price: 1250, desc: 'Bandă Desenată' },
+
+    // -----------------
+    // ANIMATED ELITE (GIF SERIES)
+    // -----------------
     { id: 'eb_ban_neon', name: 'NEON WAVE', price: 60, isElite: true, cssClass: 'banner-neonwave-gif' },
     { id: 'eb_ban_ocean', name: 'OCEAN DEEP', price: 55, isElite: true, cssClass: 'banner-ocean-gif' },
-    { id: 'eb_ban_matrix', name: 'MATRIX DIGIT', price: 65, isElite: true, cssClass: 'banner-matrix-gif' }
+    { id: 'eb_ban_matrix', name: 'MATRIX DIGIT', price: 65, isElite: true, cssClass: 'banner-matrix-gif' },
+    { id: 'eb_ban_grid', name: 'CYBER GRID', price: 50, isElite: true, cssClass: 'banner-grid-gif' },
+    { id: 'eb_ban_retro', name: 'RETRO FUTURE', price: 70, isElite: true, cssClass: 'banner-retro-gif' },
+    { id: 'eb_ban_glitch', name: 'GLITCH CORE', price: 75, isElite: true, cssClass: 'banner-glitch-gif' },
+    { id: 'eb_ban_star', name: 'STAR STREAM', price: 80, isElite: true, cssClass: 'banner-star-gif' },
+    { id: 'eb_ban_flow', name: 'ABSTRACT FLOW', price: 55, isElite: true, cssClass: 'banner-flow-gif' },
+    { id: 'eb_ban_nebula_p', name: 'PURPLE NEBULA', price: 90, isElite: true, cssClass: 'banner-purp-gif' },
+    { id: 'eb_ban_scan', name: 'TECH SCAN', price: 45, isElite: true, cssClass: 'banner-scan-gif' },
+
+    // -----------------
+    // ELITE RESTORATION SERIES
+    // -----------------
+    { id: 'eb_ban_money', name: 'CASH FLOW', price: 250, isElite: true, cssClass: 'badge-money-rain' },
+    { id: 'eb_ban_galaxy', name: 'VOID SPACE', price: 300, isElite: true, cssClass: 'badge-galaxy-2' },
+    { id: 'eb_ban_storm', name: 'STORM CELL', price: 280, isElite: true, cssClass: 'badge-god-thunder' },
+    { id: 'eb_ban_nebula', name: 'ORION CLOUD', price: 350, isElite: true, cssClass: 'badge-nebula' },
+
+    // -----------------
+    // ELITE V2 VARIANTS (CLEANED)
+    // -----------------
+    { id: 'eb_ban_hacker2', name: 'TERMINAL V2', price: 40, isElite: true, cssClass: 'bubble-hacker-v2' },
+    { id: 'eb_ban_nebula2', name: 'NEBULA SHIFT', price: 50, isElite: true, cssClass: 'bubble-nebula-v2' },
+    { id: 'eb_ban_bluefire', name: 'BLUE INFERNO', price: 65, isElite: true, cssClass: 'bubble-blue-fire' },
+    { id: 'eb_ban_destruct', name: 'DESTRUCTION', price: 70, isElite: true, cssClass: 'bubble-destruction' },
+    { id: 'eb_ban_supernova', name: 'SUPERNOVA', price: 100, isElite: true, cssClass: 'bubble-anim-supernova' },
+    { id: 'eb_ban_emerald', name: 'EMERALD SHARD', price: 85, isElite: true, cssClass: 'bubble-emerald-shard' },
+    { id: 'eb_ban_plasma', name: 'PLASMA COIL', price: 95, isElite: true, cssClass: 'bubble-anim-storm' }
+
 ];
 
 
@@ -14781,7 +15009,7 @@ window.previewAudio = (url, btn) => {
     }
 };
 
-// --- PROFILE BANNERS SHOP (FIXED) ---
+// --- PROFILE BANNERS SHOP (UPDATED FOR ANIMATIONS) ---
 window.openProfileBannerShop = async () => {
     if(!auth.currentUser) return;
     
@@ -14804,16 +15032,28 @@ window.openProfileBannerShop = async () => {
         card.className = 'bm-offer-card-v4';
         card.style.padding = "15px";
         
-        card.innerHTML = `
-            <div class="p-ban-preview ${item.cssClass}"></div>
-            <div class="bm-title-v4" style="font-size:12px;">${item.name}</div>
-            ${isOwned 
-                ? `<div style="color:#00ff88; font-weight:900; font-size:10px; margin-top:10px;">DEȚINUT</div>` 
-                : `<button class="bm-price-btn-v4" onclick="buyProfileItem('banner', '${item.id}', ${item.price})" style="background:#fff !important; color:#000; width:100%; margin-top:10px;">
-                     ${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" style="width:12px;">
-                   </button>`
-            }
-        `;
+        // --- NEW: Inject extra layer for complex animations (Cyber & Void) ---
+        let innerHtml = '';
+        if (item.id === 'pban_cyber' || item.id === 'pban_void') {
+            innerHtml = '<div class="overlay"></div>';
+        }
+
+card.innerHTML = `
+        <!-- The Preview Box -->
+        <div class="p-ban-preview ${item.cssClass}">
+            ${(item.id === 'pban_cyber' || item.id === 'pban_void') ? '<div class="overlay"></div>' : ''}
+        </div>
+        
+        <!-- Title and Buttons below -->
+        <div class="bm-title-v4" style="font-size:12px;">${item.name}</div>
+        
+        ${isOwned 
+            ? `<div style="color:#00ff88; font-weight:900; font-size:10px; margin-top:10px;">DEȚINUT</div>` 
+            : `<button class="bm-price-btn-v4" onclick="buyProfileItem('banner', '${item.id}', ${item.price})" style="background:#fff !important; color:#000; width:100%; margin-top:10px;">
+                 ${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" style="width:12px;">
+               </button>`
+        }
+    `;
         list.appendChild(card);
     });
 };
