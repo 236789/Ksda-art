@@ -6231,6 +6231,38 @@ body {
     border-color: #b9f2ff !important;
     box-shadow: inset 0 0 120px #000, 0 0 25px #00e5ff !important;
 }
+
+
+
+/* --- RED ELITE SCROLLBAR --- */
+#eliteInventoryModal .bm-content-scroll {
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: #ff0000 #02080a;
+}
+#eliteInventoryModal .bm-content-scroll::-webkit-scrollbar { width: 6px; }
+#eliteInventoryModal .bm-content-scroll::-webkit-scrollbar-thumb {
+    background: #ff0000 !important;
+    box-shadow: 0 0 10px #ff0000;
+    border-radius: 10px;
+}
+
+/* Compact Audio Play Button */
+.audio-play-btn {
+    width: 35px; height: 35px; border-radius: 50%;
+    background: rgba(255, 0, 0, 0.2); border: 1px solid #ff0000;
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: 0.3s;
+}
+.audio-play-btn.playing { background: #fff; color: #ff0000; border-color: #fff; box-shadow: 0 0 15px #fff; }
+
+/* Elite Grid Fix */
+#eliteInventoryList .bm-offer-card-v4 {
+    background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
+    padding: 15px; border-radius: 15px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+}
   </style>
 
 </head>
@@ -6601,36 +6633,50 @@ body {
 <!-- COSMETICS SELECTION HUB v6 -->
 <div id="cosmeticsSelectModal" class="account-modal-overlay">
     <div class="cosmetics-card-v6">
-        <!-- Close Button -->
         <button class="close-pop" onclick="document.getElementById('cosmeticsSelectModal').classList.remove('active'); document.getElementById('accountModal').classList.add('active');">✕</button>
-        
         <div class="cosmo-content-v6">
             <div class="cosmo-header">
                 <div class="cosmo-title">SHOP & STYLE</div>
                 <div style="font-size: 10px; color: #aaa; margin-top: 5px;">Alege categoria de personalizare</div>
             </div>
 
-            <!-- PREVIEW BOX REMOVED AS REQUESTED -->
-
-<!-- CATEGORY GRID -->
-<div class="cosmo-grid-select">
-    <div class="select-btn-v6 c-badge" onclick="openInventory('badges'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-certificate"></i>
-        <span>BADGES</span>
-    </div>
-    <div class="select-btn-v6 c-frame" onclick="openInventory('frames'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-crop-alt"></i>
-        <span>RAME</span>
-    </div>
-    <div class="select-btn-v6 c-banner" onclick="openInventory('banners'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-image"></i>
-        <span>BANNERE</span>
-    </div>
-    <div class="select-btn-v6 c-text" onclick="openInventory('texts'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-font"></i>
-        <span>TEXT</span>
+            <div class="cosmo-grid-select">
+                <div class="select-btn-v6 c-badge" onclick="openInventory('badges'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
+                    <i class="fas fa-certificate"></i><span>BADGES</span>
+                </div>
+                <div class="select-btn-v6 c-frame" onclick="openInventory('frames'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
+                    <i class="fas fa-crop-alt"></i><span>RAME</span>
+                </div>
+                <div class="select-btn-v6 c-banner" onclick="openInventory('banners'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
+                    <i class="fas fa-image"></i><span>BANNERE</span>
+                </div>
+                <div class="select-btn-v6 c-text" onclick="openInventory('texts'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
+                    <i class="fas fa-font"></i><span>TEXT</span>
+                </div>
+                <!-- NEW ELITE BUTTON -->
+                <div class="select-btn-v6 c-elite" onclick="openEliteInventory('banners')" style="grid-column: span 2; border-color: #ff0000; background: rgba(255,0,0,0.05);">
+                    <i class="fas fa-crown" style="color: #ff0000;"></i><span style="color: #ff0000;">ELITE</span>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<!-- ELITE INVENTORY MODAL (TERMINAL STYLE) -->
+<div id="eliteInventoryModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 600px; height: 80vh; border: 1px solid #ff0000;">
+        <div style="background: rgba(255, 0, 0, 0.1); padding: 20px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family:'Orbitron'; font-size: 18px; font-weight: 900; color:#ff0000;">ELITE_ARCHIVE</div>
+            <button class="close-pop" onclick="document.getElementById('eliteInventoryModal').classList.remove('active'); document.getElementById('cosmeticsSelectModal').classList.add('active');" style="position:static !important; border:1px solid #ff0000; background:transparent;">✕</button>
+        </div>
+
+        <div style="display: flex; gap: 10px; padding: 15px; border-bottom: 1px solid rgba(255,0,0,0.2);">
+            <button class="online-filter-btn active" id="invTabBanners" onclick="openEliteInventory('banners')" style="flex:1;">BANNERS</button>
+            <button class="online-filter-btn" id="invTabIntros" onclick="openEliteInventory('intros')" style="flex:1;">INTROS</button>
+        </div>
+
+        <div class="bm-content-scroll" id="eliteInventoryList" style="padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <!-- JS CONTENT -->
         </div>
     </div>
 </div>
@@ -12062,6 +12108,126 @@ window.viewEditHistory = async (msgId) => {
             };
         });
     }
+
+
+// --- ELITE AUDIO ENGINE ---
+let currentEliteAudio = null;
+
+window.previewAudio = (url, btn) => {
+    // Toggle Pause if same audio
+    if (currentEliteAudio && currentEliteAudio.src === url) {
+        if (!currentEliteAudio.paused) {
+            currentEliteAudio.pause();
+            btn.classList.remove('playing');
+            btn.innerHTML = '<i class="fas fa-play"></i>';
+        } else {
+            currentEliteAudio.play();
+            btn.classList.add('playing');
+            btn.innerHTML = '<i class="fas fa-pause"></i>';
+        }
+        return;
+    }
+
+    // Stop previous
+    if (currentEliteAudio) {
+        currentEliteAudio.pause();
+        document.querySelectorAll('.audio-play-btn').forEach(b => {
+            b.classList.remove('playing');
+            b.innerHTML = '<i class="fas fa-play"></i>';
+        });
+    }
+
+    const audio = new Audio(url);
+    audio.play();
+    currentEliteAudio = audio;
+    btn.classList.add('playing');
+    btn.innerHTML = '<i class="fas fa-pause"></i>';
+
+    audio.onended = () => {
+        btn.classList.remove('playing');
+        btn.innerHTML = '<i class="fas fa-play"></i>';
+        currentEliteAudio = null;
+    };
+};
+
+// --- ELITE INVENTORY LOGIC ---
+window.openEliteInventory = async (category = 'banners') => {
+    document.getElementById('cosmeticsSelectModal').classList.remove('active');
+    document.getElementById('eliteInventoryModal').classList.add('active');
+
+    const list = document.getElementById('eliteInventoryList');
+    list.innerHTML = '<div style="color:#ff0000; grid-column:span 2; text-align:center;">DECRYPTING STORAGE...</div>';
+
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const data = userSnap.data();
+    list.innerHTML = '';
+    
+    // Active Tab Style
+    document.getElementById('invTabBanners').className = category === 'banners' ? 'online-filter-btn active' : 'online-filter-btn';
+    document.getElementById('invTabIntros').className = category === 'intros' ? 'online-filter-btn active' : 'online-filter-btn';
+
+    if (category === 'banners') {
+        const owned = data.ownedProfileBanners || [];
+        const equippedId = data.equippedProfileBanner?.id;
+
+        if (owned.length === 0) list.innerHTML = "<div style='color:#555; grid-column:span 2; text-align:center;'>NO BANNERS IN ARCHIVE</div>";
+
+        owned.forEach(id => {
+            const item = PROFILE_BANNERS_DB.find(x => x.id === id);
+            if (!item) return;
+            const isEq = (id === equippedId);
+            list.innerHTML += `
+                <div class="bm-offer-card-v4" style="${isEq ? 'border-color:#00ff88 !important;' : ''}">
+                    <div class="p-ban-preview ${item.cssClass}" style="height:50px; margin-bottom:10px;"></div>
+                    <div style="font-size:10px; color:#fff; margin-bottom:10px; font-family:Orbitron;">${item.name}</div>
+                    ${isEq 
+                        ? `<button class="equip-btn" style="background:#ff4757; color:#fff;" onclick="unequipEliteItem('banner')">UNEQUIP</button>`
+                        : `<button class="equip-btn" onclick="equipEliteItem('banner', '${item.id}', '${item.cssClass}')">EQUIP</button>`
+                    }
+                </div>`;
+        });
+    } else {
+        const owned = data.ownedIntros || [];
+        const equippedId = data.equippedIntro?.id;
+
+        if (owned.length === 0) list.innerHTML = "<div style='color:#555; grid-column:span 2; text-align:center;'>NO INTROS IN ARCHIVE</div>";
+
+        owned.forEach(id => {
+            const item = PROFILE_INTROS_DB.find(x => x.id === id);
+            if (!item) return;
+            const isEq = (id === equippedId);
+            list.innerHTML += `
+                <div class="bm-offer-card-v4" style="${isEq ? 'border-color:#00ff88 !important;' : ''}">
+                    <div class="audio-play-btn" style="margin-bottom:10px;" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
+                    <div style="font-size:10px; color:#fff; margin-bottom:10px; font-family:Orbitron;">${item.name}</div>
+                    ${isEq 
+                        ? `<button class="equip-btn" style="background:#ff4757; color:#fff;" onclick="unequipEliteItem('intro')">UNEQUIP</button>`
+                        : `<button class="equip-btn" onclick="equipEliteItem('intro', '${item.id}', '${item.audio}')">EQUIP</button>`
+                    }
+                </div>`;
+        });
+    }
+};
+
+window.equipEliteItem = async (type, id, value) => {
+    const field = type === 'banner' ? 'equippedProfileBanner' : 'equippedIntro';
+    const obj = type === 'banner' ? { id, cssClass: value } : { id, audio: value };
+    try {
+        await updateDoc(doc(db, "accounts", auth.currentUser.uid), { [field]: obj });
+        showToast("Element Elită Echipat!", "success");
+        openEliteInventory(type === 'banner' ? 'banners' : 'intros');
+    } catch(e) { console.error(e); }
+};
+
+window.unequipEliteItem = async (type) => {
+    const field = type === 'banner' ? 'equippedProfileBanner' : 'equippedIntro';
+    try {
+        await updateDoc(doc(db, "accounts", auth.currentUser.uid), { [field]: null });
+        if(type === 'intro' && currentEliteAudio) { currentEliteAudio.pause(); currentEliteAudio = null; }
+        showToast("Element Elită Dez-echipat!", "success");
+        openEliteInventory(type === 'banner' ? 'banners' : 'intros');
+    } catch(e) { console.error(e); }
+};
 </script>
 </body>
 </html>
