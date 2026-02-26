@@ -8836,6 +8836,41 @@ nav a[href="shop.html"] {
     box-shadow: 0 0 20px #00e5ff;
 }
 
+
+/* FIX: Modal Scrolling & Card Sizing */
+.bm-modal-v4, .shop-modal-v4 {
+    max-height: 85vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.bm-content-scroll {
+    overflow-y: auto !important;
+    flex: 1 !important;
+    padding-bottom: 30px !important;
+    scrollbar-width: thin;
+}
+
+/* Compact Audio Rows */
+#introShopList .bm-offer-card-v4 {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    min-height: auto !important;
+    padding: 12px 20px !important;
+    aspect-ratio: auto !important;
+}
+
+/* Audio Button Animation */
+.audio-play-btn.playing i {
+    animation: pulse 1s infinite;
+    color: #ff0000;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
   </style>
 </head>
 <body>
@@ -12290,69 +12325,76 @@ window.processDonation = async () => {
 window.activeCosmeticTicket = null; // Stores { category: 'badges', id: 'TICK-123' }
 
 window.openEliteInventory = async (category = 'banners') => {
-    // 1. Close Cosmetic Select, Open Elite Inv
-    document.getElementById('cosmeticsSelectModal').classList.remove('active');
-    document.getElementById('eliteInventoryModal').classList.add('active');
-
     const list = document.getElementById('eliteInventoryList');
-    list.innerHTML = 'Loading...';
+    list.innerHTML = '<div style="color:#aaa; text-align:center; grid-column:span 2;">DECRYPTING...</div>';
 
-    // 2. Fetch Data
     const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
     const data = userSnap.data();
-
-    // 3. Render Based on Category
     list.innerHTML = '';
     
-    // UI Tab Active State
-    document.getElementById('invTabBanners').style.background = category === 'banners' ? '#ff0000' : 'transparent';
-    document.getElementById('invTabBanners').style.color = category === 'banners' ? '#fff' : '#ff0000';
-    document.getElementById('invTabIntros').style.background = category === 'intros' ? '#ff0000' : 'transparent';
-    document.getElementById('invTabIntros').style.color = category === 'intros' ? '#fff' : '#ff0000';
+    // UI Tab State
+    document.getElementById('invTabBanners').style.opacity = category === 'banners' ? '1' : '0.5';
+    document.getElementById('invTabIntros').style.opacity = category === 'intros' ? '1' : '0.5';
 
     if (category === 'banners') {
         const owned = data.ownedProfileBanners || [];
-        const equipped = data.equippedProfileBanner?.id;
+        const equippedId = data.equippedProfileBanner?.id;
 
-        if(owned.length === 0) list.innerHTML = "<div style='color:#aaa; grid-column:span 2; text-align:center;'>Nu ai bannere.</div>";
+        if (owned.length === 0) list.innerHTML = "<div class='empty-coupons'>NICIUN ASSET GĂSIT</div>";
 
         owned.forEach(id => {
             const item = PROFILE_BANNERS_DB.find(x => x.id === id);
-            if(item) {
-                const isEq = (id === equipped);
-                list.innerHTML += `
-                    <div class="bm-offer-card-v4" style="padding:10px; ${isEq ? 'border-color:#00ff88 !important;' : ''}">
-                        <div class="p-ban-preview ${item.cssClass}" style="height:60px;"></div>
-                        <div style="font-size:10px; color:#fff; margin-bottom:10px;">${item.name}</div>
-                        ${isEq 
-                            ? `<button class="bm-price-btn-v4" style="background:transparent !important; color:#00ff88; border:1px solid #00ff88;" onclick="unequipProfileItem('banner')">UNEQUIP</button>`
-                            : `<button class="bm-price-btn-v4" onclick="equipProfileItem('banner', '${item.id}', '${item.cssClass}')">EQUIP</button>`
-                        }
-                    </div>`;
-            }
+            if (!item) return;
+            const isEq = (id === equippedId);
+            list.innerHTML += `
+                <div class="bm-offer-card-v4" style="padding:10px; ${isEq ? 'border-color:#00ff88 !important;' : ''}">
+                    <div class="p-ban-preview ${item.cssClass}" style="height:50px; margin-bottom:10px;"></div>
+                    <div style="font-size:10px; color:#fff; margin-bottom:10px;">${item.name}</div>
+                    ${isEq 
+                        ? `<button class="bm-price-btn-v4" style="background:#ff4757 !important; color:#fff;" onclick="unequipProfileItem('banner')">UNEQUIP</button>`
+                        : `<button class="bm-price-btn-v4" onclick="equipProfileItem('banner', '${item.id}', '${item.cssClass}')">EQUIP</button>`
+                    }
+                </div>`;
         });
-    } 
-    else if (category === 'intros') {
+    } else {
         const owned = data.ownedIntros || [];
-        const equipped = data.equippedIntro?.id;
+        const equippedId = data.equippedIntro?.id;
 
-        if(owned.length === 0) list.innerHTML = "<div style='color:#aaa; grid-column:span 2; text-align:center;'>Nu ai intro-uri.</div>";
+        if (owned.length === 0) list.innerHTML = "<div class='empty-coupons'>NICIUN AUDIO GĂSIT</div>";
 
         owned.forEach(id => {
             const item = PROFILE_INTROS_DB.find(x => x.id === id);
-            if(item) {
-                const isEq = (id === equipped);
-                list.innerHTML += `
-                    <div class="bm-offer-card-v4" style="padding:10px; ${isEq ? 'border-color:#00ff88 !important;' : ''}">
-                        <div class="audio-play-btn" style="margin:0 auto 10px;" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
-                        <div style="font-size:10px; color:#fff; margin-bottom:10px;">${item.name}</div>
-                        ${isEq 
-                            ? `<button class="bm-price-btn-v4" style="background:transparent !important; color:#00ff88; border:1px solid #00ff88;" onclick="unequipProfileItem('intro')">UNEQUIP</button>`
-                            : `<button class="bm-price-btn-v4" onclick="equipProfileItem('intro', '${item.id}', '${item.audio}')">EQUIP</button>`
-                        }
-                    </div>`;
-            }
+            if (!item) return;
+            const isEq = (id === equippedId);
+            list.innerHTML += `
+                <div class="bm-offer-card-v4" style="padding:10px; ${isEq ? 'border-color:#00ff88 !important;' : ''}">
+                    <div class="audio-play-btn" style="margin:0 auto 10px;" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
+                    <div style="font-size:10px; color:#fff; margin-bottom:10px;">${item.name}</div>
+                    ${isEq 
+                        ? `<button class="bm-price-btn-v4" style="background:#ff4757 !important; color:#fff;" onclick="unequipProfileItem('intro')">UNEQUIP</button>`
+                        : `<button class="bm-price-btn-v4" onclick="equipProfileItem('intro', '${item.id}', '${item.audio}')">EQUIP</button>`
+                    }
+                </div>`;
         });
+    }
+};
+
+window.unequipProfileItem = async (type) => {
+    try {
+        const field = type === 'banner' ? 'equippedProfileBanner' : 'equippedIntro';
+        await updateDoc(doc(db, "accounts", auth.currentUser.uid), { [field]: null });
+        
+        // Kill audio if unequipping an intro that might be playing
+        if(type === 'intro' && currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+
+        await showCustomAlert(`${type.toUpperCase()} dezechipat cu succes!`, "SISTEM ACTUALIZAT");
+        openEliteInventory(type === 'banner' ? 'banners' : 'intros');
+    } catch(e) {
+        console.error(e);
+        showCustomAlert("Eroare la procesare.", "EROARE");
     }
 };
 
@@ -15336,47 +15378,45 @@ window.buyEliteItem = async (id, price, type) => {
 
 
 
-// --- PROFILE INTROS SHOP ---
 let currentAudio = null;
 
 window.previewAudio = (url, btn) => {
-    // Stop current
-    if(currentAudio) {
+    // If clicking the SAME button that is already playing
+    if (currentAudio && currentAudio.src === url) {
+        if (!currentAudio.paused) {
+            currentAudio.pause();
+            btn.classList.remove('playing');
+            btn.innerHTML = '<i class="fas fa-play"></i>';
+            return;
+        } else {
+            currentAudio.play();
+            btn.classList.add('playing');
+            btn.innerHTML = '<i class="fas fa-pause"></i>';
+            return;
+        }
+    }
+
+    // If clicking a NEW button, stop the previous one
+    if (currentAudio) {
         currentAudio.pause();
-        currentAudio = null;
         document.querySelectorAll('.audio-play-btn').forEach(b => {
             b.classList.remove('playing');
             b.innerHTML = '<i class="fas fa-play"></i>';
         });
     }
 
-    // Play new
-    if(url) {
-        const audio = new Audio(url);
-        audio.play();
-        currentAudio = audio;
-        btn.classList.add('playing');
-        btn.innerHTML = '<i class="fas fa-pause"></i>';
-        
-        // --- LIMITATOR 60 SECUNDE ---
-        const sixtySecTimer = setTimeout(() => {
-            if (currentAudio === audio) {
-                audio.pause();
-                btn.classList.remove('playing');
-                btn.innerHTML = '<i class="fas fa-play"></i>';
-                currentAudio = null;
-            }
-        }, 60000); // 60000ms = 1 minut
+    const audio = new Audio(url);
+    audio.play();
+    currentAudio = audio;
+    btn.classList.add('playing');
+    btn.innerHTML = '<i class="fas fa-pause"></i>';
 
-        audio.onended = () => {
-            clearTimeout(sixtySecTimer); // Anulăm timerul dacă piesa s-a terminat singură mai repede
-            btn.classList.remove('playing');
-            btn.innerHTML = '<i class="fas fa-play"></i>';
-            currentAudio = null;
-        };
-    }
+    audio.onended = () => {
+        btn.classList.remove('playing');
+        btn.innerHTML = '<i class="fas fa-play"></i>';
+        currentAudio = null;
+    };
 };
-
 // --- PROFILE BANNERS SHOP (UPDATED FOR ANIMATIONS) ---
 window.openProfileBannerShop = async () => {
     if(!auth.currentUser) return;
