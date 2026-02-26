@@ -8871,6 +8871,49 @@ nav a[href="shop.html"] {
     100% { transform: scale(1); }
 }
 
+
+/* --- RED TERMINAL SCROLLBAR (FIX) --- */
+#introShopModal .bm-content-scroll, 
+#pBannerShopModal .bm-content-scroll,
+#eliteInventoryModal .bm-content-scroll {
+    max-height: 60vh !important; /* Limits height to force scrolling */
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: #ff0000 #02080a;
+    padding-right: 10px;
+}
+
+/* Chrome, Edge, and Safari Scrollbar styling */
+#introShopModal .bm-content-scroll::-webkit-scrollbar,
+#pBannerShopModal .bm-content-scroll::-webkit-scrollbar,
+#eliteInventoryModal .bm-content-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+#introShopModal .bm-content-scroll::-webkit-scrollbar-track,
+#pBannerShopModal .bm-content-scroll::-webkit-scrollbar-track,
+#eliteInventoryModal .bm-content-scroll::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+#introShopModal .bm-content-scroll::-webkit-scrollbar-thumb,
+#pBannerShopModal .bm-content-scroll::-webkit-scrollbar-thumb,
+#eliteInventoryModal .bm-content-scroll::-webkit-scrollbar-thumb {
+    background: #ff0000 !important; /* THE RED COLOR */
+    box-shadow: 0 0 12px #ff0000;
+    border-radius: 10px;
+}
+
+/* Fix: Make Intros look compact and horizontal */
+#introShopList .bm-offer-card-v4 {
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    min-height: auto !important;
+    padding: 12px 20px !important;
+    margin-bottom: 10px;
+}
+
   </style>
 </head>
 <body>
@@ -12325,29 +12368,33 @@ window.processDonation = async () => {
 window.activeCosmeticTicket = null; // Stores { category: 'badges', id: 'TICK-123' }
 
 window.openEliteInventory = async (category = 'banners') => {
+    // Ensure correct modal visibility
+    document.getElementById('cosmeticsSelectModal').classList.remove('active');
+    document.getElementById('eliteInventoryModal').classList.add('active');
+
     const list = document.getElementById('eliteInventoryList');
-    list.innerHTML = '<div style="color:#aaa; text-align:center; grid-column:span 2;">DECRYPTING...</div>';
+    list.innerHTML = '<div style="color:#ff0000; text-align:center; grid-column:span 2; font-family:Orbitron;">> ACCESSING ENCRYPTED STORAGE...</div>';
 
     const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
     const data = userSnap.data();
     list.innerHTML = '';
     
-    // UI Tab State
-    document.getElementById('invTabBanners').style.opacity = category === 'banners' ? '1' : '0.5';
-    document.getElementById('invTabIntros').style.opacity = category === 'intros' ? '1' : '0.5';
+    // Tab Active Styles
+    document.getElementById('invTabBanners').style.background = category === 'banners' ? '#ff0000' : 'transparent';
+    document.getElementById('invTabIntros').style.background = category === 'intros' ? '#ff0000' : 'transparent';
 
     if (category === 'banners') {
         const owned = data.ownedProfileBanners || [];
         const equippedId = data.equippedProfileBanner?.id;
 
-        if (owned.length === 0) list.innerHTML = "<div class='empty-coupons'>NICIUN ASSET GĂSIT</div>";
+        if (owned.length === 0) list.innerHTML = "<div style='color:#555; grid-column:span 2; text-align:center; padding:20px;'>NO BANNERS OWNED</div>";
 
         owned.forEach(id => {
             const item = PROFILE_BANNERS_DB.find(x => x.id === id);
             if (!item) return;
             const isEq = (id === equippedId);
             list.innerHTML += `
-                <div class="bm-offer-card-v4" style="padding:10px; ${isEq ? 'border-color:#00ff88 !important;' : ''}">
+                <div class="bm-offer-card-v4" style="${isEq ? 'border-color:#00ff88 !important;' : ''}">
                     <div class="p-ban-preview ${item.cssClass}" style="height:50px; margin-bottom:10px;"></div>
                     <div style="font-size:10px; color:#fff; margin-bottom:10px;">${item.name}</div>
                     ${isEq 
@@ -12360,14 +12407,14 @@ window.openEliteInventory = async (category = 'banners') => {
         const owned = data.ownedIntros || [];
         const equippedId = data.equippedIntro?.id;
 
-        if (owned.length === 0) list.innerHTML = "<div class='empty-coupons'>NICIUN AUDIO GĂSIT</div>";
+        if (owned.length === 0) list.innerHTML = "<div style='color:#555; grid-column:span 2; text-align:center; padding:20px;'>NO INTROS OWNED</div>";
 
         owned.forEach(id => {
             const item = PROFILE_INTROS_DB.find(x => x.id === id);
             if (!item) return;
             const isEq = (id === equippedId);
             list.innerHTML += `
-                <div class="bm-offer-card-v4" style="padding:10px; ${isEq ? 'border-color:#00ff88 !important;' : ''}">
+                <div class="bm-offer-card-v4" style="${isEq ? 'border-color:#00ff88 !important;' : ''}">
                     <div class="audio-play-btn" style="margin:0 auto 10px;" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
                     <div style="font-size:10px; color:#fff; margin-bottom:10px;">${item.name}</div>
                     ${isEq 
@@ -12384,18 +12431,17 @@ window.unequipProfileItem = async (type) => {
         const field = type === 'banner' ? 'equippedProfileBanner' : 'equippedIntro';
         await updateDoc(doc(db, "accounts", auth.currentUser.uid), { [field]: null });
         
-        // Kill audio if unequipping an intro that might be playing
-        if(type === 'intro' && currentAudio) {
-            currentAudio.pause();
-            currentAudio = null;
-        }
+        if(type === 'intro' && currentAudio) { currentAudio.pause(); currentAudio = null; }
 
-        await showCustomAlert(`${type.toUpperCase()} dezechipat cu succes!`, "SISTEM ACTUALIZAT");
-        openEliteInventory(type === 'banner' ? 'banners' : 'intros');
-    } catch(e) {
-        console.error(e);
-        showCustomAlert("Eroare la procesare.", "EROARE");
-    }
+        await showCustomAlert(`${type.toUpperCase()} DEZECHIPAT!`, "REUȘIT");
+        
+        // Refresh specific view
+        if (document.getElementById('introShopModal').classList.contains('active')) {
+            openProfileIntroShop();
+        } else {
+            openEliteInventory(type === 'banner' ? 'banners' : 'intros');
+        }
+    } catch(e) { console.error(e); }
 };
 
 window.equipProfileItem = async (type, id, value) => {
