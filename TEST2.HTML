@@ -11506,43 +11506,55 @@ window.openInventory = async (type = 'badges') => {
 
     list.innerHTML = '';
     
- if(type === 'badges') {
-    const ownedIds = data.ownedBadges || [];
-    const equipped = data.equippedBadge?.id || null;
-    if(ownedIds.length === 0) list.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">No items.</p>';
-    
-    ownedIds.forEach(id => {
-         const badge = BADGES_DB.find(b => b.id === id);
-         if(badge) {
-            const isEquipped = (id === equipped);
-            const isAnimated = badge.animClass ? true : false;
-            const badgeClass = isAnimated ? badge.animClass : 'shop-badge-preview';
-            
-            // Logic: Animated stays white/GIF, standard gets color.
-            const inlineStyle = isAnimated 
-                ? "color: #fff !important; text-shadow: 0 0 8px #000; border: 1px solid rgba(255,255,255,0.5);" 
-                : `background: ${badge.color} !important; color: #000 !important; font-weight: 900;`;
+ // --- CATEGORY: BADGES (CONSOLIDATED & FIXED) ---
+    if(type === 'badges') {
+        const ownedIds = data.ownedBadges || [];
+        const equipped = data.equippedBadge?.id || null;
+        if(ownedIds.length === 0) list.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">No items.</p>';
+        
+        ownedIds.forEach(id => {
+            const badge = BADGES_DB.find(b => b.id === id);
+            if(badge) {
+                const isEquipped = (id === equipped);
+                let badgeVisual = '';
 
-            list.innerHTML += `
-                <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
-                    <div class="item-preview-box">
-                        <span class="${badgeClass}" style="${inlineStyle}">
-                            <i class="fas ${badge.icon}"></i> ${badge.text}
-                        </span>
-                    </div>
-                    ${isEquipped 
-                        ? `<button class="btn-equip-v6 is-equipped" style="opacity: 0.5;">EQUIPPED</button>` 
-                        : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">EQUIP</button>`
-                    }
-                </div>`;
-         }
-    });
-    
-    const actionArea = document.getElementById('inventoryActions');
-    if(equipped && actionArea) {
-        actionArea.innerHTML = `<button class="unequip-btn-v6" style="margin-bottom:10px; height: 35px; font-size: 10px;" onclick="unequipItem('badge')">REMOVE BADGE</button>`;
+                // A. Logic for "The Hub" badge
+                if(badge.isHub) {
+                    badgeVisual = `<span class="${badge.animClass} shop-badge-preview inv-elite-fix"><span class="hub-text-white">The</span><span class="hub-text-orange">Hub</span></span>`;
+                } 
+                // B. Logic for Elite Animated Badges (God of Thunder, Hacker, Abyss, etc.)
+                else if (badge.isElite) {
+                    const content = badge.isNoText ? '' : `<i class="fas ${badge.icon}"></i> ${badge.text}`;
+                    badgeVisual = `<span class="${badge.animClass || 'shop-badge-preview'} elite-gif-badge inv-elite-fix">${content}</span>`;
+                }
+                // C. Logic for Standard & Special Badges (Singularity, Wheel God, etc.)
+                else {
+                    const specialBadges = ['b_wheel_god', 'b_immortal', 'b_celestial', 'b_cyber_ghost', 'b_demon_slayer', 'b_void_master', 'b_singularity'];
+                    const isSpecial = specialBadges.includes(badge.id);
+                    const badgeClass = badge.id === 'b_singularity' ? 'badge-singularity' : (isSpecial ? `badge-${badge.id}` : 'shop-badge-preview');
+                    const inlineStyle = isSpecial ? "" : `background: ${badge.color} !important; color: #000 !important; font-weight: 900 !important;`;
+                    
+                    badgeVisual = `<span class="${badgeClass}" style="${inlineStyle}"><i class="fas ${badge.icon}"></i> ${badge.text}</span>`;
+                }
+
+                list.innerHTML += `
+                    <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
+                        <div class="item-preview-box" style="min-height:75px; overflow:visible; display:flex; align-items:center; justify-content:center;">
+                            ${badgeVisual}
+                        </div>
+                        <div style="font-weight:700; font-size:11px; margin-top:10px; color:#fff; font-family:'Orbitron'; text-transform:uppercase;">${badge.text || 'HAZARD'}</div>
+                        ${isEquipped 
+                            ? `<button class="btn-equip-v6 is-equipped">EQUIPPED</button>` 
+                            : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">EQUIP</button>`
+                        }
+                    </div>`;
+            }
+        });
+        if (equipped && actionArea) {
+            actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('badge')">REMOVE BADGE</button>`;
+        }
     }
-}
+
 
 
 
@@ -11571,57 +11583,7 @@ else if (type === 'texts') {
         if (equipped && actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('text')">REMOVE TEXT COLOR</button>`;
     }
 
-// --- CATEGORY: BADGES (ELITE FIX) ---
-    else if (type === 'badges') {
-        const ownedIds = data.ownedBadges || [];
-        const equipped = data.equippedBadge?.id || null;
 
-        if (ownedIds.length === 0) {
-            list.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">Nu ai insigne deblocate.</p>';
-        }
-
-        ownedIds.forEach(id => {
-            const badge = BADGES_DB.find(b => b.id === id);
-            if (badge) {
-                const isEquipped = (id === equipped);
-                let badgeVisual = '';
-
-                // 1. Logic for "The Hub" badge
-                if(badge.isHub) {
-                    badgeVisual = `<span class="${badge.animClass} shop-badge-preview"><span class="hub-text-white">The</span><span class="hub-text-orange">Hub</span></span>`;
-                } 
-                // 2. Logic for Elite Animated Badges
-                else if (badge.isElite) {
-                    const content = badge.isNoText ? '' : `<i class="fas ${badge.icon}"></i> ${badge.text}`;
-                    badgeVisual = `<span class="${badge.animClass || 'shop-badge-preview'} elite-gif-badge inv-elite-fix">${content}</span>`;
-                }
-                // 3. Logic for Standard Badges
-                else {
-                    const specialBadges = ['b_wheel_god', 'b_immortal', 'b_celestial', 'b_cyber_ghost', 'b_demon_slayer', 'b_void_master', 'b_singularity'];
-                    const isSpecial = specialBadges.includes(badge.id);
-                    const badgeClass = badge.id === 'b_singularity' ? 'badge-singularity' : (isSpecial ? `badge-${badge.id}` : 'shop-badge-preview');
-                    const inlineStyle = isSpecial ? "" : `background: ${badge.color} !important; color: #000 !important; font-weight: 900 !important;`;
-                    
-                    badgeVisual = `<span class="${badgeClass}" style="${inlineStyle}"><i class="fas ${badge.icon}"></i> ${badge.text}</span>`;
-                }
-
-                list.innerHTML += `
-                    <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
-                        <div class="item-preview-box" style="min-height:75px; overflow:visible; display:flex; align-items:center; justify-content:center;">
-                            ${badgeVisual}
-                        </div>
-                        <div style="font-weight:700; font-size:11px; margin-top:10px; color:#fff; font-family:'Orbitron'; text-transform:uppercase;">${badge.text || 'CLASSIFIED'}</div>
-                        ${isEquipped 
-                            ? `<button class="btn-equip-v6 is-equipped">EQUIPPED</button>` 
-                            : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">EQUIP</button>`
-                        }
-                    </div>`;
-            }
-        });
-        if (equipped && actionArea) {
-            actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('badge')">REMOVE CURRENT BADGE</button>`;
-        }
-    }
 
     // --- CATEGORY: BANNERS ---
     else if (type === 'banners') {
