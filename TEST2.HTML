@@ -7865,74 +7865,145 @@ nav a[href="shop.html"] {
     justify-content: center;
     transition: 0.3s;
 }
+
+
+
+/* Special hover for Elite Boutique pedestals */
+.luxury-pedestal {
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 0, 0, 0.2) !important;
+}
+
+.luxury-pedestal .rw-border-anim {
+    opacity: 0.2; /* Subliminal spin when not hovering */
+    transition: 0.5s;
+}
+
+.luxury-pedestal:hover .rw-border-anim {
+    opacity: 1; /* Brightens up on hover */
+}
+
+.luxury-pedestal:hover {
+    box-shadow: 0 0 40px rgba(255, 0, 0, 0.3) !important;
+    background: rgba(255, 0, 0, 0.05) !important;
+}
   </style>
 </head>
 <body>
 
-<!-- ELITE BOUTIQUE MODAL (FIXED LUXURY) -->
+<!-- MAIN ELITE BOUTIQUE MODAL -->
 <div id="eliteShopModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 elite-modal-luxury" style="width: 95%; max-width: 1100px; height: auto; max-height: 90vh;">
-        
-        <!-- Luxury Close Button -->
+    <div class="shop-modal-v4 elite-modal-luxury" style="width: 95%; max-width: 900px; height: auto; max-height: 90vh;">
         <button class="lux-close-btn" onclick="closeModal('eliteShopModal')">✕</button>
 
-        <!-- Header -->
         <div class="luxury-boutique-header" style="padding: 50px 20px 30px; border-bottom: 1px solid #111;">
             <h2 class="luxury-boutique-title">
-                <i class="fas fa-crown"></i> 
-                Elite Boutique 
-                <i class="fas fa-crown"></i>
+                <i class="fas fa-crown"></i> Elite Boutique <i class="fas fa-crown"></i>
             </h2>
-            <div style="font-family: 'Montserrat'; font-size: 9px; color: #555; letter-spacing: 4px; margin-top: 15px; font-weight: 700; text-transform: uppercase;">
-            </div>
         </div>
 
-        <!-- Scrollable Content -->
         <div class="bm-content-scroll">
-            <div class="boutique-grid">
+            <div class="boutique-grid" style="grid-template-columns: repeat(2, 1fr);"> <!-- Changed to 2 columns -->
                 
-                <!-- Pedestal 1 -->
-                <div class="luxury-pedestal">
-                    <div>
-                        <i class="fas fa-crown pedestal-icon-lux"></i>
-                        <div class="item-name-lux">MYTHIC_RANK</div>
-                        <div class="item-status-lux">Coming Soon</div>
+                <!-- Entry 1: Elite Cosmetics -->
+                <div class="luxury-pedestal" onclick="openEliteCosmetics()">
+                    <div class="rw-border-anim"></div>
+                    <div style="position:relative; z-index:5;">
+                        <i class="fas fa-magic pedestal-icon-lux" style="color: #ff0000;"></i>
+                        <div class="item-name-lux" style="font-family:'Orbitron'; font-weight:900; color:#fff; letter-spacing:2px;">ELITE COSMETICS</div>
+                        <div class="item-status-lux" style="color:#ff4757; font-size:10px;">ANIMATED MODULES</div>
                     </div>
-                    <div style="margin-top: 25px;">
-                         <button class="btn-ultra-red-white" style="width: 100%; padding: 12px; font-size: 10px;">PRE-ORDER</button>
-                    </div>
-                </div>
-
-                <!-- Pedestal 2 -->
-                <div class="luxury-pedestal">
-                    <div>
-                        <i class="fas fa-gem pedestal-icon-lux"></i>
-                        <div class="item-name-lux">VAULT_ACCESS_KEY</div>
-                        <div class="item-status-lux">Classified</div>
-                    </div>
-                    <div style="margin-top: 25px;">
-                         <button class="btn-ultra-red-white" style="width: 100%; padding: 12px; font-size: 10px; opacity: 0.5;">LOCKED</button>
+                    <div style="margin-top: 25px; position:relative; z-index:5;">
+                         <button class="btn-ultra-red-white" style="width: 100%; padding: 12px; font-size: 10px;">DESCHIDE CATALOG</button>
                     </div>
                 </div>
 
-                <!-- Pedestal 3 -->
-                <div class="luxury-pedestal">
-                    <div>
-                        <i class="fas fa-user-shield pedestal-icon-lux"></i>
-                        <div class="item-name-lux">ELITE_BADGE</div>
-                        <div class="item-status-lux">Reserved</div>
+                <!-- Entry 2: Profile Prestige -->
+                <div class="luxury-pedestal" onclick="openProfilePrestige()">
+                    <div class="rw-border-anim"></div>
+                    <div style="position:relative; z-index:5;">
+                        <i class="fas fa-id-card pedestal-icon-lux" style="color: #fff;"></i>
+                        <div class="item-name-lux" style="font-family:'Orbitron'; font-weight:900; color:#fff; letter-spacing:2px;">PROFILE PRESTIGE</div>
+                        <div class="item-status-lux" style="color:#ff4757; font-size:10px;">IDENTITY ENHANCEMENTS</div>
                     </div>
-                    <div style="margin-top: 25px;">
-                         <button class="btn-ultra-red-white" style="width: 100%; padding: 12px; font-size: 10px;">UNAVAILABLE</button>
+                    <div style="margin-top: 25px; position:relative; z-index:5;">
+                         <button class="btn-ultra-red-white" style="width: 100%; padding: 12px; font-size: 10px;">DESCHIDE MODULE</button>
                     </div>
                 </div>
 
             </div>
         </div>
+    </div>
+</div>
 
-        <!-- Luxury Bottom Logo Area -->
-        <div style="padding: 20px; text-align: center; border-top: 1px solid #111; background: #050505;">
-            <img src="https://iili.io/fXvBEiB.png" height="25" style="opacity: 0.3; filter: grayscale(1);">
+<!-- SUB-MODAL 1: ELITE COSMETICS -->
+<div id="eliteCosmeticsModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 800px; height: 80vh;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 0, 0, 0.1); padding: 25px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div>
+                <div style="font-family:'Montserrat'; font-size: 22px; font-weight: 900; color:#ff0000;">ELITE_COSMETICS</div>
+                <div style="font-family:monospace; font-size: 10px; color:#aaa;">TYPE: ANIMATED_ASSETS | ACCESS: VIP</div>
+            </div>
+            <button class="close-pop" onclick="closeModal('eliteCosmeticsModal'); document.getElementById('eliteShopModal').classList.add('active');" style="border:1px solid #ff0000; background:transparent; position:static !important;">✕</button>
+        </div>
+
+        <div class="bm-content-scroll" style="padding: 20px;">
+            <div class="bm-grid-v4">
+                <!-- 3 Placeholder Categories -->
+                <div class="bm-offer-card-v4">
+                    <i class="fas fa-certificate" style="color:#ff0000; font-size:30px;"></i>
+                    <div class="bm-title-v4">ANIMATED BADGES</div>
+                    <div class="bm-desc-v4">Insigne cu efecte vizuale unice.</div>
+                    <button class="bm-price-btn-v4">ÎN CURÂND</button>
+                </div>
+                <div class="bm-offer-card-v4">
+                    <i class="fas fa-crop-alt" style="color:#fff; font-size:30px;"></i>
+                    <div class="bm-title-v4">ANIMATED FRAMES</div>
+                    <div class="bm-desc-v4">Rame de profil în mișcare.</div>
+                    <button class="bm-price-btn-v4">ÎN CURÂND</button>
+                </div>
+                <div class="bm-offer-card-v4">
+                    <i class="fas fa-comment-dots" style="color:#ff0000; font-size:30px;"></i>
+                    <div class="bm-title-v4">ANIMATED BANNERS</div>
+                    <div class="bm-desc-v4">Bule de chat animate premium.</div>
+                    <button class="bm-price-btn-v4">ÎN CURÂND</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SUB-MODAL 2: PROFILE PRESTIGE -->
+<div id="profilePrestigeModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 800px; height: 80vh;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 255, 255, 0.05); padding: 25px; border-bottom: 1px solid #fff; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div>
+                <div style="font-family:'Montserrat'; font-size: 22px; font-weight: 900; color:#fff;">PROFILE_PRESTIGE</div>
+                <div style="font-family:monospace; font-size: 10px; color:#ff0000;">MODULE: USER_INTERFACE | STATUS: ENCRYPTED</div>
+            </div>
+            <button class="close-pop" onclick="closeModal('profilePrestigeModal'); document.getElementById('eliteShopModal').classList.add('active');" style="border:1px solid #fff; background:transparent; position:static !important;">✕</button>
+        </div>
+
+        <div class="bm-content-scroll" style="padding: 20px;">
+            <div class="bm-grid-v4">
+                <!-- 2 Placeholder Categories -->
+                <div class="bm-offer-card-v4">
+                    <i class="fas fa-play-circle" style="color:#ff0000; font-size:30px;"></i>
+                    <div class="bm-title-v4">PROFILE INTROS</div>
+                    <div class="bm-desc-v4">Animații la intrarea pe profilul tău.</div>
+                    <button class="bm-price-btn-v4">ÎN CURÂND</button>
+                </div>
+                <div class="bm-offer-card-v4">
+                    <i class="fas fa-image" style="color:#fff; font-size:30px;"></i>
+                    <div class="bm-title-v4">PROFILE BANNERS</div>
+                    <div class="bm-desc-v4">Imagini de fundal personalizate pentru profil.</div>
+                    <button class="bm-price-btn-v4">ÎN CURÂND</button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -13872,6 +13943,23 @@ window.showFinalBoxReward = async (res, box) => {
 window.openEliteShop = () => {
     if(!auth.currentUser) return alert("Trebuie să fii logat!");
     document.getElementById('eliteShopModal').classList.add('active');
+};
+
+
+// --- ELITE SUB-MENU LOGIC ---
+
+window.openEliteCosmetics = () => {
+    // Close the main Boutique modal
+    document.getElementById('eliteShopModal').classList.remove('active');
+    // Open the Cosmetics sub-modal
+    document.getElementById('eliteCosmeticsModal').classList.add('active');
+};
+
+window.openProfilePrestige = () => {
+    // Close the main Boutique modal
+    document.getElementById('eliteShopModal').classList.remove('active');
+    // Open the Prestige sub-modal
+    document.getElementById('profilePrestigeModal').classList.add('active');
 };
 </script>
 </body>
