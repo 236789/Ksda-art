@@ -8400,19 +8400,22 @@ nav a[href="shop.html"] {
         </div>
 
         <div class="bm-content-scroll" style="padding: 20px;">
-<!-- UPDATE ÎN MODALUL PROFILE PRESTIGE EXISTENT -->
+<!-- Inside eliteCosmeticsModal -->
 <div class="bm-grid-v4">
-    <div class="bm-offer-card-v4" onclick="openProfileIntroShop()">
-        <i class="fas fa-play-circle" style="color:#ff0000; font-size:30px;"></i>
-        <div class="bm-title-v4">PROFILE INTROS</div>
-        <div class="bm-desc-v4">Sunet care se aude când cineva îți vizitează profilul.</div>
-        <button class="bm-price-btn-v4">DESCHIDE</button>
+    <div class="bm-offer-card-v4" onclick="openEliteCategory('badges')">
+        <i class="fas fa-certificate" style="color:#d63384; font-size:30px;"></i>
+        <div class="bm-title-v4">ELITE BADGES</div>
+        <button class="bm-price-btn-v4">OPEN</button>
     </div>
-    <div class="bm-offer-card-v4" onclick="openProfileBannerShop()">
-        <i class="fas fa-image" style="color:#fff; font-size:30px;"></i>
-        <div class="bm-title-v4">PROFILE BANNERS</div>
-        <div class="bm-desc-v4">Fundal animat sau stilizat pentru cardul tău de profil.</div>
-        <button class="bm-price-btn-v4">DESCHIDE</button>
+    <div class="bm-offer-card-v4" onclick="openEliteCategory('frames')">
+        <i class="fas fa-crop-alt" style="color:#bf55ec; font-size:30px;"></i>
+        <div class="bm-title-v4">ELITE FRAMES</div>
+        <button class="bm-price-btn-v4">OPEN</button>
+    </div>
+    <div class="bm-offer-card-v4" onclick="openEliteCategory('banners')">
+        <i class="fas fa-image" style="color:#00e5ff; font-size:30px;"></i>
+        <div class="bm-title-v4">ELITE BANNERS</div>
+        <button class="bm-price-btn-v4">OPEN</button>
     </div>
 </div>
 
@@ -14628,44 +14631,60 @@ window.openProfilePrestige = () => {
 };
 
 window.openEliteCategory = async (type) => {
-    let modalId, listId, database, ownedField;
+    if (!auth.currentUser) return alert("Loghează-te!");
     
-    if (type === 'badges') { modalId = 'badgeShopModal'; listId = 'badgeList'; database = BADGES_DB; ownedField = 'ownedBadges'; }
-    if (type === 'banners') { modalId = 'bannerShopModal'; listId = 'bannerList'; database = BANNERS_DB; ownedField = 'ownedBanners'; }
-    if (type === 'frames') { modalId = 'frameShopModal'; listId = 'frameList'; database = FRAMES_DB; ownedField = 'ownedFrames'; }
+    let modalId, listId, database, ownedField, titleText;
+    
+    if (type === 'badges') { 
+        modalId = 'badgeShopModal'; listId = 'badgeList'; database = BADGES_DB; ownedField = 'ownedBadges'; titleText = "ELITE BADGES";
+    } else if (type === 'banners') { 
+        modalId = 'bannerShopModal'; listId = 'bannerList'; database = BANNERS_DB; ownedField = 'ownedBanners'; titleText = "ELITE BANNERS";
+    } else if (type === 'frames') { 
+        modalId = 'frameShopModal'; listId = 'frameList'; database = FRAMES_DB; ownedField = 'ownedFrames'; titleText = "ELITE FRAMES";
+    }
 
     const list = document.getElementById(listId);
-    list.innerHTML = '';
+    list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">> DECRYPTING ELITE DATA...</div>';
     
+    // IMPORTANT: Close the sub-menu first to avoid z-index bugs
     document.getElementById('eliteCosmeticsModal').classList.remove('active');
     document.getElementById(modalId).classList.add('active');
+
+    // Update Title to show it's the Elite version
+    const titleEl = document.querySelector(`#${modalId} .title-${type}`);
+    if(titleEl) titleEl.innerText = titleText;
 
     const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
     const userData = userSnap.data();
     const owned = userData[ownedField] || [];
+    const userPic = userData.image || auth.currentUser.photoURL;
 
+    // Filter only elite items
     const eliteItems = database.filter(item => item.isElite);
 
+    list.innerHTML = '';
     eliteItems.forEach(item => {
         const isOwned = owned.includes(item.id);
         const card = document.createElement('div');
         card.className = 'shop-badge-item';
         
         let visualHtml = '';
-        
-        if(item.isHub) {
-            visualHtml = `<span class="${item.animClass} shop-badge-preview"><span class="hub-text-white">The</span><span class="hub-text-orange">Hub</span></span>`;
-        } else if(type === 'badges') {
-            // Handle badges with no text (like Warning)
+        if(type === 'badges') {
             const content = item.isNoText ? '' : `<i class="fas ${item.icon}"></i> ${item.text}`;
             visualHtml = `<span class="${item.animClass || 'shop-badge-preview'} elite-gif-badge">${content}</span>`;
         } else if(type === 'banners') {
-            visualHtml = `<div class="${item.cssClass}" style="padding:15px; border-radius:10px; width:100%; text-align:center; font-weight:800;">ELITE BANNER</div>`;
+            visualHtml = `<div class="${item.cssClass}" style="padding:15px; border-radius:10px; width:100%; text-align:center; font-weight:800; font-size:10px;">ELITE SIGNAL</div>`;
+        } else if(type === 'frames') {
+            visualHtml = `
+                <div class="frame-preview-box">
+                    <img src="${userPic}" class="frame-preview-user">
+                    <img src="${item.img}" class="frame-preview-img">
+                </div>`;
         }
 
         card.innerHTML = `
             <div style="min-height:70px; display:flex; align-items:center; justify-content:center; width:100%; overflow:visible;">${visualHtml}</div>
-            <div style="font-family:Orbitron; font-size:11px; color:#fff; margin-top:10px;">${item.text || item.name || 'CLASSIFIED'}</div>
+            <div style="font-family:Orbitron; font-size:11px; color:#fff; margin-top:10px;">${item.text || item.name}</div>
             <div class="shop-badge-price">
                 ${isOwned ? 'DEȚINUT' : `<img src="https://iili.io/fv5bmtj.png" width="15"> ${item.price}`}
             </div>
@@ -14726,22 +14745,15 @@ window.previewAudio = (url, btn) => {
     };
 };
 
-// --- OPEN INTRO SHOP (FIXED) ---
 window.openProfileIntroShop = async () => {
+    // FIX: Close parent modal
+    document.getElementById('profilePrestigeModal').classList.remove('active');
+    
     const list = document.getElementById('introList');
     const shopModal = document.getElementById('introShopModal');
-    
-    if(!list || !shopModal) return console.error("Intro elements not found");
-
-    // Close BOTH possible selection modals to be safe
-    document.getElementById('profilePrestigeModal').classList.remove('active');
-    document.getElementById('eliteCosmeticsModal').classList.remove('active');
-    
-    // Open the Intro Shop
     shopModal.classList.add('active');
-    list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">> DECRYPTING AUDIO MODULES...</div>';
+    list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">> LOADING AUDIO...</div>';
     
-    // Safety check for user data
     const userOwned = (window.currentUserData && window.currentUserData.ownedIntros) ? window.currentUserData.ownedIntros : [];
 
     list.innerHTML = '';
@@ -14749,41 +14761,30 @@ window.openProfileIntroShop = async () => {
         const isOwned = userOwned.includes(item.id);
         const card = document.createElement('div');
         card.className = 'v4-badge-item';
-        card.style.display = 'flex';
-        card.style.justifyContent = 'space-between';
-        card.style.alignItems = 'center';
-        card.style.padding = '15px 20px';
-        card.style.marginBottom = '10px';
+        card.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:15px 20px; margin-bottom:10px;";
 
         card.innerHTML = `
             <div style="text-align:left;">
-                <div style="font-family:'Orbitron'; font-weight:800; font-size:14px; color:#fff;">${item.name}</div>
-                <div style="color:var(--gold); font-weight:800; font-size:12px; margin-top:5px;">${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="12"></div>
+                <div style="font-family:'Orbitron'; font-weight:800; font-size:12px; color:#fff;">${item.name}</div>
+                <div style="color:var(--gold); font-weight:800; font-size:11px; margin-top:5px;">${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="12"></div>
             </div>
-            <div style="display:flex; gap:15px; align-items:center;">
+            <div style="display:flex; gap:12px; align-items:center;">
                 <div class="btn-preview-audio" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
-                ${isOwned ? '<span class="owned-label" style="color:#00ff88; font-weight:900; font-family:Orbitron; font-size:10px;">DEȚINUT</span>' : 
-                `<button class="bm-price-btn-v4" style="min-width:80px;" onclick="buyPrestige('${item.id}', ${item.price}, 'intro')">CUMPĂRĂ</button>`}
+                ${isOwned ? '<span class="owned-label" style="color:#00ff88; font-size:10px;">DEȚINUT</span>' : 
+                `<button class="bm-price-btn-v4" style="min-width:80px; font-size:10px;" onclick="buyPrestige('${item.id}', ${item.price}, 'intro')">CUMPĂRĂ</button>`}
             </div>
         `;
         list.appendChild(card);
     });
 };
 
-// --- OPEN BANNER SHOP (FIXED) ---
 window.openProfileBannerShop = async () => {
+    // FIX: Close parent modal
+    document.getElementById('profilePrestigeModal').classList.remove('active');
+    
     const list = document.getElementById('pBannerList');
     const shopModal = document.getElementById('pBannerShopModal');
-
-    if(!list || !shopModal) return console.error("Banner elements not found");
-
-    // Close BOTH possible selection modals to be safe
-    document.getElementById('profilePrestigeModal').classList.remove('active');
-    document.getElementById('eliteCosmeticsModal').classList.remove('active');
-    
-    // Open the Banner Shop
     shopModal.classList.add('active');
-    list.innerHTML = '<div style="color:#aaa; text-align:center; padding:20px;">> LOADING VISUALS...</div>';
     
     const userOwned = (window.currentUserData && window.currentUserData.ownedPBanners) ? window.currentUserData.ownedPBanners : [];
 
@@ -14793,12 +14794,12 @@ window.openProfileBannerShop = async () => {
         const card = document.createElement('div');
         card.className = 'shop-badge-item';
         card.innerHTML = `
-            <div style="width:100%; height:60px; border-radius:10px; background:${item.bgColor || 'transparent'}; background-image:${item.style}; background-size:${item.bgSize || 'cover'}; border:1px solid rgba(255,255,255,0.1);"></div>
-            <div style="font-family:'Orbitron'; font-size:11px; margin:10px 0; color:#fff;">${item.name}</div>
+            <div style="width:100%; height:50px; border-radius:8px; background:${item.bgColor || '#000'}; background-image:${item.style}; background-size:cover; border:1px solid rgba(255,255,255,0.1);"></div>
+            <div style="font-family:'Orbitron'; font-size:10px; margin:10px 0; color:#fff;">${item.name}</div>
             <div class="shop-badge-price" style="margin-bottom:10px;">
-                ${isOwned ? '<span style="color:#00ff88; font-weight:900;">DEȚINUT</span>' : `${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="14">`}
+                ${isOwned ? '<span style="color:#00ff88;">DEȚINUT</span>' : `${item.price.toLocaleString()} <img src="https://iili.io/fhc1SKQ.png" width="12">`}
             </div>
-            ${isOwned ? '' : `<button class="bm-price-btn-v4" style="width:100%;" onclick="buyPrestige('${item.id}', ${item.price}, 'banner')">DEBLOCHEAZĂ</button>`}
+            ${isOwned ? '' : `<button class="bm-price-btn-v4" style="width:100%; font-size:10px;" onclick="buyPrestige('${item.id}', ${item.price}, 'banner')">ACTIVATE</button>`}
         `;
         list.appendChild(card);
     });
