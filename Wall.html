@@ -5,6 +5,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -5779,6 +5780,55 @@ body {
 .banner-flow-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMGVxMzF0aGp1MHBtdmJrOWI1dGI4cjN5bTI3aXVzNHZsNTVkazdnYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/O0zVNAjUC0m3jxiflK/giphy.gif') !important; background-size: cover; border: 1px solid #fff !important; color: #fff; }
 .banner-purp-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3Ym9sNDJjdmZtOGJtN3I4eGRlM3l5ZjM3NWxzNmJxYzI0cjU2cXdyMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Acs8DGposhkwulcZVo/giphy.gif') !important; background-size: cover; border: 1px solid #7000ff !important; color: #fff; }
 .banner-scan-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ2t6MjJwNnd6NDhpajFnbGdkdXBjbGE5Y3pyeHI4OW15dHg0eHQxeSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3oz8xxYsI0FyH7EmfS/giphy.gif') !important; background-size: cover; border: 1px solid #00ff88 !important; color: #00ff88; }
+
+
+/* --- DYNAMIC PROFILE BANNER STYLES --- */
+/* Base class applied to the modal card */
+.account-card.profile-banner-active {
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+    box-shadow: inset 0 0 50px #000 !important;
+}
+
+/* Specific Banner Styles (Matching Shop DB) */
+.account-card.pban_cyber {
+    background-color: #000 !important;
+    background-image: 
+        linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px) !important;
+    background-size: 30px 30px !important;
+}
+.account-card.pban_magma {
+    background: linear-gradient(135deg, #400000, #200000) !important;
+    border-color: #ff4500 !important;
+}
+.account-card.pban_void {
+    background: radial-gradient(circle at center, #1a0033 0%, #000 100%) !important;
+    border-color: #7000ff !important;
+}
+.account-card.pban_gold {
+    background: linear-gradient(135deg, #1a1500, #000) !important;
+    border-color: #ffd700 !important;
+}
+.account-card.pban_matrix {
+    background-color: #000 !important;
+    border-color: #00ff41 !important;
+    /* Optional: You can add a subtle matrix GIF background here if you want */
+}
+.account-card.pban_neon {
+    background: linear-gradient(180deg, #050b14 0%, #1a001a 100%) !important;
+    border-color: #00ffff !important;
+}
+
+/* --- BADGE DISPLAY IN PROFILE --- */
+#viewUserBadges {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+}
   </style>
 
 </head>
@@ -10526,22 +10576,71 @@ window.banIpUser = async function(targetUid, targetName, targetIp) {
         } catch(e) {}
     };
     
+// --- GLOBAL VARIABLE FOR PROFILE AUDIO ---
+let profileAudio = null;
+
+// --- STOP AUDIO FUNCTION (Called on Close) ---
+window.stopProfileAudio = () => {
+    if (profileAudio) {
+        profileAudio.pause();
+        profileAudio.currentTime = 0;
+        profileAudio = null;
+    }
+};
+
+// --- OPEN USER PROFILE (ENHANCED) ---
 window.openUserProfile = async (uid) => {
-    closeAllMenus();
-    const modal = document.getElementById('viewProfileModal');
-    modal.classList.add('active');
+    closeAllMenus(); // Hide chat menus
     
-    // UI Reset
+    const modal = document.getElementById('viewProfileModal');
+    const card = modal.querySelector('.account-card');
+    
+    // 1. RESET MODAL STATE (Clear old data & styles)
+    card.className = 'account-card'; // Removes any old banner classes
+    card.style.background = '#08101b'; // Default BG
     document.getElementById('viewUserName').innerText = "Încărcare...";
     document.getElementById('viewUserBadges').innerHTML = "";
+    document.getElementById('viewUserImg').src = "https://i.ibb.co/4pGm9S2/user-placeholder.png";
+    stopProfileAudio(); // Ensure no previous audio is playing
+
+    modal.classList.add('active');
 
     try {
         const snap = await getDoc(doc(db, "accounts", uid));
         if(!snap.exists()) return;
         const data = snap.data();
-        
-        // În interiorul openUserProfile:
-        const ownerImg = data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png"; // Preluăm din field-ul custom
+
+        // --- A. APPLY PROFILE BANNER ---
+        if (data.equippedProfileBanner && data.equippedProfileBanner.id) {
+            // Add the specific class (e.g., 'pban_void')
+            card.classList.add('profile-banner-active', data.equippedProfileBanner.id);
+            
+            // If the banner uses a specific style/image stored in DB, apply it inline as fallback
+            if(data.equippedProfileBanner.style) {
+                // Remove 'url()' wrapper if double wrapped
+                let bgStyle = data.equippedProfileBanner.style;
+                // Simple check to apply gradient or image
+                if (bgStyle.includes('http') && !bgStyle.includes('url')) {
+                    card.style.backgroundImage = `url('${bgStyle}')`;
+                } else {
+                    card.style.background = bgStyle;
+                }
+            }
+        }
+
+        // --- B. PLAY PROFILE INTRO ---
+        if (data.equippedIntro && data.equippedIntro.audio) {
+            try {
+                profileAudio = new Audio(data.equippedIntro.audio);
+                profileAudio.volume = 0.4; // Set reasonable volume
+                profileAudio.play().catch(e => console.log("Audio play blocked by browser:", e));
+            } catch (err) {
+                console.error("Intro Error:", err);
+            }
+        }
+
+        // --- C. RENDER AVATAR & FRAME ---
+        const ownerImg = data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png"; 
         document.getElementById('viewUserImg').src = ownerImg;
         
         const viewFrame = document.getElementById('viewUserFrame');
@@ -10553,88 +10652,46 @@ window.openUserProfile = async (uid) => {
             viewFrame.style.height = (sc * 100) + "%";
         } else { viewFrame.style.display = 'none'; }
 
-        // 2. Name & Online Status
+        // --- D. RENDER NAME & BADGE ---
         let pName = data.username || "Anonim";
         if(data.equippedText && data.equippedText.cssClass) {
             pName = `<span class="${data.equippedText.cssClass}">${pName}</span>`;
         }
         document.getElementById('viewUserName').innerHTML = pName;
-        
+
+        // Render Badge
+        const bBox = document.getElementById('viewUserBadges');
+        if (data.equippedBadge) {
+            bBox.innerHTML = getCosmeticBadge(data.equippedBadge);
+        } else {
+            bBox.innerHTML = "";
+        }
+
+        // --- E. RENDER STATS & BIO ---
         const isOnline = checkIsOnline(data);
         document.getElementById('viewUserStatus').innerHTML = isOnline 
             ? '<span style="color:#00ff88;">● ONLINE</span>' : '<span style="color:#555;">● OFFLINE</span>';
 
-        // 3. Stats (Currencies & Streak)
         document.getElementById('viewUserCoins').innerText = formatCurrency(data.coins || 0);
         document.getElementById('viewUserDiamonds').innerText = formatCurrency(data.diamonds || 0);
         document.getElementById('viewUserStreak').innerHTML = `<i class="fas fa-fire"></i> ${data.streak || 0} DAYS STREAK`;
 
-        // 4. Bio
         document.getElementById('viewUserBio').innerText = data.bio || "Membru KSDA fără descriere.";
 
-        // --- 5. INTERACTIVE STATS BUTTONS (FIXED) ---
         const invites = data.totalReferrals || 0;
-        const inviteEl = document.getElementById('viewUserInvites');
-        inviteEl.innerHTML = `<i class="fas fa-user-plus"></i> Friends Invited: ${invites}`;
-        inviteEl.onclick = () => {
-            // Ensure History Modal is on top of Profile Modal
-            const histModal = document.getElementById('referralHistoryModal');
-            if(histModal) histModal.style.zIndex = "13000";
-            openReferralHistory(uid, pName, ownerImg);
-        };
+        document.getElementById('viewUserInvites').innerHTML = `<i class="fas fa-user-plus"></i> Friends Invited: ${invites}`;
 
         const donated = data.totalCoinsDonated || 0;
-        const donatedEl = document.getElementById('viewUserDonated');
-        let displayDonated = formatCurrency(donated);
-        donatedEl.innerHTML = `<i class="fas fa-hand-holding-usd"></i> Coins Donated: ${displayDonated}`;
-        donatedEl.onclick = () => {
-            const histModal = document.getElementById('donationHistoryModal');
-            if(histModal) histModal.style.zIndex = "13000";
-            openDonationHistory(uid, pName, ownerImg);
-        };
-
-    // --- 6. Badges (Staff & Cosmetics) ---
-        const bBox = document.getElementById('viewUserBadges');
-        let bHtml = "";
-        
-        const email = data.email || "";
-        if(email === 'nicaemmanuel433qe@gmail.com') bHtml += `<div><span class="owner-badge">WEBSITE OWNER</span></div>`;
-        else if(email === 'kevin.trinity2020@gmail.com') bHtml += `<div><span class="admin-badge">ADMIN</span></div>`;
-
-        if (data.equippedBadge) {
-            // UPDATED: Added b_singularity and your other animated IDs to this list
-            const godTierBadges = [
-                'b_wheel_god', 'b_spin_god', 'b_immortal', 'b_celestial', 
-                'b_cyber_ghost', 'b_demon_slayer', 'b_void_master', 
-                'b_singularity', 'b_dragon_anim', 'b_radar_anim', 
-                'b_glitch_anim', 'b_king_anim'
-            ];
-            
-            if (godTierBadges.includes(data.equippedBadge.id)) {
-                let className = `badge-${data.equippedBadge.id}`;
-                if(data.equippedBadge.id === 'b_wheel_god') className = 'badge-wheel-god';
-                
-                // THE FIX: Force white text and shadow so it shows over the GIF
-                bHtml += `
-                    <div style="margin-top:5px;">
-                        <span class="${className}" style="color: #fff !important; text-shadow: 0 0 8px #000 !important; border: 1px solid rgba(255,255,255,0.5) !important;">
-                            <i class="fas ${data.equippedBadge.icon}"></i> ${data.equippedBadge.text}
-                        </span>
-                    </div>`;
-            } else {
-                // Standard Badges
-                bHtml += `
-                    <div style="margin-top:5px;">
-                        <span class="cosmetic-badge" style="background:${data.equippedBadge.color} !important; color:#000 !important; box-shadow:0 0 5px ${data.equippedBadge.color}; border:none; font-weight:900;">
-                            <i class="fas ${data.equippedBadge.icon}"></i> ${data.equippedBadge.text}
-                        </span>
-                    </div>`;
-            }
-        }
-        bBox.innerHTML = bHtml;
+        document.getElementById('viewUserDonated').innerHTML = `<i class="fas fa-hand-holding-usd"></i> Coins Donated: ${formatCurrency(donated)}`;
 
     } catch(e) { console.error(e); }
-    };
+};
+
+// --- UPDATE CLOSE BUTTON TO STOP AUDIO ---
+document.getElementById('closeViewProfile').onclick = () => {
+    stopProfileAudio(); // Stop audio
+    document.getElementById('viewProfileModal').classList.remove('active');
+};
 
     closeViewProfile.onclick = () => viewProfileModal.classList.remove('active');
 
