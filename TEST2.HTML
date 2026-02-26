@@ -8140,6 +8140,29 @@ nav a[href="shop.html"] {
 .bubble-nebula-v2 { background: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3c2s0M2I3cHZlM3U5bXViaGpuYzVzMjI1eWJvN2NiYWQ0YW1nNWwzbSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/eJmUEoeU1K4d4IUbpS/giphy.gif') center !important; background-size: cover !important; border: 1px solid #7000ff !important; color: #fff !important; text-shadow: 0 0 10px #7000ff; }
 .bubble-blue-fire { background: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bTBqaXM2NmVlajJudzdrd3B3ZXBnc2JpZTZ5ODVtbG83YzNsczAyOCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3bc8pP1rVdfgN1uoMV/giphy.gif') center !important; background-size: cover !important; border: 2px solid #00ffff !important; color: #fff !important; font-weight: 900; }
 .bubble-destruction { background: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aGN6cmh0MjFrc2Nmb3NxemFnYjM3cGowYXQzbmJtNDJvYWY4amtxNCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/nKDErGClW3lsRiZ3p9/giphy.gif') center !important; background-size: cover !important; border: 1px solid #ff4500 !important; color: #fff !important; text-shadow: 2px 2px 0 #ff4500; }
+
+
+/* Fix for Elite Badges inside the Inventory Modal */
+.inv-elite-fix {
+    transform: scale(0.9); /* Slightly smaller to fit the inventory card */
+    white-space: nowrap;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ensure GIFs are visible in inventory cards */
+#inventoryList .item-preview-box span {
+    max-width: 100%;
+    overflow: visible;
+}
+
+/* Specific fix for the Warning/Hazard badge in inventory */
+#inventoryList .badge-warning-elite {
+    width: 40px !important;
+    height: 40px !important;
+    margin: 0 auto;
+}
   </style>
 </head>
 <body>
@@ -11548,42 +11571,49 @@ else if (type === 'texts') {
         if (equipped && actionArea) actionArea.innerHTML = `<button class="unequip-btn-v6" onclick="unequipItem('text')">REMOVE TEXT COLOR</button>`;
     }
 
-    // --- CATEGORY: BADGES (Singularity GIF Fix Included) ---
+// --- CATEGORY: BADGES (ELITE FIX) ---
     else if (type === 'badges') {
         const ownedIds = data.ownedBadges || [];
         const equipped = data.equippedBadge?.id || null;
 
         if (ownedIds.length === 0) {
-            list.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">Nu ai insigne deblocat.</p>';
+            list.innerHTML = '<p style="color:#aaa; width:100%; text-align:center;">Nu ai insigne deblocate.</p>';
         }
 
         ownedIds.forEach(id => {
             const badge = BADGES_DB.find(b => b.id === id);
             if (badge) {
                 const isEquipped = (id === equipped);
-                
-                // Determine if it is a special animated badge (like Singularity)
-                const isAnimated = badge.animClass ? true : false;
-                const badgeClass = isAnimated ? badge.animClass : 'shop-badge-preview';
+                let badgeVisual = '';
 
-                // FORCE STYLING: 
-                // Animated badges get white text and border. 
-                // Standard badges get the color from DB and black text.
-                const inlineStyle = isAnimated 
-                    ? "color: #ffffff !important; text-shadow: 2px 2px 4px #000 !important; border: 1px solid #fff !important; display: inline-flex !important; align-items:center; gap:6px;" 
-                    : `background: ${badge.color} !important; color: #000000 !important; font-weight: 900 !important; display: inline-flex !important; align-items:center; gap:6px;`;
+                // 1. Logic for "The Hub" badge
+                if(badge.isHub) {
+                    badgeVisual = `<span class="${badge.animClass} shop-badge-preview"><span class="hub-text-white">The</span><span class="hub-text-orange">Hub</span></span>`;
+                } 
+                // 2. Logic for Elite Animated Badges
+                else if (badge.isElite) {
+                    const content = badge.isNoText ? '' : `<i class="fas ${badge.icon}"></i> ${badge.text}`;
+                    badgeVisual = `<span class="${badge.animClass || 'shop-badge-preview'} elite-gif-badge inv-elite-fix">${content}</span>`;
+                }
+                // 3. Logic for Standard Badges
+                else {
+                    const specialBadges = ['b_wheel_god', 'b_immortal', 'b_celestial', 'b_cyber_ghost', 'b_demon_slayer', 'b_void_master', 'b_singularity'];
+                    const isSpecial = specialBadges.includes(badge.id);
+                    const badgeClass = badge.id === 'b_singularity' ? 'badge-singularity' : (isSpecial ? `badge-${badge.id}` : 'shop-badge-preview');
+                    const inlineStyle = isSpecial ? "" : `background: ${badge.color} !important; color: #000 !important; font-weight: 900 !important;`;
+                    
+                    badgeVisual = `<span class="${badgeClass}" style="${inlineStyle}"><i class="fas ${badge.icon}"></i> ${badge.text}</span>`;
+                }
 
                 list.innerHTML += `
                     <div class="item-card-v6 ${isEquipped ? 'equipped' : ''}">
-                        <div class="item-preview-box" style="min-height:75px; overflow:visible;">
-                            <span class="${badgeClass}" style="${inlineStyle}">
-                                <i class="fas ${badge.icon}"></i> ${badge.text}
-                            </span>
+                        <div class="item-preview-box" style="min-height:75px; overflow:visible; display:flex; align-items:center; justify-content:center;">
+                            ${badgeVisual}
                         </div>
-                        <div style="font-weight:700; font-size:11px; margin-top:10px; color:#fff; font-family:'Orbitron'; text-transform:uppercase;">${badge.text}</div>
+                        <div style="font-weight:700; font-size:11px; margin-top:10px; color:#fff; font-family:'Orbitron'; text-transform:uppercase;">${badge.text || 'CLASSIFIED'}</div>
                         ${isEquipped 
                             ? `<button class="btn-equip-v6 is-equipped">EQUIPPED</button>` 
-                            : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">EQUIP_BADGE</button>`
+                            : `<button class="btn-equip-v6 do-equip" onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')">EQUIP</button>`
                         }
                     </div>`;
             }
