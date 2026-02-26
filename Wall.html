@@ -10588,20 +10588,33 @@ window.stopProfileAudio = () => {
     }
 };
 
-// --- OPEN USER PROFILE (ENHANCED) ---
+// --- GLOBAL AUDIO CONTROL (FIXED) ---
+window.currentProfileAudio = null;
+
+window.stopProfileAudio = function() {
+    if (window.currentProfileAudio) {
+        window.currentProfileAudio.pause();
+        window.currentProfileAudio.currentTime = 0;
+        window.currentProfileAudio = null;
+    }
+};
+
+// --- OPEN USER PROFILE (ALL FIXES INCLUDED) ---
 window.openUserProfile = async (uid) => {
     closeAllMenus(); // Hide chat menus
     
     const modal = document.getElementById('viewProfileModal');
     const card = modal.querySelector('.account-card');
     
-    // 1. RESET MODAL STATE (Clear old data & styles)
-    card.className = 'account-card'; // Removes any old banner classes
+    // 1. RESET MODAL STATE
+    card.className = 'account-card'; // Removes old banner classes
     card.style.background = '#08101b'; // Default BG
     document.getElementById('viewUserName').innerText = "Încărcare...";
     document.getElementById('viewUserBadges').innerHTML = "";
     document.getElementById('viewUserImg').src = "https://i.ibb.co/4pGm9S2/user-placeholder.png";
-    stopProfileAudio(); // Ensure no previous audio is playing
+    
+    // FORCE STOP PREVIOUS AUDIO
+    window.stopProfileAudio(); 
 
     modal.classList.add('active');
 
@@ -10612,14 +10625,9 @@ window.openUserProfile = async (uid) => {
 
         // --- A. APPLY PROFILE BANNER ---
         if (data.equippedProfileBanner && data.equippedProfileBanner.id) {
-            // Add the specific class (e.g., 'pban_void')
             card.classList.add('profile-banner-active', data.equippedProfileBanner.id);
-            
-            // If the banner uses a specific style/image stored in DB, apply it inline as fallback
             if(data.equippedProfileBanner.style) {
-                // Remove 'url()' wrapper if double wrapped
                 let bgStyle = data.equippedProfileBanner.style;
-                // Simple check to apply gradient or image
                 if (bgStyle.includes('http') && !bgStyle.includes('url')) {
                     card.style.backgroundImage = `url('${bgStyle}')`;
                 } else {
@@ -10631,9 +10639,9 @@ window.openUserProfile = async (uid) => {
         // --- B. PLAY PROFILE INTRO ---
         if (data.equippedIntro && data.equippedIntro.audio) {
             try {
-                profileAudio = new Audio(data.equippedIntro.audio);
-                profileAudio.volume = 0.4; // Set reasonable volume
-                profileAudio.play().catch(e => console.log("Audio play blocked by browser:", e));
+                window.currentProfileAudio = new Audio(data.equippedIntro.audio);
+                window.currentProfileAudio.volume = 0.4;
+                window.currentProfileAudio.play().catch(e => console.log("Auto-play blocked:", e));
             } catch (err) {
                 console.error("Intro Error:", err);
             }
@@ -10659,7 +10667,6 @@ window.openUserProfile = async (uid) => {
         }
         document.getElementById('viewUserName').innerHTML = pName;
 
-        // Render Badge
         const bBox = document.getElementById('viewUserBadges');
         if (data.equippedBadge) {
             bBox.innerHTML = getCosmeticBadge(data.equippedBadge);
@@ -10675,25 +10682,37 @@ window.openUserProfile = async (uid) => {
         document.getElementById('viewUserCoins').innerText = formatCurrency(data.coins || 0);
         document.getElementById('viewUserDiamonds').innerText = formatCurrency(data.diamonds || 0);
         document.getElementById('viewUserStreak').innerHTML = `<i class="fas fa-fire"></i> ${data.streak || 0} DAYS STREAK`;
-
         document.getElementById('viewUserBio').innerText = data.bio || "Membru KSDA fără descriere.";
 
+        // --- F. RESTORED BUTTONS (INVITES & DONATIONS) ---
         const invites = data.totalReferrals || 0;
-        document.getElementById('viewUserInvites').innerHTML = `<i class="fas fa-user-plus"></i> Friends Invited: ${invites}`;
+        const inviteEl = document.getElementById('viewUserInvites');
+        inviteEl.innerHTML = `<i class="fas fa-user-plus"></i> Friends Invited: ${invites}`;
+        // FIX: Re-attach click listener
+        inviteEl.onclick = () => {
+            const histModal = document.getElementById('referralHistoryModal');
+            if(histModal) histModal.style.zIndex = "13000";
+            openReferralHistory(uid, pName, ownerImg);
+        };
 
         const donated = data.totalCoinsDonated || 0;
-        document.getElementById('viewUserDonated').innerHTML = `<i class="fas fa-hand-holding-usd"></i> Coins Donated: ${formatCurrency(donated)}`;
+        const donatedEl = document.getElementById('viewUserDonated');
+        donatedEl.innerHTML = `<i class="fas fa-hand-holding-usd"></i> Coins Donated: ${formatCurrency(donated)}`;
+        // FIX: Re-attach click listener
+        donatedEl.onclick = () => {
+            const histModal = document.getElementById('donationHistoryModal');
+            if(histModal) histModal.style.zIndex = "13000";
+            openDonationHistory(uid, pName, ownerImg);
+        };
 
     } catch(e) { console.error(e); }
 };
 
-// --- UPDATE CLOSE BUTTON TO STOP AUDIO ---
+// --- FORCE STOP AUDIO ON CLOSE ---
 document.getElementById('closeViewProfile').onclick = () => {
-    stopProfileAudio(); // Stop audio
+    window.stopProfileAudio(); // Forces stop
     document.getElementById('viewProfileModal').classList.remove('active');
 };
-
-    closeViewProfile.onclick = () => viewProfileModal.classList.remove('active');
 
 // --- HELPER: GET USER DATA (PFP + COLORED NAME) ---
 async function fetchUserDataForHistory(uid, fallbackName) {
