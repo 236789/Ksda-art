@@ -8997,6 +8997,12 @@ nav a[href="shop.html"] {
     }
 }
 
+#subCouponList {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
   </style>
 </head>
 <body>
@@ -15428,13 +15434,14 @@ window.openSubCoupon = (type) => {
     const info = categoryInfo[type];
     if(!info) return;
 
-    document.getElementById('subCouponTitle').innerText = info.title;
+    document.getElementById('subCouponTitle').innerText = `${info.title} (${(window.currentUserData?.myCoupons?.[type] || []).length})`;
     document.getElementById('couponInventoryModal').classList.remove('active');
     document.getElementById('subCouponModal').classList.add('active');
 
     const listContainer = document.getElementById('subCouponList');
     listContainer.innerHTML = '';
     
+    // Get all tickets of this type
     const userCoupons = (window.currentUserData?.myCoupons?.[type]) || [];
 
     if(userCoupons.length === 0) {
@@ -15442,29 +15449,32 @@ window.openSubCoupon = (type) => {
         return;
     }
 
-    userCoupons.forEach(coupon => {
+    // Logic: Loop through EVERY ticket in the array
+    userCoupons.forEach((coupon, index) => {
         const ticket = document.createElement('div');
         ticket.className = 'v4-badge-item';
-        ticket.style.cssText = "display:flex; flex-direction:row; justify-content:space-between; align-items:center; padding:15px 20px; border-color: rgba(0,255,204,0.3) !important;";
+        ticket.style.cssText = "display:flex; flex-direction:row; justify-content:space-between; align-items:center; padding:15px 20px; margin-bottom: 10px; border-color: rgba(0,255,204,0.3) !important;";
         
-        // FIX 1: Black Market is now removed from direct activation and sent to activateCouponCode
+        // Ensure each ticket uses its specific ID/Code
         let action = `activateCouponCode('${coupon.code}')`; 
-        
-        if(['badges', 'frames', 'banners', 'texts'].includes(type)) {
-            action = `activateCoupon('${coupon.code}', '${type}')`;
+        if(['blackmarket', 'badges', 'frames', 'banners', 'texts'].includes(type)) {
+            action = `activateCoupon('${coupon.id || coupon.code}', '${type}')`;
         }
 
         ticket.innerHTML = `
             <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
             <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
             <div style="display:flex; align-items:center; gap:15px;">
-                <img src="${info.img}" style="height:50px; filter: drop-shadow(0 0 5px #00ffcc);">
+                <div style="position:relative;">
+                    <img src="${info.img}" style="height:50px; filter: drop-shadow(0 0 5px #00ffcc);">
+                    <span style="position:absolute; top:-5px; left:-5px; background:#00ffcc; color:#000; font-size:9px; padding:2px 5px; border-radius:4px; font-weight:900;">#${index + 1}</span>
+                </div>
                 <div style="text-align: left;">
-                    <div style="font-family:'Montserrat'; font-weight:900; font-size:13px; color:#fff;">1 FREE ${type.toUpperCase().slice(0,10)}</div>
-                    <div style="font-family:monospace; font-size:10px; color:#555;">CODE: #${coupon.code}</div>
+                    <div style="font-family:'Montserrat'; font-weight:900; font-size:12px; color:#fff;">FREE ${type.toUpperCase()}</div>
+                    <div style="font-family:monospace; font-size:9px; color:#555;">ID: ${coupon.code.substring(0,8)}...</div>
                 </div>
             </div>
-            <button class="bm-price-btn-v4" onclick="${action}">USE CODE</button>
+            <button class="bm-price-btn-v4" onclick="${action}" style="min-width: 80px; font-size: 10px;">ACTIVATE</button>
         `;
         listContainer.appendChild(ticket);
     });
