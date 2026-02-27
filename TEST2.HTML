@@ -9008,6 +9008,56 @@ nav a[href="shop.html"] {
 </head>
 <body>
 
+
+<!-- =========================================
+     CUSTOM INTRO UPLOAD MODAL (TERMINAL V4)
+     ========================================= -->
+<div id="customIntroUploadModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 500px;">
+        <div class="bm-scanline-overlay"></div>
+        <div style="background: rgba(255, 0, 0, 0.1); padding: 25px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div>
+                <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#ff0000;">UPLOAD_CUSTOM_INTRO</div>
+                <div style="font-family:monospace; font-size: 10px; color:#aaa;">COST: 15,000 COINS | FORMAT: VID/AUD</div>
+            </div>
+            <button class="close-pop" onclick="closeModal('customIntroUploadModal')" style="border:1px solid #ff0000; background:transparent; position:static !important;">✕</button>
+        </div>
+
+        <div class="bm-content-scroll" style="padding: 30px; text-align: center;">
+            <div class="v4-badge-item" style="border: none; background: transparent;">
+                <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
+                <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
+                
+                <i class="fas fa-file-audio" style="font-size: 50px; color: #ff0000; margin-bottom: 20px; filter: drop-shadow(0 0 15px #ff0000);"></i>
+                
+                <p id="uploadStatusText" style="font-size: 11px; color: #ccc; margin-bottom: 20px;">Selectează un video sau un fișier audio din galeria ta. Sistemul va extrage automat sunetul.</p>
+
+                <!-- Hidden Input -->
+                <input type="file" id="introFileInput" accept="video/*,audio/*" style="display: none;" onchange="handleIntroSelect(event)">
+                
+                <label for="introFileInput" class="btn-ultra-red-white" style="cursor: pointer; display: inline-block; margin-bottom: 20px;">
+                    <i class="fas fa-search"></i> SELECTEAZĂ FIȘIER
+                </label>
+
+                <div id="introFileName" style="font-family: 'Courier New'; font-size: 10px; color: #00ff88; margin-bottom: 20px; display: none;">-</div>
+
+                <div class="pay-hud-warning" style="text-align: left; margin-bottom: 20px;">
+                    <div class="pay-hud-text" style="font-size: 9px;">INFO: Durata maximă recomandată este de 10 secunde. Videoclipurile vor fi convertite în fișiere audio.</div>
+                </div>
+
+                <button id="btnPayIntro" class="bm-price-btn-v4" style="background: #ff0000 !important; color: #fff; width: 100%;" onclick="processCustomIntroPurchase()" disabled>
+                    AUTHORIZE 15,000 <img src="https://iili.io/fhc1SKQ.png" width="16" style="margin-left:5px;">
+                </button>
+                
+                <!-- Progress Bar -->
+                <div id="uploadProgressContainer" style="width: 100%; height: 4px; background: #222; margin-top: 20px; display: none; border-radius: 10px; overflow: hidden;">
+                    <div id="uploadProgressBar" style="width: 0%; height: 100%; background: #ff0000; box-shadow: 0 0 10px #ff0000; transition: 0.3s;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- PROFILE INTRO SHOP MODAL -->
 <div id="introShopModal" class="account-modal-overlay">
     <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 600px;">
@@ -15763,23 +15813,23 @@ card.innerHTML = `
     });
 };
 
-// --- PROFILE INTROS SHOP (FIXED) ---
+// --- PROFILE INTROS SHOP (UPDATED WITH CUSTOM UPLOAD) ---
 window.openProfileIntroShop = async () => {
     if(!auth.currentUser) return;
 
-    // 1. Close the Menu
     document.getElementById('profilePrestigeModal').classList.remove('active');
-
-    // 2. Open the Shop
     const modal = document.getElementById('introShopModal');
     const list = document.getElementById('introShopList');
     list.innerHTML = '<div style="color:#fff; text-align:center;">LOADING AUDIO...</div>';
     modal.classList.add('active');
 
     const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
-    const owned = userSnap.data().ownedIntros || [];
+    const userData = userSnap.data();
+    const owned = userData.ownedIntros || [];
 
     list.innerHTML = '';
+    
+    // 1. Render standard items from Database
     PROFILE_INTROS_DB.forEach(item => {
         const isOwned = owned.includes(item.id);
         const card = document.createElement('div');
@@ -15799,7 +15849,6 @@ window.openProfileIntroShop = async () => {
                     <div style="font-size:9px; color:#aaa;">Audio Track</div>
                 </div>
             </div>
-            
             <div>
                 ${isOwned 
                     ? `<div style="color:#00ff88; font-weight:900; font-size:10px;">DEȚINUT</div>` 
@@ -15811,6 +15860,23 @@ window.openProfileIntroShop = async () => {
         `;
         list.appendChild(card);
     });
+
+    // 2. APPEND THE CUSTOM UPLOAD CARD AT THE VERY BOTTOM
+    const uploadCard = document.createElement('div');
+    uploadCard.className = 'bm-offer-card-v4';
+    uploadCard.style.cssText = "border: 2px dashed #ff0000; background: rgba(255,0,0,0.05); padding: 20px; margin-top: 20px;";
+    uploadCard.innerHTML = `
+        <div style="text-align: center; width: 100%;">
+            <i class="fas fa-cloud-upload-alt" style="font-size: 30px; color: #ff0000; margin-bottom: 10px;"></i>
+            <div style="font-family:'Orbitron'; font-weight:900; color:#fff; font-size:14px;">UPLOAD CUSTOM INTRO</div>
+            <div style="font-size: 10px; color: #aaa; margin: 10px 0;">Video sau Audio (Maxim 12 secunde)</div>
+            <div style="color: #ffd700; font-weight: 800; font-size: 12px; margin-bottom: 15px;">
+                COST: 15,000 <img src="https://iili.io/fhc1SKQ.png" width="12">
+            </div>
+            <button class="bm-price-btn-v4" style="width:100%; background:#ff0000 !important; color:#fff;" onclick="openCustomIntroPicker()">START UPLOAD</button>
+        </div>
+    `;
+    list.appendChild(uploadCard);
 };
 
 // --- BUY FUNCTION ---
@@ -15838,6 +15904,123 @@ window.buyProfileItem = async (type, id, price) => {
         if(type === 'banner') openProfileBannerShop();
         else openProfileIntroShop();
     } catch(e) { console.error(e); }
+};
+
+
+let selectedIntroBlob = null;
+
+window.openCustomIntroPicker = () => {
+    document.getElementById('customIntroModal').classList.add('active');
+    document.getElementById('upStatus').innerText = "Așteptare fișier (MP4, MOV, MP3, WAV)...";
+    document.getElementById('btnFinalizeIntro').style.display = "none";
+};
+
+window.handleIntroFileSelect = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const status = document.getElementById('upStatus');
+    status.innerText = "PROCESARE... TE RUGĂM SĂ NU ÎNCHIZI MODALUL.";
+
+    if (file.type.includes('video')) {
+        // Extract audio from video
+        try {
+            selectedIntroBlob = await convertVideoToAudio(file);
+            status.innerText = "AUDIO EXTRAS CU SUCCES!";
+            document.getElementById('btnFinalizeIntro').style.display = "inline-flex";
+        } catch (e) {
+            status.innerText = "EROARE LA CONVERSIE: Fișierul este prea mare sau incompatibil.";
+        }
+    } else {
+        // It's already audio
+        selectedIntroBlob = file;
+        status.innerText = "FIȘIER AUDIO PREGĂTIT.";
+        document.getElementById('btnFinalizeIntro').style.display = "inline-flex";
+    }
+};
+
+// --- VIDEO TO AUDIO ENGINE ---
+async function convertVideoToAudio(file) {
+    return new Promise((resolve, reject) => {
+        const video = document.createElement('video');
+        video.src = URL.createObjectURL(file);
+        video.muted = true;
+        video.play(); // Required to start the stream
+
+        const audioContext = new AudioContext();
+        const dest = audioContext.createMediaStreamDestination();
+        const source = audioContext.createMediaElementSource(video);
+        source.connect(dest);
+
+        const recorder = new MediaRecorder(dest.stream);
+        const chunks = [];
+
+        recorder.ondataavailable = (e) => chunks.push(e.data);
+        recorder.onstop = () => {
+            const blob = new Blob(chunks, { type: 'audio/mp3' });
+            resolve(blob);
+        };
+
+        // Capture only first 12 seconds
+        recorder.start();
+        setTimeout(() => {
+            recorder.stop();
+            video.pause();
+            audioContext.close();
+        }, 12000); 
+    });
+}
+
+window.uploadIntroToFirebase = async () => {
+    if (!selectedIntroBlob) return;
+
+    const userRef = doc(db, "accounts", auth.currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.data().coins < 15000) return showCustomAlert("Nu ai 15,000 monede!", "EROARE");
+
+    const confirm = await showCustomConfirm("Vrei să cheltui 15,000 monede pentru acest intro personalizat?", "CONFIRMARE PLATĂ");
+    if (!confirm) return;
+
+    const btn = document.getElementById('btnFinalizeIntro');
+    const bar = document.getElementById('introProgBar');
+    const fill = document.getElementById('introProgFill');
+    
+    btn.disabled = true;
+    btn.innerText = "SE TRANSMITE...";
+    bar.style.display = "block";
+    fill.style.width = "50%";
+
+    try {
+        // 1. Upload to Storage
+        const fileRef = ref(storage, `intros/${auth.currentUser.uid}_${Date.now()}.mp3`);
+        await uploadBytes(fileRef, selectedIntroBlob);
+        const url = await getDownloadURL(fileRef);
+
+        // 2. Update Database
+        const introId = `custom_${Date.now()}`;
+        const introObj = { id: introId, name: "Custom Intro", audio: url, isCustom: true };
+
+        await updateDoc(userRef, {
+            coins: increment(-15000),
+            ownedIntros: arrayUnion(introId),
+            equippedIntro: introObj
+        });
+
+        // 3. Log Transaction
+        await logTransaction(-15000, "COINS", "Shop", "Purchased Custom Intro Upload");
+
+        fill.style.width = "100%";
+        setTimeout(() => {
+            closeModal('customIntroModal');
+            showCustomAlert("Intro-ul a fost încărcat și echipat!", "SUCCES");
+            openProfileIntroShop(); // Refresh list
+        }, 500);
+
+    } catch (e) {
+        console.error(e);
+        showCustomAlert("Eroare la upload.", "FAIL");
+        btn.disabled = false;
+    }
 };
 </script>
 </body>
