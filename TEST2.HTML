@@ -13489,38 +13489,43 @@ onAuthStateChanged(auth, async user => {
 window.openBlackMarket = () => {
     if(!auth.currentUser) return alert("Loghează-te!");
     
-    document.getElementById('blackMarketModal').classList.add('active');
+    const modal = document.getElementById('blackMarketModal');
+    modal.classList.add('active');
 
     // 1. CHECK IF VOUCHER IS ACTIVE
     const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
     console.log("Black Market UI Sync: Ticket Active =", isFree);
 
-    // 2. DEFINE THE BUTTONS WE WANT TO TARGET
-    const buttonsToUpdate = [
-        { id: 'bmRainCard', price: '50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
-        { id: 'bmHijackCard', price: '150 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
-        { id: 'bmBribeCard', price: '50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
-        { id: 'bmPfpCard', price: '15 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' }
+    // 2. DEFINE THE BUTTONS AND THEIR ORIGINAL DIAMOND PRICES
+    const purchaseButtons = [
+        { id: 'bmRainCard', original: '50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
+        { id: 'bmHijackCard', original: '150 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
+        { id: 'bmBribeCard', original: '50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
+        { id: 'bmPfpCard', original: '15 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' }
     ];
 
-    // 3. LOOP AND OVERRIDE UI
-    buttonsToUpdate.forEach(item => {
+    // 3. LOOP THROUGH BUTTONS AND OVERRIDE UI IF VOUCHER IS ACTIVE
+    purchaseButtons.forEach(item => {
         const card = document.getElementById(item.id);
         if (card) {
             const btn = card.querySelector('.bm-price-btn-v4');
             if (btn) {
                 if (isFree) {
-                    btn.innerHTML = `<span style="color:#00ff88; font-weight:900; animation: pulse 1s infinite;">CLAIM FREE</span>`;
+                    // Change to "GRATUIT" or "CLAIM FREE" with a glow
+                    btn.innerHTML = `<span style="color:#00ff88; font-weight:900; animation: pulse 1s infinite;">GRATUIT</span>`;
                     btn.style.boxShadow = "0 0 15px #00ff88";
+                    btn.style.background = "rgba(0, 255, 136, 0.2)";
                 } else {
-                    btn.innerHTML = item.price;
+                    // Restore original diamond price
+                    btn.innerHTML = item.original;
                     btn.style.boxShadow = "";
+                    btn.style.background = ""; // Returns to CSS default
                 }
             }
         }
     });
 
-    // 4. START FX
+    // 4. START TERMINAL FX & CHECKS
     startCoinRainAnimation();
     checkRainCooldown();
     checkHijackStatus();
@@ -15365,6 +15370,8 @@ window.buyFlashDeal = async (id, price, category) => {
 // Start the engine
 initFlashDeals();
 
+
+
 window.activateCouponCode = (code) => {
     const input = document.getElementById('couponInput');
     if (input) {
@@ -15372,8 +15379,7 @@ window.activateCouponCode = (code) => {
         closeModal('subCouponModal');
         closeModal('couponInventoryModal');
         
-        // Scroll to the terminal so the user can see the Validate button
-        scrollToZone('zone-deals'); 
+        // Scroll smoothly to the Coupon Input so the user knows where to click Validate
         
         showCustomAlert("Codul a fost transferat în Terminal.<br>Apasă <b>VALIDATE_CREDENTIALS</b> pentru a activa gratuitatea!", "SISTEM GATA");
     }
