@@ -15372,17 +15372,34 @@ initFlashDeals();
 
 
 
-window.activateCouponCode = (code) => {
-    const input = document.getElementById('couponInput');
-    if (input) {
-        input.value = code;
-        closeModal('subCouponModal');
-        closeModal('couponInventoryModal');
-        
-        // Scroll smoothly to the Coupon Input so the user knows where to click Validate
-        
-        showCustomAlert("Codul a fost transferat în Terminal.<br>Apasă <b>VALIDATE_CREDENTIALS</b> pentru a activa gratuitatea!", "SISTEM GATA");
+window.activateCoupon = (code, type) => {
+    // 1. Set the global "Free Session" variable
+    window.activeCosmeticTicket = { id: code, category: type };
+
+    // 2. Visual Feedback
+    showCustomAlert(
+        `Tichetul pentru <b>${type.toUpperCase()}</b> a fost activat!<br>Următoarea achiziție va fi <b>GRATUITĂ</b>.`, 
+        "SISTEM PREGĂTIT"
+    );
+
+    // 3. Close the inventory modals
+    closeModal('subCouponModal');
+    closeModal('couponInventoryModal');
+
+    // 4. Automatically open the correct shop/terminal
+    if (type === 'blackmarket') {
+        openBlackMarket();
+    } else if (type === 'badges') {
+        openBadgeShop();
+    } else if (type === 'frames') {
+        openFrameShop();
+    } else if (type === 'banners') {
+        openBannerShop();
+    } else if (type === 'texts') {
+        openTextShop();
     }
+    
+    console.log(`System: Ticket ${code} activated for category ${type}`);
 };
 
 window.redeemCoupon = async () => {
