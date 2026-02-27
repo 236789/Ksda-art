@@ -9009,7 +9009,7 @@ nav a[href="shop.html"] {
 <body>
 
 <!-- =========================================
-     CUSTOM INTRO UPLOAD TERMINAL
+     CUSTOM INTRO UPLOAD TERMINAL (REMASTERED)
      ========================================= -->
 <div id="customIntroModal" class="account-modal-overlay" style="z-index: 20000;">
     <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 450px;">
@@ -9022,9 +9022,16 @@ nav a[href="shop.html"] {
             
             <input type="file" id="introFile" accept="video/*,audio/*" style="display: none;" onchange="handleIntroFileSelect(event)">
             
+            <!-- STEP 1: PICK FILE -->
             <label for="introFile" class="btn-ultra-red-white" style="cursor:pointer; display:inline-block; margin-bottom: 20px;">
                 <i class="fas fa-file-import"></i> ALEGE FIȘIER
             </label>
+
+            <!-- STEP 2: NAME INPUT (Visible after picking file) -->
+            <div id="introNameContainer" style="display: none; margin-bottom: 20px;">
+                <label class="v4-input-label">NUME AFIȘAT ÎN INVENTAR</label>
+                <input type="text" id="introNameInput" class="v4-terminal-input" placeholder="INTRO_NAME..." style="border-color: #ff0000 !important; text-align: center;">
+            </div>
 
             <div id="introProgBar" style="width: 100%; height: 4px; background: #222; display: none; border-radius: 10px; overflow: hidden; margin-bottom: 20px;">
                 <div id="introProgFill" style="width: 0%; height: 100%; background: #ff0000; box-shadow: 0 0 10px #ff0000;"></div>
@@ -15898,29 +15905,7 @@ window.openCustomIntroPicker = () => {
     document.getElementById('btnFinalizeIntro').style.display = "none";
 };
 
-window.handleIntroFileSelect = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
 
-    const status = document.getElementById('upStatus');
-    status.innerText = "PROCESARE... TE RUGĂM SĂ NU ÎNCHIZI MODALUL.";
-
-    if (file.type.includes('video')) {
-        // Extract audio from video
-        try {
-            selectedIntroBlob = await convertVideoToAudio(file);
-            status.innerText = "AUDIO EXTRAS CU SUCCES!";
-            document.getElementById('btnFinalizeIntro').style.display = "inline-flex";
-        } catch (e) {
-            status.innerText = "EROARE LA CONVERSIE: Fișierul este prea mare sau incompatibil.";
-        }
-    } else {
-        // It's already audio
-        selectedIntroBlob = file;
-        status.innerText = "FIȘIER AUDIO PREGĂTIT.";
-        document.getElementById('btnFinalizeIntro').style.display = "inline-flex";
-    }
-};
 
 // --- VIDEO TO AUDIO ENGINE ---
 async function convertVideoToAudio(file) {
@@ -15954,8 +15939,41 @@ async function convertVideoToAudio(file) {
     });
 }
 
+window.handleIntroFileSelect = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const status = document.getElementById('upStatus');
+    const nameInput = document.getElementById('introNameInput');
+    const nameContainer = document.getElementById('introNameContainer');
+    
+    status.innerText = "PROCESARE... TE RUGĂM SĂ NU ÎNCHIZI MODALUL.";
+
+    // 1. Get filename and remove extension (e.g. marian.mp4 -> marian)
+    const cleanName = file.name.replace(/\.[^/.]+$/, "");
+    nameInput.value = cleanName.toUpperCase();
+    nameContainer.style.display = "block";
+
+    if (file.type.includes('video')) {
+        try {
+            selectedIntroBlob = await convertVideoToAudio(file);
+            status.innerText = "AUDIO EXTRAS CU SUCCES!";
+            document.getElementById('btnFinalizeIntro').style.display = "inline-flex";
+        } catch (e) {
+            status.innerText = "EROARE LA CONVERSIE: Fișierul este prea mare.";
+        }
+    } else {
+        selectedIntroBlob = file;
+        status.innerText = "FIȘIER AUDIO PREGĂTIT.";
+        document.getElementById('btnFinalizeIntro').style.display = "inline-flex";
+    }
+};
+
 window.uploadIntroToFirebase = async () => {
     if (!selectedIntroBlob) return;
+
+    // GET NAME FROM THE INPUT FIELD
+    const customName = document.getElementById('introNameInput').value.trim() || "CUSTOM INTRO";
 
     const userRef = doc(db, "accounts", auth.currentUser.uid);
     const userSnap = await getDoc(userRef);
@@ -15963,7 +15981,7 @@ window.uploadIntroToFirebase = async () => {
 
     if (userData.coins < 15000) return showCustomAlert("Nu ai 15,000 monede!", "EROARE");
 
-    if(!(await showCustomConfirm("Vrei să cheltui 15,000 monede pentru acest intro personalizat?", "CONFIRMĂ"))) return;
+    if(!(await showCustomConfirm(`Vrei să cheltui 15,000 monede pentru "${customName}"?`, "CONFIRMĂ PLATĂ"))) return;
 
     const btn = document.getElementById('btnFinalizeIntro');
     const bar = document.getElementById('introProgBar');
@@ -15972,7 +15990,7 @@ window.uploadIntroToFirebase = async () => {
     btn.disabled = true;
     btn.innerText = "SE TRANSMITE...";
     bar.style.display = "block";
-    fill.style.width = "50%";
+    fill.style.width = "40%";
 
     try {
         const fileRef = ref(storage, `intros/${auth.currentUser.uid}_${Date.now()}.mp3`);
@@ -15980,24 +15998,30 @@ window.uploadIntroToFirebase = async () => {
         const url = await getDownloadURL(fileRef);
 
         const introId = `custom_${Date.now()}`;
-        // We add 'isCustom: true' so the inventory knows how to handle it
-        const introObj = { id: introId, name: "Custom Intro", audio: url, isCustom: true };
+        // USE THE CUSTOM NAME HERE
+        const introObj = { 
+            id: introId, 
+            name: customName, 
+            audio: url, 
+            isCustom: true 
+        };
 
         await updateDoc(userRef, {
             coins: increment(-15000),
             ownedIntros: arrayUnion(introId),
-            // NEW: We save the full object here so it's not lost
-            customIntros: arrayUnion(introObj), 
+            customIntros: arrayUnion(introObj),
             equippedIntro: introObj
         });
 
-        await logTransaction(-15000, "COINS", "Shop", "Purchased Custom Intro Upload");
+        await logTransaction(-15000, "COINS", "Shop", `Purchased Custom Intro: ${customName}`);
 
         fill.style.width = "100%";
         setTimeout(() => {
             closeModal('customIntroModal');
-            showCustomAlert("Intro-ul a fost încărcat și echipat!", "SUCCES");
+            showCustomAlert(`"${customName}" a fost încărcat și echipat!`, "SUCCES");
             openProfileIntroShop(); 
+            // Reset modal for next time
+            document.getElementById('introNameContainer').style.display = "none";
         }, 500);
 
     } catch (e) {
