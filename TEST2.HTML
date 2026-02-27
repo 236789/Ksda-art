@@ -15158,16 +15158,25 @@ async function initFlashDeals() {
             const lastUpdate = snap.data().lastUpdate;
             
             // CLEAR OLD TIMER BEFORE STARTING NEW ONE
+// CLEAR OLD TIMER BEFORE STARTING NEW ONE
             if (dealsCountdownInterval) clearInterval(dealsCountdownInterval);
             
             dealsCountdownInterval = setInterval(() => {
                 const remaining = Math.max(0, REFRESH_MS - (Date.now() - lastUpdate));
-                const m = Math.floor(remaining / 60000);
-                const s = Math.floor((remaining % 60000) / 1000);
+                
+                // Calculate Hours, Minutes, Seconds separately
+                const h = Math.floor(remaining / (1000 * 60 * 60));
+                const m = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((remaining % (1000 * 60)) / 1000);
                 
                 const timerEl = document.getElementById('dealsResetTimer');
                 if (timerEl) {
-                    timerEl.innerText = `REFRESH: ${m}:${s < 10 ? '0':''}${s}`;
+                    // Format nicely with leading zeros (e.g., 23:05:09)
+                    const hDisp = h < 10 ? '0' + h : h;
+                    const mDisp = m < 10 ? '0' + m : m;
+                    const sDisp = s < 10 ? '0' + s : s;
+                    
+                    timerEl.innerText = `REFRESH: ${hDisp}:${mDisp}:${sDisp}`;
                 }
 
                 // If timer hits 0, the next onSnapshot trigger will handle the refresh
