@@ -9008,52 +9008,30 @@ nav a[href="shop.html"] {
 </head>
 <body>
 
-
 <!-- =========================================
-     CUSTOM INTRO UPLOAD MODAL (TERMINAL V4)
+     CUSTOM INTRO UPLOAD TERMINAL
      ========================================= -->
-<div id="customIntroUploadModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 500px;">
+<div id="customIntroModal" class="account-modal-overlay" style="z-index: 20000;">
+    <div class="shop-modal-v4 accent-rw" style="width: 95%; max-width: 450px;">
         <div class="bm-scanline-overlay"></div>
-        <div style="background: rgba(255, 0, 0, 0.1); padding: 25px; border-bottom: 1px solid #ff0000; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
-            <div>
-                <div style="font-family:'Montserrat'; font-size: 20px; font-weight: 900; color:#ff0000;">UPLOAD_CUSTOM_INTRO</div>
-                <div style="font-family:monospace; font-size: 10px; color:#aaa;">COST: 15,000 COINS | FORMAT: VID/AUD</div>
-            </div>
-            <button class="close-pop" onclick="closeModal('customIntroUploadModal')" style="border:1px solid #ff0000; background:transparent; position:static !important;">✕</button>
+        <div style="background: #000; padding: 20px; border-bottom: 1px solid #ff0000; text-align: center;">
+            <div style="font-family:'Orbitron'; color: #ff0000; font-weight: 900;">SECURE_UPLOAD_TERMINAL</div>
         </div>
+        <div style="padding: 30px; text-align: center;">
+            <p id="upStatus" style="font-size: 11px; color: #ccc; margin-bottom: 20px;">Selectează fișierul pentru procesare...</p>
+            
+            <input type="file" id="introFile" accept="video/*,audio/*" style="display: none;" onchange="handleIntroFileSelect(event)">
+            
+            <label for="introFile" class="btn-ultra-red-white" style="cursor:pointer; display:inline-block; margin-bottom: 20px;">
+                <i class="fas fa-file-import"></i> ALEGE FIȘIER
+            </label>
 
-        <div class="bm-content-scroll" style="padding: 30px; text-align: center;">
-            <div class="v4-badge-item" style="border: none; background: transparent;">
-                <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
-                <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
-                
-                <i class="fas fa-file-audio" style="font-size: 50px; color: #ff0000; margin-bottom: 20px; filter: drop-shadow(0 0 15px #ff0000);"></i>
-                
-                <p id="uploadStatusText" style="font-size: 11px; color: #ccc; margin-bottom: 20px;">Selectează un video sau un fișier audio din galeria ta. Sistemul va extrage automat sunetul.</p>
-
-                <!-- Hidden Input -->
-                <input type="file" id="introFileInput" accept="video/*,audio/*" style="display: none;" onchange="handleIntroSelect(event)">
-                
-                <label for="introFileInput" class="btn-ultra-red-white" style="cursor: pointer; display: inline-block; margin-bottom: 20px;">
-                    <i class="fas fa-search"></i> SELECTEAZĂ FIȘIER
-                </label>
-
-                <div id="introFileName" style="font-family: 'Courier New'; font-size: 10px; color: #00ff88; margin-bottom: 20px; display: none;">-</div>
-
-                <div class="pay-hud-warning" style="text-align: left; margin-bottom: 20px;">
-                    <div class="pay-hud-text" style="font-size: 9px;">INFO: Durata maximă recomandată este de 10 secunde. Videoclipurile vor fi convertite în fișiere audio.</div>
-                </div>
-
-                <button id="btnPayIntro" class="bm-price-btn-v4" style="background: #ff0000 !important; color: #fff; width: 100%;" onclick="processCustomIntroPurchase()" disabled>
-                    AUTHORIZE 15,000 <img src="https://iili.io/fhc1SKQ.png" width="16" style="margin-left:5px;">
-                </button>
-                
-                <!-- Progress Bar -->
-                <div id="uploadProgressContainer" style="width: 100%; height: 4px; background: #222; margin-top: 20px; display: none; border-radius: 10px; overflow: hidden;">
-                    <div id="uploadProgressBar" style="width: 0%; height: 100%; background: #ff0000; box-shadow: 0 0 10px #ff0000; transition: 0.3s;"></div>
-                </div>
+            <div id="introProgBar" style="width: 100%; height: 4px; background: #222; display: none; border-radius: 10px; overflow: hidden; margin-bottom: 20px;">
+                <div id="introProgFill" style="width: 0%; height: 100%; background: #ff0000; box-shadow: 0 0 10px #ff0000;"></div>
             </div>
+
+            <button id="btnFinalizeIntro" class="bm-price-btn-v4" style="width: 100%; display: none; background: #ff0000 !important; color: #fff;" onclick="uploadIntroToFirebase()">CONFIRMĂ & PLĂTEȘTE</button>
+            <button class="view-all-btn" style="margin-top: 15px; width: 100%;" onclick="closeModal('customIntroModal')">ANULEAZĂ</button>
         </div>
     </div>
 </div>
@@ -15813,10 +15791,10 @@ card.innerHTML = `
     });
 };
 
-// --- PROFILE INTROS SHOP (UPDATED WITH CUSTOM UPLOAD) ---
 window.openProfileIntroShop = async () => {
     if(!auth.currentUser) return;
 
+    // Close the prestige menu
     document.getElementById('profilePrestigeModal').classList.remove('active');
     const modal = document.getElementById('introShopModal');
     const list = document.getElementById('introShopList');
@@ -15829,7 +15807,7 @@ window.openProfileIntroShop = async () => {
 
     list.innerHTML = '';
     
-    // 1. Render standard items from Database
+    // 1. Render standard items
     PROFILE_INTROS_DB.forEach(item => {
         const isOwned = owned.includes(item.id);
         const card = document.createElement('div');
@@ -15861,10 +15839,10 @@ window.openProfileIntroShop = async () => {
         list.appendChild(card);
     });
 
-    // 2. APPEND THE CUSTOM UPLOAD CARD AT THE VERY BOTTOM
+    // 2. THE CUSTOM UPLOAD CARD (STILL AT THE BOTTOM)
     const uploadCard = document.createElement('div');
     uploadCard.className = 'bm-offer-card-v4';
-    uploadCard.style.cssText = "border: 2px dashed #ff0000; background: rgba(255,0,0,0.05); padding: 20px; margin-top: 20px;";
+    uploadCard.style.cssText = "border: 2px dashed #ff0000; background: rgba(255,0,0,0.05); padding: 20px; margin-top: 20px; display: flex; flex-direction: column; align-items: center;";
     uploadCard.innerHTML = `
         <div style="text-align: center; width: 100%;">
             <i class="fas fa-cloud-upload-alt" style="font-size: 30px; color: #ff0000; margin-bottom: 10px;"></i>
@@ -15873,7 +15851,7 @@ window.openProfileIntroShop = async () => {
             <div style="color: #ffd700; font-weight: 800; font-size: 12px; margin-bottom: 15px;">
                 COST: 15,000 <img src="https://iili.io/fhc1SKQ.png" width="12">
             </div>
-            <button class="bm-price-btn-v4" style="width:100%; background:#ff0000 !important; color:#fff;" onclick="openCustomIntroPicker()">START UPLOAD</button>
+            <button class="bm-price-btn-v4" style="width:100%; background:#ff0000 !important; color:#fff; cursor: pointer;" onclick="openCustomIntroPicker()">START UPLOAD</button>
         </div>
     `;
     list.appendChild(uploadCard);
