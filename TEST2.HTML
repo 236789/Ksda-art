@@ -9004,9 +9004,171 @@ nav a[href="shop.html"] {
 }
 
 
+/* --- ZONE: TRADING TERMINAL (INDIGO/VIOLET THEME) --- */
+#zone-trading {
+    background: #050010; /* Deepest Indigo Black */
+    position: relative;
+    overflow: hidden;
+    padding: 100px 20px;
+    border-bottom: 2px solid rgba(160, 32, 240, 0.2);
+}
+
+/* 1. BACKGROUND: Floating Data Streams */
+.trading-bg-wrapper {
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
+}
+
+.trading-grid {
+    position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
+    background-image: 
+        linear-gradient(rgba(160, 32, 240, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(160, 32, 240, 0.1) 1px, transparent 1px);
+    background-size: 80px 80px;
+    transform: perspective(600px) rotateX(45deg);
+    animation: tradingScroll 15s linear infinite;
+    opacity: 0.5;
+}
+
+@keyframes tradingScroll {
+    from { background-position: 0 0; }
+    to { background-position: 0 160px; }
+}
+
+/* 2. THE SEPARATOR: Mint to Indigo */
+.sep-deals-trading { --start-color: #00ffcc; --end-color: #a020f0; }
+
+/* 3. NAV BUTTON: Electric Indigo */
+.btn-nav-trading { 
+    background: rgba(160, 32, 240, 0.05); 
+    border: 1px solid #a020f0; 
+    color: #a020f0; 
+    font-family:'Orbitron'; font-weight:900; text-transform:uppercase; 
+    position:relative; overflow:hidden; display:flex; align-items:center; gap:10px; 
+    transition:0.3s; padding: 10px 12px; font-size: 9px; letter-spacing: 1px; border-radius: 4px; 
+}
+.btn-nav-trading:hover { 
+    transform: translateX(8px); 
+    background: #a020f0; 
+    color: #fff; 
+    box-shadow: 0 0 20px rgba(160, 32, 240, 0.6);
+    border-color: #fff;
+}
+
+/* 4. REACTOR STATE (INDIGO) */
+.nav-trigger-reactor.state-trading {
+    border-color: #a020f0 !important;
+    box-shadow: 0 0 25px rgba(160, 32, 240, 0.6), inset 0 0 10px rgba(160, 32, 240, 0.2) !important;
+}
+.nav-trigger-reactor.state-trading i { 
+    color: #a020f0 !important; 
+    filter: drop-shadow(0 0 5px #a020f0);
+}
+
+/* 5. TITLE COLOR FOR TRADING */
+#zone-trading .metallic-title {
+    background: linear-gradient(180deg, #ffffff 0%, #a020f0 100%);
+    -webkit-background-clip: text;
+    --outline-color: #ffffff;
+}
+
+
+/* --- TRADING USER CARDS --- */
+.trading-user-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.trade-card {
+    background: rgba(10, 15, 0, 0.9);
+    border: 1px solid var(--acid);
+    border-radius: 20px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    transition: 0.3s;
+    box-shadow: 0 0 15px rgba(190, 255, 0, 0.05);
+}
+
+.trade-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 25px rgba(190, 255, 0, 0.2);
+}
+
+.trade-card-img-box {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+}
+
+.trade-card-img {
+    width: 100%; height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.1);
+}
+
+.trade-card-info { flex: 1; overflow: hidden; }
+
+.trade-card-name {
+    font-family: 'Orbitron';
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* THE BUTTON */
+.btn-send-trade {
+    background: var(--acid);
+    color: #000;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-family: 'Orbitron';
+    font-size: 10px;
+    font-weight: 900;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.btn-send-trade:hover {
+    filter: brightness(1.2);
+    box-shadow: 0 0 15px var(--acid);
+}
+
+/* REQUEST MODAL */
+#tradeRequestModal .modern-pop-card {
+    border-color: var(--acid);
+    box-shadow: 0 0 50px rgba(190, 255, 0, 0.3);
+}
+
+
   </style>
 </head>
 <body>
+
+
+<!-- TRADE REQUEST MODAL -->
+<div id="tradeRequestModal" class="reward-modal">
+    <div class="modern-pop-card" style="border-radius: 20px; padding: 40px;">
+        <i class="fas fa-exchange-alt" style="font-size: 40px; color: var(--acid); margin-bottom: 20px;"></i>
+        <h2 style="font-family:'Orbitron'; color:#fff;">TRADE REQUEST</h2>
+        <p id="tradeRequestMsg" style="color:#aaa; font-size:14px; margin: 20px 0;"></p>
+        
+        <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px;">
+            <button class="cyber-btn cancel" id="refuseTradeBtn">REFUSE</button>
+            <button class="btn-rain" id="acceptTradeBtn" style="padding: 10px 30px; font-size: 12px; width: auto;">ACCEPT</button>
+        </div>
+    </div>
+</div>
 
 <!-- PROFILE INTRO SHOP MODAL -->
 <div id="introShopModal" class="account-modal-overlay">
@@ -9438,6 +9600,10 @@ nav a[href="shop.html"] {
 <!-- Insert this between Mystery and Black Market buttons -->
 <button class="btn-nav-deals" onclick="scrollToZone('zone-deals')">
     <i class="fas fa-bolt"></i> Flash Deals
+</button>
+
+<button class="btn-nav-trading" onclick="scrollToZone('zone-trading')">
+    <i class="fas fa-exchange-alt"></i> Trading
 </button>
 
         <!-- BLACK MARKET -->
@@ -10086,6 +10252,41 @@ nav a[href="shop.html"] {
 </section>
 
 
+
+<!-- =========================================
+     ZONE: TRADING TERMINAL
+     ========================================= -->
+<section id="zone-trading" class="shop-zone">
+    
+    <!-- Background FX -->
+    <div class="trading-bg-wrapper">
+        <div class="trading-grid"></div>
+    </div>
+
+    <!-- Separator: Deals -> Trading -->
+    <div class="hr-conduit sep-deals-trading">
+        <div class="conduit-line"></div>
+        <div class="conduit-particle"></div>
+        <div class="conduit-node" style="border-color: #a020f0; box-shadow: 0 0 20px #a020f0;">
+            <i class="fas fa-chart-line" style="color: #a020f0;"></i>
+        </div>
+    </div>
+
+    <h1 class="metallic-title">Trading Terminal</h1>
+    <p class="shop-desc">Protocol P2P: Schimbă resurse direct cu alți utilizatori.</p>
+
+<div class="bm-terminal-container" style="border-color: var(--acid); box-shadow: 0 0 40px rgba(190, 255, 0, 0.15);">
+    <div class="bm-header-styled" style="border-color: var(--acid-dim); background: linear-gradient(90deg, #0a1000, #050b14);">
+        <div class="bm-glitch-title" style="color: var(--acid); text-shadow: 2px 0 #000, -1px 0 #3e5200;">TRADING_HUB</div>
+        <div class="bm-sub-glitch" style="color: #fff;">USERS_ONLINE_IN_TERMINAL: <span id="onlineTradeCount">0</span></div>
+    </div>
+    
+    <div id="tradingUserList" class="trading-user-list">
+        <!-- Live Users Injected Here -->
+    </div>
+</div>
+
+</section>
 
     <!-- SECTION 4: THE TERMINAL (Black Market) -->
     <section id="zone-terminal" class="shop-zone">
@@ -13372,6 +13573,14 @@ onAuthStateChanged(auth, async user => {
             };
         }
 
+
+
+// Inside your onAuthStateChanged(user => { ... })
+if(user) {
+    updateShopPresence(true); // Tell system I'm in shop
+    initTradingPresence();    // Watch for others
+    listenForTradeRequests(); // Watch for requests for me
+}
         // Ascultă datele în timp real
 // Ascultă datele în timp real
         onSnapshot(userRef, async (snap) => {
@@ -14386,6 +14595,7 @@ function initAdaptiveNav() {
         'zone-mystery':  { class: 'state-mystery',  color: '#ff6a00' },
         'zone-elite':    { class: 'state-elite',    color: '#ff0000' },
         'zone-deals':    { class: 'state-deals',    color: '#00ffcc' },
+'zone-trading':  { class: 'state-trading',  color: '#a020f0' },
         'zone-terminal': { class: 'state-terminal', color: '#00ff88' }
     };
 
@@ -15839,6 +16049,119 @@ window.buyProfileItem = async (type, id, price) => {
         else openProfileIntroShop();
     } catch(e) { console.error(e); }
 };
+
+
+
+// =========================================
+// TRADING TERMINAL PRESENCE & REQUESTS
+// =========================================
+
+let tradeRequestsUnsub = null;
+
+// 1. TRACK PRESENCE (In Shop)
+async function updateShopPresence(status) {
+    if (!auth.currentUser) return;
+    const userRef = doc(db, "accounts", auth.currentUser.uid);
+    await updateDoc(userRef, { 
+        isInShop: status,
+        lastPresenceUpdate: serverTimestamp() 
+    });
+}
+
+// Set true on load, false when leaving
+window.addEventListener('beforeunload', () => updateShopPresence(false));
+// If they switch tabs, set offline for trading
+document.addEventListener('visibilitychange', () => {
+    updateShopPresence(document.visibilityState === 'visible');
+});
+
+// 2. LISTEN FOR OTHER USERS IN SHOP
+function initTradingPresence() {
+    const listEl = document.getElementById('tradingUserList');
+    const countEl = document.getElementById('onlineTradeCount');
+    
+    // Listen for users where isInShop is true
+    const q = query(collection(db, "accounts"), where("isInShop", "==", true));
+    
+    onSnapshot(q, (snapshot) => {
+        listEl.innerHTML = '';
+        let count = 0;
+        
+        snapshot.forEach((userDoc) => {
+            const data = userDoc.data();
+            if (userDoc.id === auth.currentUser.uid) return; // Skip self
+            
+            count++;
+            const card = document.createElement('div');
+            card.className = `trade-card ${data.equippedBanner?.cssClass || ''}`;
+            card.innerHTML = `
+                <div class="trade-card-img-box">
+                    <img src="${data.image || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" class="trade-card-img">
+                    ${data.equippedFrame ? `<img src="${data.equippedFrame.img}" class="pop-frame-overlay">` : ''}
+                </div>
+                <div class="trade-card-info">
+                    <div class="trade-card-name ${data.equippedText?.cssClass || ''}">${data.username}</div>
+                    <div style="font-size:9px; color:var(--acid);">RANK: ${data.streak || 0} STREAK</div>
+                </div>
+                <button class="btn-send-trade" onclick="sendTradeRequest('${userDoc.id}', '${data.username}')">
+                    TRADE
+                </button>
+            `;
+            listEl.appendChild(card);
+        });
+        countEl.innerText = count;
+        
+        if(count === 0) {
+            listEl.innerHTML = `<div style="color:#444; font-family:Orbitron; width:100%; text-align:center; padding:40px;">NO OTHER USERS IN TERMINAL</div>`;
+        }
+    });
+}
+
+// 3. SEND TRADE REQUEST
+window.sendTradeRequest = async (targetUid, targetName) => {
+    const confirm = await showCustomConfirm(`Send trade request to ${targetName}?`, "INITIATE TRADE");
+    if(!confirm) return;
+
+    const requestRef = doc(db, "trade_requests", auth.currentUser.uid + "_" + targetUid);
+    await setDoc(requestRef, {
+        senderUid: auth.currentUser.uid,
+        senderName: window.currentUserData.username,
+        targetUid: targetUid,
+        status: 'pending',
+        createdAt: serverTimestamp()
+    });
+    showCustomAlert("Request sent! Waiting for response...", "SIGNAL SENT");
+};
+
+// 4. LISTEN FOR INCOMING REQUESTS
+function listenForTradeRequests() {
+    const q = query(collection(db, "trade_requests"), 
+                    where("targetUid", "==", auth.currentUser.uid), 
+                    where("status", "==", "pending"));
+                    
+    onSnapshot(q, (snapshot) => {
+        snapshot.forEach((change) => {
+            const request = change.data();
+            const modal = document.getElementById('tradeRequestModal');
+            document.getElementById('tradeRequestMsg').innerHTML = `<b>${request.senderName}</b> wants to establish a trade link with you.`;
+            
+            modal.classList.add('active');
+            
+            // Buttons logic
+            document.getElementById('acceptTradeBtn').onclick = () => handleTradeResponse(change.id, 'accepted');
+            document.getElementById('refuseTradeBtn').onclick = () => handleTradeResponse(change.id, 'refused');
+        });
+    });
+}
+
+async function handleTradeResponse(requestId, status) {
+    document.getElementById('tradeRequestModal').classList.remove('active');
+    await updateDoc(doc(db, "trade_requests", requestId), { status: status });
+    
+    if(status === 'accepted') {
+        showCustomAlert("Trade link established! (Next step: The Trading Screen)", "LINK_SYNCED");
+    }
+}
 </script>
 </body>
 </html>
