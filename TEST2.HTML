@@ -13486,20 +13486,41 @@ onAuthStateChanged(auth, async user => {
 
 
 
-// --- BLACK MARKET LOGIC ---
-
 window.openBlackMarket = () => {
     if(!auth.currentUser) return alert("Loghează-te!");
-    document.getElementById('blackMarketModal').classList.add('active');
     
-    // Check if a BM ticket is active and change button text
-    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
-    if(isFree) {
-        document.querySelectorAll('.bm-price-btn-v4').forEach(btn => {
-            btn.innerHTML = `<span style="color:#00ff88; animation:pulse 1s infinite;">CLAIM FREE</span>`;
-        });
-    }
+    document.getElementById('blackMarketModal').classList.add('active');
 
+    // 1. CHECK IF VOUCHER IS ACTIVE
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
+    console.log("Black Market UI Sync: Ticket Active =", isFree);
+
+    // 2. DEFINE THE BUTTONS WE WANT TO TARGET
+    const buttonsToUpdate = [
+        { id: 'bmRainCard', price: '50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
+        { id: 'bmHijackCard', price: '150 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
+        { id: 'bmBribeCard', price: '50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
+        { id: 'bmPfpCard', price: '15 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' }
+    ];
+
+    // 3. LOOP AND OVERRIDE UI
+    buttonsToUpdate.forEach(item => {
+        const card = document.getElementById(item.id);
+        if (card) {
+            const btn = card.querySelector('.bm-price-btn-v4');
+            if (btn) {
+                if (isFree) {
+                    btn.innerHTML = `<span style="color:#00ff88; font-weight:900; animation: pulse 1s infinite;">CLAIM FREE</span>`;
+                    btn.style.boxShadow = "0 0 15px #00ff88";
+                } else {
+                    btn.innerHTML = item.price;
+                    btn.style.boxShadow = "";
+                }
+            }
+        }
+    });
+
+    // 4. START FX
     startCoinRainAnimation();
     checkRainCooldown();
     checkHijackStatus();
@@ -15344,8 +15365,6 @@ window.buyFlashDeal = async (id, price, category) => {
 // Start the engine
 initFlashDeals();
 
-
-
 window.activateCouponCode = (code) => {
     const input = document.getElementById('couponInput');
     if (input) {
@@ -15353,7 +15372,7 @@ window.activateCouponCode = (code) => {
         closeModal('subCouponModal');
         closeModal('couponInventoryModal');
         
-        // Scroll smoothly to the Coupon Input so the user knows where to click Validate
+        // Scroll to the terminal so the user can see the Validate button
         scrollToZone('zone-deals'); 
         
         showCustomAlert("Codul a fost transferat în Terminal.<br>Apasă <b>VALIDATE_CREDENTIALS</b> pentru a activa gratuitatea!", "SISTEM GATA");
