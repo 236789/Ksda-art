@@ -14036,7 +14036,7 @@ window.openBlackMarket = () => {
     // 1. Check if the active ticket is for Black Market
     const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
 
-    // 2. Define exactly which buttons to change
+    // 2. Define the buttons and their exact original HTML (Price + Icon)
     const purchaseButtons = [
         { id: 'bmRainCard', original: '50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
         { id: 'bmHijackCard', original: '150 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
@@ -14044,24 +14044,28 @@ window.openBlackMarket = () => {
         { id: 'bmPfpCard', original: '15 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' }
     ];
 
-    // 3. Update the button text inside the modal
+    // 3. Update the buttons
     purchaseButtons.forEach(item => {
         const card = document.getElementById(item.id);
         if (card) {
             const btn = card.querySelector('.bm-price-btn-v4');
             if (btn) {
                 if (isFree) {
-                    btn.innerHTML = `<span style="color:#00ff88; font-weight:900; animation: pulse 1s infinite;">GRATUIT</span>`;
-                    btn.style.boxShadow = "0 0 15px rgba(0, 255, 136, 0.5)";
+                    // FIX: Changed color to #000 (Black) for high contrast on the neon background
+                    btn.innerHTML = `<span style="color:#000; font-weight:900; animation: pulse 1s infinite; text-shadow:none;">GRATUIT</span>`;
+                    btn.style.background = "#00ff88"; // Solid neon green
+                    btn.style.boxShadow = "0 0 20px rgba(0, 255, 136, 0.8)";
                 } else {
+                    // Restore original diamond price
                     btn.innerHTML = item.original;
+                    btn.style.background = ""; // Resets to your CSS default
                     btn.style.boxShadow = "";
                 }
             }
         }
     });
 
-    // 4. Start FX
+    // 4. Start FX & Cooldowns
     startCoinRainAnimation();
     checkRainCooldown();
     checkHijackStatus();
