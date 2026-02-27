@@ -9493,6 +9493,224 @@ nav a[href="shop.html"] {
 .listing-card:hover {
     border-color: #00ff00;
 }
+
+
+
+/* --- ROBLOX MARKET STYLE OVERRIDE --- */
+
+/* 1. The Main Modal Container */
+#secondHandModal .shop-modal-v4 {
+    background-color: #1a1a1a !important; /* Dark Grey/Black */
+    border: 4px solid #fff !important; /* Thick Retro Border */
+    border-radius: 0 !important; /* Sharp corners */
+    box-shadow: 0 0 0 4px #000, 0 0 50px rgba(0,0,0,0.8) !important; /* Double border effect */
+    width: 95%;
+    max-width: 900px;
+    height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 2. Header (Black bar with Title + Tabs) */
+.market-header-retro {
+    background: #000;
+    padding: 15px;
+    border-bottom: 4px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.market-title-retro {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    color: #fff;
+    font-size: 24px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* 3. The Tabs (Green BUY / Red SELL) */
+.market-tabs-wrapper {
+    display: flex;
+    gap: 15px;
+    flex: 1;
+    justify-content: center;
+}
+
+.retro-tab-btn {
+    padding: 10px 40px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    border: 3px solid rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.5);
+    background: #000;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: 0.1s;
+}
+
+/* Active State: BUY (Green) */
+.retro-tab-btn.tab-buy.active {
+    background: #00ff00;
+    color: #000;
+    border-color: #fff;
+    box-shadow: 0 0 15px #00ff00;
+}
+
+/* Active State: SELL (Red) */
+.retro-tab-btn.tab-sell.active {
+    background: #ff0000;
+    color: #000;
+    border-color: #fff;
+    box-shadow: 0 0 15px #ff0000;
+}
+
+/* 4. Search Bar */
+.retro-search {
+    background: #000;
+    border: 2px solid #555;
+    color: #fff;
+    padding: 8px 15px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    width: 200px;
+    outline: none;
+}
+.retro-search:focus { border-color: #fff; }
+
+/* 5. THE SELL GRID (5x2 Layout) */
+.sell-grid-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 Columns */
+    grid-template-rows: repeat(2, 1fr);    /* 2 Rows */
+    gap: 15px;
+    padding: 30px;
+    justify-content: center;
+    background: #111;
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* The Slot Box */
+.market-slot {
+    aspect-ratio: 1 / 1;
+    background: #000;
+    border: 3px solid #444;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: 0.2s;
+}
+
+.market-slot:hover {
+    border-color: #fff;
+    transform: scale(1.05);
+}
+
+/* Empty Slot (+) */
+.slot-empty-icon {
+    font-size: 50px;
+    color: #fff;
+    font-weight: 900;
+}
+
+/* Occupied Slot Styling */
+.market-slot.occupied {
+    border-color: #ff0000; /* Active Listings have red border */
+}
+
+/* Item Preview inside Slot (Reusing your Badge/Frame styles) */
+.slot-preview-wrapper {
+    width: 100%;
+    height: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* Price Tag inside Slot */
+.slot-price-tag {
+    background: #000;
+    color: #fff;
+    font-family: 'Orbitron';
+    font-size: 10px;
+    padding: 2px 8px;
+    border: 1px solid #fff;
+    margin-top: 5px;
+    font-weight: 900;
+}
+.slot-currency-icon {
+    width: 12px; vertical-align: middle; margin-left: 2px;
+}
+
+/* Cancel Button (X) */
+.slot-cancel-btn {
+    position: absolute;
+    top: -5px; right: -5px;
+    background: #ff0000;
+    color: #fff;
+    border: 2px solid #fff;
+    width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* 6. BUY LISTINGS GRID */
+.buy-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+    padding: 20px;
+    background: #111;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.buy-card {
+    background: #000;
+    border: 2px solid #00ff00; /* Green for buyable */
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    transition: 0.2s;
+}
+
+.buy-card:hover {
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+    transform: translateY(-3px);
+}
+
+/* Helper Modals (Category Picker etc) */
+.retro-modal-sm {
+    background: #000 !important;
+    border: 3px solid #fff !important;
+    width: 350px !important;
+    max-width: 90% !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sell-grid-container {
+        grid-template-columns: repeat(3, 1fr); /* 3 cols on mobile */
+    }
+    .market-header-retro {
+        flex-direction: column;
+    }
+    .market-tabs-wrapper { width: 100%; }
+    .retro-search { width: 100%; }
+}
   </style>
 </head>
 <body>
@@ -9517,46 +9735,93 @@ nav a[href="shop.html"] {
     </div>
 </div>
 
-<!-- 1. MAIN MARKET MODAL -->
+<!-- 1. MAIN MARKET MODAL (ROBLOX STYLE) -->
 <div id="secondHandModal" class="account-modal-overlay">
-    <div class="shop-modal-v4" style="width: 95%; max-width: 900px; height: 85vh;">
+    <div class="shop-modal-v4">
         
-        <!-- Header Controls -->
-        <div style="padding: 20px; background: #080808;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2 style="margin:0; font-family:'Montserrat'; font-weight:900; color:#fff; font-size:24px;">MARKETPLACE</h2>
-                <button class="close-pop" onclick="closeModal('secondHandModal')" style="position:static !important; border:2px solid #fff; background:#ff0000;">✕</button>
+        <!-- HEADER -->
+        <div class="market-header-retro">
+            <div class="market-title-retro">MARKETPLACE</div>
+            
+            <div class="market-tabs-wrapper">
+                <div id="tabBuy" class="retro-tab-btn tab-buy active" onclick="switchMarketTab('buy')">BUY</div>
+                <div id="tabSell" class="retro-tab-btn tab-sell" onclick="switchMarketTab('sell')">SELL</div>
             </div>
+            
+            <button class="close-pop" onclick="closeModal('secondHandModal')" style="position:static !important; border:2px solid #fff; background:#ff0000; width:30px; height:30px;">✕</button>
+        </div>
 
-            <!-- TABS -->
-            <div style="display: flex; gap: 15px;">
-                <div id="tabBuy" class="market-tab-btn tab-buy active" onclick="switchMarketTab('buy')">BUY</div>
-                <div id="tabSell" class="market-tab-btn tab-sell" onclick="switchMarketTab('sell')">SELL</div>
-            </div>
-
-            <!-- SEARCH -->
-            <input type="text" id="marketSearch" class="market-search-bar" placeholder="SEARCH ITEMS..." oninput="filterMarketItems()">
+        <!-- SEARCH BAR (Sticky under header) -->
+        <div style="background: #111; padding: 10px 20px; border-bottom: 2px solid #333; display:flex; justify-content:center;">
+             <input type="text" id="marketSearch" class="retro-search" placeholder="SEARCH ITEM..." oninput="filterMarketItems()">
         </div>
 
         <!-- CONTENT AREA -->
-        <div class="bm-content-scroll" style="background: #050505;">
+        <div style="flex: 1; overflow: hidden; position: relative;">
             
             <!-- VIEW: BUY (Public Listings) -->
-            <div id="marketBuyContainer" style="padding: 20px;">
-                <div id="marketListingsGrid" class="boutique-grid" style="grid-template-columns: repeat(4, 1fr); gap: 15px;">
-                    <!-- Listings load here -->
-                </div>
+            <div id="marketBuyContainer" class="buy-grid-container">
+                <!-- Listings injected by JS -->
             </div>
 
             <!-- VIEW: SELL (10 Slots) -->
-            <div id="marketSellContainer" style="display: none;">
-                <div style="text-align: center; margin-top: 20px; font-family: 'Orbitron'; letter-spacing: 2px;">SELL UNITS (ACTIVE LISTINGS)</div>
-                <div class="market-slots-grid" id="sellSlotsGrid">
-                    <!-- 10 Slots generated by JS -->
-                </div>
-                <p style="text-align: center; color: #555; font-size: 10px; margin-top: 10px;">ITEMS EXPIRE AFTER 24H. NO TAXES.</p>
+            <div id="marketSellContainer" class="sell-grid-container" style="display: none;">
+                <!-- 10 Slots injected by JS -->
             </div>
 
+        </div>
+    </div>
+</div>
+
+<!-- 2. CATEGORY PICKER (When clicking empty slot) -->
+<div id="marketCategoryModal" class="account-modal-overlay" style="z-index: 12000;">
+    <div class="shop-modal-v4 retro-modal-sm">
+        <div style="padding: 15px; border-bottom: 2px solid #333; text-align: center; color: #fff; font-family:'Orbitron'; font-weight:bold;">
+            SELECT CATEGORY
+        </div>
+        <div class="cat-pick-grid" style="padding: 15px;">
+            <div class="cat-pick-btn" onclick="openMarketInventory('badges')"><i class="fas fa-certificate"></i> BADGES</div>
+            <div class="cat-pick-btn" onclick="openMarketInventory('texts')"><i class="fas fa-font"></i> TEXTS</div>
+            <div class="cat-pick-btn" onclick="openMarketInventory('frames')"><i class="fas fa-crop-alt"></i> FRAMES</div>
+            <div class="cat-pick-btn" onclick="openMarketInventory('banners')"><i class="fas fa-image"></i> BANNERS</div>
+            <div class="cat-pick-btn" onclick="openMarketInventory('intros')"><i class="fas fa-music"></i> INTROS</div>
+        </div>
+        <button onclick="closeModal('marketCategoryModal')" style="width:100%; background:#333; color:#fff; border:none; padding:10px; cursor:pointer;">CANCEL</button>
+    </div>
+</div>
+
+<!-- 3. INVENTORY PICKER (Select Item to Sell) -->
+<div id="marketSelectorModal" class="account-modal-overlay" style="z-index: 13000;">
+    <div class="shop-modal-v4" style="width: 95%; max-width: 500px; height: 70vh; background:#000 !important; border:2px solid #fff !important;">
+        <div style="padding: 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family:'Orbitron'; font-weight:bold; color:#fff;">PICK ITEM TO SELL</span>
+            <button class="close-pop" onclick="closeModal('marketSelectorModal')" style="position:static; width:25px; height:25px;">✕</button>
+        </div>
+        <div id="marketSelectorGrid" class="bm-content-scroll" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px;">
+            <!-- Inventory items load here -->
+        </div>
+    </div>
+</div>
+
+<!-- 4. CONFIG MODAL (Set Price) -->
+<div id="marketConfigModal" class="account-modal-overlay" style="z-index: 14000;">
+    <div class="shop-modal-v4 retro-modal-sm">
+        <div style="padding: 20px; text-align: center;">
+            <h3 id="confItemName" style="margin: 0 0 15px 0; color: #fff; font-family:'Montserrat';">ITEM NAME</h3>
+            
+            <!-- Preview of item being sold -->
+            <div id="confItemPreview" style="margin-bottom: 20px; display:flex; justify-content:center;"></div>
+            
+            <label style="font-size: 10px; color: #aaa; display: block; margin-bottom: 5px; font-family:'Orbitron';">PRICE</label>
+            <input type="number" id="marketSellPrice" class="v4-terminal-input" placeholder="AMOUNT" style="margin-bottom: 15px; border-color:#fff !important;">
+            
+            <label style="font-size: 10px; color: #aaa; display: block; margin-bottom: 5px; font-family:'Orbitron';">CURRENCY</label>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button id="btnCurrCoins" class="qty-btn active" style="flex:1;" onclick="setSellCurrency('coins')">COINS</button>
+                <button id="btnCurrGems" class="qty-btn" style="flex:1;" onclick="setSellCurrency('diamonds')">GEMS</button>
+            </div>
+
+            <button class="bm-price-btn-v4" onclick="publishMarketItem()" style="width: 100%; background: #00ff00 !important; color: #000 !important; font-size:14px; padding:12px;">PUBLISH OFFER</button>
         </div>
     </div>
 </div>
@@ -16523,150 +16788,148 @@ window.openSecondHandMarket = () => {
     document.getElementById('secondHandModal').classList.add('active');
 };
 
+// --- IMPORT FIX (Add this to the top of your script imports) ---
+import { arrayRemove, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// --- GLOBAL MARKET VARIABLES ---
+// --- MARKET VARIABLES ---
 let currentMarketTab = 'buy';
-let selectedSellSlotIndex = -1; // 0 to 9
-let draftListing = {
-    category: null,
-    itemId: null,
-    itemData: null, // Full object from DB
-    currency: 'coins',
-    price: 0
-};
+let draftListing = { category: null, itemId: null, itemData: null, currency: 'coins', price: 0 };
 
-// --- 1. OPEN MARKET ---
+// --- 1. RENDER HELPER (THE KEY TO FIXING "TRASH" LOOK) ---
+// This uses your existing CSS classes (bubble-fire, badge-singularity, etc.)
+function getVisualHtml(type, item) {
+    if (type === 'badges') {
+        const isSpecial = ['b_wheel_god', 'b_immortal', 'b_celestial', 'b_singularity'].includes(item.id);
+        const badgeClass = item.id === 'b_singularity' ? 'badge-singularity' : (item.isElite ? (item.animClass + ' elite-gif-badge') : (isSpecial ? `badge-${item.id}` : 'shop-badge-preview'));
+        
+        let style = '';
+        if (!item.isElite && !isSpecial) {
+             style = `background:${item.color} !important; color:#000 !important; font-weight:900; box-shadow:0 0 10px ${item.color};`;
+        }
+        
+        // Handle "The Hub" and other complex HTML badges
+        if(item.isHub) return `<span class="${item.animClass} shop-badge-preview"><span class="hub-text-white">The</span><span class="hub-text-orange">Hub</span></span>`;
+        
+        return `<span class="${badgeClass}" style="${style} scale:0.8;"><i class="fas ${item.icon}"></i> ${item.text}</span>`;
+    } 
+    else if (type === 'frames') {
+        return `<div style="position:relative; width:60px; height:60px;">
+                    <img src="https://i.ibb.co/4pGm9S2/user-placeholder.png" style="width:100%; height:100%; border-radius:50%;">
+                    <img src="${item.img}" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:145%; height:145%;">
+                </div>`;
+    }
+    else if (type === 'texts') {
+        return `<span class="${item.cssClass}" style="font-size:14px; font-weight:900;">${item.name}</span>`;
+    }
+    else if (type === 'banners') {
+        return `<div class="${item.cssClass}" style="width:100px; height:40px; border-radius:8px;"></div>`;
+    }
+    else if (type === 'intros') {
+        return `<i class="fas fa-music" style="font-size:30px; color:#fff;"></i>`;
+    }
+    return `<span>${item.name}</span>`;
+}
+
+// --- 2. OPEN & SWITCH TABS ---
 window.openSecondHandMarket = () => {
-    if (!auth.currentUser) return showCustomAlert("Loghează-te pentru a accesa piața!", "ACCES RESTRICTIV");
+    if (!auth.currentUser) return showCustomAlert("Loghează-te!", "EROARE");
     document.getElementById('secondHandModal').classList.add('active');
-    switchMarketTab('buy'); // Default to buy
+    switchMarketTab('buy');
 };
 
-// --- 2. SWITCH TABS ---
 window.switchMarketTab = (tab) => {
     currentMarketTab = tab;
     
-    // UI Updates
     document.getElementById('tabBuy').classList.toggle('active', tab === 'buy');
     document.getElementById('tabSell').classList.toggle('active', tab === 'sell');
     
-    document.getElementById('marketBuyContainer').style.display = tab === 'buy' ? 'block' : 'none';
+    document.getElementById('marketBuyContainer').style.display = tab === 'buy' ? 'grid' : 'none';
     document.getElementById('marketSellContainer').style.display = tab === 'sell' ? 'block' : 'none';
 
-    if (tab === 'buy') {
-        loadMarketListings(); // Load public items
-    } else {
-        renderSellSlots(); // Load user's 10 slots
-    }
+    if (tab === 'buy') loadMarketListings();
+    else renderSellSlots();
 };
 
-// --- 3. RENDER SELL SLOTS (10 Slots Logic) ---
+// --- 3. RENDER SELL SLOTS (10 SQUARES) ---
 async function renderSellSlots() {
     const grid = document.getElementById('sellSlotsGrid');
-    grid.innerHTML = '<div style="color:white; grid-column:span 5;">LOADING SLOTS...</div>';
+    grid.innerHTML = '<div style="color:white;">Loading slots...</div>';
     
     const uid = auth.currentUser.uid;
-    
-    // Fetch active listings for this user
     const q = query(collection(db, "market_listings"), where("sellerUid", "==", uid));
     const snap = await getDocs(q);
     const myListings = [];
     snap.forEach(doc => myListings.push({ id: doc.id, ...doc.data() }));
 
-    grid.innerHTML = ''; // Clear
+    grid.innerHTML = ''; 
 
-    // Create 10 Slots
     for (let i = 0; i < 10; i++) {
-        // Check if we have a listing for this slot (simulated by array index)
-        // In a real DB we might store slotIndex, but here we just fill them sequentially
-        const listing = myListings[i]; 
-
+        const listing = myListings[i];
         const slot = document.createElement('div');
         
         if (listing) {
-            // OCCUPIED SLOT
-            slot.className = 'sell-slot occupied';
+            slot.className = 'market-slot occupied';
             
-            // Get Image based on item type
-            let imgUrl = "https://i.ibb.co/4pGm9S2/user-placeholder.png"; // Fallback
-            if(listing.itemType === 'badges') imgUrl = getBadgeImage(listing.itemId); // Helper needed
-            if(listing.itemType === 'frames') imgUrl = getFrameImage(listing.itemId);
-            // ... add other helpers
+            // Reconstruct Item Object locally to get visual data
+            let dbSource = [];
+            if(listing.itemType === 'badges') dbSource = BADGES_DB;
+            if(listing.itemType === 'frames') dbSource = FRAMES_DB;
+            if(listing.itemType === 'texts') dbSource = TEXTS_DB;
+            if(listing.itemType === 'banners') dbSource = BANNERS_DB;
+            if(listing.itemType === 'intros') dbSource = PROFILE_INTROS_DB;
             
+            const itemData = dbSource.find(x => x.id === listing.itemId) || { name: 'Unknown' };
+            const visual = getVisualHtml(listing.itemType, itemData);
+            const currIcon = listing.currency === 'coins' ? 'https://iili.io/fhc1SKQ.png' : 'https://iili.io/fv5bmtj.png';
+
             slot.innerHTML = `
-                <img src="${imgUrl}" class="slot-img">
-                <div class="slot-price">${listing.price} ${listing.currency === 'coins' ? 'C' : 'D'}</div>
-                <button onclick="removeListing('${listing.id}', event)" style="position:absolute; top:0; right:0; background:red; border:none; color:white; font-size:10px; cursor:pointer;">X</button>
+                <div class="slot-preview-wrapper">${visual}</div>
+                <div class="slot-price-tag">${listing.price} <img src="${currIcon}" class="slot-currency-icon"></div>
+                <div class="slot-cancel-btn" onclick="removeListing('${listing.id}', '${listing.itemType}', '${listing.itemId}', event)">X</div>
             `;
         } else {
-            // EMPTY SLOT
-            slot.className = 'sell-slot';
-            slot.innerHTML = `<div class="slot-plus">+</div>`;
-            slot.onclick = () => initiateSellProcess(i);
+            slot.className = 'market-slot';
+            slot.innerHTML = `<div class="slot-empty-icon">+</div>`;
+            slot.onclick = () => document.getElementById('marketCategoryModal').classList.add('active');
         }
-        
         grid.appendChild(slot);
     }
 }
 
-// --- 4. SELL PROCESS START ---
-function initiateSellProcess(index) {
-    selectedSellSlotIndex = index;
-    // Open Category Modal
-    document.getElementById('marketCategoryModal').classList.add('active');
-}
-
+// --- 4. SELECT ITEM FROM INVENTORY ---
 window.openMarketInventory = async (category) => {
     draftListing.category = category;
     document.getElementById('marketCategoryModal').classList.remove('active');
     
     const modal = document.getElementById('marketSelectorModal');
     const grid = document.getElementById('marketSelectorGrid');
-    grid.innerHTML = 'Loading...';
+    grid.innerHTML = '<div style="color:white; text-align:center;">SCANNING INVENTORY...</div>';
     modal.classList.add('active');
 
-    // Load User Inventory for specific category
     const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
     const userData = userSnap.data();
     
-    grid.innerHTML = '';
+    let dbSource = [], ownedField = '';
     
-    let items = [];
-    let ownedIds = [];
+    if (category === 'badges') { dbSource = BADGES_DB; ownedField = 'ownedBadges'; }
+    if (category === 'frames') { dbSource = FRAMES_DB; ownedField = 'ownedFrames'; }
+    if (category === 'texts') { dbSource = TEXTS_DB; ownedField = 'ownedTexts'; }
+    if (category === 'banners') { dbSource = BANNERS_DB; ownedField = 'ownedBanners'; }
+    if (category === 'intros') { dbSource = PROFILE_INTROS_DB; ownedField = 'ownedIntros'; }
 
-    // Map category to DB and User Field
-    if (category === 'badges') { items = BADGES_DB; ownedIds = userData.ownedBadges || []; }
-    if (category === 'frames') { items = FRAMES_DB; ownedIds = userData.ownedFrames || []; }
-    if (category === 'texts') { items = TEXTS_DB; ownedIds = userData.ownedTexts || []; }
-    if (category === 'banners') { items = BANNERS_DB; ownedIds = userData.ownedBanners || []; }
-    // Add logic for Intros/PBanners/Tickets if needed
+    const ownedIds = userData[ownedField] || [];
+    const myItems = dbSource.filter(i => ownedIds.includes(i.id));
 
-    // Filter Items
-    const myItems = items.filter(i => ownedIds.includes(i.id));
-
+    grid.innerHTML = '';
     if(myItems.length === 0) {
-        grid.innerHTML = '<div style="color:#aaa; grid-column:span 3; text-align:center;">NO ITEMS IN THIS CATEGORY</div>';
+        grid.innerHTML = `<div style="color:#aaa; grid-column:1/-1; text-align:center;">EMPTY CATEGORY</div>`;
         return;
     }
 
     myItems.forEach(item => {
         const div = document.createElement('div');
-        div.style.border = '1px solid #333';
-        div.style.padding = '10px';
-        div.style.textAlign = 'center';
-        div.style.cursor = 'pointer';
-        div.style.background = '#111';
-        
-        // Visual
-        let visual = '';
-        if(category === 'frames') visual = `<img src="${item.img}" style="height:50px;">`;
-        else if(category === 'badges') visual = `<i class="fas ${item.icon}" style="font-size:30px; color:${item.color.includes('#') ? item.color : '#fff'};"></i>`;
-        else visual = item.name;
-
-        div.innerHTML = `
-            ${visual}
-            <div style="font-size:10px; margin-top:5px; color:#fff;">${item.name || item.text}</div>
-        `;
+        div.style.cssText = "background:#111; border:1px solid #444; padding:10px; cursor:pointer; text-align:center;";
+        div.innerHTML = getVisualHtml(category, item);
         div.onclick = () => openConfigModal(item);
         grid.appendChild(div);
     });
@@ -16674,146 +16937,128 @@ window.openMarketInventory = async (category) => {
 
 function openConfigModal(item) {
     draftListing.itemId = item.id;
-    draftListing.itemData = item; // Store local DB data for reference
+    draftListing.itemData = item;
     
     document.getElementById('marketSelectorModal').classList.remove('active');
-    
     const modal = document.getElementById('marketConfigModal');
-    document.getElementById('confItemName').innerText = item.name || item.text;
     
-    // Set Image for Config
-    const imgEl = document.getElementById('confItemImg');
-    if(draftListing.category === 'frames') imgEl.src = item.img;
-    else imgEl.src = "https://i.ibb.co/4pGm9S2/user-placeholder.png"; // Generic for non-images
+    document.getElementById('confItemName').innerText = item.name || item.text;
+    document.getElementById('confItemPreview').innerHTML = getVisualHtml(draftListing.category, item);
+    document.getElementById('marketSellPrice').value = '';
     
     modal.classList.add('active');
 }
 
-// --- 5. CONFIG LOGIC ---
 window.setSellCurrency = (curr) => {
     draftListing.currency = curr;
     document.getElementById('btnCurrCoins').classList.toggle('active', curr === 'coins');
     document.getElementById('btnCurrGems').classList.toggle('active', curr === 'diamonds');
 };
 
+// --- 5. PUBLISH LISTING ---
 window.publishMarketItem = async () => {
-    const priceInput = document.getElementById('marketSellPrice');
-    const price = parseInt(priceInput.value);
-    
+    const price = parseInt(document.getElementById('marketSellPrice').value);
     if (!price || price <= 0) return alert("Invalid Price!");
 
-    // 1. Remove Item from User Inventory (To prevent duping)
     const userRef = doc(db, "accounts", auth.currentUser.uid);
-    let fieldToRemove = '';
-    if(draftListing.category === 'badges') fieldToRemove = 'ownedBadges';
-    if(draftListing.category === 'frames') fieldToRemove = 'ownedFrames';
-    if(draftListing.category === 'texts') fieldToRemove = 'ownedTexts';
-    if(draftListing.category === 'banners') fieldToRemove = 'ownedBanners';
+    let field = '';
+    if (draftListing.category === 'badges') field = 'ownedBadges';
+    if (draftListing.category === 'frames') field = 'ownedFrames';
+    if (draftListing.category === 'texts') field = 'ownedTexts';
+    if (draftListing.category === 'banners') field = 'ownedBanners';
+    if (draftListing.category === 'intros') field = 'ownedIntros';
 
     try {
-        // A. Remove from Inventory
-        await updateDoc(userRef, {
-            [fieldToRemove]: arrayRemove(draftListing.itemId)
-        });
+        // 1. Remove from Inventory
+        await updateDoc(userRef, { [field]: arrayRemove(draftListing.itemId) });
 
-        // B. Add to Market Listings
+        // 2. Add to Market
         await addDoc(collection(db, "market_listings"), {
             sellerUid: auth.currentUser.uid,
             sellerName: window.currentUserData.username,
             itemId: draftListing.itemId,
             itemType: draftListing.category,
-            itemName: draftListing.itemData.name || draftListing.itemData.text, // Save Name for display
+            itemName: draftListing.itemData.name || draftListing.itemData.text,
             currency: draftListing.currency,
             price: price,
             timestamp: serverTimestamp(),
-            expiresAt: Date.now() + (24 * 60 * 60 * 1000) // 24 Hours
+            expiresAt: Date.now() + (24 * 60 * 60 * 1000) 
         });
 
-        alert("Item Listed Successfully!");
         closeModal('marketConfigModal');
-        // Reset Draft
-        priceInput.value = '';
-        switchMarketTab('sell'); // Refresh Slots
+        showCustomAlert("Item Listed!", "SUCCESS");
+        switchMarketTab('sell'); 
 
-    } catch (e) {
-        console.error("Error listing item:", e);
-        alert("Error listing item. Check console.");
-    }
+    } catch (e) { console.error(e); alert("Error listing item."); }
 };
 
 // --- 6. REMOVE LISTING ---
-window.removeListing = async (listingId, event) => {
-    event.stopPropagation(); // Prevent slot click
-    if(!confirm("Remove listing and reclaim item?")) return;
+window.removeListing = async (listingId, type, itemId, event) => {
+    event.stopPropagation();
+    if(!confirm("Remove listing?")) return;
 
     try {
         const listingRef = doc(db, "market_listings", listingId);
-        const snap = await getDoc(listingRef);
-        if(!snap.exists()) return;
-        
-        const data = snap.data();
-        
-        // Give item back
-        const userRef = doc(db, "accounts", auth.currentUser.uid);
-        let fieldToAdd = '';
-        if(data.itemType === 'badges') fieldToAdd = 'ownedBadges';
-        if(data.itemType === 'frames') fieldToAdd = 'ownedFrames';
-        if(data.itemType === 'texts') fieldToAdd = 'ownedTexts';
-        if(data.itemType === 'banners') fieldToAdd = 'ownedBanners';
+        let field = '';
+        if (type === 'badges') field = 'ownedBadges';
+        if (type === 'frames') field = 'ownedFrames';
+        if (type === 'texts') field = 'ownedTexts';
+        if (type === 'banners') field = 'ownedBanners';
+        if (type === 'intros') field = 'ownedIntros';
 
-        await updateDoc(userRef, {
-            [fieldToAdd]: arrayUnion(data.itemId)
-        });
-
-        // Delete Listing
+        // Return Item
+        await updateDoc(doc(db, "accounts", auth.currentUser.uid), { [field]: arrayUnion(itemId) });
+        // Delete Doc
         await deleteDoc(listingRef);
         
-        renderSellSlots(); // Refresh
-
+        renderSellSlots();
     } catch(e) { console.error(e); }
 };
 
-// --- 7. LOAD PUBLIC LISTINGS (BUY TAB) ---
+// --- 7. LOAD BUY LISTINGS ---
 async function loadMarketListings() {
     const grid = document.getElementById('marketListingsGrid');
-    grid.innerHTML = "Loading market...";
+    grid.innerHTML = '<div style="color:white;">Scanning network...</div>';
     
     const now = Date.now();
-    // Query listings that haven't expired
-    // Note: Firestore inequalities require composite indexes usually. 
-    // For simplicity, we fetch all and filter in JS if list is small, or use simple query.
     const q = query(collection(db, "market_listings"), orderBy("timestamp", "desc"), limit(50));
     const snap = await getDocs(q);
     
     grid.innerHTML = '';
-    
+    let count = 0;
+
     snap.forEach(doc => {
         const data = doc.data();
-        if(data.expiresAt < now) return; // Skip expired (Should delete lazily)
-        if(data.sellerUid === auth.currentUser.uid) return; // Don't show own items in buy? Or show with "Edit"? User asked to show in buy category too.
+        if(data.expiresAt < now) return; 
+        if(data.sellerUid === auth.currentUser.uid) return; 
+
+        // Reconstruct Item Data for visuals
+        let dbSource = [];
+        if(data.itemType === 'badges') dbSource = BADGES_DB;
+        if(data.itemType === 'frames') dbSource = FRAMES_DB;
+        if(data.itemType === 'texts') dbSource = TEXTS_DB;
+        if(data.itemType === 'banners') dbSource = BANNERS_DB;
+        if(data.itemType === 'intros') dbSource = PROFILE_INTROS_DB;
+        
+        const itemData = dbSource.find(x => x.id === data.itemId) || { name: 'Unknown' };
+        const visual = getVisualHtml(data.itemType, itemData);
+        const currIcon = data.currency === 'coins' ? 'https://iili.io/fhc1SKQ.png' : 'https://iili.io/fv5bmtj.png';
 
         const card = document.createElement('div');
-        card.className = 'sell-slot'; // Reusing slot style for card
-        card.style.border = '2px solid #00ff00';
-        
-        // Helper to get image again (In real app, store image URL in listing doc to save logic)
-        let imgUrl = "https://i.ibb.co/4pGm9S2/user-placeholder.png";
-        if(data.itemType === 'frames') {
-             const f = FRAMES_DB.find(x => x.id === data.itemId);
-             if(f) imgUrl = f.img;
-        } 
-        // ... Logic for other images
-
+        card.className = 'buy-card';
         card.innerHTML = `
-            <div style="font-size:9px; color:#aaa; position:absolute; top:5px; left:5px;">${data.sellerName}</div>
-            <img src="${imgUrl}" class="slot-img">
-            <div style="font-size:10px; color:#fff; margin-bottom:15px;">${data.itemName}</div>
-            <button onclick="buyMarketItem('${doc.id}', ${data.price}, '${data.currency}')" style="background:#00ff00; color:black; border:none; font-weight:bold; padding:5px 10px; cursor:pointer;">
-                BUY: ${data.price} ${data.currency === 'coins' ? 'C' : 'D'}
+            <div style="font-size:9px; color:#aaa; width:100%; text-align:left; margin-bottom:5px;">${data.sellerName}</div>
+            <div style="margin-bottom:10px;">${visual}</div>
+            <div style="font-family:'Orbitron'; font-size:11px; color:#fff; margin-bottom:10px;">${data.itemName}</div>
+            <button onclick="buyMarketItem('${doc.id}', ${data.price}, '${data.currency}')" style="background:#00ff00; color:black; border:none; padding:5px 15px; font-weight:900; cursor:pointer;">
+                BUY: ${data.price} <img src="${currIcon}" style="width:12px; vertical-align:middle;">
             </button>
         `;
         grid.appendChild(card);
+        count++;
     });
+
+    if(count === 0) grid.innerHTML = '<div style="color:#555; text-align:center; grid-column:1/-1;">NO ACTIVE LISTINGS</div>';
 }
 
 // --- 8. BUY LOGIC ---
@@ -16826,56 +17071,51 @@ window.buyMarketItem = async (listingId, price, currency) => {
     const field = currency === 'coins' ? 'coins' : 'diamonds';
     if((myData[field] || 0) < price) return showCustomAlert("Insufficient Funds!", "ERROR");
 
-    if(!confirm(`Buy item for ${price} ${currency}?`)) return;
+    if(!await showCustomConfirm(`Buy for ${price}?`, "CONFIRM")) return;
 
     try {
         await runTransaction(db, async (transaction) => {
             const listingRef = doc(db, "market_listings", listingId);
             const listingSnap = await transaction.get(listingRef);
-            if(!listingSnap.exists()) throw "Item no longer available!";
+            if(!listingSnap.exists()) throw "Item sold/removed!";
             
             const data = listingSnap.data();
             const sellerRef = doc(db, "accounts", data.sellerUid);
 
-            // 1. Deduct from Buyer
+            // Money Transfer
             transaction.update(userRef, { [field]: increment(-price) });
-
-            // 2. Add to Seller
             transaction.update(sellerRef, { [field]: increment(price) });
 
-            // 3. Give Item to Buyer
+            // Give Item
             let fieldToAdd = '';
             if(data.itemType === 'badges') fieldToAdd = 'ownedBadges';
             if(data.itemType === 'frames') fieldToAdd = 'ownedFrames';
             if(data.itemType === 'texts') fieldToAdd = 'ownedTexts';
             if(data.itemType === 'banners') fieldToAdd = 'ownedBanners';
+            if(data.itemType === 'intros') fieldToAdd = 'ownedIntros';
             
             transaction.update(userRef, { [fieldToAdd]: arrayUnion(data.itemId) });
-
-            // 4. Delete Listing
             transaction.delete(listingRef);
         });
 
-        alert("Purchase Successful!");
-        loadMarketListings(); // Refresh
+        showCustomAlert("Item Purchased!", "SUCCESS");
+        loadMarketListings();
 
     } catch (e) {
         console.error(e);
-        alert("Transaction Failed: " + e);
+        showCustomAlert(e, "FAILED");
     }
 };
 
-// --- HELPER FOR IMAGES ---
-function getFrameImage(id) {
-    const f = FRAMES_DB.find(x => x.id === id);
-    return f ? f.img : "https://i.ibb.co/4pGm9S2/user-placeholder.png";
-}
-function getBadgeImage(id) {
-    // Return a generic badge icon or specific if you have image URLs
-    return "https://iili.io/fv5bmtj.png"; 
-}
-
-// IMPORTANT: Need to import `arrayRemove` and `deleteDoc` at the top of your module script
+// Filter Function
+window.filterMarketItems = () => {
+    const term = document.getElementById('marketSearch').value.toLowerCase();
+    const cards = document.querySelectorAll('.buy-card');
+    cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.style.display = text.includes(term) ? 'flex' : 'none';
+    });
+};
 </script>
 </body>
 </html>
