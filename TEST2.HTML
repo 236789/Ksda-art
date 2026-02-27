@@ -16058,29 +16058,41 @@ window.buyProfileItem = async (type, id, price) => {
 
 let tradeRequestsUnsub = null;
 
-// 1. TRACK PRESENCE (In Shop)
+// =========================================
+// TRADING TERMINAL PRESENCE & REQUESTS (V2)
+// =========================================
+
+// =========================================
+// TRADING TERMINAL PRESENCE & REQUESTS (V2)
+// =========================================
+
+// 1. TRACK PRESENCE
 async function updateShopPresence(status) {
     if (!auth.currentUser) return;
     const userRef = doc(db, "accounts", auth.currentUser.uid);
-    await updateDoc(userRef, { 
-        isInShop: status,
-        lastPresenceUpdate: serverTimestamp() 
-    });
+    try {
+        await updateDoc(userRef, { 
+            isInShop: status,
+            lastPresenceUpdate: serverTimestamp() 
+        });
+        console.log("TRADING_TERMINAL: Presence set to " + status);
+    } catch (e) { 
+        console.error("Presence Permission Error: Check your Firestore Rules!", e); 
+    }
 }
 
-// Set true on load, false when leaving
+// Set online when tab is active, offline when closed
 window.addEventListener('beforeunload', () => updateShopPresence(false));
-// If they switch tabs, set offline for trading
 document.addEventListener('visibilitychange', () => {
     updateShopPresence(document.visibilityState === 'visible');
 });
 
-// 2. LISTEN FOR OTHER USERS IN SHOP
+// 2. LISTEN FOR OTHER USERS
 function initTradingPresence() {
     const listEl = document.getElementById('tradingUserList');
     const countEl = document.getElementById('onlineTradeCount');
     
-    // Listen for users where isInShop is true
+    // Query for all users in shop
     const q = query(collection(db, "accounts"), where("isInShop", "==", true));
     
     onSnapshot(q, (snapshot) => {
@@ -16089,33 +16101,54 @@ function initTradingPresence() {
         
         snapshot.forEach((userDoc) => {
             const data = userDoc.data();
-            if (userDoc.id === auth.currentUser.uid) return; // Skip self
+            // SKIP SELF
+            if (userDoc.id === auth.currentUser.uid) return; 
             
             count++;
             const card = document.createElement('div');
+            // Using Acid variables we defined in CSS
             card.className = `trade-card ${data.equippedBanner?.cssClass || ''}`;
             card.innerHTML = `
+                <div class="live-indicator"></div>
                 <div class="trade-card-img-box">
                     <img src="${data.image || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" class="trade-card-img">
                     ${data.equippedFrame ? `<img src="${data.equippedFrame.img}" class="pop-frame-overlay">` : ''}
                 </div>
                 <div class="trade-card-info">
                     <div class="trade-card-name ${data.equippedText?.cssClass || ''}">${data.username}</div>
-                    <div style="font-size:9px; color:var(--acid);">RANK: ${data.streak || 0} STREAK</div>
+                    <div style="font-size:10px; color:#beff00; font-family:monospace; margin-top:4px;">STATUS: LINK_READY</div>
                 </div>
                 <button class="btn-send-trade" onclick="sendTradeRequest('${userDoc.id}', '${data.username}')">
-                    TRADE
+                    INVITE
                 </button>
             `;
             listEl.appendChild(card);
         });
-        countEl.innerText = count;
         
+        if(countEl) countEl.innerText = count;
         if(count === 0) {
-            listEl.innerHTML = `<div style="color:#444; font-family:Orbitron; width:100%; text-align:center; padding:40px;">NO OTHER USERS IN TERMINAL</div>`;
+            listEl.innerHTML = `<div style="color:#444; font-family:Orbitron; width:100%; text-align:center; padding:40px; letter-spacing:2px;">NO_DATA_RECORDS: TERMINAL_EMPTY</div>`;
         }
     });
 }
+
+// Set online when tab is active, offline when closed
+window.addEventListener('beforeunload', () => updateShopPresence(false));
+document.addEventListener('visibilitychange', () => {
+    updateShopPresence(document.visibilityState === 'visible');
+});
+
+
+
+// Set true on load, false when leaving
+window.addEventListener('beforeunload', () => updateShopPresence(false));
+// If they switch tabs, set offline for trading
+document.addEventListener('visibilitychange', () => {
+    updateShopPresence(document.visibilityState === 'visible');
+});
+
+
+  
 
 // 3. SEND TRADE REQUEST
 window.sendTradeRequest = async (targetUid, targetName) => {
@@ -16155,11 +16188,19 @@ function listenForTradeRequests() {
 }
 
 async function handleTradeResponse(requestId, status) {
-    document.getElementById('tradeRequestModal').classList.remove('active');
-    await updateDoc(doc(db, "trade_requests", requestId), { status: status });
+    const modal = document.getElementById('tradeRequestModal');
+    modal.classList.remove('active');
     
-    if(status === 'accepted') {
-        showCustomAlert("Trade link established! (Next step: The Trading Screen)", "LINK_SYNCED");
+    try {
+        const reqRef = doc(db, "trade_requests", requestId);
+        await updateDoc(reqRef, { status: status });
+        
+        if(status === 'accepted') {
+            await showCustomAlert("Handshake complete! Initializing trade interface...", "SYNC_SUCCESS");
+            // Next Step: openTradingInterface(requestId);
+        }
+    } catch (e) {
+        console.error("Trade Response Error:", e);
     }
 }
 </script>
