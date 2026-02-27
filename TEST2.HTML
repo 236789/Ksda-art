@@ -9005,111 +9005,119 @@ nav a[href="shop.html"] {
 
 
 
-/* --- UNIVERSAL SCROLLBAR STYLING FOR MODALS --- */
+/* =========================================
+   CORRECTED UNIVERSAL SCROLLBAR ENGINE
+   ========================================= */
 
-/* 1. TOXIC GREEN (Black Market) */
-#blackMarketModal .bm-content-scroll::-webkit-scrollbar { width: 6px; }
-#blackMarketModal .bm-content-scroll::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.3); }
-#blackMarketModal .bm-content-scroll::-webkit-scrollbar-thumb { 
-    background: #00ff88; 
+/* 1. GLOBAL RESET: Force scrollbars to be visible on these specific containers */
+.bm-content-scroll, 
+.aaa-loot-grid, 
+.inventory-scroll-area,
+#donationUserList,
+#subCouponList {
+    overflow-y: auto !important;
+    scrollbar-width: thin !important; /* Firefox Support */
+    -ms-overflow-style: auto !important; /* IE Support */
+}
+
+/* 2. WEBKIT (Chrome, Safari, Edge) FORCE DISPLAY */
+.bm-content-scroll::-webkit-scrollbar, 
+.aaa-loot-grid::-webkit-scrollbar, 
+.inventory-scroll-area::-webkit-scrollbar,
+#donationUserList::-webkit-scrollbar {
+    display: block !important; 
+    width: 6px !important;
+}
+
+/* 3. SHARED TRACK STYLE */
+.bm-content-scroll::-webkit-scrollbar-track, 
+.aaa-loot-grid::-webkit-scrollbar-track,
+.inventory-scroll-area::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.4) !important;
+    border-radius: 10px;
+}
+
+/* 4. DYNAMIC COLOR DEFINITIONS */
+
+/* TOXIC GREEN (Black Market) */
+#blackMarketModal .bm-content-scroll::-webkit-scrollbar-thumb,
+#tradeInputModal .bm-content-scroll::-webkit-scrollbar-thumb,
+#exchangeModal .bm-content-scroll::-webkit-scrollbar-thumb { 
+    background: #00ff88 !important; 
     border-radius: 10px;
     box-shadow: 0 0 10px #00ff88; 
 }
+#blackMarketModal .bm-content-scroll { scrollbar-color: #00ff88 rgba(0,0,0,0.4); }
 
-/* 2. PINK (Cosmetic Badges) */
-#badgeShopModal .bm-content-scroll::-webkit-scrollbar { width: 6px; }
+/* PINK (Cosmetic Badges) */
 #badgeShopModal .bm-content-scroll::-webkit-scrollbar-thumb { 
-    background: #d63384; 
+    background: #d63384 !important; 
     border-radius: 10px;
-    box-shadow: 0 0 10px #d63384; 
 }
+#badgeShopModal .bm-content-scroll { scrollbar-color: #d63384 rgba(0,0,0,0.4); }
 
-/* 3. PURPLE (Rame de Profil) */
-#frameShopModal .bm-content-scroll::-webkit-scrollbar { width: 6px; }
+/* PURPLE (Rame de Profil) */
 #frameShopModal .bm-content-scroll::-webkit-scrollbar-thumb { 
-    background: #bf55ec; 
+    background: #bf55ec !important; 
     border-radius: 10px;
-    box-shadow: 0 0 10px #bf55ec; 
 }
+#frameShopModal .bm-content-scroll { scrollbar-color: #bf55ec rgba(0,0,0,0.4); }
 
-/* 4. CYAN (Chat Banners) */
-#bannerShopModal .bm-content-scroll::-webkit-scrollbar { width: 6px; }
+/* CYAN (Chat Banners) */
 #bannerShopModal .bm-content-scroll::-webkit-scrollbar-thumb { 
-    background: #00e5ff; 
+    background: #00e5ff !important; 
     border-radius: 10px;
-    box-shadow: 0 0 10px #00e5ff; 
 }
+#bannerShopModal .bm-content-scroll { scrollbar-color: #00e5ff rgba(0,0,0,0.4); }
 
-/* 5. GOLD (Transfer Targets / Alte) */
-#donationListModal .bm-content-scroll::-webkit-scrollbar,
-#alteShopModal .bm-content-scroll::-webkit-scrollbar { width: 6px; }
+/* GOLD (Transfer Targets / Alte) */
 #donationListModal .bm-content-scroll::-webkit-scrollbar-thumb,
-#alteShopModal .bm-content-scroll::-webkit-scrollbar-thumb { 
-    background: #ffd700; 
+#alteShopModal .bm-content-scroll::-webkit-scrollbar-thumb,
+#donationAmountModal .bm-content-scroll::-webkit-scrollbar-thumb,
+#nameChangeModal .bm-content-scroll::-webkit-scrollbar-thumb { 
+    background: #ffd700 !important; 
     border-radius: 10px;
-    box-shadow: 0 0 10px #ffd700; 
+}
+#alteShopModal .bm-content-scroll { scrollbar-color: #ffd700 rgba(0,0,0,0.4); }
+
+/* MAGENTA (Text Colorat / Identity) */
+#textShopModal .bm-content-scroll::-webkit-scrollbar-thumb,
+#pfpChangeModal .bm-content-scroll::-webkit-scrollbar-thumb { 
+    background: #ff00ff !important; 
+    border-radius: 10px;
 }
 
-/* 6. MAGENTA (Text Colorat) */
-#textShopModal .bm-content-scroll::-webkit-scrollbar { width: 6px; }
-#textShopModal .bm-content-scroll::-webkit-scrollbar-thumb { 
-    background: #ff00ff; 
+/* ORANGE (Mystery Vault) */
+#mysteryShopModal .bm-content-scroll::-webkit-scrollbar-thumb,
+#boxDetailModal .bm-content-scroll::-webkit-scrollbar-thumb { 
+    background: #ff6a00 !important; 
     border-radius: 10px;
-    box-shadow: 0 0 10px #ff00ff; 
 }
 
-/* 7. ORANGE (Mystery Vault) */
-#mysteryShopModal .bm-content-scroll::-webkit-scrollbar { width: 6px; }
-#mysteryShopModal .bm-content-scroll::-webkit-scrollbar-thumb { 
-    background: #ff6a00; 
-    border-radius: 10px;
-    box-shadow: 0 0 10px #ff6a00; 
-}
-
-/* 8. PRIMARY CYAN (Probability Log & Inventory) */
-#prizeListModal .aaa-loot-grid::-webkit-scrollbar,
-#inventoryModal .inventory-scroll-area::-webkit-scrollbar { width: 6px; }
+/* PRIMARY CYAN (Probability Log & Inventory) */
 #prizeListModal .aaa-loot-grid::-webkit-scrollbar-thumb,
 #inventoryModal .inventory-scroll-area::-webkit-scrollbar-thumb { 
-    background: var(--primary); 
+    background: #29f3ff !important; 
     border-radius: 10px;
-    box-shadow: 0 0 10px var(--primary); 
+    box-shadow: 0 0 10px #29f3ff; 
 }
 
-/* 9. RED (Elite Boutique & Sub-modals) */
-#eliteShopModal .bm-content-scroll::-webkit-scrollbar,
-#eliteCosmeticsModal .bm-content-scroll::-webkit-scrollbar,
-#introShopModal .bm-content-scroll::-webkit-scrollbar,
-#pBannerShopModal .bm-content-scroll::-webkit-scrollbar,
-#profilePrestigeModal .bm-content-scroll::-webkit-scrollbar,
-#eliteInventoryModal .bm-content-scroll::-webkit-scrollbar { width: 6px; }
-
+/* RED (Elite Boutique & Elite Sub-modals) */
 #eliteShopModal .bm-content-scroll::-webkit-scrollbar-thumb,
 #eliteCosmeticsModal .bm-content-scroll::-webkit-scrollbar-thumb,
 #introShopModal .bm-content-scroll::-webkit-scrollbar-thumb,
 #pBannerShopModal .bm-content-scroll::-webkit-scrollbar-thumb,
 #profilePrestigeModal .bm-content-scroll::-webkit-scrollbar-thumb,
 #eliteInventoryModal .bm-content-scroll::-webkit-scrollbar-thumb { 
-    background: #ff0000; 
+    background: #ff0000 !important; 
     border-radius: 10px;
     box-shadow: 0 0 12px #ff0000; 
 }
 
-/* 10. MINT (Coupon Vault & Sub-coupons) */
-#couponInventoryModal .bm-content-scroll::-webkit-scrollbar,
-#subCouponModal .bm-content-scroll::-webkit-scrollbar { width: 6px; }
+/* MINT (Coupon Vault) */
 #couponInventoryModal .bm-content-scroll::-webkit-scrollbar-thumb,
 #subCouponModal .bm-content-scroll::-webkit-scrollbar-thumb { 
-    background: #00ffcc; 
-    border-radius: 10px;
-    box-shadow: 0 0 10px #00ffcc; 
-}
-
-/* Generic rule to make tracks dark across all */
-.bm-content-scroll::-webkit-scrollbar-track, 
-.aaa-loot-grid::-webkit-scrollbar-track,
-.inventory-scroll-area::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.4);
+    background: #00ffcc !important; 
     border-radius: 10px;
 }
 
