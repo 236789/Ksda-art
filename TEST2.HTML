@@ -14540,7 +14540,7 @@ let countdownInterval = null;
 function initMysteryStockSync() {
     onSnapshot(doc(db, "system", "mystery_box_stock"), async (snap) => {
         const now = Date.now();
-        const RESET_MS = 60000; // 1 Minute
+        const RESET_MS = 3600000; // 1 Hour
 
         if (!snap.exists() || (now - (snap.data().lastReset || 0) > RESET_MS)) {
             // Logic to restock if expired
@@ -15111,7 +15111,7 @@ let isUpdatingDeals = false; // To prevent write-loops
 async function initFlashDeals() {
     onSnapshot(doc(db, "system", "flash_deals"), async (snap) => {
         const now = Date.now();
-        const REFRESH_MS = 60000; // 1 Minute
+        const REFRESH_MS = 86400000; // 1 Day (24 Hours)
 
         // 1. Check if we need to generate new deals
         // Added a 2-second buffer to prevent "instant" re-triggering
