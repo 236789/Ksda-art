@@ -9004,9 +9004,368 @@ nav a[href="shop.html"] {
 }
 
 
+
+/* --- ZONE: SECOND HAND MARKET (ELECTRIC DEEP BLUE) --- */
+#zone-secondhand {
+    background: #02040a; /* Very Dark Blue-Black */
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 100px;
+    border-bottom: 1px solid rgba(0, 85, 255, 0.2);
+}
+
+/* Background Effects */
+.market-bg-wrapper { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+
+.market-grid-floor {
+    position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
+    background-image: 
+        linear-gradient(rgba(0, 85, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 85, 255, 0.1) 1px, transparent 1px);
+    background-size: 80px 80px;
+    transform: perspective(600px) rotateX(70deg);
+    animation: marketGridMove 15s linear infinite;
+    opacity: 0.5;
+}
+
+@keyframes marketGridMove {
+    from { background-position: 0 0; }
+    to { background-position: 0 80px; }
+}
+
+/* Market Buttons Container */
+.market-buttons-container {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin-top: 50px;
+    position: relative;
+    z-index: 2;
+    flex-wrap: wrap;
+}
+
+/* SICK ANIMATED MARKET CARD BUTTON */
+.market-btn-card {
+    width: 300px;
+    height: 180px;
+    background: rgba(2, 10, 30, 0.8);
+    border: 1px solid rgba(0, 85, 255, 0.3);
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 0 25px;
+    gap: 20px;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Icon Box */
+.market-icon-box {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, #0055ff, #001133);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: #fff;
+    box-shadow: 0 0 15px rgba(0, 85, 255, 0.4);
+    z-index: 2;
+}
+
+/* Text */
+.market-btn-text h3 {
+    font-family: 'Orbitron'; font-size: 16px; color: #fff; margin: 0; font-weight: 900;
+}
+.market-btn-text span {
+    font-family: 'Courier New'; font-size: 10px; color: #5599ff;
+}
+
+/* Status Indicator */
+.market-status {
+    position: absolute; top: 10px; right: 10px;
+    font-size: 9px; font-weight: 900; color: #555;
+    background: rgba(0,0,0,0.5); padding: 3px 8px; border-radius: 4px;
+}
+.market-status.online { color: #00ff88; border: 1px solid #00ff88; }
+
+/* The "Sick" Laser Sweep */
+.market-shine {
+    position: absolute; top: 0; left: -150%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 85, 255, 0.5), transparent);
+    transform: skewX(-20deg);
+    transition: 0.5s;
+    z-index: 1;
+}
+
+/* Hover Effects */
+.market-btn-card:hover {
+    transform: translateY(-10px);
+    border-color: #0055ff;
+    box-shadow: 0 0 40px rgba(0, 85, 255, 0.3);
+}
+.market-btn-card:hover .market-shine {
+    left: 150%;
+    transition: 0.7s;
+}
+.market-btn-card:hover .market-icon-box {
+    background: #fff; color: #0055ff;
+}
+
+/* --- MODAL STYLES (Deep Blue) --- */
+.accent-market {
+    background: #02040a !important;
+    border: 1px solid #0055ff !important;
+    box-shadow: 0 0 60px rgba(0, 85, 255, 0.2) !important;
+}
+.title-market {
+    font-family: 'Montserrat'; font-weight: 900; font-size: 22px; 
+    color: #0055ff; text-shadow: 0 0 15px #0055ff;
+}
+.market-modal-header {
+    background: rgba(0, 85, 255, 0.05);
+    padding: 25px;
+    border-bottom: 1px solid #0055ff;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 110;
+}
+
+/* --- QUICK NAV BUTTON STYLE --- */
+.btn-nav-market {
+    background: rgba(0, 85, 255, 0.05);
+    border: 1px solid #0055ff;
+    color: #0055ff;
+    font-family:'Orbitron'; font-weight:900; text-transform:uppercase;
+    position:relative; overflow:hidden; display:flex; align-items:center; gap:10px;
+    transition:0.3s; padding: 10px 12px; font-size: 9px; letter-spacing: 1px; border-radius: 4px;
+}
+.btn-nav-market:hover {
+    transform: translateX(8px);
+    background: #0055ff; color: #fff;
+    box-shadow: 0 0 20px rgba(0, 85, 255, 0.6);
+    border-color: #fff;
+}
+/* White Laser Scan for Button */
+.btn-nav-market::before {
+    content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    animation: btnScan 3s infinite linear;
+}
+
+/* --- REACTOR STATE (BLUE) --- */
+.nav-trigger-reactor.state-market {
+    border-color: #0055ff !important;
+    box-shadow: 0 0 25px rgba(0, 85, 255, 0.6), inset 0 0 10px rgba(0, 85, 255, 0.2) !important;
+    background: #02040a !important;
+}
+.nav-trigger-reactor.state-market i { color: #0055ff !important; filter: drop-shadow(0 0 8px #0055ff); }
+
+/* --- SEPARATOR GRADIENT FIX --- */
+.sep-deals-market .conduit-line {
+    background: linear-gradient(90deg, transparent, #00ffcc 30%, #0055ff 70%, transparent);
+}
+
+/* Mobile Fix */
+@media (max-width: 768px) {
+    .market-buttons-container { flex-direction: column; width: 100%; padding: 0 20px; }
+    .market-btn-card { width: 100%; }
+}
+
+
+/* --- ZONE: SECOND HAND MARKET (REMASTERED) --- */
+#zone-secondhand {
+    background: #02040a; 
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 100px;
+    border-bottom: 1px solid rgba(0, 85, 255, 0.2);
+}
+
+/* 1. FIXED TITLE OUTLINE (The White Stroke) */
+#zone-secondhand .metallic-title {
+    background: linear-gradient(180deg, #fff 0%, #0055ff 100%); 
+    -webkit-background-clip: text; 
+    
+    /* This variable enables the white outline engine you already have */
+    --outline-color: #ffffff; 
+    
+    /* Extra Glow for Blue Depth */
+    filter: drop-shadow(2px 2px 0px var(--outline-color)) drop-shadow(0 0 15px rgba(0, 85, 255, 0.6));
+    position: relative;
+    z-index: 5;
+}
+
+/* 2. RICHER BACKGROUND (No more empty darkness) */
+.market-bg-wrapper { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+
+/* Layer A: The Electric Nebula (Center Glow) */
+.market-nebula {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%; height: 100%;
+    background: radial-gradient(circle at center, rgba(0, 85, 255, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+    filter: blur(60px);
+    animation: bluePulse 8s ease-in-out infinite alternate;
+}
+
+/* Layer B: The 3D Grid Floor */
+.market-grid-floor {
+    position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
+    background-image: 
+        linear-gradient(rgba(0, 85, 255, 0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 85, 255, 0.15) 1px, transparent 1px);
+    background-size: 60px 60px;
+    transform: perspective(500px) rotateX(60deg);
+    animation: marketGridMove 20s linear infinite;
+    mask-image: radial-gradient(circle, black 0%, transparent 80%); /* Fades edges */
+}
+
+/* Layer C: Floating Data Particles (Fills the empty space) */
+.market-digital-rain {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(0, 200, 255, 0.4) 2px, transparent 2px);
+    background-size: 40px 40px;
+    animation: floatUp 10s linear infinite;
+    opacity: 0.3;
+}
+
+@keyframes marketGridMove { from { background-position: 0 0; } to { background-position: 0 60px; } }
+@keyframes bluePulse { 0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.8); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } }
+@keyframes floatUp { from { transform: translateY(0); } to { transform: translateY(-40px); } }
+
+/* Ensure buttons stay on top */
+.market-buttons-container { position: relative; z-index: 5; }
+
+
+
+/* --- ZONE: SECOND HAND MARKET (ELECTRIC WAVES) --- */
+#zone-secondhand {
+    background: radial-gradient(circle at center, #001a33 0%, #02040a 100%);
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 100px;
+    border-bottom: 1px solid rgba(0, 85, 255, 0.2);
+}
+
+/* Container for the effects */
+.market-bg-wrapper { 
+    position: absolute; 
+    inset: 0; 
+    pointer-events: none; 
+    z-index: 0; 
+}
+
+/* WAVE 1: Slow, Deep Blue Current */
+.electric-wave-1 {
+    position: absolute;
+    bottom: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background-color: transparent;
+    border-radius: 40%;
+    background: linear-gradient(45deg, transparent 40%, rgba(0, 85, 255, 0.1) 50%, transparent 60%);
+    animation: rotateWave 15s linear infinite;
+    opacity: 0.6;
+}
+
+/* WAVE 2: Fast, Cyan High Voltage */
+.electric-wave-2 {
+    position: absolute;
+    bottom: -60%; left: -50%;
+    width: 200%; height: 200%;
+    border-radius: 45%;
+    background: linear-gradient(135deg, transparent 45%, rgba(0, 229, 255, 0.08) 50%, transparent 55%);
+    animation: rotateWave 10s linear infinite reverse;
+    opacity: 0.8;
+}
+
+/* PULSE LINE: Horizontal Scanner looking for "Signals" */
+.electric-pulse-line {
+    position: absolute;
+    top: 50%; left: 0;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, #0055ff, #00e5ff, #0055ff, transparent);
+    box-shadow: 0 0 15px #00e5ff;
+    opacity: 0;
+    transform: scaleX(0);
+    animation: signalPulse 4s ease-in-out infinite;
+}
+
+/* STATIC GRID: To keep it looking "Technical" */
+.electric-static-grid {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(0deg, transparent 24%, rgba(0, 85, 255, .03) 25%, rgba(0, 85, 255, .03) 26%, transparent 27%, transparent),
+        linear-gradient(90deg, transparent 24%, rgba(0, 85, 255, .03) 25%, rgba(0, 85, 255, .03) 26%, transparent 27%, transparent);
+    background-size: 50px 50px;
+}
+
+/* ANIMATIONS */
+@keyframes rotateWave {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes signalPulse {
+    0% { opacity: 0; transform: scaleX(0); }
+    20% { opacity: 1; transform: scaleX(1); }
+    80% { opacity: 1; transform: scaleX(1); }
+    100% { opacity: 0; transform: scaleX(0); }
+}
+
+
+
   </style>
 </head>
 <body>
+
+
+<!-- 1. TRADING TERMINAL MODAL -->
+<div id="tradingTerminalModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-market" style="width: 95%; max-width: 800px; height: 80vh;">
+        <div class="bm-scanline-overlay"></div>
+        <div class="market-modal-header">
+            <div>
+                <div class="title-market">TRADING_TERMINAL</div>
+                <div style="font-family:monospace; font-size: 10px; color:#5599ff;">STATUS: DEVELOPMENT | P2P_LINK: WAITING</div>
+            </div>
+            <button class="close-pop" onclick="closeModal('tradingTerminalModal')" style="border-color:#0055ff;">✕</button>
+        </div>
+        <div class="bm-content-scroll" style="display:flex; align-items:center; justify-content:center; flex-direction:column; height:100%;">
+            <i class="fas fa-tools" style="font-size:50px; color:#0055ff; margin-bottom:20px; animation: pulse 2s infinite;"></i>
+            <h2 style="font-family:'Orbitron'; color:#fff;">SYSTEM UNDER CONSTRUCTION</h2>
+            <p style="color:#aaa; font-size:12px;">Acest modul va permite schimburi directe între jucători.</p>
+        </div>
+    </div>
+</div>
+
+<!-- 2. SECOND HAND MARKET MODAL -->
+<div id="secondHandModal" class="account-modal-overlay">
+    <div class="shop-modal-v4 accent-market" style="width: 95%; max-width: 900px; height: 85vh;">
+        <div class="bm-scanline-overlay"></div>
+        <div class="market-modal-header">
+            <div>
+                <div class="title-market">USED_GOODS_MARKET</div>
+                <div style="font-family:monospace; font-size: 10px; color:#5599ff;">REPOSITORY: PUBLIC | TAX: 15%</div>
+            </div>
+            <button class="close-pop" onclick="closeModal('secondHandModal')" style="border-color:#0055ff;">✕</button>
+        </div>
+        
+        <!-- Empty Content Area -->
+        <div class="bm-content-scroll" style="padding: 30px; text-align:center;">
+            <div style="border: 1px dashed #0055ff; padding: 40px; border-radius: 20px; background: rgba(0, 85, 255, 0.05);">
+                <i class="fas fa-boxes" style="font-size: 40px; color: #0055ff; margin-bottom: 15px;"></i>
+                <h3 style="font-family:'Orbitron'; color:#fff;">NO LISTINGS FOUND</h3>
+                <p style="font-size:11px; color:#888;">Momentan nu există obiecte puse la vânzare de alți jucători.</p>
+                <button class="bm-price-btn-v4" style="background: #0055ff !important; margin-top: 20px;">
+                    <i class="fas fa-plus"></i> VINDE UN OBIECT
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- PROFILE INTRO SHOP MODAL -->
 <div id="introShopModal" class="account-modal-overlay">
@@ -9438,6 +9797,12 @@ nav a[href="shop.html"] {
 <!-- Insert this between Mystery and Black Market buttons -->
 <button class="btn-nav-deals" onclick="scrollToZone('zone-deals')">
     <i class="fas fa-bolt"></i> Flash Deals
+</button>
+
+
+<!-- Insert between Flash Deals and Black Market -->
+<button class="btn-nav-market" onclick="scrollToZone('zone-secondhand')">
+    <i class="fas fa-exchange-alt"></i> MARKETPLACE
 </button>
 
         <!-- BLACK MARKET -->
@@ -10083,6 +10448,63 @@ nav a[href="shop.html"] {
         <i class="fas fa-ticket-alt"></i> CUPOANELE MELE
     </button>
 </div>
+</section>
+
+<section id="zone-secondhand" class="shop-zone">
+    
+    <!-- 1. SEPARATOR (Flash Deals Mint -> Electric Blue) -->
+    <div class="hr-conduit sep-deals-market" style="--start-color: #00ffcc; --end-color: #0055ff;">
+        <div class="conduit-line"></div>
+        <div class="conduit-particle"></div>
+        <div class="conduit-node" style="border-color: #0055ff; box-shadow: 0 0 20px #0055ff;">
+            <i class="fas fa-exchange-alt" style="color: #0055ff; transform: rotate(-45deg);"></i>
+        </div>
+    </div>
+
+    <!-- 2. NEW ELECTRIC BACKGROUND FX -->
+    <div class="market-bg-wrapper">
+        <div class="electric-static-grid"></div>
+        <div class="electric-wave-1"></div>
+        <div class="electric-wave-2"></div>
+        <div class="electric-pulse-line"></div>
+    </div>
+
+    <!-- 3. TITLE -->
+    <h1 class="metallic-title" style="background: linear-gradient(180deg, #fff 0%, #0055ff 100%); -webkit-background-clip: text; text-shadow: 0 0 30px #0055ff;">
+        SECOND HAND MARKET
+    </h1>
+    <p class="shop-desc" style="color: #80aaff; position:relative; z-index:2;">Schimburi verificate. Taxe reduse. Echipament rulat.</p>
+
+    <!-- 4. THE TWO SICK BUTTONS -->
+    <div class="market-buttons-container">
+        
+        <!-- Button 1: Trading Terminal -->
+        <div class="market-btn-card" onclick="openTradingTerminal()">
+            <div class="market-shine"></div>
+            <div class="market-icon-box">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="market-btn-text">
+                <h3>TRADING TERMINAL</h3>
+                <span>P2P EXCHANGE SYSTEM</span>
+            </div>
+            <div class="market-status">OFFLINE</div>
+        </div>
+
+        <!-- Button 2: Second Hand Market -->
+        <div class="market-btn-card" onclick="openSecondHandMarket()">
+            <div class="market-shine"></div>
+            <div class="market-icon-box">
+                <i class="fas fa-box-open"></i>
+            </div>
+            <div class="market-btn-text">
+                <h3>USED MARKET</h3>
+                <span>BUY & SELL ITEMS</span>
+            </div>
+            <div class="market-status online">ONLINE</div>
+        </div>
+
+    </div>
 </section>
 
 
@@ -10810,6 +11232,8 @@ nav a[href="shop.html"] {
         </div>
     </div>
 </div>
+
+
 
 
 <script type="module">
@@ -14386,6 +14810,7 @@ function initAdaptiveNav() {
         'zone-mystery':  { class: 'state-mystery',  color: '#ff6a00' },
         'zone-elite':    { class: 'state-elite',    color: '#ff0000' },
         'zone-deals':    { class: 'state-deals',    color: '#00ffcc' },
+    'zone-secondhand': { class: 'state-market', color: '#0055ff' },
         'zone-terminal': { class: 'state-terminal', color: '#00ff88' }
     };
 
@@ -15838,6 +16263,17 @@ window.buyProfileItem = async (type, id, price) => {
         if(type === 'banner') openProfileBannerShop();
         else openProfileIntroShop();
     } catch(e) { console.error(e); }
+};
+
+
+window.openTradingTerminal = () => {
+    if(!auth.currentUser) return showCustomAlert("Loghează-te pentru a accesa terminalul!", "ACCES RESTRICTIV");
+    document.getElementById('tradingTerminalModal').classList.add('active');
+};
+
+window.openSecondHandMarket = () => {
+    if(!auth.currentUser) return showCustomAlert("Loghează-te pentru a vedea ofertele!", "ACCES RESTRICTIV");
+    document.getElementById('secondHandModal').classList.add('active');
 };
 </script>
 </body>
