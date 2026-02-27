@@ -13482,23 +13482,27 @@ onAuthStateChanged(auth, async user => {
 
 // --- BLACK MARKET LOGIC ---
 
-// 1. Open Modal
 window.openBlackMarket = () => {
-    if(!auth.currentUser) return alert("Trebuie să fii logat!");
+    if(!auth.currentUser) return alert("Loghează-te!");
     document.getElementById('blackMarketModal').classList.add('active');
+    
+    // Check if a BM ticket is active and change button text
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
+    if(isFree) {
+        document.querySelectorAll('.bm-price-btn-v4').forEach(btn => {
+            btn.innerHTML = `<span style="color:#00ff88; animation:pulse 1s infinite;">CLAIM FREE</span>`;
+        });
+    }
+
+    startCoinRainAnimation();
     checkRainCooldown();
+    checkHijackStatus();
+    checkBribeStatus();
 };
 
 // --- BLACK MARKET LOGIC (FIXED) ---
 
 
-
-// 1. Open Modal & Check Timer
-window.openBlackMarket = () => {
-    if(!auth.currentUser) return alert("Trebuie să fii logat!");
-    document.getElementById('blackMarketModal').classList.add('active');
-    checkRainCooldown();
-};
 
 // --- BLACK MARKET LOGIC (FIXED & UPDATED) ---
 
@@ -15305,21 +15309,32 @@ initFlashDeals();
 
 
 
+window.activateCouponCode = (code) => {
+    const input = document.getElementById('couponInput');
+    if (input) {
+        input.value = code;
+        closeModal('subCouponModal');
+        closeModal('couponInventoryModal');
+        
+        // Scroll smoothly to the Coupon Input so the user knows where to click Validate
+        scrollToZone('zone-deals'); 
+        
+        showCustomAlert("Codul a fost transferat în Terminal.<br>Apasă <b>VALIDATE_CREDENTIALS</b> pentru a activa gratuitatea!", "SISTEM GATA");
+    }
+};
+
 window.redeemCoupon = async () => {
     const code = document.getElementById('couponInput').value.trim().toUpperCase();
     if(!code) return showCustomAlert("Te rugăm să introduci un cod valid.", "SISTEM_ERROR");
-
-    console.log("Validating manual code entry:", code);
 
     const btn = document.getElementById('btnRedeem');
     btn.innerText = "AUTHENTICATING...";
     btn.disabled = true;
 
-    // Check inventory categories
+    // Check all categories including Black Market
     const categories = ['coins', 'diamonds', 'texts', 'frames', 'banners', 'badges', 'blackmarket'];
     let foundCategory = null;
 
-    // Search for the code in user's data
     for (const cat of categories) {
         const hasIt = window.currentUserData?.myCoupons?.[cat]?.some(c => c.code === code || c.id === code);
         if(hasIt) {
@@ -15329,14 +15344,28 @@ window.redeemCoupon = async () => {
     }
 
     setTimeout(async () => {
+        btn.innerText = "VALIDATE_CREDENTIALS";
+        btn.disabled = false;
+
         if (foundCategory) {
-            console.log("Match found! Category:", foundCategory);
-            // SET THE GLOBAL TICKET SESSION
+            // SET THE GLOBAL SESSION
             window.activeCosmeticTicket = { id: code, category: foundCategory };
             
-            await showCustomAlert(`Cod validat! Tichetul pentru categoria ${foundCategory.toUpperCase()} este acum ACTIV. Următorul obiect este GRATUIT.`, "ACCESS GRANTED");
+            let alertMsg = `Cod validat! Tichetul pentru <b>${foundCategory.toUpperCase()}</b> este acum ACTIV.`;
             
-            // Redirect to the right shop
+            if(foundCategory === 'blackmarket') {
+                alertMsg += "<br><br>Acum poți folosi orice serviciu din <b>Black Market</b> GRATUIT o singură dată!";
+                // Redirect to Black Market
+                openBlackMarket();
+            } else if(['coins', 'diamonds'].includes(foundCategory)) {
+                // For coins/diamonds, you'd usually call a specific claim function, 
+                // but if they are simple multipliers, handle here:
+                alertMsg = "Voucher de monede detectat. Te rugăm să contactezi un administrator pentru validarea manuală a sumei.";
+            }
+
+            await showCustomAlert(alertMsg, "ACCESS GRANTED");
+            
+            // Redirect to appropriate shop for cosmetics
             if(foundCategory === 'badges') openBadgeShop();
             if(foundCategory === 'frames') openFrameShop();
             if(foundCategory === 'banners') openBannerShop();
@@ -15344,14 +15373,10 @@ window.redeemCoupon = async () => {
             
             document.getElementById('couponInput').value = "";
         } else {
-            console.warn("No match found for code:", code);
-            showCustomAlert("Codul '" + code + "' nu este valid în inventarul tău.", "ACCESS_DENIED");
+            showCustomAlert("Codul introdus nu a fost găsit în inventarul tău.", "ACCESS_DENIED");
         }
-        btn.innerText = "VALIDATE_CREDENTIALS";
-        btn.disabled = false;
     }, 1200);
 };
-
 
 
 window.openCouponInventory = () => {
@@ -15359,8 +15384,6 @@ window.openCouponInventory = () => {
     document.getElementById('couponInventoryModal').classList.add('active');
 };
 window.openSubCoupon = (type) => {
-    console.log("Opening Vault Category:", type);
-
     const categoryInfo = {
         coins: { title: "COINS_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d' },
         diamonds: { title: "DIAMOND_VOUCHERS", img: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FDiamonds%20Reduction%20cupon%20.png?alt=media&token=7fbf7d4f-78e1-4ea1-934e-619016889b84' },
@@ -15393,12 +15416,10 @@ window.openSubCoupon = (type) => {
         ticket.className = 'v4-badge-item';
         ticket.style.cssText = "display:flex; flex-direction:row; justify-content:space-between; align-items:center; padding:15px 20px; border-color: rgba(0,255,204,0.3) !important;";
         
-        // --- LOGIC CHANGE HERE ---
-        // If it is Coins or Diamonds, it uses the "Code" logic (paste into input)
-        // If it is Black Market or Cosmetics, it uses "Direct Activation" logic
+        // FIX 1: Black Market is now removed from direct activation and sent to activateCouponCode
         let action = `activateCouponCode('${coupon.code}')`; 
         
-        if(['blackmarket', 'badges', 'frames', 'banners', 'texts'].includes(type)) {
+        if(['badges', 'frames', 'banners', 'texts'].includes(type)) {
             action = `activateCoupon('${coupon.code}', '${type}')`;
         }
 
@@ -15412,52 +15433,12 @@ window.openSubCoupon = (type) => {
                     <div style="font-family:monospace; font-size:10px; color:#555;">CODE: #${coupon.code}</div>
                 </div>
             </div>
-            <button class="bm-price-btn-v4" onclick="${action}">ACTIVATE</button>
+            <button class="bm-price-btn-v4" onclick="${action}">USE CODE</button>
         `;
         listContainer.appendChild(ticket);
     });
 };
 
-// FUNCȚIA 1: Pentru activare directă (Cea pe care ai postat-o tu)
-window.activateCoupon = (id, category) => {
-    console.log("Direct Activation Triggered for:", category, "ID:", id);
-
-    // 1. Set global session (This makes the next purchase "Free")
-    window.activeCosmeticTicket = { id: id, category: category };
-    
-    // 2. Close inventory modals
-    closeModal('subCouponModal');
-    closeModal('couponInventoryModal');
-    closeModal('alteShopModal'); // Just in case
-    
-    // 3. Notify User
-    showCustomAlert(
-        `Tichetul a fost activat!<br><br>Următoarea acțiune în <b>${category.toUpperCase()}</b> va fi <span style="color:#00ff88; font-weight:900;">GRATUITĂ</span>.`, 
-        "VOUCHER ACTIVAT"
-    );
-    
-    // 4. Redirect to correct shop
-    setTimeout(() => {
-        if(category === 'badges') openBadgeShop();
-        else if(category === 'frames') openFrameShop();
-        else if(category === 'banners') openBannerShop();
-        else if(category === 'texts') openTextShop();
-        else if(category === 'blackmarket') openBlackMarket(); // <--- Redirects to Terminal
-    }, 500);
-};
-
-// FUNCȚIA 2: Pentru tichetele care merg în Terminal (Coins/Diamonds)
-// Asta rezolvă eroarea "activateCouponCode is not defined"
-window.activateCouponCode = (code) => {
-    console.log("Transferring code to terminal:", code);
-    const input = document.getElementById('couponInput');
-    if (input) {
-        input.value = code;
-        closeModal('subCouponModal');
-        closeModal('couponInventoryModal');
-        showCustomAlert("Codul a fost introdus în Terminal.<br>Apasă <b>VALIDATE_CREDENTIALS</b>!", "SISTEM GATA");
-    }
-};
 
 
 window.handleExclusiveFrameChoice = async () => {
