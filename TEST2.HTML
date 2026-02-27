@@ -13486,51 +13486,7 @@ onAuthStateChanged(auth, async user => {
 
 
 
-window.openBlackMarket = () => {
-    if(!auth.currentUser) return alert("Loghează-te!");
-    
-    const modal = document.getElementById('blackMarketModal');
-    modal.classList.add('active');
 
-    // 1. CHECK IF VOUCHER IS ACTIVE
-    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
-    console.log("Black Market UI Sync: Ticket Active =", isFree);
-
-    // 2. DEFINE THE BUTTONS AND THEIR ORIGINAL DIAMOND PRICES
-    const purchaseButtons = [
-        { id: 'bmRainCard', original: '50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
-        { id: 'bmHijackCard', original: '150 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
-        { id: 'bmBribeCard', original: '50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
-        { id: 'bmPfpCard', original: '15 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' }
-    ];
-
-    // 3. LOOP THROUGH BUTTONS AND OVERRIDE UI IF VOUCHER IS ACTIVE
-    purchaseButtons.forEach(item => {
-        const card = document.getElementById(item.id);
-        if (card) {
-            const btn = card.querySelector('.bm-price-btn-v4');
-            if (btn) {
-                if (isFree) {
-                    // Change to "GRATUIT" or "CLAIM FREE" with a glow
-                    btn.innerHTML = `<span style="color:#00ff88; font-weight:900; animation: pulse 1s infinite;">GRATUIT</span>`;
-                    btn.style.boxShadow = "0 0 15px #00ff88";
-                    btn.style.background = "rgba(0, 255, 136, 0.2)";
-                } else {
-                    // Restore original diamond price
-                    btn.innerHTML = item.original;
-                    btn.style.boxShadow = "";
-                    btn.style.background = ""; // Returns to CSS default
-                }
-            }
-        }
-    });
-
-    // 4. START TERMINAL FX & CHECKS
-    startCoinRainAnimation();
-    checkRainCooldown();
-    checkHijackStatus();
-    checkBribeStatus();
-};
 
 // --- BLACK MARKET LOGIC (FIXED) ---
 
@@ -13752,47 +13708,7 @@ function stopCoinRainAnimation() {
     if(container) container.innerHTML = '';
 }
 
-window.openBlackMarket = () => {
-    if(!auth.currentUser) return alert("Loghează-te!");
-    
-    const modal = document.getElementById('blackMarketModal');
-    modal.classList.add('active');
 
-    // --- VOUCHER UI OVERRIDE ---
-    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
-    
-    // Target only the purchase buttons (Rain, Hijack, Bribe, PFP) 
-    // We exclude "Schimb Valutar" as it's a menu, not a direct purchase.
-    const purchaseButtons = [
-        { id: 'bmRainCard', original: '50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
-        { id: 'bmHijackCard', original: '150 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
-        { id: 'bmBribeCard', original: '50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
-        { id: 'bmPfpCard', original: '15 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' }
-    ];
-
-    purchaseButtons.forEach(item => {
-        const card = document.getElementById(item.id);
-        if (card) {
-            const btn = card.querySelector('.bm-price-btn-v4');
-            if (isFree) {
-                btn.innerHTML = `<span style="color:#00ff88; animation: pulse 1s infinite; font-weight:900;">GRATUIT</span>`;
-                btn.style.background = "rgba(0, 255, 136, 0.2)";
-                btn.style.borderColor = "#00ff88";
-            } else {
-                // Restore original diamond price if no voucher
-                btn.innerHTML = item.original;
-                btn.style.background = ""; // Resets to CSS default
-                btn.style.borderColor = "";
-            }
-        }
-    });
-
-    // Start usual terminal FX
-    startCoinRainAnimation();
-    checkRainCooldown();
-    checkHijackStatus();
-    checkBribeStatus();
-};
 
 // Stop animation when Modal Closes
 window.closeModal = (id) => {
@@ -13844,14 +13760,7 @@ async function checkHijackStatus() {
     });
 }
 
-// Update your openBlackMarket function to include this check
-window.openBlackMarket = () => {
-    if(!auth.currentUser) return alert("Loghează-te!");
-    document.getElementById('blackMarketModal').classList.add('active');
-    startCoinRainAnimation();
-    checkRainCooldown();
-    checkHijackStatus(); // <--- Add this
-};
+
 
 // B. The Purchase Logic
 window.activateHijack = async () => {
@@ -14119,14 +14028,44 @@ window.processBribe = async (category) => {
     }
 };
 
-// 3. NU UITA să adaugi checkBribeStatus() în funcția openBlackMarket:
 window.openBlackMarket = () => {
     if(!auth.currentUser) return alert("Loghează-te!");
+    
     document.getElementById('blackMarketModal').classList.add('active');
+
+    // 1. Check if the active ticket is for Black Market
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
+
+    // 2. Define exactly which buttons to change
+    const purchaseButtons = [
+        { id: 'bmRainCard', original: '50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
+        { id: 'bmHijackCard', original: '150 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
+        { id: 'bmBribeCard', original: '50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
+        { id: 'bmPfpCard', original: '15 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' }
+    ];
+
+    // 3. Update the button text inside the modal
+    purchaseButtons.forEach(item => {
+        const card = document.getElementById(item.id);
+        if (card) {
+            const btn = card.querySelector('.bm-price-btn-v4');
+            if (btn) {
+                if (isFree) {
+                    btn.innerHTML = `<span style="color:#00ff88; font-weight:900; animation: pulse 1s infinite;">GRATUIT</span>`;
+                    btn.style.boxShadow = "0 0 15px rgba(0, 255, 136, 0.5)";
+                } else {
+                    btn.innerHTML = item.original;
+                    btn.style.boxShadow = "";
+                }
+            }
+        }
+    });
+
+    // 4. Start FX
     startCoinRainAnimation();
     checkRainCooldown();
     checkHijackStatus();
-    checkBribeStatus(); // <--- ADAUGĂ ASTA
+    checkBribeStatus();
 };
 
 
