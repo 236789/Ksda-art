@@ -13720,15 +13720,46 @@ function stopCoinRainAnimation() {
     if(container) container.innerHTML = '';
 }
 
-// Start animation when Modal Opens
 window.openBlackMarket = () => {
-    if(!auth.currentUser) return alert("Trebuie să fii logat!");
-    document.getElementById('blackMarketModal').classList.add('active');
+    if(!auth.currentUser) return alert("Loghează-te!");
     
-    // Start the visual rain effect
+    const modal = document.getElementById('blackMarketModal');
+    modal.classList.add('active');
+
+    // --- VOUCHER UI OVERRIDE ---
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
+    
+    // Target only the purchase buttons (Rain, Hijack, Bribe, PFP) 
+    // We exclude "Schimb Valutar" as it's a menu, not a direct purchase.
+    const purchaseButtons = [
+        { id: 'bmRainCard', original: '50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
+        { id: 'bmHijackCard', original: '150 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
+        { id: 'bmBribeCard', original: '50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' },
+        { id: 'bmPfpCard', original: '15 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">' }
+    ];
+
+    purchaseButtons.forEach(item => {
+        const card = document.getElementById(item.id);
+        if (card) {
+            const btn = card.querySelector('.bm-price-btn-v4');
+            if (isFree) {
+                btn.innerHTML = `<span style="color:#00ff88; animation: pulse 1s infinite; font-weight:900;">GRATUIT</span>`;
+                btn.style.background = "rgba(0, 255, 136, 0.2)";
+                btn.style.borderColor = "#00ff88";
+            } else {
+                // Restore original diamond price if no voucher
+                btn.innerHTML = item.original;
+                btn.style.background = ""; // Resets to CSS default
+                btn.style.borderColor = "";
+            }
+        }
+    });
+
+    // Start usual terminal FX
     startCoinRainAnimation();
-    
     checkRainCooldown();
+    checkHijackStatus();
+    checkBribeStatus();
 };
 
 // Stop animation when Modal Closes
