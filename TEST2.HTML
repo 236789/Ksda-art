@@ -13572,29 +13572,55 @@ window.triggerRain = async () => {
     if(!auth.currentUser) return;
     const uid = auth.currentUser.uid;
     const userRef = doc(db, "accounts", uid);
+    
+    // 1. CHECK FOR VOUCHER
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
+    const ticketCode = isFree ? window.activeCosmeticTicket.id : null;
+
     const userSnap = await getDoc(userRef);
     const data = userSnap.data();
 
-    // 1. CHECK COST (50 DIAMONDS)
-    if ((data.diamonds || 0) < 50) {
+    // 2. CHECK COST OR VOUCHER VALIDITY
+    if (!isFree && (data.diamonds || 0) < 50) {
         return showCustomAlert("Nu ai destule diamante (50)!", "SĂRĂCIE");
     }
 
-    // 2. CONFIRM ACTION
-    const confirm = await showCustomConfirm("Ești sigur? Vei cheltui 50 Diamante pentru a da 5000 Coins tuturor celor online!", "CONFIRMĂ PLOAIA");
+    // 3. CONFIRM ACTION
+    const msg = isFree 
+        ? "Folosești TICHETUL BLACK MARKET pentru a declanșa ploaia GRATUIT?" 
+        : "Ești sigur? Vei cheltui 50 Diamante pentru a da 5000 Coins tuturor celor online!";
+        
+    const confirm = await showCustomConfirm(msg, isFree ? "CONFIRMĂ VOUCHER" : "CONFIRMĂ PLOAIA");
     if (!confirm) return;
 
     try {
-        // 3. DEDUCT 50 DIAMONDS
-        await updateDoc(userRef, {
-            diamonds: increment(-50),
-            lastRainTime: serverTimestamp()
-        });
+        const batchUpdate = { lastRainTime: serverTimestamp() };
 
-        // 4. LOG THE SPEND
-        await logTransaction(-50, "DIAMONDS", "Black Market", "Used Make It Rain");
+        // 4. PAY LOGIC (Diamonds vs Voucher)
+        if (isFree) {
+            // Remove Voucher
+            let vouchers = data.myCoupons?.blackmarket || [];
+            // Filter out the specific ticket used
+            const newVouchers = vouchers.filter(v => v.code !== ticketCode && v.id !== ticketCode);
+            
+            // Safety check to ensure we actually removed one (prevents exploit if array empty)
+            if(vouchers.length === newVouchers.length) {
+                return showCustomAlert("Eroare: Voucherul nu a fost găsit în inventar!", "EROARE");
+            }
 
-        // 5. GIVE 5000 COINS TO EVERYONE ONLINE (Limit 50 users to save writes)
+            batchUpdate['myCoupons.blackmarket'] = newVouchers;
+            window.activeCosmeticTicket = null; // Clear session immediately
+        } else {
+            // Pay Diamonds
+            batchUpdate.diamonds = increment(-50);
+        }
+
+        await updateDoc(userRef, batchUpdate);
+
+        // 5. LOG THE SPEND
+        await logTransaction(isFree ? 0 : -50, "DIAMONDS", "Black Market", `Used Make It Rain ${isFree ? '(Voucher)' : ''}`);
+
+        // 6. GIVE 5000 COINS TO EVERYONE ONLINE
         const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
         const q = query(
             collection(db, "accounts"), 
@@ -13608,19 +13634,18 @@ window.triggerRain = async () => {
         let count = 0;
         onlineSnaps.forEach((docUser) => {
             const ref = doc(db, "accounts", docUser.id);
-            // GIVES 5000 COINS
             batch.update(ref, { coins: increment(5000) });
             count++;
         });
 
         if (count > 0) await batch.commit();
 
-        // 6. ANNOUNCE IT
+        // 7. ANNOUNCE IT
         const rainHtml = `
             <div style="text-align: center;">
                 <div style="font-size: 22px; font-weight:900; color:#ffd700; margin-bottom:5px;">💸 MAKE IT RAIN 💸</div>
                 <div style="font-size: 14px; color:#fff;">
-                    <span style="color:#29f3ff; font-weight:bold;">${data.username}</span> a plătit 50 💎!
+                    <span style="color:#29f3ff; font-weight:bold;">${data.username}</span> a făcut cinste!
                 </div>
                 <div style="font-size: 12px; color:#aaa; margin-top:5px;">
                     Toată lumea online a primit <span style="color:#ffd700;">5,000 COINS</span>!
@@ -13633,12 +13658,9 @@ window.triggerRain = async () => {
             uid: "kevin-bot-official",
             name: "Kevin Bot",
             photo: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/345b1fcb-5942-4eb3-831f-b6a42b23051b/21584177-ae66-438a-a2cd-27dc4461a670_removalai_preview.png?format=300w",
-            isSpecial: true,
-            isBot: true,
+            isSpecial: true, isBot: true,
             equippedBanner: { id: "bub_void", cssClass: "bubble-void" },
-            createdAt: serverTimestamp(),
-            reactions: {},
-            seenBy: []
+            createdAt: serverTimestamp(), reactions: {}, seenBy: []
         });
 
         closeModal('blackMarketModal');
@@ -13646,7 +13668,7 @@ window.triggerRain = async () => {
 
     } catch (e) {
         console.error(e);
-        if(e.message.includes("index")) alert("ADMIN: Trebuie creat index în consolă (F12)!");
+        showCustomAlert("Eroare la procesare.", "FAIL");
     }
 };
 
@@ -13769,39 +13791,58 @@ window.activateHijack = async () => {
     if(!auth.currentUser) return;
     const uid = auth.currentUser.uid;
     const userRef = doc(db, "accounts", uid);
+    
+    // 1. CHECK FOR VOUCHER
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
+    const ticketCode = isFree ? window.activeCosmeticTicket.id : null;
+
     const userSnap = await getDoc(userRef);
     const userData = userSnap.data();
 
-    // 1. Check Diamonds
-    if ((userData.diamonds || 0) < 100) {
-        return showCustomAlert("Ai nevoie de 100 Diamante pentru a compromite sistemul!", "FONDURI INSUFICIENTE");
+    // 2. CHECK COST
+    if (!isFree && (userData.diamonds || 0) < 150) {
+        return showCustomAlert("Ai nevoie de 150 Diamante pentru a compromite sistemul!", "FONDURI INSUFICIENTE");
     }
 
-    // 2. Double Check if one is already active (Server side check)
+    // 3. CHECK IF ACTIVE
     const sysSnap = await getDoc(doc(db, "system", "hijack_state"));
     if (sysSnap.exists() && sysSnap.data().active && Date.now() < sysSnap.data().expiresAt) {
         return showCustomAlert("Sistemul este deja sub atacul altui utilizator!", "EROARE");
     }
 
-    // 3. Confirm
-    const confirm = await showCustomConfirm(
-        "Neural Hijack: Timp de 25 minute, vei colecta automat 35% din tot ce câștigă ceilalți utilizatori pe site. Confirmi atacul?",
-        "NEURAL HIJACK"
-    );
+    // 4. CONFIRM
+    const msg = isFree 
+        ? "Activezi NEURAL HIJACK gratuit cu tichetul Black Market?"
+        : "Neural Hijack: 150 Diamante. Furi 35% din câștigurile altora. Confirmi?";
+
+    const confirm = await showCustomConfirm(msg, "NEURAL HIJACK");
     if (!confirm) return;
 
     try {
-        // 4. Pay and Set Global State
-        await updateDoc(userRef, { diamonds: increment(-150) });
+        const batchUpdate = {};
+
+        // 5. PAY LOGIC
+        if (isFree) {
+            let vouchers = userData.myCoupons?.blackmarket || [];
+            const newVouchers = vouchers.filter(v => v.code !== ticketCode && v.id !== ticketCode);
+            if(vouchers.length === newVouchers.length) return showCustomAlert("Voucher invalid.", "EROARE");
+            
+            batchUpdate['myCoupons.blackmarket'] = newVouchers;
+            window.activeCosmeticTicket = null;
+        } else {
+            batchUpdate.diamonds = increment(-150);
+        }
+
+        await updateDoc(userRef, batchUpdate);
 
         await setDoc(doc(db, "system", "hijack_state"), {
             active: true,
             buyerUid: uid,
             buyerName: userData.username,
-            expiresAt: Date.now() + (25 * 60 * 1000) // Schimbat la 25 de minute
+            expiresAt: Date.now() + (25 * 60 * 1000)
         });
 
-        // 5. Broadcat with Kevin Bot (The Villain Reveal)
+        // Broadcast
         await addDoc(collection(db, "wall_messages"), {
             text: `
                 <div style="text-align:center;">
@@ -13810,16 +13851,10 @@ window.activateHijack = async () => {
                     <div style="font-size:12px; color:#fff; margin-top:10px;">
                         Utilizatorul <b style="color:#adff2f;">${userData.username}</b> a activat <b>NEURAL HIJACK</b>!
                     </div>
-                    <div style="font-size:10px; color:#aaa; margin-top:5px;">
-                        Acesta va fura 35% din toate veniturile voastre pentru următoarele 25 minute!
-                    </div>
                 </div>
             `,
-            uid: "kevin-bot-official",
-            name: "Kevin Bot",
+            uid: "kevin-bot-official", name: "Kevin Bot", isBot: true, isSpecial: true,
             photo: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/345b1fcb-5942-4eb3-831f-b6a42b23051b/21584177-ae66-438a-a2cd-27dc4461a670_removalai_preview.png?format=300w",
-            isBot: true,
-            isSpecial: true,
             equippedBanner: { id: "bub_toxic", cssClass: "bubble-toxic" },
             createdAt: serverTimestamp()
         });
@@ -13940,83 +13975,80 @@ async function checkBribeStatus() {
 }
 
 window.processBribe = async (category) => {
-    // 1. Basic Auth Check
     if (!auth.currentUser) return showCustomAlert("Trebuie să fii logat!", "EROARE");
-    
     const uid = auth.currentUser.uid;
     const userRef = doc(db, "accounts", uid);
     
-    // Use the global data we already have to speed things up
-    const userData = window.currentUserData; 
-    if (!userData) return showCustomAlert("Se încarcă datele... încearcă din nou.", "AȘTEAPTĂ");
+    // 1. CHECK FOR VOUCHER
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
+    const ticketCode = isFree ? window.activeCosmeticTicket.id : null;
 
-    // 2. Check Diamonds
-    if ((userData.diamonds || 0) < 50) {
+    const userData = window.currentUserData; 
+    if (!userData) return showCustomAlert("Se încarcă datele...", "AȘTEAPTĂ");
+
+    // 2. CHECK COST
+    if (!isFree && (userData.diamonds || 0) < 50) {
         return showCustomAlert("Nu ai 50 💎!", "EROARE");
     }
 
-    // 3. Show Confirmation Modal (Fixes Issue 1)
-    const confirmed = await showCustomConfirm(`Confirmi mita de 50 💎 pentru Rank #1 la ${category.toUpperCase()}?`, "MITĂ SISTEM");
+    const msg = isFree 
+        ? `Mituiesti oficialii GRATUIT cu tichetul Black Market?`
+        : `Confirmi mita de 50 💎 pentru Rank #1?`;
+
+    const confirmed = await showCustomConfirm(msg, "MITĂ SISTEM");
     if(!confirmed) return;
 
     try {
-        // 4. Execute transaction
-        await updateDoc(userRef, { diamonds: increment(-50) });
+        const batchUpdate = {};
+
+        // 3. PAY LOGIC
+        if (isFree) {
+            let vouchers = userData.myCoupons?.blackmarket || [];
+            const newVouchers = vouchers.filter(v => v.code !== ticketCode && v.id !== ticketCode);
+            if(vouchers.length === newVouchers.length) return showCustomAlert("Voucher invalid.", "EROARE");
+            
+            batchUpdate['myCoupons.blackmarket'] = newVouchers;
+            window.activeCosmeticTicket = null;
+        } else {
+            batchUpdate.diamonds = increment(-50);
+        }
+
+        await updateDoc(userRef, batchUpdate);
         
         const duration = 3600000; // 1 Hour
-
         await setDoc(doc(db, "system", "leaderboard_bribe"), {
-            active: true,
-            uid: uid,
-            username: userData.username,
-            category: category,
-            expiresAt: Date.now() + duration
+            active: true, uid: uid, username: userData.username,
+            category: category, expiresAt: Date.now() + duration
         });
 
-        // 5. Send Wall Message (Fixes Issue 2)
-        // We add reactions/seenBy to ensure the Wall page doesn't crash when reading this
-        const catNames = { 
-            coins: "Top Coins", 
-            diamonds: "Top Diamonds", 
-            donated: "Top Donatori", 
-            referrals: "Top Invites" 
-        };
+        // 4. ANNOUNCE
+        const catNames = { coins: "Top Coins", diamonds: "Top Diamonds", donated: "Top Donatori", referrals: "Top Invites" };
         
         await addDoc(collection(db, "wall_messages"), {
             text: `
                 <div style="text-align:center;">
-                    <i class="fas fa-money-check-alt" style="font-size:24px; color:#ffd700; filter: drop-shadow(0 0 10px #00ff88);"></i>
-                    <div style="font-family:'Orbitron'; font-weight:900; color:#fff; margin-top:5px; letter-spacing:1px;">SISTEM MANIPULAT</div>
+                    <i class="fas fa-money-check-alt" style="font-size:24px; color:#ffd700;"></i>
+                    <div style="font-family:'Orbitron'; font-weight:900; color:#fff; margin-top:5px;">SISTEM MANIPULAT</div>
                     <div style="font-size:12px; color:#fff; margin-top:10px;">
-                        Utilizatorul <b style="color:#ffd700;">${userData.username}</b> a mituit oficialii! 💸
+                        Utilizatorul <b style="color:#ffd700;">${userData.username}</b> a mituit oficialii!
                     </div>
-                    <div style="font-family:'Orbitron'; font-size:13px; color:#00ff88; margin: 8px 0; font-weight:900; text-shadow: 0 0 8px #00ff88; letter-spacing: 2px;">
-                        BANI = POWER
-                    </div>
-                    <div style="font-size:11px; color:#e0ffef; margin-top:5px; opacity:0.9;">
+                    <div style="font-size:11px; color:#e0ffef; margin-top:5px;">
                         A preluat <b>LOCUL #1</b> în <b style="color:#fff;">${catNames[category]}</b>!
                     </div>
                 </div>
             `,
-            uid: "kevin-bot-official",
-            name: "Kevin Bot",
+            uid: "kevin-bot-official", name: "Kevin Bot", isBot: true, isSpecial: true,
             photo: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/345b1fcb-5942-4eb3-831f-b6a42b23051b/21584177-ae66-438a-a2cd-27dc4461a670_removalai_preview.png?format=300w",
-            isBot: true, 
-            isSpecial: true,
             equippedBanner: { id: "money_bribe", cssClass: "bubble-money-bribe" },
-            createdAt: serverTimestamp(),
-            reactions: {}, // Required for some Wall versions
-            seenBy: [],    // Required for some Wall versions
-            isDeleted: false
+            createdAt: serverTimestamp(), reactions: {}, seenBy: []
         });
 
-        // 6. Close selection modal and show success
         closeModal('bribeSelectionModal');
         await showCustomAlert("Mita a fost livrată. Ești oficial de neatins!", "CORUPȚIE REUȘITĂ");
         
     } catch (e) { 
-        console.error("Bribe Error:", e);
-        showCustomAlert("Eroare la procesare. Verifică conexiunea.", "EROARE");
+        console.error(e);
+        showCustomAlert("Eroare la procesare.", "EROARE");
     }
 };
 
@@ -14182,55 +14214,65 @@ window.handlePfpSelect = (event) => {
 window.uploadAndPayPfp = async () => {
     if (!auth.currentUser || !selectedPfpFile) return;
 
-    // 1. Check Balance
+    // 1. CHECK VOUCHER
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
+    const ticketCode = isFree ? window.activeCosmeticTicket.id : null;
+
     const userRef = doc(db, "accounts", auth.currentUser.uid);
     const userSnap = await getDoc(userRef);
-    const diamonds = userSnap.data().diamonds || 0;
+    const data = userSnap.data();
 
-    if (diamonds < 15) {
+    // 2. CHECK BALANCE
+    if (!isFree && (data.diamonds || 0) < 15) {
         return showCustomAlert("Nu ai 15 Diamante!", "SĂRĂCIE");
     }
 
-    const confirm = await showCustomConfirm("Plătești 15 Diamante pentru a schimba poza?", "CONFIRMĂ");
+    const msg = isFree
+        ? "Folosești tichetul pentru a schimba identitatea GRATUIT?"
+        : "Plătești 15 Diamante pentru a schimba poza?";
+
+    const confirm = await showCustomConfirm(msg, "CONFIRMĂ");
     if (!confirm) return;
 
-    // Show loading state
     const btn = document.getElementById('btnPayPfp');
     btn.innerText = "SE UPLOADAZĂ...";
     btn.disabled = true;
 
     try {
-        // 2. Pay 15 Diamonds
-        await updateDoc(userRef, { diamonds: increment(-15) });
+        const batchUpdate = { lastPfpChange: serverTimestamp() };
 
-        // 3. Upload to Firebase Storage
-        // Path: profile_pics/{uid}
+        // 3. PAY LOGIC
+        if (isFree) {
+            let vouchers = data.myCoupons?.blackmarket || [];
+            const newVouchers = vouchers.filter(v => v.code !== ticketCode && v.id !== ticketCode);
+            if(vouchers.length === newVouchers.length) throw "Voucher invalid";
+            
+            batchUpdate['myCoupons.blackmarket'] = newVouchers;
+            window.activeCosmeticTicket = null;
+        } else {
+            batchUpdate.diamonds = increment(-15);
+        }
+
+        // Upload
         const storageRef = ref(storage, `profile_pics/${auth.currentUser.uid}`);
-        
         await uploadBytes(storageRef, selectedPfpFile);
         const downloadURL = await getDownloadURL(storageRef);
+        
+        batchUpdate.image = downloadURL;
 
-        // 4. Update Firestore 'image' field
-        await updateDoc(userRef, { 
-            image: downloadURL,
-            lastPfpChange: serverTimestamp()
-        });
+        // Commit Updates
+        await updateDoc(userRef, batchUpdate);
+        await logTransaction(isFree ? 0 : -15, "DIAMONDS", "Black Market", "Changed Identity (PFP)");
 
-        // 5. Log Transaction
-        await logTransaction(-15, "DIAMONDS", "Black Market", "Changed Identity (PFP)");
-
-        // 6. Success
         closeModal('pfpChangeModal');
         showCustomAlert("Identitate nouă stabilită!", "SUCCES");
-
-        // Reset button
         btn.innerHTML = `PLĂTEȘTE 15 <img src="https://iili.io/fv5bmtj.png" width="16">`;
 
     } catch (e) {
-        console.error("Upload Error:", e);
-        btn.innerText = "EROARE (ÎNCEARCĂ IAR)";
+        console.error(e);
+        btn.innerText = "EROARE";
         btn.disabled = false;
-        showCustomAlert("Eroare la upload. Verifică consola.", "FAIL");
+        showCustomAlert("Eroare la procesare.", "FAIL");
     }
 };
 
@@ -15351,19 +15393,26 @@ window.openSubCoupon = (type) => {
         ticket.className = 'v4-badge-item';
         ticket.style.cssText = "display:flex; flex-direction:row; justify-content:space-between; align-items:center; padding:15px 20px; border-color: rgba(0,255,204,0.3) !important;";
         
+        // --- LOGIC CHANGE HERE ---
+        // If it is Coins or Diamonds, it uses the "Code" logic (paste into input)
+        // If it is Black Market or Cosmetics, it uses "Direct Activation" logic
+        let action = `activateCouponCode('${coupon.code}')`; 
+        
+        if(['blackmarket', 'badges', 'frames', 'banners', 'texts'].includes(type)) {
+            action = `activateCoupon('${coupon.code}', '${type}')`;
+        }
+
         ticket.innerHTML = `
             <div class="bm-bracket br-tl"></div><div class="bm-bracket br-tr"></div>
             <div class="bm-bracket br-bl"></div><div class="bm-bracket br-br"></div>
             <div style="display:flex; align-items:center; gap:15px;">
-                <!-- Task 4: Show Ticket Image -->
                 <img src="${info.img}" style="height:50px; filter: drop-shadow(0 0 5px #00ffcc);">
                 <div style="text-align: left;">
-                    <!-- Task 4: 1 Free item text -->
-                    <div style="font-family:'Montserrat'; font-weight:900; font-size:13px; color:#fff;">1 FREE ${type.toUpperCase().slice(0,-1)} (1 TIME USE)</div>
+                    <div style="font-family:'Montserrat'; font-weight:900; font-size:13px; color:#fff;">1 FREE ${type.toUpperCase().slice(0,10)}</div>
                     <div style="font-family:monospace; font-size:10px; color:#555;">CODE: #${coupon.code}</div>
                 </div>
             </div>
-            <button class="bm-price-btn-v4" onclick="activateCouponCode('${coupon.code}')">ACTIVATE</button>
+            <button class="bm-price-btn-v4" onclick="${action}">ACTIVATE</button>
         `;
         listContainer.appendChild(ticket);
     });
@@ -15373,24 +15422,28 @@ window.openSubCoupon = (type) => {
 window.activateCoupon = (id, category) => {
     console.log("Direct Activation Triggered for:", category, "ID:", id);
 
-    // 1. Stabilim sesiunea de "Free Item"
+    // 1. Set global session (This makes the next purchase "Free")
     window.activeCosmeticTicket = { id: id, category: category };
     
-    // 2. Închidem modalele de cupoane
+    // 2. Close inventory modals
     closeModal('subCouponModal');
     closeModal('couponInventoryModal');
+    closeModal('alteShopModal'); // Just in case
     
-    // 3. Notificăm utilizatorul
+    // 3. Notify User
     showCustomAlert(
-        `Tichetul a fost activat!<br><br>Următorul obiect ales din categoria <b>${category.toUpperCase()}</b> va fi <span style="color:#00ff88; font-weight:900;">GRATUIT</span>.`, 
-        "GRATUIT"
+        `Tichetul a fost activat!<br><br>Următoarea acțiune în <b>${category.toUpperCase()}</b> va fi <span style="color:#00ff88; font-weight:900;">GRATUITĂ</span>.`, 
+        "VOUCHER ACTIVAT"
     );
     
-    // 4. Deschidem magazinul corespunzător
-    if(category === 'badges') openBadgeShop();
-    if(category === 'frames') openFrameShop();
-    if(category === 'banners') openBannerShop();
-    if(category === 'texts') openTextShop();
+    // 4. Redirect to correct shop
+    setTimeout(() => {
+        if(category === 'badges') openBadgeShop();
+        else if(category === 'frames') openFrameShop();
+        else if(category === 'banners') openBannerShop();
+        else if(category === 'texts') openTextShop();
+        else if(category === 'blackmarket') openBlackMarket(); // <--- Redirects to Terminal
+    }, 500);
 };
 
 // FUNCȚIA 2: Pentru tichetele care merg în Terminal (Coins/Diamonds)
