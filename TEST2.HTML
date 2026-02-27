@@ -14653,6 +14653,7 @@ function startExclusiveFrameShuffle() {
     }, 600);
 }
 
+// --- UPDATED PRIZE VIEW FUNCTION ---
 window.openPrizeView = () => {
     if(!selectedBox || !selectedBox.rewards) return;
     const container = document.getElementById('prizeTableBody');
@@ -14671,30 +14672,47 @@ window.openPrizeView = () => {
         const card = document.createElement('div');
         card.className = `aaa-card ${r.style}`;
         let visualHtml = "";
-        const slotID = `shuf_${idx}_${Math.floor(Math.random()*999)}`;
+        
+        // Generate a unique ID for animation slots
+        const slotID = `shuf_${idx}_${Math.floor(Math.random()*9999)}`;
 
-        // 1. Logică Shuffle pentru Elite Badges
+        // 1. RANDOM ELITE BADGE (Celestial Box)
         if(r.label === 'RANDOM ELITE BADGE') {
             visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
-            setTimeout(() => {
-                const el = document.getElementById(slotID);
-                const elitePool = BADGES_DB.filter(b => b.isElite);
-                if(el) setInterval(() => {
-                    if (!document.getElementById('prizeListModal').classList.contains('active')) return;
-                    const b = elitePool[Math.floor(Math.random() * elitePool.length)];
-                    el.innerHTML = `<span class="${b.animClass}" style="font-size:9px; padding: 5px 10px; border-radius: 4px; border: 1px solid white;">${b.text}</span>`;
-                }, 600);
-            }, 100);
+            startShuffleAnimation(slotID, 'elite');
         }
-        // 2. Logică Iconiță Speaker pentru Profile Intro
+        // 2. RANDOM BADGE (Basic Box - FIXED)
+        else if(r.label === 'RANDOM BADGE') {
+            visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
+            startShuffleAnimation(slotID, 'badge');
+        }
+        // 3. RANDOM FRAME (Gold/Void Box - FIXED)
+        else if(r.label === 'RANDOM FRAME' || r.label === 'EXCLUSIVE FRAME') {
+            visualHtml = `<div id="${slotID}" style="height:60px; display:flex; align-items:center; justify-content:center;"></div>`;
+            startShuffleAnimation(slotID, 'frame');
+        }
+        // 4. MILIARDAR (Gold Box - FIXED)
+        else if(r.label === 'MILIARDAR') {
+            const milBadge = BADGES_DB.find(b => b.id === 'b_miliardar');
+            if(milBadge) {
+                visualHtml = `<span class="shop-badge-preview" style="background:${milBadge.color} !important; color:#000 !important; font-weight:900; box-shadow:0 0 15px ${milBadge.color}; padding:8px 15px; font-size:11px;"><i class="fas ${milBadge.icon}"></i> ${milBadge.text}</span>`;
+            } else {
+                visualHtml = `<span style="font-weight:900; color:#ffd700;">MILIARDAR</span>`;
+            }
+        }
+        // 5. SINGULARITY (Void Box)
+        else if(r.label === 'SINGULARITY') {
+             visualHtml = `<span class="badge-singularity" style="font-size:10px; padding:8px 15px;"><i class="fas fa-atom"></i> SINGULARITY</span>`;
+        }
+        // 6. PROFILE INTRO
         else if(r.label === 'RANDOM PROFILE INTRO') {
             visualHtml = `<i class="fas fa-volume-up" style="font-size: 40px; color: #00ffff; filter: drop-shadow(0 0 10px #00ffff);"></i>`;
         }
-        // 3. Logică Imagini Vouchere
+        // 7. VOUCHERS
         else if(VOUCHER_MAP[r.label]) {
             visualHtml = `<img src="${VOUCHER_MAP[r.label]}" style="height:55px; width:auto; filter: drop-shadow(0 0 10px white);">`;
         }
-        // 4. Celelalte (Coins/Diamonds)
+        // 8. DEFAULT (Coins/Diamonds)
         else {
             visualHtml = `<img src="${r.icon || 'https://iili.io/fhc1SKQ.png'}" class="aaa-card-img" style="height:50px;">`;
         }
@@ -14713,6 +14731,44 @@ window.openPrizeView = () => {
     document.getElementById('prizeListModal').classList.add('active');
 };
 
+// --- HELPER: SHUFFLE ANIMATION LOGIC (REQUIRED) ---
+function startShuffleAnimation(elementId, type) {
+    // Wait for DOM to render the ID
+    setTimeout(() => {
+        const el = document.getElementById(elementId);
+        if(!el) return;
+
+        let dbSource = [];
+        // Select data source based on type
+        if(type === 'elite') dbSource = BADGES_DB.filter(b => b.isElite);
+        if(type === 'badge') dbSource = BADGES_DB.filter(b => !b.isElite && b.id !== 'b_miliardar' && b.id !== 'b_singularity');
+        if(type === 'frame') dbSource = FRAMES_DB;
+
+        if(dbSource.length === 0) return;
+
+        // Start Interval
+        const interval = setInterval(() => {
+            // Stop if modal is closed to save performance
+            if (!document.getElementById('prizeListModal').classList.contains('active')) {
+                clearInterval(interval);
+                return;
+            }
+
+            const item = dbSource[Math.floor(Math.random() * dbSource.length)];
+            
+            if(type === 'frame') {
+                el.innerHTML = `<img src="${item.img}" style="height:50px; filter:drop-shadow(0 0 10px ${item.exclusive ? '#7000ff' : '#ffd700'});">`;
+            } else {
+                // Badge Logic
+                if(item.isElite) {
+                     el.innerHTML = `<span class="${item.animClass} elite-gif-badge" style="font-size:9px; padding: 5px 10px; border: 1px solid white;">${item.text}</span>`;
+                } else {
+                     el.innerHTML = `<span class="shop-badge-preview" style="background:${item.color}; color:#000; font-size:9px; padding:5px 10px; font-weight:900;">${item.text}</span>`;
+                }
+            }
+        }, 600); // Shuffle speed (ms)
+    }, 100);
+}
 
 // --- LEGENDARY BADGE SHUFFLE ENGINE ---
 function startBadgeShuffle() {
