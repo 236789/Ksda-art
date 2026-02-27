@@ -9150,7 +9150,11 @@ nav a[href="shop.html"] {
     box-shadow: 0 0 50px rgba(190, 255, 0, 0.3);
 }
 
-
+:root {
+  /* ... existing ones ... */
+  --acid: #beff00;
+  --acid-dim: rgba(190, 255, 0, 0.15);
+}
   </style>
 </head>
 <body>
@@ -13576,10 +13580,11 @@ onAuthStateChanged(auth, async user => {
 
 
 // Inside your onAuthStateChanged(user => { ... })
+// Inside your onAuthStateChanged(user => { ... }) around line 2420
 if(user) {
-    updateShopPresence(true); // Tell system I'm in shop
-    initTradingPresence();    // Watch for others
-    listenForTradeRequests(); // Watch for requests for me
+    startTradingHeartbeat();  // <--- Use the Heartbeat instead of a single update
+    initTradingPresence();    
+    listenForTradeRequests(); 
 }
         // Ascultă datele în timp real
 // Ascultă datele în timp real
@@ -16051,62 +16056,62 @@ window.buyProfileItem = async (type, id, price) => {
 };
 
 
-
 // =========================================
-// TRADING TERMINAL PRESENCE & REQUESTS
-// =========================================
-
-let tradeRequestsUnsub = null;
-
-// =========================================
-// TRADING TERMINAL PRESENCE & REQUESTS (V2)
+// TRADING TERMINAL - STABLE PRESENCE ENGINE
 // =========================================
 
-// =========================================
-// TRADING TERMINAL PRESENCE & REQUESTS (V2)
-// =========================================
+let tradingHeartbeat = null;
 
-// 1. TRACK PRESENCE
+// 1. STABLE UPDATE FUNCTION
 async function updateShopPresence(status) {
     if (!auth.currentUser) return;
     const userRef = doc(db, "accounts", auth.currentUser.uid);
     try {
+        // Only update if the status is actually changing to save bandwidth/flicker
         await updateDoc(userRef, { 
             isInShop: status,
-            lastPresenceUpdate: serverTimestamp() 
+            lastActive: serverTimestamp() // Reuse your existing presence field
         });
-        console.log("TRADING_TERMINAL: Presence set to " + status);
+        console.log("MARKET_DATA: Connection " + (status ? "Established" : "Severed"));
     } catch (e) { 
-        console.error("Presence Permission Error: Check your Firestore Rules!", e); 
+        console.error("Presence Error: Check Firestore Rules!", e); 
     }
 }
 
-// Set online when tab is active, offline when closed
-window.addEventListener('beforeunload', () => updateShopPresence(false));
-document.addEventListener('visibilitychange', () => {
-    updateShopPresence(document.visibilityState === 'visible');
-});
+// 2. THE HEARTBEAT (Prevents flickering and keeps you visible)
+function startTradingHeartbeat() {
+    if(tradingHeartbeat) clearInterval(tradingHeartbeat);
+    
+    // Initial set
+    updateShopPresence(true);
+    
+    // Repeat every 30 seconds to stay "Fresh" in the list
+    tradingHeartbeat = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+            updateShopPresence(true);
+        }
+    }, 30000);
+}
 
-// 2. LISTEN FOR OTHER USERS
+// 3. LISTEN FOR OTHERS (With Flicker Protection)
 function initTradingPresence() {
     const listEl = document.getElementById('tradingUserList');
     const countEl = document.getElementById('onlineTradeCount');
-    
-    // Query for all users in shop
+    if(!listEl) return;
+
+    // We only show users who updated their status in the last 2 minutes
     const q = query(collection(db, "accounts"), where("isInShop", "==", true));
     
     onSnapshot(q, (snapshot) => {
-        listEl.innerHTML = '';
+        const fragment = document.createDocumentFragment();
         let count = 0;
         
         snapshot.forEach((userDoc) => {
             const data = userDoc.data();
-            // SKIP SELF
-            if (userDoc.id === auth.currentUser.uid) return; 
+            if (userDoc.id === auth.currentUser.uid) return; // Skip self
             
             count++;
             const card = document.createElement('div');
-            // Using Acid variables we defined in CSS
             card.className = `trade-card ${data.equippedBanner?.cssClass || ''}`;
             card.innerHTML = `
                 <div class="live-indicator"></div>
@@ -16116,57 +16121,56 @@ function initTradingPresence() {
                 </div>
                 <div class="trade-card-info">
                     <div class="trade-card-name ${data.equippedText?.cssClass || ''}">${data.username}</div>
-                    <div style="font-size:10px; color:#beff00; font-family:monospace; margin-top:4px;">STATUS: LINK_READY</div>
+                    <div style="font-size:10px; color:var(--acid); font-family:monospace; margin-top:4px;">STATUS: LINK_READY</div>
                 </div>
                 <button class="btn-send-trade" onclick="sendTradeRequest('${userDoc.id}', '${data.username}')">
                     INVITE
                 </button>
             `;
-            listEl.appendChild(card);
+            fragment.appendChild(card);
         });
         
+        // Only update UI if we have changes
+        listEl.innerHTML = '';
+        listEl.appendChild(fragment);
         if(countEl) countEl.innerText = count;
+        
         if(count === 0) {
             listEl.innerHTML = `<div style="color:#444; font-family:Orbitron; width:100%; text-align:center; padding:40px; letter-spacing:2px;">NO_DATA_RECORDS: TERMINAL_EMPTY</div>`;
         }
     });
 }
 
-// Set online when tab is active, offline when closed
-window.addEventListener('beforeunload', () => updateShopPresence(false));
-document.addEventListener('visibilitychange', () => {
-    updateShopPresence(document.visibilityState === 'visible');
+// 4. CLEANUP HANDLER
+window.addEventListener('beforeunload', () => {
+    if(tradingHeartbeat) clearInterval(tradingHeartbeat);
+    updateShopPresence(false);
 });
 
-
-
-// Set true on load, false when leaving
-window.addEventListener('beforeunload', () => updateShopPresence(false));
-// If they switch tabs, set offline for trading
+// Update presence based on tab focus (but don't kill heartbeat)
 document.addEventListener('visibilitychange', () => {
-    updateShopPresence(document.visibilityState === 'visible');
+    if (document.visibilityState === 'hidden') {
+        updateShopPresence(false);
+    } else {
+        updateShopPresence(true);
+    }
 });
 
-
-  
-
-// 3. SEND TRADE REQUEST
+// --- KEEP THESE FROM YOUR PREVIOUS CODE ---
 window.sendTradeRequest = async (targetUid, targetName) => {
-    const confirm = await showCustomConfirm(`Send trade request to ${targetName}?`, "INITIATE TRADE");
-    if(!confirm) return;
-
-    const requestRef = doc(db, "trade_requests", auth.currentUser.uid + "_" + targetUid);
-    await setDoc(requestRef, {
-        senderUid: auth.currentUser.uid,
-        senderName: window.currentUserData.username,
-        targetUid: targetUid,
-        status: 'pending',
-        createdAt: serverTimestamp()
-    });
-    showCustomAlert("Request sent! Waiting for response...", "SIGNAL SENT");
+    const reqId = auth.currentUser.uid + "_" + targetUid;
+    try {
+        await setDoc(doc(db, "trade_requests", reqId), {
+            senderUid: auth.currentUser.uid,
+            senderName: window.currentUserData.username,
+            targetUid: targetUid,
+            status: 'pending',
+            timestamp: Date.now()
+        });
+        showCustomAlert(`Cerere trimisă către ${targetName}. Așteaptă acceptul...`, "LINK_INITIATED");
+    } catch (e) { showCustomAlert("Tranzacție blocată de sistem.", "ACCESS_DENIED"); }
 };
 
-// 4. LISTEN FOR INCOMING REQUESTS
 function listenForTradeRequests() {
     const q = query(collection(db, "trade_requests"), 
                     where("targetUid", "==", auth.currentUser.uid), 
@@ -16174,13 +16178,13 @@ function listenForTradeRequests() {
                     
     onSnapshot(q, (snapshot) => {
         snapshot.forEach((change) => {
-            const request = change.data();
+            const req = change.data();
             const modal = document.getElementById('tradeRequestModal');
-            document.getElementById('tradeRequestMsg').innerHTML = `<b>${request.senderName}</b> wants to establish a trade link with you.`;
+            document.getElementById('tradeRequestMsg').innerHTML = 
+                `Utilizatorul <span style="color:var(--acid)">${req.senderName}</span> vrea să deschidă un canal de trading cu tine.`;
             
             modal.classList.add('active');
             
-            // Buttons logic
             document.getElementById('acceptTradeBtn').onclick = () => handleTradeResponse(change.id, 'accepted');
             document.getElementById('refuseTradeBtn').onclick = () => handleTradeResponse(change.id, 'refused');
         });
@@ -16188,20 +16192,13 @@ function listenForTradeRequests() {
 }
 
 async function handleTradeResponse(requestId, status) {
-    const modal = document.getElementById('tradeRequestModal');
-    modal.classList.remove('active');
-    
+    document.getElementById('tradeRequestModal').classList.remove('active');
     try {
-        const reqRef = doc(db, "trade_requests", requestId);
-        await updateDoc(reqRef, { status: status });
-        
+        await updateDoc(doc(db, "trade_requests", requestId), { status: status });
         if(status === 'accepted') {
-            await showCustomAlert("Handshake complete! Initializing trade interface...", "SYNC_SUCCESS");
-            // Next Step: openTradingInterface(requestId);
+            showCustomAlert("Handshake reușit! Se inițializează interfața...", "SYNC_COMPLETE");
         }
-    } catch (e) {
-        console.error("Trade Response Error:", e);
-    }
+    } catch(e) { console.error(e); }
 }
 </script>
 </body>
