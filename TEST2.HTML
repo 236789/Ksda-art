@@ -12486,7 +12486,6 @@ window.processDonation = async () => {
 window.activeCosmeticTicket = null; // Stores { category: 'badges', id: 'TICK-123' }
 
 window.openEliteInventory = async (category = 'banners') => {
-    // Ensure correct modal visibility
     document.getElementById('cosmeticsSelectModal').classList.remove('active');
     document.getElementById('eliteInventoryModal').classList.add('active');
 
@@ -12497,44 +12496,50 @@ window.openEliteInventory = async (category = 'banners') => {
     const data = userSnap.data();
     list.innerHTML = '';
     
-    // Tab Active Styles
     document.getElementById('invTabBanners').style.background = category === 'banners' ? '#ff0000' : 'transparent';
     document.getElementById('invTabIntros').style.background = category === 'intros' ? '#ff0000' : 'transparent';
 
     if (category === 'banners') {
+        // ... (Banner logic remains the same)
         const owned = data.ownedProfileBanners || [];
         const equippedId = data.equippedProfileBanner?.id;
-
-        if (owned.length === 0) list.innerHTML = "<div style='color:#555; grid-column:span 2; text-align:center; padding:20px;'>NO BANNERS OWNED</div>";
-
         owned.forEach(id => {
             const item = PROFILE_BANNERS_DB.find(x => x.id === id);
             if (!item) return;
             const isEq = (id === equippedId);
-            list.innerHTML += `
-                <div class="bm-offer-card-v4" style="${isEq ? 'border-color:#00ff88 !important;' : ''}">
-                    <div class="p-ban-preview ${item.cssClass}" style="height:50px; margin-bottom:10px;"></div>
-                    <div style="font-size:10px; color:#fff; margin-bottom:10px;">${item.name}</div>
-                    ${isEq 
-                        ? `<button class="bm-price-btn-v4" style="background:#ff4757 !important; color:#fff;" onclick="unequipProfileItem('banner')">UNEQUIP</button>`
-                        : `<button class="bm-price-btn-v4" onclick="equipProfileItem('banner', '${item.id}', '${item.cssClass}')">EQUIP</button>`
-                    }
-                </div>`;
+            list.innerHTML += `<div class="bm-offer-card-v4" style="${isEq ? 'border-color:#00ff88 !important;' : ''}">
+                <div class="p-ban-preview ${item.cssClass}" style="height:50px; margin-bottom:10px;"></div>
+                <div style="font-size:10px; color:#fff; margin-bottom:10px;">${item.name}</div>
+                ${isEq ? `<button class="bm-price-btn-v4" style="background:#ff4757 !important; color:#fff;" onclick="unequipProfileItem('banner')">UNEQUIP</button>`
+                       : `<button class="bm-price-btn-v4" onclick="equipProfileItem('banner', '${item.id}', '${item.cssClass}')">EQUIP</button>`}
+            </div>`;
         });
     } else {
+        // --- FIXED INTRO INVENTORY LOGIC ---
         const owned = data.ownedIntros || [];
         const equippedId = data.equippedIntro?.id;
+        const customs = data.customIntros || [];
 
         if (owned.length === 0) list.innerHTML = "<div style='color:#555; grid-column:span 2; text-align:center; padding:20px;'>NO INTROS OWNED</div>";
 
         owned.forEach(id => {
-            const item = PROFILE_INTROS_DB.find(x => x.id === id);
-            if (!item) return;
+            // 1. Try to find in standard DB
+            let item = PROFILE_INTROS_DB.find(x => x.id === id);
+            
+            // 2. If not found, try to find in user's Custom Uploads
+            if (!item) {
+                item = customs.find(x => x.id === id);
+            }
+
+            if (!item) return; // Skip if still not found
+
             const isEq = (id === equippedId);
             list.innerHTML += `
                 <div class="bm-offer-card-v4" style="${isEq ? 'border-color:#00ff88 !important;' : ''}">
-                    <div class="audio-play-btn" style="margin:0 auto 10px;" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></div>
-                    <div style="font-size:10px; color:#fff; margin-bottom:10px;">${item.name}</div>
+                    <div class="audio-play-btn" style="margin:0 auto 10px;" onclick="previewAudio('${item.audio}', this)">
+                        <i class="fas fa-play"></i>
+                    </div>
+                    <div style="font-size:10px; color:#fff; margin-bottom:10px;">${item.name} ${item.isCustom ? '<span style="color:#ff0000;">(User)</span>' : ''}</div>
                     ${isEq 
                         ? `<button class="bm-price-btn-v4" style="background:#ff4757 !important; color:#fff;" onclick="unequipProfileItem('intro')">UNEQUIP</button>`
                         : `<button class="bm-price-btn-v4" onclick="equipProfileItem('intro', '${item.id}', '${item.audio}')">EQUIP</button>`
@@ -15954,10 +15959,11 @@ window.uploadIntroToFirebase = async () => {
 
     const userRef = doc(db, "accounts", auth.currentUser.uid);
     const userSnap = await getDoc(userRef);
-    if (userSnap.data().coins < 15000) return showCustomAlert("Nu ai 15,000 monede!", "EROARE");
+    const userData = userSnap.data();
 
-    const confirm = await showCustomConfirm("Vrei să cheltui 15,000 monede pentru acest intro personalizat?", "CONFIRMARE PLATĂ");
-    if (!confirm) return;
+    if (userData.coins < 15000) return showCustomAlert("Nu ai 15,000 monede!", "EROARE");
+
+    if(!(await showCustomConfirm("Vrei să cheltui 15,000 monede pentru acest intro personalizat?", "CONFIRMĂ"))) return;
 
     const btn = document.getElementById('btnFinalizeIntro');
     const bar = document.getElementById('introProgBar');
@@ -15969,29 +15975,29 @@ window.uploadIntroToFirebase = async () => {
     fill.style.width = "50%";
 
     try {
-        // 1. Upload to Storage
         const fileRef = ref(storage, `intros/${auth.currentUser.uid}_${Date.now()}.mp3`);
         await uploadBytes(fileRef, selectedIntroBlob);
         const url = await getDownloadURL(fileRef);
 
-        // 2. Update Database
         const introId = `custom_${Date.now()}`;
+        // We add 'isCustom: true' so the inventory knows how to handle it
         const introObj = { id: introId, name: "Custom Intro", audio: url, isCustom: true };
 
         await updateDoc(userRef, {
             coins: increment(-15000),
             ownedIntros: arrayUnion(introId),
+            // NEW: We save the full object here so it's not lost
+            customIntros: arrayUnion(introObj), 
             equippedIntro: introObj
         });
 
-        // 3. Log Transaction
         await logTransaction(-15000, "COINS", "Shop", "Purchased Custom Intro Upload");
 
         fill.style.width = "100%";
         setTimeout(() => {
             closeModal('customIntroModal');
             showCustomAlert("Intro-ul a fost încărcat și echipat!", "SUCCES");
-            openProfileIntroShop(); // Refresh list
+            openProfileIntroShop(); 
         }, 500);
 
     } catch (e) {
