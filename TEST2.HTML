@@ -9954,7 +9954,30 @@ nav a[href="shop.html"] {
 </head>
 <body>
 
+<!-- CAMOUFLAGE TARGET MODAL (SEPARATE) -->
+<div id="camouflageTargetModal" class="account-modal-overlay">
+    <div class="shop-modal-v4" style="width: 95%; max-width: 550px; height: 80vh; border-color: #d63384 !important; box-shadow: 0 0 50px rgba(214, 51, 132, 0.2) !important;">
+        <div class="bm-scanline-overlay"></div>
+        
+        <!-- Header -->
+        <div style="background: rgba(214, 51, 132, 0.1); padding: 20px; border-bottom: 1px solid #d63384; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div style="font-family:'Montserrat'; font-size: 18px; font-weight: 900; color: #d63384;">SELECT_IDENTITY</div>
+            <button class="close-pop" onclick="document.getElementById('camouflageTargetModal').classList.remove('active')" style="position: static !important; border: 1px solid #d63384; background: transparent; width:40px; height:40px; color: #d63384;">✕</button>
+        </div>
 
+        <!-- Search Bar -->
+        <div style="padding: 15px; background: rgba(0,0,0,0.4);">
+            <input type="text" id="searchCamouflage" class="v4-terminal-input" placeholder="CAUTĂ IDENTITATE..." style="margin: 0; padding: 10px !important; font-size: 14px; border-color: #d63384 !important;">
+        </div>
+
+        <!-- Distinct List Container -->
+        <div class="bm-content-scroll" style="flex: 1; padding: 15px;">
+            <div id="camouflageUserList" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- JS will inject users here -->
+            </div>
+        </div>
+    </div>
+</div>
 
 <div id="scratchOverlay">
     <div style="font-family:'Orbitron'; color:#fff; margin-bottom:20px; letter-spacing:2px;" id="scratchTitle">VOUCHER DETECTAT</div>
@@ -10048,6 +10071,23 @@ nav a[href="shop.html"] {
                 50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">
             </button>
         </div>
+
+
+<!-- CAMOUFLAGE CARD -->
+<div class="bm-offer-card-v4" onclick="initiateCamouflage()" style="border-color: #d63384 !important; min-height: 180px;">
+    <div class="bm-bracket br-tl" style="border-color: #d63384;"></div>
+    <div class="bm-bracket br-tr" style="border-color: #d63384;"></div>
+    <div class="bm-bracket br-bl" style="border-color: #d63384;"></div>
+    <div class="bm-bracket br-br" style="border-color: #d63384;"></div>
+    
+    <i class="fas fa-theater-masks" style="font-size: 40px; color: #d63384; margin-bottom: 15px; filter: drop-shadow(0 0 10px #d63384);"></i>
+    <div class="bm-title-v4" style="color: #fff; font-size: 16px;">CAMOUFLAGE</div>
+    <div class="bm-desc-v4">Trimite un mesaj pe chat în numele altei persoane. Conține un indiciu ascuns.</div>
+    
+    <button class="bm-price-btn-v4" style="background: #d63384 !important; color: #fff; border: none; font-weight: 900;">
+        30 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">
+    </button>
+</div>
 
     </div>
 </div>
@@ -17724,7 +17764,162 @@ function startPaymentMonitor() {
     });
 }
 
+// --- CAMOUFLAGE SYSTEM (ISOLATED) ---
 
+let camouflageCache = []; // Stores users just for this modal
+
+// 1. Start Process
+window.initiateCamouflage = async () => {
+    if(!auth.currentUser) return alert("Loghează-te!");
+
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const userData = userSnap.data();
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
+
+    // Cost Check
+    if (!isFree && (userData.diamonds || 0) < 30) {
+        return showCustomAlert("Nu ai 30 Diamante pentru a fura identitatea!", "EROARE");
+    }
+
+    const msg = isFree ? "Activezi CAMOUFLAGE GRATUIT prin voucher?" : "Cheltui 30 Diamante pentru a trimite un mesaj fals?";
+    if (!(await showCustomConfirm(msg, "IDENTITY_THEFT_PROTOCOL"))) return;
+
+    // Close Terminal, Open New Modal
+    document.getElementById('trollTerminalModal').classList.remove('active');
+    openCamouflageList();
+};
+
+// 2. Fetch & Render List
+async function openCamouflageList() {
+    const modal = document.getElementById('camouflageTargetModal');
+    const listEl = document.getElementById('camouflageUserList');
+    
+    listEl.innerHTML = '<div style="text-align:center; padding:20px; color:#d63384; font-family:Orbitron;">> DOWNLOADING PROFILES...</div>';
+    modal.classList.add('active');
+    
+    try {
+        const q = query(collection(db, "accounts"), orderBy("username", "asc"));
+        const snap = await getDocs(q);
+        
+        camouflageCache = [];
+        snap.forEach(d => {
+            if(d.id !== auth.currentUser.uid) { // Don't impersonate yourself
+                camouflageCache.push({ id: d.id, ...d.data() });
+            }
+        });
+
+        renderCamouflageList(camouflageCache);
+    } catch (e) {
+        console.error(e);
+        listEl.innerHTML = '<div style="color:red; text-align:center;">EROARE DE REȚEA</div>';
+    }
+}
+
+// 3. Render Function
+function renderCamouflageList(users) {
+    const listEl = document.getElementById('camouflageUserList');
+    listEl.innerHTML = "";
+    
+    users.forEach(u => {
+        const item = document.createElement('div');
+        item.className = 'top-item';
+        item.style.borderColor = "rgba(214, 51, 132, 0.3)"; // Pink border
+        
+        // Use placeholder if no image
+        const img = u.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
+        
+        item.innerHTML = `
+            <div class="top-left">
+                <div class="top-img-box">
+                    <img src="${img}" class="top-user-img">
+                </div>
+                <div class="top-user-name" style="color:#fff;">${u.username || 'Anonim'}</div>
+            </div>
+            <button class="bm-price-btn-v4" style="background:#d63384 !important; color:#fff; font-size:9px; padding:5px 10px;">ALEGE</button>
+        `;
+        
+        // DIRECT CLICK HANDLER (Safe!)
+        item.onclick = () => selectCamouflageTarget(u.id, u.username, img);
+        
+        listEl.appendChild(item);
+    });
+}
+
+// 4. Search Filter
+document.getElementById('searchCamouflage').addEventListener('input', (e) => {
+    const val = e.target.value.toLowerCase();
+    const filtered = camouflageCache.filter(u => (u.username || '').toLowerCase().includes(val));
+    renderCamouflageList(filtered);
+});
+
+// 5. Target Selection & Execution
+async function selectCamouflageTarget(targetUid, targetName, targetImg) {
+    // Hide list immediately
+    document.getElementById('camouflageTargetModal').classList.remove('active');
+
+    // Ask for the message
+    const fakeMsg = await showCustomPrompt(
+        `IMPERSONATING: ${targetName}`, 
+        `Ce vrei să scrie ${targetName} pe chat?`, 
+        "Ex: Sunt un bot..."
+    );
+
+    if(!fakeMsg || fakeMsg.trim() === "") return; // Cancelled
+
+    // Execute Payment & Send
+    const buyerUid = auth.currentUser.uid;
+    const buyerName = window.currentUserData.username;
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
+    const ticketCode = isFree ? window.activeCosmeticTicket.id : null;
+
+    try {
+        const userRef = doc(db, "accounts", buyerUid);
+        
+        // Handle Payment
+        if (isFree) {
+            const userData = (await getDoc(userRef)).data();
+            let vouchers = userData.myCoupons?.blackmarket || [];
+            const newVouchers = vouchers.filter(v => v.code !== ticketCode && v.id !== ticketCode);
+            await updateDoc(userRef, { 'myCoupons.blackmarket': newVouchers });
+            window.activeCosmeticTicket = null;
+        } else {
+            await updateDoc(userRef, { diamonds: increment(-30) });
+        }
+
+        // Send the Fake Message
+        await addDoc(collection(db, "wall_messages"), {
+            text: fakeMsg,
+            uid: targetUid,     // VICTIM ID (Makes it look like them)
+            name: targetName,   // VICTIM Name
+            photo: targetImg,   // VICTIM Photo
+            
+            // The Secret Flags
+            isFake: true,
+            realSender: buyerName, 
+            
+            // Standard Fields
+            createdAt: serverTimestamp(),
+            isAdmin: false, isOwner: false, isMod: false, isHelper: false,
+            isDeleted: false, reactions: {}, seenBy: []
+        });
+
+        showCustomAlert("Identitate clonată. Mesaj trimis.", "SUCCES");
+        await logTransaction(-30, "DIAMONDS", "Black Market", `Camouflage used on ${targetName}`);
+
+    } catch (e) {
+        console.error(e);
+        showToast("Eroare la execuție.");
+    }
+}
+
+// 6. Reveal Function (When clicking the mask)
+window.revealFakeSender = (realName) => {
+    new Audio('https://www.myinstants.com/media/sounds/drama.mp3').play().catch(()=>{});
+    showCustomAlert(
+        `Acest mesaj este <b style="color:#ff4757;">FALS!</b><br><br>Adevăratul autor este: <b style="color:#29f3ff;">${realName}</b>`, 
+        "DECEPTION REVEALED"
+    );
+};
 </script>
 </body>
 </html>
