@@ -6726,9 +6726,12 @@ window.openUserProfile = async (uid) => {
     const modal = document.getElementById('viewProfileModal');
     const card = modal.querySelector('.account-card');
     
-    // Reset și Audio Stop (ca pe Wall)
-    card.className = 'account-card';
+    // 1. CURĂȚARE TOTALĂ (Repară bug-ul de PC și suprapunerea de culori)
+    // Eliminăm orice clasă care începe cu "pban_" sau "profile-banner-active"
+    card.className = "account-card"; 
     card.style.backgroundImage = 'none';
+    card.style.background = ""; // Reset inline styles
+    
     if(window.stopProfileAudio) window.stopProfileAudio();
 
     modal.classList.add('active');
@@ -6738,21 +6741,32 @@ window.openUserProfile = async (uid) => {
         if(!snap.exists()) return;
         const data = snap.data();
 
-        // 1. Banner & Intro Logic
-        if (data.equippedProfileBanner) {
-            card.classList.add('profile-banner-active', data.equippedProfileBanner.id);
-            if(data.equippedProfileBanner.cssClass) card.classList.add(data.equippedProfileBanner.cssClass);
+        // 2. APLICARE BANNER (Prioritate ID)
+        if (data.equippedProfileBanner && data.equippedProfileBanner.id) {
+            // Adăugăm clasa Master
+            card.classList.add('profile-banner-active');
+            // Adăugăm ID-ul ca și clasă (ex: pban_anime) - Acesta declanșează CSS-ul de mai sus
+            card.classList.add(data.equippedProfileBanner.id);
+            
+            // Dacă e un banner Custom cu URL direct (Midas/RGB etc)
+            if(data.equippedProfileBanner.style && !data.equippedProfileBanner.id.includes('anime')) {
+                card.style.background = data.equippedProfileBanner.style;
+                card.style.backgroundSize = "cover";
+            }
         }
         
+        // 3. INTRO AUDIO
         if (data.equippedIntro && data.equippedIntro.audio) {
             window.currentProfileAudio = new Audio(data.equippedIntro.audio);
             window.currentProfileAudio.volume = 0.4;
-            window.currentProfileAudio.play().catch(e => console.log("Audio block"));
+            window.currentProfileAudio.play().catch(e => console.log("Audio play blocked"));
         }
 
-        // 2. Imagine & Rama
+        // --- Restul codului tău pentru Imagine, Nume, Valute, etc. ---
+        // (Păstrează restul funcției openUserProfile așa cum l-am reparat anterior)
         const ownerImg = data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
         document.getElementById('viewUserImg').src = ownerImg;
+        // ... (etc)
         const viewFrame = document.getElementById('viewUserFrame');
         if (data.equippedFrame && data.equippedFrame.img) {
             viewFrame.src = data.equippedFrame.img;
