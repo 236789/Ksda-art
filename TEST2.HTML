@@ -9897,6 +9897,49 @@ nav a[href="shop.html"] {
     flex: 1;
     text-align: center; /* centers the text */
 }
+
+/* --- PERFORMANCE ENGINE START --- */
+/* Hardware Acceleration - forțează randarea GPU */
+.package-card, .shop-btn-v6, .aaa-card, .bm-offer-card-v4, .luxury-pedestal, .pay-modal-glass {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    perspective: 1000;
+    will-change: transform, opacity;
+}
+
+/* Reducerea efectelor grele pe Mobile (Ecran < 768px) */
+@media (max-width: 768px) {
+    /* Box-shadow este cel mai mare inamic al performanței pe mobil */
+    * {
+        box-shadow: none !important; /* Elimină glow-ul general */
+        text-shadow: none !important; /* Elimină glow-ul textului */
+    }
+
+    /* Păstrăm doar borduri simple colorate în loc de glow-uri imense */
+    .package-card, .shop-btn-v6, .aaa-card, .bm-offer-card-v4 {
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important; 
+        backdrop-filter: none !important; /* Blur-ul de fundal omoară FPS-ul */
+        background: rgba(5, 11, 20, 0.95) !important; /* Fundal mai opac */
+    }
+
+    /* Încetinirea sau oprirea animațiilor rotative complexe */
+    .aaa-card::before, .shop-btn-v6::before, .pay-modal-glass::before {
+        animation-duration: 6s !important; /* Rotație mult mai lentă */
+        opacity: 0.4 !important;
+    }
+
+    /* Eliminăm particulele care plutesc pe fundal în footer și secțiuni */
+    .white-particles, .footer-stars, .atelier-floaters, .conduit-particle {
+        display: none !important;
+    }
+    
+    /* Simplificăm animația de tip grid */
+    .atelier-grid, .footer-grid, .deals-grid-anim {
+        animation: none !important; 
+    }
+}
+/* --- PERFORMANCE ENGINE END --- */
+
   </style>
 </head>
 <body>
@@ -14602,82 +14645,72 @@ window.triggerRain = async () => {
     const uid = auth.currentUser.uid;
     const userRef = doc(db, "accounts", uid);
     
-    // 1. CHECK FOR VOUCHER
+    // 1. VERIFICARE VOUCHER
     const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
     const ticketCode = isFree ? window.activeCosmeticTicket.id : null;
 
     const userSnap = await getDoc(userRef);
     const data = userSnap.data();
 
-    // 2. CHECK COST OR VOUCHER VALIDITY
+    // 2. VERIFICARE COST
     if (!isFree && (data.diamonds || 0) < 50) {
         return showCustomAlert("Nu ai destule diamante (50)!", "SĂRĂCIE");
     }
 
-    // 3. CONFIRM ACTION
+    // 3. CONFIRMARE
     const msg = isFree 
-        ? "Folosești TICHETUL BLACK MARKET pentru a declanșa ploaia GRATUIT?" 
-        : "Ești sigur? Vei cheltui 50 Diamante pentru a da 5000 Coins tuturor celor online!";
+        ? "Folosești TICHETUL pentru a da monede TUTUROR utilizatorilor înregistrați?" 
+        : "Ești sigur? Vei cheltui 50 Diamante pentru a da 5000 Coins TUTUROR utilizatorilor (chiar și celor offline)!";
         
-    const confirm = await showCustomConfirm(msg, isFree ? "CONFIRMĂ VOUCHER" : "CONFIRMĂ PLOAIA");
+    const confirm = await showCustomConfirm(msg, "GLOBAL MAKE IT RAIN");
     if (!confirm) return;
 
     try {
         const batchUpdate = { lastRainTime: serverTimestamp() };
 
-        // 4. PAY LOGIC (Diamonds vs Voucher)
+        // 4. PLATĂ
         if (isFree) {
-            // Remove Voucher
             let vouchers = data.myCoupons?.blackmarket || [];
-            // Filter out the specific ticket used
             const newVouchers = vouchers.filter(v => v.code !== ticketCode && v.id !== ticketCode);
-            
-            // Safety check to ensure we actually removed one (prevents exploit if array empty)
-            if(vouchers.length === newVouchers.length) {
-                return showCustomAlert("Eroare: Voucherul nu a fost găsit în inventar!", "EROARE");
-            }
-
             batchUpdate['myCoupons.blackmarket'] = newVouchers;
-            window.activeCosmeticTicket = null; // Clear session immediately
+            window.activeCosmeticTicket = null;
         } else {
-            // Pay Diamonds
             batchUpdate.diamonds = increment(-50);
         }
 
         await updateDoc(userRef, batchUpdate);
+        await logTransaction(isFree ? 0 : -50, "DIAMONDS", "Black Market", `Used Global Rain ${isFree ? '(Voucher)' : ''}`);
 
-        // 5. LOG THE SPEND
-        await logTransaction(isFree ? 0 : -50, "DIAMONDS", "Black Market", `Used Make It Rain ${isFree ? '(Voucher)' : ''}`);
-
-        // 6. GIVE 5000 COINS TO EVERYONE ONLINE
-        const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
-        const q = query(
-            collection(db, "accounts"), 
-            where("lastActive", ">", tenMinsAgo), 
-            limit(50) 
-        );
+        // 5. OPERAȚIUNEA GLOBALĂ (Update la toți utilizatorii)
+        // Am scos filtrele de "lastActive" și "limit"
+        const q = query(collection(db, "accounts"));
+        const allUsersSnap = await getDocs(q);
         
-        const onlineSnaps = await getDocs(q);
         const batch = writeBatch(db); 
-        
         let count = 0;
-        onlineSnaps.forEach((docUser) => {
-            const ref = doc(db, "accounts", docUser.id);
-            batch.update(ref, { coins: increment(5000) });
-            count++;
+
+        allUsersSnap.forEach((docUser) => {
+            // Nu îi dăm monede celui care a declanșat ploaia (opțional, poți scoate IF-ul dacă vrei să primească și el)
+            if (docUser.id !== uid) {
+                const ref = doc(db, "accounts", docUser.id);
+                batch.update(ref, { coins: increment(5000) });
+                count++;
+            }
         });
 
-        if (count > 0) await batch.commit();
+        if (count > 0) {
+            await batch.commit();
+        }
 
-        // 7. ANNOUNCE IT
+        // 6. ANUNȚ KEVIN BOT (Modificat textul)
         const rainHtml = `
             <div style="text-align: center;">
-                <div style="font-size: 22px; font-weight:900; color:#ffd700; margin-bottom:5px;">💸 MAKE IT RAIN 💸</div>
+                <div style="font-size: 22px; font-weight:900; color:#ffd700; margin-bottom:5px;">💸 GLOBAL RAIN 💸</div>
                 <div style="font-size: 14px; color:#fff;">
-                    <span style="color:#29f3ff; font-weight:bold;">${data.username}</span> a făcut cinste!
+                    Legenda <span style="color:#29f3ff; font-weight:bold;">${data.username}</span> a cumpărat tăcere!
                 </div>
                 <div style="font-size: 12px; color:#aaa; margin-top:5px;">
-                    Toată lumea online a primit <span style="color:#ffd700;">5,000 COINS</span>!
+                    FIECARE cetățean a primit <span style="color:#ffd700;">5,000 COINS</span> în cont!
                 </div>
             </div>
         `;
@@ -14693,11 +14726,11 @@ window.triggerRain = async () => {
         });
 
         closeModal('blackMarketModal');
-        showCustomAlert(`Ai făcut ploaie de bani! ${count} jucători au primit coins.`, "RESPECT +100");
+        showCustomAlert(`MISIUNE REUȘITĂ! Ai trimis monede la toți cei ${count} utilizatori înregistrați.`, "MAFIA DIN K.S.D.A");
 
     } catch (e) {
         console.error(e);
-        showCustomAlert("Eroare la procesare.", "FAIL");
+        showCustomAlert("Sistemul a blocat tranzacția globală.", "FAIL");
     }
 };
 
@@ -17027,6 +17060,41 @@ window.uploadIntroToFirebase = async () => {
         btn.disabled = false;
     }
 };
+
+// --- ANTI-LAG ANIMATION CONTROLER ---
+const freezeAnimations = () => {
+    const observerOptions = {
+        root: null,
+        threshold: 0.1 // Secțiunea trebuie să fie măcar 10% vizibilă
+    };
+
+    const animationObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Pornește animațiile când vedem secțiunea
+                entry.target.style.animationPlayState = "running";
+                // Căutăm și copiii care au animații
+                entry.target.querySelectorAll('*').forEach(el => el.style.animationPlayState = "running");
+            } else {
+                // Îngheață animațiile când secțiunea e ascunsă
+                entry.target.style.animationPlayState = "paused";
+                entry.target.querySelectorAll('*').forEach(el => el.style.animationPlayState = "paused");
+            }
+        });
+    }, observerOptions);
+
+    // Monitorizăm toate zonele mari de shop
+    document.querySelectorAll('.shop-zone, .shop-zone-v4, footer, #zone-hero').forEach(zone => {
+        animationObserver.observe(zone);
+    });
+};
+
+// Lansăm optimizarea
+if (document.readyState === 'complete') {
+    freezeAnimations();
+} else {
+    window.addEventListener('load', freezeAnimations);
+}
 </script>
 </body>
 </html>
