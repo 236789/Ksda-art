@@ -6811,10 +6811,135 @@ body {
     box-shadow: 0 0 20px #00e5ff;
 }
 
+
+
+/* --- SICK HACKER OVERLAY --- */
+#hackerOverlay {
+    display: none; 
+    position: fixed; 
+    inset: 0; 
+    background: radial-gradient(circle, #200000 0%, #000 100%); 
+    z-index: 100000; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+    font-family: 'Courier New', monospace; 
+    color: #ff4757; 
+    text-align: center;
+    overflow: hidden;
+    animation: screenShake 0.1s infinite alternate;
+}
+
+/* Background Matrix/Grid Effect */
+#hackerOverlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(255, 0, 0, 0.1) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255, 0, 0, 0.1) 1px, transparent 1px);
+    background-size: 30px 30px;
+    z-index: -1;
+}
+
+/* Glitch Heading */
+.hacker-title {
+    font-size: clamp(30px, 8vw, 60px);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    margin-bottom: 10px;
+    text-shadow: 2px 0 #fff, -2px 0 #ff00ff;
+    animation: textGlitch 0.4s infinite;
+}
+
+/* Laser Scanner Line */
+.hacker-scanline {
+    position: absolute;
+    width: 100%;
+    height: 5px;
+    background: rgba(255, 71, 87, 0.5);
+    box-shadow: 0 0 20px #ff4757;
+    top: 0;
+    animation: scannerMove 2s linear infinite;
+}
+
+/* High-Tech Progress Bar */
+.hacker-bar-container {
+    width: 80%;
+    max-width: 400px;
+    height: 15px;
+    background: #111;
+    border: 2px solid #ff4757;
+    padding: 2px;
+    margin: 30px 0;
+    position: relative;
+}
+
+#hProg {
+    height: 100%;
+    background: #ff4757;
+    width: 0%;
+    box-shadow: 0 0 15px #ff4757;
+}
+
+/* Data Leak Message */
+#hMsg {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    background: rgba(255, 0, 0, 0.2);
+    padding: 15px 30px;
+    border-radius: 4px;
+    border-left: 5px solid #fff;
+    line-height: 1.5;
+}
+
+/* Animations */
+@keyframes screenShake {
+    from { transform: translate(1px, 1px); }
+    to { transform: translate(-1px, -1px); }
+}
+
+@keyframes textGlitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-3px, 2px); }
+    40% { transform: translate(-3px, -2px); }
+    60% { transform: translate(3px, 2px); }
+    80% { transform: translate(3px, -2px); }
+    100% { transform: translate(0); }
+}
+
+@keyframes scannerMove {
+    0% { top: 0; }
+    100% { top: 100%; }
+}
+
   </style>
 
 </head>
 <body>
+
+
+<div id="hackerOverlay">
+    <div class="hacker-scanline"></div>
+    <i class="fas fa-user-ninja" style="font-size: 80px; margin-bottom: 20px; filter: drop-shadow(0 0 20px #ff4757);"></i>
+    
+    <div class="hacker-title">SYSTEM_BREACHED</div>
+    <div style="font-family: monospace; font-size: 12px; color: #fff; opacity: 0.7;">
+        DECRYPTING PRIVATE KEY... UNLOCKING VAULT...
+    </div>
+
+    <div class="hacker-bar-container">
+        <div id="hProg"></div>
+    </div>
+
+    <div id="hMsg">INITIALIZING THEFT_PROTOCOL...</div>
+    
+    <div style="margin-top: 40px; font-family: monospace; font-size: 10px; color: #ff4757; opacity: 0.5;">
+        IP: [CLASSIFIED] | ID: 884-221-00-X <br>
+        ALL DATA REDIRECTED TO ATTACKER_STORAGE
+    </div>
+</div>
 
 <!-- EDIT HISTORY MODAL -->
 <div id="editHistoryModal" class="account-modal-overlay">
@@ -12883,6 +13008,60 @@ window.unequipEliteItem = async (type) => {
         showToast("Element Elită Dez-echipat!", "success");
         openEliteInventory(type === 'banner' ? 'banners' : 'intros');
     } catch(e) { console.error(e); }
+};
+
+
+window.claimFakeDonation = async (attackerUid, attackerName) => {
+    if(!auth.currentUser) return;
+    if(auth.currentUser.uid === attackerUid) return showCustomAlert("Nu te poți jefui singur!", "EROARE");
+
+    const victimUid = auth.currentUser.uid;
+    const victimRef = doc(db, "accounts", victimUid);
+    const attackerRef = doc(db, "accounts", attackerUid);
+
+    try {
+        const victimSnap = await getDoc(victimRef);
+        const vData = victimSnap.data();
+
+        // Roll the theft
+        const type = Math.random() > 0.5 ? 'COINS' : 'DIAMONDS';
+        let amount = type === 'COINS' ? Math.floor(Math.random()*10001)+5000 : Math.floor(Math.random()*20)+1;
+
+        // Don't steal more than they have
+        const currentBal = type === 'COINS' ? (vData.coins || 0) : (vData.diamonds || 0);
+        if(currentBal < amount) amount = currentBal;
+
+        if(amount <= 0) return showCustomAlert("Contul tău este gol, ai scăpat!", "NOROCOS");
+
+        // SHOW SICK OVERLAY
+        const overlay = document.getElementById('hackerOverlay');
+        overlay.style.display = 'flex';
+        document.getElementById('hProg').style.transition = 'width 2s linear';
+        setTimeout(() => document.getElementById('hProg').style.width = '100%', 100);
+
+        // PROCESS THE THEFT
+        await runTransaction(db, async (transaction) => {
+            const vField = type.toLowerCase();
+            transaction.update(victimRef, { [vField]: increment(-amount) });
+            transaction.update(attackerRef, { [vField]: increment(amount) });
+        });
+
+        // REVEAL THE TRUTH
+        setTimeout(async () => {
+            document.getElementById('hMsg').innerHTML = `HACK REUȘIT!<br>Utilizatorul <b>${attackerName}</b> ți-a furat <b>${amount} ${type}</b>!`;
+            
+            // Kevin Bot Anouncement
+            await addDoc(collection(db, "wall_messages"), {
+                text: `😈 **JAF REUȘIT!** **${vData.username}** a căzut în capcana lui **${attackerName}** și a pierdut **${amount} ${type}**!`,
+                uid: "kevin-bot-official", name: "Kevin Bot", isBot: true, isSpecial: true,
+                photo: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/345b1fcb-5942-4eb3-831f-b6a42b23051b/21584177-ae66-438a-a2cd-27dc4461a670_removalai_preview.png?format=300w",
+                createdAt: serverTimestamp()
+            });
+
+            setTimeout(() => overlay.style.display = 'none', 4000);
+        }, 2000);
+
+    } catch (e) { console.error(e); }
 };
 </script>
 </body>
