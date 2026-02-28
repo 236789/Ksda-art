@@ -9905,6 +9905,31 @@ nav a[href="shop.html"] {
 </head>
 <body>
 
+<!-- TROLL TARGET SELECTION MODAL (SEPARATE FROM DONATION) -->
+<div id="trollTargetModal" class="account-modal-overlay">
+    <div class="shop-modal-v4" style="width: 95%; max-width: 550px; height: 80vh; border-color: #ff9f43 !important; box-shadow: 0 0 50px rgba(255, 159, 67, 0.2) !important;">
+        <div class="bm-scanline-overlay"></div>
+        
+        <!-- Header -->
+        <div style="background: rgba(255, 159, 67, 0.1); padding: 20px; border-bottom: 1px solid #ff9f43; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div style="font-family:'Montserrat'; font-size: 18px; font-weight: 900; color: #ff9f43;">TARGET_ACQUISITION</div>
+            <button class="close-pop" onclick="closeModal('trollTargetModal')" style="position: static !important; border: 1px solid #ff9f43; background: transparent; width:40px; height:40px;">✕</button>
+        </div>
+
+        <!-- Search Victim -->
+        <div style="padding: 15px; background: rgba(0,0,0,0.4);">
+            <input type="text" id="searchTrollVictim" class="v4-terminal-input" placeholder="CAUTĂ VICTIMĂ..." style="margin: 0; padding: 10px !important; font-size: 14px; border-color: #ff9f43 !important;">
+        </div>
+
+        <!-- User List Area -->
+        <div class="bm-content-scroll" style="flex: 1; padding: 15px;">
+            <div id="trollUserList" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Victims injected here -->
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <!-- =========================================
      TROLL PROTOCOL TERMINAL (EMPTY FOR NOW)
@@ -17126,6 +17151,7 @@ window.openTrollTerminal = () => {
 
 
 
+// --- 1. THE TRIGGER (Button in Troll Terminal) ---
 window.startSilencePrank = async () => {
     if(!auth.currentUser) return alert("Loghează-te!");
 
@@ -17137,16 +17163,59 @@ window.startSilencePrank = async () => {
         return showCustomAlert("Nu ai 15 Diamante pentru a cumpăra liniștea!", "EROARE");
     }
 
-    const msg = isFree ? "Folosești TICHETUL pentru MUTE GRATUIT?" : "Cheltui 15 Diamante pentru a da MUTE unui utilizator?";
-    if (!(await showCustomConfirm(msg, "SILENCE PROTOCOL"))) return;
+    const msg = isFree ? "Activezi SILENCE GRATUIT prin voucher?" : "Cheltui 15 Diamante pentru SILENCE PROTOCOL?";
+    if (!(await showCustomConfirm(msg, "PROTOCOL_TERMINAL"))) return;
 
-    // SET THE MODE HERE
-    window.trollActionType = 'silence'; 
-    
+    // Close the terminal and open the NEW dedicated Target Modal
     document.getElementById('trollTerminalModal').classList.remove('active');
+    openTrollTargetList();
+};
+
+// --- 2. OPEN THE DEDICATED LIST ---
+async function openTrollTargetList() {
+    document.getElementById('trollTargetModal').classList.add('active');
+    const listEl = document.getElementById('trollUserList');
+    listEl.innerHTML = '<div style="text-align:center; padding:20px; color:#ff9f43; font-family:Orbitron;">> SCANNING VULNERABLE USERS...</div>';
     
-    // Open the selection list
-    window.openDonationList();
+    try {
+        const q = query(collection(db, "accounts"), orderBy("username", "asc"));
+        const snap = await getDocs(q);
+        
+        listEl.innerHTML = "";
+        snap.forEach((docSnap) => {
+            const m = docSnap.data();
+            const mid = docSnap.id;
+            if(mid === auth.currentUser.uid) return; // Hide self
+
+            const item = document.createElement('div');
+            item.className = 'top-item'; 
+            item.style.borderColor = "rgba(255, 159, 67, 0.3)";
+            item.innerHTML = `
+                <div class="top-left">
+                    <div class="top-img-box">
+                        <img src="${m.image || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" class="top-user-img">
+                    </div>
+                    <div class="top-user-name">${m.username || 'Anonim'}</div>
+                </div>
+                <div style="font-size: 9px; color: #ff9f43; font-weight: 800; font-family:Orbitron;">[ EXECUTE_SILENCE ]</div>
+            `;
+            item.onclick = () => {
+                window.executeSilenceAction(mid, m.username);
+                closeModal('trollTargetModal');
+            };
+            listEl.appendChild(item);
+        });
+    } catch (e) { listEl.innerHTML = "Eroare terminal."; }
+}
+
+// --- 3. SEARCH LOGIC FOR TROLL MODAL ---
+document.getElementById('searchTrollVictim').oninput = (e) => {
+    const val = e.target.value.toLowerCase();
+    const items = document.querySelectorAll('#trollUserList .top-item');
+    items.forEach(item => {
+        const name = item.querySelector('.top-user-name').innerText.toLowerCase();
+        item.style.display = name.includes(val) ? 'flex' : 'none';
+    });
 };
 
 
