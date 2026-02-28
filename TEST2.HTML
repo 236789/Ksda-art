@@ -17611,32 +17611,77 @@ function initScratchCard() {
     canvas.addEventListener('touchmove', scratch);
 }
 
+// --- 1. ACTIVARE VOUCHER (30-50% REDUCERE) ---
+window.activateCouponCode = async (code) => {
+    const userData = window.currentUserData;
+    let type = '';
+    
+    if (userData.myCoupons?.coins?.some(c => c.code === code)) type = 'coins';
+    else if (userData.myCoupons?.diamonds?.some(c => c.code === code)) type = 'diamonds';
+
+    if (!type) return showCustomAlert("Cod invalid sau expirat.");
+
+    currentScratchType = type;
+    currentScratchTicketId = code;
+    
+    // LIMITA: Minim 30%, Maxim 50%
+    currentScratchDiscount = Math.floor(Math.random() * (50 - 30 + 1)) + 30;
+    
+    initScratchCard();
+    
+    document.getElementById('scratchOverlay').style.display = 'flex';
+    document.getElementById('scratchValue').innerText = `-${currentScratchDiscount}%`;
+    document.getElementById('ticketVisual').className = `scratch-container ticket-bg-${type}`;
+    document.getElementById('scratchTitle').innerText = `${type.toUpperCase()} VOUCHER`;
+};
+
+// --- 2. COLECTARE VOUCHER + SCROLL LA VAULT ---
 window.collectVoucher = async () => {
     const userRef = doc(db, "accounts", auth.currentUser.uid);
-    const expiresAt = Date.now() + (24 * 60 * 60 * 1000); 
+    const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // Valabil 24h
 
     try {
-        // ... codul de salvare în Firebase existent ...
+        // DEFINIM OBIECTUL UPDATES (Aici era eroarea inainte)
+        const updates = {
+            activeDiscount: {
+                type: currentScratchType,
+                percent: currentScratchDiscount,
+                expiresAt: expiresAt,
+                activatedAt: serverTimestamp(),
+                ticketId: currentScratchTicketId
+            }
+        };
+
+        // Scoatem biletul din inventarul de cupoane
+        const currentCoupons = window.currentUserData.myCoupons[currentScratchType] || [];
+        const filtered = currentCoupons.filter(c => c.code !== currentScratchTicketId);
+        updates[`myCoupons.${currentScratchType}`] = filtered;
+
+        // Salvăm în Firebase
         await updateDoc(userRef, updates);
         
-        // Închidem overlay-ul
+        // UI Cleanup
         document.getElementById('scratchOverlay').style.display = 'none';
         document.getElementById('btnCollectVoucher').style.display = 'none';
         
         showCustomAlert(`Reducere de ${currentScratchDiscount}% ACTIVATĂ!`, "SISTEM ACTUALIZAT");
         
+        // Re-randăm magazinul pentru a vedea noile prețuri
         renderShop();
+
+        // SCROLL AUTOMAT LA VAULT
+        setTimeout(() => {
+            if (typeof scrollToZone === 'function') {
+                scrollToZone('zone-vault');
+            } else {
+                document.getElementById('zone-vault').scrollIntoView({ behavior: 'smooth' });
+            }
+        }, 500);
         
-        // --- ADAUGĂ ACEASTĂ LINIE PENTRU SCROLL ---
-        // Ne asigurăm că utilizatorul vede prețurile noi imediat
-        if (typeof scrollToZone === 'function') {
-            scrollToZone('zone-vault');
-        } else {
-            // Fallback dacă funcția nu e globală
-            document.getElementById('zone-vault').scrollIntoView({ behavior: 'smooth' });
-        }
-        
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error("Eroare la colectare voucher:", e);
+        alert("Eroare la salvarea voucherului.");
+    }
 };
 
 // --- 4. MONITORIZARE TRANZACȚII ADMIN (SECURITATE) ---
@@ -17672,30 +17717,6 @@ function startPaymentMonitor() {
 }
 
 
-// --- 1. ACTIVARE VOUCHER (REZOLVĂ EROAREA DIN CONSOLĂ) ---
-window.activateCouponCode = async (code) => {
-    const userData = window.currentUserData;
-    let type = '';
-    
-    // Verificăm dacă codul aparține de Coins sau Diamonds
-    if (userData.myCoupons?.coins?.some(c => c.code === code)) type = 'coins';
-    else if (userData.myCoupons?.diamonds?.some(c => c.code === code)) type = 'diamonds';
-
-    if (!type) return showCustomAlert("Codul nu a putut fi validat.", "EROARE_SISTEM");
-
-    currentScratchType = type;
-    currentScratchTicketId = code;
-    
-    // Generăm reducerea random între 50% și 80%
-    currentScratchDiscount = Math.floor(Math.random() * (80 - 50 + 1)) + 50;
-    
-    initScratchCard();
-    
-    document.getElementById('scratchOverlay').style.display = 'flex';
-    document.getElementById('scratchValue').innerText = `-${currentScratchDiscount}%`;
-    document.getElementById('ticketVisual').className = `scratch-container ticket-bg-${type}`;
-    document.getElementById('scratchTitle').innerText = `${type.toUpperCase()}_VOUCHER`;
-};
 </script>
 </body>
 </html>
