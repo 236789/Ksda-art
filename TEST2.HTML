@@ -11286,7 +11286,7 @@ nav a[href="shop.html"] {
                             <i class="fas fa-clock"></i> <span id="donateTimeLeft">00:00</span>
                         </div>
                     </div>
-                    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/images%2Fdoneaza.png?alt=media&token=83620518-2824-416e-ab6d-5f67c0f76c8c" class="buy-btn-img" id="donateStartBtn" onclick="openDonationList()">
+                    <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/images%2Fdoneaza.png?alt=media&token=83620518-2824-416e-ab6d-5f67c0f76c8c" class="buy-btn-img" id="donateStartBtn" onclick="trollActionType = 'donation'; openDonationList()">
                 </div>
 
                 <!-- Option 3: Text Colors (SHOP IMAGE) -->
@@ -13199,22 +13199,21 @@ window.processNameChange = async () => {
     let donationTarget = null;
 let donationInterval = null; // Pune asta sus de tot în <script type="module">
 
-    window.openDonationList = async () => {
-        document.getElementById('donationListModal').classList.add('active');
-        const listEl = document.getElementById('donationUserList');
-        listEl.innerHTML = '<div style="text-align:center; padding:20px;">Se încarcă membrii...</div>';
-        
-        try {
-            const q = query(collection(db, "accounts"), orderBy("coins", "desc"));
-            const snap = await getDocs(q);
-            allUsersCache = [];
-            snap.forEach(d => { 
-                if(d.id !== auth.currentUser.uid) allUsersCache.push({ id: d.id, ...d.data() }); 
-            });
-            renderDonationList(allUsersCache);
-        } catch (e) { listEl.innerHTML = "Eroare la încărcare."; }
-    };
-
+window.openDonationList = async () => {
+    document.getElementById('donationListModal').classList.add('active');
+    const listEl = document.getElementById('donationUserList');
+    listEl.innerHTML = '<div style="text-align:center; padding:20px;">Se încarcă membrii...</div>';
+    
+    try {
+        const q = query(collection(db, "accounts"), orderBy("coins", "desc"));
+        const snap = await getDocs(q);
+        allUsersCache = [];
+        snap.forEach(d => { 
+            if(d.id !== auth.currentUser.uid) allUsersCache.push({ id: d.id, ...d.data() }); 
+        });
+        renderDonationList(allUsersCache);
+    } catch (e) { listEl.innerHTML = "Eroare la încărcare."; }
+};
 
 
 // --- TEXT SHOP LOGIC (VOUCHER READY) ---
@@ -13397,17 +13396,18 @@ window.equipText = async (id, cssClass) => {
     };
 
 window.selectTarget = (id, name) => {
-    // VERIFICARE: Dacă suntem în modul Troll
+    console.log("Target selectat:", name, "Tip acțiune:", trollActionType);
+
+    // VERIFICARE: Dacă am venit din meniul de Troll
     if (trollActionType === 'silence') {
-        executeSilenceAction(id, name);
-        trollActionType = null; // Resetăm starea după execuție
-        return;
+        window.executeSilenceAction(id, name);
+        trollActionType = null; // Resetăm comutatorul
+        return; // Oprim funcția aici, nu mai merge la donație
     }
 
-    // LOGICA TA ORIGINALĂ PENTRU DONAȚIE
+    // LOGICA ORIGINALĂ PENTRU DONAȚIE
     donationTarget = { id, name };
     document.getElementById('targetName').innerText = name;
-    // Folosim document.getElementById în loc de closeModal pentru siguranță
     document.getElementById('donationListModal').classList.remove('active');
     document.getElementById('donationAmountModal').classList.add('active');
 };
