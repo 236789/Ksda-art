@@ -9979,6 +9979,23 @@ nav a[href="shop.html"] {
     </div>
 </div>
 
+<!-- MODAL PENTRU PROMPT PERSONALIZAT (FIX EROARE CAMOUFLAGE) -->
+<div id="customPromptOverlay" class="account-modal-overlay">
+    <div class="cyber-alert-card type-confirm" style="--alert-color: #d63384;">
+        <h3 id="customPromptTitle" class="cyber-alert-title">MESSAGE_INPUT</h3>
+        <p id="customPromptText" class="cyber-alert-msg">Introdu mesajul dorit:</p>
+        
+        <input type="text" id="customPromptInput" class="v4-terminal-input" 
+               style="border-color: #d63384 !important; margin-bottom: 20px;" 
+               placeholder="Scrie aici...">
+
+        <div class="cyber-btn-row">
+            <button id="customPromptCancel" class="cyber-btn cancel">ANULEAZĂ</button>
+            <button id="customPromptOk" class="cyber-btn" style="border-color: #d63384; color: #d63384;">TRIMITE</button>
+        </div>
+    </div>
+</div>
+
 <div id="scratchOverlay">
     <div style="font-family:'Orbitron'; color:#fff; margin-bottom:20px; letter-spacing:2px;" id="scratchTitle">VOUCHER DETECTAT</div>
     <div class="scratch-container" id="ticketVisual">
@@ -17789,7 +17806,7 @@ window.initiateCamouflage = async () => {
     openCamouflageList();
 };
 
-// 2. Fetch & Render List
+// 2. Fetch & Render List (UPDATED WITH KEVIN BOT)
 async function openCamouflageList() {
     const modal = document.getElementById('camouflageTargetModal');
     const listEl = document.getElementById('camouflageUserList');
@@ -17802,8 +17819,17 @@ async function openCamouflageList() {
         const snap = await getDocs(q);
         
         camouflageCache = [];
+
+        // --- MANUALLY INJECT KEVIN BOT ---
+        camouflageCache.push({
+            id: 'kevin-bot-official', // Specific ID used for logic
+            username: 'Kevin Bot',
+            image: 'https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/345b1fcb-5942-4eb3-831f-b6a42b23051b/21584177-ae66-438a-a2cd-27dc4461a670_removalai_preview.png?format=300w',
+            isBot: true // Flag to identify him
+        });
+
         snap.forEach(d => {
-            if(d.id !== auth.currentUser.uid) { // Don't impersonate yourself
+            if(d.id !== auth.currentUser.uid) { 
                 camouflageCache.push({ id: d.id, ...d.data() });
             }
         });
@@ -17852,7 +17878,7 @@ document.getElementById('searchCamouflage').addEventListener('input', (e) => {
     renderCamouflageList(filtered);
 });
 
-// 5. Target Selection & Execution
+// 5. Target Selection & Execution (UPDATED FOR KEVIN)
 async function selectCamouflageTarget(targetUid, targetName, targetImg) {
     // Hide list immediately
     document.getElementById('camouflageTargetModal').classList.remove('active');
@@ -17886,16 +17912,23 @@ async function selectCamouflageTarget(targetUid, targetName, targetImg) {
             await updateDoc(userRef, { diamonds: increment(-30) });
         }
 
+        // --- CHECK IF TARGET IS KEVIN BOT ---
+        const isTargetBot = (targetUid === 'kevin-bot-official');
+
         // Send the Fake Message
         await addDoc(collection(db, "wall_messages"), {
             text: fakeMsg,
-            uid: targetUid,     // VICTIM ID (Makes it look like them)
-            name: targetName,   // VICTIM Name
-            photo: targetImg,   // VICTIM Photo
+            uid: targetUid,     
+            name: targetName,   
+            photo: targetImg,   
             
             // The Secret Flags
             isFake: true,
             realSender: buyerName, 
+
+            // IF it is Kevin, make it look like a bot message
+            isBot: isTargetBot, 
+            isSpecial: isTargetBot, 
             
             // Standard Fields
             createdAt: serverTimestamp(),
@@ -17922,53 +17955,48 @@ window.revealFakeSender = (realName) => {
 };
 
 
-
-// --- FUNCȚIA SHOW CUSTOM PROMPT (NECESARĂ PENTRU CAMOUFLAGE) ---
-window.showCustomPrompt = (title, message, placeholder = "") => {
+window.showCustomPrompt = (title, msg, placeholder = "") => {
     return new Promise((resolve) => {
-        const modal = document.getElementById('customAlertModal');
-        const titleEl = document.getElementById('customAlertTitle');
-        const textEl = document.getElementById('customAlertText');
-        const inputEl = document.getElementById('customAlertInput');
-        const iconEl = document.getElementById('customAlertIcon');
-        const confirmBtn = document.getElementById('customAlertConfirm');
-        const cancelBtn = document.getElementById('customAlertCancel');
+        const overlay = document.getElementById('customPromptOverlay');
+        const titleEl = document.getElementById('customPromptTitle');
+        const msgEl = document.getElementById('customPromptText');
+        const inputEl = document.getElementById('customPromptInput');
+        const btnOk = document.getElementById('customPromptOk');
+        const btnCancel = document.getElementById('customPromptCancel');
 
-        // Configurare UI
         titleEl.innerText = title;
-        textEl.innerText = message;
-        inputEl.value = "";
+        msgEl.innerText = msg;
+        inputEl.value = ""; // Resetăm input-ul
         inputEl.placeholder = placeholder;
-        inputEl.style.display = "block"; // Facem input-ul vizibil
-        iconEl.innerText = "🕵️"; // Iconiță spion
         
-        // Deschide Modal
-        modal.style.display = "flex";
+        overlay.classList.add('active');
         inputEl.focus();
 
-        // Logică Butoane
-        const cleanup = () => {
-            modal.style.display = "none";
-            inputEl.style.display = "none"; // Ascundem input-ul pentru a nu strica alte alerte
-            confirmBtn.onclick = null;
-            cancelBtn.onclick = null;
-            inputEl.onkeypress = null;
-        };
-
-        confirmBtn.onclick = () => {
+        const handleOk = () => {
             const val = inputEl.value;
+            overlay.classList.remove('active');
             cleanup();
             resolve(val);
         };
 
-        cancelBtn.onclick = () => {
+        const handleCancel = () => {
+            overlay.classList.remove('active');
             cleanup();
             resolve(null);
         };
-        
-        // Permite apăsarea Enter
-        inputEl.onkeypress = (e) => {
-            if(e.key === 'Enter') confirmBtn.click();
+
+        function cleanup() {
+            btnOk.removeEventListener('click', handleOk);
+            btnCancel.removeEventListener('click', handleCancel);
+        }
+
+        btnOk.addEventListener('click', handleOk);
+        btnCancel.addEventListener('click', handleCancel);
+
+        // Permite trimiterea cu tasta Enter
+        inputEl.onkeydown = (e) => {
+            if(e.key === 'Enter') handleOk();
+            if(e.key === 'Escape') handleCancel();
         };
     });
 };
