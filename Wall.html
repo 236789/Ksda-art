@@ -13152,13 +13152,41 @@ window.claimFakeDonation = async (attackerUid, attackerName) => {
 
 
 window.revealFakeSender = (realName) => {
-    // Sunet de alertă/dramă
+    // Sunet dramatic
     new Audio('https://www.myinstants.com/media/sounds/drama.mp3').play().catch(()=>{});
     
+    // Folosim alerta custom proaspăt adăugată
     window.showCustomAlert(
         "DECEPTION REVEALED",
         `Acest mesaj este <b style="color:#ff4757;">FALS!</b><br><br>Adevăratul autor este: <b style="color:#29f3ff;">${realName}</b>`
     );
+};
+// --- FUNCTIA CARE LIPSESTE ---
+window.showCustomAlert = (title, message) => {
+    return new Promise((resolve) => {
+        const alertModal = document.getElementById('customAlertModal');
+        const alertTitle = document.getElementById('customAlertTitle');
+        const alertText = document.getElementById('customAlertText');
+        const alertInput = document.getElementById('customAlertInput');
+        const alertIcon = document.getElementById('customAlertIcon');
+        const btnConfirm = document.getElementById('customAlertConfirm');
+        const btnCancel = document.getElementById('customAlertCancel');
+
+        alertTitle.innerText = title; 
+        alertText.innerHTML = message; // Folosim innerHTML pentru culori
+        alertInput.style.display = 'none'; 
+        alertIcon.innerText = '🎭';
+        btnConfirm.className = 'alert-btn btn-yes';
+        btnConfirm.innerText = 'OK';
+        btnCancel.style.display = 'none'; // Ascundem butonul de cancel pentru alerte simple
+        alertModal.style.display = 'flex';
+
+        btnConfirm.onclick = () => { 
+            alertModal.style.display = 'none'; 
+            btnCancel.style.display = 'inline-block'; // Resetăm pentru confirm-uri
+            resolve(true); 
+        };
+    });
 };
 </script>
 </body>
