@@ -17920,6 +17920,58 @@ window.revealFakeSender = (realName) => {
         "DECEPTION REVEALED"
     );
 };
+
+
+
+// --- FUNCȚIA SHOW CUSTOM PROMPT (NECESARĂ PENTRU CAMOUFLAGE) ---
+window.showCustomPrompt = (title, message, placeholder = "") => {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('customAlertModal');
+        const titleEl = document.getElementById('customAlertTitle');
+        const textEl = document.getElementById('customAlertText');
+        const inputEl = document.getElementById('customAlertInput');
+        const iconEl = document.getElementById('customAlertIcon');
+        const confirmBtn = document.getElementById('customAlertConfirm');
+        const cancelBtn = document.getElementById('customAlertCancel');
+
+        // Configurare UI
+        titleEl.innerText = title;
+        textEl.innerText = message;
+        inputEl.value = "";
+        inputEl.placeholder = placeholder;
+        inputEl.style.display = "block"; // Facem input-ul vizibil
+        iconEl.innerText = "🕵️"; // Iconiță spion
+        
+        // Deschide Modal
+        modal.style.display = "flex";
+        inputEl.focus();
+
+        // Logică Butoane
+        const cleanup = () => {
+            modal.style.display = "none";
+            inputEl.style.display = "none"; // Ascundem input-ul pentru a nu strica alte alerte
+            confirmBtn.onclick = null;
+            cancelBtn.onclick = null;
+            inputEl.onkeypress = null;
+        };
+
+        confirmBtn.onclick = () => {
+            const val = inputEl.value;
+            cleanup();
+            resolve(val);
+        };
+
+        cancelBtn.onclick = () => {
+            cleanup();
+            resolve(null);
+        };
+        
+        // Permite apăsarea Enter
+        inputEl.onkeypress = (e) => {
+            if(e.key === 'Enter') confirmBtn.click();
+        };
+    });
+};
 </script>
 </body>
 </html>
