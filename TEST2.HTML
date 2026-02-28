@@ -13202,7 +13202,22 @@ let donationInterval = null; // Pune asta sus de tot în <script type="module">
 window.openDonationList = async () => {
     document.getElementById('donationListModal').classList.add('active');
     const listEl = document.getElementById('donationUserList');
-    listEl.innerHTML = '<div style="text-align:center; padding:20px;">Se încarcă membrii...</div>';
+    const title = document.querySelector('#donationListModal .f-hud-header span') || document.querySelector('#donationListModal .title-alte');
+    
+    // Change UI based on mode
+    if (window.trollActionType === 'silence') {
+        if(title) {
+            title.innerText = "SELECT_TARGET_TO_SILENCE";
+            title.style.color = "#ff9f43";
+        }
+        listEl.innerHTML = '<div style="text-align:center; padding:20px; color:#ff9f43; font-family:Orbitron;">> SCANNING VULNERABLE USERS...</div>';
+    } else {
+        if(title) {
+            title.innerText = "TRANSFER_TARGETS";
+            title.style.color = "#ffd700";
+        }
+        listEl.innerHTML = '<div style="text-align:center; padding:20px; color:#ffd700; font-family:Orbitron;">> LOADING REGISTERED MEMBERS...</div>';
+    }
     
     try {
         const q = query(collection(db, "accounts"), orderBy("coins", "desc"));
@@ -13213,6 +13228,25 @@ window.openDonationList = async () => {
         });
         renderDonationList(allUsersCache);
     } catch (e) { listEl.innerHTML = "Eroare la încărcare."; }
+};
+
+window.selectTarget = (id, name) => {
+    // 1. Check if we are doing a Mute (Silence)
+    if (window.trollActionType === 'silence') {
+        console.log("Muting target:", name);
+        window.executeSilenceAction(id, name); // Call the mute logic
+        window.trollActionType = null; // Reset mode immediately
+        return; // CRITICAL: Stop here so the code below doesn't run!
+    }
+
+    // 2. Normal Donation Flow
+    console.log("Donating to target:", name);
+    donationTarget = { id, name };
+    document.getElementById('targetName').innerText = name;
+    
+    // Close the list and open the amount input
+    document.getElementById('donationListModal').classList.remove('active');
+    document.getElementById('donationAmountModal').classList.add('active');
 };
 
 
@@ -17092,41 +17126,29 @@ window.openTrollTerminal = () => {
 
 
 
-// --- TROLL PROTOCOL: SILENCE LOGIC (FIXED NAME) ---
 window.startSilencePrank = async () => {
     if(!auth.currentUser) return alert("Loghează-te!");
 
-    // Verificare Voucher Black Market
-    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
-    const ticketCode = isFree ? window.activeCosmeticTicket.id : null;
-
     const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
     const userData = userSnap.data();
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
 
-    // Verificare fonduri
     if (!isFree && (userData.diamonds || 0) < 15) {
         return showCustomAlert("Nu ai 15 Diamante pentru a cumpăra liniștea!", "EROARE");
     }
 
-    const msg = isFree ? "Folosești TICHETUL pentru a reduce pe cineva la tăcere GRATUIT?" : "Cheltui 15 Diamante pentru a da MUTE unui utilizator?";
+    const msg = isFree ? "Folosești TICHETUL pentru MUTE GRATUIT?" : "Cheltui 15 Diamante pentru a da MUTE unui utilizator?";
     if (!(await showCustomConfirm(msg, "SILENCE PROTOCOL"))) return;
 
-    // Activăm modul Troll pentru lista de selecție
+    // SET THE MODE HERE
     window.trollActionType = 'silence'; 
     
-    // Deschidem lista de utilizatori
     document.getElementById('trollTerminalModal').classList.remove('active');
-    document.getElementById('donationListModal').classList.add('active');
     
-    const title = document.querySelector('#donationListModal .title-alte');
-    if(title) {
-        title.innerText = "SELECT_TARGET_TO_SILENCE";
-        title.style.color = "#ff9f43";
-    }
-
-    // Trigger la încărcarea listei (refolosim funcția ta de donații)
+    // Open the selection list
     window.openDonationList();
 };
+
 
 // Trebuie să legăm și funcția de execuție la window pentru a fi accesibilă
 window.executeSilenceAction = async (targetUid, targetName) => {
