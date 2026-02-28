@@ -9949,30 +9949,68 @@ nav a[href="shop.html"] {
     animation: pulseRed 2s infinite;
 }
 
+/* --- RECYCLE UI OVERHAUL --- */
+.recycle-card-v4 {
+    background: rgba(0, 20, 10, 0.9) !important;
+    border: 1px solid #00ff88 !important;
+    border-radius: 15px !important;
+    padding: 15px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    text-align: center;
+    transition: 0.3s;
+    min-height: 180px;
+}
 
+.recycle-preview-box {
+    width: 100%;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+/* Fix for Profile Banners in Recycle */
+.recycle-preview-box .p-ban-preview {
+    height: 45px !important;
+    width: 90% !important;
+    margin: 0 !important;
+}
+
+/* Fix for Badges in Recycle */
+.recycle-preview-box .shop-badge-preview, 
+.recycle-preview-box .elite-gif-badge {
+    transform: scale(0.85);
+}
 
   </style>
 </head>
 <body>
 
-
-<!-- RECYCLE HUB (CATEGORY SELECT) -->
+<!-- RECYCLE HUB (REMASTERED) -->
 <div id="recycleHubModal" class="account-modal-overlay">
     <div class="shop-modal-v4 accent-terminal" style="width: 95%; max-width: 550px;">
         <div class="bm-scanline-overlay"></div>
         <div style="background: rgba(0, 255, 136, 0.05); padding: 25px; border-bottom: 1px solid #00ff88; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
-            <div style="font-family:'Montserrat'; font-size: 18px; color:#00ff88;">SELECT_CATEGORY_TO_SCAN</div>
+            <div style="font-family:'Montserrat'; font-size: 18px; color:#00ff88; font-weight: 900;">RECYCLE_HUB_v2</div>
             <button class="close-pop" onclick="closeModal('recycleHubModal')" style="position: static !important; border: 1px solid #00ff88; background: transparent;">✕</button>
         </div>
         <div class="bm-content-scroll" style="padding: 20px;">
             <div class="cosmo-grid-select">
                 <div class="select-btn-v6 c-badge" onclick="openRecycleCategory('badges')"><i class="fas fa-certificate"></i><span>BADGES</span></div>
                 <div class="select-btn-v6 c-frame" onclick="openRecycleCategory('frames')"><i class="fas fa-crop-alt"></i><span>FRAMES</span></div>
-                <div class="select-btn-v6 c-banner" onclick="openRecycleCategory('banners')"><i class="fas fa-image"></i><span>BANNERS</span></div>
-                <div class="select-btn-v6 c-text" onclick="openRecycleCategory('texts')"><i class="fas fa-font"></i><span>TEXTS</span></div>
-                <div class="select-btn-v6 c-elite" onclick="openRecycleCategory('elite')" style="grid-column: span 2; border-color:#ff0000; color:#ff0000;"><i class="fas fa-crown"></i><span>ELITE ASSETS</span></div>
-                <div class="select-btn-v6" onclick="openRecycleCategory('prestige')" style="grid-column: span 2; border-color:#fff; color:#fff;"><i class="fas fa-id-card"></i><span>PROFILE INTROS/BANNERS</span></div>
-                <div class="select-btn-v6" onclick="openRecycleCategory('vouchers')" style="grid-column: span 2; border-color:#00ffcc; color:#00ffcc;"><i class="fas fa-ticket-alt"></i><span>VOUCHERS/COUPONS</span></div>
+                <div class="select-btn-v6 c-banner" onclick="openRecycleCategory('banners')"><i class="fas fa-image"></i><span>CHAT BANNERS</span></div>
+                <div class="select-btn-v6 c-text" onclick="openRecycleCategory('texts')"><i class="fas fa-font"></i><span>TEXT COLORS</span></div>
+                
+                <div class="select-btn-v6" onclick="openRecycleCategory('p_banners')" style="grid-column: span 1; border-color:#00e5ff; color:#00e5ff;"><i class="fas fa-id-card"></i><span>PROFILE BANNERS</span></div>
+                <div class="select-btn-v6" onclick="openRecycleCategory('p_intros')" style="grid-column: span 1; border-color:#ff4757; color:#ff4757;"><i class="fas fa-volume-up"></i><span>PROFILE INTROS</span></div>
+                
+                <div class="select-btn-v6 c-elite" onclick="openRecycleCategory('elite')" style="grid-column: span 2; border-color:#ffd700; color:#ffd700;"><i class="fas fa-crown"></i><span>ELITE STORE</span></div>
+                <div class="select-btn-v6" onclick="openRecycleCategory('vouchers')" style="grid-column: span 2; border-color:#00ffcc; color:#00ffcc;"><i class="fas fa-ticket-alt"></i><span>VOUCHERS ARSENAL</span></div>
             </div>
         </div>
     </div>
@@ -9992,26 +10030,36 @@ nav a[href="shop.html"] {
     </div>
 </div>
 
-<!-- THE FINAL RECYCLE OFFER MODAL -->
+<!-- THE ULTIMATE RECYCLE OFFER MODAL -->
 <div id="recycleConfirmModal" class="account-modal-overlay">
-    <div class="shop-modal-v4 accent-terminal" style="width: 95%; max-width: 400px;">
-        <div class="bm-scanline-overlay"></div>
-        <div style="padding: 30px; text-align: center;">
-            <div id="recycleItemPreview" style="margin-bottom: 20px;"></div>
-            <h3 id="recycleItemName" style="font-family:'Montserrat'; color:#fff; margin-bottom: 5px;">ITEM_NAME</h3>
-            <p style="font-size: 10px; color: #555; margin-bottom: 20px;">SYSTEM VALUATION COMPLETE</p>
-            
-            <div style="background: rgba(0,0,0,0.4); border: 1px solid #333; padding: 15px; border-radius: 10px; margin-bottom: 25px;">
-                <div style="font-size: 11px; color:#888;">ORIGINAL PRICE</div>
-                <div id="recycleOrigPrice" style="font-family:'Orbitron'; font-size: 16px; color:#fff; margin-bottom: 10px;">0</div>
-                <div style="height: 1px; background: rgba(255,255,255,0.1); margin: 10px 0;"></div>
-                <div style="font-size: 11px; color:#00ff88; font-weight:900;">YOU RECEIVE (75%)</div>
-                <div id="recycleReturnPrice" style="font-family:'Orbitron'; font-size: 24px; color:#00ff88;">0</div>
+    <div class="pay-modal-glass pay-green" style="width: 95%; max-width: 420px;">
+        <div class="pay-inner-content">
+            <button class="pay-close-btn" onclick="closeModal('recycleConfirmModal')">✕</button>
+            <div class="pay-header">
+                <div class="pay-title-glitch">RECYCLE_OFFER</div>
             </div>
+            <div class="pay-body">
+                <div id="recycleItemPreview" style="margin-bottom: 20px; display: flex; justify-content: center; align-items: center; min-height: 100px; width: 100%;"></div>
+                
+                <h3 id="recycleItemName" style="font-family:'Montserrat'; font-weight:900; color:#fff; margin-bottom: 5px; text-transform: uppercase;">ITEM_NAME</h3>
+                <div style="font-size: 10px; color: #00ff88; font-family: 'Orbitron'; margin-bottom: 20px; letter-spacing: 2px;">VALUATION: 75% RETURN</div>
 
-            <div class="cyber-btn-row">
-                <button class="cyber-btn cancel" onclick="closeModal('recycleConfirmModal')">REFUZĂ</button>
-                <button class="cyber-btn" id="executeRecycleBtn" style="border-color:#00ff88; color:#00ff88;">ACCEPTĂ OFERTA</button>
+                <div class="pay-hud-warning" style="background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.1);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="font-size: 10px; color: #666;">VALOARE ORIGINALĂ:</span>
+                        <span id="recycleOrigPrice" style="font-size: 11px; font-weight: 800; color: #fff;">0</span>
+                    </div>
+                    <div style="height: 1px; background: rgba(255, 255, 255, 0.05); margin: 10px 0;"></div>
+                    <div style="text-align: center;">
+                        <span style="font-size: 9px; color: #00ff88; display: block; margin-bottom: 5px;">SUMĂ COLECTABILĂ:</span>
+                        <div id="recycleReturnPrice" class="aaa-card-value" style="background:#00ff88 !important; color:#000 !important; border:none; width: 100%;">0</div>
+                    </div>
+                </div>
+
+                <div class="pay-btn-group" style="margin-top: 20px;">
+                    <button id="executeRecycleBtn" class="pay-holo-btn" style="background:#00ff88; color:#000;">ACCEPTĂ TRANZACȚIA</button>
+                    <button class="pay-holo-btn" onclick="closeModal('recycleConfirmModal')" style="background:transparent; border:1px solid #555; color:#888;">REFUZĂ</button>
+                </div>
             </div>
         </div>
     </div>
@@ -18125,7 +18173,7 @@ window.openRecycleHub = () => {
 window.openRecycleCategory = async (cat) => {
     const list = document.getElementById('recycleItemList');
     const title = document.getElementById('recycleCategoryTitle');
-    list.innerHTML = '<div style="color:#00ff88; grid-column:span 2; text-align:center;">SCANNING INVENTORY...</div>';
+    list.innerHTML = '<div style="color:#00ff88; grid-column:span 2; text-align:center; padding: 40px; font-family:Orbitron;">> SCANNING BIO-SIGNATURES...</div>';
     
     document.getElementById('recycleHubModal').classList.remove('active');
     document.getElementById('recycleCategoryModal').classList.add('active');
@@ -18133,74 +18181,80 @@ window.openRecycleCategory = async (cat) => {
     title.innerText = `SCAN_RESULTS: ${cat.toUpperCase()}`;
     
     const d = window.currentUserData;
+    const VOUCHER_IMGS = {
+        badges: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBadge%20Discount%20cupon%20.png?alt=media&token=bca814cf-2a76-4e93-aa23-e6f7ba6defae',
+        frames: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FFrame%20discount%20cupon%20.png?alt=media&token=c49a5fb2-06e8-4df5-bcf3-ed37afd1cdef',
+        banners: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FBanner%20discount%20cupon%20.png?alt=media&token=e75ab8ee-5278-496c-9938-d1796bda02e0',
+        texts: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FReducere%20text%20animat%20%C8%99i%20stilizat-Photoroom.png?alt=media&token=c83cbb45-5290-4aa5-a6a6-f55be0971d8f',
+        coins: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FCoins%20reduction%20cumpon.png?alt=media&token=23af7c4c-2754-401c-8768-acd9e7d3347d',
+        diamonds: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2FDiamonds%20Reduction%20cupon%20.png?alt=media&token=7fbf7d4f-78e1-4ea1-934e-619016889b84',
+        blackmarket: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/cupons%2F01d7a0d4-f450-4835-90bb-b80580dd9377-Photoroom.png?alt=media&token=15999551-bf22-47b7-99d1-8553db68df1d'
+    };
+
     let ownedIds = [];
     let database = [];
-    let typeLabel = "";
 
-    // 1. Determine Ownership & Database
-    switch(cat) {
-        case 'badges': ownedIds = d.ownedBadges || []; database = BADGES_DB.filter(x => !x.isElite); typeLabel = "Badge"; break;
-        case 'frames': ownedIds = d.ownedFrames || []; database = FRAMES_DB; typeLabel = "Frame"; break;
-        case 'banners': ownedIds = d.ownedBanners || []; database = BANNERS_DB.filter(x => !x.isElite); typeLabel = "Banner"; break;
-        case 'texts': ownedIds = d.ownedTexts || []; database = TEXTS_DB; typeLabel = "Text"; break;
-        case 'elite': 
-            const eBadges = (d.ownedBadges || []).filter(id => id.startsWith('eb_'));
-            const eBanners = (d.ownedBanners || []).filter(id => id.startsWith('eb_ban_'));
-            ownedIds = [...eBadges, ...eBanners];
-            database = [...BADGES_DB, ...BANNERS_DB].filter(x => x.isElite);
-            typeLabel = "Elite Item";
-            break;
-        case 'prestige':
-            const pBanners = d.ownedProfileBanners || [];
-            const pIntros = d.ownedIntros || [];
-            ownedIds = [...pBanners, ...pIntros];
-            database = [...PROFILE_BANNERS_DB, ...PROFILE_INTROS_DB];
-            typeLabel = "Prestige Asset";
-            break;
-        case 'vouchers':
-            // Vouchers are in myCoupons object
-            list.innerHTML = '';
-            const cats = ['badges','frames','banners','texts','blackmarket','coins','diamonds'];
-            cats.forEach(c => {
-                const coupons = d.myCoupons?.[c] || [];
-                coupons.forEach((v, idx) => {
-                    const card = document.createElement('div');
-                    card.className = 'bm-offer-card-v4';
-                    // Static recycle value for vouchers
-                    const val = c === 'blackmarket' ? 20 : (['coins','diamonds'].includes(c) ? 10 : 1000);
-                    const isDiamonds = c === 'blackmarket' || c === 'diamonds';
-                    
-                    card.innerHTML = `
-                        <i class="fas fa-ticket-alt" style="color:#00ffcc; font-size:24px;"></i>
-                        <div style="font-size:10px; margin:10px 0;">${c.toUpperCase()} VOUCHER</div>
-                        <button class="bm-price-btn-v4" onclick='prepRecycleVoucher("${c}", "${v.id || v.code}", ${val}, ${isDiamonds})'>SCAN VALUE</button>
-                    `;
-                    list.appendChild(card);
-                });
+    if (cat === 'vouchers') {
+        list.innerHTML = '';
+        const cats = ['badges','frames','banners','texts','blackmarket','coins','diamonds'];
+        cats.forEach(c => {
+            const coupons = d.myCoupons?.[c] || [];
+            coupons.forEach((v, idx) => {
+                const card = document.createElement('div');
+                card.className = 'recycle-card-v4';
+                const val = c === 'blackmarket' ? 20 : (['coins','diamonds'].includes(c) ? 10 : 1000);
+                const isDiamonds = c === 'blackmarket' || c === 'diamonds';
+                card.innerHTML = `
+                    <div class="recycle-preview-box"><img src="${VOUCHER_IMGS[c]}" style="height:50px;"></div>
+                    <div style="font-size:10px; color:#fff; font-weight:800;">${c.toUpperCase()} VOUCHER</div>
+                    <button class="bm-price-btn-v4" onclick='prepRecycleVoucher("${c}", "${v.id || v.code}", ${val}, ${isDiamonds})'>SCAN VALUE</button>
+                `;
+                list.appendChild(card);
             });
-            return;
+        });
+        return;
     }
 
-    // 2. Render Items
-    list.innerHTML = '';
-    if(ownedIds.length === 0) list.innerHTML = '<div style="color:#555; grid-column:span 2; text-align:center;">NO OWNED ITEMS DETECTED</div>';
+    // Mapping databases
+    switch(cat) {
+        case 'badges': ownedIds = d.ownedBadges || []; database = BADGES_DB.filter(x => !x.isElite); break;
+        case 'frames': ownedIds = d.ownedFrames || []; database = FRAMES_DB; break;
+        case 'banners': ownedIds = d.ownedBanners || []; database = BANNERS_DB.filter(x => !x.isElite); break;
+        case 'texts': ownedIds = d.ownedTexts || []; database = TEXTS_DB; break;
+        case 'elite': 
+            ownedIds = [...(d.ownedBadges || []), ...(d.ownedBanners || [])].filter(id => id.startsWith('eb_'));
+            database = [...BADGES_DB, ...BANNERS_DB].filter(x => x.isElite);
+            break;
+        case 'p_banners': ownedIds = d.ownedProfileBanners || []; database = PROFILE_BANNERS_DB; break;
+        case 'p_intros': ownedIds = d.ownedIntros || []; database = PROFILE_INTROS_DB; break;
+    }
 
-    ownedIds.forEach(id => {
+    list.innerHTML = '';
+    const filteredOwned = ownedIds.filter(id => database.some(item => item.id === id));
+    
+    if(filteredOwned.length === 0) {
+        list.innerHTML = '<div style="color:#555; grid-column:span 2; text-align:center; padding: 40px;">NO DATA DETECTED IN THIS SECTOR</div>';
+        return;
+    }
+
+    filteredOwned.forEach(id => {
         const item = database.find(x => x.id === id);
         if(!item) return;
 
         const card = document.createElement('div');
-        card.className = 'bm-offer-card-v4';
+        card.className = 'recycle-card-v4';
         
-        let preview = "";
-        if(item.img) preview = `<img src="${item.img}" style="height:40px;">`;
-        else if(item.cssClass) preview = `<div class="${item.cssClass}" style="padding:5px; font-size:10px; border-radius:5px;">PREVIEW</div>`;
-        else if(item.animClass) preview = `<span class="${item.animClass} elite-gif-badge" style="font-size:8px;">${item.text}</span>`;
-        else preview = `<i class="fas ${item.icon || 'fa-box'}" style="font-size:24px;"></i>`;
+        let visual = "";
+        if(cat === 'p_banners') visual = `<div class="p-ban-preview ${item.cssClass}"></div>`;
+        else if(cat === 'p_intros') visual = `<button class="audio-play-btn" onclick="previewAudio('${item.audio}', this)"><i class="fas fa-play"></i></button>`;
+        else if(item.img) visual = `<img src="${item.img}" style="height:45px;">`;
+        else if(item.cssClass) visual = `<div class="${item.cssClass}" style="padding:5px 10px; font-size:10px; border-radius:5px; width:100%;">BANNER</div>`;
+        else if(item.animClass) visual = `<span class="${item.animClass} elite-gif-badge" style="font-size:8px;">${item.text}</span>`;
+        else if(item.color) visual = `<span class="shop-badge-preview" style="background:${item.color} !important; color:#000 !important; font-size:8px;">${item.text}</span>`;
 
         card.innerHTML = `
-            <div style="height:40px; display:flex; align-items:center; justify-content:center;">${preview}</div>
-            <div style="font-size:10px; margin:10px 0;">${(item.text || item.name || "Item").toUpperCase()}</div>
+            <div class="recycle-preview-box">${visual}</div>
+            <div style="font-size:10px; color:#fff; font-weight:800; margin-bottom:10px;">${(item.text || item.name || "Item").toUpperCase()}</div>
             <button class="bm-price-btn-v4" onclick='prepRecycleOffer(${JSON.stringify(item)}, "${cat}")'>SCAN VALUE</button>
         `;
         list.appendChild(card);
@@ -18217,18 +18271,22 @@ window.prepRecycleOffer = (item, cat) => {
 
     nameEl.innerText = (item.text || item.name).toUpperCase();
     
-    // Calculate Prices
     const isElite = item.isElite || cat === 'elite';
-    const currencyIcon = isElite ? `<img src="https://iili.io/fv5bmtj.png" width="16">` : `<img src="https://iili.io/fhc1SKQ.png" width="16">`;
+    const currencyIcon = isElite ? `<img src="https://iili.io/fv5bmtj.png" width="14">` : `<img src="https://iili.io/fhc1SKQ.png" width="14">`;
     const currencyType = isElite ? "DIAMONDS" : "COINS";
 
     origEl.innerHTML = `${item.price.toLocaleString()} ${currencyIcon}`;
     const recycleValue = Math.floor(item.price * 0.75);
     retEl.innerHTML = `${recycleValue.toLocaleString()} ${currencyIcon}`;
 
-    // Preview
-    if(item.img) preview.innerHTML = `<img src="${item.img}" style="height:80px; filter:drop-shadow(0 0 15px #00ff88);">`;
-    else preview.innerHTML = `<i class="fas fa-recycle" style="font-size:50px; color:#00ff88;"></i>`;
+    // Fix Preview rendering in Offer Modal
+    let visual = "";
+    if(cat === 'p_banners') visual = `<div class="p-ban-preview ${item.cssClass}" style="width:300px; height:60px;"></div>`;
+    else if(item.img) visual = `<img src="${item.img}" style="height:100px; filter:drop-shadow(0 0 15px #00ff88);">`;
+    else if(item.animClass) visual = `<span class="${item.animClass} elite-gif-badge" style="font-size:14px; padding:10px 20px;">${item.text}</span>`;
+    else visual = `<i class="fas fa-recycle" style="font-size:60px; color:#00ff88;"></i>`;
+    
+    preview.innerHTML = visual;
 
     btn.onclick = () => executeRecycle(item, cat, recycleValue, currencyType);
     
