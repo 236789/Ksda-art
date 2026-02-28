@@ -4826,6 +4826,85 @@ input:checked + .slider:before { transform: translateX(16px); }
     gap: 5px;
 }
 
+
+/* --- REPARAȚIE MODAL PROFIL --- */
+#viewProfileModal .account-card {
+    background: #08101b !important;
+    border: 1px solid var(--primary) !important;
+    padding: 40px 20px 30px !important;
+    max-width: 400px !important;
+    width: 95% !important;
+    border-radius: 35px !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+}
+
+/* Butonul X - Fixat în colțul de sus-dreapta */
+#viewProfileModal .close-pop {
+    position: absolute !important;
+    top: 20px !important;
+    right: 20px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    width: 35px !important;
+    height: 35px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #fff !important;
+    z-index: 100 !important;
+    opacity: 1 !important;
+    cursor: pointer !important;
+}
+
+/* Valutele - Capsule separate care nu se mai ciocnesc */
+.view-profile-row {
+    display: flex !important;
+    gap: 15px !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin: 20px 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+.view-stat {
+    flex: 1 !important;
+    background: #050b14 !important;
+    border-radius: 20px !important;
+    padding: 12px 5px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: 1.5px solid transparent !important;
+    min-width: 100px !important;
+}
+
+/* Culori distincte pentru monede și diamante */
+.view-stat:first-child { border-color: #ffd700 !important; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2) !important; }
+.view-stat:nth-child(2) { border-color: #00ff88 !important; box-shadow: 0 0 15px rgba(0, 255, 136, 0.2) !important; }
+
+.view-stat-val {
+    font-family: 'Orbitron', sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    color: #fff !important;
+}
+
+
+@keyframes rotateAura { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes cyberGridMove { from { background-position: 0 0; } to { background-position: 0 40px; } }
+@keyframes goldShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+
+/* Fix pentru insignele Elite în inventar */
+#inventoryList .shop-badge-item {
+    min-height: 120px;
+    justify-content: center;
+}
   </style>
 </head>
 <body>
@@ -5882,12 +5961,33 @@ window.openInventory = async (type = 'badges') => {
     actionContainer.innerHTML = ''; 
 
     const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    if(!userSnap.exists()) return;
     const data = userSnap.data();
-
+    
+    // FIX: Definim userPic aici pentru a fi folosită în secțiunea de rame
     const userPic = data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
     list.innerHTML = '';
 
-
+    if(type === 'badges') {
+        const ownedIds = data.ownedBadges || [];
+        const equipped = data.equippedBadge?.id || null;
+        if(ownedIds.length === 0) list.innerHTML = '<p style="width:100%; text-align:center; color:#aaa;">Nu ai nicio insignă în inventar.</p>';
+        
+        ownedIds.forEach(id => {
+            const badge = BADGES_DB.find(b => b.id === id);
+            if(badge) {
+                const isEquipped = (id === equipped);
+                list.innerHTML += `
+                    <div class="shop-badge-item">
+                        <div class="item-preview-box">${getCosmeticBadge(badge)}</div>
+                        <div style="font-weight:700; font-size:11px; margin-top:5px; color:#fff;">${badge.text}</div>
+                        <button class="equip-btn" ${isEquipped ? 'style="background:#555;" disabled' : `onclick="equipBadge('${badge.id}', '${badge.text}', '${badge.color}', '${badge.icon}')"`}>
+                            ${isEquipped ? 'EQUIPPED' : 'EQUIP'}
+                        </button>
+                    </div>`;
+            }
+        });
+    } 
     // --- TEXTS ---
     if(type === 'texts') {
         const ownedIds = data.ownedTexts || [];
@@ -6634,13 +6734,10 @@ window.openUserProfile = async (uid) => {
     const modal = document.getElementById('viewProfileModal');
     const card = modal.querySelector('.account-card');
     
-    // 1. Resetare vizuală
-    card.className = 'account-card'; 
+    // Reset și Audio Stop (ca pe Wall)
+    card.className = 'account-card';
     card.style.backgroundImage = 'none';
-    document.getElementById('viewUserName').innerText = "Încărcare...";
-    
-    // 2. Oprim muzica anterioară obligatoriu
-    window.stopProfileAudio();
+    if(window.stopProfileAudio) window.stopProfileAudio();
 
     modal.classList.add('active');
 
@@ -6649,64 +6746,53 @@ window.openUserProfile = async (uid) => {
         if(!snap.exists()) return;
         const data = snap.data();
 
-        // --- A. LOGICA BANNER PROFIL ---
-        if (data.equippedProfileBanner && data.equippedProfileBanner.id) {
+        // 1. Banner & Intro Logic
+        if (data.equippedProfileBanner) {
             card.classList.add('profile-banner-active', data.equippedProfileBanner.id);
-            // Dacă bannerul are un URL de fundal specific salvat în DB
-            if(data.equippedProfileBanner.style) {
-                card.style.backgroundImage = `url('${data.equippedProfileBanner.style}')`;
-            }
+            if(data.equippedProfileBanner.cssClass) card.classList.add(data.equippedProfileBanner.cssClass);
         }
-
-        // --- B. LOGICA INTRO AUDIO ---
-        if (data.equippedIntro && data.equippedIntro.audio) {
-            try {
-                window.currentProfileAudio = new Audio(data.equippedIntro.audio);
-                window.currentProfileAudio.volume = 0.4;
-                window.currentProfileAudio.play().catch(e => console.log("Muzica a fost blocată de browser"));
-            } catch (err) { console.error("Eroare Audio:", err); }
-        }
-
-        // --- C. RENDER IMAGINE & RAMA ---
-        const ownerImg = data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png"; 
-        document.getElementById('viewUserImg').src = ownerImg;
         
+        if (data.equippedIntro && data.equippedIntro.audio) {
+            window.currentProfileAudio = new Audio(data.equippedIntro.audio);
+            window.currentProfileAudio.volume = 0.4;
+            window.currentProfileAudio.play().catch(e => console.log("Audio block"));
+        }
+
+        // 2. Imagine & Rama
+        const ownerImg = data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
+        document.getElementById('viewUserImg').src = ownerImg;
         const viewFrame = document.getElementById('viewUserFrame');
         if (data.equippedFrame && data.equippedFrame.img) {
             viewFrame.src = data.equippedFrame.img;
             viewFrame.style.display = 'block';
             const sc = data.equippedFrame.scale || 1.45;
-            viewFrame.style.width = (sc * 100) + "%";
-            viewFrame.style.height = (sc * 100) + "%";
+            viewFrame.style.width = (sc * 100) + "%"; viewFrame.style.height = (sc * 100) + "%";
         } else { viewFrame.style.display = 'none'; }
 
-        // --- D. LOGICA NUME & BADGES (ELITE INCLUS) ---
+        // 3. Nume & Badges
         let pName = data.username || "Anonim";
-        if(data.equippedText && data.equippedText.cssClass) {
-            pName = `<span class="${data.equippedText.cssClass}">${pName}</span>`;
-        }
+        if(data.equippedText?.cssClass) pName = `<span class="${data.equippedText.cssClass}">${pName}</span>`;
         document.getElementById('viewUserName').innerHTML = pName;
+        document.getElementById('viewUserBadges').innerHTML = getRoleBadge(data.email) + (data.equippedBadge ? getCosmeticBadge(data.equippedBadge) : "");
 
-        const bBox = document.getElementById('viewUserBadges');
-        bBox.innerHTML = "";
-        
-        // Roluri Staff
-        bBox.innerHTML += getRoleBadge(data.email);
-        
-        // Insigna Echipată (Folosește funcția getCosmeticBadge de pe Wall)
-        if (data.equippedBadge) {
-            bBox.innerHTML += getCosmeticBadge(data.equippedBadge);
-        }
-
-        // --- E. STATISTICI ---
+        // 4. Valute & Status
         document.getElementById('viewUserCoins').innerText = formatNumber(data.coins || 0);
         document.getElementById('viewUserDiamonds').innerText = formatNumber(data.diamonds || 0);
         document.getElementById('viewUserStreak').innerHTML = `<i class="fas fa-fire"></i> ${data.streak || 0} DAYS STREAK`;
-        document.getElementById('viewUserBio').innerText = data.bio || "Membru KSDA fără descriere.";
+        
+        const isOnline = checkIsOnline(data);
+        document.getElementById('viewUserStatus').innerHTML = isOnline ? '<span style="color:#00ff88;">● ONLINE</span>' : '<span style="color:#555;">● OFFLINE</span>';
 
-        // Fix Butoane Istoric
-        document.getElementById('viewUserInvites').innerHTML = `<i class="fas fa-user-plus"></i> Friends Invited: ${data.totalReferrals || 0}`;
-        document.getElementById('viewUserDonated').innerHTML = `<i class="fas fa-hand-holding-usd"></i> Coins Donated: ${formatNumber(data.totalCoinsDonated || 0)}`;
+        // 5. FIX CRITICAL: BUTOANE ISTORIC
+        const inviteBtn = document.getElementById('viewUserInvites');
+        const donateBtn = document.getElementById('viewUserDonated');
+
+        inviteBtn.innerHTML = `<i class="fas fa-user-plus"></i> Friends Invited: ${data.totalReferrals || 0}`;
+        donateBtn.innerHTML = `<i class="fas fa-hand-holding-usd"></i> Coins Donated: ${formatNumber(data.totalCoinsDonated || 0)}`;
+
+        // Re-atașăm evenimentele pentru a fi siguri că funcționează
+        inviteBtn.onclick = () => window.openReferralHistory(uid, pName, ownerImg);
+        donateBtn.onclick = () => window.openDonationHistory(uid, pName, ownerImg);
 
     } catch(e) { console.error(e); }
 };
