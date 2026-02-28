@@ -17171,53 +17171,82 @@ window.startSilencePrank = async () => {
     openTrollTargetList();
 };
 
-// --- 2. OPEN THE DEDICATED LIST ---
+let trollVictimsCache = []; // Local cache for target list
+
+// --- 1. OPEN & FETCH LIST ---
 async function openTrollTargetList() {
     document.getElementById('trollTargetModal').classList.add('active');
     const listEl = document.getElementById('trollUserList');
-    listEl.innerHTML = '<div style="text-align:center; padding:20px; color:#ff9f43; font-family:Orbitron;">> SCANNING VULNERABLE USERS...</div>';
+    listEl.innerHTML = '<div style="text-align:center; padding:20px; color:#ff9f43; font-family:Orbitron;">> SCANNING NETWORK...</div>';
     
     try {
         const q = query(collection(db, "accounts"), orderBy("username", "asc"));
         const snap = await getDocs(q);
         
-        listEl.innerHTML = "";
+        trollVictimsCache = [];
         snap.forEach((docSnap) => {
             const m = docSnap.data();
-            const mid = docSnap.id;
-            if(mid === auth.currentUser.uid) return; // Hide self
-
-            const item = document.createElement('div');
-            item.className = 'top-item'; 
-            item.style.borderColor = "rgba(255, 159, 67, 0.3)";
-            item.innerHTML = `
-                <div class="top-left">
-                    <div class="top-img-box">
-                        <img src="${m.image || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" class="top-user-img">
-                    </div>
-                    <div class="top-user-name">${m.username || 'Anonim'}</div>
-                </div>
-                <div style="font-size: 9px; color: #ff9f43; font-weight: 800; font-family:Orbitron;">[ EXECUTE_SILENCE ]</div>
-            `;
-            item.onclick = () => {
-                window.executeSilenceAction(mid, m.username);
-                closeModal('trollTargetModal');
-            };
-            listEl.appendChild(item);
+            if(docSnap.id !== auth.currentUser.uid) {
+                trollVictimsCache.push({ id: docSnap.id, ...m });
+            }
         });
-    } catch (e) { listEl.innerHTML = "Eroare terminal."; }
+
+        // SORTING: Online users first
+        trollVictimsCache.sort((a, b) => {
+            if (a.isOnline === b.isOnline) return 0;
+            return a.isOnline ? -1 : 1;
+        });
+
+        renderTrollList(trollVictimsCache);
+    } catch (e) { 
+        console.error(e);
+        listEl.innerHTML = '<div style="color:red;">CONNECTION_ERROR</div>'; 
+    }
 }
 
-// --- 3. SEARCH LOGIC FOR TROLL MODAL ---
+// --- 2. RENDER FUNCTION (With Online Status) ---
+function renderTrollList(users) {
+    const listEl = document.getElementById('trollUserList');
+    listEl.innerHTML = "";
+    
+    if (users.length === 0) {
+        listEl.innerHTML = '<div style="text-align:center; padding:20px; color:#555;">NO_TARGETS_FOUND</div>';
+        return;
+    }
+
+    users.forEach((m) => {
+        const item = document.createElement('div');
+        item.className = 'top-item'; 
+        item.style.borderColor = m.isOnline ? "rgba(0, 255, 136, 0.4)" : "rgba(255, 159, 67, 0.2)";
+        
+        item.innerHTML = `
+            <div class="top-left">
+                <div class="top-img-box">
+                    <img src="${m.image || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" class="top-user-img">
+                    <div class="list-status ${m.isOnline ? 'online' : ''}"></div>
+                </div>
+                <div class="top-user-name">${m.username || 'Anonim'}</div>
+            </div>
+            <div style="font-size: 9px; color: ${m.isOnline ? '#00ff88' : '#ff9f43'}; font-weight: 800; font-family:Orbitron;">
+                ${m.isOnline ? '[ READY_TO_SILENCE ]' : '[ OFFLINE ]'}
+            </div>
+        `;
+        item.onclick = () => {
+            window.executeSilenceAction(m.id, m.username);
+            closeModal('trollTargetModal');
+        };
+        listEl.appendChild(item);
+    });
+}
+
+// --- 3. FIXED SEARCH BAR ---
 document.getElementById('searchTrollVictim').oninput = (e) => {
     const val = e.target.value.toLowerCase();
-    const items = document.querySelectorAll('#trollUserList .top-item');
-    items.forEach(item => {
-        const name = item.querySelector('.top-user-name').innerText.toLowerCase();
-        item.style.display = name.includes(val) ? 'flex' : 'none';
-    });
+    const filtered = trollVictimsCache.filter(u => 
+        (u.username || '').toLowerCase().includes(val)
+    );
+    renderTrollList(filtered);
 };
-
 
 // Trebuie să legăm și funcția de execuție la window pentru a fi accesibilă
 window.executeSilenceAction = async (targetUid, targetName) => {
