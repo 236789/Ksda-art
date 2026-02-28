@@ -17670,6 +17670,32 @@ function startPaymentMonitor() {
         });
     });
 }
+
+
+// --- 1. ACTIVARE VOUCHER (REZOLVĂ EROAREA DIN CONSOLĂ) ---
+window.activateCouponCode = async (code) => {
+    const userData = window.currentUserData;
+    let type = '';
+    
+    // Verificăm dacă codul aparține de Coins sau Diamonds
+    if (userData.myCoupons?.coins?.some(c => c.code === code)) type = 'coins';
+    else if (userData.myCoupons?.diamonds?.some(c => c.code === code)) type = 'diamonds';
+
+    if (!type) return showCustomAlert("Codul nu a putut fi validat.", "EROARE_SISTEM");
+
+    currentScratchType = type;
+    currentScratchTicketId = code;
+    
+    // Generăm reducerea random între 50% și 80%
+    currentScratchDiscount = Math.floor(Math.random() * (80 - 50 + 1)) + 50;
+    
+    initScratchCard();
+    
+    document.getElementById('scratchOverlay').style.display = 'flex';
+    document.getElementById('scratchValue').innerText = `-${currentScratchDiscount}%`;
+    document.getElementById('ticketVisual').className = `scratch-container ticket-bg-${type}`;
+    document.getElementById('scratchTitle').innerText = `${type.toUpperCase()}_VOUCHER`;
+};
 </script>
 </body>
 </html>
