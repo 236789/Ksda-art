@@ -6812,13 +6812,13 @@ body {
 }
 
 
-
-/* --- SICK HACKER OVERLAY --- */
+/* --- SICK HACKER OVERLAY (REMASTERED FOR MOBILE) --- */
 #hackerOverlay {
     display: none; 
     position: fixed; 
     inset: 0; 
-    background: radial-gradient(circle, #200000 0%, #000 100%); 
+    background: #000; /* Deep black base */
+    background: radial-gradient(circle, #300000 0%, #000 100%); 
     z-index: 100000; 
     flex-direction: column; 
     justify-content: center; 
@@ -6827,91 +6827,114 @@ body {
     color: #ff4757; 
     text-align: center;
     overflow: hidden;
-    animation: screenShake 0.1s infinite alternate;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
-/* Background Matrix/Grid Effect */
+/* Background Matrix Glitch */
 #hackerOverlay::before {
     content: "";
     position: absolute;
     inset: 0;
-    background-image: linear-gradient(rgba(255, 0, 0, 0.1) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(255, 0, 0, 0.1) 1px, transparent 1px);
-    background-size: 30px 30px;
+    background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXk4cmRtNWd3azBxeWtteGtoa3V3MjV3cWFmNmhzeXhjaWhxanN0MSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/26FPKhUtNG3TW74f6/giphy.gif');
+    background-size: cover;
+    opacity: 0.15;
     z-index: -1;
+    pointer-events: none;
 }
 
-/* Glitch Heading */
-.hacker-title {
-    font-size: clamp(30px, 8vw, 60px);
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 5px;
-    margin-bottom: 10px;
-    text-shadow: 2px 0 #fff, -2px 0 #ff00ff;
-    animation: textGlitch 0.4s infinite;
-}
-
-/* Laser Scanner Line */
+/* Moving Scanline */
 .hacker-scanline {
     position: absolute;
-    width: 100%;
-    height: 5px;
-    background: rgba(255, 71, 87, 0.5);
-    box-shadow: 0 0 20px #ff4757;
     top: 0;
-    animation: scannerMove 2s linear infinite;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: rgba(255, 0, 0, 0.2);
+    box-shadow: 0 0 15px #ff0000;
+    animation: scanMove 2s linear infinite;
+    pointer-events: none;
 }
 
-/* High-Tech Progress Bar */
+/* Glitch Title */
+.hacker-title {
+    font-size: clamp(22px, 8vw, 50px); /* Fluid size */
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 10px 0;
+    color: #fff;
+    text-shadow: 0 0 10px #ff0000, 2px 2px #ff00ff;
+    animation: textGlitch 0.3s infinite alternate;
+}
+
+/* Ninja Icon Scale */
+#hackerOverlay i {
+    font-size: clamp(40px, 15vw, 80px);
+    color: #ff4757;
+    filter: drop-shadow(0 0 15px #ff0000);
+    margin-bottom: 10px;
+}
+
+/* Progress Bar Container */
 .hacker-bar-container {
-    width: 80%;
-    max-width: 400px;
-    height: 15px;
+    width: 85%;
+    max-width: 350px;
+    height: 12px;
     background: #111;
-    border: 2px solid #ff4757;
+    border: 1px solid #ff4757;
     padding: 2px;
-    margin: 30px 0;
-    position: relative;
+    margin: 20px 0;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
 }
 
 #hProg {
     height: 100%;
     background: #ff4757;
     width: 0%;
-    box-shadow: 0 0 15px #ff4757;
+    box-shadow: 0 0 20px #ff4757;
+    /* Transition is handled in JS via style.width */
 }
 
-/* Data Leak Message */
+/* Terminal Message Box */
 #hMsg {
-    color: #fff;
-    font-size: 18px;
-    font-weight: 700;
-    background: rgba(255, 0, 0, 0.2);
-    padding: 15px 30px;
-    border-radius: 4px;
-    border-left: 5px solid #fff;
-    line-height: 1.5;
+    width: 90%;
+    max-width: 400px;
+    color: #00ff88; /* Matrix Green for the actual data */
+    font-size: clamp(12px, 3.5vw, 16px);
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #333;
+    padding: 15px;
+    border-radius: 5px;
+    line-height: 1.4;
+    word-break: break-word;
+    box-shadow: inset 0 0 10px #000;
 }
 
-/* Animations */
-@keyframes screenShake {
-    from { transform: translate(1px, 1px); }
-    to { transform: translate(-1px, -1px); }
+/* ANIMATIONS */
+@keyframes scanMove {
+    0% { transform: translateY(-100px); }
+    100% { transform: translateY(100vh); }
 }
 
 @keyframes textGlitch {
     0% { transform: translate(0); }
-    20% { transform: translate(-3px, 2px); }
-    40% { transform: translate(-3px, -2px); }
-    60% { transform: translate(3px, 2px); }
-    80% { transform: translate(3px, -2px); }
+    20% { transform: translate(-2px, 1px); }
+    40% { transform: translate(-2px, -1px); }
+    60% { transform: translate(2px, 1px); }
+    80% { transform: translate(2px, -1px); }
     100% { transform: translate(0); }
 }
 
-@keyframes scannerMove {
-    0% { top: 0; }
-    100% { top: 100%; }
+/* Optional: Slight screen vibration */
+.screen-vibrate {
+    animation: shake 0.1s infinite;
+}
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    50% { transform: translate(-1px, -1px) rotate(0.1deg); }
+    100% { transform: translate(1px, -1px) rotate(0deg); }
 }
 
   </style>
@@ -7869,7 +7892,7 @@ lbOverlay.addEventListener('click', (e) => {
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, query,writeBatch,  orderBy, serverTimestamp, doc, getDoc, setDoc, updateDoc, getDocs, limit, startAfter, increment, arrayUnion, getCountFromServer, deleteDoc, onSnapshot,where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query,writeBatch,  orderBy, serverTimestamp, doc, getDoc, setDoc, updateDoc, getDocs, limit, startAfter, increment, arrayUnion, getCountFromServer, deleteDoc, onSnapshot,where,runTransaction  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
 
@@ -13013,55 +13036,93 @@ window.unequipEliteItem = async (type) => {
 
 window.claimFakeDonation = async (attackerUid, attackerName) => {
     if(!auth.currentUser) return;
-    if(auth.currentUser.uid === attackerUid) return showCustomAlert("Nu te poți jefui singur!", "EROARE");
+    
+    // 1. Prevenire auto-jaf
+    if(auth.currentUser.uid === attackerUid) {
+        return showCustomAlert("Sistemul detectează amprenta ta digitală. Nu te poți jefui singur!", "ERROR_SELF_HACK");
+    }
 
     const victimUid = auth.currentUser.uid;
     const victimRef = doc(db, "accounts", victimUid);
     const attackerRef = doc(db, "accounts", attackerUid);
+    
+    const overlay = document.getElementById('hackerOverlay');
+    const hProg = document.getElementById('hProg');
+    const hMsg = document.getElementById('hMsg');
 
     try {
         const victimSnap = await getDoc(victimRef);
         const vData = victimSnap.data();
 
-        // Roll the theft
+        // 2. Calcul sumă de furat
         const type = Math.random() > 0.5 ? 'COINS' : 'DIAMONDS';
-        let amount = type === 'COINS' ? Math.floor(Math.random()*10001)+5000 : Math.floor(Math.random()*20)+1;
+        let amount = type === 'COINS' ? Math.floor(Math.random() * 10001) + 5000 : Math.floor(Math.random() * 20) + 1;
 
-        // Don't steal more than they have
         const currentBal = type === 'COINS' ? (vData.coins || 0) : (vData.diamonds || 0);
         if(currentBal < amount) amount = currentBal;
 
-        if(amount <= 0) return showCustomAlert("Contul tău este gol, ai scăpat!", "NOROCOS");
+        if(amount <= 0) {
+            return showCustomAlert("Ai încercat să revendici, dar nu ai nimic în seif! Ai scăpat de data asta.", "SAFE_VOID");
+        }
 
-        // SHOW SICK OVERLAY
-        const overlay = document.getElementById('hackerOverlay');
+        // 3. PORNEȘTE OVERLAY-UL "SICK"
         overlay.style.display = 'flex';
-        document.getElementById('hProg').style.transition = 'width 2s linear';
-        setTimeout(() => document.getElementById('hProg').style.width = '100%', 100);
+        hMsg.innerHTML = "> INITIALIZING EXPLOIT...<br>> BYPASSING FIREWALL...";
+        
+        // Sunet de alarmă (opțional, poți schimba link-ul)
+        const alarm = new Audio("https://www.myinstants.com/media/sounds/alarm.mp3");
+        alarm.volume = 0.5;
+        alarm.play().catch(() => {});
 
-        // PROCESS THE THEFT
+        // Animație Bară de încărcare
+        setTimeout(() => {
+            hProg.style.transition = 'width 2.5s cubic-bezier(0.1, 0.7, 1.0, 0.1)';
+            hProg.style.width = '100%';
+        }, 100);
+
+        // 4. EXECUȚIE TRANZACȚIE (În timp ce victima se uită la overlay)
         await runTransaction(db, async (transaction) => {
             const vField = type.toLowerCase();
             transaction.update(victimRef, { [vField]: increment(-amount) });
             transaction.update(attackerRef, { [vField]: increment(amount) });
         });
 
-        // REVEAL THE TRUTH
+        // 5. REVELAȚIA (După 2.5 secunde)
         setTimeout(async () => {
-            document.getElementById('hMsg').innerHTML = `HACK REUȘIT!<br>Utilizatorul <b>${attackerName}</b> ți-a furat <b>${amount} ${type}</b>!`;
+            hMsg.innerHTML = `<span style="color:#fff; text-shadow: 0 0 10px #ff0000;">HACK_SUCCESSFUL!</span><br>
+                              TOTAL: -${amount.toLocaleString()} ${type}<br>
+                              OWNER: ${attackerName}`;
             
-            // Kevin Bot Anouncement
+            // 6. ANUNȚ KEVIN BOT (Public)
             await addDoc(collection(db, "wall_messages"), {
-                text: `😈 **JAF REUȘIT!** **${vData.username}** a căzut în capcana lui **${attackerName}** și a pierdut **${amount} ${type}**!`,
-                uid: "kevin-bot-official", name: "Kevin Bot", isBot: true, isSpecial: true,
+                text: `
+                    <div style="border-left: 4px solid #ff4757; padding-left: 10px;">
+                        <b style="color:#ff4757;">⚠️ SECURITY BREACH!</b><br>
+                        <b>${vData.username}</b> a mușcat momeala! <br>
+                        A fost jefuit de <b style="color:#29f3ff;">${attackerName}</b> pentru 
+                        <b style="color:#ffd700;">${amount.toLocaleString()} ${type}</b>! 😈
+                    </div>
+                `,
+                uid: "kevin-bot-official",
+                name: "Kevin Bot",
                 photo: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/345b1fcb-5942-4eb3-831f-b6a42b23051b/21584177-ae66-438a-a2cd-27dc4461a670_removalai_preview.png?format=300w",
+                isBot: true, isSpecial: true,
                 createdAt: serverTimestamp()
             });
 
-            setTimeout(() => overlay.style.display = 'none', 4000);
-        }, 2000);
+            // Închidere overlay după încă 4 secunde
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                hProg.style.width = '0%'; // Reset bară
+            }, 4500);
 
-    } catch (e) { console.error(e); }
+        }, 2500);
+
+    } catch (e) {
+        console.error("Robbery Failed:", e);
+        overlay.style.display = 'none';
+        showCustomAlert("Conexiunea a fost întreruptă de sistemul de securitate.", "HACK_FAILED");
+    }
 };
 </script>
 </body>
