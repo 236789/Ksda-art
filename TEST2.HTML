@@ -11898,6 +11898,8 @@ COMUNITATEA</div>
 // NEW IMPORTS FOR IMAGE UPLOAD:
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
+let trollActionType = null;
+
 
     const firebaseConfig = {
       apiKey: "AIzaSyDoH80kffNrzFAcyRqsTVdifs-whUhwH9A",
@@ -13394,12 +13396,21 @@ window.equipText = async (id, cssClass) => {
         renderDonationList(filtered);
     };
 
-    function selectTarget(id, name) {
-        donationTarget = { id, name };
-        document.getElementById('targetName').innerText = name;
-        closeModal('donationListModal');
-        document.getElementById('donationAmountModal').classList.add('active');
+window.selectTarget = (id, name) => {
+    // VERIFICARE: Dacă suntem în modul Troll
+    if (trollActionType === 'silence') {
+        executeSilenceAction(id, name);
+        trollActionType = null; // Resetăm starea după execuție
+        return;
     }
+
+    // LOGICA TA ORIGINALĂ PENTRU DONAȚIE
+    donationTarget = { id, name };
+    document.getElementById('targetName').innerText = name;
+    // Folosim document.getElementById în loc de closeModal pentru siguranță
+    document.getElementById('donationListModal').classList.remove('active');
+    document.getElementById('donationAmountModal').classList.add('active');
+};
 
 window.processDonation = async () => {
     const amountInput = document.getElementById('donateAmount');
@@ -17081,73 +17092,50 @@ window.openTrollTerminal = () => {
 
 
 
-window.startSilenceTroll = async () => {
-    if(!auth.currentUser) return;
+// --- TROLL PROTOCOL: SILENCE LOGIC (FIXED NAME) ---
+window.startSilencePrank = async () => {
+    if(!auth.currentUser) return alert("Loghează-te!");
 
-    // Verificare Voucher
+    // Verificare Voucher Black Market
     const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
     const ticketCode = isFree ? window.activeCosmeticTicket.id : null;
 
     const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
     const userData = userSnap.data();
 
+    // Verificare fonduri
     if (!isFree && (userData.diamonds || 0) < 15) {
         return showCustomAlert("Nu ai 15 Diamante pentru a cumpăra liniștea!", "EROARE");
     }
 
-    const msg = isFree ? "Folosești TICHETUL pentru a reduce pe cineva la tăcere?" : "Cheltui 15 Diamante pentru a da MUTE unui utilizator?";
+    const msg = isFree ? "Folosești TICHETUL pentru a reduce pe cineva la tăcere GRATUIT?" : "Cheltui 15 Diamante pentru a da MUTE unui utilizator?";
     if (!(await showCustomConfirm(msg, "SILENCE PROTOCOL"))) return;
 
-    // Deschidem lista de utilizatori (Refolosim logica de la donații, dar cu alt callback)
-    window.trollModeActive = true; 
-    openTrollUserList();
-};
-
-window.openTrollUserList = async () => {
-    // Închidem modalul troll și deschidem lista de selecție
+    // Activăm modul Troll pentru lista de selecție
+    window.trollActionType = 'silence'; 
+    
+    // Deschidem lista de utilizatori
     document.getElementById('trollTerminalModal').classList.remove('active');
     document.getElementById('donationListModal').classList.add('active');
     
-    // Modificăm titlul listei temporar pentru context
     const title = document.querySelector('#donationListModal .title-alte');
-    if(title) title.innerText = "SELECT_TARGET_TO_SILENCE";
+    if(title) {
+        title.innerText = "SELECT_TARGET_TO_SILENCE";
+        title.style.color = "#ff9f43";
+    }
 
-    const listEl = document.getElementById('donationUserList');
-    listEl.innerHTML = '<div style="text-align:center; padding:20px;">Scanning users...</div>';
-
-    try {
-        const q = query(collection(db, "accounts"), orderBy("lastActive", "desc"), limit(30));
-        const snap = await getDocs(q);
-        const users = [];
-        snap.forEach(d => { 
-            if(d.id !== auth.currentUser.uid) users.push({ id: d.id, ...d.data() }); 
-        });
-
-        listEl.innerHTML = "";
-        users.forEach((u, idx) => {
-            const item = document.createElement('div');
-            item.className = 'top-item';
-            item.innerHTML = `
-                <div class="top-left">
-                    <div class="top-img-box"><img src="${u.image || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" class="top-user-img"></div>
-                    <div class="top-user-name">${u.username}</div>
-                </div>
-                <button class="bm-price-btn-v4" style="background:#ff9f43 !important; color:#000; font-size:9px;">SELECTEAZĂ</button>
-            `;
-            item.onclick = () => executeSilenceAction(u.id, u.username);
-            listEl.appendChild(item);
-        });
-    } catch(e) { console.error(e); }
+    // Trigger la încărcarea listei (refolosim funcția ta de donații)
+    window.openDonationList();
 };
 
-async function executeSilenceAction(targetUid, targetName) {
+// Trebuie să legăm și funcția de execuție la window pentru a fi accesibilă
+window.executeSilenceAction = async (targetUid, targetName) => {
     const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
     const ticketCode = isFree ? window.activeCosmeticTicket.id : null;
     const buyerUid = auth.currentUser.uid;
     const buyerName = window.currentUserData.username;
 
     try {
-        // 1. Platim
         const userRef = doc(db, "accounts", buyerUid);
         if (isFree) {
             const userData = (await getDoc(userRef)).data();
@@ -17159,8 +17147,7 @@ async function executeSilenceAction(targetUid, targetName) {
             await updateDoc(userRef, { diamonds: increment(-15) });
         }
 
-        // 2. Aplicăm MUTE în baza de date (Muted_users)
-        // Setăm durata la 1 minut (60.000 ms)
+        // Aplicăm MUTE (1 minut)
         await setDoc(doc(db, "muted_users", targetUid), {
             uid: targetUid,
             name: targetName,
@@ -17170,13 +17157,13 @@ async function executeSilenceAction(targetUid, targetName) {
             unmuteAt: Date.now() + 60000
         });
 
-        // 3. Kevin Bot trimite mesajul amuzant pe Wall
+        // Kevin Bot mesaje
         const funnyLines = [
             `✂️🌐 Shhh! **${buyerName}** i-a tăiat cablul de net lui **${targetName}** pentru 60 de secunde!`,
-            `🤐 **${targetName}** a rămas fără voce! **${buyerName}** i-a aplicat un 'Mute' virtual de la distanță.`,
+            `🤐 **${targetName}** a rămas fără voce! **${buyerName}** i-a aplicat un 'Mute' virtual.`,
             `🧲💻 Eroare de conexiune! **${buyerName}** a aruncat cu un magnet în routerul lui **${targetName}**.`,
-            `🤐🔥 Cineva să-i dea un pahar cu apă! **${buyerName}** i-a pus un 'fermoar' invizibil la gură lui **${targetName}**.`,
-            `🛰️🔇 Semnal bruiat! **${targetName}** a primit un 'Neural Silence' de la **${buyerName}**. Ne auzim peste un minut!`
+            `🤐🔥 Cineva să-i dea un pahar cu apă! **${buyerName}** i-a pus un 'fermoar' la gură lui **${targetName}**.`,
+            `🛰️🔇 Semnal bruiat! **${targetName}** a primit un 'Neural Silence' de la **${buyerName}**.`
         ];
         const randomLine = funnyLines[Math.floor(Math.random() * funnyLines.length)];
 
@@ -17192,13 +17179,13 @@ async function executeSilenceAction(targetUid, targetName) {
 
         document.getElementById('donationListModal').classList.remove('active');
         showCustomAlert(`Ținta **${targetName}** a fost redusă la tăcere!`, "HAOS INJECTAT");
-        await logTransaction(-15, "DIAMONDS", "Troll Shop", `Used Silence on ${targetName}`);
+        await logTransaction(-15, "DIAMONDS", "Black Market", `Used Silence on ${targetName}`);
 
     } catch(e) {
         console.error(e);
-        showCustomAlert("Eroare la injectarea protocolului.", "FAIL");
+        showCustomAlert("Eroare la procesare.", "FAIL");
     }
-}
+};
 </script>
 </body>
 </html>
