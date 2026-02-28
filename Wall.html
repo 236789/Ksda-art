@@ -6939,6 +6939,69 @@ body {
     100% { transform: translate(1px, -1px) rotate(0deg); }
 }
 
+
+/* --- PLAYER PROFILE HUD OVERHAUL --- */
+
+#viewProfileModal .account-card {
+    background: rgba(5, 11, 20, 0.9) !important;
+    backdrop-filter: blur(30px) !important;
+    -webkit-backdrop-filter: blur(30px) !important;
+    border: 1px solid rgba(41, 243, 255, 0.4) !important;
+    box-shadow: 0 0 60px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(41, 243, 255, 0.1) !important;
+    padding: 30px 20px !important;
+    overflow: visible !important; /* Allow frames to pop out */
+}
+
+/* Metallic Text Shadow for the User Name */
+#viewProfileModal .metallic-title-card {
+    background: linear-gradient(180deg, #fff, var(--primary)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    filter: drop-shadow(0 0 10px rgba(41, 243, 255, 0.5));
+}
+
+/* Glowing Currency Pills */
+#viewProfileModal .holo-pill-v5 {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    transition: 0.3s;
+}
+
+#viewProfileModal .holo-pill-v5:hover {
+    transform: translateY(-2px);
+    border-color: #fff;
+}
+
+/* Glassy Bio Container */
+.view-bio {
+    font-size: 13px !important;
+    color: #a5b1c2 !important;
+    font-style: italic;
+    padding: 15px !important;
+    border-radius: 15px !important;
+    line-height: 1.5;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Player Stat Boxes (Invites/Donated) */
+.square-btn-v5.sq-rank:hover { border-color: #00ff88; box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
+.square-btn-v5.sq-shop:hover { border-color: #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
+
+/* The horizontal scanner inside the profile image */
+.hacker-scanline {
+    position: absolute;
+    width: 100%;
+    background: var(--primary);
+    box-shadow: 0 0 10px var(--primary);
+    animation: scanVertical 3s infinite linear;
+    z-index: 5;
+    pointer-events: none;
+}
+
+@keyframes scanVertical {
+    0% { top: 0; }
+    100% { top: 100%; }
+}
+
   </style>
 
 </head>
@@ -7061,66 +7124,67 @@ body {
     </div>
 </div>
 
-<!-- VIEW USER PROFILE MODAL -->
+<!-- UPDATED VIEW USER PROFILE MODAL v7 -->
 <div id="viewProfileModal" class="account-modal-overlay">
-    <div class="account-card">
+    <div class="account-card profile-banner-active" style="max-width: 400px; border-color: var(--primary);">
         <button id="closeViewProfile" class="close-pop">✕</button>
         
-        <!-- Avatar & Frame -->
-        <div class="profile-frame-wrapper">
-            <img id="viewUserImg" src="" class="pop-img-inner">
-            <img id="viewUserFrame" src="" class="pop-frame-overlay" style="display: none;">
-        </div>        
-        
-        <h3 id="viewUserName" class="pop-user" style="margin-bottom:2px;">User</h3>
+        <div class="cosmo-content-v6" style="padding: 10px;">
+            <!-- 1. AVATAR & SCANNER LINE -->
+            <div class="profile-frame-wrapper" style="width: 100px; height: 100px; margin-top: 20px;">
+                <img id="viewUserImg" src="" class="pop-img-inner">
+                <img id="viewUserFrame" src="" class="pop-frame-overlay" style="display: none;">
+                <div class="hacker-scanline" style="height: 2px; opacity: 0.5;"></div>
+            </div>        
+            
+            <div class="name-wrapper-v5">
+                <h3 id="viewUserName" class="metallic-title-card" style="font-size: 24px; margin-bottom: 2px;">User</h3>
+                <div id="viewUserStatus" style="font-size: 9px; font-family: 'Orbitron'; margin-bottom: 10px;"></div>
+            </div>
 
-        <!-- Badges -->
-        <div id="viewUserBadges" class="badge-stack-container"></div> 
+            <!-- 2. BADGES CONTAINER (STACKED) -->
+            <div id="viewUserBadges" class="badge-stack-container" style="margin-bottom: 15px;"></div> 
 
-        <!-- 1. STATUS & STREAK (Stacked) -->
-        <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:15px; align-items:center;">
-            <div id="viewUserStatus" style="font-size:10px; font-weight:bold; font-family:'Orbitron';"></div>
-            <!-- REVAMPED STREAK -->
-            <div id="viewUserStreak" class="streak-badge-profile">
-                <i class="fas fa-fire"></i> 0 DAYS STREAK
+            <!-- 3. HOLOGRAPHIC STATS (COINS & DIAMONDS) -->
+            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 20px;">
+                <div class="holo-pill-v5" style="border-color: rgba(255, 215, 0, 0.4); background: rgba(0,0,0,0.4);">
+                    <img src="https://iili.io/fhc1SKQ.png" width="22">
+                    <span id="viewUserCoins" style="color:#ffd700; font-family:'Orbitron'; font-weight:900; font-size:18px;">0</span>
+                </div>
+                <div class="holo-pill-v5" style="border-color: rgba(0, 255, 136, 0.4); background: rgba(0,0,0,0.4);">
+                    <img src="https://iili.io/fv5bmtj.png" width="20">
+                    <span id="viewUserDiamonds" style="color:#00ff88; font-family:'Orbitron'; font-weight:900; font-size:18px;">0</span>
+                </div>
+            </div>
+
+            <!-- 4. BIO SECTION -->
+            <div class="input-group">
+                <label style="text-align: center; display: block;">DATABASE DESCRIPTION</label>
+                <div id="viewUserBio" class="view-bio" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); text-align: center; min-height: 50px;">
+                    Membru KSDA fără descriere.
+                </div>
+            </div>
+
+            <!-- 5. INTERACTIVE PLAYER STATS (GRID) -->
+            <div class="grid-4-v5" style="grid-template-columns: 1fr 1fr; margin-top: 15px; gap: 10px;">
+                <div id="viewUserInvites" class="square-btn-v5 sq-rank" style="aspect-ratio: auto; padding: 12px; cursor: pointer;">
+                    <i class="fas fa-user-plus"></i>
+                    <span style="font-size: 8px;">Friends Invited: 0</span>
+                </div>
+                <div id="viewUserDonated" class="square-btn-v5 sq-shop" style="aspect-ratio: auto; padding: 12px; cursor: pointer;">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <span style="font-size: 8px;">Coins Donated: 0</span>
+                </div>
+            </div>
+
+            <!-- 6. EXTERNAL LINKS -->
+            <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 8px;">
+                 <div id="viewUserBirth" style="font-size:10px; color:#556; font-family: 'Orbitron';"></div>
+                 <a id="viewUserTikTok" href="#" target="_blank" class="btn-ksda-fire blue-white-theme" style="display:none; width: 100%; padding: 10px;">
+                    <span><i class="fab fa-tiktok"></i> FOLLOW ON TIKTOK</span>
+                </a>
             </div>
         </div>
-
-        <!-- 2. COINS & DIAMONDS ROW -->
-        <div class="view-profile-row">
-            <!-- Coins -->
-            <div class="view-stat">
-                <img src="https://iili.io/fhc1SKQ.png" style="width:28px; margin-bottom:5px;">
-                <span id="viewUserCoins" class="view-stat-val">0</span>
-            </div>
-            <!-- Diamonds (New) -->
-            <div class="view-stat">
-                <img src="https://iili.io/fv5bmtj.png" style="width:28px; margin-bottom:5px;">
-                <span id="viewUserDiamonds" class="view-stat-val" style="color:#00ff88;">0</span>
-            </div>
-        </div>
-
-        <!-- Bio -->
-       <!-- Bio -->
-        <div id="viewUserBio" class="view-bio">Nu există descriere.</div>
-
-        <!-- STATS STACK (Vertical) -->
-        <div class="profile-stats-stack">
-            <!-- 3. Friends Invited -->
-            <div id="viewUserInvites" class="invite-stat">
-                <i class="fas fa-user-plus"></i> Friends Invited: 0
-            </div>
-
-            <!-- 4. Coins Donated -->
-            <div id="viewUserDonated" class="donate-stat">
-                <i class="fas fa-hand-holding-usd"></i> Coins Donated: 0
-            </div>
-        </div>
-
-        <!-- Birthdate -->
-        <div id="viewUserBirth" style="font-size:11px; color:#aaa; margin-bottom:10px;"></div>
-        <!-- TikTok -->
-        <a id="viewUserTikTok" href="#" target="_blank" class="tiktok-btn" style="display:none;"><i class="fab fa-tiktok"></i> Follow on TikTok</a>
     </div>
 </div>
 
