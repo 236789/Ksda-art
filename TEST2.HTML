@@ -17344,46 +17344,52 @@ window.executeSilenceAction = async (targetUid, targetName) => {
     }
 };
 
-
-
 window.startTrapPrank = async () => {
     if(!auth.currentUser) return;
     const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
     const userData = userSnap.data();
 
-    if ((userData.diamonds || 0) < 50) return showCustomAlert("Ai nevoie de 50 💎!", "EROARE");
+    if ((userData.diamonds || 0) < 50) return showCustomAlert("Nu ai 50 💎 pentru această farsă!", "SĂRĂCIE");
 
-    const msg = "Vei cheltui 50 💎 pentru a întinde o capcană pe chat. Cel care dă click va fi jefuit de tine. Confirmi?";
+    const msg = "Vei cheltui 50 💎 pentru a crea o donație FALSĂ pe chat. Cine apasă 'Claim' va fi jefuit de tine. Confirmi?";
     if (!(await showCustomConfirm(msg, "EXECUTĂ CAPCANA"))) return;
 
     try {
         const attackerUid = auth.currentUser.uid;
         const attackerName = userData.username;
-
         await updateDoc(doc(db, "accounts", attackerUid), { diamonds: increment(-50) });
 
+        // THE WOW BAIT MESSAGE
         const baitHtml = `
-            <div style="text-align: center; border: 2px dashed #ffd700; padding: 15px; border-radius: 15px; background: rgba(255, 215, 0, 0.05);">
-                <div style="font-family:'Montserrat'; font-weight: 900; color: #ffd700; font-size: 16px;">🎊 MEGA DONAȚIE! 🎊</div>
-                <div style="font-size: 12px; margin: 10px 0; color: #fff;">
-                    Legenda <b style="color:#29f3ff;">${attackerName}</b> a donat <b>50,000 COINS</b> tuturor!
+            <div class="bubble-gold" style="padding: 20px; border-radius: 20px; border: 3px solid #ffd700; text-align: center; position: relative; overflow: hidden; background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728);">
+                <div class="vault-shine" style="opacity:0.5;"></div>
+                <div style="font-family:'Montserrat'; font-weight: 900; color: #000; font-size: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">✨ LEGENDARY GIVEAWAY ✨</div>
+                
+                <div style="font-size: 14px; color: #000; font-weight: 800; margin: 10px 0;">
+                    WOW! <span style="text-decoration:underline;">${attackerName}</span> se simte darnic astăzi! <br>
+                    A donat un total de <b style="font-size:18px;">50,000 COINS</b> comunității!
                 </div>
+
                 <button class="bm-price-btn-v4" 
-                        style="background:#ffd700 !important; color:#000; width:100%;" 
+                        style="background: #000 !important; color: #ffd700 !important; border: 2px solid #000; width: 100%; height: 50px; font-weight: 900; font-family:'Orbitron'; cursor: pointer; font-size: 14px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border-radius: 50px;" 
                         onclick="window.claimFakeDonation('${attackerUid}', '${attackerName}')">
-                    REVENDICĂ 5,000 COINS
+🎁 REVENDICĂ 50.000 DE MONEDE 🎁
                 </button>
+                
+                <div style="font-size: 9px; color: rgba(0,0,0,0.6); margin-top: 10px; font-weight: 700; font-family: monospace;">
+                    LIMITED SLOTS AVAILABLE | VERIFIED BY KEVIN_BOT
+                </div>
             </div>
         `;
 
         await addDoc(collection(db, "wall_messages"), {
             text: baitHtml, uid: "kevin-bot-official", name: "Kevin Bot", isBot: true, isSpecial: true,
             photo: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/345b1fcb-5942-4eb3-831f-b6a42b23051b/21584177-ae66-438a-a2cd-27dc4461a670_removalai_preview.png?format=300w",
-            createdAt: serverTimestamp(), isTrap: true, attackerId: attackerUid
+            createdAt: serverTimestamp()
         });
 
         closeModal('trollTerminalModal');
-        showCustomAlert("Capcana a fost întinsă pe Wall!", "SUCCES");
+        showCustomAlert("Capcana de lux a fost lansată pe Community Wall!", "SUCCES");
         await logTransaction(-50, "DIAMONDS", "Black Market", "Set Robbery Trap");
     } catch (e) { console.error(e); }
 };
