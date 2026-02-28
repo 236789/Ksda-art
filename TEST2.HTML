@@ -9898,48 +9898,6 @@ nav a[href="shop.html"] {
     text-align: center; /* centers the text */
 }
 
-/* --- PERFORMANCE ENGINE START --- */
-/* Hardware Acceleration - forțează randarea GPU */
-.package-card, .shop-btn-v6, .aaa-card, .bm-offer-card-v4, .luxury-pedestal, .pay-modal-glass {
-    backface-visibility: hidden;
-    transform: translateZ(0);
-    perspective: 1000;
-    will-change: transform, opacity;
-}
-
-/* Reducerea efectelor grele pe Mobile (Ecran < 768px) */
-@media (max-width: 768px) {
-    /* Box-shadow este cel mai mare inamic al performanței pe mobil */
-    * {
-        box-shadow: none !important; /* Elimină glow-ul general */
-        text-shadow: none !important; /* Elimină glow-ul textului */
-    }
-
-    /* Păstrăm doar borduri simple colorate în loc de glow-uri imense */
-    .package-card, .shop-btn-v6, .aaa-card, .bm-offer-card-v4 {
-        box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important; 
-        backdrop-filter: none !important; /* Blur-ul de fundal omoară FPS-ul */
-        background: rgba(5, 11, 20, 0.95) !important; /* Fundal mai opac */
-    }
-
-    /* Încetinirea sau oprirea animațiilor rotative complexe */
-    .aaa-card::before, .shop-btn-v6::before, .pay-modal-glass::before {
-        animation-duration: 6s !important; /* Rotație mult mai lentă */
-        opacity: 0.4 !important;
-    }
-
-    /* Eliminăm particulele care plutesc pe fundal în footer și secțiuni */
-    .white-particles, .footer-stars, .atelier-floaters, .conduit-particle {
-        display: none !important;
-    }
-    
-    /* Simplificăm animația de tip grid */
-    .atelier-grid, .footer-grid, .deals-grid-anim {
-        animation: none !important; 
-    }
-}
-/* --- PERFORMANCE ENGINE END --- */
-
 
 
 
