@@ -17171,40 +17171,55 @@ window.startSilencePrank = async () => {
     openTrollTargetList();
 };
 
-let trollVictimsCache = []; // Local cache for target list
+let trollVictimsCache = []; 
 
-// --- 1. OPEN & FETCH LIST ---
+// --- 1. THE REFINED LIST FETCHER ---
 async function openTrollTargetList() {
     document.getElementById('trollTargetModal').classList.add('active');
     const listEl = document.getElementById('trollUserList');
-    listEl.innerHTML = '<div style="text-align:center; padding:20px; color:#ff9f43; font-family:Orbitron;">> SCANNING NETWORK...</div>';
+    listEl.innerHTML = '<div style="text-align:center; padding:20px; color:#ff9f43; font-family:Orbitron;">> SCANNING SATELLITE DATA...</div>';
     
     try {
         const q = query(collection(db, "accounts"), orderBy("username", "asc"));
         const snap = await getDocs(q);
-        
+        const now = Date.now();
+        const fiveMinutes = 5 * 60 * 1000; // 300,000ms threshold
+
         trollVictimsCache = [];
         snap.forEach((docSnap) => {
             const m = docSnap.data();
-            if(docSnap.id !== auth.currentUser.uid) {
-                trollVictimsCache.push({ id: docSnap.id, ...m });
+            if(docSnap.id === auth.currentUser.uid) return;
+
+            // --- THE GHOST FIX: Calculate if they are REALLY online ---
+            let isReallyOnline = false;
+            if (m.isOnline && m.lastActive) {
+                const lastActiveTime = m.lastActive.toMillis ? m.lastActive.toMillis() : m.lastActive;
+                if (now - lastActiveTime < fiveMinutes) {
+                    isReallyOnline = true;
+                }
             }
+
+            trollVictimsCache.push({ 
+                id: docSnap.id, 
+                ...m, 
+                isReallyOnline: isReallyOnline // Use this for UI
+            });
         });
 
-        // SORTING: Online users first
+        // SORTING: Truly online first, then alphabetical
         trollVictimsCache.sort((a, b) => {
-            if (a.isOnline === b.isOnline) return 0;
-            return a.isOnline ? -1 : 1;
+            if (a.isReallyOnline === b.isReallyOnline) return a.username.localeCompare(b.username);
+            return a.isReallyOnline ? -1 : 1;
         });
 
         renderTrollList(trollVictimsCache);
     } catch (e) { 
         console.error(e);
-        listEl.innerHTML = '<div style="color:red;">CONNECTION_ERROR</div>'; 
+        listEl.innerHTML = '<div style="color:red; text-align:center; padding:20px;">CONNECTION_INTERRUPTED</div>'; 
     }
 }
 
-// --- 2. RENDER FUNCTION (With Online Status) ---
+// --- 2. THE REFINED RENDERER ---
 function renderTrollList(users) {
     const listEl = document.getElementById('trollUserList');
     listEl.innerHTML = "";
@@ -17217,18 +17232,20 @@ function renderTrollList(users) {
     users.forEach((m) => {
         const item = document.createElement('div');
         item.className = 'top-item'; 
-        item.style.borderColor = m.isOnline ? "rgba(0, 255, 136, 0.4)" : "rgba(255, 159, 67, 0.2)";
+        // Glow green only if they are truly online
+        item.style.borderColor = m.isReallyOnline ? "rgba(0, 255, 136, 0.4)" : "rgba(255, 159, 67, 0.2)";
         
         item.innerHTML = `
             <div class="top-left">
                 <div class="top-img-box">
                     <img src="${m.image || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" class="top-user-img">
-                    <div class="list-status ${m.isOnline ? 'online' : ''}"></div>
+                    <!-- Status dot logic -->
+                    <div class="list-status ${m.isReallyOnline ? 'online' : ''}"></div>
                 </div>
                 <div class="top-user-name">${m.username || 'Anonim'}</div>
             </div>
-            <div style="font-size: 9px; color: ${m.isOnline ? '#00ff88' : '#ff9f43'}; font-weight: 800; font-family:Orbitron;">
-                ${m.isOnline ? '[ READY_TO_SILENCE ]' : '[ OFFLINE ]'}
+            <div style="font-size: 9px; color: ${m.isReallyOnline ? '#00ff88' : '#ff9f43'}; font-weight: 800; font-family:Orbitron;">
+                ${m.isReallyOnline ? '[ READY_TO_SILENCE ]' : '[ OFFLINE ]'}
             </div>
         `;
         item.onclick = () => {
@@ -17239,14 +17256,16 @@ function renderTrollList(users) {
     });
 }
 
-// --- 3. FIXED SEARCH BAR ---
-document.getElementById('searchTrollVictim').oninput = (e) => {
-    const val = e.target.value.toLowerCase();
+// --- 3. THE FIXED SEARCH BAR ---
+document.getElementById('searchTrollVictim').addEventListener('input', (e) => {
+    const val = e.target.value.toLowerCase().trim();
+    // Filter from the cache
     const filtered = trollVictimsCache.filter(u => 
         (u.username || '').toLowerCase().includes(val)
     );
+    // Re-render only filtered results
     renderTrollList(filtered);
-};
+});
 
 // Trebuie să legăm și funcția de execuție la window pentru a fi accesibilă
 window.executeSilenceAction = async (targetUid, targetName) => {
