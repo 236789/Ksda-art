@@ -9950,7 +9950,8 @@ nav a[href="shop.html"] {
         </div>
 
 <div class="bm-content-scroll" style="padding: 20px; text-align: center; position: relative; z-index: 105;">
-    <div class="bm-grid-v4" style="grid-template-columns: 1fr; padding: 0;">
+    <div class="bm-grid-v4" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; padding: 0;">
+        
         <!-- SILENCE OFFER CARD -->
         <div class="bm-offer-card-v4" onclick="startSilencePrank()" style="border-color: #ff9f43 !important; min-height: 180px;">
             <div class="bm-bracket br-tl" style="border-color: #ff9f43;"></div>
@@ -9966,6 +9967,23 @@ nav a[href="shop.html"] {
                 15 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">
             </button>
         </div>
+
+        <!-- ROBBERY DEGHIZATĂ (TRAP) CARD -->
+        <div class="bm-offer-card-v4" onclick="startTrapPrank()" style="border-color: #ff4757 !important; min-height: 180px;">
+            <div class="bm-bracket br-tl" style="border-color: #ff4757;"></div>
+            <div class="bm-bracket br-tr" style="border-color: #ff4757;"></div>
+            <div class="bm-bracket br-bl" style="border-color: #ff4757;"></div>
+            <div class="bm-bracket br-br" style="border-color: #ff4757;"></div>
+            
+            <i class="fas fa-user-ninja" style="font-size: 40px; color: #ff4757; margin-bottom: 15px; filter: drop-shadow(0 0 10px #ff4757);"></i>
+            <div class="bm-title-v4" style="color: #fff; font-size: 16px;">ROBBERY_DEGHIZATĂ</div>
+            <div class="bm-desc-v4">Întinde o capcană sub forma unei donații pe chat. Cine apasă, îl jefuiești!</div>
+            
+            <button class="bm-price-btn-v4" style="background: #ff4757 !important; color: #fff; border: none; font-weight: 900;">
+                50 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">
+            </button>
+        </div>
+
     </div>
 </div>
 
@@ -17324,6 +17342,50 @@ window.executeSilenceAction = async (targetUid, targetName) => {
         console.error(e);
         showCustomAlert("Eroare la procesare.", "FAIL");
     }
+};
+
+
+
+window.startTrapPrank = async () => {
+    if(!auth.currentUser) return;
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const userData = userSnap.data();
+
+    if ((userData.diamonds || 0) < 50) return showCustomAlert("Ai nevoie de 50 💎!", "EROARE");
+
+    const msg = "Vei cheltui 50 💎 pentru a întinde o capcană pe chat. Cel care dă click va fi jefuit de tine. Confirmi?";
+    if (!(await showCustomConfirm(msg, "EXECUTĂ CAPCANA"))) return;
+
+    try {
+        const attackerUid = auth.currentUser.uid;
+        const attackerName = userData.username;
+
+        await updateDoc(doc(db, "accounts", attackerUid), { diamonds: increment(-50) });
+
+        const baitHtml = `
+            <div style="text-align: center; border: 2px dashed #ffd700; padding: 15px; border-radius: 15px; background: rgba(255, 215, 0, 0.05);">
+                <div style="font-family:'Montserrat'; font-weight: 900; color: #ffd700; font-size: 16px;">🎊 MEGA DONAȚIE! 🎊</div>
+                <div style="font-size: 12px; margin: 10px 0; color: #fff;">
+                    Legenda <b style="color:#29f3ff;">${attackerName}</b> a donat <b>50,000 COINS</b> tuturor!
+                </div>
+                <button class="bm-price-btn-v4" 
+                        style="background:#ffd700 !important; color:#000; width:100%;" 
+                        onclick="window.claimFakeDonation('${attackerUid}', '${attackerName}')">
+                    REVENDICĂ 5,000 COINS
+                </button>
+            </div>
+        `;
+
+        await addDoc(collection(db, "wall_messages"), {
+            text: baitHtml, uid: "kevin-bot-official", name: "Kevin Bot", isBot: true, isSpecial: true,
+            photo: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/345b1fcb-5942-4eb3-831f-b6a42b23051b/21584177-ae66-438a-a2cd-27dc4461a670_removalai_preview.png?format=300w",
+            createdAt: serverTimestamp(), isTrap: true, attackerId: attackerUid
+        });
+
+        closeModal('trollTerminalModal');
+        showCustomAlert("Capcana a fost întinsă pe Wall!", "SUCCES");
+        await logTransaction(-50, "DIAMONDS", "Black Market", "Set Robbery Trap");
+    } catch (e) { console.error(e); }
 };
 </script>
 </body>
