@@ -14682,6 +14682,8 @@ onAuthStateChanged(auth, async user => {
                 const d = snap.data();
                 window.currentUserData = d; 
 
+
+
         
        // --- FIX TITLU HERO ---
         const heroTitle = document.getElementById('heroTitle');
@@ -14749,6 +14751,10 @@ onAuthStateChanged(auth, async user => {
 
                 if(streakLabel) streakLabel.innerText = `Daily Streak: ${d.streak || 0}`;
             }
+
+                if(typeof renderShop === 'function') renderShop(); 
+                if(typeof renderActiveTicketBadge === 'function') renderActiveTicketBadge();
+
         });
 
     } else {
@@ -14768,6 +14774,8 @@ onAuthStateChanged(auth, async user => {
         }
         window.currentUserData = null;
     }
+
+        startPaymentMonitor(); 
 });
 
     document.getElementById('headerLoginBtn').onclick = () => document.getElementById('accountModal').classList.add('active');
