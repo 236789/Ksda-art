@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -3873,6 +3874,12 @@
     <i class="fas fa-user-shield" style="color: #ff4757;"></i>
     <span>Administrare Useri</span>
 </a>
+
+
+<a href="#" class="ga-nav-item" onclick="switchSection('discounts-manager-view', this)">
+    <i class="fas fa-percent" style="color: #ff4757;"></i>
+    <span>Manager Reduceri</span>
+</a>
     </div>
 </div>
 </div>
@@ -4995,6 +5002,38 @@
         <button id="loadMoreArchiveBtn" class="filter-btn" style="display:none; margin: 0 auto;" onclick="loadMoreArchive()">
             INCARCA MAI MULTE
         </button>
+    </div>
+</div>
+
+
+
+<!-- VIEW: DISCOUNTS MANAGER -->
+<div id="discounts-manager-view" class="view-section">
+    <h2 class="metallic-title-big" style="text-align:center; margin-bottom: 20px; font-size:24px; color: #ff4757;">
+        <i class="fas fa-ticket-alt"></i> LIVE REDUCTIONS TRACKER
+    </h2>
+
+    <div class="search-container-center">
+        <input type="text" id="discountSearchInput" class="search-input-neon" 
+               placeholder="🔍 CAUTĂ DUPĂ NUME..." onkeyup="renderDiscountsTable()">
+    </div>
+
+    <div class="table-glass-container">
+        <table class="neon-table">
+            <thead>
+                <tr>
+                    <th class="sticky-left">UTILIZATOR</th>
+                    <th>TIP VOUCHER</th>
+                    <th>REDUCERE</th>
+                    <th>VALABILITATE</th>
+                    <th>STATUS</th>
+                    <th>TICKET ID</th>
+                </tr>
+            </thead>
+            <tbody id="discountsTableBody">
+                <tr><td colspan="6" style="padding:40px; text-align:center;">Se analizează baza de date...</td></tr>
+            </tbody>
+        </table>
     </div>
 </div>
 </main>
@@ -9461,6 +9500,91 @@ window.downloadArchiveVocal = async (url, name) => {
     }
 };
 
+
+
+// --- DISCOUNTS MANAGER LOGIC ---
+
+window.renderDiscountsTable = () => {
+    const tableBody = document.getElementById('discountsTableBody');
+    if (!tableBody) return;
+
+    const searchVal = document.getElementById('discountSearchInput').value.toLowerCase();
+    
+    // Filtrăm utilizatorii care au (sau au avut recent) un discount activ
+    const usersWithDiscounts = cachedUsers.filter(u => u.activeDiscount);
+
+    if (usersWithDiscounts.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" style="padding:40px; text-align:center; color:#555;">Niciun voucher activ înregistrat în sistem.</td></tr>';
+        return;
+    }
+
+    // Filtrare după search
+    const filtered = usersWithDiscounts.filter(u => 
+        u.username.toLowerCase().includes(searchVal)
+    );
+
+    tableBody.innerHTML = filtered.map(u => {
+        const d = u.activeDiscount;
+        const now = Date.now();
+        const isExpired = now > d.expiresAt;
+        
+        // Calcul timp rămas
+        let timeRemainingText = "";
+        if (!isExpired) {
+            const diff = d.expiresAt - now;
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            timeRemainingText = `${h}h ${m}m rămase`;
+        } else {
+            timeRemainingText = "Expirat";
+        }
+
+        // Status Visuals
+        const statusClass = isExpired ? 'risk-high' : 'risk-low';
+        const statusText = isExpired ? 'EXPIRED' : 'ACTIVE';
+        const typeColor = d.type === 'coins' ? '#ffd700' : '#00e5ff';
+        const typeIcon = d.type === 'coins' ? 'https://iili.io/fhc1SKQ.png' : 'https://iili.io/fv5bmtj.png';
+
+        return `
+        <tr>
+            <td class="sticky-left">
+                <div class="td-user">
+                    <img src="${u.pfp}" class="td-pfp">
+                    <div class="td-name">${u.username}</div>
+                </div>
+            </td>
+            <td>
+                <div class="currency-simple" style="color:${typeColor};">
+                    <img src="${typeIcon}" width="16"> ${d.type.toUpperCase()}
+                </div>
+            </td>
+            <td>
+                <span style="font-family:'Orbitron'; font-weight:900; color:#ff4757; font-size:16px;">
+                    -${d.percent}%
+                </span>
+            </td>
+            <td style="font-size:11px; color:#aaa;">
+                ${timeRemainingText}
+            </td>
+            <td>
+                <span class="risk-badge ${statusClass}">${statusText}</span>
+            </td>
+            <td style="font-family:monospace; font-size:10px; opacity:0.6;">
+                ${d.ticketId || 'N/A'}
+            </td>
+        </tr>`;
+    }).join('');
+};
+
+// Actualizăm switchSection ca să pornească randarea când intri pe pagină
+const previousSwitchSection = window.switchSection;
+window.switchSection = (sectionId, btnElement) => {
+    previousSwitchSection(sectionId, btnElement);
+    
+    if (sectionId === 'discounts-manager-view') {
+        renderDiscountsTable();
+    }
+};
   </script>
 </body>
 </html>
