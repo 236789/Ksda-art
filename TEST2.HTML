@@ -9940,10 +9940,57 @@ nav a[href="shop.html"] {
 }
 /* --- PERFORMANCE ENGINE END --- */
 
+
+
+
   </style>
 </head>
 <body>
 
+
+<!-- =========================================
+     TROLL PROTOCOL TERMINAL (EMPTY FOR NOW)
+     ========================================= -->
+<div id="trollTerminalModal" class="account-modal-overlay">
+    <div class="bm-modal-v4" style="width: 95%; max-width: 550px; border-color: #ff9f43 !important; box-shadow: 0 0 60px rgba(255, 159, 67, 0.15) !important;">
+        
+        <!-- CRT Effect -->
+        <div class="bm-scanline-overlay"></div>
+
+        <!-- Header -->
+        <div style="background: rgba(255, 159, 67, 0.05); padding: 25px; border-bottom: 1px solid #ff9f43; display: flex; justify-content: space-between; align-items: center; z-index: 110;">
+            <div>
+                <div style="font-family:'Montserrat'; font-size: 24px; color:#ff9f43; text-shadow: 0 0 15px #ff9f43;">CHAOS_INJECTOR</div>
+                <div style="font-family:monospace; font-size: 11px; color:#ff9f43; opacity:0.8; margin-top:5px;">SYSTEM_VULNERABILITY: HIGH | /// EXECUTE DISRUPTION ///</div>
+            </div>
+            <button class="close-pop" onclick="closeModal('trollTerminalModal')" style="border-radius: 0; border: 1px solid #ff9f43; background: transparent; width: 40px; height: 40px; position: static !important; cursor: pointer; color: #ff9f43;">✕</button>
+        </div>
+
+        <!-- Content Area -->
+        <div class="bm-content-scroll" style="padding: 40px 20px; text-align: center; position: relative; z-index: 105;">
+            
+            <i class="fas fa-biohazard fa-spin" style="font-size: 60px; color: #ff9f43; margin-bottom: 25px; opacity: 0.3;"></i>
+            
+            <div style="font-family: 'Orbitron'; color: #fff; font-size: 16px; letter-spacing: 2px; margin-bottom: 10px;">AȘTEPTARE COMENZI...</div>
+            <div style="font-family: 'Courier New'; color: #ff9f43; font-size: 12px; border: 1px dashed #ff9f43; padding: 15px; display: inline-block;">
+                > SCANNING FOR EXPLOITS...<br>
+                > MODULES LOADED: 0<br>
+                > CHAOS_LEVEL: 0%
+            </div>
+
+            <p style="margin-top: 30px; color: #666; font-size: 11px; font-style: italic;">
+                "Protocolul Troll permite utilizatorilor să modifice experiența vizuală a celorlalți cetățeni."
+            </p>
+
+        </div>
+
+        <!-- Footer -->
+        <div style="background: #000; padding: 15px 25px; font-family: monospace; font-size: 9px; color: #663300; border-top: 1px solid rgba(255, 159, 67, 0.2);">
+            > ROOT_ACCESS: PENDING...<br>
+            > DISRUPTION_DATABASE: EMPTY
+        </div>
+    </div>
+</div>
 <!-- =========================================
      CUSTOM INTRO UPLOAD TERMINAL (REMASTERED)
      ========================================= -->
@@ -10515,6 +10562,14 @@ nav a[href="shop.html"] {
                 </div>
 
             </div>
+
+
+
+    <i class="fas fa-masks-theater" style="font-size: 30px; color: #ff9f43; filter: drop-shadow(0 0 10px #ff9f43);"></i>
+    <div class="bm-title-v4" style="color: #ff9f43;">TROLL_PROTOCOL</div>
+    <div class="bm-desc-v4">Injectează haos în sistem. Opțiuni de sabotaj vizual și farse globale.</div>
+    <button class="bm-price-btn-v4" style="background: #ff9f43 !important; color: #000;">ACCESS TERMINAL</button>
+</div>
             
             <!-- Terminal Footer -->
             <div style="background: #000; padding: 20px 30px; font-family: monospace; font-size: 10px; color: #004400; border-top: 1px solid rgba(0, 255, 136, 0.2);">
@@ -17095,6 +17150,20 @@ if (document.readyState === 'complete') {
 } else {
     window.addEventListener('load', freezeAnimations);
 }
+
+
+
+window.openTrollTerminal = () => {
+    if(!auth.currentUser) return alert("Loghează-te!");
+    
+    // Close Black Market if it's open
+    document.getElementById('blackMarketModal').classList.remove('active');
+    
+    // Open Troll Modal
+    document.getElementById('trollTerminalModal').classList.add('active');
+    
+    console.log("System: Troll Protocol Terminal Accessed.");
+};
 </script>
 </body>
 </html>
