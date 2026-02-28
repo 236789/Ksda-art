@@ -9913,8 +9913,11 @@ nav a[href="shop.html"] {
     overflow: hidden; touch-action: none;
 }
 .ticket-bg-coins { background: linear-gradient(135deg, #ffd700, #b8860b); }
-.ticket-bg-diamonds { background: linear-gradient(135deg, #00ffff, #0055ff); }
-
+/* Schimbat din Albastru în Verde/Emerald pentru a se potrivi cu Diamantele */
+.ticket-bg-diamonds { 
+    background: linear-gradient(135deg, #00ff88, #004422) !important; 
+    border-color: #00ff88 !important;
+}
 .scratch-reward-text {
     position: absolute; inset: 0; display: flex; flex-direction: column;
     justify-content: center; align-items: center; text-align: center;
@@ -13083,7 +13086,6 @@ function renderShop() {
     const symbol = SYMBOLS[selectedCurrency];
 
     // --- LOGICĂ VOUCHER ACTIV ---
-    // Verificăm dacă utilizatorul are o reducere activă pentru tipul curent (coins/diamonds)
     const disc = window.currentUserData?.activeDiscount;
     const hasDiscount = disc && disc.type === currentShopMode && Date.now() < disc.expiresAt;
 
@@ -13095,20 +13097,20 @@ function renderShop() {
         let discountBadgeHtml = '';
 
         if (hasDiscount) {
-            // Aplicăm reducerea (ex: 100 - 60 = 40% din preț)
+            // Aplicăm reducerea
             const multiplier = (100 - disc.percent) / 100;
             finalPrice = (originalPrice * multiplier).toFixed(2);
             
             // Badge-ul roșu de reducere în colț
             discountBadgeHtml = `<div class="discount-badge-mini">-${disc.percent}%</div>`;
             
-            // Prețul vechi cu X roșu + Prețul nou
+            // Prețul vechi cu X roșu + Prețul nou în verde
             priceTagHtml = `
                 <span class="old-price-x">${symbol} ${originalPrice}</span> 
                 <span style="color: #00ff88;">${symbol} ${finalPrice}</span>
             `;
         } else {
-            // Afișare standard
+            // Afișare standard fără voucher
             priceTagHtml = `${symbol} ${originalPrice}`;
         }
         
@@ -13133,6 +13135,7 @@ function renderShop() {
     // --- CARD CALCULATOR CUSTOM ---
     const custom = document.createElement('div');
     custom.className = `package-card ${styleClass}`;
+    
     // Adăugăm badge de reducere și pe calculator dacă e activ voucherul
     let calcBadge = hasDiscount ? `<div class="discount-badge-mini">-${disc.percent}%</div>` : '';
     
@@ -13168,12 +13171,12 @@ function renderShop() {
         
         input.value = "";
         document.getElementById('priceVal').innerText = `0.00 ${symbol}`;
-        calculatePrice(); // Această funcție va trebui să țină cont de hasDiscount de asemenea
+        calculatePrice(); 
         document.getElementById('customModal').classList.add('active'); 
     };
     rechargeGrid.appendChild(custom);
 
-    // Actualizăm badge-ul de sub RON/EUR cu timpul rămas
+    // Actualizăm badge-ul de sub RON/EUR cu timpul rămas (Timer-ul biletului)
     if (typeof renderActiveTicketBadge === 'function') {
         renderActiveTicketBadge();
     }
@@ -17543,7 +17546,7 @@ window.activateCurrencyCode = async (code) => {
     currentScratchTicketId = code;
     
     // Generăm reducerea random între 50% și 80%
-    currentScratchDiscount = Math.floor(Math.random() * (80 - 50 + 1)) + 50;
+    currentScratchDiscount = Math.floor(Math.random() * (50 - 30 + 1)) + 30;
     
     // Inițializăm canvas-ul de răzuire
     initScratchCard();
@@ -17608,38 +17611,30 @@ function initScratchCard() {
     canvas.addEventListener('touchmove', scratch);
 }
 
-// --- 3. SALVARE ÎN FIRESTORE ---
 window.collectVoucher = async () => {
     const userRef = doc(db, "accounts", auth.currentUser.uid);
-    const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // 24 ore
+    const expiresAt = Date.now() + (24 * 60 * 60 * 1000); 
 
     try {
-        // Scoatem biletul din inventar și activăm reducerea globală
-        const updates = {
-            activeDiscount: {
-                type: currentScratchType,
-                percent: currentScratchDiscount,
-                expiresAt: expiresAt,
-                activatedAt: serverTimestamp(),
-                ticketId: currentScratchTicketId
-            }
-        };
-
-        // Ștergem biletul din lista de cupoane
-        const currentCoupons = window.currentUserData.myCoupons[currentScratchType] || [];
-        const filtered = currentCoupons.filter(c => c.code !== currentScratchTicketId);
-        updates[`myCoupons.${currentScratchType}`] = filtered;
-
+        // ... codul de salvare în Firebase existent ...
         await updateDoc(userRef, updates);
         
+        // Închidem overlay-ul
         document.getElementById('scratchOverlay').style.display = 'none';
         document.getElementById('btnCollectVoucher').style.display = 'none';
         
-        showCustomAlert(`Reducere de ${currentScratchDiscount}% ACTIVATĂ pentru 24h!`, "SISTEM ACTUALIZAT");
+        showCustomAlert(`Reducere de ${currentScratchDiscount}% ACTIVATĂ!`, "SISTEM ACTUALIZAT");
         
-        // Re-randăm magazinul
         renderShop();
-        renderActiveTicketBadge();
+        
+        // --- ADAUGĂ ACEASTĂ LINIE PENTRU SCROLL ---
+        // Ne asigurăm că utilizatorul vede prețurile noi imediat
+        if (typeof scrollToZone === 'function') {
+            scrollToZone('zone-vault');
+        } else {
+            // Fallback dacă funcția nu e globală
+            document.getElementById('zone-vault').scrollIntoView({ behavior: 'smooth' });
+        }
         
     } catch (e) { console.error(e); }
 };
@@ -17675,34 +17670,6 @@ function startPaymentMonitor() {
         });
     });
 }
-
-
-
-// --- 1. ACTIVARE VOUCHER (REZOLVĂ EROAREA DIN CONSOLĂ) ---
-window.activateCouponCode = async (code) => {
-    const userData = window.currentUserData;
-    let type = '';
-    
-    // Verificăm dacă codul aparține de Coins sau Diamonds
-    if (userData.myCoupons?.coins?.some(c => c.code === code)) type = 'coins';
-    else if (userData.myCoupons?.diamonds?.some(c => c.code === code)) type = 'diamonds';
-
-    if (!type) return showCustomAlert("Codul nu a putut fi validat.", "EROARE_SISTEM");
-
-    currentScratchType = type;
-    currentScratchTicketId = code;
-    
-    // Generăm reducerea random între 50% și 80%
-    currentScratchDiscount = Math.floor(Math.random() * (80 - 50 + 1)) + 50;
-    
-    initScratchCard();
-    
-    document.getElementById('scratchOverlay').style.display = 'flex';
-    document.getElementById('scratchValue').innerText = `-${currentScratchDiscount}%`;
-    document.getElementById('ticketVisual').className = `scratch-container ticket-bg-${type}`;
-    document.getElementById('scratchTitle').innerText = `${type.toUpperCase()}_VOUCHER`;
-};
-
 </script>
 </body>
 </html>
