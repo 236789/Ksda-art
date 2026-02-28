@@ -10066,6 +10066,73 @@ nav a[href="shop.html"] {
     .f-tk-card { width: 90px; }
 }
 
+
+/* --- CINEMATIC NEON SEPARATOR --- */
+.premium-divider {
+    width: 100%;
+    height: 100px; /* Space between sections */
+    background: #02050a; /* Pure deep dark */
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+/* The Grid Pattern from the image */
+.premium-divider::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(rgba(41, 243, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(41, 243, 255, 0.03) 1px, transparent 1px);
+    background-size: 30px 30px;
+    z-index: 1;
+}
+
+/* The Atmosphere Glow */
+.premium-divider::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, rgba(41, 243, 255, 0.1) 0%, transparent 75%);
+    z-index: 2;
+}
+
+/* The Actual Glowing Laser Line */
+.neon-laser-line {
+    width: 100%;
+    height: 2px;
+    background: #29f3ff;
+    box-shadow: 
+        0 0 15px #29f3ff, 
+        0 0 30px rgba(41, 243, 255, 0.6),
+        0 0 60px rgba(41, 243, 255, 0.3);
+    position: relative;
+    z-index: 3;
+}
+
+/* Optional: Add a small technical "node" in the middle to make it look active */
+.line-node {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 4px;
+    background: #fff;
+    filter: blur(2px);
+    box-shadow: 0 0 20px #fff;
+    z-index: 4;
+    border-radius: 50%;
+    opacity: 0.8;
+}
+
   </style>
 </head>
 <body>
@@ -18499,6 +18566,38 @@ window.executeRecycleVoucher = async (subCat, vId, val, isDiamonds) => {
         openRecycleCategory('vouchers');
     } catch(e) { console.error(e); }
 };
+
+
+// --- REDIRECT HANDLER: OPEN ELITE INVENTORY FROM URL ---
+function checkRedirectActions() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+
+    if (action === 'openEliteInventory') {
+        // Așteptăm ca datele utilizatorului să fie încărcate (Auth)
+        const checkAuth = setInterval(() => {
+            if (auth.currentUser && window.currentUserData) {
+                clearInterval(checkAuth);
+                
+                console.log("System: Redirect action detected. Opening Elite Inventory...");
+                
+                // Deschidem direct inventarul Elite pe categoria dorită
+                if (typeof openEliteInventory === 'function') {
+                    openEliteInventory('banners'); 
+                }
+                
+                // Curățăm URL-ul pentru a nu se redeschide la refresh
+                window.history.replaceState({}, document.title, "shop.html");
+            }
+        }, 500);
+
+        // Siguranță: oprim căutarea după 10 secunde dacă nu se loghează
+        setTimeout(() => clearInterval(checkAuth), 10000);
+    }
+}
+
+// Lansăm verificarea
+checkRedirectActions();
 </script>
 </body>
 </html>
