@@ -9924,23 +9924,25 @@ nav a[href="shop.html"] {
             <button class="close-pop" onclick="closeModal('trollTerminalModal')" style="border-radius: 0; border: 1px solid #ff9f43; background: transparent; width: 40px; height: 40px; position: static !important; cursor: pointer; color: #ff9f43;">✕</button>
         </div>
 
-        <!-- Content Area -->
-        <div class="bm-content-scroll" style="padding: 40px 20px; text-align: center; position: relative; z-index: 105;">
+<div class="bm-content-scroll" style="padding: 20px; text-align: center; position: relative; z-index: 105;">
+    <div class="bm-grid-v4" style="grid-template-columns: 1fr; padding: 0;">
+        <!-- SILENCE OFFER CARD -->
+        <div class="bm-offer-card-v4" onclick="startSilencePrank()" style="border-color: #ff9f43 !important; min-height: 180px;">
+            <div class="bm-bracket br-tl" style="border-color: #ff9f43;"></div>
+            <div class="bm-bracket br-tr" style="border-color: #ff9f43;"></div>
+            <div class="bm-bracket br-bl" style="border-color: #ff9f43;"></div>
+            <div class="bm-bracket br-br" style="border-color: #ff9f43;"></div>
             
-            <i class="fas fa-biohazard fa-spin" style="font-size: 60px; color: #ff9f43; margin-bottom: 25px; opacity: 0.3;"></i>
+            <i class="fas fa-comment-slash" style="font-size: 40px; color: #ff9f43; margin-bottom: 15px; filter: drop-shadow(0 0 10px #ff9f43);"></i>
+            <div class="bm-title-v4" style="color: #fff; font-size: 16px;">SILENCE_PROTOCOL</div>
+            <div class="bm-desc-v4">Oprește vocea oricărui utilizator pe chat timp de 1 minut.</div>
             
-            <div style="font-family: 'Orbitron'; color: #fff; font-size: 16px; letter-spacing: 2px; margin-bottom: 10px;">AȘTEPTARE COMENZI...</div>
-            <div style="font-family: 'Courier New'; color: #ff9f43; font-size: 12px; border: 1px dashed #ff9f43; padding: 15px; display: inline-block;">
-                > SCANNING FOR EXPLOITS...<br>
-                > MODULES LOADED: 0<br>
-                > CHAOS_LEVEL: 0%
-            </div>
-
-            <p style="margin-top: 30px; color: #666; font-size: 11px; font-style: italic;">
-                "Protocolul Troll permite utilizatorilor să modifice experiența vizuală a celorlalți cetățeni."
-            </p>
-
+            <button class="bm-price-btn-v4" id="btnTrollSilencePrice" style="background: #ff9f43 !important; color: #000; border: none; font-weight: 900;">
+                15 <img src="https://iili.io/fv5bmtj.png" class="bm-inline-gem">
+            </button>
         </div>
+    </div>
+</div>
 
         <!-- Footer -->
         <div style="background: #000; padding: 15px 25px; font-family: monospace; font-size: 9px; color: #663300; border-top: 1px solid rgba(255, 159, 67, 0.2);">
@@ -17076,6 +17078,127 @@ window.openTrollTerminal = () => {
     
     console.log("System: Troll Protocol Terminal Accessed.");
 };
+
+
+
+window.startSilenceTroll = async () => {
+    if(!auth.currentUser) return;
+
+    // Verificare Voucher
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
+    const ticketCode = isFree ? window.activeCosmeticTicket.id : null;
+
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const userData = userSnap.data();
+
+    if (!isFree && (userData.diamonds || 0) < 15) {
+        return showCustomAlert("Nu ai 15 Diamante pentru a cumpăra liniștea!", "EROARE");
+    }
+
+    const msg = isFree ? "Folosești TICHETUL pentru a reduce pe cineva la tăcere?" : "Cheltui 15 Diamante pentru a da MUTE unui utilizator?";
+    if (!(await showCustomConfirm(msg, "SILENCE PROTOCOL"))) return;
+
+    // Deschidem lista de utilizatori (Refolosim logica de la donații, dar cu alt callback)
+    window.trollModeActive = true; 
+    openTrollUserList();
+};
+
+window.openTrollUserList = async () => {
+    // Închidem modalul troll și deschidem lista de selecție
+    document.getElementById('trollTerminalModal').classList.remove('active');
+    document.getElementById('donationListModal').classList.add('active');
+    
+    // Modificăm titlul listei temporar pentru context
+    const title = document.querySelector('#donationListModal .title-alte');
+    if(title) title.innerText = "SELECT_TARGET_TO_SILENCE";
+
+    const listEl = document.getElementById('donationUserList');
+    listEl.innerHTML = '<div style="text-align:center; padding:20px;">Scanning users...</div>';
+
+    try {
+        const q = query(collection(db, "accounts"), orderBy("lastActive", "desc"), limit(30));
+        const snap = await getDocs(q);
+        const users = [];
+        snap.forEach(d => { 
+            if(d.id !== auth.currentUser.uid) users.push({ id: d.id, ...d.data() }); 
+        });
+
+        listEl.innerHTML = "";
+        users.forEach((u, idx) => {
+            const item = document.createElement('div');
+            item.className = 'top-item';
+            item.innerHTML = `
+                <div class="top-left">
+                    <div class="top-img-box"><img src="${u.image || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" class="top-user-img"></div>
+                    <div class="top-user-name">${u.username}</div>
+                </div>
+                <button class="bm-price-btn-v4" style="background:#ff9f43 !important; color:#000; font-size:9px;">SELECTEAZĂ</button>
+            `;
+            item.onclick = () => executeSilenceAction(u.id, u.username);
+            listEl.appendChild(item);
+        });
+    } catch(e) { console.error(e); }
+};
+
+async function executeSilenceAction(targetUid, targetName) {
+    const isFree = window.activeCosmeticTicket && window.activeCosmeticTicket.category === 'blackmarket';
+    const ticketCode = isFree ? window.activeCosmeticTicket.id : null;
+    const buyerUid = auth.currentUser.uid;
+    const buyerName = window.currentUserData.username;
+
+    try {
+        // 1. Platim
+        const userRef = doc(db, "accounts", buyerUid);
+        if (isFree) {
+            const userData = (await getDoc(userRef)).data();
+            let vouchers = userData.myCoupons?.blackmarket || [];
+            const newVouchers = vouchers.filter(v => v.code !== ticketCode && v.id !== ticketCode);
+            await updateDoc(userRef, { 'myCoupons.blackmarket': newVouchers });
+            window.activeCosmeticTicket = null;
+        } else {
+            await updateDoc(userRef, { diamonds: increment(-15) });
+        }
+
+        // 2. Aplicăm MUTE în baza de date (Muted_users)
+        // Setăm durata la 1 minut (60.000 ms)
+        await setDoc(doc(db, "muted_users", targetUid), {
+            uid: targetUid,
+            name: targetName,
+            reason: "Troll Protocol: Silence",
+            mutedBy: buyerName,
+            mutedAt: serverTimestamp(),
+            unmuteAt: Date.now() + 60000
+        });
+
+        // 3. Kevin Bot trimite mesajul amuzant pe Wall
+        const funnyLines = [
+            `✂️🌐 Shhh! **${buyerName}** i-a tăiat cablul de net lui **${targetName}** pentru 60 de secunde!`,
+            `🤐 **${targetName}** a rămas fără voce! **${buyerName}** i-a aplicat un 'Mute' virtual de la distanță.`,
+            `🧲💻 Eroare de conexiune! **${buyerName}** a aruncat cu un magnet în routerul lui **${targetName}**.`,
+            `🤐🔥 Cineva să-i dea un pahar cu apă! **${buyerName}** i-a pus un 'fermoar' invizibil la gură lui **${targetName}**.`,
+            `🛰️🔇 Semnal bruiat! **${targetName}** a primit un 'Neural Silence' de la **${buyerName}**. Ne auzim peste un minut!`
+        ];
+        const randomLine = funnyLines[Math.floor(Math.random() * funnyLines.length)];
+
+        await addDoc(collection(db, "wall_messages"), {
+            text: randomLine,
+            uid: "kevin-bot-official",
+            name: "Kevin Bot",
+            photo: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/345b1fcb-5942-4eb3-831f-b6a42b23051b/21584177-ae66-438a-a2cd-27dc4461a670_removalai_preview.png?format=300w",
+            isBot: true, isSpecial: true,
+            equippedBanner: { id: "bub_toxic", cssClass: "bubble-toxic" },
+            createdAt: serverTimestamp(), seenBy: []
+        });
+
+        document.getElementById('donationListModal').classList.remove('active');
+        showCustomAlert(`Ținta **${targetName}** a fost redusă la tăcere!`, "HAOS INJECTAT");
+        await logTransaction(-15, "DIAMONDS", "Troll Shop", `Used Silence on ${targetName}`);
+
+    } catch(e) {
+        console.error(e);
+        showCustomAlert("Eroare la injectarea protocolului.", "FAIL");
+    }
+}
 </script>
 </body>
 </html>
