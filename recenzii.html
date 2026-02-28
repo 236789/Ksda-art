@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -312,6 +313,2118 @@
         .input-area-wrapper { padding: 10px; } .chat-input { height: 50px; } .send-btn { height: 50px; width: 50px; }
         .already-posted { font-size: 11px; padding: 8px; margin-bottom: 0; }
     }
+
+
+/* --- PROFILE BANNERS ENGINE --- */
+.account-card.profile-banner-active {
+    background-size: cover !important;
+    background-position: center !important;
+    box-shadow: inset 0 0 100px #000, 0 0 50px rgba(0,0,0,0.5) !important;
+    position: relative; overflow: hidden !important;
+}
+.account-card.profile-banner-active * { position: relative; z-index: 10; }
+
+/* Adaugă clasele de bannere (Exemple necesare) */
+.account-card.pban_anime { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/anime-mix.gif?alt=media&token=eed3db7d-e99f-4a5c-b7ee-15b6b51f20e8') !important; border-color: #ff00ff !important; }
+.account-card.pban_thunder { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') !important; border-color: #00e5ff !important; }
+
+/* ISTORIC VIZUAL */
+.history-list { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; padding: 5px; }
+.history-card { display: flex; align-items: center; justify-content: space-between; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 15px; padding: 12px; }
+.hist-user { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 80px; text-align: center; }
+.hist-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); }
+.hist-name { font-size: 10px; font-weight: 700; color: #fff; }
+.hist-value { font-family: 'Orbitron'; font-size: 14px; font-weight: 800; color: #ffd700; background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 6px; }
+
+/* BUTON ELITE (Lung cât 2 coloane) */
+.c-elite { grid-column: span 2 !important; border-color: #ff0000 !important; color: #ff0000 !important; }
+
+
+
+
+/* --- MULTI-IMAGE GRID SYSTEM --- */
+.media-grid {
+    display: grid;
+    gap: 4px;
+    width: 100%;
+    max-width: 320px; /* Keeps bubbles from getting too wide */
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+/* Single Image (Standard) */
+.media-grid[data-count="1"] {
+    grid-template-columns: 1fr;
+}
+
+/* 2 Images (Side by Side 50/50) */
+.media-grid[data-count="2"] {
+    grid-template-columns: 1fr 1fr;
+}
+
+/* 3 Images (1 Top, 2 Bottom) */
+.media-grid[data-count="3"] {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 150px 100px;
+}
+.media-grid[data-count="3"] .grid-img:first-child {
+    grid-column: span 2; /* Spans full width */
+    height: 150px;
+}
+
+/* 4 Images (2x2 Square) */
+.media-grid[data-count="4"] {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 100px 100px;
+}
+
+/* 5+ Images (2 Top, 3 Bottom) */
+.media-grid[data-count="5"] {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr; /* 6 fractional units */
+    grid-template-rows: 100px 80px;
+}
+/* First 2 images take 50% width each */
+.media-grid[data-count="5"] .grid-img:nth-child(1),
+.media-grid[data-count="5"] .grid-img:nth-child(2) {
+    grid-column: span 3; 
+}
+/* Bottom 3 images take 33% width each */
+.media-grid[data-count="5"] .grid-img:nth-child(n+3) {
+    grid-column: span 2;
+}
+
+/* Common Image Style in Grid */
+.grid-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures perfect squares without stretching */
+    cursor: zoom-in;
+    background: rgba(0,0,0,0.3);
+    transition: 0.2s;
+    min-height: 80px; /* Safety height */
+}
+.grid-img:hover {
+    filter: brightness(1.1);
+    transform: scale(1.02);
+}
+
+/* PREVIEW CONTAINER UPDATE */
+.preview-container {
+    display: none; 
+    gap: 5px; 
+    padding: 10px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 15px; 
+    margin-bottom: 10px; 
+    border: 1px dashed var(--primary);
+    flex-wrap: wrap;
+}
+.mini-preview {
+    width: 50px; height: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+
+/* --- PRO TOOLBAR ANIMATIONS V2 --- */
+
+/* 1. PALETTE (Reality Shifter) - LIQUID METAL */
+/* No more rainbow. A sleek cyan/white shine sweeps across it. */
+#paletteBtn i {
+    position: relative;
+    overflow: hidden;
+    /* Masking text allows background gradient to be the color */
+    background: linear-gradient(110deg, var(--primary) 30%, #fff 50%, var(--primary) 70%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: liquid-shine 3s linear infinite;
+    filter: drop-shadow(0 0 5px rgba(41, 243, 255, 0.3));
+}
+@keyframes liquid-shine {
+    to { background-position: -200% 0; }
+}
+
+/* 2. MIC - SOUND SHIVER */
+/* Vibrates rapidly then pauses, simulating voice detection */
+#micBtn:not(.recording) i {
+    animation: mic-shiver 3s infinite;
+    transform-origin: center bottom;
+}
+@keyframes mic-shiver {
+    0%, 90%, 100% { transform: rotate(0deg); }
+    92% { transform: rotate(-10deg); }
+    94% { transform: rotate(10deg); }
+    96% { transform: rotate(-5deg); }
+    98% { transform: rotate(5deg); }
+}
+
+/* 3. IMAGE - CAMERA FLASH */
+/* A sudden burst of brightness, no floating */
+#imgBtn i {
+    animation: camera-flash 4s infinite;
+}
+@keyframes camera-flash {
+    0%, 95%, 100% { filter: brightness(1) drop-shadow(0 0 0 transparent); }
+    96% { filter: brightness(2.5) drop-shadow(0 0 15px #fff); } /* FLASH */
+    98% { filter: brightness(1); }
+}
+
+/* 4. POLL - BAR CHART GROWTH */
+/* Stretches vertically slightly, mimicking a graph growing */
+#pollBtn i {
+    animation: bar-grow 3s infinite ease-in-out;
+    transform-origin: bottom; /* Grow from the floor */
+}
+@keyframes bar-grow {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(1.2); }
+}
+
+/* 5. GIF BUTTON - NEON FLICKER */
+/* Looks like a cyberpunk neon sign with a loose connection */
+#gifBtn .gif-text-icon {
+    animation: neon-flicker 4s infinite;
+}
+@keyframes neon-flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        opacity: 1;
+        text-shadow: 0 0 5px var(--primary);
+    }
+    20%, 24%, 55% {
+        opacity: 0.5;
+        text-shadow: none;
+    }
+}
+
+/* 6. SPEAKER (AUTO-READ) - KEEPING IT */
+#autoReadBtn i {
+    animation: sound-pulse 2.5s infinite;
+}
+@keyframes sound-pulse {
+    0% { transform: scale(1); }
+    5% { transform: scale(1.2); }
+    10% { transform: scale(1); }
+    100% { transform: scale(1); }
+}
+
+/* 7. RESET CHAT - THE TRASH EATER */
+/* The icon tilts to 'open', a paper ball falls in, it slams shut */
+#resetChatBtn {
+    position: relative; /* Needed for the paper ball */
+}
+
+#resetChatBtn i {
+    animation: trash-eat 2.5s infinite ease-in-out;
+    transform-origin: bottom right; /* Hinges at the corner */
+}
+
+/* Create the 'Paper Ball' using CSS */
+#resetChatBtn::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: 10px;
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    opacity: 0;
+    animation: paper-drop 2.5s infinite ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes trash-eat {
+    0%, 100% { transform: rotate(0deg); }
+    10% { transform: rotate(0deg); }
+    20% { transform: rotate(-25deg); } /* Open Lid / Tilt Back */
+    40% { transform: rotate(-25deg); } /* Hold Open */
+    50% { transform: rotate(0deg) scale(0.9); } /* Slam & Squat */
+    60% { transform: scale(1); } /* Recover */
+}
+
+@keyframes paper-drop {
+    0%, 15% { opacity: 0; transform: translateY(0); }
+    20% { opacity: 1; transform: translateY(0); } /* Ball appears */
+    40% { opacity: 1; transform: translateY(15px) translateX(5px); } /* Falls into bin */
+    45% { opacity: 0; } /* Disappears inside */
+    100% { opacity: 0; }
+}
+
+
+
+/* --- GOD TIER BADGE STYLES (CHAT & PROFILE) --- */
+
+/* Base style for all animated badges */
+[class*="badge-b_"], .badge-wheel-god {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px !important;
+    border-radius: 50px !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-weight: 900 !important;
+    font-size: 9px !important;
+    text-transform: uppercase;
+    vertical-align: middle;
+    margin-left: 4px;
+    border: 1.5px solid transparent; 
+    line-height: 1;
+}
+
+/* 1. QUANTUM GOD (Void/Cyan + Scanner) */
+.badge-wheel-god, .badge-b_wheel_god {
+    background: #050b14 !important;
+    color: #fff !important;
+    border-color: #29f3ff !important;
+    box-shadow: 0 0 15px rgba(41, 243, 255, 0.5), inset 0 0 8px #7000ff !important;
+    text-shadow: 0 0 5px #29f3ff;
+    position: relative;
+    overflow: hidden;
+}
+.badge-wheel-god::before, .badge-b_wheel_god::before {
+    content: ''; position: absolute; top: 0; left: -150%; width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(41, 243, 255, 0.8), transparent);
+    animation: quantumGlobalScan 2.5s infinite linear;
+}
+
+/* 2. WHEEL GOD (Gold/Electric) */
+.badge-b_spin_god {
+    background: linear-gradient(45deg, #000, #333) !important;
+    color: #fff !important;
+    border-color: #ffd700 !important;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.6), inset 0 0 5px #ffd700 !important;
+    text-shadow: 0 0 5px #ffd700;
+    animation: pulseGoldBadge 2s infinite alternate;
+}
+
+/* 3. IMMORTAL (Purple/Void) */
+.badge-b_immortal {
+    background: radial-gradient(circle, #240046 0%, #000 100%) !important;
+    color: #fff !important;
+    border-color: #7000ff !important;
+    box-shadow: 0 0 15px rgba(112, 0, 255, 0.5), inset 0 0 5px #7000ff !important;
+    text-shadow: 0 0 8px #7000ff;
+}
+
+/* 4. CELESTIAL (Cyan/Blue Star) */
+.badge-b_celestial {
+    background: linear-gradient(135deg, #004d40, #000) !important;
+    color: #e0f7fa !important;
+    border-color: #00e5ff !important;
+    box-shadow: 0 0 15px #00e5ff, inset 0 0 5px #00e5ff !important;
+    text-shadow: 0 0 5px #00e5ff;
+}
+
+/* 5. CYBER GHOST (Neon Green/Matrix) */
+.badge-b_cyber_ghost {
+    background: #000 !important;
+    color: #00ff41 !important;
+    border-color: #00ff41 !important;
+    box-shadow: 0 0 15px #00ff41, inset 0 0 5px #00ff41 !important;
+    font-family: 'Courier New', monospace !important;
+    letter-spacing: 1px;
+}
+
+/* 6. DEMON SLAYER (Red/Hell) */
+.badge-b_demon_slayer {
+    background: linear-gradient(to bottom, #300, #000) !important;
+    color: #ff0000 !important;
+    border-color: #ff0000 !important;
+    box-shadow: 0 0 15px #ff0000, inset 0 0 5px #500 !important;
+    text-shadow: 0 0 8px #f00;
+}
+
+/* 7. VOID MASTER (Deep Blue/Cosmic) */
+.badge-b_void_master {
+    background: #050b14 !important;
+    color: #fff !important;
+    border-color: #29f3ff !important;
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.4), inset 0 0 10px #000 !important;
+    text-shadow: 0 0 10px #29f3ff;
+}
+
+
+/* --- NEW SICK BANNERS --- */
+.bubble-dragon {
+    background: linear-gradient(135deg, #600, #000) !important;
+    border: 2px solid #ffd700 !important;
+    color: #ffd700 !important;
+    box-shadow: 0 0 15px #f00 !important;
+    font-family: 'Orbitron';
+}
+.bubble-carbon {
+    background: repeating-linear-gradient(45deg, #111, #111 5px, #222 5px, #222 10px) !important;
+    border: 1px solid #444 !important;
+    color: #fff !important;
+    text-shadow: 1px 1px 2px #000;
+}
+.bubble-biohazard {
+    background: #000 !important;
+    border: 2px solid #ccff00 !important;
+    color: #ccff00 !important;
+    box-shadow: inset 0 0 15px #ccff00 !important;
+    font-family: 'Orbitron';
+}
+.bubble-cybercity {
+    background: linear-gradient(to bottom, #000, #1a0033) !important;
+    background-image: url('https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndnN3Z3R4Z3R4Z3R4Z3R4Z3R4Z3R4Z3R4Z3R4Z3R4Z3R4Z3&ep=v1_gifs_search&rid=giphy.gif&ct=g') !important;
+    background-size: cover;
+    border: 1px solid #ff00ff !important;
+}
+.bubble-abyss {
+    background: #00050a !important;
+    border: 1px solid #00e5ff !important;
+    color: #00e5ff !important;
+    box-shadow: 0 0 20px #00e5ff !important;
+}
+
+/* --- NEW SICK ANIMATED BANNERS --- */
+.bubble-anim-quantum {
+    background: #000 !important;
+    border: 2px solid #29f3ff !important;
+    color: #fff !important;
+    animation: quantumGlow 2s infinite alternate !important;
+}
+.bubble-anim-overdrive {
+    background: linear-gradient(90deg, #ff0000, #ff8c00, #ff0000) !important;
+    background-size: 200% 100% !important;
+    animation: gradientMove 1s linear infinite !important;
+    color: #fff !important;
+    font-weight: 900;
+}
+.bubble-anim-inferno {
+    background: #000 !important;
+    border: 2px solid #ff4500 !important;
+    color: #ff4500 !important;
+    box-shadow: 0 0 10px #ff4500 !important;
+    animation: firePulse 0.5s infinite alternate !important;
+}
+.bubble-anim-matrix-v2 {
+    background: #000 !important;
+    color: #00ff41 !important;
+    border: 1px solid #00ff41 !important;
+    animation: flicker-light 0.5s infinite !important;
+    font-family: monospace;
+}
+.bubble-anim-aurora {
+    background: linear-gradient(270deg, #00ff88, #00e5ff, #7000ff) !important;
+    background-size: 600% 600% !important;
+    animation: rainbowAnim 10s ease infinite !important;
+    color: #fff !important;
+}
+
+
+/* --- SINGULARITY BADGE: WALL OPTIMIZED --- */
+.badge-singularity {
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/desc%C4%83rcare.gif?alt=media&token=f0045bb9-4176-4e6a-92e2-25be1eea9bae') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.6) !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    font-size: 8px !important; /* Smaller for chat */
+    padding: 2px 8px !important;
+    border-radius: 4px !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 0 10px rgba(112, 0, 255, 0.6);
+    text-shadow: 1px 1px 3px #000, 0 0 5px #000 !important;
+    vertical-align: middle;
+    margin-left: 5px;
+}
+
+/* Ensure the icon inside is visible */
+.badge-singularity i {
+    font-size: 9px;
+    filter: drop-shadow(0 0 3px #fff);
+}
+
+/* --- SINGULARITY FIX: PRIORITY 1 --- */
+.badge-singularity {
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/desc%C4%83rcare.gif?alt=media&token=f0045bb9-4176-4e6a-92e2-25be1eea9bae') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    color: #ffffff !important;
+    font-size: 9px !important;
+    padding: 5px 12px !important;
+    border-radius: 4px !important;
+    box-shadow: 0 0 15px rgba(112, 0, 255, 0.6) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px;
+}
+
+/* Kill the horizontal scrollbar in inventory */
+#inventoryModal .cosmetics-card-v6 {
+    overflow-x: hidden !important;
+}
+#inventoryList {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 10px !important;
+}
+
+
+
+/* --- ELITE ANIMATION ENGINE --- */
+
+/* 1. GIF Background for Badges/Banners */
+.elite-gif-bg {
+    background-size: cover !important;
+    background-position: center !important;
+    -webkit-background-clip: text !important; /* For text with GIF inside */
+    background-clip: text !important;
+}
+
+/* 2. God of Thunder Special Styling */
+.badge-god-thunder {
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd');
+    background-size: cover;
+    color: #fff !important;
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #fff;
+    border: 2px solid #00ffff !important;
+    box-shadow: 0 0 15px #00ffff;
+    font-weight: 900;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 3. Animated Borders for Elite Frames */
+@keyframes eliteBorderSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.elite-frame-wrapper {
+    position: relative;
+    padding: 5px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.elite-frame-outline {
+    position: absolute;
+    inset: -50%;
+    background: conic-gradient(from 0deg, transparent, #ff0000, #00ffff, #ff0000);
+    animation: eliteBorderSpin 3s linear infinite;
+    z-index: 0;
+}
+
+/* 4. Text Effects */
+.t-elite-shimmer {
+    background: linear-gradient(90deg, #fff, #ff0000, #fff);
+    background-size: 200% auto;
+    animation: text-shimmer 2s linear infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+
+/* --- GOD OF THUNDER BADGE --- */
+.badge-god-thunder {
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') !important;
+    background-size: cover;
+    color: #fff !important;
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #fff;
+    border: 2px solid #00ffff !important;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+    font-weight: 900 !important;
+    padding: 6px 12px !important;
+}
+
+/* --- ELITE BANNER: THUNDERSTORM --- */
+.bubble-elite-thunder {
+    background: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') center !important;
+    background-size: cover !important;
+    border: 2px solid #fff !important;
+    color: #fff !important;
+    font-weight: 800;
+    text-shadow: 2px 2px 5px #000;
+    box-shadow: 0 0 15px #00ffff !important;
+}
+
+/* --- ELITE BANNER: MATRIX --- */
+.bubble-elite-matrix {
+    background: #000 url('https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJndnZpYmZ4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JnB0PWEmZXA9djFfaW50ZXJuYWxfZ2lmX2J5X2lkJmN0PWc/3o7TKVUn7iM8FMEU24/giphy.gif') !important;
+    background-size: cover !important;
+    color: #00ff41 !important;
+    border: 1px solid #00ff41 !important;
+    font-family: monospace;
+}
+
+/* --- ELITE FRAME ANIMATION --- */
+.item-card-v6.elite-animated-frame .item-preview-box {
+    position: relative;
+    border: 2px solid transparent;
+    background-image: linear-gradient(#08101b, #08101b), conic-gradient(from 0deg, #ff0000, #00ffff, #ff0000);
+    background-origin: border-box;
+    background-clip: content-box, border-box;
+    animation: rotateAura 2s linear infinite;
+}
+
+
+/* --- ELITE GIF ENGINE --- */
+.elite-gif-badge {
+    background-size: cover !important;
+    background-position: center !important;
+    border: 1px solid rgba(255,255,255,0.4) !important;
+    box-shadow: 0 0 15px rgba(255,255,255,0.2);
+    color: #fff !important;
+    font-weight: 900 !important;
+    text-shadow: 1px 1px 3px #000;
+}
+
+/* THE HUB BADGE SPECIFIC */
+.badge-the-hub {
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/pornhub-intro-download.gif?alt=media&token=04726b76-9d31-409a-bdbb-330a892fba3b') !important;
+    border: 1px solid #ff9900 !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0px !important;
+}
+.hub-text-white { color: #fff !important; }
+.hub-text-orange { 
+    background: #ff9900; 
+    color: #000 !important; 
+    padding: 0 4px; 
+    border-radius: 4px; 
+    margin-left: 2px;
+    text-shadow: none !important;
+}
+
+/* MONEY RAIN STYLE */
+.badge-money-rain {
+    background-image: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmo2ZHl0NXEyNzcxcG13b3VuNWw5cnV6bWhyZGV5NGRxOGk1NmdteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BfFFYPSVYr9UR6EtEL/giphy.gif') !important;
+    border: 1px solid #00ff88 !important;
+    box-shadow: 0 0 15px #00ff88;
+}
+
+/* GALAXY ELITE STYLES */
+.badge-galaxy-1 { background-image: url('https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExdmUxbmJ3OHVtdzhkM25xNGl5OHduaTE3dnMxNTJqZTlpMXQxMWtjbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l3c614V12UA82q1vG/giphy.gif') !important; }
+.badge-galaxy-2 { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExa3pwcHoxNm44M3kyaGRhaGdtbTA1OXlrbWJqaTgzMHpwMWFvaHFkOCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3ohhwEZqxzKbNUHzji/giphy.gif') !important; }
+.badge-nebula { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMHBqOWp4d3IwOWFkZW9uOWx3dzllbGY4eTBhazV1N2xpc3V1YjQ0YiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bPZdEfOgBh1de/giphy.gif') !important; }
+.badge-deep-sea { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExYXhtNGZicDExYXdoc3FzNmhrdnRreDEwc3p2NXNhOGZiODJycnRtMyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/J39gurpvL7SHpnTTJB/giphy.gif') !important; }
+
+
+/* --- GOD-MODE ELITE CSS ENGINE --- */
+
+/* Base for Elite Badges - more padding and better borders */
+.elite-gif-badge {
+    padding: 6px 14px !important;
+    border-radius: 4px;
+    font-family: 'Orbitron', sans-serif !important;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-size: cover !important;
+    background-position: center !important;
+    transition: 0.3s;
+}
+
+/* 1. CYBERPUNK (Pink/Cyan Glitch Text) */
+.badge-cyberpunk {
+    background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXk4cmRtNWd3azBxeWtteGtoa3V3MjV3cWFmNmhzeXhjaWhxanN0MSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/26FPKhUtNG3TW74f6/giphy.gif') !important;
+    border: 1px solid #ff00ff !important;
+    color: #00ffff !important;
+    text-shadow: 2px 2px #ff00ff, -1px -1px #fff;
+    box-shadow: 0 0 15px #ff00ff;
+}
+
+/* 2. HACKER (Matrix Green Glow) */
+.badge-hacker-elite {
+    background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXk4cmRtNWd3azBxeWtteGtoa3V3MjV3cWFmNmhzeXhjaWhxanN0MSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/26FPKhUtNG3TW74f6/giphy.gif') !important;
+    border: 1px solid #00ff41 !important;
+    color: #00ff41 !important;
+    text-shadow: 0 0 8px #00ff41;
+    box-shadow: inset 0 0 10px #000;
+}
+
+/* 3. ABYSS (Deep Violet Shimmer) */
+.badge-abyss-elite {
+    background-image: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3c2s0M2I3cHZlM3U5bXViaGpuYzVzMjI1eWJvN2NiYWQ0YW1nNWwzbSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/YqhIK6Gbor6CLeloBq/giphy.gif') !important;
+    border: 1px solid #7000ff !important;
+    color: #e0b0ff !important;
+    text-shadow: 0 0 12px #7000ff;
+}
+
+/* 4. GODLIKE (Divine Gold/White) */
+.badge-godlike-elite {
+    background-image: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bGk3NGdnb3kyc3R0NGEwOGJiMzZiYWYxYXJsdGRrb3RyejkyZjNlcyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/9JxkPTP3alOykb8PmQ/giphy.gif') !important;
+    border: 1.5px solid #fff !important;
+    color: #fff !important;
+    text-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700;
+    box-shadow: 0 0 20px rgba(255,255,255,0.5);
+}
+
+/* 5. WARNING (Hazard Shape - No Text) */
+.badge-warning-elite {
+    background-image: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bGk3NGdnb3kyc3R0NGEwOGJiMzZiYWYxYXJsdGRrb3RyejkyZjNlcyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/9JxkPTP3alOykb8PmQ/giphy.gif') !important;
+    width: 45px; height: 45px;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    border: 2px solid #ffcc00 !important;
+    box-shadow: 0 0 15px #ffcc00;
+}
+
+/* 6. LIGHTNING (Electric Cyan) */
+.badge-lightning-elite {
+    background-image: url('https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHdxMzFldDNqdWlneHFlc2JyN2tucGYybGN0c2drYTlqczluc3MxNSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Ta1MVGKCG2GFq/giphy.gif') !important;
+    border: 1px solid #fff !important;
+    color: #fff !important;
+    text-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff;
+}
+
+/* --- ELITE BANNERS --- */
+.bubble-hacker-v2 { background: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3Nm5la3cxcnAwczA5ZTcyajk2YjJtMmcyNmZ6eTBzYW5ta3RveXVuNCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/hun4DFmfnDId3lid5b/giphy.gif') center !important; background-size: cover !important; border: 1px solid #00ff41 !important; color: #00ff41 !important; font-family: monospace; }
+.bubble-nebula-v2 { background: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3c2s0M2I3cHZlM3U5bXViaGpuYzVzMjI1eWJvN2NiYWQ0YW1nNWwzbSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/eJmUEoeU1K4d4IUbpS/giphy.gif') center !important; background-size: cover !important; border: 1px solid #7000ff !important; color: #fff !important; text-shadow: 0 0 10px #7000ff; }
+.bubble-blue-fire { background: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bTBqaXM2NmVlajJudzdrd3B3ZXBnc2JpZTZ5ODVtbG83YzNsczAyOCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3bc8pP1rVdfgN1uoMV/giphy.gif') center !important; background-size: cover !important; border: 2px solid #00ffff !important; color: #fff !important; font-weight: 900; }
+.bubble-destruction { background: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aGN6cmh0MjFrc2Nmb3NxemFnYjM3cGowYXQzbmJtNDJvYWY4amtxNCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/nKDErGClW3lsRiZ3p9/giphy.gif') center !important; background-size: cover !important; border: 1px solid #ff4500 !important; color: #fff !important; text-shadow: 2px 2px 0 #ff4500; }
+
+
+/* Fix for Elite Badges inside the Inventory Modal */
+.inv-elite-fix {
+    transform: scale(0.9); /* Slightly smaller to fit the inventory card */
+    white-space: nowrap;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ensure GIFs are visible in inventory cards */
+#inventoryList .item-preview-box span {
+    max-width: 100%;
+    overflow: visible;
+}
+
+/* Specific fix for the Warning/Hazard badge in inventory */
+#inventoryList .badge-warning-elite {
+    width: 40px !important;
+    height: 40px !important;
+    margin: 0 auto;
+}
+
+
+/* --- INVENTORY COMPACT SCALING --- */
+
+/* 1. Shrink Elite Badges (God of Thunder, Hacker, etc.) */
+#inventoryList .elite-gif-badge {
+    font-size: 9px !important;      /* Smaller text */
+    padding: 3px 10px !important;   /* Thinner padding */
+    letter-spacing: 0.5px !important;
+    transform: scale(1) !important; /* Reset previous scale to use padding instead */
+}
+
+/* 2. Shrink Standard Badges (BOSS, OG, etc.) */
+#inventoryList .shop-badge-preview {
+    font-size: 9px !important;
+    padding: 3px 8px !important;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* 3. Shrink the Hazard Triangle */
+#inventoryList .badge-warning-elite {
+    width: 32px !important; 
+    height: 32px !important;
+    min-height: 32px !important;
+}
+
+/* 4. Fix "The Hub" Scale */
+#inventoryList .badge-the-hub {
+    font-size: 10px !important;
+    padding: 2px 6px !important;
+}
+
+/* 5. Item Preview Box - Center and Clean */
+#inventoryList .item-preview-box {
+    min-height: 60px !important; /* Tighter box */
+    padding: 5px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 6. Fix for wide badges like "Lightning" and "God of Thunder" */
+#inventoryList .inv-elite-fix {
+    max-width: 95%; /* Prevents them from hitting the edges of the box */
+    white-space: nowrap;
+}
+
+
+/* --- ELITE VISUAL ENGINE: WALL SYNC --- */
+
+/* 1. Elite Badges - GIF Support */
+.elite-gif-badge {
+    padding: 3px 10px !important;
+    border-radius: 4px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    background-size: cover !important;
+    background-position: center !important;
+    color: #fff !important;
+    text-shadow: 1px 1px 3px #000, 0 0 10px #000;
+    border: 1px solid rgba(255,255,255,0.4) !important;
+    font-size: 9px !important;
+}
+
+/* Badge GIF assignments */
+.badge-god-thunder { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') !important; border-color: #00ffff !important; }
+.badge-cyberpunk { background-image: url('https://media.giphy.com/media/26FPKhUtNG3TW74f6/giphy.gif') !important; border-color: #ff00ff !important; }
+.badge-hacker-elite { background-image: url('https://media.giphy.com/media/26FPKhUtNG3TW74f6/giphy.gif') !important; border-color: #00ff41 !important; }
+.badge-abyss-elite { background-image: url('https://media.giphy.com/media/YqhIK6Gbor6CLeloBq/giphy.gif') !important; border-color: #7000ff !important; }
+.badge-godlike-elite { background-image: url('https://media.giphy.com/media/9JxkPTP3alOykb8PmQ/giphy.gif') !important; border-color: #ffd700 !important; }
+.badge-lightning-elite { background-image: url('https://media0.giphy.com/media/Ta1MVGKCG2GFq/giphy.gif') !important; }
+.badge-warning-elite {
+    background-image: url('https://media.giphy.com/media/9JxkPTP3alOykb8PmQ/giphy.gif') !important;
+    width: 32px !important; height: 32px !important;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    border: 2px solid #ffcc00 !important;
+}
+
+/* 2. Elite Banners - GIF Support */
+.bubble-elite-hacker2 { background: url('https://media.giphy.com/media/hun4DFmfnDId3lid5b/giphy.gif') center !important; background-size: cover !important; color: #00ff41 !important; border: 1px solid #00ff41 !important; }
+.bubble-elite-nebula2 { background: url('https://media.giphy.com/media/eJmUEoeU1K4d4IUbpS/giphy.gif') center !important; background-size: cover !important; border: 1px solid #7000ff !important; }
+.bubble-elite-bluefire { background: url('https://media.giphy.com/media/3bc8pP1rVdfgN1uoMV/giphy.gif') center !important; background-size: cover !important; border: 2px solid #00ffff !important; }
+.bubble-elite-destruction { background: url('https://media.giphy.com/media/nKDErGClW3lsRiZ3p9/giphy.gif') center !important; background-size: cover !important; border: 2px solid #ff4500 !important; }
+
+
+/* Force GIF visibility in inventory (Kills white boxes) */
+#inventoryList .elite-gif-badge { background-color: transparent !important; background-clip: border-box !important; -webkit-background-clip: border-box !important; }
+
+
+
+
+/* --- ELITE GIF ENGINE --- */
+.elite-gif-badge {
+    padding: 4px 10px !important;
+    border-radius: 4px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    background-size: cover !important;
+    background-position: center !important;
+    color: #fff !important;
+    text-shadow: 1px 1px 3px #000, 0 0 10px #000;
+    border: 1px solid rgba(255,255,255,0.4) !important;
+    font-size: 9px !important;
+}
+
+/* Specific Badge GIFs */
+.badge-god-thunder { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media') !important; }
+.badge-cyberpunk { background-image: url('https://media.giphy.com/media/26FPKhUtNG3TW74f6/giphy.gif') !important; color: #00ffff !important; border-color: #ff00ff !important; }
+.badge-hacker-elite { background-image: url('https://media.giphy.com/media/26FPKhUtNG3TW74f6/giphy.gif') !important; color: #00ff41 !important; border-color: #00ff41 !important; }
+.badge-abyss-elite { background-image: url('https://media.giphy.com/media/YqhIK6Gbor6CLeloBq/giphy.gif') !important; border-color: #7000ff !important; }
+.badge-godlike-elite { background-image: url('https://media.giphy.com/media/9JxkPTP3alOykb8PmQ/giphy.gif') !important; border-color: #ffd700 !important; }
+.badge-warning-elite { background-image: url('https://media.giphy.com/media/9JxkPTP3alOykb8PmQ/giphy.gif') !important; border-color: #ff0000 !important; }
+.badge-lightning-elite { background-image: url('https://media0.giphy.com/media/Ta1MVGKCG2GFq/giphy.gif') !important; }
+
+/* Banners (Missing Classes) */
+.bubble-elite-hacker2 { background: url('https://media.giphy.com/media/hun4DFmfnDId3lid5b/giphy.gif') center !important; background-size: cover !important; color: #00ff41 !important; border: 1px solid #00ff41 !important; }
+.bubble-elite-nebula2 { background: url('https://media.giphy.com/media/eJmUEoeU1K4d4IUbpS/giphy.gif') center !important; background-size: cover !important; border: 1px solid #7000ff !important; }
+.bubble-elite-bluefire { background: url('https://media.giphy.com/media/3bc8pP1rVdfgN1uoMV/giphy.gif') center !important; background-size: cover !important; border: 1px solid #00ffff !important; }
+.bubble-elite-destruction { background: url('https://media.giphy.com/media/nKDErGClW3lsRiZ3p9/giphy.gif') center !important; background-size: cover !important; border: 1px solid #ff4500 !important; }
+/* ============================================================
+   --- INVENTORY SYSTEM REPAIR (SYNCED WITH SHOP PAGE) ---
+   ============================================================ */
+
+/* 1. Modal Card - Same fixed structure as Shop */
+#inventoryModal .cosmetics-card-v6 {
+    width: min(420px, 95vw) !important;
+    height: 80vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+}
+
+/* 2. Content Wrapper - Flexbox logic from Shop */
+#inventoryModal .cosmo-content-v6 {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    padding: 20px !important;
+    z-index: 5 !important;
+    overflow: hidden !important;
+}
+
+/* 3. Unequip Button Area - Force separate row */
+#inventoryActions {
+    width: 100% !important;
+    margin-bottom: 15px !important;
+    flex-shrink: 0 !important;
+}
+
+#inventoryActions .unequip-btn-v6 {
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+/* 4. THE GRID - Strict 2-Column (Same as Shop) */
+#inventoryList.inventory-scroll-area {
+    flex: 1 !important; 
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+    padding: 10px 5px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    align-content: start !important;
+}
+
+/* 5. ITEM CARDS - Matches Shop cards */
+#inventoryList .item-card-v6 {
+    background: rgba(13, 25, 41, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 18px !important;
+    padding: 15px 10px !important;
+    min-height: 160px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+}
+
+/* 6. BADGE PREVIEWS - Same sizing as Shop */
+#inventoryList .item-preview-box {
+    height: 60px !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: visible !important;
+}
+
+/* 7. ELITE BADGE SCALING (STOPS SQUASHING) */
+#inventoryList .elite-gif-badge, 
+#inventoryList .shop-badge-preview,
+#inventoryList .badge-singularity,
+#inventoryList .badge-wheel-god,
+#inventoryList [class*="badge-b_"] { 
+    font-size: 8px !important;
+    padding: 4px 8px !important;
+    white-space: nowrap !important;
+    transform: scale(0.9) !important; /* Scaled down slightly to fit */
+    display: inline-flex !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+/* 8. HAZARD BADGE FIX - Remove triangle cut in inventory */
+#inventoryList .badge-warning-elite {
+    clip-path: none !important; 
+    border-radius: 4px !important;
+    min-width: 40px !important;
+}
+
+/* 9. SCROLLBAR - Same as Black Market scroll */
+#inventoryList::-webkit-scrollbar { width: 4px; }
+#inventoryList::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+#inventoryList::-webkit-scrollbar-thumb { 
+    background: #d63384; 
+    border-radius: 10px;
+}
+
+/* 10. Navigation Buttons Area */
+#inventoryModal .nav-btn-row {
+    margin-top: 15px !important;
+    flex-shrink: 0 !important;
+    gap: 10px !important;
+}
+
+
+
+/* --- NEW BADGE GIFS --- */
+.badge-magma-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcnY0Mjlwb24zd2d6cDl2cnMzcjRmczEzZmQ0MXplc2g5YWhqNXhxYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/auKRHcLuzy6ME/giphy.gif') !important; }
+.badge-electric-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExb3MwNHB0MHdiejV3Z3RnYWJoNWNiejl0dGt2b2IybmI1OXp1NXMwaiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/iuXaJKoTb4GpGGXV9r/giphy.gif') !important; }
+.badge-frozen-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGEwM2FtNHU4OXM4dXVoYXRzNDdtc2Nha3h6OWhxYTR2aW5mOGkxMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3og0IyRiAsl1Pczi6Y/giphy.gif') !important; }
+.badge-toxic-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aXpoemxmbHByMjc1cGxxNDFpbm5kc2xjNTZmb3ZuYzNlMHhxa2NidyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/KH4QT4rqnnka04884l/giphy.gif') !important; }
+.badge-divine-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGEwM2FtNHU4OXM4dXVoYXRzNDdtc2Nha3h6OWhxYTR2aW5mOGkxMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3ov9k1173PdfJWRsoE/giphy.gif') !important; }
+.badge-crystal-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3a3RpdmhheHJyZnhmZHV5YmlseWg1c2FxcDZ0eThmZjRlMng2cWQ5ZiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/YuKPddTlZ0SE8/giphy.gif') !important; }
+
+/* --- NEW BANNER GIFS --- */
+.banner-neonwave-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXQ0M3h1dWJhbG14ZDNmcWszYnJ5azM4Zzk2aTFyajB1cjF0cjZkciZlcD12MV9naWZzX3NlYXJjaCZjdD1n/mviluc9o1wCBy/giphy.gif') !important; background-size: cover; border: 1px solid #00ffff !important; color: #fff; }
+.banner-ocean-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaW5mNmp2cGtsdG10MWV6cnYzcDFlejZwMmVya3I3YjJ2YWlhMjFnZCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3og0IMh7rRNPtNSK9q/giphy.gif') !important; background-size: cover; border: 1px solid #0055ff !important; color: #fff; }
+.banner-matrix-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMDMzeGl5ZmlxaHRseHgydGg1bjh6eG0wajFjNXBtbGRsMnFxMnBueCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/EyiufcIwTdF35pNIFS/giphy.gif') !important; background-size: cover; border: 1px solid #00ff00 !important; color: #00ff00; }
+.banner-grid-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMDMzeGl5ZmlxaHRseHgydGg1bjh6eG0wajFjNXBtbGRsMnFxMnBueCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/JvDzcuVBUglS9EISo7/giphy.gif') !important; background-size: cover; border: 1px solid #fff !important; color: #fff; }
+.banner-retro-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjhqdXI3ZnVscjBra2p6ZXhybm9tZ2xqYXBpajk3b3ZzcndzdDBtbiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/l3fQnAa8cHBgzVQFq/giphy.gif') !important; background-size: cover; border: 1px solid #ff00ff !important; color: #fff; }
+.banner-glitch-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExb3MwNHB0MHdiejV3Z3RnYWJoNWNiejl0dGt2b2IybmI1OXp1NXMwaiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/QpVUMRUJGokfqXyfa1/giphy.gif') !important; background-size: cover; border: 1px solid #ff4757 !important; color: #fff; }
+.banner-star-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMGVxMzF0aGp1MHBtdmJrOWI1dGI4cjN5bTI3aXVzNHZsNTVkazdnYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/l3c614V12UA82q1vG/giphy.gif') !important; background-size: cover; border: 1px solid #ffff00 !important; color: #000; font-weight: 900; }
+.banner-flow-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMGVxMzF0aGp1MHBtdmJrOWI1dGI4cjN5bTI3aXVzNHZsNTVkazdnYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/O0zVNAjUC0m3jxiflK/giphy.gif') !important; background-size: cover; border: 1px solid #fff !important; color: #fff; }
+.banner-purp-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3Ym9sNDJjdmZtOGJtN3I4eGRlM3l5ZjM3NWxzNmJxYzI0cjU2cXdyMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Acs8DGposhkwulcZVo/giphy.gif') !important; background-size: cover; border: 1px solid #7000ff !important; color: #fff; }
+.banner-scan-gif { background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ2t6MjJwNnd6NDhpajFnbGdkdXBjbGE5Y3pyeHI4OW15dHg0eHQxeSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3oz8xxYsI0FyH7EmfS/giphy.gif') !important; background-size: cover; border: 1px solid #00ff88 !important; color: #00ff88; }
+
+/* =========================================
+   ULTIMATE PROFILE BANNERS (WALL EDITION)
+   ========================================= */
+
+/* --- 1. SHOP PREVIEW CARDS (The Animated Buttons) --- */
+.p-ban-preview {
+    width: 100%;
+    height: 80px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+    background: #000;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+    z-index: 1;
+}
+.p-ban-preview:hover { transform: scale(1.05); z-index: 10; }
+
+/* Universal Scanline Overlay */
+.p-ban-preview::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+    background-size: 100% 2px;
+    pointer-events: none; z-index: 5;
+}
+
+/* --- ANIMATED PREVIEW STYLES --- */
+
+/* CYBER */
+.p-ban-cyber { background: #02080a; border-color: #00ff88; box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
+.p-ban-cyber::before {
+    content: ''; position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
+    background-image: linear-gradient(rgba(0, 255, 136, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 136, 0.3) 1px, transparent 1px);
+    background-size: 40px 40px; transform: perspective(300px) rotateX(60deg);
+    animation: cyberGridMove 5s linear infinite;
+}
+
+/* MAGMA */
+.p-ban-magma { background: #1a0500; border-color: #ff4500; }
+.p-ban-magma::before {
+    content: ''; position: absolute; inset: -50%;
+    background: radial-gradient(circle, #ff0000, #ff8c00, #330000);
+    filter: blur(20px); animation: magmaFlow 6s ease infinite alternate;
+}
+
+/* VOID */
+.p-ban-void { background: #000; border-color: #7000ff; }
+.p-ban-void::before {
+    content: ''; position: absolute; top: 50%; left: 50%; width: 200%; height: 200%;
+    transform: translate(-50%, -50%);
+    background: conic-gradient(from 0deg, #000, #4b0082, #9400d3, #000);
+    animation: voidSpin 4s linear infinite; opacity: 0.7;
+}
+
+/* GOLD */
+.p-ban-gold { background: #1a1a00; border-color: #ffd700; }
+.p-ban-gold::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(120deg, #b8860b, #ffd700, #fff, #ffd700, #b8860b);
+    background-size: 200% 200%; animation: goldShimmer 3s linear infinite;
+}
+
+/* MATRIX */
+.p-ban-matrix { background: #000; border-color: #00ff00; font-family: monospace; color: #00ff00; }
+.p-ban-matrix::before {
+    content: "10 01 11 00 10 10 01 11"; position: absolute; top: -100%; left: 0; width: 100%;
+    animation: matrixRain 3s linear infinite; opacity: 0.7; font-size: 14px;
+}
+
+/* NEON */
+.p-ban-neon { background: linear-gradient(180deg, #2b002b 0%, #000044 100%); border-color: #00ffff; }
+.p-ban-neon::before {
+    content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 30px;
+    background-image: linear-gradient(0deg, transparent 24%, rgba(0, 255, 255, .5) 25%, transparent 26%);
+    background-size: 40px 10px; transform: perspective(100px) rotateX(60deg);
+    animation: vaporGrid 1s linear infinite;
+}
+
+/* --- NEW: ANIME FANBOY --- */
+.p-ban-anime {
+    background: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/anime-mix.gif?alt=media&token=eed3db7d-e99f-4a5c-b7ee-15b6b51f20e8') center/cover no-repeat;
+    border: 1px solid #ff00ff;
+    box-shadow: inset 0 0 30px #000, 0 0 15px #ff00ff;
+}
+.p-ban-anime::before {
+    content: ''; position: absolute; inset: -50%;
+    background: conic-gradient(from 0deg, transparent, #ff00ff, #00ffff, transparent 30%);
+    animation: rotateAura 2.5s linear infinite;
+    z-index: 0; opacity: 0.5;
+}
+
+/* --- NEW: THUNDER GOD --- */
+.p-ban-thunder {
+    background: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') center/cover no-repeat;
+    border: 1px solid #00e5ff;
+    box-shadow: inset 0 0 30px #000, 0 0 15px #00e5ff;
+}
+.p-ban-thunder::before {
+    content: ''; position: absolute; inset: -50%;
+    background: conic-gradient(from 0deg, transparent, #fff, #00e5ff, transparent 40%);
+    animation: rotateAura 1.5s linear infinite;
+    z-index: 0; opacity: 0.6;
+}
+
+/* Animations */
+@keyframes cyberGridMove { from { background-position: 0 0; } to { background-position: 0 40px; } }
+@keyframes magmaFlow { 0% { transform: translate(-10%, -10%); } 100% { transform: translate(10%, 10%); } }
+@keyframes voidSpin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes goldShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+@keyframes matrixRain { from { top: -100%; } to { top: 100%; } }
+@keyframes vaporGrid { from { background-position: 0 0; } to { background-position: 0 20px; } }
+@keyframes rotateAura { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+
+/* =========================================
+   ULTIMATE ACTIVE PROFILE BANNERS (FIXED)
+   ========================================= */
+
+/* 1. BASE CARD RESET - Make it ready for full background */
+.account-card.profile-banner-active {
+    background-color: #000 !important; /* Fallback */
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    /* Heavy inner shadow to make text readable */
+    box-shadow: inset 0 0 100px #000, 0 0 50px rgba(0,0,0,0.5) !important; 
+    border-width: 2px !important;
+    border-style: solid !important;
+    position: relative;
+    z-index: 1;
+    overflow: hidden !important;
+}
+
+/* 2. MAKE INNER CONTENT TRANSPARENT (So we can see the banner) */
+.account-card.profile-banner-active .view-stat,
+.account-card.profile-banner-active .invite-stat,
+.account-card.profile-banner-active .donate-stat {
+    background: rgba(0, 0, 0, 0.6) !important; /* Semi-transparent black */
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    z-index: 10; /* Keep on top */
+}
+
+/* Make Text Pop out against busy backgrounds */
+.account-card.profile-banner-active h3,
+.account-card.profile-banner-active p,
+.account-card.profile-banner-active span,
+.account-card.profile-banner-active i {
+    text-shadow: 0 2px 4px #000 !important;
+    position: relative;
+    z-index: 10;
+}
+
+/* =========================================
+   THE ANIMATED BANNERS (FULL CARD)
+   ========================================= */
+
+/* --- 1. ANIME FANBOY (The one you wanted) --- */
+.account-card.pban_anime {
+    /* Full GIF Background */
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/anime-mix.gif?alt=media&token=eed3db7d-e99f-4a5c-b7ee-15b6b51f20e8') !important;
+    border-color: #ff00ff !important;
+    box-shadow: inset 0 0 150px rgba(0,0,0,0.9), 0 0 30px #ff00ff !important;
+}
+/* Rotating Neon Border Overlay */
+.account-card.pban_anime::before {
+    content: ''; position: absolute; inset: 0;
+    border: 2px solid transparent;
+    background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff);
+    background-size: 200% 200%;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    animation: gradientMove 2s linear infinite;
+    pointer-events: none; z-index: 5;
+}
+
+/* --- 2. THUNDER GOD --- */
+.account-card.pban_thunder {
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') !important;
+    border-color: #00e5ff !important;
+    box-shadow: inset 0 0 120px rgba(0,0,0,0.8), 0 0 30px #00e5ff !important;
+}
+/* Lightning Flash Overlay */
+.account-card.pban_thunder::after {
+    content: ''; position: absolute; inset: 0;
+    background: rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    animation: flash 3s infinite;
+    pointer-events: none; z-index: 1;
+}
+
+/* --- 3. PHANTOM (New) --- */
+.account-card.pban_phantom {
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/desc%C4%83rcare.gif?alt=media&token=b2facc41-d8e6-40c5-bb0a-f4011911f415') !important;
+    border-color: #8a2be2 !important; /* Purple */
+    box-shadow: inset 0 0 150px #000, 0 0 30px #8a2be2 !important;
+}
+
+/* --- 4. CYBER GRID (Animated CSS) --- */
+.account-card.pban_cyber {
+    background-color: #000 !important;
+    border-color: #00ff88 !important;
+    box-shadow: inset 0 0 100px #000, 0 0 20px #00ff88 !important;
+}
+/* Moving 3D Floor */
+.account-card.pban_cyber::before {
+    content: ''; position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
+    background-image: 
+        linear-gradient(rgba(0, 255, 136, 0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.2) 1px, transparent 1px);
+    background-size: 50px 50px;
+    transform: perspective(500px) rotateX(60deg);
+    animation: cyberGridMove 5s linear infinite;
+    pointer-events: none; z-index: 0;
+}
+
+/* --- 5. MAGMA (Animated CSS) --- */
+.account-card.pban_magma {
+    background-color: #1a0500 !important;
+    border-color: #ff4500 !important;
+    box-shadow: inset 0 0 100px #000, 0 0 30px #ff4500 !important;
+}
+.account-card.pban_magma::before {
+    content: ''; position: absolute; inset: -50%;
+    background: radial-gradient(circle, #ff0000, #ff8c00, transparent 60%);
+    filter: blur(40px); opacity: 0.6;
+    animation: magmaFlow 6s ease infinite alternate;
+    pointer-events: none; z-index: 0;
+}
+
+/* --- 6. VOID (Animated CSS) --- */
+.account-card.pban_void {
+    background-color: #000 !important;
+    border-color: #7000ff !important;
+    box-shadow: inset 0 0 80px #000, 0 0 30px #7000ff !important;
+}
+.account-card.pban_void::before {
+    content: ''; position: absolute; top: 50%; left: 50%; width: 200%; height: 200%;
+    transform: translate(-50%, -50%);
+    background: conic-gradient(from 0deg, #000, #4b0082, #9400d3, #000);
+    animation: voidSpin 5s linear infinite;
+    opacity: 0.5; pointer-events: none; z-index: 0;
+}
+
+/* --- 7. NEON (Vaporwave) --- */
+.account-card.pban_neon {
+    background: linear-gradient(180deg, #050b14 0%, #2b002b 100%) !important;
+    border-color: #00ffff !important;
+    box-shadow: inset 0 0 50px #000, 0 0 20px #ff00ff !important;
+}
+.account-card.pban_neon::before {
+    content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 50%;
+    background-image: linear-gradient(0deg, transparent 24%, rgba(0, 255, 255, .3) 25%, transparent 26%);
+    background-size: 100% 20px;
+    transform: perspective(300px) rotateX(45deg);
+    animation: vaporGrid 1s linear infinite;
+    pointer-events: none; z-index: 0;
+}
+
+/* --- 8. MATRIX (Code) --- */
+.account-card.pban_matrix {
+    background-color: #000 !important;
+    border-color: #00ff41 !important;
+    font-family: monospace;
+}
+.account-card.pban_matrix::before {
+    content: "10110001 010101 11001 000101 11100";
+    position: absolute; top: -50%; left: 0; width: 100%; height: 200%;
+    color: #003300; font-size: 20px; line-height: 20px; word-break: break-all;
+    animation: matrixRain 2s linear infinite;
+    opacity: 0.5; pointer-events: none; z-index: 0;
+}
+
+/* --- 9. GOLD (Luxury) --- */
+.account-card.pban_gold {
+    background: radial-gradient(circle, #332200, #000) !important;
+    border-color: #ffd700 !important;
+    box-shadow: inset 0 0 100px #000, 0 0 30px #ffd700 !important;
+}
+.account-card.pban_gold::before {
+    content: ''; position: absolute; inset: -50%;
+    background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+    animation: goldShimmer 3s infinite linear;
+    pointer-events: none; z-index: 0;
+}
+
+/* ANIMATIONS */
+@keyframes cyberGridMove { from { background-position: 0 0; } to { background-position: 0 50px; } }
+@keyframes magmaFlow { 0% { transform: translate(-10%, -10%); } 100% { transform: translate(10%, 10%); } }
+@keyframes voidSpin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes vaporGrid { from { background-position: 0 0; } to { background-position: 0 20px; } }
+@keyframes matrixRain { from { transform: translateY(0); } to { transform: translateY(50px); } }
+@keyframes goldShimmer { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes flash { 0%, 90% { opacity: 0; } 92% { opacity: 0.5; } 95% { opacity: 0; } }
+/* --- BADGE DISPLAY IN PROFILE --- */
+#viewUserBadges {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+
+
+    /* --- ACTIVE MODAL STYLES FOR NEW BANNERS --- */
+.account-card.pban_rgb {
+    border: 3px solid transparent;
+    background: #000;
+    box-shadow: 0 0 50px rgba(255,0,0,0.5);
+    animation: borderRotate 1s linear infinite; /* RGB Spin on border */
+}
+.account-card.pban_death {
+    background: radial-gradient(circle, #300, #000) !important;
+    border-color: #ff0000 !important;
+    box-shadow: inset 0 0 100px #000, 0 0 50px #ff0000 !important;
+}
+.account-card.pban_frozen {
+    background-color: #001 !important;
+    border-color: #00ffff !important;
+    box-shadow: 0 0 50px #00ffff, inset 0 0 50px #00ffff !important;
+}
+.account-card.pban_toxic {
+    background-color: #050 !important;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 40px #00ff00 !important;
+}
+.account-card.pban_midas {
+    background: radial-gradient(circle, #ffd700, #332200) !important;
+    border-color: #fff !important;
+    box-shadow: 0 0 60px #ffd700 !important;
+}
+.account-card.pban_bluefire {
+    background-image: url('https://media.giphy.com/media/3bc8pP1rVdfgN1uoMV/giphy.gif') !important;
+    background-size: cover !important;
+    border-color: #00e5ff !important;
+}
+.account-card.pban_glitch {
+    background-color: #000 !important;
+    border: 2px dashed #fff !important;
+    animation: glitchShake 0.2s infinite !important;
+}
+.account-card.pban_nebula {
+    background-image: url('https://media.giphy.com/media/eJmUEoeU1K4d4IUbpS/giphy.gif') !important;
+    background-size: cover !important;
+    border-color: #9900ff !important;
+}
+.account-card.pban_akatsuki {
+    background-color: #000 !important;
+    border-color: #a00000 !important;
+    /* Red Clouds */
+    background-image: radial-gradient(circle at 20% 20%, #a00000 10%, transparent 11%), radial-gradient(circle at 80% 80%, #a00000 10%, transparent 11%) !important;
+}
+.account-card.pban_hyper {
+    background: repeating-linear-gradient(90deg, #000, #000 20px, #222 20px, #222 40px) !important;
+    border-color: #fff !important;
+}
+.account-card.pban_cash {
+    background-image: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmo2ZHl0NXEyNzcxcG13b3VuNWw5cnV6bWhyZGV5NGRxOGk1NmdteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BfFFYPSVYr9UR6EtEL/giphy.gif') !important;
+    background-size: cover !important;
+    border-color: #00ff00 !important;
+    box-shadow: 0 0 50px #00ff00 !important;
+}
+
+
+/* =========================================
+   NEW GOD-TIER PROFILE BANNERS (WALL SYNC)
+   ========================================= */
+
+/* 1. SOLAR FLARE (Pure CSS - Intense Heat) */
+.account-card.pban_solar {
+    background: radial-gradient(circle at center, #ff8c00, #ff0000, #000) !important;
+    border-color: #ffaa00 !important;
+    box-shadow: inset 0 0 100px #000, 0 0 30px #ff4500 !important;
+}
+.account-card.pban_solar::before {
+    content: ''; position: absolute; inset: -50%;
+    background: conic-gradient(from 0deg, transparent, #fff, #ff4500, transparent 40%);
+    animation: rotateAura 2s linear infinite;
+    opacity: 0.4; z-index: 0;
+}
+
+/* 2. PLASMA ENERGY (Pure CSS - Flowing Fluid) */
+.account-card.pban_plasma_flow {
+    background: #050014 !important;
+    border-color: #bf55ec !important;
+    box-shadow: inset 0 0 80px #000, 0 0 25px #7000ff !important;
+}
+.account-card.pban_plasma_flow::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, #7000ff, #ff00ff, #00ffff, #7000ff);
+    background-size: 400% 400%;
+    animation: gradientMove 4s ease infinite;
+    opacity: 0.5;
+    mask-image: radial-gradient(circle, black 20%, transparent 70%);
+    -webkit-mask-image: radial-gradient(circle, black 20%, transparent 70%);
+}
+
+/* 3. TOXIC WASTE ELITE (GIF Integrated) */
+.account-card.pban_toxic_el {
+    background-image: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aXpoemxmbHByMjc1cGxxNDFpbm5kc2xjNTZmb3ZuYzNlMHhxa2NidyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/KH4QT4rqnnka04884l/giphy.gif') !important;
+    border-color: #00ff88 !important;
+    box-shadow: inset 0 0 150px #000, 0 0 25px #00ff88 !important;
+}
+
+/* 4. MAGMA LORD ELITE (GIF Integrated) */
+.account-card.pban_magma_el {
+    background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcnY0Mjlwb24zd2d6cDl2cnMzcjRmczEzZmQ0MXplc2g5YWhqNXhxYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/auKRHcLuzy6ME/giphy.gif') !important;
+    border-color: #ff4500 !important;
+    box-shadow: inset 0 0 150px #000, 0 0 30px rgba(255, 69, 0, 0.6) !important;
+}
+
+/* 5. MONEY RAIN ELITE (GIF Integrated) */
+.account-card.pban_cash_el {
+    background-image: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmo2ZHl0NXEyNzcxcG13b3VuNWw5cnV6bWhyZGV5NGRxOGk1NmdteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BfFFYPSVYr9UR6EtEL/giphy.gif') !important;
+    border-color: #ffd700 !important;
+    box-shadow: inset 0 0 150px #000, 0 0 40px rgba(255, 215, 0, 0.5) !important;
+}
+
+/* 6. DIVINE ETHER (GIF Integrated) */
+.account-card.pban_divine_el {
+    background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGEwM2FtNHU4OXM4dXVoYXRzNDdtc2Nha3h6OWhxYTR2aW5mOGkxMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3ov9k1173PdfJWRsoE/giphy.gif') !important;
+    border-color: #ffffff !important;
+    box-shadow: inset 0 0 150px rgba(0,0,0,0.5), 0 0 20px #fff !important;
+}
+
+/* 7. NEBULA GOD (GIF Integrated) */
+.account-card.pban_nebula_el {
+    background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMHBqOWp4d3IwOWFkZW9uOWx3dzllbGY4eTBhazV1N2xpc3V1YjQ0YiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bPZdEfOgBh1de/giphy.gif') !important;
+    border-color: #7000ff !important;
+    box-shadow: inset 0 0 150px #000, 0 0 30px #7000ff !important;
+}
+
+/* 8. CYBERPUNK ELITE (GIF Integrated) */
+.account-card.pban_cyber_el {
+    background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXk4cmRtNWd3azBxeWtteGtoa3V3MjV3cWFmNmhzeXhjaWhxanN0MSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/26FPKhUtNG3TW74f6/giphy.gif') !important;
+    border-color: #00ffff !important;
+    filter: hue-rotate(45deg) brightness(1.2);
+}
+
+/* 9. FROZEN CORE (GIF Integrated) */
+.account-card.pban_ice_el {
+    background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGEwM2FtNHU4OXM4dXVoYXRzNDdtc2Nha3h6OWhxYTR2aW5mOGkxMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3og0IyRiAsl1Pczi6Y/giphy.gif') !important;
+    border-color: #b9f2ff !important;
+    box-shadow: inset 0 0 120px #000, 0 0 25px #00e5ff !important;
+}
+
+
+
+/* --- RED ELITE SCROLLBAR --- */
+#eliteInventoryModal .bm-content-scroll {
+    max-height: 60vh !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: #ff0000 #02080a;
+}
+#eliteInventoryModal .bm-content-scroll::-webkit-scrollbar { width: 6px; }
+#eliteInventoryModal .bm-content-scroll::-webkit-scrollbar-thumb {
+    background: #ff0000 !important;
+    box-shadow: 0 0 10px #ff0000;
+    border-radius: 10px;
+}
+
+/* Compact Audio Play Button */
+.audio-play-btn {
+    width: 35px; height: 35px; border-radius: 50%;
+    background: rgba(255, 0, 0, 0.2); border: 1px solid #ff0000;
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: 0.3s;
+}
+.audio-play-btn.playing { background: #fff; color: #ff0000; border-color: #fff; box-shadow: 0 0 15px #fff; }
+
+/* Elite Grid Fix */
+#eliteInventoryList .bm-offer-card-v4 {
+    background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
+    padding: 15px; border-radius: 15px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+}
+
+
+
+/* ==========================
+   1. CYBER GRID (Tactical Green)
+   ========================== */
+.p-ban-cyber {
+    background: #02080a;
+    border: 1px solid #00ff88;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+}
+
+/* The Moving 3D Grid */
+.p-ban-cyber::before {
+    content: '';
+    position: absolute;
+    width: 200%; height: 200%;
+    top: -50%; left: -50%;
+    background-image: 
+        linear-gradient(rgba(0, 255, 136, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.3) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: perspective(300px) rotateX(60deg);
+    animation: cyberGridMove 5s linear infinite;
+}
+
+/* The Radar Sweep */
+.p-ban-cyber .overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent 40%, rgba(0, 255, 136, 0.5) 50%, transparent 60%);
+    animation: radarSweep 3s infinite linear;
+}
+
+@keyframes cyberGridMove { from { background-position: 0 0; } to { background-position: 0 40px; } }
+@keyframes radarSweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+
+/* ==========================
+   2. MAGMA FLOW (Volcanic)
+   ========================== */
+.p-ban-magma {
+    background: #1a0500;
+    border: 1px solid #ff4500;
+    box-shadow: 0 0 15px rgba(255, 69, 0, 0.3);
+}
+
+/* Moving Lava Layers */
+.p-ban-magma::before {
+    content: '';
+    position: absolute; inset: -50%;
+    background: radial-gradient(circle, #ff0000, #ff8c00, #330000);
+    background-size: 200% 200%;
+    filter: blur(20px);
+    animation: magmaFlow 6s ease infinite alternate;
+}
+
+/* Floating Embers */
+.p-ban-magma::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(#fff 1px, transparent 1px);
+    background-size: 30px 30px;
+    animation: embersRise 4s linear infinite;
+    opacity: 0.6;
+}
+
+@keyframes magmaFlow { 0% { transform: translate(-10%, -10%); } 100% { transform: translate(10%, 10%); } }
+@keyframes embersRise { from { background-position: 0 0; } to { background-position: 0 -60px; } }
+
+
+/* ==========================
+   3. DEEP VOID (Singularity)
+   ========================== */
+.p-ban-void {
+    background: #000;
+    border: 1px solid #7000ff;
+    box-shadow: 0 0 20px rgba(112, 0, 255, 0.4);
+}
+
+/* Rotating Black Hole Accretion Disk */
+.p-ban-void::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 200%; height: 200%;
+    transform: translate(-50%, -50%);
+    background: conic-gradient(from 0deg, #000, #4b0082, #9400d3, #000);
+    animation: voidSpin 4s linear infinite;
+    border-radius: 50%;
+    opacity: 0.7;
+}
+
+/* Central Event Horizon */
+.p-ban-void .overlay {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px; height: 40px;
+    background: #000;
+    border-radius: 50%;
+    box-shadow: 0 0 15px #7000ff, 0 0 30px #fff;
+    z-index: 2;
+}
+
+@keyframes voidSpin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+
+/* ==========================
+   4. GOLD RUSH (Luxury)
+   ========================== */
+.p-ban-gold {
+    background: #1a1a00;
+    border: 1px solid #ffd700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+    overflow: hidden;
+}
+
+/* Liquid Gold Wave */
+.p-ban-gold::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(120deg, #b8860b, #ffd700, #fff, #ffd700, #b8860b);
+    background-size: 200% 200%;
+    animation: goldShimmer 3s linear infinite;
+}
+
+/* Sparkles */
+.p-ban-gold::after {
+    content: '✦';
+    position: absolute;
+    color: #fff;
+    font-size: 20px;
+    animation: sparkleMove 2s infinite;
+    text-shadow: 0 0 5px #fff;
+}
+
+@keyframes goldShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+@keyframes sparkleMove { 
+    0% { top: 10%; left: 10%; opacity: 0; transform: scale(0); } 
+    50% { opacity: 1; transform: scale(1); } 
+    100% { top: 80%; left: 80%; opacity: 0; transform: scale(0); } 
+}
+
+
+/* ==========================
+   5. MATRIX CODE (Hacker)
+   ========================== */
+.p-ban-matrix {
+    background: #000;
+    border: 1px solid #00ff00;
+    font-family: 'Courier New', monospace;
+    color: #00ff00;
+    overflow: hidden;
+}
+
+/* Code Rain Effect */
+.p-ban-matrix::before {
+    content: "10 01 11 00 10 10 01 11 00 10 10 01 11 00 10 10 01 11 00 10";
+    position: absolute; top: -100%; left: 0;
+    width: 100%;
+    font-size: 14px;
+    line-height: 14px;
+    word-break: break-all;
+    text-shadow: 0 0 5px #00ff00;
+    animation: matrixRain 3s linear infinite;
+    opacity: 0.7;
+}
+
+/* Second Layer for Depth */
+.p-ban-matrix::after {
+    content: "01 10 00 11 01 01 10 00 11 01 01 10 00 11 01 01 10 00 11 01";
+    position: absolute; top: -100%; left: 5px;
+    width: 100%;
+    font-size: 10px;
+    color: #003300;
+    animation: matrixRain 5s linear infinite reverse;
+    z-index: 0;
+}
+
+@keyframes matrixRain { from { top: -100%; } to { top: 100%; } }
+
+
+/* ==========================
+   6. NEON CITY (Vaporwave)
+   ========================== */
+.p-ban-neon {
+    background: linear-gradient(180deg, #2b002b 0%, #000044 100%);
+    border: 1px solid #ff00ff;
+    border-bottom: 3px solid #00ffff;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+}
+
+/* Retro Sun */
+.p-ban-neon::before {
+    content: '';
+    position: absolute;
+    bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    width: 60px; height: 60px;
+    background: linear-gradient(to top, #ff00ff, #ffcc00);
+    border-radius: 50%;
+    box-shadow: 0 0 20px #ff00ff;
+    /* Create lines in sun */
+    mask-image: linear-gradient(to bottom, black 50%, transparent 50%, black 55%, transparent 55%, black 60%, transparent 60%);
+}
+
+/* Moving Grid Floor */
+.p-ban-neon::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 30px;
+    background-image: 
+        linear-gradient(0deg, transparent 24%, rgba(0, 255, 255, .5) 25%, rgba(0, 255, 255, .5) 26%, transparent 27%, transparent),
+        linear-gradient(90deg, transparent 24%, rgba(0, 255, 255, .5) 25%, rgba(0, 255, 255, .5) 26%, transparent 27%, transparent);
+    background-size: 40px 10px;
+    transform: perspective(100px) rotateX(60deg);
+    animation: vaporGrid 1s linear infinite;
+}
+
+@keyframes vaporGrid { from { background-position: 0 0; } to { background-position: 0 20px; } }
+
+/* --- AUDIO PLAYER BUTTON --- */
+.audio-play-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 0, 0, 0.2);
+    border: 1px solid #ff0000;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: 0.3s;
+    font-size: 16px;
+}
+.audio-play-btn:hover { background: #ff0000; box-shadow: 0 0 15px #ff0000; }
+.audio-play-btn.playing { background: #fff; color: #ff0000; border-color: #fff; animation: pulse 1s infinite; }
+
+
+/* ==========================
+   7. ANIME FANBOY (Pink/Cyan Energy)
+   ========================== */
+.p-ban-anime {
+    /* The Background GIF */
+    background: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/anime-mix.gif?alt=media&token=eed3db7d-e99f-4a5c-b7ee-15b6b51f20e8') center/cover no-repeat;
+    /* Inner shadow to make text readable */
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.7), 0 0 20px rgba(255, 0, 255, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Rotating Neon Border */
+.p-ban-anime::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(
+        from 0deg, 
+        transparent, 
+        #ff00ff, /* Pink */
+        #00ffff, /* Cyan */
+        transparent 30%
+    );
+    animation: rotateAura 2.5s linear infinite; /* Fast rotation */
+    z-index: 0;
+}
+
+/* Inner Mask to show only the border */
+.p-ban-anime::after {
+    content: '';
+    position: absolute;
+    inset: 3px; /* Border Thickness */
+    background: inherit; /* Keeps the GIF visible inside */
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    z-index: 1;
+}
+
+/* ==========================
+   8. THUNDER GOD (Electric Blue)
+   ========================== */
+.p-ban-thunder {
+    /* The Background GIF (Lightning) */
+    background: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') center/cover no-repeat;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.6), 0 0 25px rgba(0, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Rotating Electric Border */
+.p-ban-thunder::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(
+        from 0deg, 
+        transparent, 
+        #ffffff, /* White Spark */
+        #00e5ff, /* Electric Blue */
+        transparent 40%
+    );
+    animation: rotateAura 1.5s linear infinite; /* Super fast spin */
+    z-index: 0;
+}
+
+/* Inner Mask */
+.p-ban-thunder::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: inherit;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    z-index: 1;
+}
+
+/* Ensure the animation keyframe exists */
+@keyframes rotateAura { 
+    from { transform: rotate(0deg); } 
+    to { transform: rotate(360deg); } 
+}
+
+
+
+/* =========================================
+   GOD-TIER PROFILE BANNERS (NEW ADDITIONS)
+   ========================================= */
+
+/* 10. RGB OVERLOAD (Fast Rainbow Spin) */
+.p-ban-rgb {
+    background: #000;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+.p-ban-rgb::before {
+    content: ''; position: absolute; inset: -100%;
+    background: conic-gradient(red, orange, yellow, green, blue, indigo, violet, red);
+    animation: rotateAura 1.5s linear infinite; /* FAST SPIN */
+    z-index: 0;
+}
+.p-ban-rgb::after {
+    content: ''; position: absolute; inset: 4px;
+    background: #111; border-radius: 8px; z-index: 1;
+}
+
+/* 11. DEATH SQUAD (Red/Black Smoke) */
+.p-ban-death {
+    background: radial-gradient(circle, #300, #000);
+    border: 1px solid #ff0000;
+    box-shadow: 0 0 25px #ff0000;
+    position: relative; overflow: hidden;
+}
+.p-ban-death::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: repeating-linear-gradient(45deg, #200, #200 10px, #000 10px, #000 20px);
+    animation: cyberGridMove 10s linear infinite;
+    opacity: 0.5;
+}
+
+/* 12. FROZEN CORE (Ice Blue Breathing) */
+.p-ban-frozen {
+    background: #001;
+    border: 1px solid #00ffff;
+    box-shadow: 0 0 15px #00ffff, inset 0 0 20px #00ffff;
+    animation: flash 3s infinite; /* Breathing effect */
+}
+.p-ban-frozen::after {
+    content: '❄️'; font-size: 50px; position: absolute; right: -10px; bottom: -10px; opacity: 0.2;
+}
+
+/* 13. TOXIC HAZE (Green/Purple Biohazard) */
+.p-ban-toxic {
+    background: #050;
+    border-left: 3px solid #00ff00;
+    border-right: 3px solid #8a2be2;
+    box-shadow: 0 0 20px #00ff00;
+    position: relative; overflow: hidden;
+}
+.p-ban-toxic::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.4), transparent);
+    transform: skewX(-20deg);
+    animation: radarSweep 2s infinite linear;
+}
+
+/* 14. MIDAS TOUCH (Sparkling Gold) */
+.p-ban-midas {
+    background: radial-gradient(ellipse at center, #ffd700 0%, #332200 100%);
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 30px #ffd700;
+    overflow: hidden; position: relative;
+}
+.p-ban-midas::before {
+    content: ''; position: absolute; inset: -50%;
+    background: conic-gradient(from 0deg, transparent, white, transparent 30%);
+    animation: rotateAura 3s linear infinite;
+    opacity: 0.5;
+}
+
+/* 15. BLUE FLAME (Ghost Rider Vibe) */
+.p-ban-bluefire {
+    background: url('https://media.giphy.com/media/3bc8pP1rVdfgN1uoMV/giphy.gif') center/cover;
+    border: 1px solid #00e5ff;
+    box-shadow: inset 0 0 40px #000, 0 0 20px #00e5ff;
+}
+
+/* 16. GLITCH ERROR (Distorted) */
+.p-ban-glitch {
+    background: #000;
+    border: 1px dashed #fff;
+    font-family: monospace;
+    position: relative; overflow: hidden;
+}
+.p-ban-glitch::before {
+    content: "ERROR 404"; position: absolute; top: 20%; left: 20%;
+    font-size: 30px; color: rgba(255,255,255,0.1); font-weight: 900;
+    animation: glitchShake 0.2s infinite;
+}
+
+/* 17. NEBULA STORM (Cosmic Purple) */
+.p-ban-nebula {
+    background: url('https://media.giphy.com/media/eJmUEoeU1K4d4IUbpS/giphy.gif') center/cover;
+    border: 1px solid #9900ff;
+    box-shadow: 0 0 25px #9900ff;
+}
+
+/* 18. AKATSUKI (Anime Clouds) */
+.p-ban-akatsuki {
+    background: #000;
+    border: 2px solid #a00000;
+    box-shadow: 0 0 20px #a00000;
+    position: relative; overflow: hidden;
+}
+.p-ban-akatsuki::before {
+    content: '☁️'; color: #a00000; font-size: 40px; position: absolute; left: -20px; animation: floatRight 5s linear infinite;
+}
+.p-ban-akatsuki::after {
+    content: '☁️'; color: #a00000; font-size: 30px; position: absolute; left: -50px; top: 30px; animation: floatRight 7s linear infinite;
+}
+@keyframes floatRight { from { left: -50px; } to { left: 100%; } }
+
+/* 19. HYPER SPEED (Racing) */
+.p-ban-hyper {
+    background: #000;
+    border-top: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    position: relative; overflow: hidden;
+}
+.p-ban-hyper::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(255,255,255,0.2) 20px, rgba(255,255,255,0.2) 40px);
+    animation: radarSweep 0.2s infinite linear; /* Super fast */
+}
+
+/* 20. MONEY MAKER (Falling Cash GIF) */
+.p-ban-cash {
+    background: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmo2ZHl0NXEyNzcxcG13b3VuNWw5cnV6bWhyZGV5NGRxOGk1NmdteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BfFFYPSVYr9UR6EtEL/giphy.gif') center/cover;
+    border: 2px solid #00ff00;
+    box-shadow: 0 0 20px #00ff00;
+}
+
+
+/* =========================================
+   NEW GOD-TIER PROFILE BANNERS
+   ========================================= */
+
+/* 1. SOLAR FLARE (Pure CSS - Intense Heat) */
+.p-ban-solar {
+    background: radial-gradient(circle at center, #ff8c00, #ff0000, #000);
+    border: 1px solid #ffaa00;
+    box-shadow: 0 0 20px #ff4500;
+}
+.p-ban-solar::before {
+    content: ''; position: absolute; inset: -50%;
+    background: conic-gradient(from 0deg, transparent, #fff, #ff4500, transparent 40%);
+    animation: rotateAura 2s linear infinite;
+    opacity: 0.4;
+}
+
+/* 2. PLASMA LEAK (Pure CSS - Flowing Energy) */
+.p-ban-plasma-flow {
+    background: #050014;
+    border: 1px solid #bf55ec;
+}
+.p-ban-plasma-flow::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, #7000ff, #ff00ff, #00ffff, #7000ff);
+    background-size: 400% 400%;
+    animation: gradientMove 4s ease infinite;
+    opacity: 0.6;
+    mask-image: radial-gradient(circle, black 20%, transparent 70%);
+}
+
+/* 3. TOXIC WASTE (GIF Integrated) */
+.p-ban-toxic-elite {
+    background: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3aXpoemxmbHByMjc1cGxxNDFpbm5kc2xjNTZmb3ZuYzNlMHhxa2NidyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/KH4QT4rqnnka04884l/giphy.gif') center/cover;
+    border: 2px solid #00ff88;
+    box-shadow: inset 0 0 40px #000, 0 0 15px #00ff88;
+}
+
+/* 4. MAGMA LORD (GIF Integrated) */
+.p-ban-magma-elite {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcnY0Mjlwb24zd2d6cDl2cnMzcjRmczEzZmQ0MXplc2g5YWhqNXhxYiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/auKRHcLuzy6ME/giphy.gif') center/cover;
+    border: 1px solid #ff4500;
+    box-shadow: 0 0 25px rgba(255, 69, 0, 0.5);
+}
+
+/* 5. MONEY RAIN ELITE (GIF Integrated) */
+.p-ban-cash-elite {
+    background: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmo2ZHl0NXEyNzcxcG13b3VuNWw5cnV6bWhyZGV5NGRxOGk1NmdteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BfFFYPSVYr9UR6EtEL/giphy.gif') center/cover;
+    border: 2px solid #ffd700;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+}
+
+/* 6. DIVINE LIGHT (GIF Integrated) */
+.p-ban-divine {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGEwM2FtNHU4OXM4dXVoYXRzNDdtc2Nha3h6OWhxYTR2aW5mOGkxMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3ov9k1173PdfJWRsoE/giphy.gif') center/cover;
+    border: 1px solid #fff;
+    box-shadow: 0 0 20px #fff;
+}
+
+/* 7. NEBULA GOD (GIF Integrated) */
+.p-ban-nebula-elite {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMHBqOWp4d3IwOWFkZW9uOWx3dzllbGY4eTBhazV1N2xpc3V1YjQ0YiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/bPZdEfOgBh1de/giphy.gif') center/cover;
+    border: 1px solid #7000ff;
+    box-shadow: 0 0 30px #7000ff;
+}
+
+/* 8. CYBERPUNK GLITCH (GIF Integrated) */
+.p-ban-cyber-elite {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXk4cmRtNWd3azBxeWtteGtoa3V3MjV3cWFmNmhzeXhjaWhxanN0MSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/26FPKhUtNG3TW74f6/giphy.gif') center/cover;
+    border: 1px solid #00ffff;
+    filter: hue-rotate(45deg);
+}
+
+/* 9. DIAMOND ICE (GIF Integrated) */
+.p-ban-ice-elite {
+    background: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOGEwM2FtNHU4OXM4dXVoYXRzNDdtc2Nha3h6OWhxYTR2aW5mOGkxMSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/3og0IyRiAsl1Pczi6Y/giphy.gif') center/cover;
+    border: 2px solid #b9f2ff;
+    box-shadow: 0 0 20px #00e5ff;
+}
+
+
+/* --- SICK HACKER OVERLAY (REMASTERED FOR MOBILE) --- */
+#hackerOverlay {
+    display: none; 
+    position: fixed; 
+    inset: 0; 
+    background: #000; /* Deep black base */
+    background: radial-gradient(circle, #300000 0%, #000 100%); 
+    z-index: 100000; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+    font-family: 'Courier New', monospace; 
+    color: #ff4757; 
+    text-align: center;
+    overflow: hidden;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Background Matrix Glitch */
+#hackerOverlay::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXk4cmRtNWd3azBxeWtteGtoa3V3MjV3cWFmNmhzeXhjaWhxanN0MSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/26FPKhUtNG3TW74f6/giphy.gif');
+    background-size: cover;
+    opacity: 0.15;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Moving Scanline */
+.hacker-scanline {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: rgba(255, 0, 0, 0.2);
+    box-shadow: 0 0 15px #ff0000;
+    animation: scanMove 2s linear infinite;
+    pointer-events: none;
+}
+
+/* Glitch Title */
+.hacker-title {
+    font-size: clamp(22px, 8vw, 50px); /* Fluid size */
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 10px 0;
+    color: #fff;
+    text-shadow: 0 0 10px #ff0000, 2px 2px #ff00ff;
+    animation: textGlitch 0.3s infinite alternate;
+}
+
+/* Ninja Icon Scale */
+#hackerOverlay i {
+    font-size: clamp(40px, 15vw, 80px);
+    color: #ff4757;
+    filter: drop-shadow(0 0 15px #ff0000);
+    margin-bottom: 10px;
+}
+
+/* Progress Bar Container */
+.hacker-bar-container {
+    width: 85%;
+    max-width: 350px;
+    height: 12px;
+    background: #111;
+    border: 1px solid #ff4757;
+    padding: 2px;
+    margin: 20px 0;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+}
+
+#hProg {
+    height: 100%;
+    background: #ff4757;
+    width: 0%;
+    box-shadow: 0 0 20px #ff4757;
+    /* Transition is handled in JS via style.width */
+}
+
+/* Terminal Message Box */
+#hMsg {
+    width: 90%;
+    max-width: 400px;
+    color: #00ff88; /* Matrix Green for the actual data */
+    font-size: clamp(12px, 3.5vw, 16px);
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #333;
+    padding: 15px;
+    border-radius: 5px;
+    line-height: 1.4;
+    word-break: break-word;
+    box-shadow: inset 0 0 10px #000;
+}
+
+/* ANIMATIONS */
+@keyframes scanMove {
+    0% { transform: translateY(-100px); }
+    100% { transform: translateY(100vh); }
+}
+
+@keyframes textGlitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 1px); }
+    40% { transform: translate(-2px, -1px); }
+    60% { transform: translate(2px, 1px); }
+    80% { transform: translate(2px, -1px); }
+    100% { transform: translate(0); }
+}
+
+/* Optional: Slight screen vibration */
+.screen-vibrate {
+    animation: shake 0.1s infinite;
+}
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    50% { transform: translate(-1px, -1px) rotate(0.1deg); }
+    100% { transform: translate(1px, -1px) rotate(0deg); }
+}
+
   </style>
 </head>
 <body>
@@ -344,15 +2457,17 @@
     </div>
 </div>
 
-<!-- VIEW USER PROFILE MODAL (ADDED) -->
 <div id="viewProfileModal" class="account-modal-overlay">
     <div class="account-card">
         <button id="closeViewProfile" class="close-pop">✕</button>
-        <img id="viewUserImg" src="" class="pop-img" style="border-color:#ffd700;">
+        
+        <div class="profile-frame-wrapper" style="position:relative; width:90px; height:90px; margin: 0 auto 12px;">
+            <img id="viewUserImg" src="" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+            <img id="viewUserFrame" src="" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:145%; height:145%; display:none; pointer-events:none;">
+        </div>
         
         <h3 id="viewUserName" class="pop-user" style="margin-bottom:2px;">User</h3>
-        
-        <!-- STATUS BADGE -->
+        <div id="viewUserBadges" style="margin-bottom:10px;"></div>
         <div id="viewUserStatus" style="font-size:10px; font-weight:bold; margin-bottom:15px; font-family:'Orbitron';"></div>
         
         <div class="view-profile-row">
@@ -361,17 +2476,40 @@
                 <span id="viewUserCoins" class="view-stat-val">0</span>
             </div>
             <div class="view-stat">
-                <i class="fas fa-fire" style="color:#ff4500; font-size:20px; margin-bottom:5px;"></i>
-                <span id="viewUserStreak" class="view-stat-val">0</span>
+                <img src="https://iili.io/fv5bmtj.png" style="width:25px; margin-bottom:5px;">
+                <span id="viewUserDiamonds" class="view-stat-val" style="color:#00ff88;">0</span>
             </div>
         </div>
 
-        <div id="viewUserBio" class="view-bio">Nu există descriere.</div>
-        <div id="viewUserBirth" style="font-size:11px; color:#aaa; margin-bottom:10px;"></div>
-        
-        <a id="viewUserTikTok" href="#" target="_blank" class="tiktok-btn" style="display:none;">
-            <i class="fab fa-tiktok"></i> Follow on TikTok
-        </a>
+        <div id="viewUserBio" class="view-bio">Fără descriere.</div>
+
+        <div style="display:flex; flex-direction:column; gap:10px; width:100%; align-items:center;">
+            <div id="viewUserInvites" class="btn-tasks" style="width:90%; padding:10px; cursor:pointer; margin-bottom:0; border-color:#00ff88; color:#00ff88;">
+                <i class="fas fa-user-plus"></i> Invites: 0
+            </div>
+            <div id="viewUserDonated" class="btn-tasks" style="width:90%; padding:10px; cursor:pointer; margin-bottom:0; border-color:#ffd700; color:#ffd700;">
+                <i class="fas fa-hand-holding-usd"></i> Donated: 0
+            </div>
+        </div>
+
+        <div id="viewUserBirth" style="font-size:11px; color:#aaa; margin-top:10px;"></div>
+        <a id="viewUserTikTok" href="#" target="_blank" class="tiktok-btn" style="display:none;"><i class="fab fa-tiktok"></i> TikTok</a>
+    </div>
+</div>
+
+<div id="referralHistoryModal" class="account-modal-overlay" style="z-index: 13000;">
+    <div class="account-card" style="max-width: 400px;">
+        <button class="close-pop" onclick="document.getElementById('referralHistoryModal').classList.remove('active')">✕</button>
+        <h3 style="font-family:'Orbitron'; color:#00ff88; margin-bottom:15px;">ISTORIC INVITAȚII</h3>
+        <div id="referralList" class="history-list"></div>
+    </div>
+</div>
+
+<div id="donationHistoryModal" class="account-modal-overlay" style="z-index: 13000;">
+    <div class="account-card" style="max-width: 400px;">
+        <button class="close-pop" onclick="document.getElementById('donationHistoryModal').classList.remove('active')">✕</button>
+        <h3 style="font-family:'Orbitron'; color:#ffd700; margin-bottom:15px;">ISTORIC DONAȚII</h3>
+        <div id="donationList" class="history-list"></div>
     </div>
 </div>
 
@@ -1032,6 +3170,234 @@ const reviewData = {
     const menuBtn = document.getElementById('menuBtn'), sideMenu = document.getElementById('sideMenu'), closeMenu = document.getElementById('closeMenu');
     menuBtn.onclick = () => sideMenu.classList.add('open');
     closeMenu.onclick = () => sideMenu.classList.remove('open');
+
+
+
+const PROFILE_BANNERS_DB = [
+    // --- CLASSICS ---
+    { id: 'pban_cyber', name: 'CYBER GRID', price: 5000, cssClass: 'p-ban-cyber' },
+    { id: 'pban_magma', name: 'MAGMA FLOW', price: 7500, cssClass: 'p-ban-magma' },
+    { id: 'pban_void',  name: 'DEEP VOID',  price: 10000, cssClass: 'p-ban-void' },
+    { id: 'pban_gold',  name: 'GOLD RUSH',  price: 15000, cssClass: 'p-ban-gold' },
+    { id: 'pban_matrix',name: 'MATRIX CODE',price: 12000, cssClass: 'p-ban-matrix' },
+    { id: 'pban_neon',  name: 'NEON CITY',  price: 3000,  cssClass: 'p-ban-neon' },
+
+    // --- SICK CSS ANIMATED ---
+    { id: 'pban_solar', name: 'SOLAR FLARE', price: 20000, cssClass: 'p-ban-solar' },
+    { id: 'pban_plasma_flow', name: 'PLASMA ENERGY', price: 18000, cssClass: 'p-ban-plasma-flow' },
+    
+    // --- ELITE GIF SERIES (NEW) ---
+    { id: 'pban_toxic_el', name: 'TOXIC WASTE ELITE', price: 25000, cssClass: 'p-ban-toxic-elite' },
+    { id: 'pban_magma_el', name: 'MAGMA LORD ELITE', price: 25000, cssClass: 'p-ban-magma-elite' },
+    { id: 'pban_cash_el',  name: 'MONEY RAIN ELITE', price: 50000, cssClass: 'p-ban-cash-elite' },
+    { id: 'pban_divine_el',name: 'DIVINE ETHER',    price: 35000, cssClass: 'p-ban-divine' },
+    { id: 'pban_nebula_el',name: 'NEBULA GOD',      price: 30000, cssClass: 'p-ban-nebula-elite' },
+    { id: 'pban_cyber_el', name: 'CYBERPUNK ELITE', price: 22000, cssClass: 'p-ban-cyber-elite' },
+    { id: 'pban_ice_el',   name: 'FROZEN CORE',     price: 24000, cssClass: 'p-ban-ice-elite' },
+    
+    // --- GIF ANIMATED ---
+    { id: 'pban_anime',   name: 'ANIME FANBOY', price: 8000, cssClass: 'p-ban-anime' },
+    { id: 'pban_thunder', name: 'THUNDER GOD',  price: 9000, cssClass: 'p-ban-thunder' },
+    { id: 'pban_phantom', name: 'PHANTOM',      price: 8500, cssClass: 'p-ban-phantom' },
+    
+    // --- NEW INSANE ADDITIONS ---
+    { id: 'pban_rgb',      name: 'RGB OVERLOAD', price: 20000, cssClass: 'p-ban-rgb' },
+    { id: 'pban_death',    name: 'DEATH SQUAD',  price: 18000, cssClass: 'p-ban-death' },
+    { id: 'pban_frozen',   name: 'FROZEN CORE',  price: 12500, cssClass: 'p-ban-frozen' },
+    { id: 'pban_toxic',    name: 'TOXIC HAZE',   price: 11000, cssClass: 'p-ban-toxic' },
+    { id: 'pban_midas',    name: 'MIDAS TOUCH',  price: 25000, cssClass: 'p-ban-midas' },
+    { id: 'pban_bluefire', name: 'BLUE FLAME',   price: 14000, cssClass: 'p-ban-bluefire' },
+    { id: 'pban_glitch',   name: 'SYSTEM FAIL',  price: 13000, cssClass: 'p-ban-glitch' },
+    { id: 'pban_nebula',   name: 'NEBULA STORM', price: 16000, cssClass: 'p-ban-nebula' },
+    { id: 'pban_akatsuki', name: 'RED CLOUDS',   price: 17500, cssClass: 'p-ban-akatsuki' },
+    { id: 'pban_hyper',    name: 'HYPER SPEED',  price: 15500, cssClass: 'p-ban-hyper' },
+    { id: 'pban_cash',     name: 'MONEY MAKER',  price: 30000, cssClass: 'p-ban-cash' }
+];
+
+const PROFILE_INTROS_DB = [
+    { 
+        id: 'intro_fato', 
+        name: 'Haide fato știu că vrei', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Video%20Project.m4a?alt=media&token=7e4eb9d9-4b30-4b3a-8e47-a7ae7d0b9dd6' 
+    },
+    { 
+        id: 'intro_bug_mafia', 
+        name: 'B.U.G. Mafia - Cine E Cu Noi', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FB.U.G.%20Mafia%20-%20Cine%20E%20Cu%20Noi%20(feat.%20Nico)%20(Prod.%20Tata%20Vlad)%20(Videoclip).mp3?alt=media&token=fc20492a-1a3c-446d-9fd5-3e1913778614' 
+    },
+    { 
+        id: 'intro_aur_vass', 
+        name: 'Copilul de Aur & Laura Vass - Buzele tale', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FCopilul%20de%20Aur%20%20Laura%20Vass%20%20Buzele%20tale%2C%20doua%20petale%20%20%23PovesteDeCartier%20%20Special%20Guest%20M.Merisan.mp3?alt=media&token=02f5dbcf-ae26-4545-8c36-f1069f0b35a0' 
+    },
+    { 
+        id: 'intro_crazy_frog', 
+        name: 'Crazy Frog - Axel F', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FCrazy%20Frog%20-%20Axel%20F%20turned%2020%20years%20old%20%20%23fyp%20%23music%20%23musica%20%23edm%20%23dancemusic%20%23crazyfrog%20%23memories.mp3?alt=media&token=70124cc9-c453-48af-a041-52e54aeab46b' 
+    },
+    { 
+        id: 'intro_made_in_ro', 
+        name: 'Ionut Cercel - Made in Romania', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FIonut%20Cercel%20-%20Made%20in%20Romania.mp3?alt=media&token=66a09af4-e300-4f78-9220-de05325c0eae' 
+    },
+    { 
+        id: 'intro_narcisa', 
+        name: 'Narcisa - Dai din buci ca la turci', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNARCISA%20-%20DAI%20DIN%20BUCI%20CA%20LA%20TURCI%20-%20DANS%20CRISTINA%20PUCEAN.mp3?alt=media&token=86223ee7-2bdc-477b-a7c3-116965051881' 
+    },
+    { 
+        id: 'intro_nek', 
+        name: 'Nek - Cate una, cate doua', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNEK%20-%20Cate%20una%2C%20cate%20doua%20-OFFICIAL%20VIDEO.mp3?alt=media&token=97853258-96e0-4eac-bad7-238b4fe4774f' 
+    },
+    { 
+        id: 'intro_guta_gigolo', 
+        name: 'Nicolae Guta - Gigolo', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNicolae%20Guta%20-%20GIGOLO.mp3?alt=media&token=f1effc9b-d02c-45a9-ac33-2ce1bd7868b9' 
+    },
+    { 
+        id: 'intro_guta_pahare', 
+        name: 'Nicolae Guta - Noi bem spargem pahare', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNicolae%20Guta%20-%20Noi%20bem%20spargem%20pahare.mp3?alt=media&token=a87afc4d-8590-476c-895b-203a172b4f77' 
+    },
+    { 
+        id: 'intro_guta_mafia', 
+        name: 'Nicolae Guta - Vine Mafia', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNicolae%20Guta%20-%20Vine%20mafia.mp3?alt=media&token=e3ab3fbb-bb5b-47fb-b0eb-cec5152c9ded' 
+    },
+    { 
+        id: 'intro_guta_aj', 
+        name: 'Nicolae Guta & Play AJ - Tu esti fata de oras', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FNicolae%20Guta%20si%20Play%20Aj%20-%20Tu%20esti%20fata%20de%20oras.mp3?alt=media&token=0ee882d8-fd7d-4e3a-91c5-254457502f31' 
+    },
+    { 
+        id: 'intro_puya_fresh', 
+        name: 'Puya - Fresh', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FPuya%20-%20Fresh.mp3?alt=media&token=1124ff3a-9307-4e29-8dba-7fdfb3cb6a2d' 
+    },
+    { 
+        id: 'intro_puya_om', 
+        name: 'Puya - Om bogat, om sarac', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FPuya-Om%20bogat%2Com%20sarac.mp3?alt=media&token=649d3f0a-60af-43d4-b0c8-b4e3861c8756' 
+    },
+    { 
+        id: 'intro_susanu', 
+        name: 'Susanu - La lautari', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FSusanu%20-%20La%20lautari.mp3?alt=media&token=a6c9bb80-8b9c-4508-b4fb-3747369ad4c4' 
+    },
+    { 
+        id: 'intro_theo_rose', 
+        name: 'Theo Rose - A venit politia', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FTheo%20Rose%20-%20A%20venit%20poli%C8%9Bia%20%20From%20Candidatul%20perfect%20The%20Movie.mp3?alt=media&token=2fd9e5d3-9d27-48e0-9b37-2fab5972d954' 
+    },
+    { 
+        id: 'intro_vocea_bagabontilor', 
+        name: 'Vocea Bagabontilor - Latraii', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FVOCEA%20BAGABONTILOR%20%EF%BE%92%20L%C4%82TR%C4%82II%20%20OFICIAL%20VIDEO.mp3?alt=media&token=77c4801b-4b9b-4809-b0e3-bf8a9c8f3724' 
+    },
+    { 
+        id: 'intro_vijelie', 
+        name: 'Vali Vijelie - Sa iubesti doua femei', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FVali%20Vijelie%20-%20Sa%20iubesti%20doua%20femei.mp3?alt=media&token=28ae2f76-0734-4e4c-9119-f945b7d6483b' 
+    },
+    { 
+        id: 'intro_zamfir', 
+        name: 'Zamfir de la Baia Mare - Mamaliga cu carnat', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2FZamfir%20de%20la%20Baia%20Mare%20-%20Mamaliga%20cu%20carnat%20%5Bvideoclip%20oficial%5D.mp3?alt=media&token=a7314651-f676-4c8d-9ade-bde7f53b5fef' 
+    },
+    { 
+        id: 'intro_un_leu', 
+        name: 'Imi dai si mie un leu?', 
+        price: 5000, 
+        audio: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/intros%2F%C3%8Emi%20dai%20%C8%99i%20mie%20un%20leu_.mp3?alt=media&token=96072279-0567-496d-b8d1-8798c6e5f5436' 
+    }
+];
+// 2. Control Audio Global
+window.currentProfileAudio = null;
+window.stopProfileAudio = function() {
+    if (window.currentProfileAudio) {
+        window.currentProfileAudio.pause();
+        window.currentProfileAudio.currentTime = 0;
+        window.currentProfileAudio = null;
+    }
+};
+
+// 3. Funcția openUserProfile actualizată (Pune-o peste cea veche)
+window.openUserProfile = async (uid) => {
+    const modal = document.getElementById('viewProfileModal');
+    const card = modal.querySelector('.account-card');
+    
+    // Reset
+    card.className = 'account-card'; 
+    window.stopProfileAudio(); 
+
+    modal.classList.add('active');
+
+    try {
+        const snap = await getDoc(doc(db, "accounts", uid));
+        if(!snap.exists()) return;
+        const data = snap.data();
+
+        // Aplică Banner
+        if (data.equippedProfileBanner && data.equippedProfileBanner.id) {
+            card.classList.add('profile-banner-active', data.equippedProfileBanner.id);
+        }
+
+        // Play Intro
+        if (data.equippedIntro && data.equippedIntro.audio) {
+            window.currentProfileAudio = new Audio(data.equippedIntro.audio);
+            window.currentProfileAudio.volume = 0.4;
+            window.currentProfileAudio.play().catch(e => console.log("Blocked"));
+        }
+
+        // PFP & Frame
+        document.getElementById('viewUserImg').src = data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
+        const viewFrame = document.getElementById('viewUserFrame');
+        if (data.equippedFrame) {
+            viewFrame.src = data.equippedFrame.img;
+            viewFrame.style.display = 'block';
+        } else { viewFrame.style.display = 'none'; }
+
+        // Stats
+        document.getElementById('viewUserName').innerText = data.username || "Anonim";
+        document.getElementById('viewUserCoins').innerText = data.coins || 0;
+        document.getElementById('viewUserDiamonds').innerText = data.diamonds || 0;
+        document.getElementById('viewUserBio').innerText = data.bio || "Fără descriere.";
+        
+        // Istoric (Click)
+        document.getElementById('viewUserInvites').onclick = () => openReferralHistory(uid, data.username, data.image);
+        document.getElementById('viewUserDonated').onclick = () => openDonationHistory(uid, data.username, data.image);
+
+    } catch(e) { console.error(e); }
+};
+
+// 4. Funcțiile de Istoric (Adaugă-le)
+window.openReferralHistory = async (uid, name, img) => {
+    document.getElementById('referralHistoryModal').classList.add('active');
+    // Aici adaugi logica de fetch din Wall dacă vrei să vezi lista exactă
+};
+
+window.openDonationHistory = async (uid, name, img) => {
+    document.getElementById('donationHistoryModal').classList.add('active');
+};
 </script>
 </body>
 </html>
