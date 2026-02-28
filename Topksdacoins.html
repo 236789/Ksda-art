@@ -4896,7 +4896,69 @@ input:checked + .slider:before { transform: translateX(16px); }
 }
 
 
+/* --- FIX VIZIBILITATE BANNERE ANIMATE --- */
+.account-card.profile-banner-active {
+    background-image: none !important; /* Scoatem fundalul default ca să se vadă cel animat */
+    background-color: #050b14 !important;
+    overflow: hidden !important;
+    z-index: 1;
+}
 
+/* Forțăm conținutul să stea deasupra animațiilor */
+.account-card.profile-banner-active > *:not(.close-pop) {
+    position: relative;
+    z-index: 10;
+}
+
+/* 1. ANIME FANBOY (Fix ID: pban_anime) */
+.account-card.pban_anime {
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/anime-mix.gif?alt=media&token=eed3db7d-e99f-4a5c-b7ee-15b6b51f20e8') !important;
+    background-size: cover !important;
+    border-color: #ff00ff !important;
+    box-shadow: inset 0 0 150px rgba(0,0,0,0.9), 0 0 30px #ff00ff !important;
+}
+
+/* 2. THUNDER GOD (Fix ID: pban_thunder) */
+.account-card.pban_thunder {
+    background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') !important;
+    background-size: cover !important;
+    border-color: #00e5ff !important;
+    box-shadow: inset 0 0 120px rgba(0,0,0,0.8), 0 0 30px #00e5ff !important;
+}
+
+/* 3. CYBER GRID (Fix ID: pban_cyber) */
+.account-card.pban_cyber {
+    border-color: #00ff88 !important;
+    box-shadow: inset 0 0 100px #000, 0 0 20px #00ff88 !important;
+}
+.account-card.pban_cyber::before {
+    content: ''; position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
+    background-image: linear-gradient(rgba(0, 255, 136, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 136, 0.2) 1px, transparent 1px);
+    background-size: 50px 50px; transform: perspective(500px) rotateX(60deg);
+    animation: cyberGridMove 5s linear infinite; z-index: 0;
+}
+
+/* 4. MAGMA (Fix ID: pban_magma) */
+.account-card.pban_magma {
+    border-color: #ff4500 !important;
+    box-shadow: inset 0 0 100px #000, 0 0 30px #ff4500 !important;
+}
+.account-card.pban_magma::before {
+    content: ''; position: absolute; inset: -50%;
+    background: radial-gradient(circle, #ff0000, #ff8c00, transparent 60%);
+    filter: blur(40px); opacity: 0.6; animation: magmaFlow 6s ease infinite alternate; z-index: 0;
+}
+
+/* 5. VOID (Fix ID: pban_void) */
+.account-card.pban_void {
+    border-color: #7000ff !important;
+    box-shadow: inset 0 0 80px #000, 0 0 30px #7000ff !important;
+}
+.account-card.pban_void::before {
+    content: ''; position: absolute; top: 50%; left: 50%; width: 200%; height: 200%;
+    transform: translate(-50%, -50%); background: conic-gradient(from 0deg, #000, #4b0082, #9400d3, #000);
+    animation: voidSpin 5s linear infinite; opacity: 0.5; z-index: 0;
+}
   </style>
 </head>
 <body>
