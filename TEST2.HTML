@@ -18000,6 +18000,44 @@ window.showCustomPrompt = (title, msg, placeholder = "") => {
         };
     });
 };
+
+
+window.showToast = (msg) => {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+        background: rgba(0, 255, 136, 0.9); color: #000; padding: 12px 25px;
+        border-radius: 50px; font-family: 'Orbitron'; font-size: 12px; font-weight: 900;
+        z-index: 100000; box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        animation: slideUpFade 0.4s ease forwards;
+    `;
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = '0.5s';
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
+};
+
+// De asemenea, asigură-te că ai adăugat showCustomPrompt din mesajul anterior:
+window.showCustomPrompt = (title, msg, placeholder = "") => {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById('customPromptOverlay');
+        const inputEl = document.getElementById('customPromptInput');
+        document.getElementById('customPromptTitle').innerText = title;
+        document.getElementById('customPromptText').innerText = msg;
+        inputEl.value = "";
+        inputEl.placeholder = placeholder;
+        overlay.classList.add('active');
+        
+        const handleOk = () => { overlay.classList.remove('active'); resolve(inputEl.value); };
+        const handleCancel = () => { overlay.classList.remove('active'); resolve(null); };
+        
+        document.getElementById('customPromptOk').onclick = handleOk;
+        document.getElementById('customPromptCancel').onclick = handleCancel;
+    });
+};
 </script>
 </body>
 </html>
