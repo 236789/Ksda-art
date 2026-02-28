@@ -6,6 +6,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -11179,13 +11180,36 @@ function loadMessages() {
                     bubbleContent += gridHtml;
                 }
                 // STANDARD TEXT ESCAPING (This is what was breaking your cards before)
+// --- FAKE MESSAGE DETECTION (CAMOUFLAGE) ---
+                let maskHtml = "";
+                if (data.isFake) {
+                    maskHtml = `
+                        <span onclick="event.stopPropagation(); window.revealFakeSender('${data.realSender}')" 
+                              title="Click to reveal sender" 
+                              style="
+                                  display: inline-block; 
+                                  margin-left: 8px; 
+                                  cursor: pointer; 
+                                  color: #d63384; 
+                                  font-size: 14px;
+                                  vertical-align: middle;
+                                  filter: drop-shadow(0 0 5px #d63384);
+                                  animation: pulseRed 2s infinite;
+                              ">
+                            <i class="fas fa-theater-masks"></i>
+                        </span>
+                    `;
+                }
+
+                // STANDARD TEXT ESCAPING
                 let baseText = (data.text || "").replace(/</g, "&lt;").replace(/\n/g, "<br>");
                 if (baseText) {
-let processedBody = linkify(baseText, msgId);
+                    let processedBody = linkify(baseText, msgId);
                     if (textStyleClass) {
                         processedBody = `<span class="${textStyleClass}">${processedBody}</span>`;
                     }
-                    bubbleContent += `<div>${processedBody}</div>`;
+                    // APPEND THE MASK ICON HERE
+                    bubbleContent += `<div>${processedBody} ${maskHtml}</div>`;
                 }
             }
 
