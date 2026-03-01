@@ -6225,12 +6225,6 @@ input:checked + .slider:before { transform: translateX(16px); }
     z-index: 10; pointer-events: none;
 }
 
-.top-item {
-    background: rgba(13, 25, 41, 0.4) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-}
 
 .podium-item {
     z-index: 10;
@@ -6447,6 +6441,96 @@ input:checked + .slider:before { transform: translateX(16px); }
         transform: translateY(110vh) rotate(720deg);
         opacity: 0;
     }
+}
+
+
+/* --- DYNAMIC UI VARIABLES --- */
+:root {
+    --theme-color: #ffd700; /* Default Gold */
+    --theme-glow: rgba(255, 215, 0, 0.3);
+}
+
+/* 1. DYNAMIC SCROLLBAR */
+html::-webkit-scrollbar { width: 10px; }
+html::-webkit-scrollbar-track { background: #02050a; }
+html::-webkit-scrollbar-thumb {
+    background: var(--theme-color) !important;
+    border-radius: 10px;
+    border: 2px solid #02050a;
+    box-shadow: 0 0 15px var(--theme-color);
+}
+
+/* 2. DYNAMIC HEADER */
+header {
+    border: 1px solid var(--theme-color) !important;
+    box-shadow: 0 0 20px var(--theme-glow), inset 0 0 10px var(--theme-glow) !important;
+    transition: all 0.6s ease !important;
+}
+
+nav a:hover, nav a.active {
+    color: var(--theme-color) !important;
+    text-shadow: 0 0 10px var(--theme-color);
+}
+
+/* 3. DYNAMIC SIDE MENU */
+#sideMenu {
+    background: #050b14 !important;
+    border-left: 4px solid var(--theme-color) !important;
+    box-shadow: -15px 0 50px rgba(0, 0, 0, 0.9);
+    transition: border-color 0.6s ease !important;
+}
+
+.menu-links a:hover {
+    color: var(--theme-color) !important;
+    padding-left: 15px; /* Efect de slide */
+}
+
+#sideMenu .closeBtn, .hamburger {
+    color: var(--theme-color) !important;
+}
+
+.side-menu-login-btn {
+    border-color: var(--theme-color) !important;
+    color: var(--theme-color) !important;
+}
+
+
+/* --- DYNAMIC NEON SCROLLBAR --- */
+
+/* Pentru Chrome, Safari și Edge */
+::-webkit-scrollbar {
+    width: 10px;
+    background-color: #02050a; /* Fundalul bazei */
+}
+
+::-webkit-scrollbar-track {
+    background: #02050a;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+}
+
+::-webkit-scrollbar-thumb {
+    /* Folosește culoarea temei setată prin JS */
+    background: var(--theme-color) !important;
+    border-radius: 100px;
+    
+    /* Efectul de 'contur' care face bara să pară că plutește */
+    border: 2px solid #02050a;
+    
+    /* Glow-ul specific care se schimbă odată cu culoarea */
+    box-shadow: 0 0 15px var(--theme-color);
+    
+    transition: background 0.6s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #ffffff !important; /* Devine albă la hover pentru feedback vizual */
+    box-shadow: 0 0 20px var(--theme-color);
+}
+
+/* Pentru Firefox */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--theme-color) #02050a;
 }
   </style>
 </head>
@@ -7933,20 +8017,32 @@ window.switchLeaderboard = (mode) => {
     if(currentMode === mode) return;
     currentMode = mode;
     
-    // --- 1. SYNC BACKGROUND ENGINE ---
+    // --- 1. DEFINIRE CULORI TEMA ---
+    const colors = {
+        coins: '#ffd700',
+        diamonds: '#00ff88',
+        referrals: '#29f3ff',
+        donated: '#ff4757',
+        sustinatori: '#bf55ec'
+    };
+    const activeColor = colors[mode];
+
+    // --- 2. UPDATE CSS VARIABLES (HEADER, SCROLL, MENU) ---
+    document.documentElement.style.setProperty('--theme-color', activeColor);
+    document.documentElement.style.setProperty('--theme-glow', activeColor + '44'); // 44 e opacitatea pentru glow
+
+    // --- 3. SYNC BACKGROUND ENGINE ---
     const bgEngine = document.getElementById('bg-engine');
     if(bgEngine) bgEngine.className = 'theme-' + mode;
 
-    // --- 2. UPDATE TAB BUTTONS ---
+    // --- 4. UPDATE BUTOANE TABS ---
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    const activeBtn = document.getElementById(`tab-${mode}`);
-    if(activeBtn) activeBtn.classList.add('active');
+    document.getElementById(`tab-${mode}`).classList.add('active');
 
-    // --- 3. SYNC DYNAMIC TITLES ---
+    // --- 5. SYNC DYNAMIC TITLES ---
     const heroTitle = document.getElementById('heroTitle');
     const heroDesc = document.getElementById('heroDesc');
 
-    // Curățăm clasele vechi și aplicăm stilul nou (Shop Style)
     heroTitle.classList.remove('hero-coins', 'hero-diamonds', 'hero-referrals', 'hero-donated', 'hero-sustinatori');
     heroTitle.classList.add('hero-' + mode);
 
@@ -7956,14 +8052,14 @@ window.switchLeaderboard = (mode) => {
     } 
     else if (mode === 'diamonds') {
         heroTitle.innerText = "TOP DIAMANTE";
-        heroDesc.innerText = "Colecționarii de elită care au strâns cele mai multe diamante prețioase.";
+        heroDesc.innerText = "Colecționarii de elită care au strâns cele mai multe diamante prețioase prin task-uri.";
     }
     else if (mode === 'donated') {
-        heroTitle.innerText = "TOP DONATORI";
+        heroTitle.innerText = "TOP DONATORI BOGĂTAȘI";
         heroDesc.innerText = "Membrii care au strâns o avere colosală și își permit să împartă surplusul.";
     }
     else if (mode === 'referrals') {
-        heroTitle.innerText = "TOP INVITES";
+        heroTitle.innerText = "TOP RECOMANDĂRI";
         heroDesc.innerText = "Cei mai populari membri care au invitat cei mai mulți prieteni.";
     }
     else if (mode === 'sustinatori') {
@@ -7971,7 +8067,7 @@ window.switchLeaderboard = (mode) => {
         heroDesc.innerText = "Oamenii de bază care au contribuit direct la dezvoltarea noastră.";
     }
 
-    // --- 4. RE-FETCH DATA ---
+    // --- 6. RE-FETCH DATA ---
     setupLeaderboardListener(); 
     fetchTotalCount();
 };
