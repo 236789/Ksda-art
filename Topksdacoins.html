@@ -4959,6 +4959,32 @@ input:checked + .slider:before { transform: translateX(16px); }
     transform: translate(-50%, -50%); background: conic-gradient(from 0deg, #000, #4b0082, #9400d3, #000);
     animation: voidSpin 5s linear infinite; opacity: 0.5; z-index: 0;
 }
+
+
+
+   /* --- ELITE BUTTON STYLE (Wide & Red) --- */
+.cosmetic-select-btn.c-elite { 
+    grid-column: span 2; /* Forces it to take up 2 columns (Full Width) */
+    border-color: #ff0000 !important; 
+    background: linear-gradient(180deg, rgba(255,0,0,0.1) 0%, rgba(0,0,0,0.8) 100%);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
+}
+
+.cosmetic-select-btn.c-elite i { 
+    color: #ff0000; 
+    filter: drop-shadow(0 0 10px #ff0000); 
+}
+
+.cosmetic-select-btn.c-elite span { 
+    color: #ff0000; 
+    text-shadow: 0 0 5px #ff0000; 
+}
+
+.cosmetic-select-btn.c-elite:hover { 
+    background: rgba(255,0,0,0.2) !important; 
+    transform: translateY(-5px); 
+    box-shadow: 0 0 25px rgba(255, 0, 0, 0.5); 
+}
   </style>
 </head>
 <body>
@@ -5241,27 +5267,37 @@ input:checked + .slider:before { transform: translateX(16px); }
                 <div style="font-size: 10px; color: #aaa; margin-top: 5px;">Alege categoria de personalizare</div>
             </div>
 
-            <!-- PREVIEW BOX REMOVED AS REQUESTED -->
+            <!-- THE GRID -->
+            <div class="cosmetics-selection-grid">
+                <!-- 1. Badges -->
+                <div class="cosmetic-select-btn" onclick="openInventory('badges'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
+                    <i class="fas fa-certificate" style="color: #d63384;"></i>
+                    <span style="color: #d63384;">BADGES</span>
+                </div>
+                <!-- 2. Rame -->
+                <div class="cosmetic-select-btn" onclick="openInventory('frames'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
+                    <i class="fas fa-crop-alt" style="color: #bf55ec;"></i>
+                    <span style="color: #bf55ec;">RAME</span>
+                </div>
+                <!-- 3. Bannere -->
+                <div class="cosmetic-select-btn" onclick="openInventory('banners'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
+                    <i class="fas fa-image" style="color: #00e5ff;"></i>
+                    <span style="color: #00e5ff;">BANNERE</span>
+                </div>
+                <!-- 4. Text -->
+                <div class="cosmetic-select-btn" onclick="openInventory('texts'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
+                    <i class="fas fa-font" style="color: #ffd700;"></i>
+                    <span style="color: #ffd700;">TEXT</span>
+                </div>
 
-<!-- CATEGORY GRID -->
-<div class="cosmo-grid-select">
-    <div class="select-btn-v6 c-badge" onclick="openInventory('badges'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-certificate"></i>
-        <span>BADGES</span>
-    </div>
-    <div class="select-btn-v6 c-frame" onclick="openInventory('frames'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-crop-alt"></i>
-        <span>RAME</span>
-    </div>
-    <div class="select-btn-v6 c-banner" onclick="openInventory('banners'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-image"></i>
-        <span>BANNERE</span>
-    </div>
-    <div class="select-btn-v6 c-text" onclick="openInventory('texts'); document.getElementById('inventoryModal').classList.add('active'); document.getElementById('cosmeticsSelectModal').classList.remove('active');">
-        <i class="fas fa-font"></i>
-        <span>TEXT</span>
-    </div>
-</div>
+                <!-- 5. NEW ELITE BUTTON (Wide) -->
+                <!-- Note: The URL parameter ?action=openEliteInventory triggers your Shop JS -->
+                <div class="cosmetic-select-btn c-elite" onclick="window.location.href='shop.html?action=openEliteInventory'">
+                    <i class="fas fa-crown"></i>
+                    <span>ELITE STORE</span>
+                </div>
+
+            </div>
         </div>
     </div>
 </div>
