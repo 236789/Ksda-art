@@ -6621,6 +6621,61 @@ html {
     0% { opacity: 0.8; transform: scale(1); }
     100% { opacity: 1; transform: scale(1.02); }
 }
+
+/* --- FIX 1: SOCIAL BUTTONS (Big, Square & Centered) --- */
+#viewSocialGrid {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important; /* Centers them if less than 4 */
+    gap: 10px !important;
+    width: 100%;
+}
+
+/* Force specific size so they are all equal */
+.view-social-btn {
+    width: 65px !important;
+    height: 65px !important;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: 0.3s;
+    flex-shrink: 0; /* Prevents shrinking */
+}
+
+.view-social-btn:hover {
+    background: rgba(41, 243, 255, 0.1);
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.view-social-btn i {
+    font-size: 24px;
+    margin-bottom: 5px;
+    color: #fff;
+}
+
+.view-social-btn span {
+    font-family: 'Orbitron';
+    font-size: 8px;
+    font-weight: 800;
+    color: #aaa;
+    text-transform: uppercase;
+}
+
+/* Social Colors */
+.s-tiktok i { color: #00f2ea; text-shadow: 2px 2px 0 #ff0050; }
+.s-insta i { color: #e1306c; }
+.s-youtube i { color: #ff0000; }
+.s-discord i { color: #5865f2; }
+.s-whatsapp i { color: #25d366; }
+
+
   </style>
 </head>
 <body>
@@ -8783,8 +8838,8 @@ window.openUserProfile = async (uid) => {
     
     // 1. Reset & Clean
     if(card) {
-        const baseClass = card.classList.contains('account-card-v5') ? 'account-card-v5' : 'account-card';
-        card.className = baseClass; 
+        // Reset classes to base state
+        card.className = 'account-card-v5'; 
         card.style.backgroundImage = "";
         card.style.background = ""; 
     }
@@ -8805,10 +8860,14 @@ window.openUserProfile = async (uid) => {
 
         const data = snap.data();
 
-        // --- A. BANNER LOGIC ---
+        // --- A. BANNER LOGIC (FIXED) ---
         if (card && data.equippedProfileBanner && data.equippedProfileBanner.id) {
+            // CRITICAL FIX: Add 'account-card' so the CSS selectors work
+            card.classList.add('account-card'); 
             card.classList.add('profile-banner-active');
             card.classList.add(data.equippedProfileBanner.id);
+            
+            // Handle custom gradient styles vs GIF classes
             if(data.equippedProfileBanner.style && !data.equippedProfileBanner.id.includes('anime')) {
                 card.style.background = data.equippedProfileBanner.style;
                 card.style.backgroundSize = "cover";
@@ -8856,7 +8915,7 @@ window.openUserProfile = async (uid) => {
             (typeof getRoleBadge === 'function' ? getRoleBadge(data.email) : "") + 
             (data.equippedBadge && typeof getCosmeticBadge === 'function' ? getCosmeticBadge(data.equippedBadge) : "");
 
-        // --- F. TOP RANK STATUS (FIXED COLORS) ---
+        // --- F. TOP RANK STATUS ---
         const rankEl = document.getElementById('viewTopRankStatus');
         rankEl.style.display = 'none';
 
@@ -8865,12 +8924,8 @@ window.openUserProfile = async (uid) => {
             if (rankIndex >= 0 && rankIndex < 3) {
                 const rankNum = rankIndex + 1;
                 let trophy = rankNum === 1 ? '👑' : (rankNum === 2 ? '🥈' : '🥉');
-                
-                // Determine Mode
                 let activeMode = (typeof currentMode !== 'undefined') ? currentMode : "coins";
                 let modeName = activeMode.toUpperCase();
-                
-                // Set Class based on Mode
                 let colorClass = `rank-mode-${activeMode}`; 
 
                 rankEl.innerHTML = `<div class="top-rank-glow-text ${colorClass}"><span class="rank-emoji">${trophy}</span> RANK #${rankNum} ${modeName}</div>`;
@@ -8916,10 +8971,10 @@ window.openUserProfile = async (uid) => {
                     else if(p.key === 'youtube') finalLink = `https://youtube.com/${link}`;
                 }
                 const btn = document.createElement('a');
-                btn.className = `sq-holo-btn ${p.class}`;
+                btn.className = `view-social-btn ${p.class}`; // Changed to match your fixed CSS
                 btn.href = finalLink;
                 btn.target = "_blank";
-                btn.innerHTML = `<i class="${p.icon}" style="font-size:18px; margin-bottom:4px;"></i><span style="font-size:8px;">${p.label}</span>`;
+                btn.innerHTML = `<i class="${p.icon}"></i><span>${p.label}</span>`;
                 socialGrid.appendChild(btn);
             }
         });
@@ -8928,14 +8983,11 @@ window.openUserProfile = async (uid) => {
             socialGrid.innerHTML = `<div style="width: 100%; text-align: center; color: #555; font-size: 10px; padding: 10px; font-family:'Orbitron';">NICIUN LINK SOCIAL</div>`;
         }
 
-        // --- I. DETAILS (BIO, GENDER, BIRTH, LOCATION) ---
+        // --- I. DETAILS ---
         document.getElementById('viewUserBio').innerText = data.bio || "Acest utilizator nu are o descriere.";
         document.getElementById('viewUserGender').innerText = (data.gender || "-").toUpperCase();
         document.getElementById('viewUserBirth').innerText = data.birthDate || "-";
-
-        // ADDED LOCATION FIELD HERE
-        // IMPORTANT: Update your HTML to include the Location div in the grid, 
-        // see Step 3 below if you haven't added it yet.
+        
         const locEl = document.getElementById('viewUserLocation');
         if(locEl) locEl.innerText = (data.location || "-").toUpperCase();
 
@@ -8946,31 +8998,25 @@ window.openUserProfile = async (uid) => {
         const statusEl = document.getElementById('viewUserOnlineStatus');
         statusEl.innerHTML = isOnline ? '<span style="color:#00ff88;">● ONLINE</span>' : '<span style="color:#555;">● OFFLINE</span>';
 
-        // --- J. FIX BUTTONS (RE-BINDING EVENTS) ---
+        // --- J. BUTTON RE-BINDING ---
         const inviteBtn = document.getElementById('viewUserInvites');
         const donateBtn = document.getElementById('viewUserDonated');
         
-        // 1. Update Text
         inviteBtn.innerHTML = `<i class="fas fa-user-plus"></i> Invited: ${data.totalReferrals || 0}`;
         donateBtn.innerHTML = `<i class="fas fa-hand-holding-usd"></i> Donated: ${fmtNum(data.totalCoinsDonated || 0)}`;
 
-        // 2. RE-BIND CLICKS (Fix for Issue #4)
-        // We clone the node to strip old listeners, then add new ones
         const newInviteBtn = inviteBtn.cloneNode(true);
         const newDonateBtn = donateBtn.cloneNode(true);
         
         inviteBtn.parentNode.replaceChild(newInviteBtn, inviteBtn);
         donateBtn.parentNode.replaceChild(newDonateBtn, donateBtn);
 
-        // Add the listener
         newInviteBtn.onclick = () => {
             if(window.openReferralHistory) window.openReferralHistory(uid, pName, ownerImg);
-            else alert("Functie istoric indisponibila");
         };
 
         newDonateBtn.onclick = () => {
             if(window.openDonationHistory) window.openDonationHistory(uid, pName, ownerImg);
-            else alert("Functie istoric indisponibila");
         };
         
         // --- AUDIO ---
