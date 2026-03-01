@@ -6527,6 +6527,35 @@ html {
     scrollbar-width: thin;
     scrollbar-color: var(--theme-color) #02050a;
 }
+
+
+/* Special Rank Glow Text */
+.top-rank-glow-text {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 8px;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+    border-top: 1px solid rgba(255, 215, 0, 0.5);
+    border-bottom: 1px solid rgba(255, 215, 0, 0.5);
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    animation: pulseGold 2s infinite;
+}
+
+@keyframes pulseGold {
+    0% { opacity: 0.8; text-shadow: 0 0 5px #ffd700; }
+    100% { opacity: 1; text-shadow: 0 0 20px #ffd700; }
+}
+
+/* Social Button specific icon colors when mapped */
+.sq-social-tiktok i { color: #00f2ea; text-shadow: 2px 2px 0 #ff0050; }
+.sq-social-insta i { color: #e1306c; }
+.sq-social-fb i { color: #1877f2; }
+.sq-social-discord i { color: #5865f2; }
+.sq-social-youtube i { color: #ff0000; }
   </style>
 </head>
 <body>
@@ -6923,35 +6952,100 @@ html {
 
 <div id="toastBox"></div>
 
+<!-- VIEW PROFILE MODAL (PREMIUM V6 REWORK) -->
 <div id="viewProfileModal" class="account-modal-overlay" style="z-index: 12000;">
-    <div class="account-card">
+    <!-- Reuse the V5 Card style for consistency -->
+    <div class="account-card-v5" style="border-color: var(--primary);">
+        
         <button id="closeViewProfile" class="close-pop">✕</button>
-        <div class="profile-frame-wrapper">
-            <img id="viewUserImg" src="" class="pop-img-inner">
-            <img id="viewUserFrame" src="" class="pop-frame-overlay" style="display: none;">
-        </div>        
-        <h3 id="viewUserName" class="pop-user" style="margin-bottom:5px; line-height:1;">User</h3>
-        <div id="viewUserBadges" style="display: flex; flex-direction: column; align-items: center; gap: 5px; margin-bottom: 15px;"></div>
         
-        <div style="display:flex; flex-direction:column; gap:5px; margin-bottom:15px; align-items:center;">
-            <div id="viewUserStatus" style="font-size:10px; font-weight:bold; font-family:'Orbitron';"></div>
-            <div id="viewUserStreak" class="streak-badge-profile"><i class="fas fa-fire"></i> 0 DAYS STREAK</div>
-        </div>
-        
-        <div class="view-profile-row">
-            <div class="view-stat"><img src="https://iili.io/fhc1SKQ.png" style="width:25px; margin-bottom:5px;"><span id="viewUserCoins" class="view-stat-val">0</span></div>
-            <div class="view-stat"><img src="https://iili.io/fv5bmtj.png" style="width:25px; margin-bottom:5px;"><span id="viewUserDiamonds" class="view-stat-val" style="color:#00ff88;">0</span></div>
-        </div>
+        <div class="modal-content-v5">
+            
+            <!-- 1. PROFILE PICTURE & FRAME -->
+            <div class="profile-frame-wrapper" style="width: 100px; height: 100px; margin-top: 10px; margin-bottom: 10px;">
+                <img id="viewUserImg" src="" class="pop-img-inner">
+                <img id="viewUserFrame" src="" class="pop-frame-overlay" style="display: none;">
+            </div>
 
-        <div id="viewUserBio" class="view-bio">Nu există descriere.</div>
+            <!-- 2. USERNAME & BADGES -->
+            <div class="name-wrapper-v5">
+                <h3 id="viewUserName" class="pop-user" style="font-size: 20px; text-transform: uppercase;">User</h3>
+                <div id="viewUserMemberSince" style="font-size: 9px; color: #aaa; margin-top: 2px; font-family: 'Orbitron'; letter-spacing: 1px;">
+                    MEMBER SINCE: ...
+                </div>
+            </div>
 
-        <div class="profile-stats-stack">
-            <div id="viewUserInvites" class="invite-stat"><i class="fas fa-user-plus"></i> Friends Invited: 0</div>
-            <div id="viewUserDonated" class="donate-stat"><i class="fas fa-hand-holding-usd"></i> Coins Donated: 0</div>
+            <!-- 3. EQUIPPED BADGES ROW -->
+            <div id="viewUserBadges" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; margin: 10px 0;">
+                <!-- Badges injected by JS -->
+            </div>
+
+            <!-- 4. TOP RANK STATUS (If applicable) -->
+            <div id="viewTopRankStatus" style="display:none; width: 100%; text-align: center; margin-bottom: 10px;">
+                <!-- Content like "🏆 #1 KSDA LEGEND" goes here -->
+            </div>
+
+            <!-- 5. HOLOGRAPHIC CURRENCIES -->
+            <div style="display: flex; gap: 10px; width: 100%; margin-bottom: 15px;">
+                <div class="holo-pill-v5" style="border-color: rgba(255, 215, 0, 0.5);">
+                    <img src="https://iili.io/fhc1SKQ.png" width="22">
+                    <span id="viewUserCoins" style="color:#ffd700; font-family:'Orbitron'; font-weight:900; font-size:16px;">0</span>
+                </div>
+                <div class="holo-pill-v5" style="border-color: rgba(0, 255, 136, 0.5);">
+                    <img src="https://iili.io/fv5bmtj.png" width="20">
+                    <span id="viewUserDiamonds" style="color:#00ff88; font-family:'Orbitron'; font-weight:900; font-size:16px;">0</span>
+                </div>
+            </div>
+
+            <!-- 6. SOCIAL MEDIA GRID (The 8 Buttons Style) -->
+            <div class="classamente-title-box" style="margin-bottom: 5px; margin-top: 10px;">
+                <span style="font-family:'Orbitron'; font-size:10px; color:#fff;">SOCIAL & CONTACT</span>
+            </div>
+            
+            <div id="viewSocialGrid" class="grid-8-v6">
+                <!-- Social buttons injected by JS -->
+                <div style="grid-column: span 4; text-align: center; color: #555; font-size: 10px; padding: 10px;">
+                    Acest utilizator nu are rețele sociale conectate.
+                </div>
+            </div>
+
+            <!-- 7. BIO & DETAILS SECTION -->
+            <div style="width: 100%; background: rgba(0,0,0,0.4); border-radius: 15px; padding: 15px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05);">
+                
+                <!-- Bio -->
+                <div style="font-family: 'Orbitron'; font-size: 9px; color: var(--primary); margin-bottom: 5px;">BIO</div>
+                <div id="viewUserBio" style="font-size: 11px; color: #ddd; font-style: italic; margin-bottom: 15px; line-height: 1.4;">
+                    Nu există descriere.
+                </div>
+
+                <!-- Info Grid -->
+                <div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                    
+                    <div style="text-align: center;">
+                        <div style="font-family: 'Orbitron'; font-size: 8px; color: #aaa;">GEN</div>
+                        <div id="viewUserGender" style="font-weight: 700; color: #fff; font-size: 11px;">-</div>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <div style="font-family: 'Orbitron'; font-size: 8px; color: #aaa;">NAȘTERE</div>
+                        <div id="viewUserBirth" style="font-weight: 700; color: #fff; font-size: 11px;">-</div>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <div style="font-family: 'Orbitron'; font-size: 8px; color: #aaa;">STATUS</div>
+                        <div id="viewUserOnlineStatus" style="font-weight: 700; color: #fff; font-size: 11px;">OFFLINE</div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 8. INTERACTION BUTTONS -->
+            <div class="profile-stats-stack" style="margin-top: 15px;">
+                <div id="viewUserInvites" class="invite-stat" style="width:100%;"><i class="fas fa-user-plus"></i> Friends Invited: 0</div>
+                <div id="viewUserDonated" class="donate-stat" style="width:100%;"><i class="fas fa-hand-holding-usd"></i> Coins Donated: 0</div>
+            </div>
+
         </div>
-
-        <div id="viewUserBirth" style="font-size:11px; color:#aaa; margin-bottom:10px;"></div>
-        <a id="viewUserTikTok" href="#" target="_blank" class="tiktok-btn" style="display:none;"><i class="fab fa-tiktok"></i> Follow on TikTok</a>
     </div>
 </div>
 
@@ -8614,83 +8708,157 @@ window.stopProfileAudio = function() {
 
 window.openUserProfile = async (uid) => {
     const modal = document.getElementById('viewProfileModal');
-    const card = modal.querySelector('.account-card');
+    const card = modal.querySelector('.account-card-v5'); // Updated selector
     
-    // 1. CURĂȚARE TOTALĂ (Repară bug-ul de PC și suprapunerea de culori)
-    // Eliminăm orice clasă care începe cu "pban_" sau "profile-banner-active"
-    card.className = "account-card"; 
-    card.style.backgroundImage = 'none';
+    // 1. Reset & Clean
+    card.className = "account-card-v5"; 
+    card.style.backgroundImage = "";
     card.style.background = ""; // Reset inline styles
-    
     if(window.stopProfileAudio) window.stopProfileAudio();
 
     modal.classList.add('active');
 
     try {
-        const snap = await getDoc(doc(db, "accounts", uid));
+        const snap = await window.getDoc(window.doc(window.db, "accounts", uid));
         if(!snap.exists()) return;
         const data = snap.data();
 
-        // 2. APLICARE BANNER (Prioritate ID)
+        // --- A. BANNER LOGIC ---
         if (data.equippedProfileBanner && data.equippedProfileBanner.id) {
-            // Adăugăm clasa Master
             card.classList.add('profile-banner-active');
-            // Adăugăm ID-ul ca și clasă (ex: pban_anime) - Acesta declanșează CSS-ul de mai sus
             card.classList.add(data.equippedProfileBanner.id);
-            
-            // Dacă e un banner Custom cu URL direct (Midas/RGB etc)
             if(data.equippedProfileBanner.style && !data.equippedProfileBanner.id.includes('anime')) {
                 card.style.background = data.equippedProfileBanner.style;
                 card.style.backgroundSize = "cover";
             }
         }
+
+        // --- B. PFP & FRAME ---
+        const ownerImg = data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
+        document.getElementById('viewUserImg').src = ownerImg;
         
-        // 3. INTRO AUDIO
+        const viewFrame = document.getElementById('viewUserFrame');
+        if (data.equippedFrame && data.equippedFrame.img) {
+            viewFrame.src = data.equippedFrame.img;
+            viewFrame.style.display = 'block';
+            const sc = data.equippedFrame.scale || 1.45;
+            viewFrame.style.width = (sc * 100) + "%"; 
+            viewFrame.style.height = (sc * 100) + "%";
+        } else { 
+            viewFrame.style.display = 'none'; 
+        }
+
+        // --- C. NAME & COSMETIC TEXT ---
+        let pName = data.username || "Anonim";
+        const nameEl = document.getElementById('viewUserName');
+        if(data.equippedText?.cssClass) {
+            nameEl.innerHTML = `<span class="${data.equippedText.cssClass}">${pName}</span>`;
+        } else {
+            nameEl.innerText = pName;
+        }
+
+        // --- D. MEMBER SINCE DATE ---
+        const memberSinceEl = document.getElementById('viewUserMemberSince');
+        if (data.joinedAt) {
+            const date = new Date(data.joinedAt.seconds * 1000);
+            const dateStr = date.toLocaleDateString('ro-RO', { year: 'numeric', month: 'long', day: 'numeric' });
+            memberSinceEl.innerText = `MEMBRU DIN: ${dateStr.toUpperCase()}`;
+        } else {
+            memberSinceEl.innerText = `MEMBRU DIN: NECUNOSCUT`;
+        }
+
+        // --- E. BADGES ---
+        document.getElementById('viewUserBadges').innerHTML = 
+            (typeof getRoleBadge === 'function' ? getRoleBadge(data.email) : "") + 
+            (data.equippedBadge && typeof getCosmeticBadge === 'function' ? getCosmeticBadge(data.equippedBadge) : "");
+
+        // --- F. TOP RANK DISPLAY ---
+        const rankEl = document.getElementById('viewTopRankStatus');
+        rankEl.style.display = 'none'; // Hide by default
+
+        // Logic to check if user is in Top 3 of current leaderboard (if data exists)
+        if (typeof currentLeaderboardData !== 'undefined' && currentLeaderboardData.length > 0) {
+            const rankIndex = currentLeaderboardData.findIndex(u => u.id === uid);
+            if (rankIndex >= 0 && rankIndex < 3) {
+                const rankNum = rankIndex + 1;
+                let trophy = rankNum === 1 ? '👑' : (rankNum === 2 ? '🥈' : '🥉');
+                rankEl.innerHTML = `<div class="top-rank-glow-text">${trophy} RANK #${rankNum} ${currentMode ? currentMode.toUpperCase() : "GLOBAL"}</div>`;
+                rankEl.style.display = 'block';
+            }
+        }
+
+        // --- G. CURRENCIES ---
+        document.getElementById('viewUserCoins').innerText = formatNumber(data.coins || 0);
+        document.getElementById('viewUserDiamonds').innerText = formatNumber(data.diamonds || 0);
+
+        // --- H. SOCIAL MEDIA GRID (DYNAMIC) ---
+        const socialGrid = document.getElementById('viewSocialGrid');
+        socialGrid.innerHTML = ''; // Clear previous
+
+        const socials = data.socialLinks || {};
+        const platformMap = [
+            { key: 'tiktok', icon: 'fab fa-tiktok', label: 'TikTok', class: 'sq-social-tiktok' },
+            { key: 'insta', icon: 'fab fa-instagram', label: 'Insta', class: 'sq-social-insta' },
+            { key: 'fb', icon: 'fab fa-facebook-f', label: 'Facebook', class: 'sq-social-fb' },
+            { key: 'discord', icon: 'fab fa-discord', label: 'Discord', class: 'sq-social-discord' },
+            { key: 'youtube', icon: 'fab fa-youtube', label: 'YouTube', class: 'sq-social-youtube' },
+            { key: 'twitch', icon: 'fab fa-twitch', label: 'Twitch', class: 'sq-social-twitch' },
+            { key: 'whatsapp', icon: 'fab fa-whatsapp', label: 'WhatsApp', class: 'sq-social-wa' },
+            { key: 'snapchat', icon: 'fab fa-snapchat-ghost', label: 'Snap', class: 'sq-social-snap' }
+        ];
+
+        let hasSocials = false;
+
+        platformMap.forEach(p => {
+            const link = socials[p.key];
+            if (link && link.length > 2) {
+                hasSocials = true;
+                
+                // Format Link properly if it's just a username
+                let finalLink = link;
+                if (!link.startsWith('http')) {
+                    if(p.key === 'tiktok') finalLink = `https://tiktok.com/@${link.replace('@','')}`;
+                    else if(p.key === 'insta') finalLink = `https://instagram.com/${link}`;
+                    else if(p.key === 'youtube') finalLink = `https://youtube.com/${link}`;
+                    // Add others as needed
+                }
+
+                const btn = document.createElement('a');
+                btn.className = `sq-holo-btn ${p.class}`;
+                btn.href = finalLink;
+                btn.target = "_blank";
+                btn.innerHTML = `<i class="${p.icon}"></i><span>${p.label}</span>`;
+                socialGrid.appendChild(btn);
+            }
+        });
+
+        if (!hasSocials) {
+            socialGrid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: #555; font-size: 10px; padding: 10px; font-family:'Orbitron';">NICIUN LINK SOCIAL CONECTAT</div>`;
+        }
+
+        // --- I. DETAILS (Bio, Gender, Birth) ---
+        const bioText = data.bio || "Acest utilizator nu are o descriere.";
+        document.getElementById('viewUserBio').innerText = bioText;
+        
+        document.getElementById('viewUserGender').innerText = (data.gender || "Nespecificat").toUpperCase();
+        document.getElementById('viewUserBirth').innerText = data.birthDate || "Nespecificat";
+
+        const isOnline = checkIsOnline(data);
+        const statusEl = document.getElementById('viewUserOnlineStatus');
+        statusEl.innerHTML = isOnline ? '<span style="color:#00ff88;">● ONLINE</span>' : '<span style="color:#555;">● OFFLINE</span>';
+
+        // --- J. STATS BUTTONS ---
+        document.getElementById('viewUserInvites').innerHTML = `<i class="fas fa-user-plus"></i> Invited: ${data.totalReferrals || 0}`;
+        document.getElementById('viewUserDonated').innerHTML = `<i class="fas fa-hand-holding-usd"></i> Donated: ${formatNumber(data.totalCoinsDonated || 0)}`;
+        
+        // --- AUDIO ---
         if (data.equippedIntro && data.equippedIntro.audio) {
             window.currentProfileAudio = new Audio(data.equippedIntro.audio);
             window.currentProfileAudio.volume = 0.4;
             window.currentProfileAudio.play().catch(e => console.log("Audio play blocked"));
         }
 
-        // --- Restul codului tău pentru Imagine, Nume, Valute, etc. ---
-        // (Păstrează restul funcției openUserProfile așa cum l-am reparat anterior)
-        const ownerImg = data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
-        document.getElementById('viewUserImg').src = ownerImg;
-        // ... (etc)
-        const viewFrame = document.getElementById('viewUserFrame');
-        if (data.equippedFrame && data.equippedFrame.img) {
-            viewFrame.src = data.equippedFrame.img;
-            viewFrame.style.display = 'block';
-            const sc = data.equippedFrame.scale || 1.45;
-            viewFrame.style.width = (sc * 100) + "%"; viewFrame.style.height = (sc * 100) + "%";
-        } else { viewFrame.style.display = 'none'; }
-
-        // 3. Nume & Badges
-        let pName = data.username || "Anonim";
-        if(data.equippedText?.cssClass) pName = `<span class="${data.equippedText.cssClass}">${pName}</span>`;
-        document.getElementById('viewUserName').innerHTML = pName;
-        document.getElementById('viewUserBadges').innerHTML = getRoleBadge(data.email) + (data.equippedBadge ? getCosmeticBadge(data.equippedBadge) : "");
-
-        // 4. Valute & Status
-        document.getElementById('viewUserCoins').innerText = formatNumber(data.coins || 0);
-        document.getElementById('viewUserDiamonds').innerText = formatNumber(data.diamonds || 0);
-        document.getElementById('viewUserStreak').innerHTML = `<i class="fas fa-fire"></i> ${data.streak || 0} DAYS STREAK`;
-        
-        const isOnline = checkIsOnline(data);
-        document.getElementById('viewUserStatus').innerHTML = isOnline ? '<span style="color:#00ff88;">● ONLINE</span>' : '<span style="color:#555;">● OFFLINE</span>';
-
-        // 5. FIX CRITICAL: BUTOANE ISTORIC
-        const inviteBtn = document.getElementById('viewUserInvites');
-        const donateBtn = document.getElementById('viewUserDonated');
-
-        inviteBtn.innerHTML = `<i class="fas fa-user-plus"></i> Friends Invited: ${data.totalReferrals || 0}`;
-        donateBtn.innerHTML = `<i class="fas fa-hand-holding-usd"></i> Coins Donated: ${formatNumber(data.totalCoinsDonated || 0)}`;
-
-        // Re-atașăm evenimentele pentru a fi siguri că funcționează
-        inviteBtn.onclick = () => window.openReferralHistory(uid, pName, ownerImg);
-        donateBtn.onclick = () => window.openDonationHistory(uid, pName, ownerImg);
-
-    } catch(e) { console.error(e); }
+    } catch(e) { console.error("Profile Error:", e); }
 };
 
 // Asigură-te că butonul de închidere oprește muzica
