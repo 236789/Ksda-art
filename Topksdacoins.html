@@ -6556,6 +6556,71 @@ html {
 .sq-social-fb i { color: #1877f2; }
 .sq-social-discord i { color: #5865f2; }
 .sq-social-youtube i { color: #ff0000; }
+
+
+/* --- FIX 1 & 2: Socials & Bio Centering --- */
+#viewSocialGrid {
+    display: flex !important;           /* Changed from grid to flex */
+    flex-wrap: wrap !important;         /* Allow wrapping */
+    justify-content: center !important; /* Center items */
+    gap: 8px !important;
+}
+
+#viewUserBio {
+    text-align: center !important;      /* Center Bio Text */
+}
+
+/* --- FIX 3: Dynamic Rank Colors --- */
+/* Base Style */
+.top-rank-glow-text {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 8px;
+    border-top: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    animation: pulseRank 2s infinite alternate;
+}
+
+/* Specific Mode Colors */
+.rank-mode-coins { 
+    color: #ffd700; 
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.4); 
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+}
+.rank-mode-diamonds { 
+    color: #00ff88; 
+    text-shadow: 0 0 15px rgba(0, 255, 136, 0.4); 
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+}
+.rank-mode-referrals { 
+    color: #29f3ff; 
+    text-shadow: 0 0 15px rgba(41, 243, 255, 0.4); 
+    background: linear-gradient(90deg, transparent, rgba(41, 243, 255, 0.1), transparent);
+}
+.rank-mode-donated { 
+    color: #ff4757; 
+    text-shadow: 0 0 15px rgba(255, 71, 87, 0.4); 
+    background: linear-gradient(90deg, transparent, rgba(255, 71, 87, 0.1), transparent);
+}
+.rank-mode-sustinatori { 
+    color: #bf55ec; 
+    text-shadow: 0 0 15px rgba(191, 85, 236, 0.4); 
+    background: linear-gradient(90deg, transparent, rgba(191, 85, 236, 0.1), transparent);
+}
+
+/* Emoji Glow Overlay */
+.rank-emoji {
+    filter: drop-shadow(0 0 8px currentColor); /* Makes the emoji glow the same color as text */
+    margin-right: 5px;
+}
+
+@keyframes pulseRank {
+    0% { opacity: 0.8; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.02); }
+}
   </style>
 </head>
 <body>
@@ -7018,25 +7083,31 @@ html {
                     Nu există descriere.
                 </div>
 
-                <!-- Info Grid -->
-                <div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
-                    
-                    <div style="text-align: center;">
-                        <div style="font-family: 'Orbitron'; font-size: 8px; color: #aaa;">GEN</div>
-                        <div id="viewUserGender" style="font-weight: 700; color: #fff; font-size: 11px;">-</div>
-                    </div>
+<!-- Info Grid (Updated with Location) -->
+<div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+    
+    <div style="text-align: center; flex: 1;">
+        <div style="font-family: 'Orbitron'; font-size: 7px; color: #aaa;">GEN</div>
+        <div id="viewUserGender" style="font-weight: 700; color: #fff; font-size: 10px;">-</div>
+    </div>
 
-                    <div style="text-align: center;">
-                        <div style="font-family: 'Orbitron'; font-size: 8px; color: #aaa;">NAȘTERE</div>
-                        <div id="viewUserBirth" style="font-weight: 700; color: #fff; font-size: 11px;">-</div>
-                    </div>
+    <div style="text-align: center; flex: 1;">
+        <div style="font-family: 'Orbitron'; font-size: 7px; color: #aaa;">NAȘTERE</div>
+        <div id="viewUserBirth" style="font-weight: 700; color: #fff; font-size: 10px;">-</div>
+    </div>
 
-                    <div style="text-align: center;">
-                        <div style="font-family: 'Orbitron'; font-size: 8px; color: #aaa;">STATUS</div>
-                        <div id="viewUserOnlineStatus" style="font-weight: 700; color: #fff; font-size: 11px;">OFFLINE</div>
-                    </div>
+    <!-- NEW LOCATION COLUMN -->
+    <div style="text-align: center; flex: 1;">
+        <div style="font-family: 'Orbitron'; font-size: 7px; color: #aaa;">LOCAȚIE</div>
+        <div id="viewUserLocation" style="font-weight: 700; color: #fff; font-size: 10px;">-</div>
+    </div>
 
-                </div>
+    <div style="text-align: center; flex: 1;">
+        <div style="font-family: 'Orbitron'; font-size: 7px; color: #aaa;">STATUS</div>
+        <div id="viewUserOnlineStatus" style="font-weight: 700; color: #fff; font-size: 10px;">OFF</div>
+    </div>
+
+</div>
             </div>
 
             <!-- 8. INTERACTION BUTTONS -->
@@ -8708,36 +8779,29 @@ window.stopProfileAudio = function() {
 
 window.openUserProfile = async (uid) => {
     const modal = document.getElementById('viewProfileModal');
-    // Găsim cardul indiferent dacă e v5 sau v6 sau simplu
-    const card = modal.querySelector('.account-card, .account-card-v5'); 
+    const card = modal.querySelector('.account-card-v5'); 
     
-    // 1. Resetare și Curățare
+    // 1. Reset & Clean
     if(card) {
-        // Păstrăm clasa de bază dar scoatem bannerele vechi
         const baseClass = card.classList.contains('account-card-v5') ? 'account-card-v5' : 'account-card';
         card.className = baseClass; 
         card.style.backgroundImage = "";
-        card.style.background = ""; // Reset inline styles
+        card.style.background = ""; 
     }
     
     if(window.stopProfileAudio) window.stopProfileAudio();
 
     modal.classList.add('active');
 
-    // 2. Setare stare de încărcare (opțional, ca să nu pară gol)
+    // 2. Loading State
     document.getElementById('viewUserName').innerText = "Se încarcă...";
-    document.getElementById('viewUserMemberSince').innerText = "PRELUARE DATE...";
+    document.getElementById('viewUserMemberSince').innerText = "...";
 
     try {
-        // --- FIX: Folosim direct db, doc, getDoc (fără window.) ---
-        // Aceste variabile sunt disponibile în scriptul type="module"
         const userRef = doc(db, "accounts", uid);
         const snap = await getDoc(userRef);
         
-        if(!snap.exists()) {
-            console.error("Userul nu există în baza de date.");
-            return;
-        }
+        if(!snap.exists()) return;
 
         const data = snap.data();
 
@@ -8745,7 +8809,6 @@ window.openUserProfile = async (uid) => {
         if (card && data.equippedProfileBanner && data.equippedProfileBanner.id) {
             card.classList.add('profile-banner-active');
             card.classList.add(data.equippedProfileBanner.id);
-            // Dacă e banner custom (imagine URL)
             if(data.equippedProfileBanner.style && !data.equippedProfileBanner.id.includes('anime')) {
                 card.style.background = data.equippedProfileBanner.style;
                 card.style.backgroundSize = "cover";
@@ -8756,7 +8819,6 @@ window.openUserProfile = async (uid) => {
         const ownerImg = data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
         const imgEl = document.getElementById('viewUserImg');
         imgEl.src = ownerImg;
-        // Fallback dacă imaginea e stricată
         imgEl.onerror = function() { this.src = 'https://i.ibb.co/4pGm9S2/user-placeholder.png'; };
         
         const viewFrame = document.getElementById('viewUserFrame');
@@ -8770,7 +8832,7 @@ window.openUserProfile = async (uid) => {
             viewFrame.style.display = 'none'; 
         }
 
-        // --- C. NAME & COSMETIC TEXT ---
+        // --- C. NAME ---
         let pName = data.username || "Anonim";
         const nameEl = document.getElementById('viewUserName');
         if(data.equippedText?.cssClass) {
@@ -8779,7 +8841,7 @@ window.openUserProfile = async (uid) => {
             nameEl.innerText = pName;
         }
 
-        // --- D. MEMBER SINCE DATE ---
+        // --- D. MEMBER SINCE ---
         const memberSinceEl = document.getElementById('viewUserMemberSince');
         if (data.joinedAt) {
             const date = new Date(data.joinedAt.seconds * 1000);
@@ -8794,26 +8856,29 @@ window.openUserProfile = async (uid) => {
             (typeof getRoleBadge === 'function' ? getRoleBadge(data.email) : "") + 
             (data.equippedBadge && typeof getCosmeticBadge === 'function' ? getCosmeticBadge(data.equippedBadge) : "");
 
-        // --- F. TOP RANK STATUS ---
+        // --- F. TOP RANK STATUS (FIXED COLORS) ---
         const rankEl = document.getElementById('viewTopRankStatus');
-        if(rankEl) {
-            rankEl.style.display = 'none';
-            // Verificăm dacă variabila globală currentLeaderboardData există
-            if (typeof currentLeaderboardData !== 'undefined' && currentLeaderboardData.length > 0) {
-                const rankIndex = currentLeaderboardData.findIndex(u => u.id === uid);
-                if (rankIndex >= 0 && rankIndex < 3) {
-                    const rankNum = rankIndex + 1;
-                    let trophy = rankNum === 1 ? '👑' : (rankNum === 2 ? '🥈' : '🥉');
-                    // Verificăm dacă currentMode există, altfel punem GLOBAL
-                    let modeName = (typeof currentMode !== 'undefined') ? currentMode.toUpperCase() : "GLOBAL";
-                    rankEl.innerHTML = `<div class="top-rank-glow-text">${trophy} RANK #${rankNum} ${modeName}</div>`;
-                    rankEl.style.display = 'block';
-                }
+        rankEl.style.display = 'none';
+
+        if (typeof currentLeaderboardData !== 'undefined' && currentLeaderboardData.length > 0) {
+            const rankIndex = currentLeaderboardData.findIndex(u => u.id === uid);
+            if (rankIndex >= 0 && rankIndex < 3) {
+                const rankNum = rankIndex + 1;
+                let trophy = rankNum === 1 ? '👑' : (rankNum === 2 ? '🥈' : '🥉');
+                
+                // Determine Mode
+                let activeMode = (typeof currentMode !== 'undefined') ? currentMode : "coins";
+                let modeName = activeMode.toUpperCase();
+                
+                // Set Class based on Mode
+                let colorClass = `rank-mode-${activeMode}`; 
+
+                rankEl.innerHTML = `<div class="top-rank-glow-text ${colorClass}"><span class="rank-emoji">${trophy}</span> RANK #${rankNum} ${modeName}</div>`;
+                rankEl.style.display = 'block';
             }
         }
 
         // --- G. CURRENCIES ---
-        // Helper simplu pentru numere dacă funcția formatNumber nu e disponibilă în scope
         const fmtNum = (num) => {
              if(typeof formatNumber === 'function') return formatNumber(num);
              if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
@@ -8825,72 +8890,88 @@ window.openUserProfile = async (uid) => {
 
         // --- H. SOCIAL MEDIA GRID ---
         const socialGrid = document.getElementById('viewSocialGrid');
-        if(socialGrid) {
-            socialGrid.innerHTML = ''; 
+        socialGrid.innerHTML = ''; 
 
-            const socials = data.socialLinks || {};
-            const platformMap = [
-                { key: 'tiktok', icon: 'fab fa-tiktok', label: 'TikTok', class: 'sq-social-tiktok' },
-                { key: 'insta', icon: 'fab fa-instagram', label: 'Insta', class: 'sq-social-insta' },
-                { key: 'fb', icon: 'fab fa-facebook-f', label: 'Facebk', class: 'sq-social-fb' }, // Scurtat "Facebook"
-                { key: 'discord', icon: 'fab fa-discord', label: 'Discord', class: 'sq-social-discord' },
-                { key: 'youtube', icon: 'fab fa-youtube', label: 'YouTube', class: 'sq-social-youtube' },
-                { key: 'twitch', icon: 'fab fa-twitch', label: 'Twitch', class: 'sq-social-twitch' },
-                { key: 'whatsapp', icon: 'fab fa-whatsapp', label: 'WApp', class: 'sq-social-wa' },
-                { key: 'snapchat', icon: 'fab fa-snapchat-ghost', label: 'Snap', class: 'sq-social-snap' }
-            ];
+        const socials = data.socialLinks || {};
+        const platformMap = [
+            { key: 'tiktok', icon: 'fab fa-tiktok', label: 'TikTok', class: 'sq-social-tiktok' },
+            { key: 'insta', icon: 'fab fa-instagram', label: 'Insta', class: 'sq-social-insta' },
+            { key: 'fb', icon: 'fab fa-facebook-f', label: 'Facebk', class: 'sq-social-fb' },
+            { key: 'discord', icon: 'fab fa-discord', label: 'Discord', class: 'sq-social-discord' },
+            { key: 'youtube', icon: 'fab fa-youtube', label: 'YouTube', class: 'sq-social-youtube' },
+            { key: 'twitch', icon: 'fab fa-twitch', label: 'Twitch', class: 'sq-social-twitch' },
+            { key: 'whatsapp', icon: 'fab fa-whatsapp', label: 'WApp', class: 'sq-social-wa' },
+            { key: 'snapchat', icon: 'fab fa-snapchat-ghost', label: 'Snap', class: 'sq-social-snap' }
+        ];
 
-            let hasSocials = false;
-
-            platformMap.forEach(p => {
-                const link = socials[p.key];
-                if (link && link.length > 1) {
-                    hasSocials = true;
-                    
-                    let finalLink = link;
-                    // Formatare rapidă link
-                    if (!link.startsWith('http')) {
-                        if(p.key === 'tiktok') finalLink = `https://tiktok.com/@${link.replace('@','')}`;
-                        else if(p.key === 'insta') finalLink = `https://instagram.com/${link}`;
-                        else if(p.key === 'youtube') finalLink = `https://youtube.com/${link}`;
-                    }
-
-                    const btn = document.createElement('a');
-                    btn.className = `sq-holo-btn ${p.class}`;
-                    btn.href = finalLink;
-                    btn.target = "_blank";
-                    // Icon sus, text jos
-                    btn.innerHTML = `<i class="${p.icon}" style="font-size:18px; margin-bottom:4px;"></i><span style="font-size:8px;">${p.label}</span>`;
-                    socialGrid.appendChild(btn);
+        let hasSocials = false;
+        platformMap.forEach(p => {
+            const link = socials[p.key];
+            if (link && link.length > 1) {
+                hasSocials = true;
+                let finalLink = link;
+                if (!link.startsWith('http')) {
+                    if(p.key === 'tiktok') finalLink = `https://tiktok.com/@${link.replace('@','')}`;
+                    else if(p.key === 'insta') finalLink = `https://instagram.com/${link}`;
+                    else if(p.key === 'youtube') finalLink = `https://youtube.com/${link}`;
                 }
-            });
-
-            if (!hasSocials) {
-                socialGrid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: #555; font-size: 10px; padding: 10px; font-family:'Orbitron';">NICIUN LINK SOCIAL</div>`;
+                const btn = document.createElement('a');
+                btn.className = `sq-holo-btn ${p.class}`;
+                btn.href = finalLink;
+                btn.target = "_blank";
+                btn.innerHTML = `<i class="${p.icon}" style="font-size:18px; margin-bottom:4px;"></i><span style="font-size:8px;">${p.label}</span>`;
+                socialGrid.appendChild(btn);
             }
+        });
+
+        if (!hasSocials) {
+            socialGrid.innerHTML = `<div style="width: 100%; text-align: center; color: #555; font-size: 10px; padding: 10px; font-family:'Orbitron';">NICIUN LINK SOCIAL</div>`;
         }
 
-        // --- I. DETAILS ---
-        const bioText = data.bio || "Acest utilizator nu are o descriere.";
-        document.getElementById('viewUserBio').innerText = bioText;
-        
+        // --- I. DETAILS (BIO, GENDER, BIRTH, LOCATION) ---
+        document.getElementById('viewUserBio').innerText = data.bio || "Acest utilizator nu are o descriere.";
         document.getElementById('viewUserGender').innerText = (data.gender || "-").toUpperCase();
         document.getElementById('viewUserBirth').innerText = data.birthDate || "-";
 
-        // Status Online (folosim funcția globală checkIsOnline dacă există)
+        // ADDED LOCATION FIELD HERE
+        // IMPORTANT: Update your HTML to include the Location div in the grid, 
+        // see Step 3 below if you haven't added it yet.
+        const locEl = document.getElementById('viewUserLocation');
+        if(locEl) locEl.innerText = (data.location || "-").toUpperCase();
+
         let isOnline = false;
         if (typeof checkIsOnline === 'function') isOnline = checkIsOnline(data);
-        else if (data.isOnline) isOnline = true; // fallback simplu
+        else if (data.isOnline) isOnline = true; 
 
         const statusEl = document.getElementById('viewUserOnlineStatus');
         statusEl.innerHTML = isOnline ? '<span style="color:#00ff88;">● ONLINE</span>' : '<span style="color:#555;">● OFFLINE</span>';
 
-        // --- J. STATS BUTTONS ---
-        const inviteEl = document.getElementById('viewUserInvites');
-        if(inviteEl) inviteEl.innerHTML = `<i class="fas fa-user-plus"></i> Invited: ${data.totalReferrals || 0}`;
+        // --- J. FIX BUTTONS (RE-BINDING EVENTS) ---
+        const inviteBtn = document.getElementById('viewUserInvites');
+        const donateBtn = document.getElementById('viewUserDonated');
         
-        const donateEl = document.getElementById('viewUserDonated');
-        if(donateEl) donateEl.innerHTML = `<i class="fas fa-hand-holding-usd"></i> Donated: ${fmtNum(data.totalCoinsDonated || 0)}`;
+        // 1. Update Text
+        inviteBtn.innerHTML = `<i class="fas fa-user-plus"></i> Invited: ${data.totalReferrals || 0}`;
+        donateBtn.innerHTML = `<i class="fas fa-hand-holding-usd"></i> Donated: ${fmtNum(data.totalCoinsDonated || 0)}`;
+
+        // 2. RE-BIND CLICKS (Fix for Issue #4)
+        // We clone the node to strip old listeners, then add new ones
+        const newInviteBtn = inviteBtn.cloneNode(true);
+        const newDonateBtn = donateBtn.cloneNode(true);
+        
+        inviteBtn.parentNode.replaceChild(newInviteBtn, inviteBtn);
+        donateBtn.parentNode.replaceChild(newDonateBtn, donateBtn);
+
+        // Add the listener
+        newInviteBtn.onclick = () => {
+            if(window.openReferralHistory) window.openReferralHistory(uid, pName, ownerImg);
+            else alert("Functie istoric indisponibila");
+        };
+
+        newDonateBtn.onclick = () => {
+            if(window.openDonationHistory) window.openDonationHistory(uid, pName, ownerImg);
+            else alert("Functie istoric indisponibila");
+        };
         
         // --- AUDIO ---
         if (data.equippedIntro && data.equippedIntro.audio) {
@@ -8901,7 +8982,6 @@ window.openUserProfile = async (uid) => {
 
     } catch(e) { 
         console.error("Profile Error:", e);
-        // Arătăm eroarea în consolă dar nu blocăm tot UI-ul
     }
 };
 
