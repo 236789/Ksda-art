@@ -6910,18 +6910,33 @@ html {
 }
 
 
-
-/* This makes the dark overlay transparent enough to see the GIF */
-.account-card-v5.profile-banner-active::before {
-    background: rgba(5, 11, 20, 0.4) !important; 
-    backdrop-filter: blur(2px);
-}
-
-/* Asigură-te că GIF-ul acoperă tot cardul */
-.account-card-v5.profile-banner-active {
+/* 1. BASE CARD RESET - Make it ready for full background */
+/* We target both account-card and account-card-v5 to be safe */
+.account-card-v5.profile-banner-active,
+.account-card.profile-banner-active {
+    background-image: none !important; /* Remove the default dashboard GIF */
     background-size: cover !important;
     background-position: center !important;
+    background-repeat: no-repeat !important;
+    box-shadow: inset 0 0 100px #000, 0 0 50px rgba(0,0,0,0.5) !important; 
+    border-width: 2px !important;
+    position: relative;
+    z-index: 1;
 }
+
+/* 2. MAKE OVERLAY TRANSPARENT SO WE CAN SEE THE GIF */
+.account-card-v5.profile-banner-active::before,
+.account-card.profile-banner-active::before {
+    background: rgba(5, 11, 20, 0.35) !important; /* Lowered from 0.96 */
+    backdrop-filter: blur(2px);
+    z-index: 0;
+}
+
+/* 3. FIX GIF SELECTORS (Force them to override everything) */
+/* Ensure these class names match exactly what is in your BANNERS_DB */
+.account-card-v5.pban_anime, .account-card.pban_anime { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/anime-mix.gif?alt=media&token=eed3db7d-e99f-4a5c-b7ee-15b6b51f20e8') !important; }
+.account-card-v5.pban_thunder, .account-card.pban_thunder { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') !important; }
+.account-card-v5.pban_phantom, .account-card.pban_phantom { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/desc%C4%83rcare.gif?alt=media&token=b2facc41-d8e6-40c5-bb0a-f4011911f415') !important; }
   </style>
 </head>
 <body>
