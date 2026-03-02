@@ -6909,6 +6909,18 @@ html {
     box-shadow: 0 0 20px #00e5ff;
 }
 
+
+
+/* Permite GIF-ului să se vadă prin stratul întunecat */
+.account-card-v5.profile-banner-active::before {
+    background: rgba(5, 11, 20, 0.3) !important; /* Scade opacitatea de la 0.96 la 0.3 */
+}
+
+/* Asigură-te că GIF-ul acoperă tot cardul */
+.account-card-v5.profile-banner-active {
+    background-size: cover !important;
+    background-position: center !important;
+}
   </style>
 </head>
 <body>
@@ -9093,18 +9105,18 @@ window.openUserProfile = async (uid) => {
 
         const data = snap.data();
 
-// --- A. BANNER LOGIC (REPARAT) ---
+// --- A. BANNER LOGIC (FIXED) ---
         if (card && data.equippedProfileBanner && data.equippedProfileBanner.id) {
             card.classList.add('account-card', 'profile-banner-active', data.equippedProfileBanner.id);
             
-            // Dacă e banner de tip GIF/Animat (pban_), NU aplicăm stilul de fundal (gradient)
-            if(data.equippedProfileBanner.style && !data.equippedProfileBanner.id.startsWith('pban_')) {
+            // Dacă e banner animat (GIF), eliminăm stilul manual pentru a lăsa CSS-ul să lucreze
+            if(data.equippedProfileBanner.id.startsWith('pban_')) {
+                card.style.removeProperty('background');
+                card.style.removeProperty('background-image');
+            } else if(data.equippedProfileBanner.style) {
+                // Dacă e gradient static, îl aplicăm manual
                 card.style.background = data.equippedProfileBanner.style;
                 card.style.backgroundSize = "cover";
-            } else {
-                // IMPORTANT: Ștergem fundalul manual ca să lăsăm GIF-ul din CSS să se vadă
-                card.style.background = "none";
-                card.style.backgroundImage = ""; 
             }
         }
 
