@@ -4900,7 +4900,6 @@ input:checked + .slider:before { transform: translateX(16px); }
 
 /* --- FIX VIZIBILITATE BANNERE ANIMATE --- */
 .account-card.profile-banner-active {
-    background-image: none !important; /* Scoatem fundalul default ca să se vadă cel animat */
     background-color: #050b14 !important;
     overflow: hidden !important;
     z-index: 1;
@@ -9094,17 +9093,18 @@ window.openUserProfile = async (uid) => {
 
         const data = snap.data();
 
-        // --- A. BANNER LOGIC (FIXED) ---
+// --- A. BANNER LOGIC (REPARAT) ---
         if (card && data.equippedProfileBanner && data.equippedProfileBanner.id) {
-            // CRITICAL FIX: Add 'account-card' so the CSS selectors work
-            card.classList.add('account-card'); 
-            card.classList.add('profile-banner-active');
-            card.classList.add(data.equippedProfileBanner.id);
+            card.classList.add('account-card', 'profile-banner-active', data.equippedProfileBanner.id);
             
-            // Handle custom gradient styles vs GIF classes
-if(data.equippedProfileBanner.style && !data.equippedProfileBanner.id.startsWith('pban_')) {
+            // Dacă e banner de tip GIF/Animat (pban_), NU aplicăm stilul de fundal (gradient)
+            if(data.equippedProfileBanner.style && !data.equippedProfileBanner.id.startsWith('pban_')) {
                 card.style.background = data.equippedProfileBanner.style;
                 card.style.backgroundSize = "cover";
+            } else {
+                // IMPORTANT: Ștergem fundalul manual ca să lăsăm GIF-ul din CSS să se vadă
+                card.style.background = "none";
+                card.style.backgroundImage = ""; 
             }
         }
 
