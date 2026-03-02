@@ -6909,34 +6909,30 @@ html {
     box-shadow: 0 0 20px #00e5ff;
 }
 
-
-/* 1. BASE CARD RESET - Make it ready for full background */
-/* We target both account-card and account-card-v5 to be safe */
-.account-card-v5.profile-banner-active,
-.account-card.profile-banner-active {
-    background-image: none !important; /* Remove the default dashboard GIF */
+/* --- UNIVERSAL BANNER SYSTEM (Leaderboard & Wall Sync) --- */
+.account-card.profile-banner-active,
+.account-card-v5.profile-banner-active {
+    background-image: none !important; /* Removes the default dashboard GIF */
     background-size: cover !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
-    box-shadow: inset 0 0 100px #000, 0 0 50px rgba(0,0,0,0.5) !important; 
-    border-width: 2px !important;
-    position: relative;
-    z-index: 1;
+    box-shadow: inset 0 0 120px #000, 0 0 30px rgba(0,0,0,0.5) !important;
 }
 
-/* 2. MAKE OVERLAY TRANSPARENT SO WE CAN SEE THE GIF */
-.account-card-v5.profile-banner-active::before,
-.account-card.profile-banner-active::before {
-    background: rgba(5, 11, 20, 0.35) !important; /* Lowered from 0.96 */
+/* CRITICAL FIX: Make the dark overlay transparent when a banner is active */
+.account-card.profile-banner-active::before,
+.account-card-v5.profile-banner-active::before {
+    background: rgba(5, 11, 20, 0.45) !important; /* Changed from 0.96 to 0.45 */
     backdrop-filter: blur(2px);
-    z-index: 0;
 }
 
-/* 3. FIX GIF SELECTORS (Force them to override everything) */
-/* Ensure these class names match exactly what is in your BANNERS_DB */
-.account-card-v5.pban_anime, .account-card.pban_anime { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/anime-mix.gif?alt=media&token=eed3db7d-e99f-4a5c-b7ee-15b6b51f20e8') !important; }
-.account-card-v5.pban_thunder, .account-card.pban_thunder { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') !important; }
-.account-card-v5.pban_phantom, .account-card.pban_phantom { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/desc%C4%83rcare.gif?alt=media&token=b2facc41-d8e6-40c5-bb0a-f4011911f415') !important; }
+/* GIF assignments - Removed the .account-card prefix so they work on any card */
+.pban_anime { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/anime-mix.gif?alt=media&token=eed3db7d-e99f-4a5c-b7ee-15b6b51f20e8') !important; border-color: #ff00ff !important; }
+.pban_thunder { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/placidplace-lightning-19147_256.gif?alt=media&token=4ef1b977-dff7-40c7-b650-58cef0250bfd') !important; border-color: #00e5ff !important; }
+.pban_phantom { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/desc%C4%83rcare.gif?alt=media&token=b2facc41-d8e6-40c5-bb0a-f4011911f415') !important; border-color: #8a2be2 !important; }
+.pban_bluefire { background-image: url('https://media.giphy.com/media/3bc8pP1rVdfgN1uoMV/giphy.gif') !important; border-color: #00e5ff !important; }
+.pban_cash { background-image: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmo2ZHl0NXEyNzcxcG13b3VuNWw5cnV6bWhyZGV5NGRxOGk1NmdteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BfFFYPSVYr9UR6EtEL/giphy.gif') !important; border-color: #00ff00 !important; }
+
   </style>
 </head>
 <body>
@@ -9163,23 +9159,36 @@ window.openUserProfile = async (uid) => {
 
         const data = snap.data();
 
-// --- A. BANNER LOGIC (FIXED) ---
-// Changed 'equippedProfileBanner' to 'equippedBanner' to match what is saved in the DB
+// --- A. BANNER LOGIC (ULTIMATE REPAIR) ---
 const bannerData = data.equippedBanner; 
 
-if (card && bannerData && bannerData.id) {
-    card.classList.add('account-card', 'profile-banner-active', bannerData.id);
+if (card) {
+    // 1. CLEAR EVERYTHING FIRST (Prevent old GIFs from sticking)
+    card.classList.remove('profile-banner-active');
+    // Remove any class that looks like a banner ID
+    const classesToRemove = Array.from(card.classList).filter(c => c.startsWith('pban_') || c.startsWith('anim_'));
+    classesToRemove.forEach(c => card.classList.remove(c));
     
-    // If it's an animated banner (GIF), we remove manual styles so the CSS class takes over
-    if(bannerData.id.startsWith('pban_') || bannerData.id.startsWith('anim_')) {
-        card.style.removeProperty('background');
-        card.style.removeProperty('background-image');
-    } else if(bannerData.cssClass) {
-        // Fallback: If it has a cssClass, add that too
-        card.classList.add(bannerData.cssClass);
+    // Reset manual styles
+    card.style.background = "";
+    card.style.backgroundImage = "";
+
+    if (bannerData && bannerData.id) {
+        // 2. APPLY NEW BANNER
+        card.classList.add('profile-banner-active', bannerData.id);
+        
+        // 3. FORCE VISIBILITY FOR GIFs
+        if(bannerData.id.startsWith('pban_') || bannerData.id.startsWith('anim_')) {
+            // We set these to important "none" via JS to ensure the CSS .class takes over
+            card.style.setProperty('background', 'none', 'important');
+            card.style.setProperty('background-image', 'none', 'important');
+        } else if (bannerData.style) {
+            // Normal static gradients
+            card.style.background = bannerData.style;
+            card.style.backgroundSize = "cover";
+        }
     }
 }
-
         // --- B. PFP & FRAME ---
         const ownerImg = data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
         const imgEl = document.getElementById('viewUserImg');
