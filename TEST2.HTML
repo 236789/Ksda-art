@@ -8449,6 +8449,55 @@ input:checked + .slider:before { transform: translateX(16px); }
     box-shadow: 0 0 50px var(--plasma-color), inset 0 0 20px rgba(var(--rgb-color), 0.4);
     background: rgba(var(--rgb-color), 0.1);
 }
+
+
+
+
+@media (max-width: 768px) {
+    /* 1. Kill 'Fixed' Background - This is the #1 cause of mobile lag */
+    body {
+        background-attachment: scroll !important;
+        /* Optional: Disable the GIF on mobile if it's still laggy */
+        /* background-image: linear-gradient(to bottom, rgba(5, 11, 20, 0.9), var(--bg-dark)), url('https://i.ibb.co/4pGm9S2/static-bg.jpg') !important; */
+    }
+
+    /* 2. Disable Backdrop Blurs - Extremely expensive for mobile GPUs */
+    header, 
+    .feature-card, 
+    .review-slide-card, 
+    .btn-plasma, 
+    .btn-reviews-plasma,
+    .btn-team-plasma,
+    .account-card-v5 {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(13, 25, 41, 0.95) !important; /* Make background more solid so it still looks good */
+    }
+
+    /* 3. Simplify Shadows - Large blurs kill scroll performance */
+    * {
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+    
+    /* Keep only critical glows but smaller */
+    .hero-title-master {
+        filter: drop-shadow(0 0 10px rgba(41, 243, 255, 0.5)) !important;
+    }
+
+    /* 4. Stop Background Grid Animations - No need to move them while scrolling */
+    .hero-grid-floor, 
+    .cyber-grid-indigo, 
+    .indigo-grid, 
+    .footer-3d-grid {
+        animation: none !important;
+    }
+
+    /* 5. Optimization: Prevent Layout Re-paints */
+    section, div {
+        will-change: auto !important; 
+    }
+}
   </style>
 </head>
 <body>
@@ -14880,11 +14929,19 @@ async function updateOnlineStatus() {
     }
 }
 
-// REMOVE THE SCROLL LISTENER - It is the main cause of lag.
-// Relying on click and mousemove is enough to know a user is active.
+// --- OPTIMIZED ONLINE STATUS TRACKING ---
+// Consolidated listeners. The 'scroll' listener is removed to fix lag.
+
 window.addEventListener('click', updateOnlineStatus);
-window.addEventListener('mousemove', updateOnlineStatus);
 window.addEventListener('keydown', updateOnlineStatus);
+
+// Optimization: Only track mouse movements on PC. 
+// On Mobile, we use 'touchstart' which is much lighter on the CPU.
+if (window.innerWidth > 768) {
+    window.addEventListener('mousemove', updateOnlineStatus);
+} else {
+    window.addEventListener('touchstart', updateOnlineStatus, {passive: true});
+}
 
 
 function formatCurrency(num) {
@@ -14893,10 +14950,7 @@ function formatCurrency(num) {
     return num || 0;
 }
 
-    // Attach listeners
-    window.addEventListener('scroll', updateOnlineStatus);
-    window.addEventListener('click', updateOnlineStatus);
-    window.addEventListener('mousemove', updateOnlineStatus);
+
 
 async function handleLoginFlow() {
     try {
