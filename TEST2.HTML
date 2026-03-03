@@ -8556,9 +8556,8 @@ COMUNITATEA</div>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, orderBy, serverTimestamp, doc, getDoc, setDoc, updateDoc, getDocs, limit, startAfter, increment, arrayUnion, getCountFromServer, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, orderBy, serverTimestamp,where, doc, getDoc, setDoc, updateDoc, getDocs, limit, startAfter, increment, arrayUnion, getCountFromServer, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-import { getDatabase, ref, set, push, onValue, update, remove, onChildAdded, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 
     const firebaseConfig = {
@@ -9856,183 +9855,177 @@ function goToCategories() {
     console.log("Navigare către categorii...");
     showScreen('categoryScreen');
 }
-const rtdb = getDatabase(app);
-let currentRoom = null;
-let myPlayerID = null;
+
+
+
+// Add these to your firebase-firestore imports
+// import { collection, query, where, onSnapshot, addDoc, doc, updateDoc, getDocs, getDoc, setDoc } from "...";
+
+let currentRoomId = null;
 
 const gameEngine = {
-    // 1. ROOM SYSTEM
+    // 1. CREATE & JOIN
     async createRoom() {
-        if (!auth.currentUser) return alert("Please login first!");
-        const roomID = Math.floor(1000 + Math.random() * 9000);
-        currentRoom = roomID;
-        const roomRef = ref(rtdb, `rooms/${roomID}`);
+        if (!auth.currentUser) return alert("Please Login");
+        const id = Math.floor(1000 + Math.random() * 9000).toString();
+        currentRoomId = id;
         
-        await set(roomRef, {
+        await setDoc(doc(db, "rooms", id), {
             host: auth.currentUser.uid,
-            status: 'lobby',
-            turn: 0,
+            status: "lobby",
+            turnIndex: 0,
+            targetId: null,
+            players: [{
+                id: auth.currentUser.uid,
+                name: auth.currentUser.displayName,
+                img: auth.currentUser.photoURL,
+                strikes: 0,
+                hasPass: true
+            }],
             createdAt: Date.now()
         });
-        this.joinRoom(roomID);
+        this.initRoomListener(id);
     },
 
-    async joinRoom(manualID = null) {
-        let roomID = manualID;
-        if (!roomID) {
-            const roomsSnap = await get(ref(rtdb, 'rooms'));
-            const available = roomsSnap.val();
-            roomID = Object.keys(available || {}).find(id => available[id].status === 'lobby');
-            if (!roomID) return alert("No rooms available. Create one!");
-        }
+    async autoJoin() {
+        const q = query(collection(db, "rooms"), where("status", "==", "lobby"));
+        const snap = await getDocs(q);
+        if (snap.empty) return this.createRoom();
 
-        currentRoom = roomID;
-        const playerRef = ref(rtdb, `rooms/${roomID}/players/${auth.currentUser.uid}`);
-        const pSnap = await get(ref(rtdb, `rooms/${roomID}/players`));
-        const pCount = Object.keys(pSnap.val() || {}).length;
+        const roomDoc = snap.docs[0];
+        const data = roomDoc.data();
+        if (data.players.length >= 6) return this.createRoom();
 
-        if (pCount >= 6) return alert("Room full!");
-
-        await set(playerRef, {
+        currentRoomId = roomDoc.id;
+        const newPlayers = [...data.players, {
+            id: auth.currentUser.uid,
             name: auth.currentUser.displayName,
             img: auth.currentUser.photoURL,
             strikes: 0,
-            hasPass: true,
-            order: pCount,
-            id: auth.currentUser.uid
-        });
+            hasPass: true
+        }];
 
-        this.switchScreen('screenLobby');
-        document.getElementById('roomIDDisplay').innerText = `Room: #${roomID}`;
-        this.listenToRoom(roomID);
+        await updateDoc(doc(db, "rooms", currentRoomId), { players: newPlayers });
+        this.initRoomListener(currentRoomId);
     },
 
-    // 2. SYNC ENGINE
-    listenToRoom(id) {
-        onValue(ref(rtdb, `rooms/${id}`), (snapshot) => {
-            const data = snapshot.val();
+    // 2. REAL-TIME SYNC
+    initRoomListener(id) {
+        this.switchScreen('screenLobby');
+        document.getElementById('roomIDDisplay').innerText = `Room: #${id}`;
+
+        onSnapshot(doc(db, "rooms", id), (snapshot) => {
+            const data = snapshot.val ? snapshot.val() : snapshot.data();
             if (!data) return;
 
-            const players = Object.values(data.players || {}).sort((a,b) => a.order - b.order);
-            this.renderPlayers(players, data);
-
-            if (data.status === 'playing') {
-                this.switchScreen('screenArena');
-                this.handleTurns(data, players);
-            }
+            this.renderPlayers(data);
             
-            if (data.host === auth.currentUser.uid) {
-                document.getElementById('startBtn').style.display = 'block';
+            if (data.status === "playing") {
+                this.switchScreen('screenArena');
+                this.updateArenaUI(data);
+            }
+
+            if (data.host === auth.currentUser.uid && data.status === "lobby") {
+                document.getElementById('startBtn').style.display = "block";
             }
         });
 
         // Chat Listener
-        onChildAdded(ref(rtdb, `rooms/${id}/chat`), (snap) => {
-            const msg = snap.val();
+        const chatQ = query(collection(db, "rooms", id, "chat"), orderBy("time", "asc"));
+        onSnapshot(chatQ, (snap) => {
             const log = document.getElementById('gameChatLog');
-            log.innerHTML += `<div><b style="color:var(--primary)">${msg.user}:</b> ${msg.text}</div>`;
+            log.innerHTML = "";
+            snap.forEach(doc => {
+                const m = doc.data();
+                log.innerHTML += `<div><b style="color:var(--primary)">${m.user}:</b> ${m.text}</div>`;
+            });
             log.scrollTop = log.scrollHeight;
         });
     },
 
-    // 3. GAMEPLAY LOGIC
+    // 3. GAMEPLAY
     async startGame() {
-        await update(ref(rtdb, `rooms/${currentRoom}`), { status: 'playing' });
+        await updateDoc(doc(db, "rooms", currentRoomId), { status: "playing" });
     },
 
-    renderPlayers(players, roomData) {
-        const containers = ['lobbyPlayersList', 'arenaPlayersList'];
-        containers.forEach(cid => {
-            const el = document.getElementById(cid);
-            if (!el) return;
-            el.innerHTML = players.map((p, idx) => `
-                <div class="p-card ${roomData.turn === idx ? 'active-turn' : ''} ${roomData.target === p.id ? 'is-target' : ''} ${p.strikes >= 3 ? 'eliminated' : ''}" 
-                     onclick="gameEngine.selectTarget('${p.id}', ${idx})">
-                    ${p.id === roomData.host ? '<div class="p-host-tag">👑 HOST</div>' : ''}
-                    <div class="webcam-overlay" id="cam-${p.id}">
-                        <video class="webcam-video" id="vid-${p.id}" autoplay></video>
-                        <div class="timer-circle" id="timer-${p.id}">15</div>
-                    </div>
-                    <img src="${p.img}" class="p-avatar">
-                    <div class="p-name">PLAYER ${idx + 1}</div>
-                    <div class="p-name" style="font-size:8px; opacity:0.6;">${p.name}</div>
-                    <div class="strike-bar">
-                        <div class="strike-dot ${p.strikes >=1 ? 'on' : ''}"></div>
-                        <div class="strike-dot ${p.strikes >=2 ? 'on' : ''}"></div>
-                        <div class="strike-dot ${p.strikes >=3 ? 'on' : ''}"></div>
-                    </div>
+    renderPlayers(data) {
+        const listId = data.status === "lobby" ? "lobbyPlayersList" : "arenaPlayersList";
+        const container = document.getElementById(listId);
+        container.innerHTML = data.players.map((p, idx) => `
+            <div class="p-card ${data.turnIndex === idx ? 'active-turn' : ''} ${data.targetId === p.id ? 'is-target' : ''}" 
+                 onclick="gameEngine.setTarget('${p.id}')">
+                ${p.id === data.host ? '<div class="p-host-tag">👑 HOST</div>' : ''}
+                <div class="webcam-overlay" id="cam-${p.id}">
+                    <video id="vid-${p.id}" class="webcam-video" autoplay></video>
+                    <div class="timer-circle" id="timer-${p.id}">15</div>
                 </div>
-            `).join('');
-        });
+                <img src="${p.img}" class="p-avatar">
+                <div class="p-name">${p.name}</div>
+                <div class="strike-bar">
+                    <div class="strike-dot ${p.strikes >=1 ? 'on' : ''}"></div>
+                    <div class="strike-dot ${p.strikes >=2 ? 'on' : ''}"></div>
+                    <div class="strike-dot ${p.strikes >=3 ? 'on' : ''}"></div>
+                </div>
+            </div>
+        `).join('');
     },
 
-    async selectTarget(targetID, targetIdx) {
-        const snap = await get(ref(rtdb, `rooms/${currentRoom}`));
-        const data = snap.val();
-        const players = Object.values(data.players).sort((a,b) => a.order - b.order);
+    async setTarget(tid) {
+        const roomRef = doc(db, "rooms", currentRoomId);
+        const snap = await getDoc(roomRef);
+        const data = snap.data();
+        if (data.players[data.turnIndex].id !== auth.currentUser.uid) return;
+        if (tid === auth.currentUser.uid) return;
+        await updateDoc(roomRef, { targetId: tid });
+    },
+
+    updateArenaUI(data) {
+        const isMyTurn = data.players[data.turnIndex].id === auth.currentUser.uid;
+        const iAmTarget = data.targetId === auth.currentUser.uid;
         
-        // Only active player can select others
-        if (players[data.turn].id !== auth.currentUser.uid) return;
-        if (targetID === auth.currentUser.uid) return alert("Can't pick yourself!");
-
-        await update(ref(rtdb, `rooms/${currentRoom}`), { 
-            target: targetID,
-            gameState: 'awaiting_choice' 
-        });
-    },
-
-    handleTurns(roomData, players) {
-        const isMyTurn = players[roomData.turn].id === auth.currentUser.uid;
-        const amITarget = roomData.target === auth.currentUser.uid;
-
-        document.getElementById('turnControls').style.display = isMyTurn ? 'block' : 'none';
-        document.getElementById('choiceModal').style.display = amITarget ? 'block' : 'none';
+        document.getElementById('turnNotice').innerText = isMyTurn ? "YOUR TURN: PICK A TARGET" : `${data.players[data.turnIndex].name}'s Turn...`;
+        document.getElementById('choiceControls').style.display = iAmTarget ? "flex" : "none";
     },
 
     async submitChoice(type) {
-        await this.sendMessage(`I choose: ${type.toUpperCase()}! Challenge me.`);
-        document.getElementById('choiceModal').style.display = 'none';
-        if (type === 'dare') this.startWebcamTask();
+        await this.sendMessage(`I choose ${type.toUpperCase()}!`);
+        if (type === 'dare') this.startWebcam();
     },
 
-    // 4. WEBCAM & MEDIA
-    async startWebcamTask() {
-        const vid = document.getElementById(`vid-${auth.currentUser.uid}`);
+    // 4. WEBCAM
+    async startWebcam() {
         const overlay = document.getElementById(`cam-${auth.currentUser.uid}`);
+        const video = document.getElementById(`vid-${auth.currentUser.uid}`);
         overlay.classList.add('live');
         
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            vid.srcObject = stream;
-            let timeLeft = 15;
-            const timerInterval = setInterval(() => {
-                timeLeft--;
-                document.getElementById(`timer-${auth.currentUser.uid}`).innerText = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    stream.getTracks().forEach(t => t.stop());
-                    overlay.classList.remove('live');
-                    this.addStrike();
-                }
-            }, 1000);
-        } catch (err) { alert("Camera access denied!"); }
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        
+        let time = 15;
+        const timer = setInterval(async () => {
+            time--;
+            document.getElementById(`timer-${auth.currentUser.uid}`).innerText = time;
+            if (time <= 0) {
+                clearInterval(timer);
+                stream.getTracks().forEach(t => t.stop());
+                overlay.classList.remove('live');
+                await this.handlePenalty();
+            }
+        }, 1000);
     },
 
-    async addStrike() {
-        const pRef = ref(rtdb, `rooms/${currentRoom}/players/${auth.currentUser.uid}`);
-        const snap = await get(pRef);
-        const current = snap.val().strikes || 0;
-        await update(pRef, { strikes: current + 1 });
-        this.nextTurn();
-    },
-
-    async nextTurn() {
-        const snap = await get(ref(rtdb, `rooms/${currentRoom}`));
-        const data = snap.val();
-        const pCount = Object.keys(data.players).length;
-        await update(ref(rtdb, `rooms/${currentRoom}`), {
-            turn: (data.turn + 1) % pCount,
-            target: null
+    async handlePenalty() {
+        const roomRef = doc(db, "rooms", currentRoomId);
+        const snap = await getDoc(roomRef);
+        const data = snap.data();
+        const players = data.players.map(p => {
+            if (p.id === auth.currentUser.uid) p.strikes++;
+            return p;
+        });
+        await updateDoc(roomRef, { 
+            players, 
+            turnIndex: (data.turnIndex + 1) % data.players.length,
+            targetId: null 
         });
     },
 
@@ -10041,16 +10034,15 @@ const gameEngine = {
         document.getElementById(id).classList.add('active');
     },
 
-    sendMessage(manualText = null) {
+    async sendMessage() {
         const input = document.getElementById('gameChatInput');
-        const text = manualText || input.value;
-        if (!text) return;
-        push(ref(rtdb, `rooms/${currentRoom}/chat`), {
+        if (!input.value) return;
+        await addDoc(collection(db, "rooms", currentRoomId, "chat"), {
             user: auth.currentUser.displayName,
-            text: text,
+            text: input.value,
             time: Date.now()
         });
-        input.value = '';
+        input.value = "";
     }
 };
 
