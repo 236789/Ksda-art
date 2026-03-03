@@ -9414,98 +9414,73 @@ function checkIsOnline(userData) {
     return (now - lastActive) < 300000; // 5 minutes
 }
 
-// --- OPEN USER PROFILE (ULTIMATE FIXED) ---
+// --- OPEN USER PROFILE (COMMUNITY SYNC VERSION) ---
 window.openUserProfile = async (uid) => {
+    closeAllMenus();
     const modal = document.getElementById('viewProfileModal');
-    const card = document.getElementById('viewProfileCard');
+    const card = modal.querySelector('.account-card');
     
-    window.stopProfileAudio();
-    
-    // Reset Card state
-    if(card) {
-        card.className = 'account-card-v5'; 
-        card.style.backgroundImage = "";
-    }
+    // 1. Reset Modal State
+    card.className = 'account-card'; 
+    card.style.background = '#08101b';
+    card.style.backgroundImage = "";
+    window.stopProfileAudio(); 
 
     modal.classList.add('active');
 
     try {
-        const userRef = doc(db, "accounts", uid);
-        const snap = await getDoc(userRef);
+        const snap = await getDoc(doc(db, "accounts", uid));
         if(!snap.exists()) return;
         const data = snap.data();
 
-        // A. BANNER LOGIC
-        if (data.equippedBanner && card) {
-            card.classList.add('profile-banner-active', data.equippedBanner.cssClass || data.equippedBanner.id);
+        // A. Apply Animated Profile Banner
+        if (data.equippedProfileBanner && data.equippedProfileBanner.id) {
+            card.classList.add('profile-banner-active', data.equippedProfileBanner.id);
         }
 
-        // B. AVATAR & FRAME
-        document.getElementById('viewUserImg').src = data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
+        // B. Avatar & Frame logic
+        const pfp = data.image || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
+        document.getElementById('viewUserImg').src = pfp;
         const vFrame = document.getElementById('viewUserFrame');
         if(data.equippedFrame && data.equippedFrame.img) {
             vFrame.src = data.equippedFrame.img;
             vFrame.style.display = 'block';
             const sc = data.equippedFrame.scale || 1.45;
-            vFrame.style.width = (sc * 100) + "%"; 
-            vFrame.style.height = (sc * 100) + "%";
+            vFrame.style.width = (sc * 100) + "%"; vFrame.style.height = (sc * 100) + "%";
         } else { vFrame.style.display = 'none'; }
 
-        // C. NAME & BADGES
+        // C. Name & Badges (Handles GIFs)
         const nameEl = document.getElementById('viewUserName');
-        const rawName = data.username || "Anonim";
-        nameEl.innerHTML = data.equippedText ? `<span class="${data.equippedText.cssClass}">${rawName}</span>` : rawName;
+        nameEl.innerHTML = data.equippedText ? `<span class="${data.equippedText.cssClass}">${data.username}</span>` : data.username;
+        document.getElementById('viewUserBadges').innerHTML = getRoleBadge(data.email) + getCosmeticBadge(data.equippedBadge);
+
+        // D. Numbers (Coins, Diamonds, Streak)
+        document.getElementById('viewUserCoins').innerText = formatCurrency(data.coins || 0);
+        document.getElementById('viewUserDiamonds').innerText = formatCurrency(data.diamonds || 0);
+        document.getElementById('viewUserStreak').innerHTML = `<i class="fas fa-fire"></i> ${data.streak || 0} DAYS STREAK`;
+
+        // E. Referral & Donation Buttons (CSS + Functional)
+        const inviteBtn = document.getElementById('viewUserInvites');
+        const donateBtn = document.getElementById('viewUserDonated');
         
-        document.getElementById('viewUserBadges').innerHTML = 
-            getRoleBadge(data.email) + (data.equippedBadge ? getCosmeticBadge(data.equippedBadge) : "");
+        inviteBtn.innerHTML = `<i class="fas fa-user-plus"></i> Friends Invited: ${data.totalReferrals || 0}`;
+        donateBtn.innerHTML = `<i class="fas fa-hand-holding-usd"></i> Coins Donated: ${formatCurrency(data.totalCoinsDonated || 0)}`;
 
-        // D. MEMBER SINCE
-        if (data.joinedAt) {
-            const date = data.joinedAt.toDate ? data.joinedAt.toDate() : new Date(data.joinedAt);
-            document.getElementById('viewUserMemberSince').innerText = `MEMBER SINCE: ${date.getFullYear()}`;
-        }
+        // Attach clicks to open history
+        inviteBtn.onclick = () => openReferralHistory(uid, data.username, pfp);
+        donateBtn.onclick = () => openDonationHistory(uid, data.username, pfp);
 
-        // E. CURRENCIES
-        document.getElementById('viewUserCoins').innerText = formatNumber(data.coins || 0);
-        document.getElementById('viewUserDiamonds').innerText = formatNumber(data.diamonds || 0);
-
-        // F. SOCIALS
-        const socialGrid = document.getElementById('viewSocialGrid');
-        socialGrid.innerHTML = '';
-        const s = data.socialLinks || {};
-        const platforms = [
-            {k:'tiktok', i:'fab fa-tiktok', c:'s-tiktok'},
-            {k:'insta', i:'fab fa-instagram', c:'s-insta'},
-            {k:'youtube', i:'fab fa-youtube', c:'s-youtube'},
-            {k:'discord', i:'fab fa-discord', c:'s-discord'}
-        ];
-        let hasSocials = false;
-        platforms.forEach(p => {
-            if(data[p.k + 'Link'] || s[p.k]) { // Checking both locations
-                const link = data[p.k + 'Link'] || s[p.k];
-                socialGrid.innerHTML += `<a href="${link}" target="_blank" class="view-social-btn ${p.c}"><i class="${p.i}"></i></a>`;
-                hasSocials = true;
-            }
-        });
-        if(!hasSocials) socialGrid.innerHTML = '<div style="grid-column: span 4; color: #555; font-size: 10px;">Fără rețele conectate.</div>';
-
-        // G. BIO & INFO
+        // F. Bio
         document.getElementById('viewUserBio').innerText = data.bio || "Nu există descriere.";
-        document.getElementById('viewUserGender').innerText = (data.gender || "-").toUpperCase();
-        document.getElementById('viewUserLocation').innerText = (data.location || "-").toUpperCase();
-        
-        const isOnline = checkIsOnline(data);
-        document.getElementById('viewUserOnlineStatus').innerHTML = isOnline ? 
-            '<span style="color:#00ff88;">● ONLINE</span>' : '<span style="color:#555;">● OFFLINE</span>';
 
-        // H. INTRO AUDIO
+        // G. Audio Intro
         if (data.equippedIntro && data.equippedIntro.audio) {
             window.currentProfileAudio = new Audio(data.equippedIntro.audio);
             window.currentProfileAudio.volume = 0.4;
-            window.currentProfileAudio.play().catch(() => console.log("Audio Blocked by Browser"));
+            window.currentProfileAudio.play().catch(e => console.log("Audio blocked"));
         }
 
-    } catch(e) { console.error("Error loading profile:", e); }
+    } catch(e) { console.error("Error opening profile:", e); }
 };
 
 // Bind close button
@@ -9515,13 +9490,12 @@ document.getElementById('closeViewProfile').onclick = () => {
 };
 
 
-// --- COMMUNITY LIST LOGIC ---
+// --- COMMUNITY LIST LOGIC (ULTIMATE SYNC) ---
 const communityWindow = document.getElementById('communityWindow');
 const openCommBtn = document.getElementById('openCommBtn');
 const closeComm = document.getElementById('closeComm');
 const userListItems = document.getElementById('userListItems');
 
-// Toggle Window
 closeComm.onclick = () => {
     communityWindow.style.display = 'none';
     openCommBtn.style.display = 'block';
@@ -9533,36 +9507,59 @@ openCommBtn.onclick = () => {
 
 // Fetch Users Real-time
 async function loadCommunity() {
-    // We use onSnapshot for real-time online/offline status
     onSnapshot(collection(db, "accounts"), (snapshot) => {
         userListItems.innerHTML = "";
-        
         let users = [];
         snapshot.forEach(doc => users.push(doc.data()));
 
-        // Sort: Online users first
-        users.sort((a, b) => (b.isOnline === true) - (a.isOnline === true));
+        // Sort: Online users first, then by name
+        users.sort((a, b) => {
+            const aOn = checkIsOnline(a);
+            const bOn = checkIsOnline(b);
+            return (bOn === true) - (aOn === true);
+        });
 
         users.forEach(data => {
             const isOnline = checkIsOnline(data);
             const userDiv = document.createElement('div');
             userDiv.className = 'comm-user-item';
+            
+            // Apply banner class to the sidebar item too if it exists!
+            if(data.equippedBanner && data.equippedBanner.cssClass) {
+                userDiv.classList.add(data.equippedBanner.cssClass);
+            }
+
             userDiv.onclick = () => window.openUserProfile(data.uid);
 
+            // Get Badges for the list view
+            const badgeHtml = getCosmeticBadge(data.equippedBadge);
+            const staffBadge = getRoleBadge(data.email);
+
             userDiv.innerHTML = `
-                <img src="${data.image || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" class="comm-avatar" 
-                     style="border-color: ${isOnline ? '#00ff88' : '#333'}">
+                <div class="list-avatar-wrapper">
+                    <img src="${data.image || 'https://i.ibb.co/4pGm9S2/user-placeholder.png'}" class="comm-avatar" 
+                         style="border-color: ${isOnline ? '#00ff88' : '#333'}">
+                </div>
                 <div class="comm-info">
-                    <span class="comm-name">${data.username || 'Anonim'}</span>
-                    <span class="comm-status ${isOnline ? 'status-online' : 'status-offline'}">
-                        ${isOnline ? '● Online' : '● Offline'}
-                    </span>
+                    <div class="comm-name-row" style="display:flex; align-items:center; gap:5px;">
+                        <span class="comm-name ${data.equippedText ? data.equippedText.cssClass : ''}">${data.username || 'Anonim'}</span>
+                        ${staffBadge}
+                    </div>
+                    <div style="display:flex; align-items:center; gap:4px; margin-top:2px;">
+                        <span class="comm-status ${isOnline ? 'status-online' : 'status-offline'}">
+                            ${isOnline ? '● Online' : '● Offline'}
+                        </span>
+                        ${badgeHtml}
+                    </div>
                 </div>
             `;
             userListItems.appendChild(userDiv);
         });
     });
 }
+
+// Initial Load
+loadCommunity();
 
 
 
