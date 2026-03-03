@@ -7478,8 +7478,7 @@ html {
 <!-- VIEW PROFILE MODAL (PREMIUM V6 REWORK) -->
 <div id="viewProfileModal" class="account-modal-overlay" style="z-index: 12000;">
     <!-- Reuse the V5 Card style for consistency -->
-    <div class="account-card-v5" style="border-color: var(--primary);">
-        
+<div id="viewProfileCard" class="account-card-v5" style="border-color: var(--primary);">        
         <button id="closeViewProfile" class="close-pop">✕</button>
         
         <div class="modal-content-v5">
@@ -9387,16 +9386,44 @@ window.stopProfileAudio = () => {
     }
 };
 
-// --- 2. OPEN USER PROFILE (ULTIMATE) ---
+// --- HELPER: FORMAT NUMBERS (1000 -> 1k) ---
+function formatNumber(num) {
+    if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+    return num || 0;
+}
+
+// --- HELPER: GET COSMETIC BADGE HTML ---
+function getCosmeticBadge(badge) {
+    if (!badge) return "";
+    // Check if it's an elite badge (GIF)
+    if (badge.animClass) {
+        return `<span class="elite-gif-badge ${badge.animClass}"><i class="fas ${badge.icon || 'fa-certificate'}"></i> ${badge.text}</span>`;
+    }
+    // Standard badge
+    return `<span class="shop-badge-preview" style="background:${badge.color}; color:#000; border:none; box-shadow:0 0 10px ${badge.color}; margin: 0 5px;">
+                <i class="fas ${badge.icon}"></i> ${badge.text}
+            </span>`;
+}
+
+// --- HELPER: CHECK ONLINE STATUS (5 min window) ---
+function checkIsOnline(userData) {
+    if (!userData.lastActive) return false;
+    const now = Date.now();
+    const lastActive = userData.lastActive.seconds ? userData.lastActive.seconds * 1000 : userData.lastActive;
+    return (now - lastActive) < 300000; // 5 minutes
+}
+
+// --- OPEN USER PROFILE (ULTIMATE FIXED) ---
 window.openUserProfile = async (uid) => {
     const modal = document.getElementById('viewProfileModal');
     const card = document.getElementById('viewProfileCard');
     
-    // Stop previous music and clean classes
     window.stopProfileAudio();
+    
+    // Reset Card state
     if(card) {
-        card.className = 'account-card-v5'; // Reset to default
-        card.style.background = ""; 
+        card.className = 'account-card-v5'; 
         card.style.backgroundImage = "";
     }
 
@@ -9410,11 +9437,7 @@ window.openUserProfile = async (uid) => {
 
         // A. BANNER LOGIC
         if (data.equippedBanner && card) {
-            const b = data.equippedBanner;
-            card.classList.add('profile-banner-active', b.id);
-            // If it's a GIF ID (pban_...) the CSS handles the image. 
-            // If it's a custom style:
-            if(b.style) card.style.background = b.style;
+            card.classList.add('profile-banner-active', data.equippedBanner.cssClass || data.equippedBanner.id);
         }
 
         // B. AVATAR & FRAME
@@ -9424,7 +9447,8 @@ window.openUserProfile = async (uid) => {
             vFrame.src = data.equippedFrame.img;
             vFrame.style.display = 'block';
             const sc = data.equippedFrame.scale || 1.45;
-            vFrame.style.width = (sc * 100) + "%"; vFrame.style.height = (sc * 100) + "%";
+            vFrame.style.width = (sc * 100) + "%"; 
+            vFrame.style.height = (sc * 100) + "%";
         } else { vFrame.style.display = 'none'; }
 
         // C. NAME & BADGES
@@ -9437,7 +9461,7 @@ window.openUserProfile = async (uid) => {
 
         // D. MEMBER SINCE
         if (data.joinedAt) {
-            const date = new Date(data.joinedAt.seconds * 1000);
+            const date = data.joinedAt.toDate ? data.joinedAt.toDate() : new Date(data.joinedAt);
             document.getElementById('viewUserMemberSince').innerText = `MEMBER SINCE: ${date.getFullYear()}`;
         }
 
@@ -9445,7 +9469,7 @@ window.openUserProfile = async (uid) => {
         document.getElementById('viewUserCoins').innerText = formatNumber(data.coins || 0);
         document.getElementById('viewUserDiamonds').innerText = formatNumber(data.diamonds || 0);
 
-        // F. SOCIALS (Sync with your 8-button grid)
+        // F. SOCIALS
         const socialGrid = document.getElementById('viewSocialGrid');
         socialGrid.innerHTML = '';
         const s = data.socialLinks || {};
@@ -9455,14 +9479,18 @@ window.openUserProfile = async (uid) => {
             {k:'youtube', i:'fab fa-youtube', c:'s-youtube'},
             {k:'discord', i:'fab fa-discord', c:'s-discord'}
         ];
+        let hasSocials = false;
         platforms.forEach(p => {
-            if(s[p.k]) {
-                socialGrid.innerHTML += `<a href="${s[p.k]}" target="_blank" class="view-social-btn ${p.c}"><i class="${p.i}"></i></a>`;
+            if(data[p.k + 'Link'] || s[p.k]) { // Checking both locations
+                const link = data[p.k + 'Link'] || s[p.k];
+                socialGrid.innerHTML += `<a href="${link}" target="_blank" class="view-social-btn ${p.c}"><i class="${p.i}"></i></a>`;
+                hasSocials = true;
             }
         });
+        if(!hasSocials) socialGrid.innerHTML = '<div style="grid-column: span 4; color: #555; font-size: 10px;">Fără rețele conectate.</div>';
 
-        // G. BIO
-        document.getElementById('viewUserBio').innerText = data.bio || "No biography set.";
+        // G. BIO & INFO
+        document.getElementById('viewUserBio').innerText = data.bio || "Nu există descriere.";
         document.getElementById('viewUserGender').innerText = (data.gender || "-").toUpperCase();
         document.getElementById('viewUserLocation').innerText = (data.location || "-").toUpperCase();
         
@@ -9474,10 +9502,10 @@ window.openUserProfile = async (uid) => {
         if (data.equippedIntro && data.equippedIntro.audio) {
             window.currentProfileAudio = new Audio(data.equippedIntro.audio);
             window.currentProfileAudio.volume = 0.4;
-            window.currentProfileAudio.play().catch(() => console.log("Audio Blocked"));
+            window.currentProfileAudio.play().catch(() => console.log("Audio Blocked by Browser"));
         }
 
-    } catch(e) { console.error(e); }
+    } catch(e) { console.error("Error loading profile:", e); }
 };
 
 // Bind close button
