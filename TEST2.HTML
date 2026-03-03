@@ -9858,85 +9858,77 @@ function goToCategories() {
 
 
 
-// Add these to your firebase-firestore imports
-// import { collection, query, where, onSnapshot, addDoc, doc, updateDoc, getDocs, getDoc, setDoc } from "...";
-
 let currentRoomId = null;
+let mediaRecorder = null;
+let audioChunks = [];
 
 const gameEngine = {
-    // 1. CREATE & JOIN
+    // 1. ROOM HANDLING
     async createRoom() {
-        if (!auth.currentUser) return alert("Please Login");
+        if (!auth.currentUser) return alert("Trebuie să fii logat!");
         const id = Math.floor(1000 + Math.random() * 9000).toString();
         currentRoomId = id;
-        
         await setDoc(doc(db, "rooms", id), {
             host: auth.currentUser.uid,
             status: "lobby",
             turnIndex: 0,
             targetId: null,
-            players: [{
-                id: auth.currentUser.uid,
-                name: auth.currentUser.displayName,
-                img: auth.currentUser.photoURL,
-                strikes: 0,
-                hasPass: true
-            }],
-            createdAt: Date.now()
+            createdAt: serverTimestamp()
         });
-        this.initRoomListener(id);
+        this.joinRoomInternal(id);
     },
 
-    async autoJoin() {
+    async joinRoom() { // Matches the button in HTML
         const q = query(collection(db, "rooms"), where("status", "==", "lobby"));
         const snap = await getDocs(q);
         if (snap.empty) return this.createRoom();
+        currentRoomId = snap.docs[0].id;
+        this.joinRoomInternal(currentRoomId);
+    },
 
-        const roomDoc = snap.docs[0];
-        const data = roomDoc.data();
-        if (data.players.length >= 6) return this.createRoom();
-
-        currentRoomId = roomDoc.id;
-        const newPlayers = [...data.players, {
+    async joinRoomInternal(rid) {
+        await setDoc(doc(db, "rooms", rid, "players", auth.currentUser.uid), {
             id: auth.currentUser.uid,
             name: auth.currentUser.displayName,
             img: auth.currentUser.photoURL,
             strikes: 0,
-            hasPass: true
-        }];
-
-        await updateDoc(doc(db, "rooms", currentRoomId), { players: newPlayers });
-        this.initRoomListener(currentRoomId);
+            hasPass: true,
+            order: Date.now()
+        });
+        this.initListeners(rid);
     },
 
-    // 2. REAL-TIME SYNC
-    initRoomListener(id) {
+    // 2. REAL-TIME ENGINE
+    initListeners(rid) {
         this.switchScreen('screenLobby');
-        document.getElementById('roomIDDisplay').innerText = `Room: #${id}`;
+        document.getElementById('roomIDDisplay').innerText = `ROOM: #${rid}`;
 
-        onSnapshot(doc(db, "rooms", id), (snapshot) => {
-            const data = snapshot.val ? snapshot.val() : snapshot.data();
-            if (!data) return;
+        onSnapshot(doc(db, "rooms", rid), (roomSnap) => {
+            const roomData = roomSnap.data();
+            if (!roomData) return;
 
-            this.renderPlayers(data);
-            
-            if (data.status === "playing") {
-                this.switchScreen('screenArena');
-                this.updateArenaUI(data);
-            }
+            onSnapshot(collection(db, "rooms", rid, "players"), (pSnap) => {
+                const players = [];
+                pSnap.forEach(d => players.push(d.data()));
+                players.sort((a,b) => a.order - b.order);
 
-            if (data.host === auth.currentUser.uid && data.status === "lobby") {
-                document.getElementById('startBtn').style.display = "block";
-            }
+                this.renderPlayers(players, roomData);
+                if (roomData.status === "playing") {
+                    this.switchScreen('screenArena');
+                    this.updateArenaUI(players, roomData);
+                }
+                if (roomData.host === auth.currentUser.uid && roomData.status === "lobby") {
+                    document.getElementById('startBtn').style.display = "block";
+                }
+            });
         });
 
-        // Chat Listener
-        const chatQ = query(collection(db, "rooms", id, "chat"), orderBy("time", "asc"));
-        onSnapshot(chatQ, (snap) => {
+        onSnapshot(query(collection(db, "rooms", rid, "chat"), orderBy("time", "asc")), (snap) => {
             const log = document.getElementById('gameChatLog');
+            if(!log) return;
             log.innerHTML = "";
-            snap.forEach(doc => {
-                const m = doc.data();
+            snap.forEach(d => {
+                const m = d.data();
                 log.innerHTML += `<div><b style="color:var(--primary)">${m.user}:</b> ${m.text}</div>`;
             });
             log.scrollTop = log.scrollHeight;
@@ -9948,13 +9940,14 @@ const gameEngine = {
         await updateDoc(doc(db, "rooms", currentRoomId), { status: "playing" });
     },
 
-    renderPlayers(data) {
-        const listId = data.status === "lobby" ? "lobbyPlayersList" : "arenaPlayersList";
-        const container = document.getElementById(listId);
-        container.innerHTML = data.players.map((p, idx) => `
-            <div class="p-card ${data.turnIndex === idx ? 'active-turn' : ''} ${data.targetId === p.id ? 'is-target' : ''}" 
-                 onclick="gameEngine.setTarget('${p.id}')">
-                ${p.id === data.host ? '<div class="p-host-tag">👑 HOST</div>' : ''}
+    renderPlayers(players, roomData) {
+        const containerId = roomData.status === "lobby" ? "lobbyPlayersList" : "arenaPlayersList";
+        const container = document.getElementById(containerId);
+        if(!container) return;
+        container.innerHTML = players.map((p, idx) => `
+            <div class="p-card ${roomData.turnIndex === idx ? 'active-turn' : ''} ${roomData.targetId === p.id ? 'is-target' : ''}" 
+                 onclick="gameEngine.setTarget('${p.id}', ${roomData.turnIndex})">
+                ${p.id === roomData.host ? '<div class="p-host-tag">👑 HOST</div>' : ''}
                 <div class="webcam-overlay" id="cam-${p.id}">
                     <video id="vid-${p.id}" class="webcam-video" autoplay></video>
                     <div class="timer-circle" id="timer-${p.id}">15</div>
@@ -9970,77 +9963,100 @@ const gameEngine = {
         `).join('');
     },
 
-    async setTarget(tid) {
-        const roomRef = doc(db, "rooms", currentRoomId);
-        const snap = await getDoc(roomRef);
-        const data = snap.data();
-        if (data.players[data.turnIndex].id !== auth.currentUser.uid) return;
+    async setTarget(tid, currentTurnIdx) {
+        const pSnap = await getDocs(collection(db, "rooms", currentRoomId, "players"));
+        const players = [];
+        pSnap.forEach(d => players.push(d.data()));
+        players.sort((a,b) => a.order - b.order);
+        if (players[currentTurnIdx].id !== auth.currentUser.uid) return;
         if (tid === auth.currentUser.uid) return;
-        await updateDoc(roomRef, { targetId: tid });
+        await updateDoc(doc(db, "rooms", currentRoomId), { targetId: tid });
     },
 
-    updateArenaUI(data) {
-        const isMyTurn = data.players[data.turnIndex].id === auth.currentUser.uid;
+    updateArenaUI(players, data) {
+        const notice = document.getElementById('turnNotice');
+        if (!notice) return; // Fixes the null error
+        const isMyTurn = players[data.turnIndex].id === auth.currentUser.uid;
         const iAmTarget = data.targetId === auth.currentUser.uid;
         
-        document.getElementById('turnNotice').innerText = isMyTurn ? "YOUR TURN: PICK A TARGET" : `${data.players[data.turnIndex].name}'s Turn...`;
+        notice.innerText = isMyTurn ? "E RÂNDUL TĂU: ALEGE O ȚINTĂ" : `Rândul lui ${players[data.turnIndex].name}...`;
         document.getElementById('choiceControls').style.display = iAmTarget ? "flex" : "none";
     },
 
     async submitChoice(type) {
-        await this.sendMessage(`I choose ${type.toUpperCase()}!`);
+        await this.sendMessage(`Am ales ${type.toUpperCase()}!`);
+        document.getElementById('choiceControls').style.display = "none";
         if (type === 'dare') this.startWebcam();
     },
 
-    // 4. WEBCAM
+    // 4. MEDIA (VOICE & WEBCAM)
+    async recordVoice() {
+        const btn = document.getElementById('voiceBtn');
+        if (!mediaRecorder) {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                this.sendMessage("[Mesaj Vocal Trimis]");
+                audioChunks = [];
+            };
+            mediaRecorder.start();
+            btn.style.color = "#ff4757";
+        } else {
+            mediaRecorder.stop();
+            mediaRecorder = null;
+            btn.style.color = "var(--primary)";
+        }
+    },
+
     async startWebcam() {
         const overlay = document.getElementById(`cam-${auth.currentUser.uid}`);
         const video = document.getElementById(`vid-${auth.currentUser.uid}`);
         overlay.classList.add('live');
-        
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         video.srcObject = stream;
-        
         let time = 15;
         const timer = setInterval(async () => {
             time--;
-            document.getElementById(`timer-${auth.currentUser.uid}`).innerText = time;
+            const timerEl = document.getElementById(`timer-${auth.currentUser.uid}`);
+            if(timerEl) timerEl.innerText = time;
             if (time <= 0) {
                 clearInterval(timer);
                 stream.getTracks().forEach(t => t.stop());
                 overlay.classList.remove('live');
-                await this.handlePenalty();
+                this.usePass(); // Penalty
             }
         }, 1000);
     },
 
-    async handlePenalty() {
+    async usePass() {
+        const pRef = doc(db, "rooms", currentRoomId, "players", auth.currentUser.uid);
+        await updateDoc(pRef, { strikes: increment(1), hasPass: false });
+        this.nextTurn();
+    },
+
+    async nextTurn() {
         const roomRef = doc(db, "rooms", currentRoomId);
-        const snap = await getDoc(roomRef);
-        const data = snap.data();
-        const players = data.players.map(p => {
-            if (p.id === auth.currentUser.uid) p.strikes++;
-            return p;
-        });
-        await updateDoc(roomRef, { 
-            players, 
-            turnIndex: (data.turnIndex + 1) % data.players.length,
-            targetId: null 
-        });
+        const pSnap = await getDocs(collection(db, "rooms", currentRoomId, "players"));
+        const roomSnap = await getDoc(roomRef);
+        const nextIdx = (roomSnap.data().turnIndex + 1) % pSnap.size;
+        await updateDoc(roomRef, { turnIndex: nextIdx, targetId: null });
     },
 
     switchScreen(id) {
         document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
+        const screen = document.getElementById(id);
+        if(screen) screen.classList.add('active');
     },
 
-    async sendMessage() {
+    async sendMessage(text = null) {
         const input = document.getElementById('gameChatInput');
-        if (!input.value) return;
+        const msg = text || input.value;
+        if (!msg) return;
         await addDoc(collection(db, "rooms", currentRoomId, "chat"), {
             user: auth.currentUser.displayName,
-            text: input.value,
-            time: Date.now()
+            text: msg,
+            time: serverTimestamp()
         });
         input.value = "";
     }
