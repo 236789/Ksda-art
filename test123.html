@@ -2,7 +2,6 @@
 
 
 
-
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -4712,8 +4711,7 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
                     <label style="font-size: 10px; color: #888;">SUMĂ</label>
-<!-- Type changed to text to allow 'k' and 'm' -->
-<input type="text" id="adminAmount" class="edit-input" placeholder="Ex: 500, 250k, 1m">
+                    <input type="number" id="adminAmount" class="edit-input" placeholder="Ex: 500">
                 </div>
                 <div>
                     <label style="font-size: 10px; color: #888;">MOTIV (Log)</label>
@@ -6144,32 +6142,9 @@ window.selectAdminCurrency = (type) => {
     }
 };
 
-
-// Helper to convert "1.5k" to 1500, "1m" to 1000000
-window.parseSmartCurrency = (input) => {
-    if (!input) return 0;
-    
-    // Make lowercase and remove spaces or commas
-    let s = input.toString().toLowerCase().replace(/,/g, '').trim();
-    
-    // Parse the base number (handles decimals like 1.5)
-    let val = parseFloat(s);
-    if (isNaN(val)) return 0;
-
-    // Apply multipliers
-    if (s.includes('k')) {
-        val *= 1000;
-    } else if (s.includes('m')) {
-        val *= 1000000;
-    }
-
-    return Math.floor(val); // Return integer
-};
-
 // --- ADMIN BALANCE ACTION FIX ---
 let isAdminProcessing = false; // Flag to prevent multiple clicks
 
-// --- UPDATED ADMIN ACTION FUNCTION ---
 window.executeAdminAction = async (action) => {
     // 1. Prevent overlapping clicks
     if (isAdminProcessing) return;
@@ -6177,16 +6152,13 @@ window.executeAdminAction = async (action) => {
     
     const amountInput = document.getElementById('adminAmount');
     const reasonInput = document.getElementById('adminReason');
-    
-    // --- UPDATED PARSING LOGIC START ---
-    const rawVal = amountInput.value.trim();
-    const amount = window.parseSmartCurrency(rawVal);
+    const amountVal = amountInput.value.trim();
 
-    if (!amount || amount <= 0) {
-        return alert("Introdu o sumă validă! (Ex: 500, 250k, 1.5m)");
+    if (!amountVal || isNaN(amountVal) || Number(amountVal) <= 0) {
+        return alert("Introdu o sumă validă!");
     }
-    // --- UPDATED PARSING LOGIC END ---
 
+    const amount = parseInt(amountVal);
     const finalAmount = action === 'add' ? amount : -amount;
     
     // Check which currency is active
@@ -6195,7 +6167,7 @@ window.executeAdminAction = async (action) => {
 
     // 2. Start Processing Mode
     isAdminProcessing = true;
-    const btn = event.target.closest('button'); 
+    const btn = event.target.closest('button'); // Get the button that was clicked
     const originalText = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SE SALVEAZĂ...';
@@ -6203,18 +6175,16 @@ window.executeAdminAction = async (action) => {
     try {
         const userRef = doc(db, "accounts", selectedAdminTargetUid);
         
-        // 3. DATABASE UPDATE
+        // 3. DATABASE UPDATE (The only thing that matters)
         await updateDoc(userRef, {
             [dbField]: increment(finalAmount)
         });
 
         // 4. LOG TRANSACTION
+        // We look up user data from cache to fill the log
         const targetUser = cachedUsers.find(u => u.uid === selectedAdminTargetUid);
         const adminName = auth.currentUser ? (auth.currentUser.displayName || "Admin") : "System";
         
-        // Format displayed amount for the toast (e.g. "250k")
-        const displayAmount = rawVal.toLowerCase().includes('k') || rawVal.toLowerCase().includes('m') ? rawVal : amount;
-
         await addDoc(collection(db, "transactions"), {
             userId: selectedAdminTargetUid,
             username: targetUser ? targetUser.username : "User",
@@ -6227,11 +6197,15 @@ window.executeAdminAction = async (action) => {
         });
 
         // 5. SUCCESS UI
-        showToast(`Succes! ${action === 'add' ? 'Adăugat' : 'Scăzut'} ${displayAmount} ${dbField}.`);
+        showToast(`Succes! ${action === 'add' ? 'Adăugat' : 'Scăzut'} ${amount} ${dbField}.`);
         
         // Clear inputs
         amountInput.value = '';
         reasonInput.value = '';
+        
+        // IMPORTANT: DO NOT manually update cachedUsers. 
+        // Your onSnapshot(collection(db, "accounts")) will see the change 
+        // in the database and update the UI automatically and correctly.
 
     } catch (e) {
         console.error("Eroare Admin Balance:", e);
