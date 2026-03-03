@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -10127,7 +10128,6 @@ nav a:hover, nav a.active {
     <div class="hero-grid-floor"></div>
     <div class="hero-core-glow"></div>
     <div class="hero-particles"></div>
-    <div class="hero-scan-line"></div>
 
     <div class="hero-content-v2">
         
@@ -10336,8 +10336,7 @@ nav a:hover, nav a.active {
 
     <div class="container" style="position: relative; z-index: 5;">
         
-        <h2 class="services-main-title">CE <span>OFERIM?</span></h2>
-
+<h2 class="services-main-title"><span>CE ÎȚI OFERĂ KSDA</span></h2>
         <div class="features-grid">
             
             <!-- CARD 1: GAMING CENTER -->
@@ -10507,7 +10506,7 @@ nav a:hover, nav a.active {
     </div>
 
     <div class="container" style="position: relative; z-index: 5;">
-        <h2 class="votes-main-title">VOTUL <span>COMUNITĂȚII</span></h2>
+        <h2 class="votes-main-title"> <span>VOTUL COMUNITĂȚII</span></h2>
         
         <p style="color: #a5b1c2; font-family: 'Poppins'; text-align: center; max-width: 700px; margin: 0 auto 50px; line-height: 1.6; font-weight: 500;">
             Deciziile tale scriu viitorul KSDA. Participă la voturile live și controlează evoluția proiectului.
@@ -10547,11 +10546,11 @@ nav a:hover, nav a.active {
     </div>
 
     <div class="container" style="position: relative; z-index: 5; text-align: center;">
-        <h2 class="feedback-main-title">LIVE <span>FEEDBACK</span></h2>
+        <h2 class="feedback-main-title"><span>FEEDBACKS</span></h2>
         
-        <p style="color: #a5b1c2; font-family: 'Poppins'; max-width: 700px; margin: 0 auto 50px; line-height: 1.6; font-weight: 500;">
-            Transmisiuni în timp real din centrul de sugestii. Vezi ce idei sunt analizate sau implementate chiar acum.
-        </p>
+<p style="color: #a5b1c2; font-family: 'Poppins'; max-width: 700px; margin: 0 auto 50px; line-height: 1.6; font-weight: 500;">
+    Părerea ta contează. Ai o idee sau ai descoperit o problemă? Trimite-ne feedback și ajută-ne să îmbunătățim platforma.
+</p>
 
         <!-- DYNAMIC FEEDBACK DISPLAY -->
         <div class="feedback-live-card" id="live-feedback-container">
@@ -17571,14 +17570,14 @@ startLiveVoteSwitcher();
 
 
 
-// --- LIVE FEEDBACK RANDOM SWITCHER ENGINE ---
+// --- LIVE FEEDBACK RANDOM SWITCHER ENGINE (FILTERED) ---
 async function startLiveFeedbackSwitcher() {
     const container = document.getElementById('live-feedback-container');
     if (!container) return;
 
     try {
-        // Tragem un pool de 30 de feedback-uri recente pentru a avea de unde alege
-        const q = query(collection(db, "feedbacks"), orderBy("createdAt", "desc"), limit(30));
+        // Fetch last 50 feedbacks to ensure we have enough after filtering
+        const q = query(collection(db, "feedbacks"), orderBy("createdAt", "desc"), limit(50));
         const snapshot = await getDocs(q);
 
         if (snapshot.empty) {
@@ -17586,11 +17585,24 @@ async function startLiveFeedbackSwitcher() {
             return;
         }
 
-        const feedbacks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        // 1. Get all data
+        const rawFeedbacks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // 2. FILTER: Only show Approved (In Lucru) OR Completed (Implementat). 
+        // Exclude Cancelled or raw Pending (items with no status flags).
+        const feedbacks = rawFeedbacks.filter(f => 
+            (f.isApproved === true || f.isCompleted === true) && f.isCancelled !== true
+        );
+
+        if (feedbacks.length === 0) {
+            container.innerHTML = "<div style='color:#aaa; font-size:12px;'>Momentan nu sunt feedback-uri aprobate sau implementate.</div>";
+            return;
+        }
+
         let lastIdx = -1;
 
         const showRandomFeedback = () => {
-            // Alegem un index random diferit de ultimul afișat
+            // Pick a random index different from the last one
             let randomIdx;
             if (feedbacks.length > 1) {
                 do {
@@ -17603,19 +17615,22 @@ async function startLiveFeedbackSwitcher() {
             lastIdx = randomIdx;
             const f = feedbacks[randomIdx];
 
-            // --- LOGICA STATUS (FETCHED FROM DB) ---
-            let statusHtml = '<div class="f-status-pill f-status-pending"><i class="fas fa-clock"></i> ÎN ANALIZĂ</div>';
+            // --- STATUS LOGIC ---
+            let statusHtml = '';
+            
             if (f.isCompleted) {
                 statusHtml = '<div class="f-status-pill f-status-completed"><i class="fas fa-check-double"></i> IMPLEMENTAT</div>';
             } else if (f.isApproved) {
-                statusHtml = '<div class="f-status-pill f-status-approved"><i class="fas fa-tools"></i> LUAT ÎN CONSIDERARE</div>';
-            } else if (f.isCancelled) {
-                statusHtml = '<div class="f-status-pill f-status-pending" style="color:#ff4757; border-color:#ff4757;"><i class="fas fa-times"></i> REFUZAT</div>';
+                // "Approved" usually means accepted/in progress
+                statusHtml = '<div class="f-status-pill f-status-approved"><i class="fas fa-tools"></i> ÎN LUCRU / APROBAT</div>';
+            } else {
+                // Fallback (shouldn't happen due to filter, but safe to have)
+                statusHtml = '<div class="f-status-pill f-status-pending"><i class="fas fa-clock"></i> ÎN ANALIZĂ</div>';
             }
 
             const userImg = f.photo || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
             
-            // Efect de tranziție (Fade out)
+            // Transition Effect
             container.style.opacity = '0';
             container.style.transform = 'scale(0.95)';
 
@@ -17637,15 +17652,13 @@ async function startLiveFeedbackSwitcher() {
                         </div>
                     </div>
                 `;
-                // Efect de tranziție (Fade in)
                 container.style.opacity = '1';
                 container.style.transform = 'scale(1)';
             }, 500);
         };
 
-        // Pornim prima afișare și setăm intervalul
         showRandomFeedback();
-        setInterval(showRandomFeedback, 7000); // Schimbă la fiecare 7 secunde
+        setInterval(showRandomFeedback, 7000); 
 
     } catch (e) {
         console.error("Feedback Switcher Error:", e);
