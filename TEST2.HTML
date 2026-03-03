@@ -9564,14 +9564,7 @@ async function loadCommunity() {
     });
 }
 
-// Online helper function (Checks if lastActive was in the last 5 minutes)
-function checkIsOnline(userData) {
-    if (!userData.isOnline) return false;
-    if (!userData.lastActive) return false;
-    const now = Date.now();
-    const lastActive = userData.lastActive.seconds * 1000;
-    return (now - lastActive) < 300000; // 5 minutes
-}
+
 
 // Initial Load
 loadCommunity();
