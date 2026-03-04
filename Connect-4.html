@@ -8618,61 +8618,70 @@ div.header-container header {
 }
 
 
-/* --- CONNECT 4 FUTURISTIC UI --- */
-.c4-game-layout { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 700px; padding: 10px; }
+
+/* --- CONNECT 4 FUTURISTIC REWORK --- */
+.vs-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: space-around; }
+.c4-game-layout { display: flex; flex-direction: column; align-items: center; width: 95%; max-width: 600px; }
 
 .c4-tactical-hud {
     width: 100%; display: flex; justify-content: space-between; align-items: center;
     background: rgba(5,11,20,0.9); border: 1px solid var(--primary);
-    padding: 10px 20px; border-radius: 100px; margin-bottom: 20px; font-family: 'Orbitron';
+    padding: 10px 15px; border-radius: 100px; margin-bottom: 15px; font-family: 'Orbitron';
 }
-.mini-pfp { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--primary); }
+.mini-pfp { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
 .mini-pfp.bot { border-color: #ff4757; }
+.hud-player { display: flex; align-items: center; gap: 10px; color: #fff; }
+
+.turn-pill {
+    background: var(--primary); color: #000; padding: 6px 20px; border-radius: 50px;
+    font-size: 10px; font-weight: 900; box-shadow: 0 0 15px var(--primary-dim);
+}
 
 /* THE NEON BOARD */
 .c4-neon-board {
-    display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
-    background: rgba(31, 58, 82, 0.4); padding: 15px; border-radius: 15px;
-    border: 3px solid #1f3a52; box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 20px var(--primary-dim);
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+    background: rgba(31, 58, 82, 0.5); padding: 12px; border-radius: 15px;
+    border: 3px solid #1f3a52; box-shadow: 0 0 40px rgba(0,0,0,0.8);
     position: relative; z-index: 5;
 }
 
 .c4-cell {
-    aspect-ratio: 1; width: clamp(40px, 10vw, 70px);
+    aspect-ratio: 1; width: 100%; min-width: 35px;
     background: #050b14; border-radius: 50%;
-    box-shadow: inset 0 4px 8px rgba(0,0,0,0.8);
-    position: relative; overflow: visible;
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.8);
+    position: relative;
 }
 
-/* TOKEN DROP ANIMATION */
+/* DROP ANIMATION */
 .c4-token {
     position: absolute; width: 100%; height: 100%; background-size: contain;
-    background-repeat: no-repeat; z-index: 10;
-    /* The fall animation is calculated in JS but the bounce is here */
+    background-repeat: no-repeat; z-index: 10; top: 0; left: 0;
     transition: transform 0.6s cubic-bezier(0.47, 0, 0.745, 0.715);
 }
 
-/* COLOR PICKER GRID */
-.c4-choice-card { background: #08101b; border: 2px solid var(--primary); padding: 30px; border-radius: 30px; text-align: center; max-width: 500px; }
-.color-grid-c4 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-top: 20px; }
+/* COLOR PICKER */
+.c4-choice-card { background: #08101b; border: 2px solid var(--primary); padding: 25px; border-radius: 30px; text-align: center; width: 90%; max-width: 450px; }
+.color-grid-c4 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 20px; }
 .color-opt-btn { cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.color-opt-btn img { width: 50px; height: 50px; border-radius: 50%; border: 2px solid transparent; }
-.color-opt-btn:hover img { border-color: #fff; transform: scale(1.1); box-shadow: 0 0 15px #fff; }
-.color-opt-btn span { font-size: 9px; font-family: 'Orbitron'; color: #aaa; }
+.color-opt-btn img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid transparent; }
+.color-opt-btn:hover img { border-color: #fff; transform: scale(1.15); box-shadow: 0 0 15px var(--primary); }
+.color-opt-btn span { font-size: 8px; font-family: 'Orbitron'; color: #666; text-transform: uppercase; }
 
 .give-up-btn {
-    margin-top: 30px; background: rgba(255, 71, 87, 0.1); border: 1px solid #ff4757;
-    color: #ff4757; padding: 10px 20px; border-radius: 50px; cursor: pointer; font-family: 'Orbitron'; font-size: 10px;
+    margin-top: 20px; background: rgba(255, 71, 87, 0.05); border: 1px solid #ff4757;
+    color: #ff4757; padding: 8px 15px; border-radius: 50px; cursor: pointer; font-family: 'Orbitron'; font-size: 9px;
 }
 
 .drop-lines-overlay {
-    position: absolute; inset: 15px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; pointer-events: none;
+    position: absolute; inset: 12px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; pointer-events: none;
 }
-.drop-line { height: 100%; border-left: 1px dashed rgba(41, 243, 255, 0); transition: 0.2s; }
-.drop-line.active { background: rgba(41, 243, 255, 0.05); border-left-color: rgba(41, 243, 255, 0.3); border-right: 1px dashed rgba(41, 243, 255, 0.3); }
+.drop-line { height: 100%; border-left: 1px dashed transparent; border-right: 1px dashed transparent; transition: 0.2s; }
+.drop-line.active { background: rgba(41, 243, 255, 0.08); border-color: rgba(41, 243, 255, 0.3); }
 
-@media (max-width: 500px) { .color-grid-c4 { grid-template-columns: repeat(3, 1fr); } }
-
+@media (max-width: 600px) {
+    .color-grid-c4 { grid-template-columns: repeat(4, 1fr); }
+    .c4-tactical-hud { padding: 8px 12px; }
+}
   </style>
 </head>
 <body>
@@ -8682,7 +8691,7 @@ div.header-container header {
 <div id="c4GameOverlay" class="account-modal-overlay" style="display: none;">
     
     <!-- STAGE 1: INTRO (VS ANIMATION) -->
-    <div id="c4IntroScreen" class="vs-container" style="display:none;">
+    <div id="c4IntroScreen" class="vs-container" style="display:none; width: 100%; height: 100%; justify-content: space-around; align-items: center;">
         <div class="vs-player-side">
             <div class="vs-circle"><img id="vsPlayerImg" src=""></div>
             <span class="vs-name" id="vsPlayerName">PLAYER</span>
@@ -8698,7 +8707,7 @@ div.header-container header {
 
     <!-- STAGE 2: COLOR PICKER -->
     <div id="c4ColorPicker" class="c4-choice-card" style="display:none;">
-        <h2 class="mode-title">PICK YOUR TOKEN</h2>
+        <h2 class="mode-title" style="color: #fff; font-family: 'Orbitron'; margin-bottom: 20px;">AUTHORIZE TOKEN COLOR</h2>
         <div class="color-grid-c4" id="colorOptions">
             <!-- Buttons injected by JS -->
         </div>
@@ -8709,16 +8718,16 @@ div.header-container header {
         <div class="c4-tactical-hud">
             <div class="hud-player">
                 <img id="hudPfp" src="" class="mini-pfp">
-                <div id="pName">PLAYER</div>
+                <div id="pName" style="font-size: 10px;">PLAYER</div>
             </div>
             <div id="gameStatusPill" class="turn-pill">YOUR TURN</div>
-            <div class="hud-player">
-                <div style="text-align:right;">KEVIN BOT</div>
+            <div class="hud-player" style="flex-direction: row-reverse;">
                 <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media" class="mini-pfp bot">
+                <div style="text-align:right; font-size: 10px; margin-right: 10px;">KEVIN BOT</div>
             </div>
         </div>
 
-        <div class="c4-main-wrapper">
+        <div class="c4-main-wrapper" style="position: relative;">
             <div id="dropLines" class="drop-lines-overlay"></div>
             <div id="c4Grid" class="c4-neon-board"></div>
         </div>
@@ -8727,13 +8736,14 @@ div.header-container header {
     </div>
 
     <!-- STAGE 4: RESULT MODAL -->
-    <div id="c4ResultModal" class="c4-result-card" style="display:none;">
-        <h1 id="resultTitle">VICTORY!</h1>
-        <div class="reward-box">
-            <img src="https://iili.io/fhc1SKQ.png" width="40">
-            <span id="resultReward">+500</span>
+    <div id="c4ResultModal" class="reward-card" style="display:none; border-color: var(--primary); max-width: 400px;">
+        <h1 id="resultTitle" style="font-family: 'Orbitron'; font-weight: 900; margin-bottom: 15px;">VICTORY!</h1>
+        <p id="resultText" style="color: #aaa; margin-bottom: 20px;">You've outsmarted the bot.</p>
+        <div class="reward-coins-box" style="margin-bottom: 30px;">
+            <img src="https://iili.io/fhc1SKQ.png" width="50">
+            <span id="resultReward" style="font-size: 32px;">+500</span>
         </div>
-        <button class="super-btn" onclick="closeC4Game()">MENU PRINCIPAL</button>
+        <button class="super-btn" onclick="location.reload()">MENU PRINCIPAL</button>
     </div>
 </div>
 <!-- SCHIMBĂ ACEASTĂ LINIE -->
@@ -10787,30 +10797,39 @@ if(mobileLoginBtn) {
     };
 }
 
-// --- CONNECT 4 PRO ENGINE ---
+// --- CONNECT 4 MASTER ENGINE ---
 const C4_TOKENS = [
-    { name: 'Yellow', url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FYellow%20Connect%204%20Pice.png?alt=media' },
-    { name: 'Silver', url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FSilver%20Connect%204%20Pice.png?alt=media' },
-    { name: 'Red',    url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FRed%20Connect%204%20Pice.png?alt=media' },
-    { name: 'Purple', url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FPurple%20Connect%204%20pice.png?alt=media' },
-    { name: 'Pink',   url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FPink%20Connect%204%20pice.png?alt=media' },
-    { name: 'Orange', url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FOrange%20Connect%204%20pice.png?alt=media' },
-    { name: 'Green',  url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FGreen%20Connect%204%20Pice.png?alt=media' },
-    { name: 'Cyan',   url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FCyan%20connect%204%20pice.png?alt=media' },
-    { name: 'Blue',   url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FBlue%20Connect%204%20pice.png?alt=media' },
-    { name: 'Black',  url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FBlack%20Connect%204%20Pice.png?alt=media' }
+    { name: 'Yellow', url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FYellow%20Connect%204%20Pice.png?alt=media&token=d56bb594-528e-466b-b163-545fe5417a9f' },
+    { name: 'Silver', url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FSilver%20Connect%204%20Pice.png?alt=media&token=39481570-33a7-4345-a193-175efd3a1dd9' },
+    { name: 'Red',    url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FRed%20Connect%204%20Pice.png?alt=media&token=c618f6ec-237a-42fd-8b76-5e78ffe3265a' },
+    { name: 'Purple', url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FPurple%20Connect%204%20pice.png?alt=media&token=08feeefb-50f8-419d-9644-2d5a12d64568' },
+    { name: 'Pink',   url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FPink%20Connect%204%20pice.png?alt=media&token=b345d47d-6d6d-4be9-ae12-30e9178ef330' },
+    { name: 'Orange', url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FOrange%20Connect%204%20pice.png?alt=media&token=4fb75743-b6d5-4219-974a-aae2bcb6dfa9' },
+    { name: 'Green',  url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FGreen%20Connect%204%20Pice.png?alt=media&token=a881f6cf-7a37-4c50-a513-892ab8474ed5' },
+    { name: 'Cyan',   url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FCyan%20connect%204%20pice.png?alt=media&token=4546f719-8ed9-47de-8c5b-4f9421d1cb54' },
+    { name: 'Blue',   url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FCyan%20connect%204%20pice.png?alt=media&token=4546f719-8ed9-47de-8c5b-4f9421d1cb54' },
+    { name: 'Black',  url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FBlack%20Connect%204%20Pice.png?alt=media&token=3bfd4ac1-2901-41a7-ae2f-13055b6a42c3' }
 ];
 
-const KEVIN_TOKEN = "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FKevin%20Bot%20Connect%204%20pice.png?alt=media";
+const KEVIN_TOKEN = "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FKevin%20Bot%20Connect%204%20pice.png?alt=media&token=fb91289c-149c-4c9e-9695-efa80b253d62";
 
 let c4Board = [];
 let c4PlayerToken = "";
 let c4Active = false;
 let c4Turn = 1; // 1=Player, 2=Kevin
 
-// PRELOAD IMAGES
+// 0. PRELOADER
 C4_TOKENS.forEach(t => { const img = new Image(); img.src = t.url; });
-new Image().src = KEVIN_TOKEN;
+const kImg = new Image(); kImg.src = KEVIN_TOKEN;
+
+// 1. STAGE CONTROLLER
+function showC4Stage(stageId) {
+    document.getElementById('c4IntroScreen').style.display = 'none';
+    document.getElementById('c4ColorPicker').style.display = 'none';
+    document.getElementById('c4GameBoardUI').style.display = 'none';
+    document.getElementById('c4ResultModal').style.display = 'none';
+    document.getElementById(stageId).style.display = 'flex';
+}
 
 window.startSinglePlayerC4 = () => {
     document.getElementById('c4GameOverlay').style.display = 'flex';
@@ -10820,118 +10839,88 @@ window.startSinglePlayerC4 = () => {
         document.getElementById('vsPlayerImg').src = auth.currentUser.photoURL;
         document.getElementById('vsPlayerName').innerText = auth.currentUser.displayName.toUpperCase();
         document.getElementById('hudPfp').src = auth.currentUser.photoURL;
-        document.getElementById('pName').innerText = auth.currentUser.displayName.split(' ')[0];
+        document.getElementById('pName').innerText = auth.currentUser.displayName.split(' ')[0].toUpperCase();
     }
 
     setTimeout(() => {
         showC4Stage('c4ColorPicker');
-        renderColorOptions();
-    }, 4000);
+        renderC4Colors();
+    }, 4500);
 };
 
-function renderColorOptions() {
+function renderC4Colors() {
     const container = document.getElementById('colorOptions');
     container.innerHTML = '';
-    C4_TOKENS.forEach(token => {
-        const div = document.createElement('div');
-        div.className = 'color-opt-btn';
-        div.innerHTML = `<img src="${token.url}"><span>${token.name}</span>`;
-        div.onclick = () => {
-            c4PlayerToken = token.url;
-            startGameLogic();
+    C4_TOKENS.forEach(t => {
+        const btn = document.createElement('div');
+        btn.className = 'color-opt-btn';
+        btn.innerHTML = `<img src="${t.url}"><span>${t.name}</span>`;
+        btn.onclick = () => {
+            c4PlayerToken = t.url;
+            initRealBoard();
         };
-        container.appendChild(div);
+        container.appendChild(btn);
     });
 }
 
-function showC4Stage(stageId) {
-    ['c4IntroScreen', 'c4ColorPicker', 'c4GameBoardUI', 'c4ResultModal'].forEach(id => {
-        document.getElementById(id).style.display = (id === stageId) ? 'flex' : 'none';
-    });
-}
-
-function startGameLogic() {
+// 2. BOARD INITIALIZATION
+function initRealBoard() {
     showC4Stage('c4GameBoardUI');
     const grid = document.getElementById('c4Grid');
     const lines = document.getElementById('dropLines');
     grid.innerHTML = '';
     lines.innerHTML = '';
     c4Board = Array(6).fill().map(() => Array(7).fill(0));
-    c4Active = true;
     c4Turn = 1;
-    
-    for(let i=0; i<7; i++) lines.innerHTML += `<div class="drop-line" id="line-${i}"></div>`;
-    
+    c4Active = true;
+
+    for(let i=0; i<7; i++) lines.innerHTML += `<div class="drop-line" id="l-${i}"></div>`;
+
     for (let r = 0; r < 6; r++) {
         for (let c = 0; c < 7; c++) {
             const cell = document.createElement('div');
             cell.className = 'c4-cell';
             cell.dataset.col = c;
-            cell.dataset.row = r;
-            cell.onclick = () => handleMove(c);
-            cell.onmouseenter = () => document.getElementById(`line-${c}`).classList.add('active');
-            cell.onmouseleave = () => document.getElementById(`line-${c}`).classList.remove('active');
+            cell.onclick = () => handleC4Move(c);
+            cell.onmouseenter = () => document.getElementById(`l-${c}`).classList.add('active');
+            cell.onmouseleave = () => document.getElementById(`l-${c}`).classList.remove('active');
             grid.appendChild(cell);
         }
     }
-    updateStatus("YOUR TURN");
+    updateC4HUD("YOUR TURN");
 }
 
-async function handleMove(col) {
+// 3. GAMEPLAY LOGIC
+async function handleC4Move(col) {
     if (!c4Active || c4Turn !== 1) return;
-    if (await executeDrop(col, 1)) {
-        if (checkVictory(1)) return triggerEnd(1);
-        if (isBoardFull()) return triggerEnd(0);
+    if (await dropTokenAnim(col, 1)) {
+        if (checkWinStrict(1)) return triggerWin(1);
+        if (checkTie()) return triggerWin(0);
+        
         c4Turn = 2;
-        updateStatus("KEVIN BOT IS THINKING...");
-        setTimeout(kevinLogic, 1000);
+        updateC4HUD("KEVIN IS THINKING...");
+        setTimeout(kevinBotBrain, 800);
     }
 }
 
-function kevinLogic() {
-    let bestCol = -1;
-    // 1. Can Kevin win?
-    for(let c=0; c<7; c++) if(canWin(c, 2)) { bestCol = c; break; }
-    // 2. Block Player?
-    if(bestCol === -1) for(let c=0; c<7; c++) if(canWin(c, 1)) { bestCol = c; break; }
-    // 3. Random
-    if(bestCol === -1) {
-        let valid = [];
-        for(let c=0; c<7; c++) if(c4Board[0][c] === 0) valid.push(c);
-        bestCol = valid[Math.floor(Math.random() * valid.length)];
+async function dropTokenAnim(col, p) {
+    let row = -1;
+    for (let r = 5; r >= 0; r--) {
+        if (c4Board[r][col] === 0) { row = r; break; }
     }
-    executeDrop(bestCol, 2).then(() => {
-        if (checkVictory(2)) return triggerEnd(2);
-        if (isBoardFull()) return triggerEnd(0);
-        c4Turn = 1;
-        updateStatus("YOUR TURN");
-    });
-}
-
-function canWin(col, p) {
-    let row = -1;
-    for(let r=5; r>=0; r--) if(c4Board[r][col] === 0) { row = r; break; }
-    if(row === -1) return false;
-    c4Board[row][col] = p;
-    let win = checkVictory(p);
-    c4Board[row][col] = 0;
-    return win;
-}
-
-async function executeDrop(col, p) {
-    let row = -1;
-    for(let r=5; r>=0; r--) if(c4Board[r][col] === 0) { row = r; break; }
-    if(row === -1) return false;
+    if (row === -1) return false;
 
     c4Board[row][col] = p;
-    const cell = document.querySelector(`.c4-cell[data-col="${col}"][data-row="${row}"]`);
+    const cells = document.querySelectorAll(`.c4-cell[data-col="${col}"]`);
+    const targetCell = cells[row];
+    
     const token = document.createElement('div');
     token.className = 'c4-token';
     token.style.backgroundImage = `url(${p === 1 ? c4PlayerToken : KEVIN_TOKEN})`;
     
-    // Physics Drop: Start from above the board
-    token.style.transform = `translateY(-${(row + 2) * 100}%)`;
-    cell.appendChild(token);
+    // THE FALLING ANIMATION
+    token.style.transform = `translateY(-${(row + 5) * 100}%)`;
+    targetCell.appendChild(token);
     
     return new Promise(res => {
         setTimeout(() => {
@@ -10941,38 +10930,95 @@ async function executeDrop(col, p) {
     });
 }
 
-function checkVictory(p) {
-    const rows = 6, cols = 7;
-    for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-            if (c4Board[r][c] !== p) continue;
-            if (c <= cols - 4 && c4Board[r][c+1] === p && c4Board[r][c+2] === p && c4Board[r][c+3] === p) return true;
-            if (r <= rows - 4 && c4Board[r+1][c] === p && c4Board[r+2][c] === p && c4Board[r+3][c] === p) return true;
-            if (r <= rows - 4 && c <= cols - 4 && c4Board[r+1][c+1] === p && c4Board[r+2][c+2] === p && c4Board[r+3][c+3] === p) return true;
-            if (r >= 3 && c <= cols - 4 && c4Board[r-1][c+1] === p && c4Board[r-2][c+2] === p && c4Board[r-3][c+3] === p) return true;
+function kevinBotBrain() {
+    if (!c4Active) return;
+    let col = -1;
+    // 1. Win if possible
+    for(let c=0; c<7; c++) if(simMove(c, 2)) { col = c; break; }
+    // 2. Block player
+    if(col === -1) for(let c=0; c<7; c++) if(simMove(c, 1)) { col = c; break; }
+    // 3. Center logic
+    if(col === -1 && c4Board[5][3] === 0) col = 3;
+    // 4. Random valid
+    if(col === -1) {
+        let valid = [];
+        for(let c=0; c<7; c++) if(c4Board[0][c] === 0) valid.push(c);
+        col = valid[Math.floor(Math.random() * valid.length)];
+    }
+
+    dropTokenAnim(col, 2).then(() => {
+        if (checkWinStrict(2)) return triggerWin(2);
+        if (checkTie()) return triggerWin(0);
+        c4Turn = 1;
+        updateC4HUD("YOUR TURN");
+    });
+}
+
+function simMove(col, p) {
+    let r = -1;
+    for (let i=5; i>=0; i--) if(c4Board[i][col] === 0) { r = i; break; }
+    if(r === -1) return false;
+    c4Board[r][col] = p;
+    let win = checkWinStrict(p);
+    c4Board[r][col] = 0;
+    return win;
+}
+
+// 4. WIN & TIE DETECTION (STRICT)
+function checkWinStrict(p) {
+    const rCount = 6, cCount = 7;
+    // Horizontal
+    for (let r=0; r<rCount; r++) {
+        for (let c=0; c<cCount-3; c++) {
+            if (c4Board[r][c]==p && c4Board[r][c+1]==p && c4Board[r][c+2]==p && c4Board[r][c+3]==p) return true;
+        }
+    }
+    // Vertical
+    for (let r=0; r<rCount-3; r++) {
+        for (let c=0; c<cCount; c++) {
+            if (c4Board[r][c]==p && c4Board[r+1][c]==p && c4Board[r+2][c]==p && c4Board[r+3][c]==p) return true;
+        }
+    }
+    // Diagonal Down
+    for (let r=0; r<rCount-3; r++) {
+        for (let c=0; c<cCount-3; c++) {
+            if (c4Board[r][c]==p && c4Board[r+1][c+1]==p && c4Board[r+2][c+2]==p && c4Board[r+3][c+3]==p) return true;
+        }
+    }
+    // Diagonal Up
+    for (let r=3; r<rCount; r++) {
+        for (let c=0; c<cCount-3; c++) {
+            if (c4Board[r][c]==p && c4Board[r-1][c+1]==p && c4Board[r-2][c+2]==p && c4Board[r-3][c+3]==p) return true;
         }
     }
     return false;
 }
 
-function isBoardFull() { return c4Board[0].every(cell => cell !== 0); }
+function checkTie() { return c4Board[0].every(v => v !== 0); }
 
-async function triggerEnd(result) {
+// 5. RESULTS & PENALTY
+async function triggerWin(res) {
     c4Active = false;
+    const modal = document.getElementById('c4ResultModal');
     const title = document.getElementById('resultTitle');
     const reward = document.getElementById('resultReward');
-    
-    if(result === 1) {
+    const text = document.getElementById('resultText');
+
+    if(res === 1) {
         title.innerText = "VICTORY!";
         title.style.color = "var(--primary)";
+        text.innerText = "Te-ai pișat pe Kevin Bot!";
         reward.innerText = "+500 KSDA";
         if(auth.currentUser) await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(500) });
-    } else if(result === 2) {
+    } else if(res === 2) {
         title.innerText = "DEFEAT!";
         title.style.color = "#ff4757";
-        reward.innerText = "TRY AGAIN";
+        text.innerText = "Kevin Bot e mai smart...";
+        reward.innerText = "+0";
     } else {
         title.innerText = "DRAW!";
+        title.style.color = "#fff";
+        text.innerText = "Nimeni nu a câștigat.";
         reward.innerText = "+100 KSDA";
         if(auth.currentUser) await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(100) });
     }
@@ -10980,22 +11026,21 @@ async function triggerEnd(result) {
 }
 
 window.handleGiveUp = async () => {
-    if(!confirm("Ești sigur? Pierzi 1000 monede dacă renunți!")) return;
-    if(auth.currentUser) await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(-1000) });
-    closeC4Game();
+    if(!confirm("Ești sigur? Pierzi 1000 monede dacă ieși acum!")) return;
+    if(auth.currentUser) {
+        await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(-1000) });
+        logTransaction(-1000, "Penalty", "Abandonat meci Connect 4");
+    }
+    location.reload();
 };
 
-function updateStatus(txt) {
+function updateC4HUD(txt) {
     const pill = document.getElementById('gameStatusPill');
     pill.innerText = txt;
     pill.style.background = (c4Turn === 1) ? 'var(--primary)' : '#ff4757';
 }
 
-window.closeC4Game = () => {
-    document.getElementById('c4GameOverlay').style.display = 'none';
-    c4Active = false;
-};
-
+window.closeC4Game = () => { document.getElementById('c4GameOverlay').style.display = 'none'; c4Active = false; };
 // ATTACH TO BUTTON
 document.querySelector('.mode-card').onclick = window.startSinglePlayerC4;
   </script>
