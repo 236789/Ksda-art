@@ -11015,14 +11015,22 @@ async function dropTokenAnim(col, p) {
     if (row === -1) return false;
 
     c4Board[row][col] = p;
-    const cells = document.querySelectorAll(`.c4-cell[data-col="${col}"]`);
-    const targetCell = cells[(row * 7) + col]; // Correct index calculation
     
+    // Select all cells, then find the specific one at (row, col)
+    // Formula: (row * 7) + col
+    const allCells = document.querySelectorAll('.c4-cell');
+    const targetCell = allCells[(row * 7) + col]; 
+    
+    if (!targetCell) {
+        console.error("Target cell not found at row", row, "col", col);
+        return false;
+    }
+
     const token = document.createElement('div');
     token.className = 'c4-token';
     token.style.backgroundImage = `url(${p === 1 ? c4PlayerToken : KEVIN_TOKEN})`;
     
-    // Animation Start Position
+    // Animation Start Position (Top of board)
     token.style.transform = `translateY(-${(row + 1) * 100}%)`;
     targetCell.appendChild(token);
     
@@ -11030,9 +11038,9 @@ async function dropTokenAnim(col, p) {
     token.offsetHeight;
 
     return new Promise(res => {
-        token.style.transition = "transform 0.5s cubic-bezier(0.47, 0, 0.745, 0.715)";
+        token.style.transition = "transform 0.6s cubic-bezier(0.47, 0, 0.745, 0.715)";
         token.style.transform = 'translateY(0)';
-        setTimeout(() => res(true), 550);
+        setTimeout(() => res(true), 650);
     });
 }
 
@@ -11079,27 +11087,27 @@ function simMove(col, p) {
 }
 
 function checkWinStrict(p) {
-    // Horizontal
-    for (let r=0; r<6; r++) {
-        for (let c=0; c<4; c++) {
+    // Horizontal check
+    for (let r = 0; r < 6; r++) {
+        for (let c = 0; c < 4; c++) {
             if (c4Board[r][c] === p && c4Board[r][c+1] === p && c4Board[r][c+2] === p && c4Board[r][c+3] === p) return true;
         }
     }
-    // Vertical
-    for (let r=0; r<3; r++) {
-        for (let c=0; c<7; c++) {
+    // Vertical check
+    for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 7; c++) {
             if (c4Board[r][c] === p && c4Board[r+1][c] === p && c4Board[r+2][c] === p && c4Board[r+3][c] === p) return true;
         }
     }
-    // Diagonal Down
-    for (let r=0; r<3; r++) {
-        for (let c=0; c<4; c++) {
+    // Diagonal Down-Right
+    for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 4; c++) {
             if (c4Board[r][c] === p && c4Board[r+1][c+1] === p && c4Board[r+2][c+2] === p && c4Board[r+3][c+3] === p) return true;
         }
     }
-    // Diagonal Up
-    for (let r=3; r<6; r++) {
-        for (let c=0; c<4; c++) {
+    // Diagonal Up-Right
+    for (let r = 3; r < 6; r++) {
+        for (let c = 0; c < 4; c++) {
             if (c4Board[r][c] === p && c4Board[r-1][c+1] === p && c4Board[r-2][c+2] === p && c4Board[r-3][c+3] === p) return true;
         }
     }
@@ -11111,7 +11119,7 @@ function checkTie() { return c4Board[0].every(v => v !== 0); }
 async function triggerWin(res) {
     c4Active = false;
     c4IsBusy = true;
-    const modal = document.getElementById('c4ResultModal');
+    
     const title = document.getElementById('resultTitle');
     const reward = document.getElementById('resultReward');
     const text = document.getElementById('resultText');
@@ -11119,13 +11127,13 @@ async function triggerWin(res) {
     if(res === 1) {
         title.innerText = "VICTORIE!";
         title.style.color = "var(--primary)";
-        text.innerText = "L-ai distrus pe Kevin Bot!";
+        text.innerText = "L-ai bătut pe Kevin Bot!";
         reward.innerText = "+500";
         if(auth.currentUser) await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(500) });
     } else if(res === 2) {
         title.innerText = "ÎNFRÂNGERE!";
         title.style.color = "#ff4757";
-        text.innerText = "Kevin Bot a fost mai strategic...";
+        text.innerText = "Kevin Bot a fost mai bun...";
         reward.innerText = "+0";
     } else {
         title.innerText = "REMIZĂ!";
@@ -11135,9 +11143,10 @@ async function triggerWin(res) {
         if(auth.currentUser) await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(100) });
     }
     
+    // Give it a moment so the user sees the last coin land
     setTimeout(() => {
         showC4Stage('c4ResultModal');
-    }, 1000);
+    }, 800);
 }
 
 function updateC4HUD(txt) {
