@@ -8835,94 +8835,59 @@ div.header-container header {
     z-index: 20 !important;
 }
 
-/* --- FIX 1: FRAME OUTSIDE AVATAR --- */
+/* --- FIXED VERSUS OVERLAY CSS --- */
+.vs-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px;
+    height: 100%;
+    z-index: 100;
+}
+
 .vs-circle {
     position: relative;
-    width: 160px; 
-    height: 160px;
-    display: flex; 
-    justify-content: center; 
-    align-items: center;
-    /* Removed overflow: hidden from here so the frame can breathe */
-}
-
-.vs-avatar-mask {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    overflow: hidden; /* This clips ONLY the user image */
-    border: 4px solid var(--primary);
-    box-shadow: 0 0 20px var(--primary-dim);
-    z-index: 1;
-}
-
-.vs-avatar-mask img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.vs-frame {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 145%; /* Makes it significantly larger than the circle */
-    height: 145%;
-    pointer-events: none;
-    z-index: 10; /* Sits on top of the avatar */
-}
-
-/* --- FIX 2: PERFECT SYMMETRY --- */
-.vs-container {
+    width: 140px; /* Base size of the avatar */
+    height: 140px;
     display: flex;
     justify-content: center;
     align-items: center;
+    /* We DO NOT use overflow:hidden here or the frame gets cut off */
+}
+
+/* The actual player/bot photo */
+.vs-avatar {
     width: 100%;
-    gap: 20px;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%; /* Makes only the face a circle */
+    z-index: 1;
+    border: 3px solid rgba(255,255,255,0.1);
 }
 
-.vs-player-side, .vs-bot-side {
-    flex: 1; /* Both sides take exactly equal space */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 200px;
+/* The decorative frame */
+.vs-frame {
+    position: absolute;
+    top: 50%; 
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 160%; /* Significantly larger to overlap the edges */
+    height: 160%;
+    z-index: 5; /* Must be higher than vs-avatar */
+    pointer-events: none; /* Allows clicks to pass through if needed */
 }
 
-.c4-tactical-hud {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 140px 1fr; /* Exact fixed center width for total symmetry */
-    align-items: center;
-    background: rgba(5,11,20,0.9);
-    border: 1px solid var(--primary);
-    padding: 10px 20px;
-    border-radius: 100px;
-    margin-bottom: 20px;
+/* Specific glow for the Bot side */
+.bot-glow .vs-avatar {
+    border-color: #ff4757;
+    box-shadow: 0 0 30px rgba(255, 71, 87, 0.5);
 }
 
-.hud-player {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #fff;
-    overflow: hidden;
-}
-
-/* Left side name pushes to right */
-#pName { text-align: left; flex: 1; }
-
-/* Right side setup */
-.hud-right {
-    flex-direction: row-reverse;
-    text-align: right;
-}
-
-/* Ensure the central pill is always dead-center */
-#gameStatusPill {
-    width: 100%;
-    text-align: center;
-    white-space: nowrap;
+/* The Versus Logo in the middle */
+.vs-logo-anim {
+    width: 250px;
+    z-index: 10;
 }
   </style>
 </head>
@@ -11080,6 +11045,7 @@ window.startSinglePlayerC4 = async () => {
     document.getElementById('c4GameOverlay').style.display = 'flex';
     showC4Stage('c4IntroScreen');
     
+    // FETCH ACTUAL USER DATA FOR CUSTOM NAME/FRAME
     if(auth.currentUser) {
         const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
         const userData = userSnap.data();
@@ -11088,22 +11054,28 @@ window.startSinglePlayerC4 = async () => {
         const nameDisplay = userData.equippedText ? 
             `<span class="${userData.equippedText.cssClass}">${finalName}</span>` : finalName;
 
-        // --- NEW STRUCTURE FOR THE VS CIRCLE ---
-        const vsCircle = document.querySelector('.vs-player-side .vs-circle');
-        vsCircle.innerHTML = `
-            <div class="vs-avatar-mask">
-                <img id="vsPlayerImg" src="${userData.image || auth.currentUser.photoURL}">
-            </div>
-        `;
-        
-        // Add Frame OUTSIDE the mask but inside the vsCircle container
-        if(userData.equippedFrame) {
-            vsCircle.innerHTML += `<img src="${userData.equippedFrame.img}" class="vs-frame">`;
-        }
-
+        // Intro Screen Setup
+        document.getElementById('vsPlayerImg').src = userData.image || auth.currentUser.photoURL;
         document.getElementById('vsPlayerName').innerHTML = nameDisplay;
+        
+        // Add Frame if exists
+// 1. Setup Player Side
+const vsPlayerCircle = document.querySelector('.vs-player-side .vs-circle');
+const playerImgUrl = userData.image || auth.currentUser.photoURL;
 
-        // HUD Setup (Symmetrical)
+// Re-render the inner HTML to ensure classes are correct
+let playerHtml = `<img src="${playerImgUrl}" class="vs-avatar">`;
+if(userData.equippedFrame && userData.equippedFrame.img) {
+    playerHtml += `<img src="${userData.equippedFrame.img}" class="vs-frame">`;
+}
+vsPlayerCircle.innerHTML = playerHtml;
+
+// 2. Setup Bot Side (Just in case you want to add a frame to the bot later)
+const vsBotCircle = document.querySelector('.vs-bot-side .vs-circle');
+const botImgUrl = "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media";
+vsBotCircle.innerHTML = `<img src="${botImgUrl}" class="vs-avatar">`;
+
+        // HUD Setup
         document.getElementById('hudPfp').src = userData.image || auth.currentUser.photoURL;
         document.getElementById('pName').innerHTML = nameDisplay;
     }
