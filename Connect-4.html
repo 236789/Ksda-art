@@ -8682,6 +8682,96 @@ div.header-container header {
     .color-grid-c4 { grid-template-columns: repeat(4, 1fr); }
     .c4-tactical-hud { padding: 8px 12px; }
 }
+
+
+/* --- FIX 1: VERSUS OVERLAY MOBILE --- */
+@media (max-width: 768px) {
+    .vs-container {
+        flex-direction: column !important;
+        gap: 30px;
+        padding: 40px 0;
+    }
+    .vs-circle {
+        width: 120px !important;
+        height: 120px !important;
+    }
+    .vs-logo-anim {
+        width: 180px !important;
+    }
+}
+
+/* --- FIX 2: TOKEN PICKER UI --- */
+.c4-choice-card {
+    background: #08101b;
+    border: 2px solid var(--primary);
+    padding: 30px;
+    border-radius: 30px;
+    text-align: center;
+    width: 95%;
+    max-width: 500px;
+    box-shadow: 0 0 40px rgba(41, 243, 255, 0.3);
+}
+
+.color-grid-c4 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); /* Better than fixed 5 columns */
+    gap: 15px;
+    margin-top: 25px;
+    justify-items: center;
+}
+
+.color-opt-btn img {
+    width: 55px !important;
+    height: 55px !important;
+    border: 3px solid transparent;
+    transition: 0.3s;
+    border-radius: 50%;
+}
+
+.color-opt-btn:hover img {
+    border-color: #fff;
+    transform: scale(1.1);
+    box-shadow: 0 0 20px var(--primary);
+}
+
+/* --- FIX 3: BOARD & OVERLAY ALIGNMENT --- */
+.c4-main-wrapper {
+    position: relative;
+    padding: 10px;
+    background: #1f3a52;
+    border-radius: 20px;
+    border: 4px solid #162a3d;
+}
+
+.c4-neon-board {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px; /* Sync this with drop-lines */
+    position: relative;
+    z-index: 5;
+}
+
+.drop-lines-overlay {
+    position: absolute;
+    inset: 10px; /* Must match wrapper padding */
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px; /* Must match grid gap */
+    pointer-events: none;
+    z-index: 2;
+}
+
+.drop-line {
+    height: 100%;
+    background: transparent;
+    transition: 0.2s;
+    border-radius: 10px;
+}
+
+.drop-line.active {
+    background: rgba(41, 243, 255, 0.1);
+    border: 1px dashed var(--primary);
+}
   </style>
 </head>
 <body>
@@ -10797,7 +10887,7 @@ if(mobileLoginBtn) {
     };
 }
 
-// --- CONNECT 4 MASTER ENGINE ---
+// --- CONNECT 4 MASTER ENGINE (FIXED) ---
 const C4_TOKENS = [
     { name: 'Yellow', url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FYellow%20Connect%204%20Pice.png?alt=media&token=d56bb594-528e-466b-b163-545fe5417a9f' },
     { name: 'Silver', url: 'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FSilver%20Connect%204%20Pice.png?alt=media&token=39481570-33a7-4345-a193-175efd3a1dd9' },
@@ -10816,11 +10906,8 @@ const KEVIN_TOKEN = "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.fire
 let c4Board = [];
 let c4PlayerToken = "";
 let c4Active = false;
-let c4Turn = 1; // 1=Player, 2=Kevin
-
-// 0. PRELOADER
-C4_TOKENS.forEach(t => { const img = new Image(); img.src = t.url; });
-const kImg = new Image(); kImg.src = KEVIN_TOKEN;
+let c4Turn = 1; 
+let c4IsBusy = false; // NEW: Prevents spamming while animations run
 
 // 1. STAGE CONTROLLER
 function showC4Stage(stageId) {
@@ -10828,7 +10915,13 @@ function showC4Stage(stageId) {
     document.getElementById('c4ColorPicker').style.display = 'none';
     document.getElementById('c4GameBoardUI').style.display = 'none';
     document.getElementById('c4ResultModal').style.display = 'none';
-    document.getElementById(stageId).style.display = 'flex';
+    
+    const target = document.getElementById(stageId);
+    if(stageId === 'c4IntroScreen' || stageId === 'c4GameBoardUI') {
+        target.style.display = 'flex';
+    } else {
+        target.style.display = 'block';
+    }
 }
 
 window.startSinglePlayerC4 = () => {
@@ -10863,7 +10956,6 @@ function renderC4Colors() {
     });
 }
 
-// 2. BOARD INITIALIZATION
 function initRealBoard() {
     showC4Stage('c4GameBoardUI');
     const grid = document.getElementById('c4Grid');
@@ -10873,6 +10965,7 @@ function initRealBoard() {
     c4Board = Array(6).fill().map(() => Array(7).fill(0));
     c4Turn = 1;
     c4Active = true;
+    c4IsBusy = false;
 
     for(let i=0; i<7; i++) lines.innerHTML += `<div class="drop-line" id="l-${i}"></div>`;
 
@@ -10890,16 +10983,27 @@ function initRealBoard() {
     updateC4HUD("YOUR TURN");
 }
 
-// 3. GAMEPLAY LOGIC
 async function handleC4Move(col) {
-    if (!c4Active || c4Turn !== 1) return;
-    if (await dropTokenAnim(col, 1)) {
-        if (checkWinStrict(1)) return triggerWin(1);
-        if (checkTie()) return triggerWin(0);
+    if (!c4Active || c4Turn !== 1 || c4IsBusy) return;
+
+    c4IsBusy = true; // Lock the board
+    const success = await dropTokenAnim(col, 1);
+    
+    if (success) {
+        if (checkWinStrict(1)) {
+            triggerWin(1);
+            return;
+        }
+        if (checkTie()) {
+            triggerWin(0);
+            return;
+        }
         
         c4Turn = 2;
         updateC4HUD("KEVIN IS THINKING...");
-        setTimeout(kevinBotBrain, 800);
+        setTimeout(kevinBotBrain, 1000); // Give the bot time to "think"
+    } else {
+        c4IsBusy = false; // Column was full, unlock
     }
 }
 
@@ -10912,34 +11016,37 @@ async function dropTokenAnim(col, p) {
 
     c4Board[row][col] = p;
     const cells = document.querySelectorAll(`.c4-cell[data-col="${col}"]`);
-    const targetCell = cells[row];
+    const targetCell = cells[(row * 7) + col]; // Correct index calculation
     
     const token = document.createElement('div');
     token.className = 'c4-token';
     token.style.backgroundImage = `url(${p === 1 ? c4PlayerToken : KEVIN_TOKEN})`;
     
-    // THE FALLING ANIMATION
-    token.style.transform = `translateY(-${(row + 5) * 100}%)`;
+    // Animation Start Position
+    token.style.transform = `translateY(-${(row + 1) * 100}%)`;
     targetCell.appendChild(token);
     
+    // Force a reflow
+    token.offsetHeight;
+
     return new Promise(res => {
-        setTimeout(() => {
-            token.style.transform = 'translateY(0)';
-            setTimeout(res, 600);
-        }, 50);
+        token.style.transition = "transform 0.5s cubic-bezier(0.47, 0, 0.745, 0.715)";
+        token.style.transform = 'translateY(0)';
+        setTimeout(() => res(true), 550);
     });
 }
 
 function kevinBotBrain() {
     if (!c4Active) return;
     let col = -1;
-    // 1. Win if possible
+
+    // 1. Can Kevin Win?
     for(let c=0; c<7; c++) if(simMove(c, 2)) { col = c; break; }
-    // 2. Block player
+    // 2. Must Kevin Block Player?
     if(col === -1) for(let c=0; c<7; c++) if(simMove(c, 1)) { col = c; break; }
-    // 3. Center logic
+    // 3. Center preference
     if(col === -1 && c4Board[5][3] === 0) col = 3;
-    // 4. Random valid
+    // 4. Random valid column
     if(col === -1) {
         let valid = [];
         for(let c=0; c<7; c++) if(c4Board[0][c] === 0) valid.push(c);
@@ -10947,9 +11054,16 @@ function kevinBotBrain() {
     }
 
     dropTokenAnim(col, 2).then(() => {
-        if (checkWinStrict(2)) return triggerWin(2);
-        if (checkTie()) return triggerWin(0);
+        if (checkWinStrict(2)) {
+            triggerWin(2);
+            return;
+        }
+        if (checkTie()) {
+            triggerWin(0);
+            return;
+        }
         c4Turn = 1;
+        c4IsBusy = false; // Unlock for player
         updateC4HUD("YOUR TURN");
     });
 }
@@ -10964,31 +11078,29 @@ function simMove(col, p) {
     return win;
 }
 
-// 4. WIN & TIE DETECTION (STRICT)
 function checkWinStrict(p) {
-    const rCount = 6, cCount = 7;
     // Horizontal
-    for (let r=0; r<rCount; r++) {
-        for (let c=0; c<cCount-3; c++) {
-            if (c4Board[r][c]==p && c4Board[r][c+1]==p && c4Board[r][c+2]==p && c4Board[r][c+3]==p) return true;
+    for (let r=0; r<6; r++) {
+        for (let c=0; c<4; c++) {
+            if (c4Board[r][c] === p && c4Board[r][c+1] === p && c4Board[r][c+2] === p && c4Board[r][c+3] === p) return true;
         }
     }
     // Vertical
-    for (let r=0; r<rCount-3; r++) {
-        for (let c=0; c<cCount; c++) {
-            if (c4Board[r][c]==p && c4Board[r+1][c]==p && c4Board[r+2][c]==p && c4Board[r+3][c]==p) return true;
+    for (let r=0; r<3; r++) {
+        for (let c=0; c<7; c++) {
+            if (c4Board[r][c] === p && c4Board[r+1][c] === p && c4Board[r+2][c] === p && c4Board[r+3][c] === p) return true;
         }
     }
     // Diagonal Down
-    for (let r=0; r<rCount-3; r++) {
-        for (let c=0; c<cCount-3; c++) {
-            if (c4Board[r][c]==p && c4Board[r+1][c+1]==p && c4Board[r+2][c+2]==p && c4Board[r+3][c+3]==p) return true;
+    for (let r=0; r<3; r++) {
+        for (let c=0; c<4; c++) {
+            if (c4Board[r][c] === p && c4Board[r+1][c+1] === p && c4Board[r+2][c+2] === p && c4Board[r+3][c+3] === p) return true;
         }
     }
     // Diagonal Up
-    for (let r=3; r<rCount; r++) {
-        for (let c=0; c<cCount-3; c++) {
-            if (c4Board[r][c]==p && c4Board[r-1][c+1]==p && c4Board[r-2][c+2]==p && c4Board[r-3][c+3]==p) return true;
+    for (let r=3; r<6; r++) {
+        for (let c=0; c<4; c++) {
+            if (c4Board[r][c] === p && c4Board[r-1][c+1] === p && c4Board[r-2][c+2] === p && c4Board[r-3][c+3] === p) return true;
         }
     }
     return false;
@@ -10996,43 +11108,37 @@ function checkWinStrict(p) {
 
 function checkTie() { return c4Board[0].every(v => v !== 0); }
 
-// 5. RESULTS & PENALTY
 async function triggerWin(res) {
     c4Active = false;
+    c4IsBusy = true;
     const modal = document.getElementById('c4ResultModal');
     const title = document.getElementById('resultTitle');
     const reward = document.getElementById('resultReward');
     const text = document.getElementById('resultText');
 
     if(res === 1) {
-        title.innerText = "VICTORY!";
+        title.innerText = "VICTORIE!";
         title.style.color = "var(--primary)";
-        text.innerText = "Te-ai pișat pe Kevin Bot!";
-        reward.innerText = "+500 KSDA";
+        text.innerText = "L-ai distrus pe Kevin Bot!";
+        reward.innerText = "+500";
         if(auth.currentUser) await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(500) });
     } else if(res === 2) {
-        title.innerText = "DEFEAT!";
+        title.innerText = "ÎNFRÂNGERE!";
         title.style.color = "#ff4757";
-        text.innerText = "Kevin Bot e mai smart...";
+        text.innerText = "Kevin Bot a fost mai strategic...";
         reward.innerText = "+0";
     } else {
-        title.innerText = "DRAW!";
+        title.innerText = "REMIZĂ!";
         title.style.color = "#fff";
         text.innerText = "Nimeni nu a câștigat.";
-        reward.innerText = "+100 KSDA";
+        reward.innerText = "+100";
         if(auth.currentUser) await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(100) });
     }
-    showC4Stage('c4ResultModal');
+    
+    setTimeout(() => {
+        showC4Stage('c4ResultModal');
+    }, 1000);
 }
-
-window.handleGiveUp = async () => {
-    if(!confirm("Ești sigur? Pierzi 1000 monede dacă ieși acum!")) return;
-    if(auth.currentUser) {
-        await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(-1000) });
-        logTransaction(-1000, "Penalty", "Abandonat meci Connect 4");
-    }
-    location.reload();
-};
 
 function updateC4HUD(txt) {
     const pill = document.getElementById('gameStatusPill');
