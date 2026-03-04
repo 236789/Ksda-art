@@ -10035,6 +10035,18 @@ onAuthStateChanged(auth, user => {
             mobileLoginBtn.innerHTML = '<i class="fas fa-user-circle"></i> Cont';
         }
 
+// FIX GAME VISIBILITY
+    const loginWall = document.getElementById('c4LoginWall');
+    const modeSelect = document.getElementById('c4ModeSelect');
+
+    if (user) {
+        if(loginWall) loginWall.style.display = 'none';
+        if(modeSelect) modeSelect.style.display = 'block';
+    } else {
+        if(loginWall) loginWall.style.display = 'flex'; 
+        if(modeSelect) modeSelect.style.display = 'none';
+    }
+
         // 2. Listen for Global Metadata (Notifications)
         onSnapshot(doc(db, "site_metadata", "counters"), (metaSnap) => {
             const totalGlobal = metaSnap.data()?.totalNews || 0;
