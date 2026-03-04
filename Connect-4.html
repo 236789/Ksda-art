@@ -8297,28 +8297,38 @@ div.header-container header {
     padding-left: 10px;
 }
 
-/* --- PC MODE GRID FIX --- */
+/* --- PC GRID: FILL ALL THE WAY --- */
 .c4-mode-grid {
-    display: grid;
-    /* Force 2 equal columns on PC to fill the whole shell */
-    grid-template-columns: 1fr 1fr; 
-    gap: 20px;
-    width: 100%;
+    display: grid !important;
+    /* Force exactly 2 columns that share 100% of the space */
+    grid-template-columns: 1fr 1fr !important; 
+    width: 100% !important;
+    gap: 25px;
     margin-top: 30px;
-    z-index: 2;
+    padding: 0;
 }
 
-/* --- MOBILE FIX (Stack them only on small screens) --- */
+/* --- CARDS: FILL THE COLUMN --- */
+.c4-mode-card {
+    width: 100% !important; /* Stretch to fill the grid column */
+    max-width: none !important; /* Remove any limits */
+    background: rgba(255, 255, 255, 0.03);
+    border: 1.5px solid rgba(41, 243, 255, 0.3);
+    border-radius: 20px;
+    padding: 50px 20px;
+    cursor: pointer;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+/* --- MOBILE FIX: GO BACK TO 1 COLUMN --- */
 @media (max-width: 768px) {
     .c4-mode-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
     }
-}
-
-/* Ensure cards don't have a restricted width */
-.c4-mode-card {
-    width: 100%; 
-    min-width: 0; /* Prevents overflow */
 }
 
   </style>
