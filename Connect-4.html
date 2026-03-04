@@ -7979,14 +7979,13 @@ div.header-container header {
     padding: 30px;
     backdrop-filter: blur(10px);
     box-shadow: 0 0 40px rgba(41, 243, 255, 0.2), inset 0 0 20px rgba(41, 243, 255, 0.1);
-    min-height: 500px;
+    min-height: 550px; /* Am mărit puțin înălțimea pentru PC */
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start; /* SCHIMBAT: Împinge totul spre top */
 }
 
-/* THE LOGO/STATUS BAR ABOVE THE BOARD */
 .c4-status-bar {
     width: 100%;
     background: rgba(41, 243, 255, 0.1);
@@ -7996,7 +7995,7 @@ div.header-container header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 20px; /* Micșorat de la 30px */
     font-family: 'Orbitron';
     font-size: 12px;
     letter-spacing: 1px;
@@ -8023,13 +8022,17 @@ div.header-container header {
     50% { opacity: 0.4; transform: scale(1.2); }
 }
 
-/* MODE SELECTION BUTTONS */
+/* Caută blocul unde ai setat ".c4-mode-grid" pentru PC (spre finalul codului) */
 .c4-mode-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    width: 100%;
-    max-width: 500px;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important; 
+    width: 100% !important;
+    max-width: 700px !important; /* Limitează lățimea pe PC ca să nu fie butoanele exagerat de lungi */
+    gap: 25px;
+    margin-top: auto !important;    /* SCHIMBAT: Împinge butoanele spre centru */
+    margin-bottom: auto !important; /* SCHIMBAT: Echilibrează spațiul */
+    padding: 20px 0;
+    z-index: 2;
 }
 
 .mode-card {
