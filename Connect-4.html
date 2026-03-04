@@ -9062,43 +9062,60 @@ div.header-container header {
     .vs-logo-anim { width: 180px !important; }
     .vs-circle { width: 120px !important; height: 120px !important; }
 }
+
+/* Ensure the names in HUD and Intro are never cut off */
+#pName, #vsPlayerName {
+    display: inline-block !important;
+    white-space: nowrap !important;
+}
+
+/* Fix Tactical HUD Center alignment */
+.c4-tactical-hud {
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 10px !important;
+}
+
+/* Force the overlay items to center */
+.vs-container {
+    position: absolute !important;
+    inset: 0 !important;
+    background: #02050a !important; /* Prevents seeing board behind intro */
+}
+
+/* Make sure the token color picker card is on top */
+.c4-choice-card {
+    position: relative !important;
+    z-index: 500 !important;
+}
   </style>
 </head>
 <body>
 
-
 <!-- CONNECT 4 ULTIMATE OVERLAY -->
 <div id="c4GameOverlay" class="account-modal-overlay" style="display: none;">
     
-<!-- STAGE 1: INTRO (VS ANIMATION) -->
-<div id="c4IntroScreen" class="vs-container" style="display:none;">
-    <div class="vs-player-side">
-        <div class="vs-circle">
-            <!-- ID added here -->
-            <img id="vsPlayerImg" src="">
+    <!-- STAGE 1: INTRO (VS ANIMATION) -->
+    <div id="c4IntroScreen" class="vs-container" style="display:none;">
+        <div class="vs-player-side">
+            <div class="vs-circle"><img id="vsPlayerImg" src=""></div>
+            <span class="vs-name" id="vsPlayerName">PLAYER</span>
         </div>
-        <span class="vs-name" id="vsPlayerName">PLAYER</span>
-    </div>
-
-    <div class="vs-center">
-        <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F1cdc5696-cb5e-4e9f-89ee-4bf653a4d1d5.png?alt=media" class="vs-logo-anim">
-    </div>
-
-    <div class="vs-bot-side">
-        <div class="vs-circle bot-glow">
-            <!-- ID added here to fix the console error -->
-            <img id="vsBotImg" src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media">
+        <div class="vs-center">
+            <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F1cdc5696-cb5e-4e9f-89ee-4bf653a4d1d5.png?alt=media" class="vs-logo-anim">
         </div>
-        <span class="vs-name">KEVIN BOT</span>
+        <div class="vs-bot-side">
+            <div class="vs-circle bot-glow"><img id="vsBotImg" src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media"></div>
+            <span class="vs-name">KEVIN BOT</span>
+        </div>
     </div>
-</div>
 
     <!-- STAGE 2: COLOR PICKER -->
     <div id="c4ColorPicker" class="c4-choice-card" style="display:none;">
         <h2 class="mode-title" style="color: #fff; font-family: 'Orbitron'; margin-bottom: 20px;">AUTHORIZE TOKEN COLOR</h2>
-        <div class="color-grid-c4" id="colorOptions">
-            <!-- Buttons injected by JS -->
-        </div>
+        <div class="color-grid-c4" id="colorOptions"></div>
     </div>
 
     <!-- STAGE 3: THE TACTICAL BOARD -->
@@ -9106,12 +9123,12 @@ div.header-container header {
         <div class="c4-tactical-hud">
             <div class="hud-player">
                 <img id="hudPfp" src="" class="mini-pfp">
-                <div id="pName" style="font-size: 10px;">PLAYER</div>
+                <div id="pName" style="font-size: 11px; font-weight: 800; font-family: 'Orbitron';">PLAYER</div>
             </div>
             <div id="gameStatusPill" class="turn-pill">YOUR TURN</div>
             <div class="hud-player" style="flex-direction: row-reverse;">
                 <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media" class="mini-pfp bot">
-                <div style="text-align:right; font-size: 10px; margin-right: 10px;">KEVIN BOT</div>
+                <div style="text-align:right; font-size: 10px; margin-right: 10px; font-family: 'Orbitron';">KEVIN BOT</div>
             </div>
         </div>
 
@@ -9121,17 +9138,6 @@ div.header-container header {
         </div>
 
         <button class="give-up-btn" onclick="handleGiveUp()">GIVE UP (-1000 KSDA)</button>
-    </div>
-
-    <!-- STAGE 4: RESULT MODAL -->
-    <div id="c4ResultModal" class="reward-card" style="display:none; border-color: var(--primary); max-width: 400px;">
-        <h1 id="resultTitle" style="font-family: 'Orbitron'; font-weight: 900; margin-bottom: 15px;">VICTORY!</h1>
-        <p id="resultText" style="color: #aaa; margin-bottom: 20px;">You've outsmarted the bot.</p>
-        <div class="reward-coins-box" style="margin-bottom: 30px;">
-            <img src="https://iili.io/fhc1SKQ.png" width="50">
-            <span id="resultReward" style="font-size: 32px;">+500</span>
-        </div>
-        <button class="super-btn" onclick="location.reload()">MENU PRINCIPAL</button>
     </div>
 </div>
 <!-- SCHIMBĂ ACEASTĂ LINIE -->
@@ -11207,20 +11213,53 @@ let c4Active = false;
 let c4Turn = 1; 
 let c4IsBusy = false; // NEW: Prevents spamming while animations run
 
-// 1. STAGE CONTROLLER
+// 1. IMPROVED STAGE CONTROLLER
 function showC4Stage(stageId) {
+    // Explicitly hide every possible screen first
     document.getElementById('c4IntroScreen').style.display = 'none';
     document.getElementById('c4ColorPicker').style.display = 'none';
     document.getElementById('c4GameBoardUI').style.display = 'none';
     document.getElementById('c4ResultModal').style.display = 'none';
     
     const target = document.getElementById(stageId);
-    if(stageId === 'c4IntroScreen' || stageId === 'c4GameBoardUI') {
-        target.style.display = 'flex';
+    if (!target) return;
+
+    // Screens that need Flexbox layout
+    if (stageId === 'c4IntroScreen' || stageId === 'c4GameBoardUI') {
+        target.style.setProperty('display', 'flex', 'important');
     } else {
-        target.style.display = 'block';
+        target.style.setProperty('display', 'block', 'important');
     }
 }
+
+// 2. FIXED START FUNCTION
+window.startSinglePlayerC4 = async () => {
+    document.getElementById('c4GameOverlay').style.display = 'flex';
+    showC4Stage('c4IntroScreen');
+    
+    if (auth.currentUser) {
+        const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+        const userData = userSnap.data();
+        
+        const rawName = userData.username || auth.currentUser.displayName;
+        const nameWithColor = userData.equippedText ? 
+            `<span class="${userData.equippedText.cssClass}">${rawName}</span>` : rawName;
+
+        // Update Intro Screen
+        document.getElementById('vsPlayerImg').src = userData.image || auth.currentUser.photoURL;
+        document.getElementById('vsPlayerName').innerHTML = nameWithColor;
+
+        // Update Tactical HUD (The bar above the game)
+        document.getElementById('hudPfp').src = userData.image || auth.currentUser.photoURL;
+        document.getElementById('pName').innerHTML = nameWithColor; // THIS FIXES THE "PLAYER" NAME
+    }
+
+    // Move to Color Picker after 4 seconds
+    setTimeout(() => {
+        showC4Stage('c4ColorPicker');
+        renderC4Colors();
+    }, 4000);
+};
 
 window.startSinglePlayerC4 = async () => {
     document.getElementById('c4GameOverlay').style.display = 'flex';
