@@ -8334,6 +8334,77 @@ div.header-container header {
     }
 }
 
+
+/* =========================================
+   FIX ULTIMAT PENTRU CONNECT 4 - PC LAYOUT
+   ========================================= */
+
+@media (min-width: 1025px) {
+    /* 1. Shell-ul principal - Împinge bara sus, restul la mijloc */
+    .c4-main-shell {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important; /* Bara pleacă de sus */
+        align-items: center !important;
+        min-height: 600px !important; /* Înălțime fixă pentru a vedea spațierea */
+        padding: 20px !important;
+    }
+
+    /* 2. Bara de Status - Forțată să stea la marginea de sus */
+    .c4-status-bar, .c4-header-hud {
+        width: 100% !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* 3. Containerul butoanelor - Centrat vertical în spațiul rămas */
+    #c4ModeSelect, .c4-mode-grid {
+        display: flex !important;
+        flex-direction: row !important; /* Butoane unul lângă altul */
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        height: 100% !important;
+        margin-top: auto !important;    /* Magia: margin-top auto + margin-bottom auto */
+        margin-bottom: auto !important; /* Pune tot gridul exact pe mijlocul shell-ului */
+        gap: 30px !important;
+    }
+
+    /* 4. Butoanele individuale - Transformate în dreptunghiuri lungi */
+    .mode-card, .c4-mode-card {
+        flex: 1 !important; /* Fiecare ocupă jumătate din lățime */
+        width: 100% !important;
+        max-width: 450px !important; /* Lungimea maximă a fiecărui buton */
+        height: 180px !important;   /* Înălțimea lor pe PC */
+        aspect-ratio: auto !important; /* Șterge forma pătrată */
+        display: flex !important;
+        flex-direction: column !important; /* Iconița sus, textul jos */
+        justify-content: center !important;
+        border-radius: 20px !important;
+        padding: 0 !important;
+    }
+
+    /* Ajustare dimensiuni iconițe și text în interiorul butoanelor lungi */
+    .mode-card i, .c4-mode-card i {
+        font-size: 50px !important;
+        margin-bottom: 10px !important;
+    }
+
+    .mode-card h3, .c4-mode-card span.mode-title {
+        font-size: 18px !important;
+        letter-spacing: 2px !important;
+    }
+}
+
+/* Fix pentru mobil să rămână intact */
+@media (max-width: 1024px) {
+    .c4-mode-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
+}
+
   </style>
 </head>
 <body>
