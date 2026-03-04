@@ -9930,24 +9930,48 @@ function listenToRoom(roomId) {
         const data = snap.data();
         updateUI(data);
     });
+
+
+// Inside listenToRoom(roomId)...
+    if (chatListener) chatListener();
+    const chatRef = collection(db, "rooms", roomId, "chat");
+    const q = query(chatRef, orderBy("timestamp", "asc"));
+    
+    chatListener = onSnapshot(q, (snap) => {
+        const chatBox = document.getElementById('chatMessages');
+        chatBox.innerHTML = snap.docs.map(doc => {
+            const m = doc.data();
+            const isMe = m.uid === auth.currentUser.uid;
+            if (m.type === "system") return `<div class="chat-msg msg-system">${m.content}</div>`;
+            return `<div class="chat-msg ${isMe ? 'msg-me' : 'msg-player'}">${m.content}</div>`;
+        }).join('');
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
 }
 
 function updateUI(roomData) {
     const pList = document.getElementById('playerList');
-    pList.innerHTML = roomData.players.map(p => `
+    // Ensure players exist before mapping
+    const players = roomData.players || [];
+    
+    pList.innerHTML = players.map(p => `
         <div class="lobby-player">
             <img src="${p.photoURL}" class="lobby-pfp">
-            <span class="lobby-name">${p.username} ${p.isHost ? '👑' : ''}</span>
+            <span class="lobby-name">${p.username} ${p.id === roomData.host ? '👑' : ''}</span>
         </div>
     `).join('');
 
-    if (roomData.hostId === auth.currentUser.uid) {
+    // FIX: Check 'host' instead of 'hostId'
+    if (roomData.host === auth.currentUser.uid && roomData.gameState === "waiting") {
         document.getElementById('hostControls').style.display = 'block';
+    } else {
+        document.getElementById('hostControls').style.display = 'none';
     }
 
     if (roomData.gameState === "playing") {
         showScreen('gameScreen');
         renderGameGrid(roomData);
+        handleActiveChallengeUI(roomData); // Added for next step
     }
 }
 
@@ -10050,6 +10074,74 @@ window.selectTarget = async (targetId) => {
         }
     });
 };
+
+
+// --- TRUTH OR DARE CHOICE ---
+function handleActiveChallengeUI(roomData) {
+    const overlay = document.getElementById('challengeOverlay');
+    const options = document.getElementById('targetOptions');
+    const statusText = document.getElementById('challengeText');
+    const myId = auth.currentUser.uid;
+    const challenge = roomData.activeChallenge;
+
+    if (!challenge) return;
+
+    overlay.style.display = 'flex';
+    
+    // 1. I AM THE TARGET
+    if (challenge.targetPlayerId === myId && challenge.status === "selecting") {
+        statusText.innerText = "Ai fost ales! Adevăr sau Provocare?";
+        options.style.display = 'flex';
+    } 
+    // 2. I AM THE INITIATOR (Waiting for choice)
+    else if (challenge.fromPlayerId === myId && challenge.status === "selecting") {
+        statusText.innerText = "Așteptăm ca victima să aleagă...";
+        options.style.display = 'none';
+    }
+    // 3. CHOICE MADE - SHOW CHALLENGE STATUS
+    else if (challenge.type) {
+        statusText.innerHTML = `Jucătorul a ales: <b style="color:var(--primary);">${challenge.type.toUpperCase()}</b>`;
+        options.style.display = 'none';
+        
+        // Start 15s Timer visual if DARE
+        if (challenge.type === 'dare') {
+            startDareTimer(challenge.startedAt);
+        }
+    }
+}
+
+window.pickType = async (type) => {
+    if (!currentRoomId) return;
+    const roomRef = doc(db, "rooms", currentRoomId);
+    const snap = await getDoc(roomRef);
+    const data = snap.data();
+    
+    await updateDoc(roomRef, {
+        "activeChallenge.type": type,
+        "activeChallenge.status": "active"
+    });
+
+    // Add system message to chat
+    await addDoc(collection(db, "rooms", currentRoomId, "chat"), {
+        type: "system",
+        content: `${auth.currentUser.displayName} a ales ${type.toUpperCase()}!`,
+        timestamp: serverTimestamp()
+    });
+};
+
+function startDareTimer(startTime) {
+    const timerText = document.getElementById('challengeText');
+    const interval = setInterval(() => {
+        const remaining = Math.round((startTime + 15000 - Date.now()) / 1000);
+        if (remaining <= 0) {
+            clearInterval(interval);
+            timerText.innerText = "TIMP EXPIRAT!";
+            // Future strike logic here
+        } else {
+            timerText.innerHTML += `<br><span style="color:#ff4757; font-size:20px;">${remaining}s</span>`;
+        }
+    }, 1000);
+}
   </script>
 </body>
 </html>
