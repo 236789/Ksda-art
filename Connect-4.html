@@ -8407,95 +8407,95 @@ div.header-container header {
 
 
 /* =========================================
-   CONNECT 4 PC - ULTRA-WIDE BUTTONS FIX
+   CONNECT 4 PC - FINAL REFINED LAYOUT
    ========================================= */
 
 @media (min-width: 1025px) {
-    /* 1. Containerul principal - Forțează alinierea de sus */
+    /* 1. Shell-ul principal - Fixat pentru aliniere top-down */
     .c4-main-shell {
         display: flex !important;
         flex-direction: column !important;
         justify-content: flex-start !important; 
         align-items: center !important;
-        padding: 40px !important;
-        min-height: 650px !important;
+        padding: 30px !important;
+        min-height: 600px !important;
         width: 100% !important;
     }
 
-    /* 2. Bara de status - Lipită de marginea de sus */
-    .c4-status-bar, .c4-header-hud {
+    /* 2. Bara de status - Sus de tot */
+    .c4-status-bar {
         width: 100% !important;
-        max-width: 100% !important;
         margin-top: 0 !important;
-        margin-bottom: auto !important; /* Împinge tot ce urmează în jos */
+        margin-bottom: 20px !important;
+        flex-shrink: 0 !important;
     }
 
-    /* 3. Containerul butoanelor - Ocupă tot spațiul orizontal */
+    /* 3. Containerul butoanelor - Ocupă restul spațiului și se centrează */
     #c4ModeSelect, .c4-mode-grid {
         display: flex !important;
-        flex-direction: column !important; /* Butoanele vor fi unul sub altul pentru a fi "Very Long" */
-        justify-content: center !important;
+        flex-direction: column !important;
+        justify-content: center !important; /* Centrare verticală în interiorul spațiului rămas */
         align-items: center !important;
+        flex-grow: 1 !important; /* Ia tot spațiul până la fundul shell-ului */
         width: 100% !important;
-        max-width: 100% !important;
-        gap: 25px !important;
-        margin-top: auto !important;    /* Le centrează vertical între bară și bottom */
-        margin-bottom: auto !important;
-        padding: 0 !important;
+        gap: 20px !important;
+        margin: 0 !important;
     }
 
-    /* 4. Butoanele - Transformate în dreptunghiuri orizontale masive */
+    /* 4. Butoanele - Dreptunghiuri lungi și elegante */
     .mode-card, .c4-mode-card {
-        width: 100% !important;      /* Ocupă toată lățimea containerului */
-        max-width: 800px !important;  /* Limită de siguranță pentru ecrane gigant */
-        height: 140px !important;     /* Înălțime fixă de "pastilă" lungă */
+        width: 100% !important;
+        max-width: 750px !important; /* Lungime orizontală mare */
+        height: 110px !important;    /* Înălțime mai mică pentru aspect de "bară" */
+        min-height: 110px !important;
         aspect-ratio: auto !important;
         
-        /* Schimbăm orientarea internă: Iconița în stânga, Textul în dreapta */
-        flex-direction: row !important; 
+        flex-direction: row !important; /* Icon în stânga, text în dreapta */
         justify-content: flex-start !important;
-        padding: 0 60px !important;
-        gap: 40px !important;
+        align-items: center !important;
+        padding: 0 40px !important; /* Spațiu generos în interior */
+        gap: 30px !important;
         
-        background: rgba(41, 243, 255, 0.03) !important;
-        border: 2px solid var(--primary) !important;
+        background: rgba(41, 243, 255, 0.05) !important;
+        border: 1.5px solid var(--primary) !important;
+        transition: 0.3s !important;
     }
 
-    /* Ajustare elemente din interiorul butoanelor */
+    /* 5. Iconițele - DIMENSIUNE MICȘORATĂ */
     .mode-card i, .c4-mode-card i {
-        font-size: 60px !important; /* Iconița mare în stânga */
+        font-size: 40px !important; /* SCHIMBAT: Mai mici pentru a nu atinge marginile */
+        width: 60px !important;    /* Spațiu fix pentru iconiță ca să aliniem textul */
+        text-align: center !important;
         margin: 0 !important;
-        filter: drop-shadow(0 0 15px var(--primary)) !important;
+        color: var(--primary) !important;
+        filter: drop-shadow(0 0 10px var(--primary)) !important;
     }
 
+    /* 6. Aliniere Text (Titlu + Descriere) */
     .mode-card h3, .c4-mode-card span.mode-title {
-        font-size: 24px !important;
-        text-align: left !important;
+        font-size: 20px !important;
         margin: 0 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 3px !important;
+        text-align: left !important;
+        white-space: nowrap !important;
     }
 
+    /* Descrierea (ex: VS KEVIN-BOT) - pusă în dreapta titlului sau sub el */
     .mode-card span:not(.mode-title) {
-        display: block !important;
-        font-size: 12px !important;
-        opacity: 0.6 !important;
+        margin-left: 20px !important;
+        font-size: 11px !important;
+        opacity: 0.5 !important;
+        letter-spacing: 1px !important;
     }
-    
-    /* Grupare text (Titlu + Descriere) pentru aliniere */
-    .mode-card div.text-group {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-    }
-}
 
-/* Păstrăm mobilul intact (2 coloane sau 1 coloană cum era) */
-@media (max-width: 1024px) {
-    .c4-mode-grid {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 15px !important;
+    /* Efect Hover */
+    .mode-card:hover {
+        background: var(--primary) !important;
+        transform: scale(1.02) !important;
+    }
+    .mode-card:hover i, .mode-card:hover h3, .mode-card:hover span {
+        color: #000 !important;
+        filter: none !important;
+        opacity: 1 !important;
     }
 }
 
