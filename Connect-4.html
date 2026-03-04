@@ -8499,9 +8499,177 @@ div.header-container header {
     }
 }
 
+
+
+/* --- CONNECT 4 VS ANIMATION --- */
+.vs-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    max-width: 1000px;
+    height: 100%;
+    perspective: 1000px;
+}
+
+.vs-circle {
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    border: 4px solid var(--primary);
+    overflow: hidden;
+    box-shadow: 0 0 30px var(--primary-dim);
+    animation: slideInLeft 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.bot-glow { border-color: #ff4757; box-shadow: 0 0 30px rgba(255, 71, 87, 0.5); animation: slideInRight 0.8s ease forwards; }
+
+.vs-circle img { width: 100%; height: 100%; object-fit: cover; }
+
+.vs-name {
+    display: block; text-align: center; margin-top: 15px;
+    font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px; color: #fff;
+}
+
+/* SICK CRASHING VERSUS LOGO */
+.vs-logo-anim {
+    width: 300px;
+    filter: drop-shadow(0 0 20px #fff);
+    animation: logoCrash 1s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+    opacity: 0;
+}
+
+@keyframes logoCrash {
+    0% { transform: scale(5); opacity: 0; filter: blur(20px) brightness(5); }
+    70% { transform: scale(0.8); opacity: 1; filter: blur(0) brightness(2); }
+    100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 15px var(--primary)); }
+}
+
+@keyframes slideInLeft { from { transform: translateX(-500px) rotate(-90deg); opacity: 0; } to { transform: translateX(0) rotate(0); opacity: 1; } }
+@keyframes slideInRight { from { transform: translateX(500px) rotate(90deg); opacity: 0; } to { transform: translateX(0) rotate(0); opacity: 1; } }
+
+/* --- GAME BOARD STYLES --- */
+.c4-board-container {
+    position: relative;
+    background: #0a192f;
+    padding: 15px;
+    border-radius: 20px;
+    border: 5px solid #1f3a52;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 20px rgba(41, 243, 255, 0.1);
+}
+
+.c4-actual-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 70px);
+    grid-template-rows: repeat(6, 70px);
+    gap: 10px;
+}
+
+.c4-cell {
+    width: 70px; height: 70px;
+    background: #050b14;
+    border-radius: 50%;
+    box-shadow: inset 0 5px 10px rgba(0,0,0,0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+/* THE TOKENS */
+.token {
+    position: absolute;
+    width: 100%; height: 100%;
+    background-size: cover;
+    z-index: 5;
+    /* Drop Animation */
+    animation: dropIn 0.5s cubic-bezier(0.47, 0, 0.745, 0.715) forwards;
+}
+
+.player-token { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FYellow%20Connect%204%20Pice.png?alt=media&token=d56bb594-528e-466b-b163-545fe5417a9f'); }
+.kevin-token { background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FKevin%20Bot%20Connect%204%20pice.png?alt=media&token=fb91289c-149c-4c9e-9695-efa80b253d62'); }
+
+@keyframes dropIn {
+    from { transform: translateY(-500px); }
+    to { transform: translateY(0); }
+}
+
+/* DROP INDICATOR LINES */
+.drop-zone {
+    position: absolute; top: 0; left: 15px; right: 15px; bottom: 0;
+    display: grid; grid-template-columns: repeat(7, 70px); gap: 10px;
+    pointer-events: none; z-index: 10;
+}
+
+.drop-col {
+    height: 100%; border-radius: 10px;
+    transition: 0.3s;
+}
+
+/* When Player Hovers */
+.drop-col.active-hover {
+    background: rgba(41, 243, 255, 0.1);
+    border-left: 1px dashed var(--primary);
+    border-right: 1px dashed var(--primary);
+}
+
+.turn-pill {
+    padding: 10px 30px; border-radius: 50px;
+    background: var(--primary); color: #000;
+    font-family: 'Orbitron'; font-weight: 900;
+    margin-bottom: 20px;
+}
+
   </style>
 </head>
 <body>
+
+
+<!-- CONNECT 4 GAME OVERLAY -->
+<div id="c4GameOverlay" class="account-modal-overlay" style="display: none; flex-direction: column;">
+    <!-- 1. INTRO ANIMATION SCREEN -->
+    <div id="c4IntroScreen" class="vs-container">
+        <div class="vs-player-side">
+            <div class="vs-circle">
+                <img id="vsPlayerImg" src="https://iili.io/fXks1Dv.png" alt="Player">
+            </div>
+            <span class="vs-name" id="vsPlayerName">PLAYER</span>
+        </div>
+
+        <div class="vs-center">
+            <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F1cdc5696-cb5e-4e9f-89ee-4bf653a4d1d5.png?alt=media&token=0239de8b-3575-4717-962a-ab1c6c6b47c4" class="vs-logo-anim" alt="VERSUS">
+        </div>
+
+        <div class="vs-bot-side">
+            <div class="vs-circle bot-glow">
+                <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media&token=e6f6f515-010f-496e-9abf-1d9b6755ba6b" alt="Kevin Bot">
+            </div>
+            <span class="vs-name">KEVIN BOT</span>
+        </div>
+    </div>
+
+    <!-- 2. ACTUAL GAME BOARD -->
+    <div id="c4GameBoardUI" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+        <div class="game-header">
+            <div id="turnIndicator" class="turn-pill">PLAYER'S TURN</div>
+            <button class="close-pop" onclick="closeC4Game()" style="position: static; margin-left: 20px;">✕</button>
+        </div>
+
+        <div class="c4-board-container">
+            <!-- Drop Indicator Lines -->
+            <div id="dropZone" class="drop-zone">
+                <div class="drop-col" data-col="0"></div>
+                <div class="drop-col" data-col="1"></div>
+                <div class="drop-col" data-col="2"></div>
+                <div class="drop-col" data-col="3"></div>
+                <div class="drop-col" data-col="4"></div>
+                <div class="drop-col" data-col="5"></div>
+                <div class="drop-col" data-col="6"></div>
+            </div>
+            
+            <div id="c4Grid" class="c4-actual-grid">
+                <!-- 42 cells generated by JS -->
+            </div>
+        </div>
+    </div>
+</div>
 <!-- SCHIMBĂ ACEASTĂ LINIE -->
 <div id="bg-engine" class="theme-connect-four">
     <div class="bg-grid"></div>
@@ -10553,7 +10721,182 @@ if(mobileLoginBtn) {
     };
 }
 
+// --- CONNECT 4 ENGINE ---
+let c4Board = [];
+let c4CurrentPlayer = 1; // 1 = Player, 2 = Kevin
+let c4GameActive = false;
 
+// 1. START GAME
+window.startSinglePlayerC4 = () => {
+    const overlay = document.getElementById('c4GameOverlay');
+    const intro = document.getElementById('c4IntroScreen');
+    const gameUI = document.getElementById('c4GameBoardUI');
+    
+    // Set Player PFP
+    if(auth.currentUser) {
+        document.getElementById('vsPlayerImg').src = auth.currentUser.photoURL;
+        document.getElementById('vsPlayerName').innerText = auth.currentUser.displayName.split(' ')[0].toUpperCase();
+    }
+
+    overlay.style.display = 'flex';
+    intro.style.display = 'flex';
+    gameUI.style.display = 'none';
+
+    // Sequence: VS Anim -> Show Board
+    setTimeout(() => {
+        intro.style.transition = '0.5s';
+        intro.style.opacity = '0';
+        setTimeout(() => {
+            intro.style.display = 'none';
+            gameUI.style.display = 'flex';
+            gameUI.style.opacity = '1';
+            initC4Board();
+        }, 500);
+    }, 3500);
+};
+
+// 2. INITIALIZE BOARD
+function initC4Board() {
+    const grid = document.getElementById('c4Grid');
+    grid.innerHTML = '';
+    c4Board = Array(6).fill().map(() => Array(7).fill(0));
+    c4CurrentPlayer = 1;
+    c4GameActive = true;
+    updateTurnUI();
+
+    for (let r = 0; r < 6; r++) {
+        for (let c = 0; c < 7; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'c4-cell';
+            cell.dataset.row = r;
+            cell.dataset.col = c;
+            cell.onclick = () => handlePlayerMove(c);
+            cell.onmouseover = () => highlightColumn(c, true);
+            cell.onmouseout = () => highlightColumn(c, false);
+            grid.appendChild(cell);
+        }
+    }
+}
+
+function highlightColumn(col, active) {
+    const cols = document.querySelectorAll('.drop-col');
+    if(active) cols[col].classList.add('active-hover');
+    else cols[col].classList.remove('active-hover');
+}
+
+// 3. PLAYER MOVE
+async function handlePlayerMove(col) {
+    if (!c4GameActive || c4CurrentPlayer !== 1) return;
+    if (dropToken(col, 1)) {
+        c4CurrentPlayer = 2;
+        updateTurnUI();
+        if (checkWin(1)) {
+            endGame("AI FOST MAI SMART CA KEVIN! AI CÂȘTIGAT!");
+        } else {
+            setTimeout(kevinBotPlay, 1000);
+        }
+    }
+}
+
+// 4. KEVIN BOT AI (Basic Logic)
+function kevinBotPlay() {
+    if (!c4GameActive) return;
+
+    let move = -1;
+
+    // 1. Can Kevin Win?
+    for(let c=0; c<7; c++) {
+        if(canWinNext(c, 2)) { move = c; break; }
+    }
+    // 2. Must Kevin Block Player?
+    if(move === -1) {
+        for(let c=0; c<7; c++) {
+            if(canWinNext(c, 1)) { move = c; break; }
+        }
+    }
+    // 3. Else Pick Random Valid
+    if(move === -1) {
+        let validCols = [];
+        for(let c=0; c<7; c++) if(c4Board[0][c] === 0) validCols.push(c);
+        move = validCols[Math.floor(Math.random() * validCols.length)];
+    }
+
+    dropToken(move, 2);
+    if (checkWin(2)) {
+        endGame("KEVIN BOT TE-A BĂTUT! MAI ÎNCEARCĂ.");
+    } else {
+        c4CurrentPlayer = 1;
+        updateTurnUI();
+    }
+}
+
+// Helper: Check if a move results in a win
+function canWinNext(col, player) {
+    let row = -1;
+    for(let r=5; r>=0; r--) { if(c4Board[r][col] === 0) { row = r; break; } }
+    if(row === -1) return false;
+    c4Board[row][col] = player;
+    let win = checkWin(player);
+    c4Board[row][col] = 0; // reset
+    return win;
+}
+
+// 5. DROP TOKEN CORE
+function dropToken(col, player) {
+    let row = -1;
+    for (let r = 5; r >= 0; r--) {
+        if (c4Board[r][col] === 0) {
+            row = r;
+            break;
+        }
+    }
+    if (row === -1) return false;
+
+    c4Board[row][col] = player;
+    const cell = document.querySelector(`.c4-cell[data-row="${row}"][data-col="${col}"]`);
+    const token = document.createElement('div');
+    token.className = `token ${player === 1 ? 'player-token' : 'kevin-token'}`;
+    cell.appendChild(token);
+    return true;
+}
+
+function updateTurnUI() {
+    const indicator = document.getElementById('turnIndicator');
+    indicator.innerText = c4CurrentPlayer === 1 ? "TURN: PLAYER" : "TURN: KEVIN BOT";
+    indicator.style.background = c4CurrentPlayer === 1 ? 'var(--primary)' : '#ff4757';
+}
+
+function checkWin(p) {
+    // Horizontal
+    for (let r=0; r<6; r++) for (let c=0; c<4; c++)
+        if (c4Board[r][c]==p && c4Board[r][c+1]==p && c4Board[r][c+2]==p && c4Board[r][c+3]==p) return true;
+    // Vertical
+    for (let r=0; r<3; r++) for (let c=0; c<7; c++)
+        if (c4Board[r][c]==p && c4Board[r+1][c]==p && c4Board[r+2][c]==p && c4Board[r+3][c]==p) return true;
+    // Diagonal Up
+    for (let r=3; r<6; r++) for (let c=0; c<4; c++)
+        if (c4Board[r][c]==p && c4Board[r-1][c+1]==p && c4Board[r-2][c+2]==p && c4Board[r-3][c+3]==p) return true;
+    // Diagonal Down
+    for (let r=0; r<3; r++) for (let c=0; c<4; c++)
+        if (c4Board[r][c]==p && c4Board[r+1][c+1]==p && c4Board[r+2][c+2]==p && c4Board[r+3][c+3]==p) return true;
+    return false;
+}
+
+function endGame(msg) {
+    c4GameActive = false;
+    setTimeout(() => {
+        alert(msg);
+        initC4Board(); // Restart
+    }, 600);
+}
+
+window.closeC4Game = () => {
+    document.getElementById('c4GameOverlay').style.display = 'none';
+    c4GameActive = false;
+};
+
+// ATTACH TO BUTTON
+document.querySelector('.mode-card').onclick = window.startSinglePlayerC4;
   </script>
 </body>
 </html>
