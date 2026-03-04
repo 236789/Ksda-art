@@ -8535,7 +8535,7 @@ COMUNITATEA</div>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, query, orderBy, serverTimestamp, doc, getDoc, setDoc, updateDoc, getDocs, limit, startAfter, increment, arrayUnion, getCountFromServer, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, query, orderBy, serverTimestamp, doc, getDoc, setDoc, updateDoc, getDocs, limit, startAfter, increment, arrayUnion, getCountFromServer, deleteDoc, onSnapshot,runTransaction  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDoH80kffNrzFAcyRqsTVdifs-whUhwH9A",
@@ -9951,11 +9951,104 @@ function updateUI(roomData) {
     }
 }
 
+// --- START GAME LOGIC ---
+document.getElementById('startGameBtn').onclick = async () => {
+    if (!currentRoomId) return;
+    
+    const roomRef = doc(db, "rooms", currentRoomId);
+    const roomSnap = await getDoc(roomRef);
+    const roomData = roomSnap.data();
+
+    if (roomData.players.length < 2) {
+        return alert("Ai nevoie de minim 2 jucători pentru a începe!");
+    }
+
+    try {
+        await updateDoc(roomRef, {
+            gameState: "playing",
+            locked: true,
+            currentTurnIndex: 0,
+            activeChallenge: null
+        });
+        
+        // System message for chat
+        await addDoc(collection(db, "rooms", currentRoomId, "chat"), {
+            type: "system",
+            content: "Jocul a început! Pregătiți-vă!",
+            timestamp: serverTimestamp()
+        });
+    } catch (e) {
+        alert("Eroare Start: " + e.message);
+    }
+};
+
 // Event Listeners for buttons
 document.getElementById('createRoomBtn').onclick = createRoom;
 document.getElementById('joinRoomBtn').onclick = () => {
     const code = document.getElementById('roomCodeInput').value;
     if(code) joinRoom(code);
+};
+
+
+function renderGameGrid(roomData) {
+    const grid = document.getElementById('gamePlayerGrid');
+    const myId = auth.currentUser.uid;
+    const isMyTurn = roomData.players[roomData.currentTurnIndex].id === myId;
+
+    grid.innerHTML = roomData.players.map((p, index) => {
+        const isTurn = index === roomData.currentTurnIndex;
+        const isTarget = roomData.activeChallenge?.targetPlayerId === p.id;
+        
+        return `
+            <div class="player-card ${isTurn ? 'active-turn' : ''} ${isTarget ? 'is-target' : ''} ${p.eliminated ? 'eliminated' : ''}" 
+                 onclick="selectTarget('${p.id}')">
+                ${p.isHost ? '<i class="fas fa-crown" style="position:absolute; top:-10px; left:50%; transform:translateX(-50%); color:#ffd700;"></i>' : ''}
+                <img src="${p.photoURL}" style="width:60px; height:60px; border-radius:50%; border:2px solid ${isTurn ? 'var(--primary)' : '#555'};">
+                <div style="font-size:10px; margin-top:5px; font-family:'Orbitron'; color:#fff;">${p.username}</div>
+                <div class="strike-dots">
+                    <div class="dot ${p.strikes >= 1 ? 'filled' : ''}"></div>
+                    <div class="dot ${p.strikes >= 2 ? 'filled' : ''}"></div>
+                    <div class="dot ${p.strikes >= 3 ? 'filled' : ''}"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Handle instructions overlay
+    const overlay = document.getElementById('challengeOverlay');
+    const statusText = document.getElementById('challengeText');
+    
+    if (isMyTurn && !roomData.activeChallenge) {
+        overlay.style.display = 'flex';
+        statusText.innerText = "Este rândul tău! Selectează un jucător din listă.";
+    } else {
+        overlay.style.display = 'none';
+    }
+}
+
+// Global function to pick a target
+window.selectTarget = async (targetId) => {
+    if (!currentRoomId) return;
+    const roomSnap = await getDoc(doc(db, "rooms", currentRoomId));
+    const roomData = roomSnap.data();
+    
+    const myId = auth.currentUser.uid;
+    const myIndex = roomData.players.findIndex(p => p.id === myId);
+    
+    // VALIDATIONS
+    if (myIndex !== roomData.currentTurnIndex) return; // Not your turn
+    if (targetId === myId) return alert("Nu te poți alege pe tine!");
+    if (roomData.activeChallenge) return; // Challenge already in progress
+
+    await updateDoc(doc(db, "rooms", currentRoomId), {
+        activeChallenge: {
+            fromPlayerId: myId,
+            targetPlayerId: targetId,
+            type: null,
+            status: "selecting",
+            startedAt: Date.now()
+        }
+    });
 };
   </script>
 </body>
