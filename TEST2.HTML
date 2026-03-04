@@ -9884,7 +9884,7 @@ async function joinRoom(roomId) {
     }
 }
 
-// --- 2. CREATE ROOM ---
+// --- FIX: Change 'hostId' to 'host' to match your Security Rules ---
 async function createRoom() {
     const roomId = Math.floor(1000 + Math.random() * 9000).toString();
     const userRef = doc(db, "accounts", auth.currentUser.uid);
@@ -9892,7 +9892,7 @@ async function createRoom() {
     const userData = userSnap.data();
 
     const roomData = {
-        hostId: auth.currentUser.uid,
+        host: auth.currentUser.uid, // Fixed from hostId
         gameState: "waiting",
         players: [{
             id: auth.currentUser.uid,
@@ -9910,11 +9910,16 @@ async function createRoom() {
         locked: false
     };
 
-    await setDoc(doc(db, "rooms", roomId), roomData);
-    currentRoomId = roomId;
-    listenToRoom(roomId);
-    showScreen('lobbyScreen');
-    document.getElementById('displayRoomCode').innerText = roomId;
+    try {
+        await setDoc(doc(db, "rooms", roomId), roomData);
+        currentRoomId = roomId;
+        listenToRoom(roomId);
+        showScreen('lobbyScreen');
+        document.getElementById('displayRoomCode').innerText = roomId;
+    } catch (e) {
+        console.error("Permission Error:", e);
+        alert("Eroare: Nu ai permisiunea de a crea camera.");
+    }
 }
 
 // --- 3. REAL-TIME SYNC ---
