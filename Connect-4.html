@@ -8889,6 +8889,104 @@ div.header-container header {
     width: 250px;
     z-index: 10;
 }
+
+
+/* --- OVERRIDE: CLEAN VERSUS ENGINE --- */
+
+.vs-container {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    gap: 50px !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
+}
+
+/* Side wrappers for Image + Name */
+.vs-player-side, .vs-bot-side {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 200px !important; /* Fixed width prevents movement */
+    flex-shrink: 0 !important;
+}
+
+.vs-circle {
+    width: 150px !important;
+    height: 150px !important;
+    border-radius: 50% !important;
+    border: 4px solid var(--primary) !important;
+    overflow: hidden !important; /* Forces the circle shape */
+    background: #050b14 !important;
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.4) !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    position: relative !important;
+}
+
+/* Fix for the Bot's Red Theme */
+.bot-glow, .vs-bot-side .vs-circle {
+    border-color: #ff4757 !important;
+    box-shadow: 0 0 30px rgba(255, 71, 87, 0.5) !important;
+}
+
+.vs-circle img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important; /* Prevents stretching */
+    display: block !important;
+}
+
+/* Versus Logo in middle */
+.vs-center {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+}
+
+.vs-logo-anim {
+    width: 300px !important;
+    max-width: 100% !important;
+    filter: drop-shadow(0 0 20px rgba(255,255,255,0.3)) !important;
+    opacity: 1 !important;
+}
+
+/* Name Text Styling */
+.vs-name {
+    margin-top: 20px !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-weight: 900 !important;
+    font-size: 18px !important;
+    color: #fff !important;
+    text-transform: uppercase !important;
+    letter-spacing: 2px !important;
+    text-align: center !important;
+    display: block !important;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5) !important;
+}
+
+/* Responsive Mobile Fix */
+@media (max-width: 768px) {
+    .vs-container {
+        flex-direction: column !important;
+        gap: 30px !important;
+    }
+    .vs-logo-anim {
+        width: 180px !important;
+    }
+    .vs-circle {
+        width: 120px !important;
+        height: 120px !important;
+    }
+    .vs-player-side, .vs-bot-side {
+        width: 100% !important;
+    }
+}
   </style>
 </head>
 <body>
@@ -11045,39 +11143,26 @@ window.startSinglePlayerC4 = async () => {
     document.getElementById('c4GameOverlay').style.display = 'flex';
     showC4Stage('c4IntroScreen');
     
-    // FETCH ACTUAL USER DATA FOR CUSTOM NAME/FRAME
     if(auth.currentUser) {
         const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
         const userData = userSnap.data();
         
-        const finalName = userData.username || auth.currentUser.displayName;
-        const nameDisplay = userData.equippedText ? 
-            `<span class="${userData.equippedText.cssClass}">${finalName}</span>` : finalName;
-
-        // Intro Screen Setup
-        document.getElementById('vsPlayerImg').src = userData.image || auth.currentUser.photoURL;
-        document.getElementById('vsPlayerName').innerHTML = nameDisplay;
+        // 1. Set Player Info (Removing Frame injection)
+        const pImg = document.getElementById('vsPlayerImg');
+        const pName = document.getElementById('vsPlayerName');
         
-        // Add Frame if exists
-// 1. Setup Player Side
-const vsPlayerCircle = document.querySelector('.vs-player-side .vs-circle');
-const playerImgUrl = userData.image || auth.currentUser.photoURL;
+        pImg.src = userData.image || auth.currentUser.photoURL;
+        
+        // Apply custom text color if they have it
+        if(userData.equippedText) {
+            pName.innerHTML = `<span class="${userData.equippedText.cssClass}">${userData.username || auth.currentUser.displayName}</span>`;
+        } else {
+            pName.innerText = userData.username || auth.currentUser.displayName;
+        }
 
-// Re-render the inner HTML to ensure classes are correct
-let playerHtml = `<img src="${playerImgUrl}" class="vs-avatar">`;
-if(userData.equippedFrame && userData.equippedFrame.img) {
-    playerHtml += `<img src="${userData.equippedFrame.img}" class="vs-frame">`;
-}
-vsPlayerCircle.innerHTML = playerHtml;
-
-// 2. Setup Bot Side (Just in case you want to add a frame to the bot later)
-const vsBotCircle = document.querySelector('.vs-bot-side .vs-circle');
-const botImgUrl = "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media";
-vsBotCircle.innerHTML = `<img src="${botImgUrl}" class="vs-avatar">`;
-
-        // HUD Setup
-        document.getElementById('hudPfp').src = userData.image || auth.currentUser.photoURL;
-        document.getElementById('pName').innerHTML = nameDisplay;
+        // 2. Set Bot Info (Ensuring the image and circle are fixed)
+        const botImg = document.getElementById('vsBotImg');
+        botImg.src = "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media";
     }
 
     setTimeout(() => {
