@@ -7766,11 +7766,30 @@ div.header-container header {
 }
 
 
+/* --- CHAT SYSTEM ENHANCEMENTS --- */
+#chatDisplay { display: flex; flex-direction: column; gap: 10px; padding: 15px; overflow-y: auto; height: 350px; background: rgba(0,0,0,0.2); border-radius: 12px; }
 
+/* System Message Style */
+.msg-system { align-self: center; text-align: center; background: rgba(255, 255, 255, 0.05); color: var(--text-muted); font-size: 11px; padding: 5px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); font-family: 'Orbitron'; margin: 5px 0; max-width: 80%; }
+
+/* Image Message Style */
+.msg-image-container { max-width: 200px; cursor: pointer; transition: transform 0.2s; }
+.msg-image-container:hover { transform: scale(1.02); }
+.msg-image { width: 100%; border-radius: 15px; border: 2px solid var(--primary); object-fit: cover; }
+
+/* Voice Message UI */
+.voice-player { display: flex; align-items: center; gap: 10px; background: rgba(41, 243, 255, 0.1); padding: 8px 12px; border-radius: 15px; border: 1px solid var(--primary); min-width: 160px; }
+.v-play-btn { background: var(--primary); border: none; width: 30px; height: 30px; border-radius: 50%; color: #000; cursor: pointer; }
+.v-progress-container { flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; position: relative; }
+.v-progress-bar { height: 100%; background: var(--primary); width: 0%; border-radius: 2px; }
+.v-duration { font-size: 10px; font-family: 'Orbitron'; color: var(--primary); }
 
   </style>
 </head>
 <body>
+
+
+
 <!-- SCHIMBĂ ACEASTĂ LINIE -->
 <div id="bg-engine" class="theme-truth-dare">
     <div class="bg-grid"></div>
@@ -8249,6 +8268,39 @@ div.header-container header {
     <h1 class="hero-adevar">ADEVĂR SAU PROVOCARE</h1>
     <p class="top-desc-adevar">Spune adevărul sau acceptă provocarea pentru a câștiga KSDA Coins!</p>
 </div>
+
+
+<!-- GAME BOX -->
+<div class="trivia-wrapper">
+    <div class="trivia-box">
+        
+        <!-- SCREEN 1: ROOM SELECTION / LOBBY -->
+        <div id="lobbyScreen" class="trivia-screen active">
+            <h2 class="login-wall-title">Multiplayer Lobby</h2>
+            <div class="lobby-container" id="playerList">
+                <!-- Players injected here -->
+            </div>
+            <button class="btn-ksda-fire" onclick="startVoting()"><span>ÎNCEPE JOCUL</span></button>
+        </div>
+
+        <!-- SCREEN 2: THE CHAT & PLAYING AREA -->
+        <div id="gameScreen" class="trivia-screen">
+            <div id="chatDisplay"></div>
+            
+            <!-- INPUT AREA -->
+            <div class="chat-input-row" style="display:flex; gap:10px; width:100%; margin-top:15px; align-items:center;">
+                <label for="imageInput" class="bubbleBtn" style="cursor:pointer; padding: 10px;"><i class="fas fa-camera"></i></label>
+                <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="sendImage(this)">
+                
+                <input type="text" id="chatInput" placeholder="Scrie un mesaj..." class="edit-input" style="flex:1;">
+                
+                <button id="micBtn" class="bubbleBtn" style="background:#ff4757;"><i class="fas fa-microphone"></i></button>
+                <button onclick="sendText()" class="bubbleBtn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+    </div>
+</div>
 </main>
 
 
@@ -8421,6 +8473,12 @@ COMUNITATEA</div>
     import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, query, orderBy, serverTimestamp, doc, getDoc, setDoc, updateDoc, getDocs, limit, startAfter, increment, arrayUnion, getCountFromServer, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+// Anti-Spam & Throttling
+let lastMessageSentAt = 0;
+let currentPlayingAudio = null;
+
     const firebaseConfig = {
       apiKey: "AIzaSyDoH80kffNrzFAcyRqsTVdifs-whUhwH9A",
       authDomain: "ksda-7546f.firebaseapp.com",
@@ -8434,6 +8492,7 @@ import { getFirestore, collection, addDoc, query, orderBy, serverTimestamp, doc,
     const auth = getAuth(app);
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
+const storage = getStorage(app); // FIXED: No longer throws ReferenceError
 
 
     // Pune asta pe fiecare pagină (ex: pe pagina Shop pui: trackVisit("Shop"))
@@ -9715,6 +9774,131 @@ function showScreen(screenId) {
 function goToCategories() {
     console.log("Navigare către categorii...");
     showScreen('categoryScreen');
+}
+
+
+function renderSingleMessage(data, msgId) {
+    if (document.getElementById(`msg-${msgId}`)) return; // Prevent duplicates
+
+    const chatDisplay = document.getElementById('chatDisplay');
+    const div = document.createElement('div');
+    div.id = `msg-${msgId}`;
+    div.className = `msg-row ${data.type === 'system' ? 'msg-system-row' : ''}`;
+
+    if (data.type === "system") {
+        div.innerHTML = `<div class="msg-system">${data.content}</div>`;
+    } 
+    else if (data.type === "image") {
+        div.innerHTML = `
+            <div class="msg-bubble msg-image-container" onclick="window.open('${data.imageUrl}', '_blank')">
+                <img src="${data.imageUrl}" class="msg-image" loading="lazy">
+            </div>`;
+    } 
+    else if (data.type === "voice") {
+        div.innerHTML = `
+            <div class="voice-player">
+                <button class="v-play-btn" onclick="playVoiceMsg('${data.audioUrl}', this)"><i class="fas fa-play"></i></button>
+                <div class="v-progress-container"><div class="v-progress-bar"></div></div>
+                <span class="v-duration">${data.duration || '??'}</span>
+            </div>`;
+    } 
+    else {
+        // Standard Text Bubble (Keep your existing bubble style here)
+        div.innerHTML = `<div class="msg-bubble">${data.content}</div>`;
+    }
+
+    chatDisplay.appendChild(div);
+    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+}
+
+// Global Audio Controller
+window.playVoiceMsg = (url, btn) => {
+    if (currentPlayingAudio) {
+        currentPlayingAudio.pause();
+        if (currentPlayingAudio.btn) currentPlayingAudio.btn.innerHTML = '<i class="fas fa-play"></i>';
+    }
+    const audio = new Audio(url);
+    audio.play();
+    btn.innerHTML = '<i class="fas fa-pause"></i>';
+    currentPlayingAudio = audio;
+    currentPlayingAudio.btn = btn;
+    audio.onended = () => { btn.innerHTML = '<i class="fas fa-play"></i>'; };
+};
+
+let chatUnsubscribe = null;
+
+function startChatListener(roomId) {
+    if (chatUnsubscribe) chatUnsubscribe();
+    const q = query(collection(db, `rooms/${roomId}/chat`), orderBy("timestamp", "asc"));
+    
+    chatUnsubscribe = onSnapshot(q, (snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            if (change.type === "added") {
+                renderSingleMessage(change.doc.data(), change.doc.id);
+            }
+        });
+    });
+}
+
+async function sendChatMessage(roomId, type, payload) {
+    const now = Date.now();
+    if (now - lastMessageSentAt < 1000) return alert("Prea rapid! Așteaptă 1s.");
+    lastMessageSentAt = now;
+
+    const chatRef = collection(db, `rooms/${roomId}/chat`);
+    const baseData = {
+        senderId: auth.currentUser.uid,
+        type: type,
+        timestamp: serverTimestamp()
+    };
+
+    if (type === 'image') {
+        if (payload.size > 5 * 1024 * 1024) return alert("Imaginea e prea mare! Max 5MB.");
+        const fileRef = ref(storage, `chat_media/${roomId}/${now}_${payload.name}`);
+        await uploadBytes(fileRef, payload);
+        baseData.imageUrl = await getDownloadURL(fileRef);
+    } else if (type === 'voice') {
+        const fileRef = ref(storage, `chat_media/${roomId}/${now}.webm`);
+        await uploadBytes(fileRef, payload.blob);
+        baseData.audioUrl = await getDownloadURL(fileRef);
+        baseData.duration = payload.duration;
+    } else {
+        if (!payload.trim()) return;
+        baseData.content = payload;
+    }
+
+    await addDoc(chatRef, baseData);
+}
+
+// Helper to log Game Events as System Messages
+async function logGameEvent(roomId, text) {
+    await addDoc(collection(db, `rooms/${roomId}/chat`), {
+        type: "system",
+        content: text,
+        timestamp: serverTimestamp()
+    });
+}
+
+let mediaRecorder;
+let audioChunks = [];
+let startTime;
+
+async function startRecording() {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    startTime = Date.now();
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = async () => {
+        const duration = Math.round((Date.now() - startTime) / 1000) + "s";
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        sendChatMessage(currentRoomId, 'voice', { blob, duration });
+    };
+    mediaRecorder.start(); 
+}
+
+function stopRecording() {
+    if (mediaRecorder) mediaRecorder.stop();
 }
 
   </script>
