@@ -9093,7 +9093,64 @@ div.header-container header {
 
 
 
+/* --- CLEANED VERSUS ENGINE --- */
+#c4GameOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 15000; /* Higher than other modals */
+    background: #02050a; /* Pure dark background */
+    justify-content: center;
+    align-items: center;
+}
 
+.vs-container {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100vw !important; /* Force full viewport width */
+    height: 100vh !important; /* Force full viewport height */
+    gap: 40px !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
+    position: absolute !important;
+    top: 0;
+    left: 0;
+}
+
+.vs-player-side, .vs-bot-side {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 250px !important; /* Fixed width to prevent shifting */
+    flex-shrink: 0 !important;
+}
+
+/* Ensure images don't break the circle */
+.vs-circle {
+    width: 160px !important;
+    height: 160px !important;
+    border-radius: 50% !important;
+    border: 4px solid var(--primary) !important;
+    overflow: hidden !important; 
+    background: #050b14 !important;
+    box-shadow: 0 0 30px rgba(41, 243, 255, 0.4) !important;
+}
+
+.vs-circle img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+/* Responsive fix to keep it centered on mobile */
+@media (max-width: 768px) {
+    .vs-container {
+        flex-direction: column !important;
+        gap: 20px !important;
+    }
+}
   </style>
 </head>
 <body>
@@ -11226,22 +11283,21 @@ let c4Turn = 1;
 let c4IsBusy = false; // NEW: Prevents spamming while animations run
 
 function showC4Stage(stageId) {
-    // Lista tuturor ecranelor posibile
     const stages = ['c4IntroScreen', 'c4ColorPicker', 'c4GameBoardUI', 'c4ResultModal'];
     
-    // Ascundem toate ecranele care EXISTĂ în pagină
+    // Hide ALL stages first by clearing inline styles
     stages.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
+        if (el) {
+            el.style.setProperty('display', 'none', 'important');
+        }
     });
     
-    // Afișăm ecranul cerut
+    // Show the targeted stage
     const target = document.getElementById(stageId);
-    if (!target) {
-        console.error("Eroare: Ecranul " + stageId + " nu a fost găsit în HTML!");
-        return;
-    }
+    if (!target) return;
 
+    // Use FLEX for layouts that need centering, BLOCK for cards
     if (stageId === 'c4IntroScreen' || stageId === 'c4GameBoardUI') {
         target.style.setProperty('display', 'flex', 'important');
     } else {
@@ -11249,39 +11305,28 @@ function showC4Stage(stageId) {
     }
 }
 
-// 2. FIXED START FUNCTION
-
-
+// Update the start function to be faster (3 seconds instead of 4.5)
 window.startSinglePlayerC4 = async () => {
-    document.getElementById('c4GameOverlay').style.display = 'flex';
+    // Open the main container
+    const overlay = document.getElementById('c4GameOverlay');
+    overlay.style.setProperty('display', 'flex', 'important');
+    
+    // Show Intro
     showC4Stage('c4IntroScreen');
     
+    // Setup player data...
     if(auth.currentUser) {
         const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
         const userData = userSnap.data();
-        
-        // 1. Set Player Info (Removing Frame injection)
-        const pImg = document.getElementById('vsPlayerImg');
-        const pName = document.getElementById('vsPlayerName');
-        
-        pImg.src = userData.image || auth.currentUser.photoURL;
-        
-        // Apply custom text color if they have it
-        if(userData.equippedText) {
-            pName.innerHTML = `<span class="${userData.equippedText.cssClass}">${userData.username || auth.currentUser.displayName}</span>`;
-        } else {
-            pName.innerText = userData.username || auth.currentUser.displayName;
-        }
-
-        // 2. Set Bot Info (Ensuring the image and circle are fixed)
-        const botImg = document.getElementById('vsBotImg');
-        botImg.src = "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media";
+        document.getElementById('vsPlayerImg').src = userData.image || auth.currentUser.photoURL;
+        document.getElementById('vsPlayerName').innerText = userData.username || "PLAYER";
     }
 
+    // TRANSITION: Move to color picker after 3 seconds
     setTimeout(() => {
         showC4Stage('c4ColorPicker');
         renderC4Colors();
-    }, 4500);
+    }, 3000); 
 };
 
 function renderC4Colors() {
