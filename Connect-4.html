@@ -9093,53 +9093,7 @@ div.header-container header {
 
 
 
-/* --- FIXED FULLSCREEN OVERLAY --- */
-#c4GameOverlay {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    background: #02050a !important; /* Solid dark background */
-    z-index: 2000000 !important;   /* Above every other modal */
-    display: none;                  /* Managed by JS */
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
 
-/* --- THE VERSUS SCREEN --- */
-.vs-container {
-    position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: center !important;
-    align-items: center !important;
-    gap: 50px !important;
-    background: #02050a !important;
-}
-
-/* Ensure images don't break the circles */
-.vs-circle img, .mini-pfp {
-    width: 100%;
-    height: 100%;
-    object-fit: cover !important;
-    border-radius: 50%;
-}
-
-/* Center the game layout specifically */
-.c4-game-layout {
-    width: 95% !important;
-    max-width: 650px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-}
   </style>
 </head>
 <body>
@@ -11299,43 +11253,31 @@ function showC4Stage(stageId) {
 
 
 window.startSinglePlayerC4 = async () => {
-    const overlay = document.getElementById('c4GameOverlay');
-    overlay.style.setProperty('display', 'flex', 'important');
+    document.getElementById('c4GameOverlay').style.display = 'flex';
     showC4Stage('c4IntroScreen');
     
     if(auth.currentUser) {
         const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
         const userData = userSnap.data();
         
-        const finalName = userData.username || auth.currentUser.displayName || "User";
-        const finalImg = userData.image || auth.currentUser.photoURL || "https://iili.io/fXks1Dv.png";
-
-        // 1. UPDATE INTRO SCREEN
-        const vsImg = document.getElementById('vsPlayerImg');
-        const vsName = document.getElementById('vsPlayerName');
-        if(vsImg) vsImg.src = finalImg;
-        if(vsName) {
-            if(userData.equippedText) {
-                vsName.innerHTML = `<span class="${userData.equippedText.cssClass}">${finalName}</span>`;
-            } else {
-                vsName.innerText = finalName;
-            }
+        // 1. Set Player Info (Removing Frame injection)
+        const pImg = document.getElementById('vsPlayerImg');
+        const pName = document.getElementById('vsPlayerName');
+        
+        pImg.src = userData.image || auth.currentUser.photoURL;
+        
+        // Apply custom text color if they have it
+        if(userData.equippedText) {
+            pName.innerHTML = `<span class="${userData.equippedText.cssClass}">${userData.username || auth.currentUser.displayName}</span>`;
+        } else {
+            pName.innerText = userData.username || auth.currentUser.displayName;
         }
 
-        // 2. UPDATE GAME HUD (The bar that was saying "PLAYER")
-        const hudImg = document.getElementById('hudPfp');
-        const hudName = document.getElementById('pName');
-        if(hudImg) hudImg.src = finalImg;
-        if(hudName) {
-            if(userData.equippedText) {
-                hudName.innerHTML = `<span class="${userData.equippedText.cssClass}">${finalName}</span>`;
-            } else {
-                hudName.innerText = finalName;
-            }
-        }
+        // 2. Set Bot Info (Ensuring the image and circle are fixed)
+        const botImg = document.getElementById('vsBotImg');
+        botImg.src = "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media";
     }
 
-    // Transition to color picker after animation
     setTimeout(() => {
         showC4Stage('c4ColorPicker');
         renderC4Colors();
