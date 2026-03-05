@@ -9523,6 +9523,103 @@ div.header-container header {
 }
 
 
+/* --- CONNECT 4 PIXEL-PERFECT ALIGNMENT --- */
+:root {
+    --c4-padding: 20px;   /* Space inside the blue board */
+    --c4-gap: 12px;       /* Space between the holes */
+    --c4-hole-size: 100%;  /* Makes holes look smaller/realistic */
+}
+
+.c4-main-wrapper {
+    position: relative;
+    padding: var(--c4-padding) !important;
+    background: #1f3a52;
+    border-radius: 20px;
+    border: 5px solid #162a3d;
+    box-sizing: border-box !important;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 10px 0 #0d1a26;
+}
+
+/* FORCES BOTH GRIDS TO BE IDENTICAL */
+.c4-neon-board, 
+.drop-lines-overlay {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: var(--c4-gap) !important;
+    box-sizing: border-box !important;
+}
+
+/* The Board Layer */
+.c4-neon-board {
+    position: relative;
+    z-index: 5;
+    background: transparent !important;
+}
+
+/* The Line Layer - Locked exactly over the board */
+.drop-lines-overlay {
+    position: absolute;
+    top: var(--c4-padding);
+    left: var(--c4-padding);
+    right: var(--c4-padding);
+    bottom: var(--c4-padding);
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* THE HOLE FIX: Use width/height + margin instead of scale */
+.c4-cell {
+    width: var(--c4-hole-size) !important;
+    height: auto !important;
+    aspect-ratio: 1/1 !important;
+margin: 0 !important;
+    background: #050b14;
+    border-radius: 50% !important;
+    box-shadow: inset 0 4px 8px rgba(0,0,0,0.9);
+    position: relative;
+}
+
+/* THE LINE FIX: Matches the hole size perfectly */
+.drop-line {
+    height: 100%;
+width: 100% !important;
+margin: 0 !important;
+    background: transparent;
+    transition: 0.2s;
+    border-radius: 15px;
+}
+
+.drop-line.active {
+    background: rgba(41, 243, 255, 0.08);
+    /* Mutăm bordurile puțin spre interior să se alinieze cu găurile */
+    border-left: 1px dashed rgba(41, 243, 255, 0.4);
+    border-right: 1px dashed rgba(41, 243, 255, 0.4);
+}
+
+/* Ensure tokens fill the circular hole */
+.c4-token {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    background-size: contain !important;
+}
+
+/* MOBILE SCALING */
+@media (max-width: 600px) {
+    :root {
+        --c4-padding: 12px;
+        --c4-gap: 8px;
+        --c4-hole-size: 88%; /* Slightly bigger holes for touch on mobile */
+    }
+    .c4-main-wrapper {
+        padding: var(--c4-padding) !important;
+    }
+}
+
   </style>
 </head>
 <body>
