@@ -9173,48 +9173,160 @@ div.header-container header {
     background: #050b14;
     min-width: 35px; /* Prevent shrinking */
 }
+
+
+/* BRAND NEW UNIQUE CLASSES TO PREVENT CONFLICTS */
+
+/* 1. The Main Fullscreen Wrapper */
+.c4v-overlay-master {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: #02050a !important; /* Deep dark background */
+    z-index: 99999 !important;
+    display: none; /* Controlled by JS */
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 2. The Internal Content Container (Centering Logic) */
+.c4v-vs-layout {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    gap: 20px !important;
+}
+
+/* 3. The Sides (Player/Bot) */
+.c4v-side-box {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 250px !important;
+}
+
+/* 4. The Circles */
+.c4v-circle {
+    width: 180px !important;
+    height: 180px !important;
+    border-radius: 50% !important;
+    border: 4px solid var(--primary) !important;
+    box-shadow: 0 0 30px rgba(41, 243, 255, 0.5) !important;
+    overflow: hidden !important;
+    background: #050b14 !important;
+    position: relative !important;
+}
+
+.c4v-circle.bot {
+    border-color: #ff4757 !important;
+    box-shadow: 0 0 30px rgba(255, 71, 87, 0.5) !important;
+}
+
+.c4v-circle img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+/* 5. The Logo (Center) */
+.c4v-logo-box {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.c4v-logo-img {
+    width: 350px !important;
+    max-width: 30vw !important;
+    filter: drop-shadow(0 0 20px rgba(255,255,255,0.4)) !important;
+}
+
+/* 6. Name Text */
+.c4v-name-text {
+    margin-top: 20px !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-weight: 900 !important;
+    font-size: 20px !important;
+    text-transform: uppercase !important;
+    color: #fff !important;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 900px) {
+    .c4v-vs-layout {
+        flex-direction: column !important;
+        gap: 40px !important;
+    }
+    .c4v-logo-img { width: 200px !important; }
+    .c4v-circle { width: 140px !important; height: 140px !important; }
+}
   </style>
 </head>
 <body>
 
 <!-- CONNECT 4 ULTIMATE OVERLAY -->
-<div id="c4GameOverlay" class="account-modal-overlay" style="display: none;">
+<div id="c4GameOverlay" class="c4v-overlay-master" style="display: none;">
     
-    <!-- STAGE 1: INTRO (VS ANIMATION) -->
-    <div id="c4IntroScreen" class="vs-container" style="display:none;">
-        <div class="vs-player-side">
-            <div class="vs-circle"><img id="vsPlayerImg" src=""></div>
-            <span class="vs-name" id="vsPlayerName">PLAYER</span>
+    <!-- STAGE 1: INTRO (VS ANIMATION) - Using unique c4v classes for perfect centering -->
+    <div id="c4IntroScreen" class="c4v-vs-layout" style="display:none;">
+        
+        <!-- Player Side -->
+        <div class="c4v-side-box">
+            <div class="c4v-circle">
+                <img id="vsPlayerImg" src="">
+            </div>
+            <span class="c4v-name-text" id="vsPlayerName">PLAYER</span>
         </div>
-        <div class="vs-center">
-            <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F1cdc5696-cb5e-4e9f-89ee-4bf653a4d1d5.png?alt=media" class="vs-logo-anim">
+
+        <!-- Center VS Logo -->
+        <div class="c4v-logo-box">
+            <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F1cdc5696-cb5e-4e9f-89ee-4bf653a4d1d5.png?alt=media" class="c4v-logo-img vs-logo-anim">
         </div>
-        <div class="vs-bot-side">
-            <div class="vs-circle bot-glow"><img id="vsBotImg" src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media"></div>
-            <span class="vs-name">KEVIN BOT</span>
+
+        <!-- Bot Side -->
+        <div class="c4v-side-box">
+            <div class="c4v-circle bot">
+                <img id="vsBotImg" src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media">
+            </div>
+            <span class="c4v-name-text">KEVIN BOT</span>
         </div>
     </div>
 
     <!-- STAGE 2: COLOR PICKER -->
     <div id="c4ColorPicker" class="c4-choice-card" style="display:none;">
-        <h2 class="mode-title" style="color: #fff; font-family: 'Orbitron'; margin-bottom: 20px;">AUTHORIZE TOKEN COLOR</h2>
+<h2 class="mode-title" style="color: #fff; font-family: 'Orbitron'; margin-bottom: 20px;">ALEGE CULOAREA TA</h2>
         <div class="color-grid-c4" id="colorOptions"></div>
     </div>
 
     <!-- STAGE 3: THE TACTICAL BOARD -->
     <div id="c4GameBoardUI" class="c4-game-layout" style="display:none;">
+        <!-- Symmetrical HUD: Player - Turn Pill - Bot -->
         <div class="c4-tactical-hud">
             <div class="hud-player">
                 <img id="hudPfp" src="" class="mini-pfp">
                 <div id="pName" style="font-size: 11px; font-weight: 800; font-family: 'Orbitron';">PLAYER</div>
             </div>
+
             <div id="gameStatusPill" class="turn-pill">YOUR TURN</div>
+
             <div class="hud-player" style="flex-direction: row-reverse;">
                 <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media" class="mini-pfp bot">
                 <div style="text-align:right; font-size: 10px; margin-right: 10px; font-family: 'Orbitron';">KEVIN BOT</div>
             </div>
         </div>
 
+        <!-- Board Wrapper -->
         <div class="c4-main-wrapper" style="position: relative;">
             <div id="dropLines" class="drop-lines-overlay"></div>
             <div id="c4Grid" class="c4-neon-board"></div>
@@ -11307,20 +11419,18 @@ let c4IsBusy = false; // NEW: Prevents spamming while animations run
 function showC4Stage(stageId) {
     const stages = ['c4IntroScreen', 'c4ColorPicker', 'c4GameBoardUI', 'c4ResultModal'];
     
-    // Hide ALL stages first by clearing inline styles
+    // Hide all
     stages.forEach(id => {
         const el = document.getElementById(id);
-        if (el) {
-            el.style.setProperty('display', 'none', 'important');
-        }
+        if (el) el.style.setProperty('display', 'none', 'important');
     });
     
-    // Show the targeted stage
+    // Show specific
     const target = document.getElementById(stageId);
     if (!target) return;
 
-    // Use FLEX for layouts that need centering, BLOCK for cards
-    if (stageId === 'c4IntroScreen' || stageId === 'c4GameBoardUI') {
+    // The Intro and Board need Flex to center themselves inside the Master Overlay
+    if (stageId === 'c4IntroScreen' || stageId === 'c4GameBoardUI' || stageId === 'c4ResultModal') {
         target.style.setProperty('display', 'flex', 'important');
     } else {
         target.style.setProperty('display', 'block', 'important');
