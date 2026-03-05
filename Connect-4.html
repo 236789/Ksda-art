@@ -9151,6 +9151,28 @@ div.header-container header {
         gap: 20px !important;
     }
 }
+
+
+/* Ensure the HUD image and name stay aligned even with complex text animations */
+.hud-player {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px;
+    overflow: hidden;
+}
+
+#pName {
+    white-space: nowrap;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+}
+
+/* Ensure images don't look weird if they load slowly */
+.mini-pfp {
+    background: #050b14;
+    min-width: 35px; /* Prevent shrinking */
+}
   </style>
 </head>
 <body>
@@ -11305,28 +11327,48 @@ function showC4Stage(stageId) {
     }
 }
 
-// Update the start function to be faster (3 seconds instead of 4.5)
 window.startSinglePlayerC4 = async () => {
-    // Open the main container
-    const overlay = document.getElementById('c4GameOverlay');
-    overlay.style.setProperty('display', 'flex', 'important');
-    
-    // Show Intro
+    document.getElementById('c4GameOverlay').style.display = 'flex';
     showC4Stage('c4IntroScreen');
     
-    // Setup player data...
     if(auth.currentUser) {
         const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
         const userData = userSnap.data();
-        document.getElementById('vsPlayerImg').src = userData.image || auth.currentUser.photoURL;
-        document.getElementById('vsPlayerName').innerText = userData.username || "PLAYER";
+        
+        // Define fallback values
+        const userImg = userData.image || auth.currentUser.photoURL || "https://iili.io/fXks1Dv.png";
+        const userName = userData.username || auth.currentUser.displayName || "PLAYER";
+
+        // --- UPDATE INTRO SCREEN (The big VS circles) ---
+        const vsPImg = document.getElementById('vsPlayerImg');
+        const vsPName = document.getElementById('vsPlayerName');
+        if(vsPImg) vsPImg.src = userImg;
+        
+        // --- UPDATE TACTICAL HUD (The Player Turn Bar) ---
+        const hudPImg = document.getElementById('hudPfp');
+        const hudPName = document.getElementById('pName');
+        if(hudPImg) hudPImg.src = userImg;
+
+        // Apply Custom Text Cosmetics to both Intro and HUD
+        if(userData.equippedText && userData.equippedText.cssClass) {
+            const coloredName = `<span class="${userData.equippedText.cssClass}">${userName}</span>`;
+            if(vsPName) vsPName.innerHTML = coloredName;
+            if(hudPName) hudPName.innerHTML = coloredName;
+        } else {
+            if(vsPName) vsPName.innerText = userName;
+            if(hudPName) hudPName.innerText = userName;
+        }
+
+        // Set Bot Info
+        const botImg = document.getElementById('vsBotImg');
+        if(botImg) botImg.src = "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media";
     }
 
-    // TRANSITION: Move to color picker after 3 seconds
+    // Transition to game
     setTimeout(() => {
         showC4Stage('c4ColorPicker');
         renderC4Colors();
-    }, 3000); 
+    }, 4500);
 };
 
 function renderC4Colors() {
