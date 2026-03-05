@@ -9093,57 +9093,44 @@ div.header-container header {
 
 
 
-/* FIX: Overlay-ul Connect 4 să ocupe tot ecranul și să fie deasupra tuturor */
+/* 1. Make the overlay black and full screen */
 #c4GameOverlay {
     position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
+    inset: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    background: #02050a !important; /* Fundal negru solid pentru a nu vedea site-ul în spate */
-    z-index: 99999 !important; /* Forțează-l peste header și orice altceva */
-    display: none; /* Controlat de JS */
-    justify-content: center;
+    background: #02050a !important;
+    z-index: 99999 !important;
+    display: none; /* JS will toggle this */
     align-items: center;
-    overflow: hidden;
+    justify-content: center;
 }
 
-/* Stil pentru butonul de închidere X al jocului */
-.c4-exit-btn {
+/* 2. Fix the Versus screen to be full screen and center everything */
+.vs-container {
     position: absolute;
-    top: 30px;
-    right: 30px;
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid var(--primary);
-    border-radius: 50%;
-    color: #fff;
-    font-size: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 100001;
-    transition: 0.3s;
-}
-
-.c4-exit-btn:hover {
-    background: #ff4757;
-    border-color: #fff;
-    transform: rotate(90deg);
-}
-
-/* Ajustare pentru ecranele de interior să nu plutească haotic */
-.vs-container, .c4-choice-card, .c4-game-layout {
+    inset: 0;
     width: 100%;
     height: 100%;
-    display: none; /* Controlat de showC4Stage */
-    flex-direction: column;
+    display: none; /* JavaScript handles showing this */
+    flex-direction: row;
     justify-content: center;
     align-items: center;
-    padding: 20px;
-    box-sizing: border-box;
+    gap: 50px;
+    background: #02050a; /* Dark background only while Intro is active */
+}
+
+/* 3. Fix the Color Picker to stay as a card in the middle */
+.c4-choice-card {
+    position: relative;
+    z-index: 10;
+    display: none;
+    background: #08101b;
+    border: 2px solid var(--primary);
+    padding: 30px;
+    border-radius: 30px;
+    width: 90%;
+    max-width: 500px;
 }
   </style>
 </head>
@@ -11277,32 +11264,33 @@ let c4Turn = 1;
 let c4IsBusy = false; // NEW: Prevents spamming while animations run
 
 function showC4Stage(stageId) {
-    // Lista tuturor ecranelor posibile
+    // List of every screen in your C4 game
     const stages = ['c4IntroScreen', 'c4ColorPicker', 'c4GameBoardUI', 'c4ResultModal'];
     
-    // Ascundem toate ecranele care EXISTĂ în pagină
     stages.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
+        if (el) {
+            // Force it to hide using setProperty to override ANY CSS !important
+            el.style.setProperty('display', 'none', 'important');
+        }
     });
     
-    // Afișăm ecranul cerut
     const target = document.getElementById(stageId);
-    if (!target) {
-        console.error("Eroare: Ecranul " + stageId + " nu a fost găsit în HTML!");
-        return;
-    }
-
-    if (stageId === 'c4IntroScreen' || stageId === 'c4GameBoardUI') {
-        target.style.setProperty('display', 'flex', 'important');
-    } else {
-        target.style.setProperty('display', 'block', 'important');
+    if (target) {
+        // Force the new screen to show
+        if (stageId === 'c4IntroScreen' || stageId === 'c4GameBoardUI') {
+            target.style.setProperty('display', 'flex', 'important');
+        } else {
+            target.style.setProperty('display', 'block', 'important');
+        }
     }
 }
-
 // 2. FIXED START FUNCTION
 window.startSinglePlayerC4 = async () => {
-    document.getElementById('c4GameOverlay').style.display = 'flex';
+    // 1. Show the main overlay
+    document.getElementById('c4GameOverlay').style.setProperty('display', 'flex', 'important');
+    
+    // 2. Show the Versus Screen
     showC4Stage('c4IntroScreen');
     
     if (auth.currentUser) {
@@ -11313,52 +11301,23 @@ window.startSinglePlayerC4 = async () => {
         const nameWithColor = userData.equippedText ? 
             `<span class="${userData.equippedText.cssClass}">${rawName}</span>` : rawName;
 
-        // Update Intro Screen
+        // Update Intro (VS) Screen
         document.getElementById('vsPlayerImg').src = userData.image || auth.currentUser.photoURL;
         document.getElementById('vsPlayerName').innerHTML = nameWithColor;
 
-        // Update Tactical HUD (The bar above the game)
+        // Update Game HUD (The name above the board)
         document.getElementById('hudPfp').src = userData.image || auth.currentUser.photoURL;
-        document.getElementById('pName').innerHTML = nameWithColor; // THIS FIXES THE "PLAYER" NAME
+        document.getElementById('pName').innerHTML = nameWithColor;
+        
+        // Ensure Bot image is set
+        document.getElementById('vsBotImg').src = "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media";
     }
 
-    // Move to Color Picker after 4 seconds
+    // 3. AUTO-VANISH: Versus screen goes away, Color picker appears
     setTimeout(() => {
         showC4Stage('c4ColorPicker');
         renderC4Colors();
-    }, 4000);
-};
-
-window.startSinglePlayerC4 = async () => {
-    document.getElementById('c4GameOverlay').style.display = 'flex';
-    showC4Stage('c4IntroScreen');
-    
-    if(auth.currentUser) {
-        const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
-        const userData = userSnap.data();
-        
-        // 1. Set Player Info (Removing Frame injection)
-        const pImg = document.getElementById('vsPlayerImg');
-        const pName = document.getElementById('vsPlayerName');
-        
-        pImg.src = userData.image || auth.currentUser.photoURL;
-        
-        // Apply custom text color if they have it
-        if(userData.equippedText) {
-            pName.innerHTML = `<span class="${userData.equippedText.cssClass}">${userData.username || auth.currentUser.displayName}</span>`;
-        } else {
-            pName.innerText = userData.username || auth.currentUser.displayName;
-        }
-
-        // 2. Set Bot Info (Ensuring the image and circle are fixed)
-        const botImg = document.getElementById('vsBotImg');
-        botImg.src = "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media";
-    }
-
-    setTimeout(() => {
-        showC4Stage('c4ColorPicker');
-        renderC4Colors();
-    }, 4500);
+    }, 4500); 
 };
 
 function renderC4Colors() {
