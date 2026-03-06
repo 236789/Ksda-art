@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html lang="ro">
 <head>
-
+<script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script type="text/javascript">
    (function(){
@@ -9401,13 +9401,28 @@ nav a:hover, nav a.active {
 }
 
 
+/* Hide content initially */
+#siteContent, .header-container, #sideMenu {
+    display: none !important; /* Force hide until JS verifies user */
+}
 
+/* Add a loading screen */
+#securityCheckLoader {
+    position: fixed; inset: 0; 
+    background: #02050a; z-index: 999999;
+    display: flex; justify-content: center; align-items: center;
+    color: #29f3ff; font-family: 'Orbitron'; font-size: 20px;
+    flex-direction: column; gap: 20px;
+}
   </style>
 </head>
 <body>
 
 
-
+<div id="securityCheckLoader">
+    <i class="fas fa-shield-alt fa-spin" style="font-size: 50px;"></i>
+    <span>SECURING CONNECTION...</span>
+</div>
 
 <!-- BANNED OVERLAY -->
 <div id="bannedOverlay">
@@ -15683,76 +15698,103 @@ window.equipText = async (id, cssClass) => {
         } catch(e) { return "Necunoscut"; }
     }
 
-// 1. GLOBAL BAN CHECK (OPTIMIZED)
-// --- ULTIMATE BAN SYSTEM ---
-// --- 1. SUPERIOR BAN SYSTEM (FIXED) ---
-async function checkGlobalBan() {
-    const overlay = document.getElementById('bannedOverlay');
+// --- ROBUST BAN SYSTEM ---
+async function initiateSecurityCheck() {
+    const loader = document.getElementById('securityCheckLoader');
     const content = document.getElementById('siteContent');
-    const sideMenu = document.getElementById('sideMenu'); // Get side menu
-    const header = document.querySelector('.header-container'); // Get header
-    
-    const reasonText = document.getElementById('globalBanReason');
-    const ipText = document.getElementById('globalBanIp');
+    const header = document.querySelector('.header-container');
+    const sideMenu = document.getElementById('sideMenu');
+    const banOverlay = document.getElementById('bannedOverlay');
 
-    // HELPER: EXECUTE THE NUKE (ONLY RUNS IF BANNED)
-    const hammerBan = (reason, ipOrId) => {
-        console.log("BAN TRIGGERED: ", reason);
+    // 1. Get Device Fingerprint (Persistent ID)
+    const fpPromise = import('https://openfpcdn.io/fingerprintjs/v3').then(FingerprintJS => FingerprintJS.load());
+    const fp = await fpPromise;
+    const result = await fp.get();
+    const deviceId = result.visitorId; // Unique Device ID
 
-        // 1. Mark the browser (The "Mark of Death")
-        localStorage.setItem('ksda_perma_ban', 'true');
-        sessionStorage.setItem('isBanned', 'true');
-        
-        // 2. NUKE VISUALS (Remove content so they see nothing)
-        if(content) content.remove();
-        if(sideMenu) sideMenu.remove();
-        if(header) header.remove();
-        
-        // 3. SHOW RED OVERLAY
-        if(overlay) {
-            overlay.style.display = 'flex';
-            if(reasonText) reasonText.innerText = reason;
-            if(ipText) ipText.innerText = ipOrId;
-        }
-        document.body.style.overflow = 'hidden'; // Stop scrolling
-
-        // 4. ACTIVATE ANTI-TAMPER (ONLY NOW)
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        document.onkeydown = function(e) {
-            if(e.keyCode == 123) return false; // F12
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false;
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false;
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
-            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
-        }
-    };
-
-    // CHECK 1: Browser Fingerprint (Instant Local Check)
-    if (localStorage.getItem('ksda_perma_ban') === 'true') {
-        hammerBan("Dispozitiv Banat Anterior", "Device-ID");
-        return;
-    }
-
-    // CHECK 2: IP Address (Database Check)
+    // 2. Get IP
+    let userIP = "Unknown";
     try {
         const res = await fetch('https://api.ipify.org?format=json');
         const data = await res.json();
-        const userIP = data.ip;
+        userIP = data.ip;
+    } catch(e) {}
 
-        const banRef = doc(db, "banned_ips", userIP);
-        const banSnap = await getDoc(banRef);
+    // 3. Define the Ban Hammer Action
+    const executeBan = (reason) => {
+        console.warn("SECURITY ALERT: " + reason);
+        // Save ban locally so next refresh is instant
+        localStorage.setItem('ksda_perma_ban', 'true');
+        
+        // Ensure content is removed
+        if(content) content.innerHTML = "";
+        if(header) header.remove();
+        if(sideMenu) sideMenu.remove();
+        if(loader) loader.remove();
 
-        if (banSnap.exists()) {
-            const banData = banSnap.data();
-            hammerBan(banData.reason || "IP Blacklisted", userIP);
-        }
-    } catch (e) {
-        console.error("IP Check Error:", e);
+        // Show Ban Screen
+        banOverlay.style.display = 'flex';
+        document.getElementById('globalBanReason').innerText = reason;
+        document.getElementById('globalBanIp').innerText = `IP: ${userIP} | ID: ${deviceId}`;
+        
+        // Disable Controls
+        document.onkeydown = (e) => false;
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        throw new Error("Banned User Detected"); // Stop script execution
+    };
+
+    // --- CHECK 1: Local Storage (Fastest) ---
+    if (localStorage.getItem('ksda_perma_ban') === 'true') {
+        executeBan("Dispozitiv marcat anterior (Local)");
     }
+
+    // --- CHECK 2: Database Blacklist (IP & Device ID) ---
+    try {
+        // Check Banned IPs collection
+        const ipRef = doc(db, "banned_ips", userIP.replace(/\./g, '_')); // Replace dots for Firestore ID safety
+        const ipSnap = await getDoc(ipRef);
+        if (ipSnap.exists()) executeBan("IP Blocat (Database)");
+
+        // Check Banned Devices collection
+        const deviceRef = doc(db, "banned_devices", deviceId);
+        const deviceSnap = await getDoc(deviceRef);
+        if (deviceSnap.exists()) executeBan("Dispozitiv Blocat (Hardware Ban)");
+
+    } catch (e) {
+        console.error("Security Check Error", e);
+        // If internet fails, we might secure fail or let pass. 
+        // Usually let pass so normal users aren't blocked by errors.
+    }
+
+    // --- CHECK 3: Authenticated User Status (If logged in) ---
+    auth.onAuthStateChanged(async (user) => {
+        if (user) {
+            const userRef = doc(db, "accounts", user.uid);
+            const userSnap = await getDoc(userRef);
+            if (userSnap.exists() && userSnap.data().isBanned === true) {
+                // If banned, execute logic AND ban the device for future
+                await setDoc(doc(db, "banned_devices", deviceId), { 
+                    reason: "Account Banned", 
+                    uid: user.uid,
+                    timestamp: serverTimestamp() 
+                });
+                executeBan("Cont Banat (User ID)");
+            }
+        }
+        
+        // === IF WE SURVIVED ALL CHECKS ===
+        // Reveal the site
+        if(loader) loader.style.display = 'none';
+        if(content) content.style.display = 'block'; // Make sure your CSS matches this
+        if(header) header.style.display = 'flex';
+        if(sideMenu) sideMenu.style.display = 'flex'; // Or whatever initial display was
+    });
 }
 
+// Run immediately
+initiateSecurityCheck();
+
 // Run the check immediately
-checkGlobalBan();
  
 
     // LOGICA QUEST KEVIN BOT (15 MESAJE)
