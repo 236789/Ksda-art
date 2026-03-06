@@ -2,40 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>KSDA Database Restoration Tool</title>
+    <title>KSDA Full System Restore</title>
     <style>
-        body { background: #111; color: #fff; font-family: sans-serif; padding: 30px; }
-        .log-box { background: #000; border: 1px solid #333; padding: 15px; height: 400px; overflow-y: scroll; font-family: monospace; margin-top: 20px; }
-        .btn { padding: 15px 30px; font-weight: bold; cursor: pointer; border: none; border-radius: 5px; margin-right: 10px; }
+        body { background: #050b14; color: #00ff88; font-family: 'Courier New', monospace; padding: 30px; }
+        .log-box { background: #000; border: 1px solid #333; padding: 15px; height: 400px; overflow-y: scroll; margin-top: 20px; color: #ccc; }
+        .btn { padding: 15px 30px; font-weight: bold; cursor: pointer; border: none; border-radius: 5px; margin-right: 10px; font-size: 16px; text-transform: uppercase; }
         .btn-blue { background: #29f3ff; color: #000; }
-        .btn-red { background: #ff4757; color: #fff; }
-        .stat { color: #aaa; font-size: 14px; }
+        .btn-red { background: #ff4757; color: #fff; box-shadow: 0 0 15px #ff4757; }
+        input { padding: 10px; background: #111; border: 1px solid #444; color: #fff; border-radius: 5px; }
+        h1 { color: #ff4757; text-shadow: 0 0 10px #ff4757; }
     </style>
 </head>
 <body>
 
-    <h1>🚑 KSDA EMERGENCY RESTORE</h1>
-    <p>This tool attempts to calculate real data from history arrays and resets economy to a safe baseline.</p>
+    <h1>☢️ KSDA DISASTER RECOVERY V2</h1>
+    <p>This tool will standardize economy, repair invite counts, and <b>UNEQUIP all hacked cosmetics</b>.</p>
     
-    <div>
-        <label>Base Coins for Everyone:</label>
-        <input type="number" id="baseCoins" value="2500" style="padding:5px;">
+    <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; max-width: 600px;">
+        <h3>1. Compensation Settings</h3>
+        <label>Set Coins to:</label>
+        <input type="number" id="baseCoins" value="2500">
         
-        <label>Base Diamonds for Everyone:</label>
-        <input type="number" id="baseDiamonds" value="50" style="padding:5px;">
+        <label>Set Diamonds to:</label>
+        <input type="number" id="baseDiamonds" value="50">
     </div>
     <br>
 
-    <button id="loginBtn" class="btn btn-blue">1. Login Owner</button>
-    <button id="runBtn" class="btn btn-red" style="display:none;">2. EXECUTE RESTORE</button>
+    <button id="loginBtn" class="btn btn-blue">LOG IN OWNER</button>
+    <button id="runBtn" class="btn btn-red" style="display:none;">⚠️ EXECUTE WIPE & RESTORE</button>
 
-    <div id="logger" class="log-box">Waiting for login...</div>
+    <div id="logger" class="log-box">Waiting for authentication...</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, writeBatch, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        // CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyDoH80kffNrzFAcyRqsTVdifs-whUhwH9A",
             authDomain: "ksda-7546f.firebaseapp.com",
@@ -50,7 +53,7 @@
         const db = getFirestore(app);
         const logger = document.getElementById('logger');
 
-        function log(msg, color = "#fff") {
+        function log(msg, color = "#ccc") {
             const div = document.createElement('div');
             div.style.color = color;
             div.innerHTML = `> ${msg}`;
@@ -63,11 +66,11 @@
                 const provider = new GoogleAuthProvider();
                 const res = await signInWithPopup(auth, provider);
                 if(res.user.email === 'nicaemmanuel433qe@gmail.com') {
-                    log("✅ ACCESS GRANTED: OWNER DETECTED", "#00ff88");
+                    log("✅ OWNER VERIFIED.", "#00ff88");
                     document.getElementById('runBtn').style.display = 'inline-block';
                     document.getElementById('loginBtn').style.display = 'none';
                 } else {
-                    log("⛔ ACCESS DENIED: NOT OWNER", "red");
+                    log("⛔ ACCESS DENIED.", "red");
                 }
             } catch(e) { log(e.message, "red"); }
         };
@@ -76,14 +79,13 @@
             const baseCoins = parseInt(document.getElementById('baseCoins').value);
             const baseDiamonds = parseInt(document.getElementById('baseDiamonds').value);
 
-            if(!confirm(`⚠️ WARNING ⚠️\n\nThis will:\n1. Set EVERY user to ${baseCoins} Coins & ${baseDiamonds} Diamonds.\n2. Recalculate Invites/Donations based on history arrays.\n3. Reset Streaks to 0.\n\nProceed?`)) return;
+            if(!confirm(`⚠️ FINAL WARNING ⚠️\n\n1. Reset Coins/Diamonds to ${baseCoins}/${baseDiamonds}\n2. Recalculate Invites from history\n3. UNEQUIP ALL Badges/Banners/Frames\n4. Reset Streak to 0\n\nThis affects EVERY user. Continue?`)) return;
 
-            log("🚀 STARTING DATABASE REPAIR...", "yellow");
+            log("🚀 STARTING GLOBAL REPAIR...", "#ffd700");
 
             try {
                 const snapshot = await getDocs(collection(db, "accounts"));
-                const total = snapshot.size;
-                log(`📂 Loaded ${total} accounts.`);
+                log(`📂 Scanning ${snapshot.size} users...`);
 
                 let batch = writeBatch(db);
                 let count = 0;
@@ -93,25 +95,27 @@
                     const data = docSnap.data();
                     let updates = {};
 
-                    // 1. ECONOMY RESET (The Clean Slate)
-                    // We overwrite whatever hacked number is there with the base amount
+                    // --- 1. ECONOMY RESET ---
                     updates.coins = baseCoins;
                     updates.diamonds = baseDiamonds;
-                    
-                    // 2. STREAK RESET (Cannot be recovered)
                     updates.streak = 0; 
 
-                    // 3. SMART RECOVERY: REFERRALS
-                    // Hackers change the number, but usually leave the array alone.
-                    // We count the actual items in the array to get the real number.
+                    // --- 2. COSMETIC WIPE (THE FIX YOU ASKED FOR) ---
+                    // We set these to null. The user still owns them in "ownedBadges", 
+                    // but they are taken off the profile.
+                    updates.equippedBadge = null; 
+                    updates.equippedBanner = null; 
+                    updates.equippedFrame = null; 
+                    updates.equippedText = null;
+
+                    // --- 3. RECALCULATE INVITES (Smart Fix) ---
                     if (Array.isArray(data.referralHistory)) {
                         updates.totalReferrals = data.referralHistory.length;
                     } else {
                         updates.totalReferrals = 0;
                     }
 
-                    // 4. SMART RECOVERY: DONATIONS
-                    // We sum up the actual donations from history
+                    // --- 4. RECALCULATE DONATIONS (Smart Fix) ---
                     if (Array.isArray(data.donationHistory)) {
                         let realTotal = 0;
                         data.donationHistory.forEach(d => {
@@ -122,24 +126,25 @@
                         updates.totalCoinsDonated = 0;
                     }
 
-                    // Add to batch
                     batch.update(docSnap.ref, updates);
                     count++;
 
+                    // Commit in chunks of 400
                     if (count >= 400) {
                         batch.commit();
                         batch = writeBatch(db);
                         count = 0;
                         batchIndex++;
-                        log(`💾 Saved Batch ${batchIndex}...`, "#00ffff");
+                        log(`💾 Saved Batch ${batchIndex}...`, "#29f3ff");
                     }
                 });
 
                 if (count > 0) await batch.commit();
                 
                 log("✅ REPAIR COMPLETE.", "#00ff88");
-                log("All fake millions removed.", "#00ff88");
-                log("Real Invite/Donation counts restored (if history existed).", "#00ff88");
+                log("💰 Coins/Diamonds standardized.", "#00ff88");
+                log("🎨 All hacked cosmetics UNEQUIPPED.", "#00ff88");
+                log("👥 Real invite counts restored.", "#00ff88");
 
             } catch(e) {
                 log("❌ ERROR: " + e.message, "red");
