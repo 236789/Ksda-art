@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -9401,12 +9402,83 @@ nav a:hover, nav a.active {
 }
 
 
+/* --- CONSOLE BAN OVERLAY --- */
+#consoleBanOverlay {
+    position: fixed;
+    inset: 0;
+    background: #050b14;
+    z-index: 9999999;
+    display: none; 
+    flex-direction: column;
+    align-items: center;
+    justify-content: center; /* Centrează vertical */
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+    transition: opacity 0.8s ease;
+}
 
+.ban-static-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(20px, 6vw, 45px); /* Se micșorează automat */
+    color: #ff4757;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+}
+
+#kevinBanBot {
+    height: 250px; /* Mai mic pentru a lăsa loc textului */
+    max-width: 90%;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 0 20px rgba(41, 243, 255, 0.3));
+    margin-bottom: 20px;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#banSpeechBubble {
+    background: rgba(13, 25, 41, 0.95);
+    border: 2px solid #ff4757;
+    color: #fff;
+    padding: 20px;
+    border-radius: 20px;
+    width: 95%; /* Ocupă aproape tot lățimea pe mobil */
+    max-width: 500px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px; /* Font puțin mai mic pentru lizibilitate pe mobil */
+    line-height: 1.5;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    transition: border-color 0.5s ease;
+    box-sizing: border-box;
+}
+
+/* --- AJUSTĂRI SPECIFICE PENTRU ECRANE MICI --- */
+@media (max-width: 768px) {
+    #kevinBanBot {
+        height: 180px; /* Imaginea se micșorează pe telefon */
+        margin-bottom: 15px;
+    }
+    
+    .ban-static-title {
+        margin-top: 10px;
+        font-size: 18px; /* Titlu mai compact */
+    }
+
+    #banSpeechBubble {
+        font-size: 11px; /* Textul devine mai mic ca să nu facă overflow */
+        padding: 15px;
+    }
+}
   </style>
 </head>
 <body>
 
-
+<div id="consoleBanOverlay">
+    <div class="ban-static-title">CONSOLE ACCESS DENIED</div>
+    <img id="kevinBanBot" src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/449b8063-1f8b-4055-8f7d-7f38a12a5559-Photoroom.png?alt=media&token=d2a9be09-da6a-4321-b238-e8868579726d">
+    <div id="banSpeechBubble">Sistem blocat.</div>
+</div>
 
 
 <!-- BANNED OVERLAY -->
@@ -17805,6 +17877,99 @@ function initHomeDynamicTheme() {
     });
 }
 initHomeDynamicTheme();
+
+
+
+// --- ANTI-CONSOLE SYSTEM V3 (AUTO-CLOSE) ---
+let userIsAdmin = false;
+
+// 1. Verificare Admin din Firebase (site_settings -> admins -> emails [])
+async function checkAdminStatus(userEmail) {
+    try {
+        const adminRef = doc(db, "site_settings", "admins");
+        const adminSnap = await getDoc(adminRef);
+        if (adminSnap.exists()) {
+            const adminList = adminSnap.data().emails || [];
+            if (adminList.includes(userEmail)) {
+                userIsAdmin = true;
+            }
+        }
+    } catch (e) { console.error("Admin Check Error", e); }
+}
+
+// 2. Declanșare Overlay
+function triggerConsoleBan() {
+    const overlay = document.getElementById('consoleBanOverlay');
+    const bubble = document.getElementById('banSpeechBubble');
+    const botImg = document.getElementById('kevinBanBot');
+    const siteContent = document.getElementById('siteContent');
+    
+    // Resetăm stilurile bulei în caz că a mai fost deschis anterior
+    bubble.style.borderColor = "#ff4757";
+    overlay.style.opacity = "1";
+    overlay.style.display = 'flex';
+    if(siteContent) siteContent.style.filter = 'blur(15px)';
+    document.body.style.overflow = 'hidden';
+
+    const audio1 = new Audio("https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/ElevenLabs_2026-03-07T03_43_25_Marcus%20-%20Robotic%2C%20Deep%20and%20Smooth_pvc_sp95_s33_sb60_v3.mp3?alt=media&token=13ff775d-ccf5-4e4b-bfe7-abc10aaeb40f");
+    const audio2 = new Audio("https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/ElevenLabs_2026-03-07T03_51_57_Marcus%20-%20Robotic%2C%20Deep%20and%20Smooth_pvc_sp95_s33_sb60_v3.mp3?alt=media&token=7e3c4245-65c3-4c12-a3cc-76f4bc168500");
+
+    const kevinHappyImages = [
+        "https://iili.io/q2p0NwX.png", 
+        "https://iili.io/q2p0j9I.png", 
+        "https://iili.io/q2p19HB.png"
+    ];
+
+    // FAZA 1: Agresiv
+    botImg.src = "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/449b8063-1f8b-4055-8f7d-7f38a12a5559-Photoroom.png?alt=media&token=d2a9be09-da6a-4321-b238-e8868579726d";
+    bubble.innerText = "Ia uite-l mă și pe ăsta... Ce faci mă, panaramă, aici? N-ai și tu nicio treabă, n-ai nicio viață? Ești mare hacker acum, te-ai pus pe butoane? Lasă mă consola aia în pace că oricum te uiți la ea ca mâța-n calendar. Hai, valea de aici până nu-mi pierd răbdarea cu tine... MARȘ de aici!";
+    audio1.play();
+
+    audio1.onended = () => {
+        setTimeout(() => {
+            // FAZA 2: Whoops
+            botImg.src = kevinHappyImages[Math.floor(Math.random() * kevinHappyImages.length)];
+            bubble.style.borderColor = "#29f3ff";
+            bubble.innerText = "Whoops... m-a luat valul puțin. Uite, dacă chiar n-ai nicio intenție rea, îmi pare rău pentru ce-am zis mai devreme, m-am cam ambalat degeaba. Dar totuși... trebuie să înțelegi un lucru. Consola aia nu e de joacă și nu e accesibilă chiar pentru oricine. Ai grijă ce faci pe acolo, că nu e de glumă.";
+            audio2.play();
+        }, 600);
+    };
+
+    // FAZA 3: Auto-Închidere
+    audio2.onended = () => {
+        setTimeout(() => {
+            overlay.style.opacity = "0"; // Efect de fade out
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                if(siteContent) siteContent.style.filter = 'none';
+                document.body.style.overflow = 'auto';
+            }, 800);
+        }, 3000); // Mai stă 3 secunde după audio ca userul să citească finalul
+    };
+}
+
+// 3. Right Click: Blocare mută
+window.addEventListener('contextmenu', (e) => {
+    if (userIsAdmin) return;
+    e.preventDefault();
+});
+
+// 4. Taste Consola: Blocare + Kevin
+window.addEventListener('keydown', (e) => {
+    if (userIsAdmin) return;
+
+    const isConsoleKey = 
+        e.keyCode === 123 || 
+        (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || 
+        (e.ctrlKey && e.keyCode === 85);
+
+    if (isConsoleKey) {
+        e.preventDefault();
+        triggerConsoleBan();
+    }
+});
+
+
   </script>
 </body> 
 </html> 
