@@ -3844,8 +3844,20 @@ function renderDailyCalendar(userData) {
 
     // Eliminat codul care genera butonul "FORCE UNLOCK"
     
-    const now = Date.now();
-    const lastClaim = userData.lastDailyClaim ? userData.lastDailyClaim.toMillis() : 0;
+const now = Date.now();
+    
+    // Verificăm dacă există, dacă are funcția toMillis, altfel verificăm dacă e deja un număr
+    let lastClaim = 0;
+    if (userData.lastDailyClaim) {
+        if (typeof userData.lastDailyClaim.toMillis === 'function') {
+            lastClaim = userData.lastDailyClaim.toMillis();
+        } else if (typeof userData.lastDailyClaim === 'number') {
+            lastClaim = userData.lastDailyClaim;
+        } else if (userData.lastDailyClaim.seconds) {
+            lastClaim = userData.lastDailyClaim.seconds * 1000;
+        }
+    }
+
     let currentDayIndex = userData.dailyStreakIndex || 0; 
     const hoursSinceLast = (now - lastClaim) / (1000 * 60 * 60);
 
