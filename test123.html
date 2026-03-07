@@ -9703,30 +9703,41 @@ window.createNewBackup = async () => {
     
     const btn = document.getElementById('btnDoBackup');
     btn.disabled = true; 
-    btn.innerText = "SNAPSHOT TOTAL ÎN CURS...";
+    btn.innerText = "GENERARE FIȘIER BACKUP...";
 
     try {
-        // We pull directly from Firestore to ensure we get EVERY field (Bio, Donations, Invites, etc.)
+        // 1. Get all documents from Firestore
         const allUsersSnap = await getDocs(collection(db, "accounts"));
-        
-        const fullSnapshot = allUsersSnap.docs.map(docSnap => {
-            const data = docSnap.data();
-            return {
-                uid: docSnap.id,
-                ...data // Captures EVERYTHING: donationHistory, referralHistory, bio, gender, socialLinks, etc.
-            };
-        });
+        const fullSnapshot = allUsersSnap.docs.map(docSnap => ({
+            uid: docSnap.id,
+            ...docSnap.data()
+        }));
 
         const backupId = "FULL_SYNC_" + Date.now();
+        const jsonString = JSON.stringify(fullSnapshot);
+        
+        // 2. Convert string to a Blob (Binary Large Object)
+        const blob = new Blob([jsonString], { type: 'application/json' });
+
+        // 3. Upload to Firebase Storage
+        // Path: backups/FULL_SYNC_12345.json
+        const storageRef = window.ref(window.storage, `backups/${backupId}.json`);
+        
+        btn.innerText = "URCARE ÎN STORAGE (SECURIZAT)...";
+        const uploadTask = await window.uploadBytes(storageRef, blob);
+        const downloadUrl = await window.getDownloadURL(uploadTask.ref);
+
+        // 4. Save only the Metadata and URL to Firestore
         await setDoc(doc(db, "system_backups", backupId), {
             timestamp: serverTimestamp(),
             userCount: fullSnapshot.length,
-            snapshot_json: JSON.stringify(fullSnapshot), // Encoded as string to protect from direct DB edits
+            fileUrl: downloadUrl, // The link to the file
+            storagePath: `backups/${backupId}.json`,
             admin: auth.currentUser.displayName,
-            type: "IDENTITY_AND_ECONOMY_FULL"
+            type: "IDENTITY_AND_ECONOMY_STORAGE_FILE"
         });
 
-        showToast("✅ SNAPSHOT TOTAL CREAT!");
+        showToast("✅ BACKUP SALVAT ÎN STORAGE!");
         loadBackupList();
         checkBackupStatus();
     } catch (e) {
@@ -9767,24 +9778,31 @@ window.loadBackupList = async () => {
 };
 
 window.restoreBackup = async (backupId) => {
-    const confirmRestore = prompt(`⚠️ ATENȚIE MAXIMĂ: Ești pe cale să înlocuiești TOATE datele curente (Profile, Donații, Balanțe) cu cele din snapshot-ul ${backupId}.\n\nScrie "RESTAURARE TOT" pentru confirmare:`);
+    const confirmRestore = prompt(`⚠️ RESTAURARE TOTALĂ: Snapshot ${backupId}.\n\nScrie "RESTAURARE TOT" pentru confirmare:`);
     if (confirmRestore !== "RESTAURARE TOT") return;
 
     try {
         const snap = await getDoc(doc(db, "system_backups", backupId));
-        const usersToRebuild = JSON.parse(snap.data().snapshot_json);
+        if (!snap.exists()) return alert("Informațiile despre backup nu au fost găsite.");
         
-        showToast("⏳ RESTAURARE ÎN CURS... NU ÎNCHIDE PAGINA!");
+        const fileUrl = snap.data().fileUrl;
+        
+        showToast("⏳ DESCĂRCARE DATE BACKUP...");
+        
+        // 1. Download the JSON file from Storage
+        const response = await fetch(fileUrl);
+        const usersToRebuild = await response.json();
+        
+        showToast(`⏳ RESTAURARE ${usersToRebuild.length} PROFILE...`);
 
-        // Using setDoc instead of updateDoc to ensure the document is replaced EXACTLY as it was
+        // 2. Loop and Overwrite
         for (let userData of usersToRebuild) {
-            const { uid, ...cleanData } = userData; // Extract UID and the rest of the data
+            const { uid, ...cleanData } = userData;
             const userRef = doc(db, "accounts", uid);
-            
             await setDoc(userRef, cleanData); 
         }
 
-        alert(`✅ RESTAURARE REUȘITĂ!\nS-au refăcut ${usersToRebuild.length} profile de utilizatori cu toate datele istorice.`);
+        alert(`✅ RESTAURARE REUȘITĂ!\nToate datele au fost refăcute din fișierul extern.`);
         location.reload();
     } catch (e) { 
         console.error(e);
