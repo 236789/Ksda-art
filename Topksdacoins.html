@@ -2,6 +2,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -8501,11 +8502,39 @@ async function fetchTotalCount() {
     document.onclick = resetIdleTimer;
     document.onscroll = resetIdleTimer;
 
-    // --- LIVE LEADERBOARD LOGIC ---
+// --- LIVE LEADERBOARD LOGIC (FIXED) ---
     function checkIsOnline(user) {
+        // 1. Dacă este utilizatorul curent, e mereu online
         if (auth.currentUser && user.id === auth.currentUser.uid) return true;
+
+        // 2. Verifică flag-ul și timestamp-ul
         if (user.isOnline === true && user.lastActive) {
-            const diff = Date.now() - user.lastActive.toDate().getTime();
+            let lastActiveTime = 0;
+
+            try {
+                // CAZ 1: Firestore Timestamp standard (are funcția toDate)
+                if (typeof user.lastActive.toDate === 'function') {
+                    lastActiveTime = user.lastActive.toDate().getTime();
+                } 
+                // CAZ 2: Este deja un obiect Date de JavaScript
+                else if (user.lastActive instanceof Date) {
+                    lastActiveTime = user.lastActive.getTime();
+                }
+                // CAZ 3: Este un obiect tip Firestore {seconds, nanoseconds} dar fără prototip
+                else if (user.lastActive.seconds) {
+                    lastActiveTime = user.lastActive.seconds * 1000;
+                }
+                // CAZ 4: Este doar un număr (milisecunde)
+                else if (typeof user.lastActive === 'number') {
+                    lastActiveTime = user.lastActive;
+                }
+            } catch (e) {
+                console.warn("Eroare la parsarea datei pentru user:", user.username, e);
+                return false;
+            }
+
+            // Calculăm diferența (6 minute timeout)
+            const diff = Date.now() - lastActiveTime;
             return diff < 360000; 
         }
         return false;
