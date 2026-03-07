@@ -2,6 +2,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -3846,6 +3847,11 @@
         </a>
 
 
+<a href="#" class="ga-nav-item" onclick="accessBackupSection(this)">
+    <i class="fas fa-database" style="color: #00ff88;"></i>
+    <span>Backup & Restaurare</span>
+</a>
+
 <a href="#" class="ga-nav-item" onclick="switchSection('news-manager-view', this)">
     <i class="fas fa-newspaper" style="color: #00e5ff;"></i>
     <span>Manager Noutăți</span>
@@ -3882,8 +3888,13 @@
 </a>
     </div>
 </div>
+
+
 </div>
 </div>
+
+
+
 </aside>
 
 
@@ -5034,6 +5045,50 @@
                 <tr><td colspan="6" style="padding:40px; text-align:center;">Se analizează baza de date...</td></tr>
             </tbody>
         </table>
+    </div>
+</div>
+
+
+<!-- VIEW: BACKUP SYSTEM -->
+<div id="backup-system-view" class="view-section">
+    <h2 class="metallic-title-big" style="text-align:center; color: #00ff88;">
+        <i class="fas fa-shield-virus"></i> BACKUP & DATA RECOVERY
+    </h2>
+
+    <!-- Hidden by default until Code is entered -->
+    <div id="backupContentLocked" style="text-align:center; padding: 50px 20px;">
+        <i class="fas fa-lock" style="font-size: 50px; color: #ff4757; margin-bottom: 20px;"></i>
+        <h3 style="font-family:'Orbitron'; color:#fff;">ACCES RESTRICȚIONAT</h3>
+        <p style="color:#888;">Această secțiune necesită autorizare specială.</p>
+        <button onclick="unlockBackupSystem()" class="btn-outline">INTRODU COD ACCES</button>
+    </div>
+
+    <div id="backupContentUnlocked" style="display:none;">
+        <div class="stats-professional-grid" style="grid-template-columns: 1fr; max-width: 800px; margin: 0 auto 30px;">
+            <div class="stat-card-pro" style="border-color: #00ff88; align-items: center; text-align: center;">
+                <span class="stat-card-label">STARE SISTEM DATE</span>
+                <div id="backupAlertBox" style="margin: 10px 0; font-size: 13px; font-weight: bold;">Verificare...</div>
+                <button id="btnDoBackup" onclick="createNewBackup()" class="super-btn" style="background:#00ff88; color:#000; margin-top:10px;">
+                    <i class="fas fa-save"></i> CREEAZĂ PUNCT DE RESTAURARE
+                </button>
+            </div>
+        </div>
+
+        <div class="table-glass-container">
+            <table class="neon-table">
+                <thead>
+                    <tr>
+                        <th>DATA BACKUP</th>
+                        <th>USERI SALVAȚI</th>
+                        <th>ID VERSIUNE</th>
+                        <th>ACȚIUNE</th>
+                    </tr>
+                </thead>
+                <tbody id="backupListTableBody">
+                    <tr><td colspan="4" style="padding:20px;">Se încarcă lista de salvări...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 </main>
@@ -7510,7 +7565,8 @@ window.switchSection = (sectionId, btnElement) => {
         'admin-manage-view',
          'news-manager-view', // <--- ADD THIS
     'manage-users-view', // <--- ADAUGĂ ACEASTĂ LINIE AICI
-        'wall-archive-view' // Add this line
+        'wall-archive-view', // Add this line
+    'backup-system-view' // <--- ADD THIS LINE
 
 
 
@@ -7559,6 +7615,13 @@ case 'manage-users-view':
         renderManageUsersTable();
     }
     break;
+
+    case 'backup-system-view':
+        // This makes sure the list stays locked if you haven't entered the code
+        if(typeof window.checkBackupStatus === "function") window.checkBackupStatus();
+        if(backupUnlocked) window.loadBackupList(); 
+        break;
+}
 
         case 'sanctions-view':
             window.runSanctionsAnalytics();
@@ -9583,6 +9646,149 @@ window.switchSection = (sectionId, btnElement) => {
     
     if (sectionId === 'discounts-manager-view') {
         renderDiscountsTable();
+    }
+};
+
+
+// --- BACKUP & RECOVERY LOGIC (TOTAL IDENTITY SYNC) ---
+let backupUnlocked = false;
+
+window.accessBackupSection = (btn) => {
+    switchSection('backup-system-view', btn);
+    checkBackupStatus();
+};
+
+window.unlockBackupSystem = async () => {
+    // The code is stored in Firebase: system_secrets -> admin_config -> backup_code
+    const code = prompt("🔑 INTRODU CODUL DE CRIPTARE BACKUP:");
+    if (!code) return;
+
+    try {
+        const secretSnap = await getDoc(doc(db, "system_secrets", "admin_config"));
+        const correctCode = secretSnap.data()?.backup_code;
+
+        if (code === correctCode) {
+            backupUnlocked = true;
+            document.getElementById('backupContentLocked').style.display = 'none';
+            document.getElementById('backupContentUnlocked').style.display = 'block';
+            loadBackupList();
+            showToast("🔓 Acces Backup Autorizat!");
+        } else {
+            alert("❌ COD INCORECT! Accesul a fost refuzat.");
+        }
+    } catch (e) { alert("Eroare: Nu ai permisiuni să citești codul din Firebase."); }
+};
+
+async function checkBackupStatus() {
+    const q = query(collection(db, "system_backups"), orderBy("timestamp", "desc"), limit(1));
+    const snap = await getDocs(q);
+    const box = document.getElementById('backupAlertBox');
+    if(!box) return;
+
+    if (snap.empty) {
+        box.innerHTML = "<span style='color:#ff4757;'>⚠️ NICIUN BACKUP EXISTENT!</span>";
+    } else {
+        const lastDate = snap.docs[0].data().timestamp.toDate();
+        const diffDays = (new Date() - lastDate) / (1000 * 60 * 60 * 24);
+        if (diffDays > 2) {
+            box.innerHTML = `<span style='color:#ff9f43;'>⚠️ DATE VECHI (${Math.floor(diffDays)} zile). RECOMANDĂM SNAPSHOT!</span>`;
+        } else {
+            box.innerHTML = "<span style='color:#00ff88;'>✅ DATE PROTEJATE RECENT</span>";
+        }
+    }
+}
+
+window.createNewBackup = async () => {
+    if (!backupUnlocked) return alert("Deblochează sistemul mai întâi.");
+    
+    const btn = document.getElementById('btnDoBackup');
+    btn.disabled = true; 
+    btn.innerText = "SNAPSHOT TOTAL ÎN CURS...";
+
+    try {
+        // We pull directly from Firestore to ensure we get EVERY field (Bio, Donations, Invites, etc.)
+        const allUsersSnap = await getDocs(collection(db, "accounts"));
+        
+        const fullSnapshot = allUsersSnap.docs.map(docSnap => {
+            const data = docSnap.data();
+            return {
+                uid: docSnap.id,
+                ...data // Captures EVERYTHING: donationHistory, referralHistory, bio, gender, socialLinks, etc.
+            };
+        });
+
+        const backupId = "FULL_SYNC_" + Date.now();
+        await setDoc(doc(db, "system_backups", backupId), {
+            timestamp: serverTimestamp(),
+            userCount: fullSnapshot.length,
+            snapshot_json: JSON.stringify(fullSnapshot), // Encoded as string to protect from direct DB edits
+            admin: auth.currentUser.displayName,
+            type: "IDENTITY_AND_ECONOMY_FULL"
+        });
+
+        showToast("✅ SNAPSHOT TOTAL CREAT!");
+        loadBackupList();
+        checkBackupStatus();
+    } catch (e) {
+        console.error(e);
+        alert("Eroare la crearea backup-ului: " + e.message);
+    } finally {
+        btn.disabled = false; 
+        btn.innerText = "CREEAZĂ PUNCT DE RESTAURARE";
+    }
+};
+
+window.loadBackupList = async () => {
+    const tableBody = document.getElementById('backupListTableBody');
+    const q = query(collection(db, "system_backups"), orderBy("timestamp", "desc"), limit(15));
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+        tableBody.innerHTML = "<tr><td colspan='4'>Nicio salvare găsită.</td></tr>";
+        return;
+    }
+
+    tableBody.innerHTML = snap.docs.map(docSnap => {
+        const d = docSnap.data();
+        const date = d.timestamp?.toDate().toLocaleString('ro-RO') || "In procesare...";
+        return `
+        <tr>
+            <td style="color:#00ff88; font-family:'Orbitron'; font-size:12px;">${date}</td>
+            <td style="font-weight:bold;">${d.userCount} Useri (Identitate Completă)</td>
+            <td style="font-family:monospace; opacity:0.5; font-size:10px;">${docSnap.id}</td>
+            <td>
+                <button class="btn-action-staff" style="border-color:#ff4757; color:#ff4757; width:auto; padding:5px 15px;" 
+                        onclick="window.restoreBackup('${docSnap.id}')">
+                    <i class="fas fa-undo"></i> RESTAURARE TOTALĂ
+                </button>
+            </td>
+        </tr>`;
+    }).join('');
+};
+
+window.restoreBackup = async (backupId) => {
+    const confirmRestore = prompt(`⚠️ ATENȚIE MAXIMĂ: Ești pe cale să înlocuiești TOATE datele curente (Profile, Donații, Balanțe) cu cele din snapshot-ul ${backupId}.\n\nScrie "RESTAURARE TOT" pentru confirmare:`);
+    if (confirmRestore !== "RESTAURARE TOT") return;
+
+    try {
+        const snap = await getDoc(doc(db, "system_backups", backupId));
+        const usersToRebuild = JSON.parse(snap.data().snapshot_json);
+        
+        showToast("⏳ RESTAURARE ÎN CURS... NU ÎNCHIDE PAGINA!");
+
+        // Using setDoc instead of updateDoc to ensure the document is replaced EXACTLY as it was
+        for (let userData of usersToRebuild) {
+            const { uid, ...cleanData } = userData; // Extract UID and the rest of the data
+            const userRef = doc(db, "accounts", uid);
+            
+            await setDoc(userRef, cleanData); 
+        }
+
+        alert(`✅ RESTAURARE REUȘITĂ!\nS-au refăcut ${usersToRebuild.length} profile de utilizatori cu toate datele istorice.`);
+        location.reload();
+    } catch (e) { 
+        console.error(e);
+        alert("Eroare critică la restaurare: " + e.message); 
     }
 };
   </script>
