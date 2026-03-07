@@ -7750,13 +7750,20 @@ function loadAllUsers() {
             let isOnline = false;
             let statusHtml = '<span class="status-dot offline"></span>Offline';
             
-            // Verificăm dacă isOnline e true și dacă ultima activitate a fost în ultimele 5 minute
+// Verificăm dacă isOnline e true și dacă ultima activitate a fost în ultimele 5 minute
             if (data.isOnline === true && data.lastActive) {
-                const lastActiveDate = data.lastActive.toDate ? data.lastActive.toDate() : new Date(data.lastActive);
-                const diffMinutes = (new Date() - lastActiveDate) / 1000 / 60;
-                if (diffMinutes < 5) {
-                    isOnline = true;
-                    statusHtml = '<span class="status-dot online" style="background:#00ff88; box-shadow:0 0 10px #00ff88;"></span>Online';
+                // Detectează dacă e Timestamp Firestore (are .toDate) sau alt format (String/Date)
+                const lastActiveDate = (typeof data.lastActive.toDate === 'function') 
+                    ? data.lastActive.toDate() 
+                    : new Date(data.lastActive);
+
+                // Verificăm dacă data este validă înainte de calcul
+                if (!isNaN(lastActiveDate.getTime())) {
+                    const diffMinutes = (Date.now() - lastActiveDate.getTime()) / 1000 / 60;
+                    if (diffMinutes < 5) {
+                        isOnline = true;
+                        statusHtml = '<span class="status-dot online" style="background:#00ff88; box-shadow:0 0 10px #00ff88;"></span>Online';
+                    }
                 }
             }
 
@@ -9789,19 +9796,32 @@ window.restoreBackup = async (backupId) => {
         
         showToast("⏳ DESCĂRCARE DATE BACKUP...");
         
-        // 1. Download the JSON file from Storage 
+        // 1. Download the JSON file from Storage
         const response = await fetch(fileUrl);
         const usersToRebuild = await response.json();
         
         showToast(`⏳ RESTAURARE ${usersToRebuild.length} PROFILE...`);
 
-        // 2. Loop and Overwrite
+// 2. Loop and Overwrite
         for (let userData of usersToRebuild) {
             const { uid, ...cleanData } = userData;
+            
+            // --- THE FIX: Convert strings back to Dates ---
+            if (cleanData.lastActive) cleanData.lastActive = new Date(cleanData.lastActive);
+            if (cleanData.joinedAt) cleanData.joinedAt = new Date(cleanData.joinedAt);
+            
+            // Fix nested timestamps in donation history if they exist
+            if (Array.isArray(cleanData.donationHistory)) {
+                cleanData.donationHistory = cleanData.donationHistory.map(don => {
+                    if (don.timestamp) don.timestamp = new Date(don.timestamp);
+                    return don;
+                });
+            }
+            // ----------------------------------------------
+
             const userRef = doc(db, "accounts", uid);
             await setDoc(userRef, cleanData); 
         }
-
         alert(`✅ RESTAURARE REUȘITĂ!\nToate datele au fost refăcute din fișierul extern.`);
         location.reload();
     } catch (e) { 
