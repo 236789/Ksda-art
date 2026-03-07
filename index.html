@@ -9456,7 +9456,7 @@ nav a:hover, nav a.active {
 /* --- AJUSTĂRI SPECIFICE PENTRU ECRANE MICI --- */
 @media (max-width: 768px) {
     #kevinBanBot {
-        height: 180px; /* Imaginea se micșorează pe telefon */
+        height: 180px; /* Imaginea se micșorează pe telefon */ 
         margin-bottom: 15px;
     }
     
@@ -16400,6 +16400,8 @@ async function resetUserQuests(userRef, snapData) {
 
 onAuthStateChanged(auth, async (user) => {
         if (user) {
+        await checkAdminStatus(user.email);
+
             const userRef = doc(db, "accounts", user.uid);
             
             // --- BAN SYSTEM LOGIC ---
@@ -16439,6 +16441,8 @@ onAuthStateChanged(auth, async (user) => {
                 return; // STOP EXECUTION
             }  
             else {
+        userIsAdmin = false; // Reset if logged out
+
                 // 2. UNBAN RECOVERY (SELF-HEALING)
                 // If DB says NOT banned, but browser has the mark, remove it and reload.
                 if (localStorage.getItem('ksda_perma_ban') === 'true') {
@@ -17881,30 +17885,46 @@ initHomeDynamicTheme();
 
 
 // --- ANTI-CONSOLE SYSTEM V3 (AUTO-CLOSE) ---
+
+
+// --- ANTI-CONSOLE SYSTEM V4 (DEBUG MODE) ---
 let userIsAdmin = false;
 
-// 1. Verificare Admin din Firebase (site_settings -> admins -> emails [])
 async function checkAdminStatus(userEmail) {
+    if (!userEmail) return;
     try {
-        const adminRef = doc(db, "site_settings", "admins");
+        const adminRef = doc(db, "site_settings", "admins"); 
         const adminSnap = await getDoc(adminRef);
+        
         if (adminSnap.exists()) {
             const adminList = adminSnap.data().emails || [];
-            if (adminList.includes(userEmail)) {
+            // We trim and lowercase just to be 100% sure it matches
+            if (adminList.map(e => e.toLowerCase().trim()).includes(userEmail.toLowerCase().trim())) {
                 userIsAdmin = true;
+                console.log("✅ ACCESS GRANTED: Admin detected (" + userEmail + ")");
+                // Since we are admins, we remove the blur if it was triggered by mistake
+                document.getElementById('siteContent').style.filter = 'none';
+            } else {
+                console.log("❌ ACCESS DENIED: Email not in admin list.");
             }
+        } else {
+            console.log("❓ ERROR: Could not find 'admins' document in Firebase.");
         }
-    } catch (e) { console.error("Admin Check Error", e); }
+    } catch (e) { 
+        console.error("🔥 Firebase Rule Error:", e); 
+    }
 }
 
 // 2. Declanșare Overlay
 function triggerConsoleBan() {
+    // If we already verified you're an admin, stop the ban immediately
+    if (userIsAdmin) return; 
+
     const overlay = document.getElementById('consoleBanOverlay');
     const bubble = document.getElementById('banSpeechBubble');
     const botImg = document.getElementById('kevinBanBot');
     const siteContent = document.getElementById('siteContent');
     
-    // Resetăm stilurile bulei în caz că a mai fost deschis anterior
     bubble.style.borderColor = "#ff4757";
     overlay.style.opacity = "1";
     overlay.style.display = 'flex';
@@ -17920,14 +17940,12 @@ function triggerConsoleBan() {
         "https://iili.io/q2p19HB.png"
     ];
 
-    // FAZA 1: Agresiv
     botImg.src = "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/449b8063-1f8b-4055-8f7d-7f38a12a5559-Photoroom.png?alt=media&token=d2a9be09-da6a-4321-b238-e8868579726d";
     bubble.innerText = "Ia uite-l mă și pe ăsta... Ce faci mă, panaramă, aici? N-ai și tu nicio treabă, n-ai nicio viață? Ești mare hacker acum, te-ai pus pe butoane? Lasă mă consola aia în pace că oricum te uiți la ea ca mâța-n calendar. Hai, valea de aici până nu-mi pierd răbdarea cu tine... MARȘ de aici!";
     audio1.play();
 
     audio1.onended = () => {
         setTimeout(() => {
-            // FAZA 2: Whoops
             botImg.src = kevinHappyImages[Math.floor(Math.random() * kevinHappyImages.length)];
             bubble.style.borderColor = "#29f3ff";
             bubble.innerText = "Whoops... m-a luat valul puțin. Uite, dacă chiar n-ai nicio intenție rea, îmi pare rău pentru ce-am zis mai devreme, m-am cam ambalat degeaba. Dar totuși... trebuie să înțelegi un lucru. Consola aia nu e de joacă și nu e accesibilă chiar pentru oricine. Ai grijă ce faci pe acolo, că nu e de glumă.";
@@ -17935,18 +17953,35 @@ function triggerConsoleBan() {
         }, 600);
     };
 
-    // FAZA 3: Auto-Închidere
     audio2.onended = () => {
         setTimeout(() => {
-            overlay.style.opacity = "0"; // Efect de fade out
+            overlay.style.opacity = "0";
             setTimeout(() => {
                 overlay.style.display = 'none';
                 if(siteContent) siteContent.style.filter = 'none';
                 document.body.style.overflow = 'auto';
             }, 800);
-        }, 3000); // Mai stă 3 secunde după audio ca userul să citească finalul
+        }, 3000);
     };
 }
+
+// 3. Listeners
+window.addEventListener('contextmenu', (e) => {
+    if (userIsAdmin) return;
+    e.preventDefault();
+});
+
+window.addEventListener('keydown', (e) => {
+    if (userIsAdmin) return;
+
+    const isConsoleKey = e.keyCode === 123 || (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) || (e.ctrlKey && e.keyCode === 85);
+    if (isConsoleKey) {
+        e.preventDefault();
+        triggerConsoleBan();
+    }
+});
+
+
 
 // 3. Right Click: Blocare mută
 window.addEventListener('contextmenu', (e) => {
