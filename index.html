@@ -17740,7 +17740,7 @@ async function startLiveVoteSwitcher() {
     </div>`;
 }
 }
-
+ 
 // Lansează motorul
 startLiveVoteSwitcher();
 
@@ -17883,52 +17883,46 @@ function initHomeDynamicTheme() {
 initHomeDynamicTheme();
 
 
-
-// --- ANTI-CONSOLE SYSTEM V3 (AUTO-CLOSE) ---
-
-
-// --- ANTI-CONSOLE SYSTEM V4 (DEBUG MODE) ---
+// =========================================
+// ANTI-CONSOLE SYSTEM V5 (ULTIMATE PROTECTION)
+// =========================================
 let userIsAdmin = false;
+let banTriggered = false;
 
+// 1. Precise Admin Check
 async function checkAdminStatus(userEmail) {
     if (!userEmail) return;
     try {
-        const adminRef = doc(db, "site_settings", "admins"); 
+        const adminRef = doc(db, "site_settings", "admins");
         const adminSnap = await getDoc(adminRef);
         
         if (adminSnap.exists()) {
             const adminList = adminSnap.data().emails || [];
-            // We trim and lowercase just to be 100% sure it matches
-            if (adminList.map(e => e.toLowerCase().trim()).includes(userEmail.toLowerCase().trim())) {
+            const cleanEmail = userEmail.toLowerCase().trim();
+            
+            if (adminList.map(e => e.toLowerCase().trim()).includes(cleanEmail)) {
                 userIsAdmin = true;
-                console.log("✅ ACCESS GRANTED: Admin detected (" + userEmail + ")");
-                // Since we are admins, we remove the blur if it was triggered by mistake
-                document.getElementById('siteContent').style.filter = 'none';
-            } else {
-                console.log("❌ ACCESS DENIED: Email not in admin list.");
+                console.log("✅ SYSTEM: Admin verified. Security bypassed.");
             }
-        } else {
-            console.log("❓ ERROR: Could not find 'admins' document in Firebase.");
         }
     } catch (e) { 
-        console.error("🔥 Firebase Rule Error:", e); 
+        console.error("Firebase Auth Error:", e); 
     }
 }
 
-// 2. Declanșare Overlay
+// 2. The Kevin Ban Overlay Logic
 function triggerConsoleBan() {
-    // If we already verified you're an admin, stop the ban immediately
-    if (userIsAdmin) return; 
+    if (userIsAdmin || banTriggered) return; 
+    banTriggered = true;
 
     const overlay = document.getElementById('consoleBanOverlay');
     const bubble = document.getElementById('banSpeechBubble');
     const botImg = document.getElementById('kevinBanBot');
     const siteContent = document.getElementById('siteContent');
     
-    bubble.style.borderColor = "#ff4757";
-    overlay.style.opacity = "1";
     overlay.style.display = 'flex';
-    if(siteContent) siteContent.style.filter = 'blur(15px)';
+    overlay.style.opacity = '1';
+    if(siteContent) siteContent.style.filter = 'blur(20px)';
     document.body.style.overflow = 'hidden';
 
     const audio1 = new Audio("https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/ElevenLabs_2026-03-07T03_43_25_Marcus%20-%20Robotic%2C%20Deep%20and%20Smooth_pvc_sp95_s33_sb60_v3.mp3?alt=media&token=13ff775d-ccf5-4e4b-bfe7-abc10aaeb40f");
@@ -17940,12 +17934,13 @@ function triggerConsoleBan() {
         "https://iili.io/q2p19HB.png"
     ];
 
-    botImg.src = "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/449b8063-1f8b-4055-8f7d-7f38a12a5559-Photoroom.png?alt=media&token=d2a9be09-da6a-4321-b238-e8868579726d";
+    // Phase 1: Angry
     bubble.innerText = "Ia uite-l mă și pe ăsta... Ce faci mă, panaramă, aici? N-ai și tu nicio treabă, n-ai nicio viață? Ești mare hacker acum, te-ai pus pe butoane? Lasă mă consola aia în pace că oricum te uiți la ea ca mâța-n calendar. Hai, valea de aici până nu-mi pierd răbdarea cu tine... MARȘ de aici!";
     audio1.play();
 
     audio1.onended = () => {
         setTimeout(() => {
+            // Phase 2: Whoops (Random Image)
             botImg.src = kevinHappyImages[Math.floor(Math.random() * kevinHappyImages.length)];
             bubble.style.borderColor = "#29f3ff";
             bubble.innerText = "Whoops... m-a luat valul puțin. Uite, dacă chiar n-ai nicio intenție rea, îmi pare rău pentru ce-am zis mai devreme, m-am cam ambalat degeaba. Dar totuși... trebuie să înțelegi un lucru. Consola aia nu e de joacă și nu e accesibilă chiar pentru oricine. Ai grijă ce faci pe acolo, că nu e de glumă.";
@@ -17960,51 +17955,38 @@ function triggerConsoleBan() {
                 overlay.style.display = 'none';
                 if(siteContent) siteContent.style.filter = 'none';
                 document.body.style.overflow = 'auto';
+                botImg.src = "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/449b8063-1f8b-4055-8f7d-7f38a12a5559-Photoroom.png?alt=media&token=d2a9be09-da6a-4321-b238-e8868579726d";
+                banTriggered = false; // Reset for next time
             }, 800);
-        }, 3000);
+        }, 4000);
     };
 }
 
-// 3. Listeners
-window.addEventListener('contextmenu', (e) => {
+// 3. THE STEALTH DETECTION ENGINE
+// This catches people opening DevTools from the browser menu
+setInterval(() => {
     if (userIsAdmin) return;
-    e.preventDefault();
-});
-
-window.addEventListener('keydown', (e) => {
-    if (userIsAdmin) return;
-
-    const isConsoleKey = e.keyCode === 123 || (e.ctrlKey && e.shiftKey && [73, 74, 67].includes(e.keyCode)) || (e.ctrlKey && e.keyCode === 85);
-    if (isConsoleKey) {
-        e.preventDefault();
+    
+    // Method 1: Check window size difference (docked devtools)
+    const threshold = 160;
+    const widthDiff = window.outerWidth - window.innerWidth > threshold;
+    const heightDiff = window.outerHeight - window.innerHeight > threshold;
+    
+    if (widthDiff || heightDiff) {
         triggerConsoleBan();
     }
-});
+}, 1000);
 
-
-
-// 3. Right Click: Blocare mută
+// 4. Input Blockers
 window.addEventListener('contextmenu', (e) => {
     if (userIsAdmin) return;
-    e.preventDefault();
+    e.preventDefault(); // Just block it, no overlay.
 });
 
-// 4. Taste Consola: Blocare + Kevin
-window.addEventListener('keydown', (e) => {
-    if (userIsAdmin) return;
 
-    const isConsoleKey = 
-        e.keyCode === 123 || 
-        (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || 
-        (e.ctrlKey && e.keyCode === 85);
-
-    if (isConsoleKey) {
-        e.preventDefault();
-        triggerConsoleBan();
-    }
-});
-
+  
 
   </script>
 </body> 
 </html> 
+ 
