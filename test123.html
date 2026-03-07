@@ -9793,31 +9793,39 @@ window.restoreBackup = async (backupId) => {
         if (!snap.exists()) return alert("Informațiile despre backup nu au fost găsite.");
         
         const fileUrl = snap.data().fileUrl;
-        
         showToast("⏳ DESCĂRCARE DATE BACKUP...");
         
-        // 1. Download the JSON file from Storage
         const response = await fetch(fileUrl);
         const usersToRebuild = await response.json();
         
         showToast(`⏳ RESTAURARE ${usersToRebuild.length} PROFILE...`);
 
-// 2. Loop and Overwrite
         for (let userData of usersToRebuild) {
             const { uid, ...cleanData } = userData;
             if (!uid) continue;
 
-            // --- SAFETY DATE CONVERSION ---
+            // --- IMPROVED DATE CONVERSION ---
             const convertDate = (val) => {
                 if (!val) return null;
+                
+                // If it's a Firestore JSON timestamp {seconds, nanoseconds}
+                if (typeof val === 'object' && val.seconds) {
+                    return new Date(val.seconds * 1000);
+                }
+                
                 const d = new Date(val);
-                // If d is "Invalid Date", return current time as fallback instead of crashing
-                return isNaN(d.getTime()) ? new Date() : d;
+                // IF INVALID: Return a very old date (1970) instead of "Now" 
+                // so they don't appear online.
+                return isNaN(d.getTime()) ? new Date(0) : d;
             };
 
+            // Convert primary timestamps
             if (cleanData.lastActive) cleanData.lastActive = convertDate(cleanData.lastActive);
             if (cleanData.joinedAt) cleanData.joinedAt = convertDate(cleanData.joinedAt);
             
+            // Force status to offline during restore for safety
+            cleanData.isOnline = false;
+
             // Fix nested timestamps in donation history
             if (Array.isArray(cleanData.donationHistory)) {
                 cleanData.donationHistory = cleanData.donationHistory.map(don => {
@@ -9825,13 +9833,12 @@ window.restoreBackup = async (backupId) => {
                     return don;
                 });
             }
-            // -------------------------------
 
             const userRef = doc(db, "accounts", uid);
-            // setDoc ensures the document is replaced EXACTLY
             await setDoc(userRef, cleanData); 
         }
-        alert(`✅ RESTAURARE REUȘITĂ!\nToate datele au fost refăcute din fișierul extern.`);
+        
+        alert(`✅ RESTAURARE REUȘITĂ!\nUtilizatorii au fost restaurați cu status Offline.`);
         location.reload();
     } catch (e) { 
         console.error(e);
