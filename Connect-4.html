@@ -13352,25 +13352,66 @@ window.startSinglePlayerC4 = async () => {
     }, 4500);
 };
 
-function renderC4Colors(forbiddenUrl = null) {
+async function renderC4Colors() {
     const container = document.getElementById('colorOptions');
+    if (!container) return;
     container.innerHTML = '';
+
+    // Luăm datele actuale din baza de date pentru a vedea ce e ocupat
+    let hostToken = "", oppToken = "", hostPfp = "", oppPfp = "";
+    
+    if (isMultiplayer) {
+        const snap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
+        if (snap.exists()) {
+            const d = snap.data();
+            hostToken = d.hostToken || "";
+            oppToken = d.opponentToken || "";
+            hostPfp = d.hostPfp;
+            oppPfp = d.opponentPfp;
+        }
+    }
+
     C4_TOKENS.forEach(t => {
-        if (t.url === forbiddenUrl) return;
         const btn = document.createElement('div');
         btn.className = 'color-opt-btn';
-        btn.innerHTML = `<img src="${t.url}"><span>${t.name}</span>`;
-        btn.onclick = async () => {
-            c4PlayerToken = t.url;
-            if (isMultiplayer) {
-                // Host picks first and starts the turn
-                const updateData = (myRole === 'host') 
-                    ? { hostToken: t.url, turnUid: auth.currentUser.uid } 
-                    : { opponentToken: t.url };
-                await updateDoc(doc(db, "c4_lobbies", currentLobbyId), updateData);
-            }
-            initRealBoard();
-        };
+        
+        let isTaken = false;
+        let userImg = "";
+
+        // Verificăm dacă această culoare este deja aleasă de cineva
+        if (isMultiplayer) {
+            if (t.url === hostToken) { isTaken = true; userImg = hostPfp; }
+            else if (t.url === oppToken) { isTaken = true; userImg = oppPfp; }
+        }
+
+        btn.innerHTML = `
+            <div style="position:relative; width:55px; height:55px;">
+                <img src="${t.url}" style="width:100%; height:100%; ${isTaken ? 'filter: grayscale(1) opacity(0.3);' : ''}">
+                ${isTaken ? `<img src="${userImg}" style="position:absolute; inset:0; border-radius:50%; border:2px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.5); width:100%; height:100%; z-index:10;">` : ''}
+            </div>
+            <span style="font-size: 9px;">${t.name}</span>
+        `;
+
+        if (!isTaken) {
+            btn.onclick = async () => {
+                c4PlayerToken = t.url; // Salvez alegerea mea local
+                
+                if (isMultiplayer) {
+                    const updateData = (myRole === 'host') 
+                        ? { hostToken: t.url } 
+                        : { opponentToken: t.url };
+                    
+                    await updateDoc(doc(db, "c4_lobbies", currentLobbyId), updateData);
+                    // Nu pornim board-ul aici! Așteptăm ca onSnapshot să detecteze că ambii au ales.
+                } else {
+                    initRealBoard(); // Singleplayer pornește imediat
+                }
+            };
+        } else {
+            btn.style.cursor = 'not-allowed';
+            btn.style.opacity = '0.8';
+        }
+        
         container.appendChild(btn);
     });
 }
@@ -13471,21 +13512,20 @@ async function dropTokenAnim(col, p) {
     c4Board[row][col] = p;
     const allCells = document.querySelectorAll('.c4-cell');
     const targetCell = allCells[(row * 7) + col]; 
-    
     const token = document.createElement('div');
-    token.className = 'c4-token dropping'; // Added 'dropping' class for the animation
-    token.style.backgroundImage = `url(${p === 1 ? c4PlayerToken : KEVIN_TOKEN})`;
+    token.className = 'c4-token dropping';
+    
+    if (isMultiplayer) {
+        const snap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
+        const d = snap.data();
+        // p=1 este mereu host, p=2 este mereu opponent
+        token.style.backgroundImage = `url(${p === 1 ? d.hostToken : d.opponentToken})`;
+    } else {
+        token.style.backgroundImage = `url(${p === 1 ? c4PlayerToken : KEVIN_TOKEN})`;
+    }
     
     targetCell.appendChild(token);
-
-    // We wait 800ms (the length of the CSS animation) before resolving the move
-    return new Promise(res => {
-        setTimeout(() => {
-            // Remove animation class so it stays static in the slot
-            token.classList.remove('dropping'); 
-            res(true);
-        }, 800);
-    });
+    return new Promise(res => setTimeout(() => { token.classList.remove('dropping'); res(true); }, 800));
 }
 
 function kevinBotBrain() {
@@ -13604,75 +13644,89 @@ async function triggerWin(res) {
     const title = document.getElementById('resultTitle');
     const reward = document.getElementById('resultReward');
     const text = document.getElementById('resultText');
-
-    // Get rewards/penalties from config
-    const winReward = C4_CONFIG[currentC4Difficulty].reward;
-    const losePenalty = C4_CONFIG[currentC4Difficulty].penalty; // e.g., -500
     const coinImg = `<img src="https://iili.io/fhc1SKQ.png" style="width:30px; vertical-align:middle; margin-right:10px;">`;
 
+    // FIX ISSUE 5: Determinăm dacă TU ești câștigătorul
+    let amIWinner = false;
+    if (isMultiplayer) {
+        if (myRole === 'host' && res === 1) amIWinner = true;
+        if (myRole === 'opponent' && res === 2) amIWinner = true;
+    } else {
+        amIWinner = (res === 1);
+    }
+
     setTimeout(async () => {
-        if(res === 1) { // --- PLAYER WINS ---
-            title.innerText = "VICTORIE!";
-            title.style.color = "var(--primary)";
-            
-            // Dynamic Victory Texts
-            if(currentC4Difficulty === 'easy') {
-                text.innerText = "L-ai bătut pe Kevin în timp ce dormea. Încearcă ceva mai greu!";
-            } else if(currentC4Difficulty === 'medium') {
-                text.innerText = "Bravo! Kevin a început să gândească, dar tu ai fost mai rapid.";
-            } else if(currentC4Difficulty === 'hard') {
-                text.innerText = "Incredibil! L-ai depășit pe Kevin în modul Expert Strategist.";
-            } else if(currentC4Difficulty === 'hardcore') {
-                text.innerText = "DUMNEZEULE! Ai învins sistemul suprem. Ești o legendă Connect 4!";
-            }
+        // --- MULTIPLAYER LOGIC ---
+        if (isMultiplayer) {
+            const lobbySnap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
+            const lobbyData = lobbySnap.data();
+            const isFriendly = lobbyData.type === 'friendly';
 
-            reward.innerHTML = `${coinImg} +${winReward} KSDA`;
-            
-            if(auth.currentUser) {
-                await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(winReward) });
-                logTransaction(winReward, "Victory", `Câștigat Connect 4 (${currentC4Difficulty})`);
-            }
-        } 
-        else if(res === 2) { // --- BOT WINS ---
-            title.innerText = "ÎNFRÂNGERE!";
-            title.style.color = "#ff4757";
-
-            // Dynamic Defeat Texts
-            if(currentC4Difficulty === 'easy') {
-                text.innerText = "Cum naiba ai pierdut pe Easy? Kevin nici nu se uita la tablă...";
-            } else if(currentC4Difficulty === 'medium') {
-                text.innerText = "Te-a făcut Kevin la Medium. Concentrează-te mai mult!";
-            } else if(currentC4Difficulty === 'hard') {
-                text.innerText = "Expert AI-ul e nemilos. Ai nevoie de o strategie mai bună.";
-            } else if(currentC4Difficulty === 'hardcore') {
-                text.innerText = "Te-ai pus cu un Zeu și ai fost distrus. E aproape imposibil!";
-            }
-
-            // --- ADDED BALANCE CHECK START ---
-            let actualPenalty = losePenalty; // Original penalty (negative number)
-            
-            if(auth.currentUser) {
-                const userRef = doc(db, "accounts", auth.currentUser.uid);
-                const userSnap = await getDoc(userRef);
-                const currentBalance = userSnap.exists() ? (userSnap.data().coins || 0) : 0;
-
-                // If balance + penalty (e.g. 200 + -500) is less than 0, set penalty to -currentBalance
-                if (currentBalance + losePenalty < 0) {
-                    actualPenalty = -currentBalance;
+            if (res === 0) {
+                title.innerText = "REMIZĂ!";
+                title.style.color = "#aaa";
+                text.innerText = "Meci strâns! Nimeni nu a cedat.";
+                reward.innerHTML = isFriendly ? "MECI AMICAL: 0 KSDA" : `${coinImg} +100 KSDA`;
+            } else if (amIWinner) {
+                title.innerText = "VICTORIE!";
+                title.style.color = "var(--primary)";
+                text.innerText = "Ai demonstrat o strategie superioară adversarului tău!";
+                reward.innerHTML = isFriendly ? "MECI AMICAL: 0 KSDA" : `${coinImg} +1000 KSDA`;
+                
+                if (!isFriendly && auth.currentUser) {
+                    await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(1000) });
+                    logTransaction(1000, "Victory", "Câștigat Connect 4 Ranked");
                 }
+            } else {
+                title.innerText = "ÎNFRÂNGERE!";
+                title.style.color = "#ff4757";
+                text.innerText = "Adversarul a fost mai atent de data aceasta.";
+                reward.innerHTML = isFriendly ? "MECI AMICAL: 0 KSDA" : `${coinImg} -1000 KSDA`;
 
-                await updateDoc(userRef, { coins: increment(actualPenalty) });
-                logTransaction(actualPenalty, "Defeat", `Pierdut Connect 4 (${currentC4Difficulty})`);
+                if (!isFriendly && auth.currentUser) {
+                    const userRef = doc(db, "accounts", auth.currentUser.uid);
+                    const uSnap = await getDoc(userRef);
+                    const currentCoins = uSnap.data().coins || 0;
+                    let penalty = currentCoins < 1000 ? -currentCoins : -1000;
+
+                    await updateDoc(userRef, { coins: increment(penalty) });
+                    logTransaction(penalty, "Defeat", "Pierdut Connect 4 Ranked");
+                }
             }
-            reward.innerHTML = `${coinImg} ${actualPenalty} KSDA`;
-            // --- ADDED BALANCE CHECK END ---
         } 
-        else { // --- TIE ---
-            title.innerText = "REMIZĂ!";
-            title.style.color = "#aaa";
-            text.innerText = "Tabla e plină, nimeni n-a vrut să cedeze. Fair play!";
-            reward.innerHTML = `${coinImg} +100 KSDA`;
-            if(auth.currentUser) await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(100) });
+        // --- SINGLEPLAYER LOGIC (ORIGINAL) ---
+        else {
+            const winReward = C4_CONFIG[currentC4Difficulty].reward;
+            const losePenalty = C4_CONFIG[currentC4Difficulty].penalty;
+
+            if (res === 1) { // Player Win
+                title.innerText = "VICTORIE!";
+                title.style.color = "var(--primary)";
+                text.innerText = "L-ai depășit pe Kevin Bot!";
+                reward.innerHTML = `${coinImg} +${winReward} KSDA`;
+                if(auth.currentUser) {
+                    await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(winReward) });
+                    logTransaction(winReward, "Victory", `Câștigat Connect 4 (${currentC4Difficulty})`);
+                }
+            } else if (res === 2) { // Bot Win
+                title.innerText = "ÎNFRÂNGERE!";
+                title.style.color = "#ff4757";
+                text.innerText = "Kevin Bot a câștigat de data asta.";
+                
+                let actualPenalty = losePenalty;
+                if(auth.currentUser) {
+                    const userRef = doc(db, "accounts", auth.currentUser.uid);
+                    const uSnap = await getDoc(userRef);
+                    const currentBalance = uSnap.data().coins || 0;
+                    if (currentBalance + losePenalty < 0) actualPenalty = -currentBalance;
+                    await updateDoc(userRef, { coins: increment(actualPenalty) });
+                    logTransaction(actualPenalty, "Defeat", `Pierdut Connect 4 (${currentC4Difficulty})`);
+                }
+                reward.innerHTML = `${coinImg} ${actualPenalty} KSDA`;
+            } else {
+                title.innerText = "REMIZĂ!";
+                reward.innerHTML = `${coinImg} +100 KSDA`;
+            }
         }
 
         showC4Stage('c4ResultModal');
@@ -13790,46 +13844,31 @@ function startC4TurnTimer() {
     const container = document.querySelector('.timer-container');
     const bar = document.getElementById('c4TimerBar');
 
-    // If it's NOT the player's turn, hide the bar and stop
-    if (!c4Active || c4Turn !== 1) {
-        if (container) container.classList.remove('active');
+    // Verifică dacă e rândul meu (folosind UID-ul din baza de date)
+    const isMyTurn = isMultiplayer ? (c4TurnUid === auth.currentUser.uid) : (c4Turn === 1);
+    
+    if (!c4Active || !isMyTurn) {
+        container.classList.remove('active');
         return;
     }
 
-    // Dynamic time limit based on difficulty (e.g., 25 for easy)
-    const timeLimit = C4_CONFIG[currentC4Difficulty].turnTime;
+    container.classList.add('active');
+    const timeLimit = isMultiplayer ? 30 : C4_CONFIG[currentC4Difficulty].turnTime;
     let timeLeft = timeLimit;
+    bar.style.width = '100%';
 
-    if (container) container.classList.add('active');
-    
-    if (bar) {
-        bar.classList.remove('low-time');
-        bar.style.transition = 'none'; 
-        bar.style.width = '100%';
-        void bar.offsetWidth; 
-        bar.style.transition = `width 1s linear, background 0.3s ease`;
-    }
-
-    c4TimerInterval = setInterval(() => {
+    c4TimerInterval = setInterval(async () => {
         timeLeft--;
-        
-        if (bar) {
-            bar.style.width = (timeLeft / timeLimit * 100) + '%';
-            // Turn red when 5 seconds remain
-            if (timeLeft <= 5) bar.classList.add('low-time');
-        }
-
+        bar.style.width = (timeLeft / timeLimit * 100) + '%';
         if (timeLeft <= 0) {
             clearInterval(c4TimerInterval);
-            if (c4Active && c4Turn === 1) {
-                showTimeExpiredNotice(); 
-                if (container) container.classList.remove('active'); 
-                
-                c4Turn = 2; 
-                c4IsBusy = true; 
-                updateC4HUD("TIME OUT!");
-                setTimeout(kevinBotBrain, 1500);
-            }
+            showTimeExpiredNotice();
+            if (isMultiplayer) {
+                const lobbySnap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
+                const d = lobbySnap.data();
+                const nextTurn = (myRole === 'host') ? d.opponentId : d.hostId;
+                await updateDoc(doc(db, "c4_lobbies", currentLobbyId), { turnUid: nextTurn });
+            } else { kevinBotBrain(); }
         }
     }, 1000);
 }
@@ -14079,33 +14118,44 @@ window.startMultiplayerMatch = async (lobbyId, role) => {
 };
 
 
-function syncOpponentMove(col, playerNum) {
-    getDoc(doc(db, "c4_lobbies", currentLobbyId)).then(s => {
-        const data = s.data();
-        if (!data) return;
-        
-        // Find what token the opponent is using
-        const tokenUrl = (myRole === 'host') ? data.opponentToken : data.hostToken;
+async function syncOpponentMove(col, playerNum) {
+    const lobbyRef = doc(db, "c4_lobbies", currentLobbyId);
+    const s = await getDoc(lobbyRef);
+    const data = s.data();
+    if (!data) return;
+    
+    // FIX Issue 2: Identificăm exact token-ul celui care a mutat (1=Host, 2=Opponent)
+    const tokenUrl = (playerNum === 1) ? data.hostToken : data.opponentToken;
 
-        // Briefly override the token logic for the animation
-        const oldToken = c4PlayerToken;
-        // Logic inside dropTokenAnim needs to know we are dropping the opponent's piece
-        // We do this by temporarily setting the opponent's token as the 'p2' texture
-        const prevKevin = window.KEVIN_TOKEN;
-        window.KEVIN_TOKEN = tokenUrl;
+    // Suprascriem temporar piesa de "bot" cu piesa reală a adversarului pentru animație
+    const prevKevin = window.KEVIN_TOKEN;
+    window.KEVIN_TOKEN = tokenUrl;
 
-        c4IsBusy = true;
-        dropTokenAnim(col, playerNum).then(() => {
-            window.KEVIN_TOKEN = prevKevin;
-            c4IsBusy = false;
-            if (checkWinStrict(playerNum)) { 
-                triggerWin(playerNum); 
-                return; 
-            }
-            updateC4HUD("YOUR TURN");
-            startC4TurnTimer();
-        });
-    });
+    c4IsBusy = true;
+    
+    // Executăm animația de cădere
+    await dropTokenAnim(col, playerNum);
+
+    // Resetăm variabila globală la valoarea originală
+    window.KEVIN_TOKEN = prevKevin;
+    c4IsBusy = false;
+
+    // Verificăm dacă adversarul a câștigat
+    if (checkWinStrict(playerNum)) { 
+        triggerWin(playerNum); 
+        return; 
+    }
+
+    // Verificăm remiza
+    if (checkTie()) {
+        triggerWin(0);
+        return;
+    }
+
+    // FIX Issue 3: Acum este rândul tău! 
+    // Doar acum actualizăm HUD-ul și pornim timer-ul tău local.
+    updateC4HUD("YOUR TURN");
+    startC4TurnTimer();
 }
   </script>
 </body>
