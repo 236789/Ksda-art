@@ -11396,52 +11396,12 @@ margin: 0 !important;
     </div>
 
 
-<!-- CONFIRM JOIN MODAL (NOU) -->
-<div id="joinConfirmModal" class="account-modal-overlay" style="z-index: 100005;">
-    <div class="c4-choice-card" style="max-width: 400px; border-color: var(--primary);">
-        <button class="close-pop" onclick="document.getElementById('joinConfirmModal').classList.remove('active')">✕</button>
-        <div style="font-size: 50px; margin-bottom: 15px; color: var(--primary); text-shadow: 0 0 20px var(--primary-dim);">
-            <i class="fas fa-question-circle"></i>
-        </div>
-        <h2 style="font-family:'Orbitron'; color: #fff; text-transform:uppercase; margin-bottom: 5px;">CONFIRMARE</h2>
-        <p style="color:#a5b1c2; font-size:12px; margin-bottom:20px; line-height:1.5;">
-            Ești sigur că vrei să intri în acest meci?<br>
-            <strong style="color:#fff;">Winner takes all!</strong>
-        </p>
-        
-        <!-- Aici va fi injectat costul -->
-        <div id="joinConfirmCost" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); padding:15px; border-radius:15px; display:flex; justify-content:center; align-items:center; gap:15px; margin-bottom:25px;">
-        </div>
-
-        <div style="display:flex; gap:10px; width: 100%;">
-            <button class="btn-nav-v6" onclick="document.getElementById('joinConfirmModal').classList.remove('active')" style="flex:1; border-color:#ff4757; color:#ff4757;">ANULEAZĂ</button>
-            <button id="btnConfirmJoin" class="btn-ksda-fire" style="flex:1; margin-top:0; padding:10px;"><span>ACCEPTĂ</span></button>
-        </div>
-    </div>
-</div>
-
-
-<!-- STAGE 4: RESULT MODAL (REMASTERED) -->
-<div id="c4ResultModal" class="c4-choice-card" style="display:none; max-width: 450px; overflow: hidden; position: relative;">
-    <!-- Background glow effect (schimbat dinamic din JS) -->
-    <div id="resultGlowBg" style="position:absolute; inset:0; background: radial-gradient(circle at top, rgba(41, 243, 255, 0.2) 0%, transparent 70%); z-index:0; pointer-events:none;"></div>
-    
-    <div style="position:relative; z-index:1; width: 100%; display:flex; flex-direction:column; align-items:center;">
-        <h1 id="resultTitle" style="font-family: 'Orbitron'; font-size: 40px; margin-bottom: 5px; text-transform: uppercase;">VICTORIE!</h1>
-        <p id="resultText" style="color: #a5b1c2; font-size:12px; margin-bottom: 25px; text-align:center;">Ai dominat arena!</p>
-        
-        <div style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 20px; width: 100%; margin-bottom: 30px;">
-            <div id="resultSubtext" style="font-size:9px; color:#aaa; font-family:'Orbitron'; margin-bottom:10px; letter-spacing:1px;">POT CÂȘTIGAT</div>
-            
-            <div id="resultReward" style="display:flex; justify-content:center; align-items:center; gap:20px; flex-wrap:wrap;">
-                <!-- Conținut dinamic (Monede & Diamante injectate separat) -->
-            </div>
-        </div>
-
-        <button class="btn-ksda-fire" onclick="location.reload()" style="width: 100%;">
-            <span>ÎNCHIDE & ÎNTOARCE-TE LA MENIU</span>
-        </button>
-    </div>
+<!-- STAGE 4: RESULT MODAL (ADĂUGAT ACUM) -->
+<div id="c4ResultModal" class="c4-choice-card" style="display:none;">
+    <h1 id="resultTitle" style="font-family: 'Orbitron'; font-size: 40px; margin-bottom: 10px;">VICTORIE!</h1>
+    <p id="resultText" style="color: #a5b1c2; margin-bottom: 20px;">Mesaj rezultat...</p>
+    <div id="resultReward" style="font-family: 'Orbitron'; font-size: 24px; color: #ffd700; margin-bottom: 30px;">+500 KSDA</div>
+    <button class="pop-btn-cyan" onclick="location.reload()" style="padding: 15px 40px;">JOACĂ DIN NOU</button>
 </div>
 </div>
 
@@ -13941,118 +13901,89 @@ async function triggerWin(res) {
             if (token) token.classList.add('winning-token');
         });
     }
-setTimeout(async () => {
+
+    setTimeout(async () => {
         const modal = document.getElementById('c4ResultModal');
         const title = document.getElementById('resultTitle');
         const reward = document.getElementById('resultReward');
         const text = document.getElementById('resultText');
-        const subtext = document.getElementById('resultSubtext');
-        const glowBg = document.getElementById('resultGlowBg');
+        const coinImg = `<img src="https://iili.io/fhc1SKQ.png" style="width:30px; vertical-align:middle; margin-right:10px;">`;
+        const diamondImg = `<img src="https://iili.io/fv5bmtj.png" style="width:25px; vertical-align:middle; margin-right:10px;">`;
 
-        const coinImg = `<img src="https://iili.io/fhc1SKQ.png" style="width:28px; filter:drop-shadow(0 0 5px rgba(255,215,0,0.5));">`;
-        const diamondImg = `<img src="https://iili.io/fv5bmtj.png" style="width:24px; filter:drop-shadow(0 0 5px rgba(0,255,136,0.5));">`;
+        modal.className = "c4-choice-card";
+        title.className = "";
+        title.style.color = "";
 
-        // Reset styling
-        modal.style.borderColor = "var(--glass-border)";
-        
         if (res === 0) {
             // --- TIE GAME LOGIC ---
-            modal.style.borderColor = "#bdc3c7";
-            glowBg.style.background = "radial-gradient(circle at top, rgba(189, 195, 199, 0.2) 0%, transparent 70%)";
-            title.style.color = "#bdc3c7";
-            title.innerText = "REMIZĂ";
-            text.innerText = "Nimeni nu a reușit să facă 4 la rând.";
-            subtext.innerText = "MIZĂ RETURNATĂ";
+            modal.classList.add('result-card-draw');
+            title.classList.add('hero-draw-chrome');
+            title.innerText = "TIE GAME";
+            text.innerText = "Nimeni nu a reușit să facă 4 la rând. Miza a fost returnată.";
 
             if (isMultiplayer && auth.currentUser) {
                 const lobbySnap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
                 const d = lobbySnap.data();
                 if (d.type === 'ranked') {
+                    // Returnăm miza inițială (nu potul)
                     await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
                         coins: increment(d.betCoins || 0),
                         diamonds: increment(d.betDiamonds || 0)
                     });
-                    
-                    let rewHtml = "";
-                    if(d.betCoins > 0) rewHtml += `<div style="color:#ffd700; font-family:'Orbitron'; font-weight:900; font-size:24px; display:flex; align-items:center; gap:8px;">${d.betCoins} ${coinImg}</div>`;
-                    if(d.betDiamonds > 0) rewHtml += `<div style="color:#00ff88; font-family:'Orbitron'; font-weight:900; font-size:24px; display:flex; align-items:center; gap:8px;">${d.betDiamonds} ${diamondImg}</div>`;
-                    reward.innerHTML = rewHtml;
-                } else { reward.innerHTML = `<span style="color:#aaa; font-family:'Orbitron'; font-size:16px;">NIMIC</span>`; }
-            } else { reward.innerHTML = `<div style="color:#ffd700; font-family:'Orbitron'; font-weight:900; font-size:24px; display:flex; align-items:center; gap:8px;">100 ${coinImg}</div>`; }
+                    reward.innerHTML = `RETUR: ${d.betCoins > 0 ? d.betCoins + ' ' + coinImg : ''} ${d.betDiamonds > 0 ? d.betDiamonds + ' ' + diamondImg : ''}`;
+                } else { reward.innerText = "MECI AMICAL"; }
+            } else { reward.innerHTML = `${coinImg} +100 KSDA`; }
         } 
         else if (isMultiplayer) {
             // --- MULTIPLAYER RANKED LOGIC ---
             const lobbySnap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
             const d = lobbySnap.data();
+            const isFriendly = d.type === 'friendly';
+            
+            // Calculăm POT-ul (Miza x 2)
             const potCoins = (d.betCoins || 0) * 2;
             const potDiamonds = (d.betDiamonds || 0) * 2;
 
             if (amIWinner) {
-                modal.style.borderColor = "var(--primary)";
-                glowBg.style.background = "radial-gradient(circle at top, rgba(41, 243, 255, 0.2) 0%, transparent 70%)";
-                title.style.color = "var(--primary)";
                 title.innerText = "VICTORIE!";
+                title.style.color = "var(--primary)";
                 text.innerText = "Ai dominat arena! Toate resursele îți aparțin.";
-                subtext.innerText = "POT CÂȘTIGAT";
                 
-                if (d.type === 'ranked' && auth.currentUser) {
+                if (!isFriendly && auth.currentUser) {
                     await updateDoc(doc(db, "accounts", auth.currentUser.uid), { 
-                        coins: increment(potCoins), diamonds: increment(potDiamonds)
+                        coins: increment(potCoins),
+                        diamonds: increment(potDiamonds)
                     });
                     logTransaction(potCoins, "Ranked Win", "Câștigat Pot Connect 4");
-                    
-                    let rewHtml = "";
-                    if(potCoins > 0) rewHtml += `<div style="color:#ffd700; font-family:'Orbitron'; font-weight:900; font-size:24px; display:flex; align-items:center; gap:8px;">+${potCoins} ${coinImg}</div>`;
-                    if(potDiamonds > 0) rewHtml += `<div style="color:#00ff88; font-family:'Orbitron'; font-weight:900; font-size:24px; display:flex; align-items:center; gap:8px;">+${potDiamonds} ${diamondImg}</div>`;
-                    reward.innerHTML = rewHtml;
-                } else { reward.innerHTML = `<span style="color:#00ff88; font-family:'Orbitron'; font-size:16px;">MECI AMICAL (0 MIZĂ)</span>`; }
+                    reward.innerHTML = `POT ADJUNECAT: ${potCoins > 0 ? potCoins + ' ' + coinImg : ''} ${potDiamonds > 0 ? potDiamonds + ' ' + diamondImg : ''}`;
+                } else { reward.innerText = "MECI AMICAL"; }
             } else {
-                modal.style.borderColor = "#ff4757";
-                glowBg.style.background = "radial-gradient(circle at top, rgba(255, 71, 87, 0.2) 0%, transparent 70%)";
+                title.innerText = "ÎNFRÂNGERE!";
                 title.style.color = "#ff4757";
-                title.innerText = "ÎNFRÂNGERE";
                 text.innerText = "Adversarul a plecat cu miza ta.";
-                subtext.innerText = "AI PIERDUT";
-                
-                if (d.type === 'ranked') {
-                    let rewHtml = "";
-                    if(d.betCoins > 0) rewHtml += `<div style="color:#ff4757; font-family:'Orbitron'; font-weight:900; font-size:24px; display:flex; align-items:center; gap:8px;">-${d.betCoins} ${coinImg}</div>`;
-                    if(d.betDiamonds > 0) rewHtml += `<div style="color:#ff4757; font-family:'Orbitron'; font-weight:900; font-size:24px; display:flex; align-items:center; gap:8px;">-${d.betDiamonds} ${diamondImg}</div>`;
-                    reward.innerHTML = rewHtml;
-                } else { reward.innerHTML = `<span style="color:#ff4757; font-family:'Orbitron'; font-size:16px;">MECI AMICAL (0 MIZĂ)</span>`; }
+                reward.innerHTML = isFriendly ? "MECI AMICAL" : `Ai pierdut miza depusă!`;
             }
         } 
         else {
             // --- SINGLEPLAYER LOGIC ---
             const config = C4_CONFIG[currentC4Difficulty];
             if (res === 1) { 
-                modal.style.borderColor = "var(--primary)";
-                glowBg.style.background = "radial-gradient(circle at top, rgba(41, 243, 255, 0.2) 0%, transparent 70%)";
-                title.style.color = "var(--primary)";
                 title.innerText = "VICTORIE!";
-                text.innerText = "L-ai distrus pe Kevin Bot!";
-                subtext.innerText = "RECOMPENSĂ";
-                reward.innerHTML = `<div style="color:#ffd700; font-family:'Orbitron'; font-weight:900; font-size:24px; display:flex; align-items:center; gap:8px;">+${config.reward} ${coinImg}</div>`;
-                
+                title.style.color = "var(--primary)";
+                reward.innerHTML = `${coinImg} +${config.reward} KSDA`;
                 await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(config.reward) });
             } else { 
-                modal.style.borderColor = "#ff4757";
-                glowBg.style.background = "radial-gradient(circle at top, rgba(255, 71, 87, 0.2) 0%, transparent 70%)";
+                title.innerText = "ÎNFRÂNGERE!";
                 title.style.color = "#ff4757";
-                title.innerText = "ÎNFRÂNGERE";
-                text.innerText = "Inteligența artificială a fost superioară.";
-                subtext.innerText = "PENALIZARE";
-                
                 const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
                 let penalty = config.penalty;
                 if ((userSnap.data().coins || 0) + penalty < 0) penalty = -(userSnap.data().coins || 0);
-                
-                reward.innerHTML = `<div style="color:#ff4757; font-family:'Orbitron'; font-weight:900; font-size:24px; display:flex; align-items:center; gap:8px;">${penalty} ${coinImg}</div>`;
+                reward.innerHTML = `${coinImg} ${penalty} KSDA`;
                 await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(penalty) });
             }
         }
         showC4Stage('c4ResultModal');
-    }, 1500);
+    }, 1500); 
 }
 // Issue 3: HUD logic pentru nume și culori
 async function updateC4HUD(txt) {
@@ -14315,20 +14246,14 @@ function listenToLobbies() {
             if (lobby.type === currentMPTab && lobby.status === 'waiting') {
                 found = true;
                 
-                // --- CONSTRUIRE AFIȘARE MIZĂ (CU VERDE PT DIAMANTE) ---
+                // --- CONSTRUIRE AFIȘARE MIZĂ ---
                 let betDisplay = "";
                 if (lobby.type === 'ranked') {
-                    const cPart = lobby.betCoins > 0 ? `<span style="color:#ffd700; display:flex; align-items:center; gap:4px;">${lobby.betCoins} <img src="https://iili.io/fhc1SKQ.png" width="14"></span>` : "";
-                    const dPart = lobby.betDiamonds > 0 ? `<span style="color:#00ff88; display:flex; align-items:center; gap:4px;">${lobby.betDiamonds} <img src="https://iili.io/fv5bmtj.png" width="12"></span>` : "";
-                    const plus = (lobby.betCoins > 0 && lobby.betDiamonds > 0) ? `<span style="color:#fff; margin:0 4px;">+</span>` : "";
-                    
-                    betDisplay = `
-                        <div style="font-family:'Orbitron'; font-size:11px; margin-top:5px; display:flex; align-items:center;">
-                            <span style="color:#aaa; font-size:9px; margin-right:5px;">MIZĂ:</span> 
-                            ${cPart} ${plus} ${dPart}
-                        </div>`;
+                    const cPart = lobby.betCoins > 0 ? `${lobby.betCoins} <img src="https://iili.io/fhc1SKQ.png" width="12" style="vertical-align:middle;">` : "";
+                    const dPart = lobby.betDiamonds > 0 ? `${lobby.betDiamonds} <img src="https://iili.io/fv5bmtj.png" width="10" style="vertical-align:middle;">` : "";
+                    betDisplay = `<div style="font-family:'Orbitron'; font-size:10px; color:#ffd700; margin-top:3px;">MIZĂ: ${cPart} ${lobby.betCoins > 0 && lobby.betDiamonds > 0 ? '+' : ''} ${dPart}</div>`;
                 } else {
-                    betDisplay = `<div style="font-size:9px; color:#00ff88; margin-top:5px; font-family:'Orbitron';">MECI AMICAL (FĂRĂ MIZĂ)</div>`;
+                    betDisplay = `<div style="font-size:9px; color:#00ff88; margin-top:3px;">MECI FRIENDLY (FĂRĂ MIZĂ)</div>`;
                 }
 
                 const item = document.createElement('div');
@@ -14340,8 +14265,7 @@ function listenToLobbies() {
                         <div class="lobby-name">${lobby.hostName}</div>
                         ${betDisplay}
                     </div>
-                    <!-- Schimbat din joinLobby în promptJoinLobby -->
-                    <button class="btn-nav-v6" onclick="promptJoinLobby('${docSnap.id}')" style="font-size:10px; padding:5px 15px; border-color: ${lobby.type === 'ranked' ? '#ffd700' : 'var(--primary)'}">JOACĂ</button>
+                    <button class="btn-nav-v6" onclick="joinLobby('${docSnap.id}')" style="font-size:10px; padding:5px 15px; border-color: ${lobby.type === 'ranked' ? '#ffd700' : 'var(--primary)'}">JOACĂ</button>
                 `;
                 list.appendChild(item);
             }
@@ -14417,59 +14341,31 @@ window.showCyberAlert = (msg, type = 'error') => {
     setTimeout(() => alertBox.classList.remove('active'), 4000);
 };
 
-let pendingJoinLobbyId = null;
-
-window.promptJoinLobby = async (lobbyId) => {
+// Update joinLobby (Cere confirmare și ia banii opponentului)
+window.joinLobby = async (lobbyId) => {
     const user = auth.currentUser;
-    if(!user) return showCyberAlert("Trebuie să fii Logat", "warning");
-    
     const lobbyRef = doc(db, "c4_lobbies", lobbyId);
     const snap = await getDoc(lobbyRef);
-    if(!snap.exists()) return;
     const d = snap.data();
 
     if (d.hostId === user.uid) return showCyberAlert("Nu te poți juca singur!", "error");
 
-    pendingJoinLobbyId = lobbyId;
-    
-    const costBox = document.getElementById('joinConfirmCost');
-    if (d.type === 'ranked') {
-        const cPart = d.betCoins > 0 ? `<span style="color:#ffd700; font-family:'Orbitron'; font-weight:900; font-size:20px; display:flex; align-items:center; gap:5px;">${d.betCoins} <img src="https://iili.io/fhc1SKQ.png" width="24"></span>` : "";
-        const dPart = d.betDiamonds > 0 ? `<span style="color:#00ff88; font-family:'Orbitron'; font-weight:900; font-size:20px; display:flex; align-items:center; gap:5px;">${d.betDiamonds} <img src="https://iili.io/fv5bmtj.png" width="20"></span>` : "";
-        const plus = (d.betCoins > 0 && d.betDiamonds > 0) ? `<span style="color:#fff; font-size:20px;">+</span>` : "";
-        costBox.innerHTML = `${cPart} ${plus} ${dPart}`;
-    } else {
-        costBox.innerHTML = `<span style="color:#00ff88; font-family:'Orbitron'; font-weight:900; font-size:14px;">MECI AMICAL (GRATUIT)</span>`;
-    }
-
-    document.getElementById('joinConfirmModal').classList.add('active');
-};
-
-document.getElementById('btnConfirmJoin').onclick = async () => {
-    if(!pendingJoinLobbyId) return;
-    document.getElementById('joinConfirmModal').classList.remove('active');
-    
-    const user = auth.currentUser;
-    const lobbyRef = doc(db, "c4_lobbies", pendingJoinLobbyId);
-    const snap = await getDoc(lobbyRef);
-    const d = snap.data();
+    const costText = `${d.betCoins > 0 ? d.betCoins + ' monede' : ''} ${d.betDiamonds > 0 ? d.betDiamonds + ' diamante' : ''}`;
+    if (!confirm(`Ești sigur? Intrarea te costă ${costText}. Winner takes ALL!`)) return;
 
     const userSnap = await getDoc(doc(db, "accounts", user.uid));
     const userData = userSnap.data();
 
-    // Verificare fonduri
     if ((d.betCoins > (userData.coins || 0)) || (d.betDiamonds > (userData.diamonds || 0))) {
         return showCyberAlert("Nu ai resurse suficiente pentru a intra!", "error");
     }
 
-    // Plata opponent (Escrow) doar dacă e ranked
-    if(d.type === 'ranked') {
-        await updateDoc(doc(db, "accounts", user.uid), {
-            coins: increment(-(d.betCoins || 0)),
-            diamonds: increment(-(d.betDiamonds || 0))
-        });
-        logTransaction(-(d.betCoins || 0), "Bet", "Miză Connect 4 Ranked (Join)");
-    }
+    // Plata opponent (Escrow)
+    await updateDoc(doc(db, "accounts", user.uid), {
+        coins: increment(-d.betCoins),
+        diamonds: increment(-d.betDiamonds)
+    });
+    logTransaction(-d.betCoins, "Bet", "Miză Connect 4 Ranked (Join)");
 
     await updateDoc(lobbyRef, {
         opponentId: user.uid,
@@ -14479,8 +14375,9 @@ document.getElementById('btnConfirmJoin').onclick = async () => {
     });
     
     document.getElementById('multiplayerModal').classList.remove('active');
-    startMultiplayerMatch(pendingJoinLobbyId, 'opponent');
+    startMultiplayerMatch(lobbyId, 'opponent');
 };
+
 
 let isMultiplayer = false;
 let myRole = ""; // 'host' or 'opponent'
