@@ -13514,7 +13514,7 @@ async function triggerWin(res) {
 
     // Get rewards/penalties from config
     const winReward = C4_CONFIG[currentC4Difficulty].reward;
-    const losePenalty = C4_CONFIG[currentC4Difficulty].penalty;
+    const losePenalty = C4_CONFIG[currentC4Difficulty].penalty; // e.g., -500
     const coinImg = `<img src="https://iili.io/fhc1SKQ.png" style="width:30px; vertical-align:middle; margin-right:10px;">`;
 
     setTimeout(async () => {
@@ -13555,12 +13555,24 @@ async function triggerWin(res) {
                 text.innerText = "Te-ai pus cu un Zeu și ai fost distrus. E aproape imposibil!";
             }
 
-            reward.innerHTML = `${coinImg} ${losePenalty} KSDA`;
+            // --- ADDED BALANCE CHECK START ---
+            let actualPenalty = losePenalty; // Original penalty (negative number)
             
             if(auth.currentUser) {
-                await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(losePenalty) });
-                logTransaction(losePenalty, "Defeat", `Pierdut Connect 4 (${currentC4Difficulty})`);
+                const userRef = doc(db, "accounts", auth.currentUser.uid);
+                const userSnap = await getDoc(userRef);
+                const currentBalance = userSnap.exists() ? (userSnap.data().coins || 0) : 0;
+
+                // If balance + penalty (e.g. 200 + -500) is less than 0, set penalty to -currentBalance
+                if (currentBalance + losePenalty < 0) {
+                    actualPenalty = -currentBalance;
+                }
+
+                await updateDoc(userRef, { coins: increment(actualPenalty) });
+                logTransaction(actualPenalty, "Defeat", `Pierdut Connect 4 (${currentC4Difficulty})`);
             }
+            reward.innerHTML = `${coinImg} ${actualPenalty} KSDA`;
+            // --- ADDED BALANCE CHECK END ---
         } 
         else { // --- TIE ---
             title.innerText = "REMIZĂ!";
@@ -13607,9 +13619,19 @@ window.handleGiveUp = async () => {
     
     if(auth.currentUser) {
         try {
-            await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(-1000) });
-            await logTransaction(-1000, "Penalty", "Abandonat meci Connect 4 (Give Up)");
-            location.reload(); // Refresh the page to reset the game state
+            const userRef = doc(db, "accounts", auth.currentUser.uid);
+            const userSnap = await getDoc(userRef);
+            const currentCoins = userSnap.exists() ? userSnap.data().coins : 0;
+
+            let penalty = -1000;
+            // CHECK: Ensure user doesn't go below 0
+            if (currentCoins < 1000) {
+                penalty = -currentCoins;
+            }
+
+            await updateDoc(userRef, { coins: increment(penalty) });
+            await logTransaction(penalty, "Penalty", "Abandonat meci Connect 4 (Give Up)");
+            location.reload(); 
         } catch(e) {
             console.error(e);
             location.reload();
@@ -13617,9 +13639,8 @@ window.handleGiveUp = async () => {
     } else {
         location.reload();
     }
-clearInterval(c4TimerInterval);
+    clearInterval(c4TimerInterval);
 };
-
 window.closeC4Game = () => { document.getElementById('c4GameOverlay').style.display = 'none'; c4Active = false; };
 // ATTACH TO BUTTON
 
