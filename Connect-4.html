@@ -13352,21 +13352,25 @@ window.startSinglePlayerC4 = async () => {
     }, 4500);
 };
 
-function renderC4Colors() {
+function renderC4Colors(forbiddenUrl = null) {
     const container = document.getElementById('colorOptions');
     container.innerHTML = '';
     C4_TOKENS.forEach(t => {
+        if (t.url === forbiddenUrl) return;
         const btn = document.createElement('div');
         btn.className = 'color-opt-btn';
         btn.innerHTML = `<img src="${t.url}"><span>${t.name}</span>`;
-        btn.onclick = () => {
+        btn.onclick = async () => {
             c4PlayerToken = t.url;
+            if (isMultiplayer) {
+                const updateData = (myRole === 'host') ? { hostToken: t.url, turnUid: auth.currentUser.uid } : { opponentToken: t.url };
+                await updateDoc(doc(db, "c4_lobbies", currentLobbyId), updateData);
+            }
             initRealBoard();
         };
         container.appendChild(btn);
     });
 }
-
 
 function highlightC4Column(colIndex, isActive) {
     const allCells = document.querySelectorAll('.c4-cell');
@@ -13417,47 +13421,41 @@ function initRealBoard() {
 }
 
 async function handleC4Move(col) {
-    if (!c4Active || c4Turn !== 1 || c4IsBusy) return;
+    if (!c4Active || c4IsBusy) return;
 
-    // STOP TIMER IMMEDIATELY
-    clearInterval(c4TimerInterval);
-    const container = document.querySelector('.timer-container');
-    if (container) container.classList.remove('active'); 
-
-    c4IsBusy = true; 
-    const success = await dropTokenAnim(col, 1);
-    
-    if (success) {
-        if (checkWinStrict(1)) {
-            triggerWin(1);
-            return;
-        }
-        if (checkTie()) {
-            triggerWin(0);
-            return;
-        }
-        
-        c4Turn = 2;
-
-        // DYNAMIC DELAY: Hardcore = 0ms, Hard = 300ms, Medium/Easy = 800ms
-        let brainDelay = 800; 
-        if (currentC4Difficulty === 'hardcore') {
-            brainDelay = 0;
-            updateC4HUD("KEVIN COUNTERS!");
-        } else if (currentC4Difficulty === 'hard') {
-            brainDelay = 300;
-            updateC4HUD("KEVIN IS REACTING...");
-        } else {
-            updateC4HUD("KEVIN IS THINKING...");
-        }
-
-        // Trigger brain with the new fast delays
-        setTimeout(kevinBotBrain, brainDelay);
-        
+    if (isMultiplayer) {
+        const lobbySnap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
+        if (lobbySnap.data().turnUid !== auth.currentUser.uid) return;
     } else {
-        c4IsBusy = false;
-        startC4TurnTimer();
+        if (c4Turn !== 1) return;
     }
+
+    c4IsBusy = true;
+    const pNum = (isMultiplayer && myRole === 'opponent') ? 2 : 1;
+    const success = await dropTokenAnim(col, pNum);
+
+    if (success) {
+        if (checkWinStrict(pNum)) {
+            triggerWin(pNum);
+            if(isMultiplayer) updateDoc(doc(db, "c4_lobbies", currentLobbyId), { status: 'finished' });
+            return;
+        }
+
+        if (isMultiplayer) {
+            const lobbySnap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
+            const nextTurn = myRole === 'host' ? lobbySnap.data().opponentId : lobbySnap.data().hostId;
+            await updateDoc(doc(db, "c4_lobbies", currentLobbyId), {
+                lastMove: { col, by: auth.currentUser.uid, playerNum: pNum },
+                turnUid: nextTurn
+            });
+            updateC4HUD("WAITING...");
+        } else {
+            c4Turn = 2;
+            updateC4HUD("KEVIN THINKING...");
+            setTimeout(kevinBotBrain, 1000);
+        }
+    }
+    c4IsBusy = false;
 }
 
 async function dropTokenAnim(col, p) {
@@ -14008,12 +14006,47 @@ window.joinLobby = async (lobbyId) => {
     }
 };
 
-// 6. Start the actual Match (Placeholder for now)
-function startMultiplayerMatch(lobbyId, role) {
-    console.log("Starting Multiplayer Match:", lobbyId, "as", role);
-    // This is where we will hook into your Connect 4 Grid logic
-    // We'll need a different initBoard for Syncing moves.
-}
+window.startMultiplayerMatch = async (lobbyId, role) => {
+    isMultiplayer = true;
+    myRole = role;
+    currentLobbyId = lobbyId;
+
+    const lobbyRef = doc(db, "c4_lobbies", lobbyId);
+    const lobbyData = (await getDoc(lobbyRef)).data();
+
+    // Set Opponent Info in HUD
+    const oppName = (role === 'host') ? lobbyData.opponentName : lobbyData.hostName;
+    const oppPfp = (role === 'host') ? lobbyData.opponentPfp : lobbyData.hostPfp;
+    document.getElementById('opponentNameText').innerText = oppName;
+    document.getElementById('hudOpponentPfp').src = oppPfp;
+
+    // Start the VS Intro
+    startSinglePlayerC4(); 
+
+    // Listen for Moves
+    onSnapshot(lobbyRef, (docSnap) => {
+        const data = docSnap.data();
+        if (!data || data.status !== 'playing') return;
+
+        // Sync Tokens
+        if (role === 'opponent' && data.hostToken && !c4PlayerToken) {
+            renderC4Colors(data.hostToken); 
+        }
+        
+        // Receive Opponent Move
+        if (data.lastMove && data.lastMove.by !== auth.currentUser.uid) {
+            c4IsBusy = true;
+            dropTokenAnim(data.lastMove.col, data.lastMove.playerNum).then(() => {
+                c4IsBusy = false;
+                if (checkWinStrict(data.lastMove.playerNum)) triggerWin(data.lastMove.playerNum);
+                else {
+                    updateC4HUD("YOUR TURN");
+                    startC4TurnTimer();
+                }
+            });
+        }
+    });
+};
 
 let isMultiplayer = false;
 let myRole = ""; // 'host' or 'opponent'
@@ -14088,64 +14121,7 @@ window.startMultiplayerMatch = async (lobbyId, role) => {
     });
 };
 
-// Modified Color Picker to prevent same color
-function renderC4Colors(forbiddenUrl = null) {
-    const container = document.getElementById('colorOptions');
-    container.innerHTML = '';
-    C4_TOKENS.forEach(t => {
-        if (t.url === forbiddenUrl) return; // Skip the color the host picked
-        const btn = document.createElement('div');
-        btn.className = 'color-opt-btn';
-        btn.innerHTML = `<img src="${t.url}"><span>${t.name}</span>`;
-        btn.onclick = async () => {
-            c4PlayerToken = t.url;
-            if (myRole === 'host') {
-                await updateDoc(doc(db, "c4_lobbies", currentLobbyId), { hostToken: t.url, turnUid: auth.currentUser.uid });
-                initRealBoard();
-            } else {
-                await updateDoc(doc(db, "c4_lobbies", currentLobbyId), { opponentToken: t.url });
-                initRealBoard();
-            }
-        };
-        container.appendChild(btn);
-    });
-}
 
-// Logic to handle clicking a column in Multiplayer
-async function handleC4Move(col) {
-    if (!c4Active || c4IsBusy) return;
-    
-    // In Multiplayer, check if it's actually my turn
-    const lobbySnap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
-    if (lobbySnap.data().turnUid !== auth.currentUser.uid) return;
-
-    c4IsBusy = true;
-    const playerNum = (myRole === 'host') ? 1 : 2;
-    const success = await dropTokenAnim(col, playerNum);
-
-    if (success) {
-        const nextTurnUid = lobbySnap.data().hostId === auth.currentUser.uid ? lobbySnap.data().opponentId : lobbySnap.data().hostId;
-        
-        // Check win locally
-        const win = checkWinStrict(playerNum);
-        
-        await updateDoc(doc(db, "c4_lobbies", currentLobbyId), {
-            lastMove: { col: col, by: auth.currentUser.uid, playerNum: playerNum },
-            turnUid: nextTurnUid,
-            boardState: c4Board.flat() // Sync board state
-        });
-
-        if (win) {
-            triggerWin(playerNum);
-        } else if (checkTie()) {
-            triggerWin(0);
-        } else {
-            c4Turn = (playerNum === 1) ? 2 : 1;
-            updateC4HUD("WAITING FOR OPPONENT...");
-        }
-    }
-    c4IsBusy = false;
-}
 
 function syncOpponentMove(col, playerNum) {
     // Determine opponent's token
