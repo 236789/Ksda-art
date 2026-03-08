@@ -13357,9 +13357,9 @@ async function renderC4Colors() {
     if (!container) return;
     container.innerHTML = '';
 
-    // Luăm datele actuale din baza de date pentru a vedea ce e ocupat
     let hostToken = "", oppToken = "", hostPfp = "", oppPfp = "";
-    
+    let amIDone = false; // Verificăm dacă EU am ales deja
+
     if (isMultiplayer) {
         const snap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
         if (snap.exists()) {
@@ -13368,6 +13368,10 @@ async function renderC4Colors() {
             oppToken = d.opponentToken || "";
             hostPfp = d.hostPfp;
             oppPfp = d.opponentPfp;
+            
+            // Verifică dacă runda mea de ales s-a terminat
+            if (myRole === 'host' && hostToken) amIDone = true;
+            if (myRole === 'opponent' && oppToken) amIDone = true;
         }
     }
 
@@ -13378,38 +13382,55 @@ async function renderC4Colors() {
         let isTaken = false;
         let userImg = "";
 
-        // Verificăm dacă această culoare este deja aleasă de cineva
         if (isMultiplayer) {
             if (t.url === hostToken) { isTaken = true; userImg = hostPfp; }
             else if (t.url === oppToken) { isTaken = true; userImg = oppPfp; }
         }
 
         btn.innerHTML = `
-            <div style="position:relative; width:55px; height:55px;">
-                <img src="${t.url}" style="width:100%; height:100%; ${isTaken ? 'filter: grayscale(1) opacity(0.3);' : ''}">
-                ${isTaken ? `<img src="${userImg}" style="position:absolute; inset:0; border-radius:50%; border:2px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.5); width:100%; height:100%; z-index:10;">` : ''}
+            <div style="position:relative; width:55px; height:55px; display:flex; align-items:center; justify-content:center;">
+                <!-- Jetonul rămâne vizibil, dar ușor gri dacă e luat -->
+                <img src="${t.url}" style="width:100%; height:100%; ${isTaken ? 'filter: grayscale(0.5) opacity(0.7);' : ''}">
+                
+                <!-- POZA MICĂ: Apare doar dacă jetonul e luat -->
+                ${isTaken ? `
+                    <img src="${userImg}" style="
+                        position:absolute; 
+                        width:25px; 
+                        height:25px; 
+                        border-radius:50%; 
+                        border:2px solid #fff; 
+                        box-shadow: 0 0 10px rgba(0,0,0,0.5); 
+                        z-index:10;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                    ">` : ''}
             </div>
-            <span style="font-size: 9px;">${t.name}</span>
+            <span style="font-size: 9px; margin-top:5px; display:block;">${t.name}</span>
         `;
 
-        if (!isTaken) {
+        // LOGICA DE CLICK:
+        // Poți da click doar dacă: 
+        // 1. Jetonul NU e luat de celălalt 
+        // 2. TU nu ai ales deja nimic (amIDone)
+        if (!isTaken && !amIDone) {
             btn.onclick = async () => {
-                c4PlayerToken = t.url; // Salvez alegerea mea local
-                
+                c4PlayerToken = t.url;
                 if (isMultiplayer) {
                     const updateData = (myRole === 'host') 
                         ? { hostToken: t.url } 
                         : { opponentToken: t.url };
-                    
                     await updateDoc(doc(db, "c4_lobbies", currentLobbyId), updateData);
-                    // Nu pornim board-ul aici! Așteptăm ca onSnapshot să detecteze că ambii au ales.
+                    // UI-ul se va updata automat prin onSnapshot
                 } else {
-                    initRealBoard(); // Singleplayer pornește imediat
+                    initRealBoard();
                 }
             };
         } else {
             btn.style.cursor = 'not-allowed';
-            btn.style.opacity = '0.8';
+            if (isTaken) btn.style.opacity = "1"; // Să vedem clar cine l-a luat
+            else btn.style.opacity = "0.4"; // Restul devin fade după ce am ales eu
         }
         
         container.appendChild(btn);
