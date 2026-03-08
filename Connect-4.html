@@ -11156,10 +11156,11 @@ margin: 0 !important;
 <!-- STAGE 3: THE TACTICAL BOARD -->
     <div id="c4GameBoardUI" class="c4-game-layout" style="display:none;">
         <div class="c4-tactical-hud">
-            <div class="hud-player">
-                <img id="hudPfp" src="" class="mini-pfp">
-                <div id="pName" style="font-size: 11px; font-weight: 800; font-family: 'Orbitron';">PLAYER</div>
-            </div>
+<!-- Inside c4GameBoardUI -->
+<div class="hud-player" style="flex-direction: row-reverse;">
+    <img id="hudOpponentPfp" src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2F01e96c85-e0e5-4aa3-b926-a6ac7bcbb853.png?alt=media" class="mini-pfp bot">
+    <div id="opponentNameText" style="text-align:right; font-size: 10px; margin-right: 10px; font-family: 'Orbitron';">KEVIN BOT</div>
+</div>
 
             <div id="gameStatusPill" class="turn-pill">
                 <span id="gameStatusText">YOUR TURN</span>
@@ -13382,33 +13383,37 @@ function highlightC4Column(colIndex, isActive) {
 function initRealBoard() {
     showC4Stage('c4GameBoardUI');
     const grid = document.getElementById('c4Grid');
-    
     grid.innerHTML = '';
-    // Lines container is gone, so no need to clear it
 
     c4Board = Array(6).fill().map(() => Array(7).fill(0));
-    c4Turn = 1;
     c4Active = true;
+    c4IsBusy = false;
 
-    // Generate the cells
     for (let r = 0; r < 6; r++) {
         for (let c = 0; c < 7; c++) {
             const cell = document.createElement('div');
             cell.className = 'c4-cell';
-            
-            // Toggle the glow for the entire column on hover
             cell.onmouseenter = () => highlightC4Column(c, true);
             cell.onmouseleave = () => highlightC4Column(c, false);
-            
-            cell.onclick = () => {
-                highlightC4Column(c, false); // Clean up glow on click
-                handleC4Move(c);
-            };
+            cell.onclick = () => handleC4Move(c);
             grid.appendChild(cell);
         }
     }
-    updateC4HUD("YOUR TURN");
-startC4TurnTimer();
+
+    // Multiplayer Turn logic
+    if (isMultiplayer) {
+        getDoc(doc(db, "c4_lobbies", currentLobbyId)).then(s => {
+            if (s.data().turnUid === auth.currentUser.uid) {
+                updateC4HUD("YOUR TURN");
+                startC4TurnTimer();
+            } else {
+                updateC4HUD("OPPONENT'S TURN");
+            }
+        });
+    } else {
+        updateC4HUD("YOUR TURN");
+        startC4TurnTimer();
+    }
 }
 
 async function handleC4Move(col) {
@@ -14008,6 +14013,158 @@ function startMultiplayerMatch(lobbyId, role) {
     console.log("Starting Multiplayer Match:", lobbyId, "as", role);
     // This is where we will hook into your Connect 4 Grid logic
     // We'll need a different initBoard for Syncing moves.
+}
+
+let isMultiplayer = false;
+let myRole = ""; // 'host' or 'opponent'
+let currentLobbyId = null;
+let mpOpponentToken = "";
+
+// 6. Start the actual Match
+window.startMultiplayerMatch = async (lobbyId, role) => {
+    isMultiplayer = true;
+    myRole = role;
+    currentLobbyId = lobbyId;
+
+    const lobbyRef = doc(db, "c4_lobbies", lobbyId);
+    const snap = await getDoc(lobbyRef);
+    const lobbyData = snap.data();
+
+    // 1. Set Up VS Intro Screen
+    document.getElementById('c4GameOverlay').style.display = 'flex';
+    showC4Stage('c4IntroScreen');
+
+    // Determine who is who
+    const opponentPfp = (role === 'host') ? lobbyData.opponentPfp : lobbyData.hostPfp;
+    const opponentName = (role === 'host') ? lobbyData.opponentName : lobbyData.hostName;
+    const myPfp = (role === 'host') ? lobbyData.hostPfp : lobbyData.opponentPfp;
+    const myName = (role === 'host') ? lobbyData.hostName : lobbyData.opponentName;
+
+    // Update Intro UI
+    document.getElementById('vsPlayerImg').src = myPfp;
+    document.getElementById('vsPlayerName').innerText = myName;
+    document.getElementById('vsBotImg').src = opponentPfp;
+    document.querySelector('#c4IntroScreen .c4v-side-box.bot span').innerText = opponentName;
+
+    // Update Game HUD
+    document.getElementById('hudPfp').src = myPfp;
+    document.getElementById('pName').innerText = myName;
+    document.getElementById('hudOpponentPfp').src = opponentPfp;
+    document.getElementById('opponentNameText').innerText = opponentName;
+
+    // 2. Transition to Color Picker (Host picks first, then Opponent)
+    setTimeout(() => {
+        if (role === 'host') {
+            showC4Stage('c4ColorPicker');
+            renderC4Colors();
+        } else {
+            updateC4HUD("WAITTING FOR HOST...");
+            showC4Stage('c4GameBoardUI'); // Opponent waits at board
+            initRealBoard(); 
+        }
+    }, 4500);
+
+    // 3. THE MASTER LISTENER (Real-time Sync)
+    onSnapshot(lobbyRef, (docSnap) => {
+        const data = docSnap.data();
+        if (!data) return;
+
+        // Sync Tokens
+        if (role === 'opponent' && data.hostToken && !c4PlayerToken) {
+            // If I'm opponent and host picked, I can now pick
+            showC4Stage('c4ColorPicker');
+            renderC4Colors(data.hostToken); // Prevent picking same color
+        }
+        
+        if (data.lastMove && data.lastMove.by !== auth.currentUser.uid) {
+            // It's the other person's move! Animate it on my screen
+            syncOpponentMove(data.lastMove.col, data.lastMove.playerNum);
+        }
+
+        if (data.status === 'finished') {
+            c4Active = false;
+            // Handle remote quit or finish
+        }
+    });
+};
+
+// Modified Color Picker to prevent same color
+function renderC4Colors(forbiddenUrl = null) {
+    const container = document.getElementById('colorOptions');
+    container.innerHTML = '';
+    C4_TOKENS.forEach(t => {
+        if (t.url === forbiddenUrl) return; // Skip the color the host picked
+        const btn = document.createElement('div');
+        btn.className = 'color-opt-btn';
+        btn.innerHTML = `<img src="${t.url}"><span>${t.name}</span>`;
+        btn.onclick = async () => {
+            c4PlayerToken = t.url;
+            if (myRole === 'host') {
+                await updateDoc(doc(db, "c4_lobbies", currentLobbyId), { hostToken: t.url, turnUid: auth.currentUser.uid });
+                initRealBoard();
+            } else {
+                await updateDoc(doc(db, "c4_lobbies", currentLobbyId), { opponentToken: t.url });
+                initRealBoard();
+            }
+        };
+        container.appendChild(btn);
+    });
+}
+
+// Logic to handle clicking a column in Multiplayer
+async function handleC4Move(col) {
+    if (!c4Active || c4IsBusy) return;
+    
+    // In Multiplayer, check if it's actually my turn
+    const lobbySnap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
+    if (lobbySnap.data().turnUid !== auth.currentUser.uid) return;
+
+    c4IsBusy = true;
+    const playerNum = (myRole === 'host') ? 1 : 2;
+    const success = await dropTokenAnim(col, playerNum);
+
+    if (success) {
+        const nextTurnUid = lobbySnap.data().hostId === auth.currentUser.uid ? lobbySnap.data().opponentId : lobbySnap.data().hostId;
+        
+        // Check win locally
+        const win = checkWinStrict(playerNum);
+        
+        await updateDoc(doc(db, "c4_lobbies", currentLobbyId), {
+            lastMove: { col: col, by: auth.currentUser.uid, playerNum: playerNum },
+            turnUid: nextTurnUid,
+            boardState: c4Board.flat() // Sync board state
+        });
+
+        if (win) {
+            triggerWin(playerNum);
+        } else if (checkTie()) {
+            triggerWin(0);
+        } else {
+            c4Turn = (playerNum === 1) ? 2 : 1;
+            updateC4HUD("WAITING FOR OPPONENT...");
+        }
+    }
+    c4IsBusy = false;
+}
+
+function syncOpponentMove(col, playerNum) {
+    // Determine opponent's token
+    getDoc(doc(db, "c4_lobbies", currentLobbyId)).then(s => {
+        const data = s.data();
+        const tokenUrl = (myRole === 'host') ? data.opponentToken : data.hostToken;
+        
+        // Temporarily set global KEVIN_TOKEN to the player's token for the animation
+        const originalKevinToken = KEVIN_TOKEN;
+        window.KEVIN_TOKEN = tokenUrl; 
+
+        dropTokenAnim(col, playerNum).then(() => {
+            window.KEVIN_TOKEN = originalKevinToken; // Reset back
+            if (checkWinStrict(playerNum)) { triggerWin(playerNum); return; }
+            updateC4HUD("YOUR TURN");
+            c4Turn = (myRole === 'host') ? 1 : 2;
+            startC4TurnTimer();
+        });
+    });
 }
   </script>
 </body>
