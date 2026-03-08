@@ -13358,7 +13358,7 @@ async function renderC4Colors() {
     container.innerHTML = '';
 
     let hostToken = "", oppToken = "", hostPfp = "", oppPfp = "";
-    let amIDone = false; // Verificăm dacă EU am ales deja
+    let amIDone = false; 
 
     if (isMultiplayer) {
         const snap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
@@ -13368,8 +13368,7 @@ async function renderC4Colors() {
             oppToken = d.opponentToken || "";
             hostPfp = d.hostPfp;
             oppPfp = d.opponentPfp;
-            
-            // Verifică dacă runda mea de ales s-a terminat
+            // EU sunt gata doar dacă jetonul corespunzător rolului meu e în DB
             if (myRole === 'host' && hostToken) amIDone = true;
             if (myRole === 'opponent' && oppToken) amIDone = true;
         }
@@ -13379,60 +13378,46 @@ async function renderC4Colors() {
         const btn = document.createElement('div');
         btn.className = 'color-opt-btn';
         
-        let isTaken = false;
-        let userImg = "";
-
+        let takenByPfp = "";
         if (isMultiplayer) {
-            if (t.url === hostToken) { isTaken = true; userImg = hostPfp; }
-            else if (t.url === oppToken) { isTaken = true; userImg = oppPfp; }
+            if (t.url === hostToken) takenByPfp = hostPfp;
+            else if (t.url === oppToken) takenByPfp = oppPfp;
         }
 
+        const isTaken = takenByPfp !== "";
+
         btn.innerHTML = `
-            <div style="position:relative; width:55px; height:55px; display:flex; align-items:center; justify-content:center;">
-                <!-- Jetonul rămâne vizibil, dar ușor gri dacă e luat -->
-                <img src="${t.url}" style="width:100%; height:100%; ${isTaken ? 'filter: grayscale(0.5) opacity(0.7);' : ''}">
-                
-                <!-- POZA MICĂ: Apare doar dacă jetonul e luat -->
+            <div style="position:relative; width:50px; height:50px; display:flex; align-items:center; justify-content:center;">
+                <img src="${t.url}" style="width:100%; height:100%; ${isTaken ? 'filter: brightness(0.6);' : ''}">
                 ${isTaken ? `
-                    <img src="${userImg}" style="
+                    <img src="${takenByPfp}" style="
                         position:absolute; 
-                        width:25px; 
-                        height:25px; 
-                        border-radius:50%; 
-                        border:2px solid #fff; 
-                        box-shadow: 0 0 10px rgba(0,0,0,0.5); 
-                        z-index:10;
-                        top: 50%;
-                        left: 50%;
+                        width:20px; height:20px; 
+                        border-radius:50%; border:1.5px solid #fff; 
+                        box-shadow: 0 0 5px #000; 
+                        top: 50%; left: 50%;
                         transform: translate(-50%, -50%);
+                        z-index:10;
                     ">` : ''}
             </div>
-            <span style="font-size: 9px; margin-top:5px; display:block;">${t.name}</span>
+            <span style="font-size: 8px; margin-top:5px; font-family:'Orbitron';">${t.name}</span>
         `;
 
-        // LOGICA DE CLICK:
-        // Poți da click doar dacă: 
-        // 1. Jetonul NU e luat de celălalt 
-        // 2. TU nu ai ales deja nimic (amIDone)
+        // Poți da click dacă jetonul nu e luat de celălalt ȘI tu nu ai ales încă
         if (!isTaken && !amIDone) {
             btn.onclick = async () => {
                 c4PlayerToken = t.url;
                 if (isMultiplayer) {
-                    const updateData = (myRole === 'host') 
-                        ? { hostToken: t.url } 
-                        : { opponentToken: t.url };
+                    const updateData = (myRole === 'host') ? { hostToken: t.url } : { opponentToken: t.url };
                     await updateDoc(doc(db, "c4_lobbies", currentLobbyId), updateData);
-                    // UI-ul se va updata automat prin onSnapshot
                 } else {
                     initRealBoard();
                 }
             };
         } else {
             btn.style.cursor = 'not-allowed';
-            if (isTaken) btn.style.opacity = "1"; // Să vedem clar cine l-a luat
-            else btn.style.opacity = "0.4"; // Restul devin fade după ce am ales eu
+            btn.style.opacity = isTaken ? "1" : "0.3";
         }
-        
         container.appendChild(btn);
     });
 }
@@ -13462,17 +13447,22 @@ function initRealBoard() {
         for (let c = 0; c < 7; c++) {
             const cell = document.createElement('div');
             cell.className = 'c4-cell';
-            cell.onmouseenter = () => highlightC4Column(c, true);
-            cell.onmouseleave = () => highlightC4Column(c, false);
             cell.onclick = () => handleC4Move(c);
             grid.appendChild(cell);
         }
     }
 
-    // Multiplayer Turn logic
     if (isMultiplayer) {
         getDoc(doc(db, "c4_lobbies", currentLobbyId)).then(s => {
-            if (s.data().turnUid === auth.currentUser.uid) {
+            const data = s.data();
+            // Dacă nu există turnUid setat, Host-ul începe
+            if (!data.turnUid) {
+                if (myRole === 'host') {
+                    updateDoc(doc(db, "c4_lobbies", currentLobbyId), { turnUid: auth.currentUser.uid });
+                }
+            }
+            
+            if (data.turnUid === auth.currentUser.uid) {
                 updateC4HUD("YOUR TURN");
                 startC4TurnTimer();
             } else {
@@ -14084,54 +14074,49 @@ window.startMultiplayerMatch = async (lobbyId, role) => {
     const snap = await getDoc(lobbyRef);
     const lobbyData = snap.data();
 
-    // 1. Identity Logic
+    // Sincronizare Identitate
     const oppName = (role === 'host') ? lobbyData.opponentName : lobbyData.hostName;
     const oppPfp = (role === 'host') ? lobbyData.opponentPfp : lobbyData.hostPfp;
     const myName = (role === 'host') ? lobbyData.hostName : lobbyData.opponentName;
     const myPfp = (role === 'host') ? lobbyData.hostPfp : lobbyData.opponentPfp;
 
-    // 2. Update Intro Screen (Centering logic)
     document.getElementById('vsPlayerImg').src = myPfp;
     document.getElementById('vsPlayerName').innerText = myName;
     document.getElementById('vsBotImg').src = oppPfp;
     const introOppName = document.querySelector('#c4IntroScreen .c4v-side-box:last-child .c4v-name-text');
     if (introOppName) introOppName.innerText = oppName;
 
-    // 3. Update HUD (Consola de joc)
     document.getElementById('hudPfp').src = myPfp;
     document.getElementById('pName').innerText = myName;
     document.getElementById('hudOpponentPfp').src = oppPfp;
     const hudOppName = document.getElementById('opponentNameText');
     if (hudOppName) hudOppName.innerText = oppName; 
 
-    // Show the Intro Overlay
     document.getElementById('c4GameOverlay').style.display = 'flex';
     showC4Stage('c4IntroScreen');
 
-    // 4. Transition to Picker
+    // După intro, AMBII jucători merg să aleagă culoarea
     setTimeout(() => {
-        if (role === 'host') {
-            showC4Stage('c4ColorPicker');
-            renderC4Colors();
-        } else {
-            updateC4HUD("WAITTING FOR HOST...");
-            showC4Stage('c4GameBoardUI');
-            initRealBoard(); 
-        }
+        showC4Stage('c4ColorPicker');
+        renderC4Colors();
     }, 4500);
 
-    // 5. Game State Listener
+    // Listener pentru starea jocului
     onSnapshot(lobbyRef, (docSnap) => {
         const data = docSnap.data();
         if (!data) return;
 
-        // Opponent joins color picking
-        if (role === 'opponent' && data.hostToken && !c4PlayerToken) {
-            showC4Stage('c4ColorPicker');
-            renderC4Colors(data.hostToken); 
+        // Dacă ambii au ales culoarea și jocul nu a început încă, pornim tabla
+        if (data.hostToken && data.opponentToken && !c4Active) {
+            initRealBoard();
+        }
+
+        // Dacă cineva alege o culoare, refresh la picker ca să apară pozele
+        if (document.getElementById('c4ColorPicker').style.display !== 'none') {
+            renderC4Colors();
         }
         
-        // Opponent made a move
+        // Sincronizare mutări
         if (data.lastMove && data.lastMove.by !== auth.currentUser.uid) {
             syncOpponentMove(data.lastMove.col, data.lastMove.playerNum);
         }
