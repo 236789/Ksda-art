@@ -13363,7 +13363,10 @@ function renderC4Colors(forbiddenUrl = null) {
         btn.onclick = async () => {
             c4PlayerToken = t.url;
             if (isMultiplayer) {
-                const updateData = (myRole === 'host') ? { hostToken: t.url, turnUid: auth.currentUser.uid } : { opponentToken: t.url };
+                // Host picks first and starts the turn
+                const updateData = (myRole === 'host') 
+                    ? { hostToken: t.url, turnUid: auth.currentUser.uid } 
+                    : { opponentToken: t.url };
                 await updateDoc(doc(db, "c4_lobbies", currentLobbyId), updateData);
             }
             initRealBoard();
@@ -13971,11 +13974,11 @@ window.createC4Lobby = async (type) => {
         document.getElementById('createGameModal').classList.remove('active');
         alert("Partida a fost creată! Așteaptă un adversar...");
 
-        // Listen for when someone joins your lobby
-        onSnapshot(doc(db, "c4_lobbies", lobbyRef.id), (docSnap) => {
+        // FIX: Store the listener in a constant so we can kill it
+        const unsub = onSnapshot(doc(db, "c4_lobbies", lobbyRef.id), (docSnap) => {
             const data = docSnap.data();
-            if (data.status === 'playing' && data.opponentId) {
-                alert("Adversar găsit! Se începe jocul...");
+            if (data && data.status === 'playing' && data.opponentId) {
+                unsub(); // STOP LISTENING IMMEDIATELY so it doesn't loop
                 startMultiplayerMatch(lobbyRef.id, 'host');
             }
         });
@@ -14021,32 +14024,31 @@ window.startMultiplayerMatch = async (lobbyId, role) => {
     const snap = await getDoc(lobbyRef);
     const lobbyData = snap.data();
 
-    // 1. Determine Identity
+    // 1. Identity Logic
     const oppName = (role === 'host') ? lobbyData.opponentName : lobbyData.hostName;
     const oppPfp = (role === 'host') ? lobbyData.opponentPfp : lobbyData.hostPfp;
     const myName = (role === 'host') ? lobbyData.hostName : lobbyData.opponentName;
     const myPfp = (role === 'host') ? lobbyData.hostPfp : lobbyData.opponentPfp;
 
-    // 2. Set Up VS Intro Screen
-    document.getElementById('c4GameOverlay').style.display = 'flex';
-    showC4Stage('c4IntroScreen');
-
+    // 2. Update Intro Screen (Centering logic)
     document.getElementById('vsPlayerImg').src = myPfp;
     document.getElementById('vsPlayerName').innerText = myName;
     document.getElementById('vsBotImg').src = oppPfp;
-    
-    // Target the name text in the VS circle
-    const vsOppNameEl = document.querySelector('#c4IntroScreen .c4v-side-box.bot .c4v-name-text');
-    if (vsOppNameEl) vsOppNameEl.innerText = oppName;
+    const introOppName = document.querySelector('#c4IntroScreen .c4v-side-box:last-child .c4v-name-text');
+    if (introOppName) introOppName.innerText = oppName;
 
-    // 3. Set Up Game HUD (Check if elements exist first to avoid null error)
-    const hudOppPfp = document.getElementById('hudOpponentPfp');
+    // 3. Update HUD (Consola de joc)
+    document.getElementById('hudPfp').src = myPfp;
+    document.getElementById('pName').innerText = myName;
+    document.getElementById('hudOpponentPfp').src = oppPfp;
     const hudOppName = document.getElementById('opponentNameText');
-    
-    if (hudOppPfp) hudOppPfp.src = oppPfp;
-    if (hudOppName) hudOppName.innerText = oppName; // This fixes the "Kevin Bot" name issue
+    if (hudOppName) hudOppName.innerText = oppName; 
 
-    // 4. Transition to Color Picker
+    // Show the Intro Overlay
+    document.getElementById('c4GameOverlay').style.display = 'flex';
+    showC4Stage('c4IntroScreen');
+
+    // 4. Transition to Picker
     setTimeout(() => {
         if (role === 'host') {
             showC4Stage('c4ColorPicker');
@@ -14058,46 +14060,49 @@ window.startMultiplayerMatch = async (lobbyId, role) => {
         }
     }, 4500);
 
-    // 5. Sync moves via Snapshot
+    // 5. Game State Listener
     onSnapshot(lobbyRef, (docSnap) => {
         const data = docSnap.data();
         if (!data) return;
 
+        // Opponent joins color picking
         if (role === 'opponent' && data.hostToken && !c4PlayerToken) {
             showC4Stage('c4ColorPicker');
             renderC4Colors(data.hostToken); 
         }
         
+        // Opponent made a move
         if (data.lastMove && data.lastMove.by !== auth.currentUser.uid) {
             syncOpponentMove(data.lastMove.col, data.lastMove.playerNum);
-        }
-
-        if (data.status === 'finished') {
-            c4Active = false;
         }
     });
 };
 
 
-
 function syncOpponentMove(col, playerNum) {
     getDoc(doc(db, "c4_lobbies", currentLobbyId)).then(s => {
         const data = s.data();
+        if (!data) return;
+        
+        // Find what token the opponent is using
         const tokenUrl = (myRole === 'host') ? data.opponentToken : data.hostToken;
-        const oppRealName = (myRole === 'host') ? data.opponentName : data.hostName;
 
-        // Temporarily swap KEVIN_TOKEN for the animation
-        const originalKevinToken = window.KEVIN_TOKEN;
-        window.KEVIN_TOKEN = tokenUrl; 
+        // Briefly override the token logic for the animation
+        const oldToken = c4PlayerToken;
+        // Logic inside dropTokenAnim needs to know we are dropping the opponent's piece
+        // We do this by temporarily setting the opponent's token as the 'p2' texture
+        const prevKevin = window.KEVIN_TOKEN;
+        window.KEVIN_TOKEN = tokenUrl;
 
+        c4IsBusy = true;
         dropTokenAnim(col, playerNum).then(() => {
-            window.KEVIN_TOKEN = originalKevinToken;
+            window.KEVIN_TOKEN = prevKevin;
+            c4IsBusy = false;
             if (checkWinStrict(playerNum)) { 
                 triggerWin(playerNum); 
                 return; 
             }
             updateC4HUD("YOUR TURN");
-            c4Turn = (myRole === 'host') ? 1 : 2;
             startC4TurnTimer();
         });
     });
