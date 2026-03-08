@@ -10993,6 +10993,26 @@ margin: 0 !important;
     color: #fff;
 }
 
+
+/* Culori specifice pentru rândul jucătorilor în Multiplayer */
+.turn-pill.host-active {
+    border-color: #29f3ff !important;
+    color: #29f3ff !important;
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.4);
+}
+
+.turn-pill.opponent-active {
+    border-color: #ff4757 !important;
+    color: #ff4757 !important;
+    box-shadow: 0 0 20px rgba(255, 71, 87, 0.4);
+}
+
+/* Efectul de hover pe coloană (Issue 1) */
+.c4-cell.highlight-glow {
+    background: rgba(41, 243, 255, 0.15) !important;
+    box-shadow: inset 0 0 10px var(--primary) !important;
+}
+
   </style>
 </head>
 <body>
@@ -13433,7 +13453,6 @@ function highlightC4Column(colIndex, isActive) {
         }
     }
 }
-
 function initRealBoard() {
     showC4Stage('c4GameBoardUI');
     const grid = document.getElementById('c4Grid');
@@ -13443,10 +13462,16 @@ function initRealBoard() {
     c4Active = true;
     c4IsBusy = false;
 
+    // Generăm celulele și adăugăm efectul de Hover (Issue 1)
     for (let r = 0; r < 6; r++) {
         for (let c = 0; c < 7; c++) {
             const cell = document.createElement('div');
             cell.className = 'c4-cell';
+            
+            // REZOLVARE Issue 1: Efectul de lumină pe coloană la Hover
+            cell.onmouseenter = () => highlightC4Column(c, true);
+            cell.onmouseleave = () => highlightC4Column(c, false);
+            
             cell.onclick = () => handleC4Move(c);
             grid.appendChild(cell);
         }
@@ -13455,26 +13480,23 @@ function initRealBoard() {
     if (isMultiplayer) {
         getDoc(doc(db, "c4_lobbies", currentLobbyId)).then(s => {
             const data = s.data();
-            // Dacă nu există turnUid setat, Host-ul începe
-            if (!data.turnUid) {
-                if (myRole === 'host') {
-                    updateDoc(doc(db, "c4_lobbies", currentLobbyId), { turnUid: auth.currentUser.uid });
-                }
+            
+            // Setăm primul rând dacă nu există
+            if (!data.turnUid && myRole === 'host') {
+                updateDoc(doc(db, "c4_lobbies", currentLobbyId), { turnUid: auth.currentUser.uid });
             }
             
-            if (data.turnUid === auth.currentUser.uid) {
-                updateC4HUD("YOUR TURN");
-                startC4TurnTimer();
-            } else {
-                updateC4HUD("OPPONENT'S TURN");
-            }
+            // REZOLVARE Issue 3: Lăsăm funcția updateC4HUD să gestioneze numele și culorile
+            updateC4HUD(""); 
+            
+            // REZOLVARE Issue 2: startC4TurnTimer va vedea că isMultiplayer e true și nu va porni
+            startC4TurnTimer();
         });
     } else {
         updateC4HUD("YOUR TURN");
         startC4TurnTimer();
     }
 }
-
 async function handleC4Move(col) {
     if (!c4Active || c4IsBusy) return;
 
@@ -13743,32 +13765,41 @@ async function triggerWin(res) {
         showC4Stage('c4ResultModal');
     }, 1500); 
 }
-function updateC4HUD(txt) {
-    const statusText = document.getElementById('gameStatusText');
+// Issue 3: HUD logic pentru nume și culori
+async function updateC4HUD(txt) {
+    const statusEl = document.getElementById('gameStatusText');
     const pill = document.getElementById('gameStatusPill');
     const playerImg = document.getElementById('hudPfp');
-    const botImg = document.querySelector('.mini-pfp.bot');
+    const oppImg = document.getElementById('hudOpponentPfp');
     
-    if (statusText) statusText.innerText = txt;
-    
-    pill.classList.remove('player-active', 'bot-active');
-    
-    if (c4Turn === 1) {
-        pill.classList.add('player-active');
-        playerImg.style.transform = "scale(1.15)";
-        playerImg.style.opacity = "1";
-        playerImg.style.filter = "brightness(1.2)";
-        botImg.style.transform = "scale(0.9)";
-        botImg.style.opacity = "0.4";
-        botImg.style.filter = "grayscale(0.5)";
+    pill.classList.remove('player-active', 'bot-active', 'host-active', 'opponent-active');
+
+    if (isMultiplayer) {
+        const lobbySnap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
+        const d = lobbySnap.data();
+        const isHostTurn = (d.turnUid === d.hostId);
+        
+        // Setăm textul: "NUME TURN"
+        statusEl.innerText = isHostTurn ? `${d.hostName} TURN` : `${d.opponentName} TURN`;
+        
+        if (isHostTurn) {
+            pill.classList.add('host-active'); // Blue
+            playerImg.style.transform = "scale(1.2)";
+            oppImg.style.transform = "scale(0.9)";
+            oppImg.style.opacity = "0.4";
+            playerImg.style.opacity = "1";
+        } else {
+            pill.classList.add('opponent-active'); // Red
+            oppImg.style.transform = "scale(1.2)";
+            playerImg.style.transform = "scale(0.9)";
+            playerImg.style.opacity = "0.4";
+            oppImg.style.opacity = "1";
+        }
     } else {
-        pill.classList.add('bot-active');
-        botImg.style.transform = "scale(1.15)";
-        botImg.style.opacity = "1";
-        botImg.style.filter = "brightness(1.2)";
-        playerImg.style.transform = "scale(0.9)";
-        playerImg.style.opacity = "0.4";
-        playerImg.style.filter = "grayscale(0.5)";
+        // Logica veche pentru Bot
+        statusEl.innerText = statusText;
+        if (c4Turn === 1) pill.classList.add('player-active');
+        else pill.classList.add('bot-active');
     }
 }
 
@@ -13849,40 +13880,38 @@ initFallingBackground();
 
 // Run the function
 
-
 function startC4TurnTimer() {
-    if (!c4Active) return;
-    clearInterval(c4TimerInterval);
+    // REZOLVARE Issue 2, 6 și 7: Oprim complet timer-ul dacă suntem în Multiplayer
     const container = document.querySelector('.timer-container');
+    if (!c4Active || isMultiplayer) {
+        if (container) container.classList.remove('active');
+        return; 
+    }
+    
+    clearInterval(c4TimerInterval);
     const bar = document.getElementById('c4TimerBar');
 
-    // Verificăm dacă e rândul meu în funcție de mod
-    const isMyTurn = isMultiplayer ? (c4TurnUid === auth.currentUser.uid) : (c4Turn === 1);
-    
-    if (!isMyTurn) {
+    // În Singleplayer, timer-ul merge doar când e rândul tău (c4Turn === 1)
+    if (c4Turn !== 1) {
         if (container) container.classList.remove('active');
         return;
     }
 
     if (container) container.classList.add('active');
-    const timeLimit = isMultiplayer ? 30 : C4_CONFIG[currentC4Difficulty].turnTime;
+    const timeLimit = C4_CONFIG[currentC4Difficulty].turnTime;
     let timeLeft = timeLimit;
     if (bar) bar.style.width = '100%';
 
-    c4TimerInterval = setInterval(async () => {
+    c4TimerInterval = setInterval(() => {
         timeLeft--;
         if (bar) bar.style.width = (timeLeft / timeLimit * 100) + '%';
         
         if (timeLeft <= 0) {
             clearInterval(c4TimerInterval);
+            
+            // REZOLVARE Issue 6: Doar în Singleplayer se forțează mutarea lui Kevin Bot
             showTimeExpiredNotice();
-            if (isMultiplayer) {
-                const lobbyRef = doc(db, "c4_lobbies", currentLobbyId);
-                const s = await getDoc(lobbyRef);
-                const d = s.data();
-                const nextTurn = (myRole === 'host') ? d.opponentId : d.hostId;
-                await updateDoc(lobbyRef, { turnUid: nextTurn });
-            } else { kevinBotBrain(); }
+            kevinBotBrain();
         }
     }, 1000);
 }
