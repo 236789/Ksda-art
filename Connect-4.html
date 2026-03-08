@@ -13851,34 +13851,37 @@ initFallingBackground();
 
 
 function startC4TurnTimer() {
+    if (!c4Active) return;
     clearInterval(c4TimerInterval);
     const container = document.querySelector('.timer-container');
     const bar = document.getElementById('c4TimerBar');
 
-    // Verifică dacă e rândul meu (folosind UID-ul din baza de date)
+    // Verificăm dacă e rândul meu în funcție de mod
     const isMyTurn = isMultiplayer ? (c4TurnUid === auth.currentUser.uid) : (c4Turn === 1);
     
-    if (!c4Active || !isMyTurn) {
-        container.classList.remove('active');
+    if (!isMyTurn) {
+        if (container) container.classList.remove('active');
         return;
     }
 
-    container.classList.add('active');
+    if (container) container.classList.add('active');
     const timeLimit = isMultiplayer ? 30 : C4_CONFIG[currentC4Difficulty].turnTime;
     let timeLeft = timeLimit;
-    bar.style.width = '100%';
+    if (bar) bar.style.width = '100%';
 
     c4TimerInterval = setInterval(async () => {
         timeLeft--;
-        bar.style.width = (timeLeft / timeLimit * 100) + '%';
+        if (bar) bar.style.width = (timeLeft / timeLimit * 100) + '%';
+        
         if (timeLeft <= 0) {
             clearInterval(c4TimerInterval);
             showTimeExpiredNotice();
             if (isMultiplayer) {
-                const lobbySnap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
-                const d = lobbySnap.data();
+                const lobbyRef = doc(db, "c4_lobbies", currentLobbyId);
+                const s = await getDoc(lobbyRef);
+                const d = s.data();
                 const nextTurn = (myRole === 'host') ? d.opponentId : d.hostId;
-                await updateDoc(doc(db, "c4_lobbies", currentLobbyId), { turnUid: nextTurn });
+                await updateDoc(lobbyRef, { turnUid: nextTurn });
             } else { kevinBotBrain(); }
         }
     }, 1000);
@@ -14064,6 +14067,7 @@ let isMultiplayer = false;
 let myRole = ""; // 'host' or 'opponent'
 let currentLobbyId = null;
 let mpOpponentToken = "";
+let c4TurnUid = ""; // ACEASTA LIPSEA și cauza eroarea din consolă
 
 window.startMultiplayerMatch = async (lobbyId, role) => {
     isMultiplayer = true;
@@ -14101,24 +14105,47 @@ window.startMultiplayerMatch = async (lobbyId, role) => {
         renderC4Colors();
     }, 4500);
 
-    // Listener pentru starea jocului
+// 5. Game State Listener
     onSnapshot(lobbyRef, (docSnap) => {
         const data = docSnap.data();
         if (!data) return;
 
-        // Dacă ambii au ales culoarea și jocul nu a început încă, pornim tabla
-        if (data.hostToken && data.opponentToken && !c4Active) {
+        // Actualizăm cine este la rând global
+        c4TurnUid = data.turnUid;
+
+        // Dacă ambii au ales culoarea și tabla nu e gata, o pornim
+        if (data.hostToken && data.opponentToken && !c4Active && data.status !== 'finished') {
             initRealBoard();
         }
 
-        // Dacă cineva alege o culoare, refresh la picker ca să apară pozele
+        // Refresh la picker dacă e deschis
         if (document.getElementById('c4ColorPicker').style.display !== 'none') {
             renderC4Colors();
         }
         
-        // Sincronizare mutări
+        // SINCRONIZARE MUTARE: 
+        // Verificăm dacă ultima mutare din DB nu este deja pe tabla noastră locală
         if (data.lastMove && data.lastMove.by !== auth.currentUser.uid) {
-            syncOpponentMove(data.lastMove.col, data.lastMove.playerNum);
+            const lastCol = data.lastMove.col;
+            const lastPNum = data.lastMove.playerNum;
+            
+            // Verificăm dacă piesa chiar lipsește de pe rândul de sus (ca să nu dublăm mutarea)
+            if (c4Board[0] && c4Board[0][lastCol] === 0) {
+                syncOpponentMove(lastCol, lastPNum);
+            }
+        }
+
+        // DACĂ JOCUL S-A TERMINAT PE PARTEA CEALALTĂ
+        if (data.status === 'finished' && c4Active) {
+            // Așteptăm puțin să se termine animația piesei dacă a fost victorie prin mutare
+            setTimeout(() => {
+                if (c4Active) {
+                    // Dacă nu s-a declanșat deja triggerWin local, îl forțăm
+                    // (Piesa 1 e Host, 2 e Opponent)
+                    const winner = data.lastMove ? data.lastMove.playerNum : 0;
+                    triggerWin(winner);
+                }
+            }, 1000);
         }
     });
 };
