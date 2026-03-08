@@ -13511,10 +13511,16 @@ async function handleC4Move(col) {
     const pNum = (isMultiplayer && myRole === 'opponent') ? 2 : 1;
     const success = await dropTokenAnim(col, pNum);
 
-    if (success) {
+if (success) {
         if (checkWinStrict(pNum)) {
+            // REZOLVARE: Trimitem și coordonatele ultimei piese (lastMove) chiar dacă am câștigat
+            if(isMultiplayer) {
+                await updateDoc(doc(db, "c4_lobbies", currentLobbyId), { 
+                    status: 'finished',
+                    lastMove: { col, by: auth.currentUser.uid, playerNum: pNum }
+                });
+            }
             triggerWin(pNum);
-            if(isMultiplayer) updateDoc(doc(db, "c4_lobbies", currentLobbyId), { status: 'finished' });
             return;
         }
 
@@ -14134,47 +14140,41 @@ window.startMultiplayerMatch = async (lobbyId, role) => {
         renderC4Colors();
     }, 4500);
 
-// 5. Game State Listener
-    onSnapshot(lobbyRef, (docSnap) => {
+onSnapshot(lobbyRef, async (docSnap) => {
         const data = docSnap.data();
         if (!data) return;
 
-        // Actualizăm cine este la rând global
         c4TurnUid = data.turnUid;
 
-        // Dacă ambii au ales culoarea și tabla nu e gata, o pornim
         if (data.hostToken && data.opponentToken && !c4Active && data.status !== 'finished') {
             initRealBoard();
         }
 
-        // Refresh la picker dacă e deschis
         if (document.getElementById('c4ColorPicker').style.display !== 'none') {
             renderC4Colors();
         }
         
-        // SINCRONIZARE MUTARE: 
-        // Verificăm dacă ultima mutare din DB nu este deja pe tabla noastră locală
+        // REZOLVARE: Întâi procesăm mutarea, apoi verificăm dacă e final de meci
         if (data.lastMove && data.lastMove.by !== auth.currentUser.uid) {
             const lastCol = data.lastMove.col;
             const lastPNum = data.lastMove.playerNum;
             
-            // Verificăm dacă piesa chiar lipsește de pe rândul de sus (ca să nu dublăm mutarea)
             if (c4Board[0] && c4Board[0][lastCol] === 0) {
-                syncOpponentMove(lastCol, lastPNum);
+                // Așteptăm ca animația piesei să se termine
+                await syncOpponentMove(lastCol, lastPNum);
             }
         }
 
         // DACĂ JOCUL S-A TERMINAT PE PARTEA CEALALTĂ
         if (data.status === 'finished' && c4Active) {
-            // Așteptăm puțin să se termine animația piesei dacă a fost victorie prin mutare
+            // Nu mai dăm triggerWin instantaneu, așteptăm un moment 
+            // să fim siguri că ultima piesă e vizibilă pe tablă
             setTimeout(() => {
                 if (c4Active) {
-                    // Dacă nu s-a declanșat deja triggerWin local, îl forțăm
-                    // (Piesa 1 e Host, 2 e Opponent)
                     const winner = data.lastMove ? data.lastMove.playerNum : 0;
                     triggerWin(winner);
                 }
-            }, 1000);
+            }, 500); 
         }
     });
 };
