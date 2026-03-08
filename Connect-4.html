@@ -6254,7 +6254,7 @@
     font-size: 8px;
     opacity: 0.5;
 }
-
+ 
 /* Column 1 Sizing */
 .f-ksda-logo {
     height: 55px; /* Smaller logo */
@@ -7718,7 +7718,7 @@ header, #sideMenu {
     0%, 100% { 
         border: 2px solid var(--truth-color) !important; 
         box-shadow: 0 0 25px rgba(41, 243, 255, 0.4), inset 0 0 10px rgba(41, 243, 255, 0.2) !important;
-    }
+    } 
     50% { 
         border: 2px solid var(--dare-color) !important; 
         box-shadow: 0 0 35px rgba(255, 71, 87, 0.5), inset 0 0 15px rgba(255, 71, 87, 0.3) !important;
@@ -7824,8 +7824,8 @@ div.header-container header {
     position: absolute; top: 5px; right: 5px;
     width: 30px; height: 30px;
 }
-
-
+ 
+  
 /* --- CONNECT FOUR THEME (Blue Strategic Grid) --- */
 .theme-connect-four {
     /* Board Blue & Chips Colors */
@@ -7840,8 +7840,8 @@ div.header-container header {
                 radial-gradient(circle at 10% 10%, #ff4757 0%, transparent 40%) !important; /* Red Player Hint */
     opacity: 0.6;
     animation: nebulaPulse 10s ease-in-out infinite alternate;
-}
-
+} 
+ 
 /* Falling Chips Animation */
 .theme-connect-four .asset {
     opacity: 0.2;
@@ -8334,9 +8334,9 @@ div.header-container header {
         grid-template-columns: 1fr !important;
     }
 }
-
-
-/* =========================================
+  
+ 
+/*  =========================================
    FIX ULTIMAT PENTRU CONNECT 4 - PC LAYOUT
    ========================================= */
 
@@ -11053,13 +11053,154 @@ margin: 0 !important;
 .cyber-alert.active { transform: translateX(-50%) translateY(0); }
 .cyber-alert i { color: #ff4757; font-size: 20px; }
 
+
+.countdown-overlay {
+    position: fixed; inset: 0;
+    z-index: 300000; /* Peste tot */
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(5px);
+    display: flex; justify-content: center; align-items: center;
+    pointer-events: none;
+}
+
+.countdown-img-nuke {
+    width: 300px;
+    height: auto;
+    transform: scale(0);
+    opacity: 0;
+    filter: drop-shadow(0 0 30px var(--primary));
+}
+
+/* Animația principală de zoom și plutire */
+.animate-nuke {
+    animation: countdownGrow 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes countdownGrow {
+    0% { transform: scale(0) rotate(-20deg); opacity: 0; filter: brightness(5) blur(10px); }
+    40% { transform: scale(1.4) rotate(5deg); opacity: 1; filter: brightness(1.2) blur(0); }
+    70% { transform: scale(1.2) rotate(0deg); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; transform: translateY(-100px); }
+}
+
+
+/* Titlu Metalic de Argint pentru Remiză */
+.hero-draw-chrome {
+    font-family: 'Orbitron', sans-serif !important;
+    font-weight: 900 !important;
+    font-size: clamp(30px, 8vw, 60px) !important;
+    text-transform: uppercase;
+    white-space: nowrap;
+    /* Gradient de Argint */
+    background: linear-gradient(180deg, #ffffff 0%, #bdc3c7 45%, #95a5a6 55%, #7f8c8d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.5));
+    animation: drawGlow 3s infinite ease-in-out;
+}
+
+@keyframes drawGlow {
+    0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3)); transform: scale(1); }
+    50% { filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.7)); transform: scale(1.02); }
+}
+
+/* Stil pentru cardul de rezultat când e remiză */
+.result-card-draw {
+    border-color: #bdc3c7 !important;
+    background: rgba(13, 25, 41, 0.95) !important;
+    box-shadow: 0 0 50px rgba(189, 195, 199, 0.2) !important;
+}
+
+
+/* THE UNIVERSAL CYBER ALERT */
+.cyber-alert {
+    position: fixed;
+    top: 25px; left: 50%;
+    transform: translateX(-50%) translateY(-150px);
+    background: rgba(8, 16, 27, 0.98);
+    backdrop-filter: blur(10px);
+    padding: 18px 35px;
+    border-radius: 12px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 2px solid var(--primary);
+    box-shadow: 0 0 30px rgba(41, 243, 255, 0.2);
+    pointer-events: none;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.cyber-alert.active { transform: translateX(-50%) translateY(0); }
+
+/* VARIATII CULORI */
+.ca-error { border-color: #ff4757 !important; box-shadow: 0 0 30px rgba(255, 71, 87, 0.4) !important; color: #ff4757; }
+.ca-success { border-color: #00ff88 !important; box-shadow: 0 0 30px rgba(0, 255, 136, 0.4) !important; color: #00ff88; }
+.ca-warning { border-color: #ffd700 !important; box-shadow: 0 0 30px rgba(255, 215, 0, 0.4) !important; color: #ffd700; }
+
+
+.select-btn-v6.bet-active {
+    border-color: #fff !important;
+    background: var(--primary-dim) !important;
+    box-shadow: 0 0 15px var(--primary);
+}
   </style>
 </head>
 <body>
+<!-- RANKED SETUP MODAL -->
+<div id="rankedSetupModal" class="account-modal-overlay" style="z-index: 100005;">
+    <div class="c4-choice-card" style="max-width: 450px;">
+        <button class="close-pop" onclick="document.getElementById('rankedSetupModal').classList.remove('active')">✕</button>
+        <h2 class="hero-c4-mega" style="font-size: 24px !important;">RANKED_SETUP</h2>
+        <p style="color: #aaa; font-size: 11px; margin-bottom: 20px;">Alege miza partidei. Winner takes all!</p>
+
+        <!-- Selectie Valuta -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; margin-bottom: 20px;">
+            <div id="btnBetCoins" class="select-btn-v6" onclick="toggleBetType('coins')" style="padding: 15px 5px;">
+                <img src="https://iili.io/fhc1SKQ.png" width="25">
+                <span style="font-size: 9px;">COINS</span>
+            </div>
+            <div id="btnBetDiamonds" class="select-btn-v6" onclick="toggleBetType('diamonds')" style="padding: 15px 5px;">
+                <img src="https://iili.io/fv5bmtj.png" width="22">
+                <span style="font-size: 9px;">DIAMONDS</span>
+            </div>
+            <div id="btnBetBoth" class="select-btn-v6" onclick="toggleBetType('both')" style="padding: 15px 5px;">
+                <i class="fas fa-plus-circle" style="color: #fff;"></i>
+                <span style="font-size: 9px;">BOTH</span>
+            </div>
+        </div>
+
+        <!-- Inputuri Sume -->
+        <div id="betInputs" style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
+            <div id="boxCoins" style="display:none;">
+                <label style="font-family: 'Orbitron'; font-size: 9px; color: #ffd700; display: block; text-align: left; margin-bottom: 5px;">CÂTE MONEDE PARIEZI?</label>
+                <input type="number" id="inputBetCoins" class="edit-input" placeholder="Min. 500" min="500" value="1000">
+            </div>
+            <div id="boxDiamonds" style="display:none;">
+                <label style="font-family: 'Orbitron'; font-size: 9px; color: #00ff88; display: block; text-align: left; margin-bottom: 5px;">CÂTE DIAMANTE PARIEZI?</label>
+                <input type="number" id="inputBetDiamonds" class="edit-input" placeholder="Min. 1" min="1" value="5">
+            </div>
+        </div>
+
+        <button class="btn-ksda-fire" style="width: 100%; margin-top: 25px;" onclick="confirmRankedCreation()">
+            <span>INIȚIALIZEAZĂ LUPTA</span>
+        </button>
+    </div>
+</div>
+
+<!-- COUNTDOWN OVERLAY -->
+<div id="countdownOverlay" class="countdown-overlay" style="display: none;">
+    <img id="countdownImage" src="" class="countdown-img-nuke">
+</div>
 
 <div id="cyberAlert" class="cyber-alert">
-    <i class="fas fa-exclamation-triangle"></i>
-    <span id="cyberAlertText">TEXT_ERROARE</span>
+    <i id="caIcon" class="fas fa-exclamation-triangle"></i>
+    <span id="cyberAlertText">SYSTEM_MESSAGE</span>
 </div>
 
 
@@ -11246,6 +11387,10 @@ margin: 0 !important;
         <div class="c4-main-wrapper" id="c4BoardParent" style="position: relative;">
             <div id="c4Grid" class="c4-neon-board"></div>
         </div>
+
+
+
+<button class="give-up-btn" onclick="handleGiveUp()">GIVE UP (-1000 KSDA)</button>
 
         <button class="give-up-btn" onclick="handleGiveUp()">GIVE UP (-1000 KSDA)</button>
     </div>
@@ -13476,7 +13621,7 @@ async function renderC4Colors() {
                     const updateData = (myRole === 'host') ? { hostToken: t.url } : { opponentToken: t.url };
                     await updateDoc(doc(db, "c4_lobbies", currentLobbyId), updateData);
                 } else {
-                    initRealBoard();
+                    runC4Countdown();
                 }
             };
         } else {
@@ -13594,6 +13739,13 @@ async function dropTokenAnim(col, p) {
     if (row === -1) return false;
 
     c4Board[row][col] = p;
+
+    // REZOLVARE: Redăm sunetul instant când piesa începe să cadă
+    // Folosim .cloneNode() pentru a permite sunetelor să se suprapună dacă se mută rapid
+    const sfxInstance = dropSFX.cloneNode();
+    sfxInstance.volume = 0.6; // Volum optimizat
+    sfxInstance.play().catch(e => console.log("Audio SFX blocked by browser"));
+
     const allCells = document.querySelectorAll('.c4-cell');
     const targetCell = allCells[(row * 7) + col]; 
     const token = document.createElement('div');
@@ -13602,14 +13754,18 @@ async function dropTokenAnim(col, p) {
     if (isMultiplayer) {
         const snap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
         const d = snap.data();
-        // p=1 este mereu host, p=2 este mereu opponent
         token.style.backgroundImage = `url(${p === 1 ? d.hostToken : d.opponentToken})`;
     } else {
         token.style.backgroundImage = `url(${p === 1 ? c4PlayerToken : KEVIN_TOKEN})`;
     }
     
     targetCell.appendChild(token);
-    return new Promise(res => setTimeout(() => { token.classList.remove('dropping'); res(true); }, 800));
+    
+    // Așteptăm să se termine animația de cădere (0.8s conform CSS-ului tău)
+    return new Promise(res => setTimeout(() => { 
+        token.classList.remove('dropping'); 
+        res(true); 
+    }, 800));
 }
 
 function kevinBotBrain() {
@@ -13711,11 +13867,33 @@ function checkWinStrict(p) {
 
 function checkTie() { return c4Board[0].every(v => v !== 0); }
 async function triggerWin(res) {
+    if (activeBGM) {
+        activeBGM.pause();
+        activeBGM.currentTime = 0;
+    }
     const winningCoords = checkWinStrict(res);
     c4Active = false;
     clearInterval(c4TimerInterval); 
     
-    // 1. Highlight the winning line
+    let amIWinner = false;
+    if (isMultiplayer) {
+        if (myRole === 'host' && res === 1) amIWinner = true;
+        if (myRole === 'opponent' && res === 2) amIWinner = true;
+    } else {
+        amIWinner = (res === 1); 
+    }
+
+    if (res === 0) {
+        drawSFX.currentTime = 0;
+        drawSFX.play().catch(e => {});
+    } else if (amIWinner) {
+        winUserSFX.currentTime = 0;
+        winUserSFX.play().catch(e => {});
+    } else {
+        winOpponentSFX.currentTime = 0;
+        winOpponentSFX.play().catch(e => {});
+    }
+
     if (winningCoords) {
         winningCoords.forEach(([r, c]) => {
             const cells = document.querySelectorAll(`.c4-cell`);
@@ -13724,95 +13902,86 @@ async function triggerWin(res) {
         });
     }
 
-    const modal = document.getElementById('c4ResultModal');
-    const title = document.getElementById('resultTitle');
-    const reward = document.getElementById('resultReward');
-    const text = document.getElementById('resultText');
-    const coinImg = `<img src="https://iili.io/fhc1SKQ.png" style="width:30px; vertical-align:middle; margin-right:10px;">`;
-
-    // FIX ISSUE 5: Determinăm dacă TU ești câștigătorul
-    let amIWinner = false;
-    if (isMultiplayer) {
-        if (myRole === 'host' && res === 1) amIWinner = true;
-        if (myRole === 'opponent' && res === 2) amIWinner = true;
-    } else {
-        amIWinner = (res === 1);
-    }
-
     setTimeout(async () => {
-        // --- MULTIPLAYER LOGIC ---
-        if (isMultiplayer) {
-            const lobbySnap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
-            const lobbyData = lobbySnap.data();
-            const isFriendly = lobbyData.type === 'friendly';
+        const modal = document.getElementById('c4ResultModal');
+        const title = document.getElementById('resultTitle');
+        const reward = document.getElementById('resultReward');
+        const text = document.getElementById('resultText');
+        const coinImg = `<img src="https://iili.io/fhc1SKQ.png" style="width:30px; vertical-align:middle; margin-right:10px;">`;
+        const diamondImg = `<img src="https://iili.io/fv5bmtj.png" style="width:25px; vertical-align:middle; margin-right:10px;">`;
 
-            if (res === 0) {
-                title.innerText = "REMIZĂ!";
-                title.style.color = "#aaa";
-                text.innerText = "Meci strâns! Nimeni nu a cedat.";
-                reward.innerHTML = isFriendly ? "MECI AMICAL: 0 KSDA" : `${coinImg} +100 KSDA`;
-            } else if (amIWinner) {
+        modal.className = "c4-choice-card";
+        title.className = "";
+        title.style.color = "";
+
+        if (res === 0) {
+            // --- TIE GAME LOGIC ---
+            modal.classList.add('result-card-draw');
+            title.classList.add('hero-draw-chrome');
+            title.innerText = "TIE GAME";
+            text.innerText = "Nimeni nu a reușit să facă 4 la rând. Miza a fost returnată.";
+
+            if (isMultiplayer && auth.currentUser) {
+                const lobbySnap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
+                const d = lobbySnap.data();
+                if (d.type === 'ranked') {
+                    // Returnăm miza inițială (nu potul)
+                    await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
+                        coins: increment(d.betCoins || 0),
+                        diamonds: increment(d.betDiamonds || 0)
+                    });
+                    reward.innerHTML = `RETUR: ${d.betCoins > 0 ? d.betCoins + ' ' + coinImg : ''} ${d.betDiamonds > 0 ? d.betDiamonds + ' ' + diamondImg : ''}`;
+                } else { reward.innerText = "MECI AMICAL"; }
+            } else { reward.innerHTML = `${coinImg} +100 KSDA`; }
+        } 
+        else if (isMultiplayer) {
+            // --- MULTIPLAYER RANKED LOGIC ---
+            const lobbySnap = await getDoc(doc(db, "c4_lobbies", currentLobbyId));
+            const d = lobbySnap.data();
+            const isFriendly = d.type === 'friendly';
+            
+            // Calculăm POT-ul (Miza x 2)
+            const potCoins = (d.betCoins || 0) * 2;
+            const potDiamonds = (d.betDiamonds || 0) * 2;
+
+            if (amIWinner) {
                 title.innerText = "VICTORIE!";
                 title.style.color = "var(--primary)";
-                text.innerText = "Ai demonstrat o strategie superioară adversarului tău!";
-                reward.innerHTML = isFriendly ? "MECI AMICAL: 0 KSDA" : `${coinImg} +1000 KSDA`;
+                text.innerText = "Ai dominat arena! Toate resursele îți aparțin.";
                 
                 if (!isFriendly && auth.currentUser) {
-                    await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(1000) });
-                    logTransaction(1000, "Victory", "Câștigat Connect 4 Ranked");
-                }
+                    await updateDoc(doc(db, "accounts", auth.currentUser.uid), { 
+                        coins: increment(potCoins),
+                        diamonds: increment(potDiamonds)
+                    });
+                    logTransaction(potCoins, "Ranked Win", "Câștigat Pot Connect 4");
+                    reward.innerHTML = `POT ADJUNECAT: ${potCoins > 0 ? potCoins + ' ' + coinImg : ''} ${potDiamonds > 0 ? potDiamonds + ' ' + diamondImg : ''}`;
+                } else { reward.innerText = "MECI AMICAL"; }
             } else {
                 title.innerText = "ÎNFRÂNGERE!";
                 title.style.color = "#ff4757";
-                text.innerText = "Adversarul a fost mai atent de data aceasta.";
-                reward.innerHTML = isFriendly ? "MECI AMICAL: 0 KSDA" : `${coinImg} -1000 KSDA`;
-
-                if (!isFriendly && auth.currentUser) {
-                    const userRef = doc(db, "accounts", auth.currentUser.uid);
-                    const uSnap = await getDoc(userRef);
-                    const currentCoins = uSnap.data().coins || 0;
-                    let penalty = currentCoins < 1000 ? -currentCoins : -1000;
-
-                    await updateDoc(userRef, { coins: increment(penalty) });
-                    logTransaction(penalty, "Defeat", "Pierdut Connect 4 Ranked");
-                }
+                text.innerText = "Adversarul a plecat cu miza ta.";
+                reward.innerHTML = isFriendly ? "MECI AMICAL" : `Ai pierdut miza depusă!`;
             }
         } 
-        // --- SINGLEPLAYER LOGIC (ORIGINAL) ---
         else {
-            const winReward = C4_CONFIG[currentC4Difficulty].reward;
-            const losePenalty = C4_CONFIG[currentC4Difficulty].penalty;
-
-            if (res === 1) { // Player Win
+            // --- SINGLEPLAYER LOGIC ---
+            const config = C4_CONFIG[currentC4Difficulty];
+            if (res === 1) { 
                 title.innerText = "VICTORIE!";
                 title.style.color = "var(--primary)";
-                text.innerText = "L-ai depășit pe Kevin Bot!";
-                reward.innerHTML = `${coinImg} +${winReward} KSDA`;
-                if(auth.currentUser) {
-                    await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(winReward) });
-                    logTransaction(winReward, "Victory", `Câștigat Connect 4 (${currentC4Difficulty})`);
-                }
-            } else if (res === 2) { // Bot Win
+                reward.innerHTML = `${coinImg} +${config.reward} KSDA`;
+                await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(config.reward) });
+            } else { 
                 title.innerText = "ÎNFRÂNGERE!";
                 title.style.color = "#ff4757";
-                text.innerText = "Kevin Bot a câștigat de data asta.";
-                
-                let actualPenalty = losePenalty;
-                if(auth.currentUser) {
-                    const userRef = doc(db, "accounts", auth.currentUser.uid);
-                    const uSnap = await getDoc(userRef);
-                    const currentBalance = uSnap.data().coins || 0;
-                    if (currentBalance + losePenalty < 0) actualPenalty = -currentBalance;
-                    await updateDoc(userRef, { coins: increment(actualPenalty) });
-                    logTransaction(actualPenalty, "Defeat", `Pierdut Connect 4 (${currentC4Difficulty})`);
-                }
-                reward.innerHTML = `${coinImg} ${actualPenalty} KSDA`;
-            } else {
-                title.innerText = "REMIZĂ!";
-                reward.innerHTML = `${coinImg} +100 KSDA`;
+                const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+                let penalty = config.penalty;
+                if ((userSnap.data().coins || 0) + penalty < 0) penalty = -(userSnap.data().coins || 0);
+                reward.innerHTML = `${coinImg} ${penalty} KSDA`;
+                await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(penalty) });
             }
         }
-
         showC4Stage('c4ResultModal');
     }, 1500); 
 }
@@ -13857,8 +14026,13 @@ async function updateC4HUD(txt) {
 window.handleGiveUp = async () => {
     if(!confirm("Ești sigur că vrei să renunți? Kevin Bot va câștiga automat și vei pierde 1000 monede!")) return;
     
+
+    if (activeBGM) {
+        activeBGM.pause();
+    }
+
     if(auth.currentUser) {
-        try {
+        try { 
             const userRef = doc(db, "accounts", auth.currentUser.uid);
             const userSnap = await getDoc(userRef);
             const currentCoins = userSnap.exists() ? userSnap.data().coins : 0;
@@ -14021,11 +14195,17 @@ window.openDifficultyMenu = () => {
     showC4Stage('c4DifficultySelect');
 };
 window.selectC4Difficulty = (level) => {
-    currentC4Difficulty = level; // Store the level (easy, medium, etc.)
-    console.log("Mode engaged:", level);
-    startSinglePlayerC4(); // Proceed to intro
-};
+    currentC4Difficulty = level;
+    
+    // REZOLVARE: Arătăm butonul de Force Tie doar pe Easy
+    const tieBtn = document.getElementById('forceTieBtn');
+    if (tieBtn) {
+        tieBtn.style.display = (level === 'easy') ? 'block' : 'none';
+    }
 
+    console.log("Mode engaged:", level);
+    startSinglePlayerC4();
+};
 
 // --- MULTIPLAYER CORE LOGIC ---
 let currentMPTab = 'friendly';
@@ -14033,8 +14213,8 @@ let lobbyListener = null;
 
 // 1. Open Modal and Start Listening
 window.openMultiplayerLobby = () => {
-    if(!auth.currentUser) return alert("Trebuie să fii logat!");
-    document.getElementById('multiplayerModal').classList.add('active');
+// Înlocuiește alert("Trebuie să fii logat") cu:
+if(!auth.currentUser) return showCyberAlert("Trebuie să fii Logat", "warning");    document.getElementById('multiplayerModal').classList.add('active');
     listenToLobbies();
 };
 
@@ -14048,7 +14228,7 @@ window.switchMPTab = (type) => {
 
 // 3. Listen to Open Games
 function listenToLobbies() {
-    if (lobbyListener) lobbyListener(); // Unsubscribe previous
+    if (lobbyListener) lobbyListener();
 
     const q = query(
         collection(db, "c4_lobbies"), 
@@ -14065,16 +14245,27 @@ function listenToLobbies() {
             const lobby = docSnap.data();
             if (lobby.type === currentMPTab && lobby.status === 'waiting') {
                 found = true;
+                
+                // --- CONSTRUIRE AFIȘARE MIZĂ ---
+                let betDisplay = "";
+                if (lobby.type === 'ranked') {
+                    const cPart = lobby.betCoins > 0 ? `${lobby.betCoins} <img src="https://iili.io/fhc1SKQ.png" width="12" style="vertical-align:middle;">` : "";
+                    const dPart = lobby.betDiamonds > 0 ? `${lobby.betDiamonds} <img src="https://iili.io/fv5bmtj.png" width="10" style="vertical-align:middle;">` : "";
+                    betDisplay = `<div style="font-family:'Orbitron'; font-size:10px; color:#ffd700; margin-top:3px;">MIZĂ: ${cPart} ${lobby.betCoins > 0 && lobby.betDiamonds > 0 ? '+' : ''} ${dPart}</div>`;
+                } else {
+                    betDisplay = `<div style="font-size:9px; color:#00ff88; margin-top:3px;">MECI FRIENDLY (FĂRĂ MIZĂ)</div>`;
+                }
+
                 const item = document.createElement('div');
-                item.className = 'lobby-player'; // Style we define in CSS
+                item.className = 'lobby-player'; 
                 item.style.marginBottom = "10px";
                 item.innerHTML = `
                     <img src="${lobby.hostPfp}" class="lobby-pfp">
                     <div style="flex:1">
                         <div class="lobby-name">${lobby.hostName}</div>
-                        <div style="font-size:9px; color:#555;">Creat acum puțin timp</div>
+                        ${betDisplay}
                     </div>
-                    <button class="btn-nav-v6" onclick="joinLobby('${docSnap.id}')" style="font-size:10px; padding:5px 15px;">JOACĂ</button>
+                    <button class="btn-nav-v6" onclick="joinLobby('${docSnap.id}')" style="font-size:10px; padding:5px 15px; border-color: ${lobby.type === 'ranked' ? '#ffd700' : 'var(--primary)'}">JOACĂ</button>
                 `;
                 list.appendChild(item);
             }
@@ -14105,7 +14296,7 @@ window.createC4Lobby = async (type) => {
         });
 
         document.getElementById('createGameModal').classList.remove('active');
-        alert("Partida a fost creată! Așteaptă un adversar...");
+showCyberAlert("Partida a fost creată! Așteaptă un adversar...", "success");
 
         // FIX: Store the listener in a constant so we can kill it
         const unsub = onSnapshot(doc(db, "c4_lobbies", lobbyRef.id), (docSnap) => {
@@ -14121,43 +14312,70 @@ window.createC4Lobby = async (type) => {
     }
 };
 
-// --- NEW UTILITY: CYBER ALERT ---
-window.showCyberAlert = (msg) => {
+window.showCyberAlert = (msg, type = 'error') => {
     const alertBox = document.getElementById('cyberAlert');
     const alertText = document.getElementById('cyberAlertText');
+    const alertIcon = document.getElementById('caIcon');
+
+    // Resetăm clasele anterioare
+    alertBox.classList.remove('ca-error', 'ca-success', 'ca-warning', 'active');
+    
+    // Setăm Iconița și Clasa în funcție de tip
+    if(type === 'success') {
+        alertIcon.className = "fas fa-check-circle";
+        alertBox.classList.add('ca-success');
+    } else if(type === 'warning') {
+        alertIcon.className = "fas fa-exclamation-circle";
+        alertBox.classList.add('ca-warning');
+    } else {
+        alertIcon.className = "fas fa-radiation-alt";
+        alertBox.classList.add('ca-error');
+    }
+
     alertText.innerText = msg;
-    alertBox.classList.add('active');
-    setTimeout(() => alertBox.classList.remove('active'), 3500);
+
+    // Trigger Vizual
+    setTimeout(() => alertBox.classList.add('active'), 50);
+
+    // Auto-hide după 4 secunde
+    setTimeout(() => alertBox.classList.remove('active'), 4000);
 };
 
-// --- UPDATED JOIN LOBBY (PREVENT SELF-JOIN) ---
+// Update joinLobby (Cere confirmare și ia banii opponentului)
 window.joinLobby = async (lobbyId) => {
     const user = auth.currentUser;
     const lobbyRef = doc(db, "c4_lobbies", lobbyId);
-    
-    try {
-        const snap = await getDoc(lobbyRef);
-        const lobbyData = snap.data();
+    const snap = await getDoc(lobbyRef);
+    const d = snap.data();
 
-        // REZOLVARE: Verificăm dacă ești chiar tu creatorul
-        if (lobbyData.hostId === user.uid) {
-            showCyberAlert("Nu te poți juca singur, amuzantule! 🤡");
-            return;
-        }
+    if (d.hostId === user.uid) return showCyberAlert("Nu te poți juca singur!", "error");
 
-        await updateDoc(lobbyRef, {
-            opponentId: user.uid,
-            opponentName: user.displayName || "Player",
-            opponentPfp: user.photoURL || "https://iili.io/fXks1Dv.png",
-            status: 'playing'
-        });
-        
-        document.getElementById('multiplayerModal').classList.remove('active');
-        startMultiplayerMatch(lobbyId, 'opponent');
-        
-    } catch (e) {
-        showCyberAlert("Eroare: Nu s-a putut intra în partidă.");
+    const costText = `${d.betCoins > 0 ? d.betCoins + ' monede' : ''} ${d.betDiamonds > 0 ? d.betDiamonds + ' diamante' : ''}`;
+    if (!confirm(`Ești sigur? Intrarea te costă ${costText}. Winner takes ALL!`)) return;
+
+    const userSnap = await getDoc(doc(db, "accounts", user.uid));
+    const userData = userSnap.data();
+
+    if ((d.betCoins > (userData.coins || 0)) || (d.betDiamonds > (userData.diamonds || 0))) {
+        return showCyberAlert("Nu ai resurse suficiente pentru a intra!", "error");
     }
+
+    // Plata opponent (Escrow)
+    await updateDoc(doc(db, "accounts", user.uid), {
+        coins: increment(-d.betCoins),
+        diamonds: increment(-d.betDiamonds)
+    });
+    logTransaction(-d.betCoins, "Bet", "Miză Connect 4 Ranked (Join)");
+
+    await updateDoc(lobbyRef, {
+        opponentId: user.uid,
+        opponentName: user.displayName || "Player",
+        opponentPfp: user.photoURL || "https://iili.io/fXks1Dv.png",
+        status: 'playing'
+    });
+    
+    document.getElementById('multiplayerModal').classList.remove('active');
+    startMultiplayerMatch(lobbyId, 'opponent');
 };
 
 
@@ -14210,7 +14428,7 @@ onSnapshot(lobbyRef, async (docSnap) => {
         c4TurnUid = data.turnUid;
 
         if (data.hostToken && data.opponentToken && !c4Active && data.status !== 'finished') {
-            initRealBoard();
+            runC4Countdown();
         }
 
         if (document.getElementById('c4ColorPicker').style.display !== 'none') {
@@ -14282,6 +14500,201 @@ async function syncOpponentMove(col, playerNum) {
     updateC4HUD("YOUR TURN");
     startC4TurnTimer();
 }
+
+// --- 1. ACTUAL ASSETS DATABASE ---
+const countdownData = [
+    { 
+        img: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2F3.png?alt=media&token=445dedb6-d47d-40ba-b1f6-629b853213b0", 
+        audio: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2F3.m4a?alt=media&token=388f4945-0f0b-484e-84b5-1636342687c7" 
+    },
+    { 
+        img: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2F2.png?alt=media&token=0f29e296-d34f-453f-98e2-08ba1ca5f210", 
+        audio: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2F2.m4a?alt=media&token=3a5e6914-df43-4dd0-be6a-d0d0c2bb217b" 
+    },
+    { 
+        img: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2F1.png?alt=media&token=c789b0ff-56a4-4fd6-aa0d-f0ecb6de0845", 
+        audio: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2F1.m4a?alt=media&token=c13a79d6-c3d3-4480-8fb6-96a2c896d084" 
+    },
+    { 
+        img: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2FGO.png?alt=media&token=b2e1d28e-d359-4278-a3bf-dbd1d438e61d", 
+        audio: "https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2FGO.m4a?alt=media&token=240068fe-bf3c-4777-948c-6990e5e0f851" 
+    }
+];
+
+// --- 2. PRELOADER ENGINE ---
+const preloadedImages = [];
+const preloadedAudios = [];
+
+function preloadCountdownResources() {
+    countdownData.forEach((item, index) => {
+        // Preload Images
+        const img = new Image();
+        img.src = item.img;
+        preloadedImages[index] = img;
+
+        // Preload Audios
+        const audio = new Audio();
+        audio.src = item.audio;
+        audio.preload = 'auto';
+        preloadedAudios[index] = audio;
+    });
+}
+preloadCountdownResources(); // Rulează instant la încărcarea paginii
+// --- 3. FIX FOR SEQUENCE & ANIMATION (WITH BGM) ---
+window.runC4Countdown = async () => {
+    const overlay = document.getElementById('countdownOverlay');
+    const imgEl = document.getElementById('countdownImage');
+    
+    document.getElementById('c4ColorPicker').style.display = 'none';
+    overlay.style.display = 'flex';
+
+    // --- START BGM LOGIC ---
+    // Alegem piesa în funcție de dificultate (Multiplayer folosește 'hard')
+    const selectedMode = isMultiplayer ? 'hard' : currentC4Difficulty;
+    activeBGM = modeMusic[selectedMode];
+    
+    if(activeBGM) {
+        activeBGM.currentTime = 0;
+        activeBGM.play().catch(e => console.log("BGM Play blocked by browser"));
+    }
+    // --- END BGM LOGIC ---
+
+    for (let i = 0; i < countdownData.length; i++) {
+        // Setează SRC din cache-ul preîncărcat
+        imgEl.src = preloadedImages[i].src;
+        
+        // Redă audio numărătoare (3, 2, 1, GO)
+        preloadedAudios[i].currentTime = 0;
+        preloadedAudios[i].play().catch(e => console.warn("Audio interaction blocked"));
+
+        // RESET ANIMATION
+        imgEl.classList.remove('animate-nuke');
+        void imgEl.offsetWidth; // Forțează reflow
+        imgEl.classList.add('animate-nuke');
+
+        // Așteptăm pasul (1.2s pentru a permite vizibilitatea animației)
+        await new Promise(res => setTimeout(res, 1200));
+        
+        // Pauza de jumătate de secundă cerută între numere
+        await new Promise(res => setTimeout(res, 500));
+    }
+
+    // Finalizare și start board
+    overlay.style.display = 'none';
+    initRealBoard();
+};
+
+
+const dropSFX = new Audio("https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2Fdragon-studio-pop-402322.mp3?alt=media&token=7d23cbad-c586-4847-b75b-119eac3ac7f3");
+dropSFX.preload = 'auto';
+
+const winUserSFX = new Audio("https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2Ffreesound_community-friend-request-14878.mp3?alt=media&token=7a6b92eb-ca40-4280-bb97-4b276e328c53");
+const winOpponentSFX = new Audio("https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2Funiversfield-opening-144757.mp3?alt=media&token=dd33708a-4d6f-4db1-8643-81dc19f480ad");
+
+[winUserSFX, winOpponentSFX].forEach(s => s.preload = 'auto');
+
+
+
+
+
+const drawSFX = new Audio("https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2Fdowner_noise.mp3?alt=media&token=862d0d0a-334b-4d97-8432-43e2e12fa3d0");
+drawSFX.preload = 'auto';
+
+
+const modeMusic = {
+    easy: new Audio("https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2Feazy.mp3?alt=media&token=d002d70d-d734-41f9-9c48-74b8ec6706d4"),
+    medium: new Audio("https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2Fmedium.mp3?alt=media&token=cf2d7e4e-2dfd-44f8-8866-91a31293448a"),
+    hard: new Audio("https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2Fhard.mp3?alt=media&token=7590659e-93ee-4dcd-a836-3bd9d3ee3dc8"),
+    hardcore: new Audio("https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/COUNT%20DOWN%2F01kikosk-make-it-bun-dem-370882.mp3?alt=media&token=c7739fbb-207b-4104-a80f-0a1c37b18e15")
+};
+
+let activeBGM = null; // Aici reținem melodia care cântă acum
+
+// Preîncărcare
+Object.values(modeMusic).forEach(m => {
+    m.preload = 'auto';
+    m.loop = true;
+    m.volume = 0.4;
+});
+
+
+let currentBetType = "coins"; // coins, diamonds, both
+
+window.toggleBetType = (type) => {
+    currentBetType = type;
+    document.getElementById('btnBetCoins').classList.toggle('bet-active', type === 'coins');
+    document.getElementById('btnBetDiamonds').classList.toggle('bet-active', type === 'diamonds');
+    document.getElementById('btnBetBoth').classList.toggle('bet-active', type === 'both');
+
+    document.getElementById('boxCoins').style.display = (type === 'coins' || type === 'both') ? 'block' : 'none';
+    document.getElementById('boxDiamonds').style.display = (type === 'diamonds' || type === 'both') ? 'block' : 'none';
+};
+
+// Deschide meniul Ranked
+window.openCreateGameMenu = () => {
+    // Închidem lobby-ul general și deschidem selecția
+    document.getElementById('createGameModal').classList.add('active');
+};
+
+// Când dai click pe butonul de creat lobby (Friendly / Ranked)
+window.createC4Lobby = async (type) => {
+    if (type === 'friendly') {
+        processCreateLobby('friendly', 0, 0);
+    } else {
+        document.getElementById('createGameModal').classList.remove('active');
+        document.getElementById('rankedSetupModal').classList.add('active');
+        toggleBetType('coins'); // default
+    }
+};
+
+window.confirmRankedCreation = async () => {
+    const coinsBet = (currentBetType === 'coins' || currentBetType === 'both') ? parseInt(document.getElementById('inputBetCoins').value) || 0 : 0;
+    const diamondsBet = (currentBetType === 'diamonds' || currentBetType === 'both') ? parseInt(document.getElementById('inputBetDiamonds').value) || 0 : 0;
+
+    // Verificare sold
+    const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const userData = userSnap.data();
+
+    if (coinsBet > (userData.coins || 0) || diamondsBet > (userData.diamonds || 0)) {
+        return showCyberAlert("Nu ai suficiente resurse pentru acest pariu!", "error");
+    }
+
+    // Retragere bani Host (Escrow)
+    await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
+        coins: increment(-coinsBet),
+        diamonds: increment(-diamondsBet)
+    });
+    logTransaction(-coinsBet, "Bet", "Miză Connect 4 Ranked (Creat)");
+
+    processCreateLobby('ranked', coinsBet, diamondsBet);
+    document.getElementById('rankedSetupModal').classList.remove('active');
+};
+
+async function processCreateLobby(type, coins, diamonds) {
+    const user = auth.currentUser;
+    const lobbyRef = await addDoc(collection(db, "c4_lobbies"), {
+        hostId: user.uid,
+        hostName: user.displayName || "Player",
+        hostPfp: user.photoURL || "https://iili.io/fXks1Dv.png",
+        type: type,
+        betCoins: coins,
+        betDiamonds: diamonds,
+        status: 'waiting',
+        createdAt: serverTimestamp(),
+        opponentId: null
+    });
+    showCyberAlert("Arena creată! Așteaptă adversar...", "success");
+    
+    const unsub = onSnapshot(doc(db, "c4_lobbies", lobbyRef.id), (docSnap) => {
+        const data = docSnap.data();
+        if (data && data.status === 'playing' && data.opponentId) {
+            unsub();
+            startMultiplayerMatch(lobbyRef.id, 'host');
+        }
+    });
+}
+
   </script>
 </body>
 </html>
+ 
