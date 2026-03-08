@@ -11013,9 +11013,54 @@ margin: 0 !important;
     box-shadow: inset 0 0 10px var(--primary) !important;
 }
 
+
+/* FIX: Game Type Buttons Layout (Multiplayer Selection) */
+#createGameModal .mode-card {
+    flex-direction: column !important; /* Stack icon above text */
+    justify-content: center !important;
+    height: auto !important;
+    padding: 25px 15px !important;
+    text-align: center !important;
+}
+
+#createGameModal .mode-card div {
+    margin-left: 0 !important;
+    margin-top: 10px;
+}
+
+/* THE CYBER ALERT (Replaces Google Alert) */
+.cyber-alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: rgba(13, 25, 41, 0.95);
+    border: 2px solid #ff4757;
+    color: #fff;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    z-index: 200000;
+    box-shadow: 0 0 30px rgba(255, 71, 87, 0.5);
+    transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.cyber-alert.active { transform: translateX(-50%) translateY(0); }
+.cyber-alert i { color: #ff4757; font-size: 20px; }
+
   </style>
 </head>
 <body>
+
+<div id="cyberAlert" class="cyber-alert">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span id="cyberAlertText">TEXT_ERROARE</span>
+</div>
 
 
 <!-- MULTIPLAYER LOBBY MODAL -->
@@ -14076,12 +14121,30 @@ window.createC4Lobby = async (type) => {
     }
 };
 
-// 5. Join a Lobby
+// --- NEW UTILITY: CYBER ALERT ---
+window.showCyberAlert = (msg) => {
+    const alertBox = document.getElementById('cyberAlert');
+    const alertText = document.getElementById('cyberAlertText');
+    alertText.innerText = msg;
+    alertBox.classList.add('active');
+    setTimeout(() => alertBox.classList.remove('active'), 3500);
+};
+
+// --- UPDATED JOIN LOBBY (PREVENT SELF-JOIN) ---
 window.joinLobby = async (lobbyId) => {
     const user = auth.currentUser;
     const lobbyRef = doc(db, "c4_lobbies", lobbyId);
     
     try {
+        const snap = await getDoc(lobbyRef);
+        const lobbyData = snap.data();
+
+        // REZOLVARE: Verificăm dacă ești chiar tu creatorul
+        if (lobbyData.hostId === user.uid) {
+            showCyberAlert("Nu te poți juca singur, amuzantule! 🤡");
+            return;
+        }
+
         await updateDoc(lobbyRef, {
             opponentId: user.uid,
             opponentName: user.displayName || "Player",
@@ -14093,7 +14156,7 @@ window.joinLobby = async (lobbyId) => {
         startMultiplayerMatch(lobbyId, 'opponent');
         
     } catch (e) {
-        alert("Nu s-a putut intra în partidă.");
+        showCyberAlert("Eroare: Nu s-a putut intra în partidă.");
     }
 };
 
