@@ -10965,9 +10965,96 @@ margin: 0 !important;
         grid-template-columns: repeat(3, 1fr) !important; /* 3 tokens per row on mobile */
     }
 }
+
+.lobby-player {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 10px 15px;
+    border-radius: 15px;
+    transition: 0.3s;
+}
+.lobby-player:hover {
+    background: rgba(41, 243, 255, 0.05);
+    border-color: var(--primary);
+}
+.lobby-pfp {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+}
+.lobby-name {
+    font-family: 'Orbitron';
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+}
+
   </style>
 </head>
 <body>
+
+
+<!-- MULTIPLAYER LOBBY MODAL -->
+<div id="multiplayerModal" class="account-modal-overlay">
+    <div class="cosmetics-card-v6" style="border-color: var(--primary); max-width: 500px;">
+        <button class="close-pop" onclick="document.getElementById('multiplayerModal').classList.remove('active')">✕</button>
+        
+        <div class="cosmo-content-v6">
+            <div class="cosmo-header">
+                <div class="cosmo-title">BATTLE ARENA</div>
+                <div style="font-size: 10px; color: #aaa; margin-top: 5px;">Alege o partidă sau creează una nouă</div>
+            </div>
+
+            <!-- Tabs Selection -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button id="tabFriendly" class="btn-nav-v6" onclick="switchMPTab('friendly')" style="border-color: var(--primary); background: rgba(41,243,255,0.1);">FRIENDLY</button>
+                <button id="tabRanked" class="btn-nav-v6" onclick="switchMPTab('ranked')">RANKED BATTLE</button>
+            </div>
+
+            <!-- Game List Area -->
+            <div id="lobbyList" class="inventory-scroll-area" style="min-height: 250px; display: block;">
+                <!-- Open games will appear here -->
+                <div style="text-align:center; color:#555; padding-top:50px;">Nu sunt partide disponibile...</div>
+            </div>
+
+            <!-- Create Button -->
+            <button class="btn-ksda-fire" style="width: 100%; margin-top: 20px;" onclick="openCreateGameMenu()">
+                <span>CREEAZĂ PARTIDĂ NOUĂ</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- CREATE GAME SELECTION MODAL -->
+<div id="createGameModal" class="account-modal-overlay" style="z-index: 100001;">
+    <div class="c4-choice-card" style="max-width: 400px;">
+        <button class="close-pop" onclick="document.getElementById('createGameModal').classList.remove('active')">✕</button>
+        <h2 class="mode-title">TIPUL JOCULUI</h2>
+        <p style="color: #aaa; font-size: 12px; margin-bottom: 20px;">Cum vrei să joci astăzi?</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 15px; width: 100%;">
+            <div class="mode-card" onclick="createC4Lobby('friendly')" style="flex-direction: row; padding: 20px; height: auto;">
+                <i class="fas fa-handshake" style="font-size: 30px;"></i>
+                <div style="text-align: left; margin-left: 15px;">
+                    <h3 style="font-size: 14px;">FRIENDLY GAME</h3>
+                    <span style="font-size: 9px; opacity: 0.6;">Fără mize, doar distracție</span>
+                </div>
+            </div>
+
+            <div class="mode-card" onclick="createC4Lobby('ranked')" style="flex-direction: row; padding: 20px; height: auto; border-color: #ffd700;">
+                <i class="fas fa-trophy" style="font-size: 30px; color: #ffd700;"></i>
+                <div style="text-align: left; margin-left: 15px;">
+                    <h3 style="font-size: 14px; color: #ffd700;">RANKED BATTLE</h3>
+                    <span style="font-size: 9px; opacity: 0.6;">Miză: 1000 KSDA & Rank</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- CONNECT 4 ULTIMATE OVERLAY -->
 <div id="c4GameOverlay" class="c4v-overlay-master" style="display: none;">
@@ -11625,11 +11712,11 @@ margin: 0 !important;
                         <span style="font-size: 9px; opacity: 0.6;">VS KEVIN-BOT (AI)</span>
                     </div>
 
-                    <div class="mode-card" onclick="alert('Incurând: Meciuri Rankate 1V1')">
-                        <i class="fas fa-user-friends"></i>
-                        <h3>BATTLE 1V1</h3>
-                        <span style="font-size: 9px; opacity: 0.6;">RANKED MULTIPLAYER</span>
-                    </div>
+<div class="mode-card" onclick="openMultiplayerLobby()">
+    <i class="fas fa-user-friends"></i>
+    <h3>BATTLE 1V1</h3>
+    <span style="font-size: 9px; opacity: 0.6;">RANKED MULTIPLAYER</span>
+</div>
                 </div>
             </div>
 
@@ -13799,6 +13886,129 @@ window.selectC4Difficulty = (level) => {
     console.log("Mode engaged:", level);
     startSinglePlayerC4(); // Proceed to intro
 };
+
+
+// --- MULTIPLAYER CORE LOGIC ---
+let currentMPTab = 'friendly';
+let lobbyListener = null;
+
+// 1. Open Modal and Start Listening
+window.openMultiplayerLobby = () => {
+    if(!auth.currentUser) return alert("Trebuie să fii logat!");
+    document.getElementById('multiplayerModal').classList.add('active');
+    listenToLobbies();
+};
+
+// 2. Tab Switcher
+window.switchMPTab = (type) => {
+    currentMPTab = type;
+    document.getElementById('tabFriendly').style.background = type === 'friendly' ? 'rgba(41,243,255,0.1)' : 'transparent';
+    document.getElementById('tabRanked').style.background = type === 'ranked' ? 'rgba(41,243,255,0.1)' : 'transparent';
+    listenToLobbies();
+};
+
+// 3. Listen to Open Games
+function listenToLobbies() {
+    if (lobbyListener) lobbyListener(); // Unsubscribe previous
+
+    const q = query(
+        collection(db, "c4_lobbies"), 
+        orderBy("createdAt", "desc"),
+        limit(20)
+    );
+
+    lobbyListener = onSnapshot(q, (snapshot) => {
+        const list = document.getElementById('lobbyList');
+        list.innerHTML = '';
+        
+        let found = false;
+        snapshot.forEach((docSnap) => {
+            const lobby = docSnap.data();
+            if (lobby.type === currentMPTab && lobby.status === 'waiting') {
+                found = true;
+                const item = document.createElement('div');
+                item.className = 'lobby-player'; // Style we define in CSS
+                item.style.marginBottom = "10px";
+                item.innerHTML = `
+                    <img src="${lobby.hostPfp}" class="lobby-pfp">
+                    <div style="flex:1">
+                        <div class="lobby-name">${lobby.hostName}</div>
+                        <div style="font-size:9px; color:#555;">Creat acum puțin timp</div>
+                    </div>
+                    <button class="btn-nav-v6" onclick="joinLobby('${docSnap.id}')" style="font-size:10px; padding:5px 15px;">JOACĂ</button>
+                `;
+                list.appendChild(item);
+            }
+        });
+
+        if (!found) {
+            list.innerHTML = `<div style="text-align:center; color:#555; padding-top:50px;">Nu sunt partide ${currentMPTab} disponibile...</div>`;
+        }
+    });
+}
+
+// 4. Create a Lobby
+window.openCreateGameMenu = () => {
+    document.getElementById('createGameModal').classList.add('active');
+};
+
+window.createC4Lobby = async (type) => {
+    const user = auth.currentUser;
+    try {
+        const lobbyRef = await addDoc(collection(db, "c4_lobbies"), {
+            hostId: user.uid,
+            hostName: user.displayName || "Player",
+            hostPfp: user.photoURL || "https://iili.io/fXks1Dv.png",
+            type: type,
+            status: 'waiting',
+            createdAt: serverTimestamp(),
+            opponentId: null
+        });
+
+        document.getElementById('createGameModal').classList.remove('active');
+        alert("Partida a fost creată! Așteaptă un adversar...");
+
+        // Listen for when someone joins your lobby
+        onSnapshot(doc(db, "c4_lobbies", lobbyRef.id), (docSnap) => {
+            const data = docSnap.data();
+            if (data.status === 'playing' && data.opponentId) {
+                alert("Adversar găsit! Se începe jocul...");
+                startMultiplayerMatch(lobbyRef.id, 'host');
+            }
+        });
+
+    } catch (e) {
+        console.error("Error creating lobby:", e);
+    }
+};
+
+// 5. Join a Lobby
+window.joinLobby = async (lobbyId) => {
+    const user = auth.currentUser;
+    const lobbyRef = doc(db, "c4_lobbies", lobbyId);
+    
+    try {
+        await updateDoc(lobbyRef, {
+            opponentId: user.uid,
+            opponentName: user.displayName || "Player",
+            opponentPfp: user.photoURL || "https://iili.io/fXks1Dv.png",
+            status: 'playing'
+        });
+        
+        document.getElementById('multiplayerModal').classList.remove('active');
+        startMultiplayerMatch(lobbyId, 'opponent');
+        
+    } catch (e) {
+        alert("Nu s-a putut intra în partidă.");
+    }
+};
+
+// 6. Start the actual Match (Placeholder for now)
+function startMultiplayerMatch(lobbyId, role) {
+    console.log("Starting Multiplayer Match:", lobbyId, "as", role);
+    // This is where we will hook into your Connect 4 Grid logic
+    // We'll need a different initBoard for Syncing moves.
+}
   </script>
 </body>
 </html>
