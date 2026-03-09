@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -1269,8 +1270,7 @@ async function trackVisit(pageName) {
         lastVisit: serverTimestamp()
     }, { merge: true });
 }
-trackVisit("Noutați/Anunțuri"); // Schimbă numele aici pentru fiecare pagină
-
+trackVisit("Noutati_Anunturi"); // Folosește underscore în loc de slash
 // FIND THIS BUTTON ACTION
 const openCosmeticsBtn = document.getElementById('openCosmeticsBtn');
 
@@ -1722,6 +1722,7 @@ onAuthStateChanged(auth, async (user) => {
           // --- START FIX: PROFILE PICTURE SYNC ---
                 // 1. Determine the correct image (Database > Google > Placeholder)
                 const finalProfilePic = data.image || user.photoURL || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
+    window.myCurrentPfp = finalProfilePic; // <--- ADAUGĂ ACEASTĂ LINIE
 
                 // 2. Force Update Header Image
                 if (headerUserImg) headerUserImg.src = finalProfilePic;
@@ -2029,14 +2030,16 @@ window.postComment = async (id) => {
             const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
             const userData = userSnap.data();
             const displayName = userData.username || auth.currentUser.displayName;
+        const userImg = userData.image || auth.currentUser.photoURL || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
+
 
             const commentData = { 
                 text: text, 
                 uid: auth.currentUser.uid, 
                 email: auth.currentUser.email, 
                 name: displayName, // Numele corect
-            photo: finalPic,
-            image: finalPic,
+            photo: userImg, // Înlocuit finalPic cu userImg
+            image: userImg, // Înlocuit finalPic cu userImg
 
                 createdAt: serverTimestamp() 
             };
