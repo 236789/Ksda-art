@@ -14464,7 +14464,7 @@ window.joinLobby = async (lobbyId) => {
     const snap = await getDoc(lobbyRef);
     const d = snap.data();
 
-    if (d.hostId === user.uid) return showCyberAlert("Nu te poți juca singur!", "error");
+    if (d.hostId === user.uid) return window.showCyberAlert("Nu te poți juca singur!", "error");
 
     // --- 1. OFFLINE CHECK ---
     const hostSnap = await getDoc(doc(db, "accounts", d.hostId));
@@ -14476,27 +14476,31 @@ window.joinLobby = async (lobbyId) => {
         const isOffline = (Date.now() - lastActive) > (5 * 60 * 1000); 
 
         if (isOffline || hostData.isOnline === false) {
-            return showCyberAlert("Acest jucător este offline. Nu poți juca cu el acum.", "error");
+            return window.showCyberAlert("Acest jucător este offline. Nu poți juca cu el acum.", "error");
         }
     }
     // ------------------------
 
     const costText = `${d.betCoins > 0 ? d.betCoins + ' monede' : ''} ${d.betDiamonds > 0 ? d.betDiamonds + ' diamante' : ''}`;
-    if (!confirm(`Ești sigur? Intrarea te costă ${costText}. Winner takes ALL!`)) return;
+    if (d.type === 'ranked') {
+        if (!confirm(`Ești sigur? Intrarea te costă ${costText}. Winner takes ALL!`)) return;
+    }
 
     // FETCH REAL DATA
     const userSnap = await getDoc(doc(db, "accounts", user.uid));
     const userData = userSnap.exists() ? userSnap.data() : {};
 
-    if ((d.betCoins > (userData.coins || 0)) || (d.betDiamonds > (userData.diamonds || 0))) {
-        return showCyberAlert("Nu ai resurse suficiente pentru a intra!", "error");
+    if (d.type === 'ranked' && ((d.betCoins > (userData.coins || 0)) || (d.betDiamonds > (userData.diamonds || 0)))) {
+        return window.showCyberAlert("Nu ai resurse suficiente pentru a intra!", "error");
     }
 
-    await updateDoc(doc(db, "accounts", user.uid), {
-        coins: increment(-d.betCoins),
-        diamonds: increment(-d.betDiamonds)
-    });
-    logTransaction(-d.betCoins, "Bet", "Miză Connect 4 Ranked (Join)");
+    if (d.type === 'ranked') {
+        await updateDoc(doc(db, "accounts", user.uid), {
+            coins: increment(-d.betCoins),
+            diamonds: increment(-d.betDiamonds)
+        });
+        logTransaction(-d.betCoins, "Bet", "Miză Connect 4 Ranked (Join)");
+    }
 
     // GET PROPER NAME
     const customName = userData.username || user.displayName || "Player";
@@ -14516,7 +14520,9 @@ window.joinLobby = async (lobbyId) => {
     });
     
     document.getElementById('multiplayerModal').classList.remove('active');
-    startMultiplayerMatch(lobbyId, 'opponent');
+    
+    // CRITICAL FIX: Added window. prefix
+    window.startMultiplayerMatch(lobbyId, 'opponent');
 };
 
 
@@ -14535,20 +14541,16 @@ window.startMultiplayerMatch = async (lobbyId, role) => {
     const snap = await getDoc(lobbyRef);
     const lobbyData = snap.data();
 
-    // Sincronizare Identitate & Cosmetice
+    // Sync Identity & Custom Text
     const oppName = (role === 'host') ? lobbyData.opponentName : lobbyData.hostName;
     const oppPfp = (role === 'host') ? lobbyData.opponentPfp : lobbyData.hostPfp;
     const oppCss = (role === 'host') ? lobbyData.opponentTextCss : lobbyData.hostTextCss;
-    const oppFrame = (role === 'host') ? lobbyData.opponentFrameImg : lobbyData.hostFrameImg;
-    const oppFrameScale = (role === 'host') ? lobbyData.opponentFrameScale : lobbyData.hostFrameScale;
 
     const myName = (role === 'host') ? lobbyData.hostName : lobbyData.opponentName;
     const myPfp = (role === 'host') ? lobbyData.hostPfp : lobbyData.opponentPfp;
     const myCss = (role === 'host') ? lobbyData.hostTextCss : lobbyData.opponentTextCss;
-    const myFrame = (role === 'host') ? lobbyData.hostFrameImg : lobbyData.opponentFrameImg;
-    const myFrameScale = (role === 'host') ? lobbyData.hostFrameScale : lobbyData.opponentFrameScale;
 
-    // --- INTRO SCREEN (VS) ---
+    // --- INTRO SCREEN (VS) - NO FRAMES ---
     document.getElementById('vsPlayerImg').src = myPfp;
     const vsPName = document.getElementById('vsPlayerName');
     vsPName.innerHTML = myCss ? `<span class="${myCss}">${myName}</span>` : myName;
@@ -14559,14 +14561,11 @@ window.startMultiplayerMatch = async (lobbyId, role) => {
         introOppName.innerHTML = oppCss ? `<span class="${oppCss}">${oppName}</span>` : oppName;
     }
 
-    // Apply Frames to VS Circles
+    // Force remove any lingering frames just to be 100% sure
     const p1Circle = document.getElementById('vsPlayerImg').parentElement;
     const p2Circle = document.getElementById('vsBotImg').parentElement;
     p1Circle.querySelectorAll('.pop-frame-overlay').forEach(e => e.remove());
     p2Circle.querySelectorAll('.pop-frame-overlay').forEach(e => e.remove());
-
-    if (myFrame) p1Circle.innerHTML += `<img src="${myFrame}" class="pop-frame-overlay" style="width:${(myFrameScale||1.45)*100}%; height:${(myFrameScale||1.45)*100}%; display:block; z-index:2; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;">`;
-    if (oppFrame) p2Circle.innerHTML += `<img src="${oppFrame}" class="pop-frame-overlay" style="width:${(oppFrameScale||1.45)*100}%; height:${(oppFrameScale||1.45)*100}%; display:block; z-index:2; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;">`;
 
     // --- TACTICAL HUD ---
     document.getElementById('hudPfp').src = myPfp;
@@ -14592,7 +14591,7 @@ window.startMultiplayerMatch = async (lobbyId, role) => {
         c4TurnUid = data.turnUid;
 
         if (data.hostToken && data.opponentToken && !c4Active && data.status !== 'finished') {
-            runC4Countdown();
+            window.runC4Countdown();
         }
 
         if (document.getElementById('c4ColorPicker').style.display !== 'none') {
@@ -14855,13 +14854,19 @@ async function processCreateLobby(type, coins, diamonds) {
         createdAt: serverTimestamp(),
         opponentId: null
     });
-    showCyberAlert("Arena creată! Așteaptă adversar...", "success");
+    
+    // Close modals so the screen is clear for the game
+    document.getElementById('createGameModal').classList.remove('active');
+    document.getElementById('multiplayerModal').classList.remove('active');
+    
+    window.showCyberAlert("Arena creată! Așteaptă adversar...", "success");
     
     const unsub = onSnapshot(doc(db, "c4_lobbies", lobbyRef.id), (docSnap) => {
         const data = docSnap.data();
         if (data && data.status === 'playing' && data.opponentId) {
             unsub();
-            startMultiplayerMatch(lobbyRef.id, 'host');
+            // CRITICAL FIX: Added window. prefix to prevent ReferenceError crash
+            window.startMultiplayerMatch(lobbyRef.id, 'host'); 
         }
     });
 }
