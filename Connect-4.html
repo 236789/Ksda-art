@@ -14275,6 +14275,47 @@ window.switchMPTab = (type) => {
     listenToLobbies();
 };
 
+
+// --- AUTO REFUND & EXPIRE LOBBY SYSTEM ---
+async function handleExpiredLobby(lobbyId, lobbyData) {
+    if (lobbyData.status !== 'waiting') return; // Prevent double refunds
+    
+    const lobbyRef = doc(db, "c4_lobbies", lobbyId);
+    try {
+        // Run a transaction to ensure only ONE person triggers the refund
+        await runTransaction(db, async (transaction) => {
+            const freshSnap = await transaction.get(lobbyRef);
+            if (!freshSnap.exists()) return;
+            const freshData = freshSnap.data();
+            
+            // Ensure it hasn't already been refunded by another player viewing the list
+            if (freshData.status === 'waiting') {
+                // 1. Mark the lobby as expired
+                transaction.update(lobbyRef, { status: 'expired' });
+                
+                // 2. Refund the host if it was a ranked match
+                if (freshData.type === 'ranked') {
+                    const hostRef = doc(db, "accounts", freshData.hostId);
+                    const hostSnap = await transaction.get(hostRef);
+                    
+                    if (hostSnap.exists()) {
+                        const hData = hostSnap.data();
+                        transaction.update(hostRef, {
+                            coins: increment(freshData.betCoins || 0),
+                            diamonds: increment(freshData.betDiamonds || 0)
+                        });
+                        console.log(`Lobby expired: Refunded ${freshData.betCoins} coins to host.`);
+                    }
+                }
+            }
+        });
+    } catch (e) {
+        console.error("Refund transaction failed: ", e);
+    }
+}
+
+
+// 3. Listen to Open Games (WITH AUTO-EXPIRATION)
 function listenToLobbies() {
     if (lobbyListener) lobbyListener();
 
@@ -14289,8 +14330,23 @@ function listenToLobbies() {
         list.innerHTML = '';
         
         let found = false;
+        const now = Date.now();
+
         snapshot.forEach((docSnap) => {
             const lobby = docSnap.data();
+            
+            // --- 25 MINUTE EXPIRATION CHECK ---
+            // If the server timestamp hasn't processed locally yet, use Date.now()
+            const createdAt = lobby.createdAt ? lobby.createdAt.toMillis() : now;
+            const ageInMinutes = (now - createdAt) / (1000 * 60);
+
+            if (ageInMinutes >= 25 && lobby.status === 'waiting') {
+                // Lobby is older than 25 mins: Expire & Refund!
+                handleExpiredLobby(docSnap.id, lobby);
+                return; // Skip rendering this lobby on the screen
+            }
+            // ----------------------------------
+
             if (lobby.type === currentMPTab && lobby.status === 'waiting') {
                 found = true;
                 
@@ -14322,8 +14378,8 @@ function listenToLobbies() {
                         <img src="${lobby.hostPfp}" style="width:100%; height:100%; border-radius:50%; border:2px solid var(--primary); object-fit:cover; position:relative; z-index:1;">
                         ${frameHtml}
                     </div>
-                    <div style="flex:1; position:relative; z-index:2;">
-                        <div style="font-family: 'Montserrat', sans-serif; font-size: 8px; font-weight: 900; color: #fff; text-transform: uppercase; text-shadow: 1px 1px 4px #000;">${nameHtml}</div>
+                    <div style="flex:1; position:relative; z-index:2; overflow:hidden;">
+                        <div class="lobby-name">${nameHtml}</div>
                         ${betDisplay}
                     </div>
                     <button class="btn-nav-v6" onclick="joinLobby('${docSnap.id}')" style="position:relative; z-index:2; font-size:10px; padding:5px 15px; border-color: ${lobby.type === 'ranked' ? '#ffd700' : 'var(--primary)'}">JOACĂ</button>
@@ -14409,6 +14465,21 @@ window.joinLobby = async (lobbyId) => {
     const d = snap.data();
 
     if (d.hostId === user.uid) return showCyberAlert("Nu te poți juca singur!", "error");
+
+    // --- 1. OFFLINE CHECK ---
+    const hostSnap = await getDoc(doc(db, "accounts", d.hostId));
+    if (hostSnap.exists()) {
+        const hostData = hostSnap.data();
+        const lastActive = hostData.lastActive ? hostData.lastActive.toMillis() : 0;
+        
+        // If the host hasn't interacted with the site in 5 minutes (300,000ms), block the match
+        const isOffline = (Date.now() - lastActive) > (5 * 60 * 1000); 
+
+        if (isOffline || hostData.isOnline === false) {
+            return showCyberAlert("Acest jucător este offline. Nu poți juca cu el acum.", "error");
+        }
+    }
+    // ------------------------
 
     const costText = `${d.betCoins > 0 ? d.betCoins + ' monede' : ''} ${d.betDiamonds > 0 ? d.betDiamonds + ' diamante' : ''}`;
     if (!confirm(`Ești sigur? Intrarea te costă ${costText}. Winner takes ALL!`)) return;
