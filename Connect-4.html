@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -11149,6 +11150,49 @@ margin: 0 !important;
     background: var(--primary-dim) !important;
     box-shadow: 0 0 15px var(--primary);
 }
+
+
+/* --- MULTIPLAYER LOBBY UI FIXES --- */
+/* Bolder font for the names */
+.lobby-name {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    color: #fff;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 4px #000;
+}
+
+/* Allow banners in the lobby background */
+.lobby-player {
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+/* Dark overlay so text is readable if a bright banner is equipped */
+.lobby-player.profile-banner-active::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75) !important;
+    z-index: -1;
+}
+
+/* --- FIX FOR THE TURN PILL COLORS --- */
+.turn-pill.player-active {
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
+    text-shadow: 0 0 10px var(--primary) !important;
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.4), inset 0 0 10px rgba(41, 243, 255, 0.2) !important;
+}
+
+.turn-pill.bot-active {
+    border-color: #ff4757 !important;
+    color: #ff4757 !important;
+    text-shadow: 0 0 10px #ff4757 !important;
+    box-shadow: 0 0 20px rgba(255, 71, 87, 0.4), inset 0 0 10px rgba(255, 71, 87, 0.2) !important;
+}
   </style>
 </head>
 <body>
@@ -13985,7 +14029,6 @@ async function triggerWin(res) {
         showC4Stage('c4ResultModal');
     }, 1500); 
 }
-// Issue 3: HUD logic pentru nume și culori
 async function updateC4HUD(txt) {
     const statusEl = document.getElementById('gameStatusText');
     const pill = document.getElementById('gameStatusPill');
@@ -13999,8 +14042,11 @@ async function updateC4HUD(txt) {
         const d = lobbySnap.data();
         const isHostTurn = (d.turnUid === d.hostId);
         
-        // Setăm textul: "NUME TURN"
-        statusEl.innerText = isHostTurn ? `${d.hostName} TURN` : `${d.opponentName} TURN`;
+        // Use custom CSS for the names in the Turn Box too!
+        const hostNameHtml = d.hostTextCss ? `<span class="${d.hostTextCss}">${d.hostName}</span>` : d.hostName;
+        const oppNameHtml = d.opponentTextCss ? `<span class="${d.opponentTextCss}">${d.opponentName}</span>` : d.opponentName;
+
+        statusEl.innerHTML = isHostTurn ? `${hostNameHtml} TURN` : `${oppNameHtml} TURN`;
         
         if (isHostTurn) {
             pill.classList.add('host-active'); // Blue
@@ -14016,10 +14062,22 @@ async function updateC4HUD(txt) {
             oppImg.style.opacity = "1";
         }
     } else {
-        // Logica veche pentru Bot
-        statusEl.innerText = statusText;
-        if (c4Turn === 1) pill.classList.add('player-active');
-        else pill.classList.add('bot-active');
+        // --- SINGLEPLAYER FIX ---
+        statusEl.innerText = txt; // FIXED: Changed from statusText to txt
+        
+        if (c4Turn === 1) {
+            pill.classList.add('player-active');
+            playerImg.style.transform = "scale(1.2)";
+            oppImg.style.transform = "scale(0.9)";
+            oppImg.style.opacity = "0.4";
+            playerImg.style.opacity = "1";
+        } else {
+            pill.classList.add('bot-active'); // THIS MAKES IT RED
+            oppImg.style.transform = "scale(1.2)";
+            playerImg.style.transform = "scale(0.9)";
+            playerImg.style.opacity = "0.4";
+            oppImg.style.opacity = "1";
+        }
     }
 }
 
@@ -14226,7 +14284,6 @@ window.switchMPTab = (type) => {
     listenToLobbies();
 };
 
-// 3. Listen to Open Games
 function listenToLobbies() {
     if (lobbyListener) lobbyListener();
 
@@ -14246,26 +14303,39 @@ function listenToLobbies() {
             if (lobby.type === currentMPTab && lobby.status === 'waiting') {
                 found = true;
                 
-                // --- CONSTRUIRE AFIȘARE MIZĂ ---
                 let betDisplay = "";
                 if (lobby.type === 'ranked') {
                     const cPart = lobby.betCoins > 0 ? `${lobby.betCoins} <img src="https://iili.io/fhc1SKQ.png" width="12" style="vertical-align:middle;">` : "";
                     const dPart = lobby.betDiamonds > 0 ? `${lobby.betDiamonds} <img src="https://iili.io/fv5bmtj.png" width="10" style="vertical-align:middle;">` : "";
-                    betDisplay = `<div style="font-family:'Orbitron'; font-size:10px; color:#ffd700; margin-top:3px;">MIZĂ: ${cPart} ${lobby.betCoins > 0 && lobby.betDiamonds > 0 ? '+' : ''} ${dPart}</div>`;
+                    betDisplay = `<div style="font-family:'Orbitron'; font-size:10px; color:#ffd700; margin-top:3px; position:relative; z-index:2;">MIZĂ: ${cPart} ${lobby.betCoins > 0 && lobby.betDiamonds > 0 ? '+' : ''} ${dPart}</div>`;
                 } else {
-                    betDisplay = `<div style="font-size:9px; color:#00ff88; margin-top:3px;">MECI FRIENDLY (FĂRĂ MIZĂ)</div>`;
+                    betDisplay = `<div style="font-size:9px; color:#00ff88; margin-top:3px; position:relative; z-index:2;">MECI FRIENDLY (FĂRĂ MIZĂ)</div>`;
                 }
 
+                // --- APPLY COSMETICS ---
+                const bannerClass = lobby.hostBannerCss ? `profile-banner-active ${lobby.hostBannerCss}` : "";
+                const nameHtml = lobby.hostTextCss ? `<span class="${lobby.hostTextCss}">${lobby.hostName}</span>` : lobby.hostName;
+                const frameHtml = lobby.hostFrameImg ? `<img src="${lobby.hostFrameImg}" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:${(lobby.hostFrameScale||1.45)*100}%; height:${(lobby.hostFrameScale||1.45)*100}%; z-index:2; pointer-events:none;">` : "";
+                const darkOverlay = lobby.hostBannerCss ? `<div style="position:absolute; inset:0; background:rgba(0,0,0,0.7); z-index:0;"></div>` : "";
+
                 const item = document.createElement('div');
-                item.className = 'lobby-player'; 
+                item.className = `lobby-player ${bannerClass}`; 
                 item.style.marginBottom = "10px";
+                item.style.position = "relative";
+                item.style.overflow = "hidden";
+                item.style.zIndex = "1";
+
                 item.innerHTML = `
-                    <img src="${lobby.hostPfp}" class="lobby-pfp">
-                    <div style="flex:1">
-                        <div class="lobby-name">${lobby.hostName}</div>
+                    ${darkOverlay}
+                    <div style="position:relative; width:45px; height:45px; margin-right:15px; flex-shrink:0;">
+                        <img src="${lobby.hostPfp}" style="width:100%; height:100%; border-radius:50%; border:2px solid var(--primary); object-fit:cover; position:relative; z-index:1;">
+                        ${frameHtml}
+                    </div>
+                    <div style="flex:1; position:relative; z-index:2;">
+                        <div style="font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 900; color: #fff; text-transform: uppercase; text-shadow: 1px 1px 4px #000;">${nameHtml}</div>
                         ${betDisplay}
                     </div>
-                    <button class="btn-nav-v6" onclick="joinLobby('${docSnap.id}')" style="font-size:10px; padding:5px 15px; border-color: ${lobby.type === 'ranked' ? '#ffd700' : 'var(--primary)'}">JOACĂ</button>
+                    <button class="btn-nav-v6" onclick="joinLobby('${docSnap.id}')" style="position:relative; z-index:2; font-size:10px; padding:5px 15px; border-color: ${lobby.type === 'ranked' ? '#ffd700' : 'var(--primary)'}">JOACĂ</button>
                 `;
                 list.appendChild(item);
             }
@@ -14341,7 +14411,6 @@ window.showCyberAlert = (msg, type = 'error') => {
     setTimeout(() => alertBox.classList.remove('active'), 4000);
 };
 
-// Update joinLobby (Cere confirmare și ia banii opponentului)
 window.joinLobby = async (lobbyId) => {
     const user = auth.currentUser;
     const lobbyRef = doc(db, "c4_lobbies", lobbyId);
@@ -14353,24 +14422,34 @@ window.joinLobby = async (lobbyId) => {
     const costText = `${d.betCoins > 0 ? d.betCoins + ' monede' : ''} ${d.betDiamonds > 0 ? d.betDiamonds + ' diamante' : ''}`;
     if (!confirm(`Ești sigur? Intrarea te costă ${costText}. Winner takes ALL!`)) return;
 
+    // FETCH REAL DATA
     const userSnap = await getDoc(doc(db, "accounts", user.uid));
-    const userData = userSnap.data();
+    const userData = userSnap.exists() ? userSnap.data() : {};
 
     if ((d.betCoins > (userData.coins || 0)) || (d.betDiamonds > (userData.diamonds || 0))) {
         return showCyberAlert("Nu ai resurse suficiente pentru a intra!", "error");
     }
 
-    // Plata opponent (Escrow)
     await updateDoc(doc(db, "accounts", user.uid), {
         coins: increment(-d.betCoins),
         diamonds: increment(-d.betDiamonds)
     });
     logTransaction(-d.betCoins, "Bet", "Miză Connect 4 Ranked (Join)");
 
+    // GET PROPER NAME
+    const customName = userData.username || user.displayName || "Player";
+
     await updateDoc(lobbyRef, {
         opponentId: user.uid,
-        opponentName: user.displayName || "Player",
-        opponentPfp: user.photoURL || "https://iili.io/fXks1Dv.png",
+        opponentName: customName, // FIXED NAME
+        opponentPfp: userData.image || user.photoURL || "https://iili.io/fXks1Dv.png",
+        
+        // Save Opponent Cosmetics
+        opponentTextCss: userData.equippedText?.cssClass || "",
+        opponentFrameImg: userData.equippedFrame?.img || "",
+        opponentFrameScale: userData.equippedFrame?.scale || 1.45,
+        opponentBannerCss: userData.equippedBanner?.cssClass || "",
+        
         status: 'playing'
     });
     
@@ -14394,34 +14473,57 @@ window.startMultiplayerMatch = async (lobbyId, role) => {
     const snap = await getDoc(lobbyRef);
     const lobbyData = snap.data();
 
-    // Sincronizare Identitate
+    // Sincronizare Identitate & Cosmetice
     const oppName = (role === 'host') ? lobbyData.opponentName : lobbyData.hostName;
     const oppPfp = (role === 'host') ? lobbyData.opponentPfp : lobbyData.hostPfp;
+    const oppCss = (role === 'host') ? lobbyData.opponentTextCss : lobbyData.hostTextCss;
+    const oppFrame = (role === 'host') ? lobbyData.opponentFrameImg : lobbyData.hostFrameImg;
+    const oppFrameScale = (role === 'host') ? lobbyData.opponentFrameScale : lobbyData.hostFrameScale;
+
     const myName = (role === 'host') ? lobbyData.hostName : lobbyData.opponentName;
     const myPfp = (role === 'host') ? lobbyData.hostPfp : lobbyData.opponentPfp;
+    const myCss = (role === 'host') ? lobbyData.hostTextCss : lobbyData.opponentTextCss;
+    const myFrame = (role === 'host') ? lobbyData.hostFrameImg : lobbyData.opponentFrameImg;
+    const myFrameScale = (role === 'host') ? lobbyData.hostFrameScale : lobbyData.opponentFrameScale;
 
+    // --- INTRO SCREEN (VS) ---
     document.getElementById('vsPlayerImg').src = myPfp;
-    document.getElementById('vsPlayerName').innerText = myName;
+    const vsPName = document.getElementById('vsPlayerName');
+    vsPName.innerHTML = myCss ? `<span class="${myCss}">${myName}</span>` : myName;
+
     document.getElementById('vsBotImg').src = oppPfp;
     const introOppName = document.querySelector('#c4IntroScreen .c4v-side-box:last-child .c4v-name-text');
-    if (introOppName) introOppName.innerText = oppName;
+    if (introOppName) {
+        introOppName.innerHTML = oppCss ? `<span class="${oppCss}">${oppName}</span>` : oppName;
+    }
 
+    // Apply Frames to VS Circles
+    const p1Circle = document.getElementById('vsPlayerImg').parentElement;
+    const p2Circle = document.getElementById('vsBotImg').parentElement;
+    p1Circle.querySelectorAll('.pop-frame-overlay').forEach(e => e.remove());
+    p2Circle.querySelectorAll('.pop-frame-overlay').forEach(e => e.remove());
+
+    if (myFrame) p1Circle.innerHTML += `<img src="${myFrame}" class="pop-frame-overlay" style="width:${(myFrameScale||1.45)*100}%; height:${(myFrameScale||1.45)*100}%; display:block; z-index:2; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;">`;
+    if (oppFrame) p2Circle.innerHTML += `<img src="${oppFrame}" class="pop-frame-overlay" style="width:${(oppFrameScale||1.45)*100}%; height:${(oppFrameScale||1.45)*100}%; display:block; z-index:2; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none;">`;
+
+    // --- TACTICAL HUD ---
     document.getElementById('hudPfp').src = myPfp;
-    document.getElementById('pName').innerText = myName;
+    const hudPName = document.getElementById('pName');
+    hudPName.innerHTML = myCss ? `<span class="${myCss}">${myName}</span>` : myName;
+    
     document.getElementById('hudOpponentPfp').src = oppPfp;
     const hudOppName = document.getElementById('opponentNameText');
-    if (hudOppName) hudOppName.innerText = oppName; 
+    if (hudOppName) hudOppName.innerHTML = oppCss ? `<span class="${oppCss}">${oppName}</span>` : oppName;
 
     document.getElementById('c4GameOverlay').style.display = 'flex';
     showC4Stage('c4IntroScreen');
 
-    // După intro, AMBII jucători merg să aleagă culoarea
     setTimeout(() => {
         showC4Stage('c4ColorPicker');
         renderC4Colors();
     }, 4500);
 
-onSnapshot(lobbyRef, async (docSnap) => {
+    onSnapshot(lobbyRef, async (docSnap) => {
         const data = docSnap.data();
         if (!data) return;
 
@@ -14435,21 +14537,15 @@ onSnapshot(lobbyRef, async (docSnap) => {
             renderC4Colors();
         }
         
-        // REZOLVARE: Întâi procesăm mutarea, apoi verificăm dacă e final de meci
         if (data.lastMove && data.lastMove.by !== auth.currentUser.uid) {
             const lastCol = data.lastMove.col;
             const lastPNum = data.lastMove.playerNum;
-            
             if (c4Board[0] && c4Board[0][lastCol] === 0) {
-                // Așteptăm ca animația piesei să se termine
                 await syncOpponentMove(lastCol, lastPNum);
             }
         }
 
-        // DACĂ JOCUL S-A TERMINAT PE PARTEA CEALALTĂ
         if (data.status === 'finished' && c4Active) {
-            // Nu mai dăm triggerWin instantaneu, așteptăm un moment 
-            // să fim siguri că ultima piesă e vizibilă pe tablă
             setTimeout(() => {
                 if (c4Active) {
                     const winner = data.lastMove ? data.lastMove.playerNum : 0;
@@ -14672,10 +14768,24 @@ window.confirmRankedCreation = async () => {
 
 async function processCreateLobby(type, coins, diamonds) {
     const user = auth.currentUser;
+    // 1. Fetch real user data from the database
+    const userSnap = await getDoc(doc(db, "accounts", user.uid));
+    const userData = userSnap.exists() ? userSnap.data() : {};
+    
+    // 2. Prioritize Custom DB Name -> Google Name -> "Player"
+    const customName = userData.username || user.displayName || "Player";
+
     const lobbyRef = await addDoc(collection(db, "c4_lobbies"), {
         hostId: user.uid,
-        hostName: user.displayName || "Player",
-        hostPfp: user.photoURL || "https://iili.io/fXks1Dv.png",
+        hostName: customName, // FIXED NAME
+        hostPfp: userData.image || user.photoURL || "https://iili.io/fXks1Dv.png",
+        
+        // 3. Save Host Cosmetics
+        hostTextCss: userData.equippedText?.cssClass || "",
+        hostFrameImg: userData.equippedFrame?.img || "",
+        hostFrameScale: userData.equippedFrame?.scale || 1.45,
+        hostBannerCss: userData.equippedBanner?.cssClass || "",
+        
         type: type,
         betCoins: coins,
         betDiamonds: diamonds,
