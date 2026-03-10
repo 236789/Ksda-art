@@ -7188,6 +7188,68 @@ html {
 .podium-item {
     padding: 0 1px; /* Small horizontal buffer */
 }
+
+/* --- THE PODIUM FIX V2: NO COLLISION, RANK 1 IN MIDDLE --- */
+@media (max-width: 900px) {
+    .podium {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        justify-content: center !important;
+        align-items: flex-end !important;
+        gap: 12px !important; /* Increased gap to prevent hitting */
+        padding: 0 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .podium-item {
+        flex: 1 !important;
+        width: 30% !important; /* Slightly smaller to give breathing room */
+        min-width: 0 !important;
+        position: relative !important;
+    }
+
+    /* Order: Rank 2 (Left) | Rank 1 (Middle) | Rank 3 (Right) */
+    .podium-item.rank-2 { 
+        order: 1 !important; 
+        z-index: 5 !important;
+    }
+    .podium-item.rank-1 { 
+        order: 2 !important; 
+        z-index: 20 !important; /* Forces Rank 1 to stay on TOP of others */
+        transform: scale(1.08) translateY(-2px) !important; /* Adjusted scale to stop overlap */
+    }
+    .podium-item.rank-3 { 
+        order: 3 !important; 
+        z-index: 5 !important;
+    }
+
+    /* Podium Base Height Fixes */
+    .rank-1 .podium-base { height: 130px !important; }
+    .rank-2 .podium-base { height: 90px !important; }
+    .rank-3 .podium-base { height: 65px !important; }
+
+    /* Fix image wrapper alignment */
+    .podium-img-wrapper {
+        margin: 0 auto 10px auto !important;
+    }
+
+    /* Make sure names don't overlap */
+    .rank-name {
+        font-size: 9px !important;
+        height: 35px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: block !important;
+    }
+}
+
+/* Extra safety for tiny screens */
+@media (max-width: 400px) {
+    .podium { gap: 6px !important; }
+    .podium-item.rank-1 { transform: scale(1.05) !important; }
+}
   </style>
 </head>
 <body>
