@@ -221,6 +221,21 @@ body {
     }
     .podium-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; background: #111; }
 
+@media (max-width: 768px) {
+    /* Rank 2 & 3 (Sides) */
+    .podium-img-wrapper {
+        width: 55px !important;
+        height: 55px !important;
+        padding: 4px !important; /* Smaller padding for smaller images */
+    }
+
+    /* Rank 1 (Middle) */
+    .rank-1 .podium-img-wrapper {
+        width: 80px !important;
+        height: 80px !important;
+    }
+}
+
     /* ONLINE DOT IN PODIUM */
     .podium-status {
         position: absolute; bottom: 5px; right: 5px;
@@ -3807,7 +3822,7 @@ input:checked + .slider:before { transform: translateX(16px); }
     border-color: #7000ff !important;
     box-shadow: inset 0 0 150px #000, 0 0 30px #7000ff !important;
 }
-
+ 
 /* 8. CYBERPUNK ELITE (GIF Integrated) */
 .account-card.pban_cyber_el {
     background-image: url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXk4cmRtNWd3azBxeWtteGtoa3V3MjV3cWFmNmhzeXhjaWhxanN0MSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/26FPKhUtNG3TW74f6/giphy.gif') !important;
@@ -7025,35 +7040,36 @@ html {
     .rank-3 .podium-base { height: 60px; }
 }
 
+/* --- ULTIMATE NEON PODIUM ENGINE --- */
 .podium {
     display: flex;
     justify-content: center;
-    align-items: flex-end; /* Keeps them on the floor */
+    align-items: flex-end; /* Keeps bases on the floor */
     width: 100%;
     max-width: 900px;
-    margin: 80px auto 40px;
-    gap: 10px;
+    margin: 100px auto 40px;
+    padding: 0 10px;
+    gap: 15px; /* Space between pedestals */
 }
 
 .podium-item {
-    flex: 1; /* Ensures equal width columns */
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     position: relative;
 }
 
-/* User Info Section */
 .podium-data {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
-    z-index: 5;
+    z-index: 10;
     margin-bottom: 10px;
 }
 
-/* Pedestal Bases */
+/* The Pedestal Bases */
 .podium-base {
     width: 100%;
     display: flex;
@@ -7061,43 +7077,117 @@ html {
     justify-content: center;
     font-family: 'Orbitron', sans-serif;
     font-weight: 900;
-    font-size: 40px;
-    color: rgba(255, 255, 255, 0.05);
+    font-size: 50px;
+    position: relative;
     border-radius: 15px 15px 0 0;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(13, 25, 41, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-bottom: none;
+    transition: 0.4s;
 }
 
-/* Staircase Heights */
-.rank-1 .podium-base { height: 180px; border-top: 3px solid #ffd700; box-shadow: 0 -5px 20px rgba(255, 215, 0, 0.1); }
-.rank-2 .podium-base { height: 120px; border-top: 3px solid #d1d1d1; }
-.rank-3 .podium-base { height: 80px; border-top: 3px solid #cd7f32; }
+/* 1st Place - GOLD NEON */
+.rank-1 .podium-base { 
+    height: 180px; 
+    background: linear-gradient(180deg, #ffd700 0%, #b8860b 50%, #050b14 100%);
+    border-top: 4px solid #fff;
+    color: #fff;
+    text-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700;
+    box-shadow: 0 -10px 30px rgba(255, 215, 0, 0.3);
+}
 
-/* Image Wrappers */
+/* 2nd Place - SILVER NEON */
+.rank-2 .podium-base { 
+    height: 125px; 
+    background: linear-gradient(180deg, #e0e0e0 0%, #757f9a 50%, #050b14 100%);
+    border-top: 3px solid #fff;
+    color: #fff;
+    text-shadow: 0 0 20px #e0e0e0, 0 0 40px #fff;
+    box-shadow: 0 -10px 20px rgba(255, 255, 255, 0.1);
+}
+
+/* 3rd Place - BRONZE NEON */
+.rank-3 .podium-base { 
+    height: 85px; 
+    background: linear-gradient(180deg, #ff8c00 0%, #804a00 50%, #050b14 100%);
+    border-top: 3px solid #ff8c00;
+    color: #fff;
+    text-shadow: 0 0 20px #ff8c00, 0 0 40px #804a00;
+    box-shadow: 0 -10px 20px rgba(255, 140, 0, 0.1);
+}
+
+/* Floating Avatar Shadows */
 .podium-img-wrapper {
     position: relative;
-    width: 90px;
-    height: 90px;
-    margin-bottom: 10px;
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    margin-bottom: 12px;
 }
-.rank-1 .podium-img-wrapper { width: 120px; height: 120px; }
+.rank-1 .podium-img-wrapper { width: 125px; height: 125px; border: 3px solid #ffd700; box-shadow: 0 0 25px #ffd700; }
+.rank-2 .podium-img-wrapper { border: 2px solid #e0e0e0; box-shadow: 0 0 15px #fff; }
+.rank-3 .podium-img-wrapper { border: 2px solid #ff8c00; box-shadow: 0 0 15px #ff8c00; }
 
-.rank-name { font-size: 13px !important; text-align: center; height: 40px; }
+.rank-name { font-size: 14px !important; text-transform: uppercase; font-weight: 800; height: 40px; text-align: center; }
 
-/* Mobile Fix: No collisions, Top 1 still in middle */
+/* MOBILE REPAIR */
 @media (max-width: 768px) {
-    .podium { gap: 5px; margin-top: 50px; }
-    .podium-item { max-width: 33.33%; }
-    .podium-img-wrapper { width: 65px; height: 65px; }
-    .rank-1 .podium-img-wrapper { width: 90px; height: 90px; }
-    .rank-name { font-size: 9px !important; height: 35px; }
-    .rank-coins { font-size: 11px; }
-    .podium-base { font-size: 24px; height: 60px; }
+    .podium { gap: 8px; margin-top: 50px; align-items: flex-end; }
+    .podium-item { max-width: 32%; }
+    .podium-img-wrapper { width: 65px !important; height: 65px !important; }
+    .rank-1 .podium-img-wrapper { width: 85px !important; height: 85px !important; }
+    .podium-base { font-size: 28px; border-radius: 10px 10px 0 0; }
     .rank-1 .podium-base { height: 130px; }
     .rank-2 .podium-base { height: 90px; }
-    .rank-3 .podium-base { height: 60px; }
+    .rank-3 .podium-base { height: 65px; }
+    .rank-name { font-size: 10px !important; height: 35px; overflow: hidden; }
 }
 
+
+/* Specific fix for very small phones (under 380px) */
+@media (max-width: 380px) {
+    .podium {
+        gap: 4px !important; /* Minimum gap */
+    }
+    
+    .podium-item {
+        flex: 1;
+        min-width: 0; /* Forces items to shrink instead of breaking */
+    }
+
+    /* Shrink the images more so they fit side-by-side */
+    .podium-img-wrapper {
+        width: 55px !important;
+        height: 55px !important;
+    }
+    
+    .rank-1 .podium-img-wrapper {
+        width: 75px !important;
+        height: 75px !important;
+    }
+
+    .rank-name {
+        font-size: 8px !important; /* Ultra small text to prevent overlap */
+        height: 30px !important;
+    }
+
+    .rank-coins {
+        font-size: 9px !important;
+    }
+    
+    .rank-coins img {
+        width: 10px !important;
+    }
+
+    .podium-base {
+        font-size: 18px !important; /* Smaller numbers in the blocks */
+    }
+}
+
+}
+
+/* ADD THIS: Safety check to ensure they never overlap */
+.podium-item {
+    padding: 0 1px; /* Small horizontal buffer */
+}
   </style>
 </head>
 <body>
@@ -7200,7 +7290,7 @@ html {
     </div>
 </main>
 <div class="podium" id="podiumContainer">
-    <!-- Rank 2 (Left) -->
+    <!-- Rank 2 (LEFT) -->
     <div class="podium-item rank-2" id="box-2">
         <div class="podium-data">
             <div class="podium-img-wrapper">
@@ -7209,12 +7299,12 @@ html {
             </div>
             <div id="name-2" class="rank-name">...</div>
             <div id="coins-2" class="rank-coins">...</div>
-            <div id="streak-2" style="display:none;"></div> <!-- Fixes line 8946 error -->
+            <div id="streak-2" style="display:none;"></div> <!-- Prevents JS error -->
         </div>
         <div class="podium-base">2</div>
     </div>
 
-    <!-- Rank 1 (Middle) -->
+    <!-- Rank 1 (MIDDLE) -->
     <div class="podium-item rank-1" id="box-1">
         <div class="podium-data">
             <div class="podium-img-wrapper">
@@ -7223,12 +7313,12 @@ html {
             </div>
             <div id="name-1" class="rank-name">...</div>
             <div id="coins-1" class="rank-coins">...</div>
-            <div id="streak-1" style="display:none;"></div> <!-- Fixes line 8946 error -->
+            <div id="streak-1" style="display:none;"></div> <!-- Prevents JS error -->
         </div>
         <div class="podium-base">1</div>
     </div>
 
-    <!-- Rank 3 (Right) -->
+    <!-- Rank 3 (RIGHT) -->
     <div class="podium-item rank-3" id="box-3">
         <div class="podium-data">
             <div class="podium-img-wrapper">
@@ -7237,7 +7327,7 @@ html {
             </div>
             <div id="name-3" class="rank-name">...</div>
             <div id="coins-3" class="rank-coins">...</div>
-            <div id="streak-3" style="display:none;"></div> <!-- Fixes line 8946 error -->
+            <div id="streak-3" style="display:none;"></div> <!-- Prevents JS error -->
         </div>
         <div class="podium-base">3</div>
     </div>
