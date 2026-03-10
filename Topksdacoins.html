@@ -6935,91 +6935,103 @@ html {
 .pban_bluefire { background-image: url('https://media.giphy.com/media/3bc8pP1rVdfgN1uoMV/giphy.gif') !important; border-color: #00e5ff !important; }
 .pban_cash { background-image: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmo2ZHl0NXEyNzcxcG13b3VuNWw5cnV6bWhyZGV5NGRxOGk1NmdteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BfFFYPSVYr9UR6EtEL/giphy.gif') !important; border-color: #00ff00 !important; }
 
-/* 1. Main Podium Container */
+
+/* Container Fix */
 .podium {
     display: flex;
-    align-items: flex-end; /* This aligns steps to the bottom */
     justify-content: center;
-    gap: 5px; 
-    margin-top: 60px;
-    margin-bottom: 100px;
+    align-items: flex-end; /* Aligns blocks to bottom */
+    gap: 10px;
+    margin: 80px auto 50px;
+    max-width: 1000px;
+    padding: 0 10px;
 }
 
-/* 2. Individual Item Spacing */
+/* Item Structure - Prevents collisions */
 .podium-item {
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 160px;
+    max-width: 220px;
     position: relative;
-    transition: 0.3s;
+    z-index: 1;
 }
 
-/* 3. The Visual Steps */
-.podium-step {
+/* User Info Section (Above the block) */
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* The Pedestal Blocks */
+.pedestal-block {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Orbitron', sans-serif;
+    font-size: 32px;
     font-weight: 900;
-    font-size: 40px;
-    color: rgba(255,255,255,0.15); /* Faint number on the block */
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
+    color: rgba(255, 255, 255, 0.2);
+    border-radius: 15px 15px 0 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-bottom: none;
 }
 
-/* Rank Specific Heights & Gradients */
-.rank-1 .podium-step {
-    height: 140px;
-    background: linear-gradient(180deg, rgba(245, 209, 0, 0.4) 0%, rgba(184, 134, 11, 0.1) 100%);
+/* Height logic for Staircase */
+.rank-1 .pedestal-block { 
+    height: 140px; 
+    background: linear-gradient(to bottom, rgba(245, 209, 0, 0.3), transparent);
     border-top: 3px solid #f5d100;
-    box-shadow: 0 0 30px rgba(245, 209, 0, 0.2);
 }
-
-.rank-2 .podium-step {
-    height: 100px;
-    background: linear-gradient(180deg, rgba(209, 209, 209, 0.3) 0%, rgba(125, 125, 125, 0.1) 100%);
+.rank-2 .pedestal-block { 
+    height: 100px; 
+    background: linear-gradient(to bottom, rgba(209, 209, 209, 0.2), transparent);
     border-top: 3px solid #d1d1d1;
 }
-
-.rank-3 .podium-step {
-    height: 70px;
-    background: linear-gradient(180deg, rgba(205, 127, 50, 0.3) 0%, rgba(128, 74, 0, 0.1) 100%);
+.rank-3 .pedestal-block { 
+    height: 70px; 
+    background: linear-gradient(to bottom, rgba(205, 127, 50, 0.2), transparent);
     border-top: 3px solid #cd7f32;
 }
 
-/* 4. Fix Label Position (Pushes them above the steps) */
-.rank-name {
-    margin-top: 15px;
-    margin-bottom: 5px;
-    font-size: 13px !important;
-    height: auto !important;
-    z-index: 10;
+/* Fixing Icon Position */
+.special-icon {
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    margin-bottom: -15px;
+    font-size: 30px !important;
+    z-index: 5;
 }
 
-.rank-coins {
-    margin-bottom: 15px;
-    z-index: 10;
+/* Ensure images don't overlap */
+.podium-img-wrapper {
+    position: relative;
+    z-index: 2;
+    margin: 0 auto;
 }
 
-/* 5. Mobile Podium Fix */
-@media (max-width: 900px) {
-    .podium {
-        gap: 2px;
-        padding: 0 10px;
-    }
-    .podium-item { width: 33%; }
-    .rank-1 .podium-step { height: 110px; }
-    .rank-2 .podium-step { height: 80px; }
-    .rank-3 .podium-step { height: 55px; }
-    .podium-step { font-size: 24px; }
-    .rank-name { font-size: 10px !important; }
-}
+.rank-1 .podium-img-wrapper { width: 120px; height: 120px; }
+.rank-2 .podium-img-wrapper, 
+.rank-3 .podium-img-wrapper { width: 100px; height: 100px; }
 
+/* Responsive Mobile Fix */
+@media (max-width: 768px) {
+    .podium { gap: 5px; margin-top: 40px; }
+    .podium-item { max-width: 33%; }
+    .rank-1 .podium-img-wrapper { width: 90px; height: 90px; }
+    .rank-2 .podium-img-wrapper, 
+    .rank-3 .podium-img-wrapper { width: 75px; height: 75px; }
+    .rank-name { font-size: 10px !important; white-space: normal; height: 40px; }
+    .rank-coins { font-size: 12px; }
+    .pedestal-block { font-size: 20px; }
+}
   </style>
 </head>
 <body>
@@ -7122,43 +7134,49 @@ html {
     </div>
 </main>
 <div class="podium" id="podiumContainer">
-    <!-- Rank 2 -->
+    <!-- Rank 2 (Left) -->
     <div class="podium-item rank-2" id="box-2">
-        <i class="fas fa-medal special-icon"></i>
-        <div class="podium-img-wrapper">
-            <img id="img-2" src="https://i.ibb.co/4pGm9S2/user-placeholder.png" class="podium-img">
-            <div id="status-2" class="podium-status"></div>
+        <div class="user-info">
+            <i class="fas fa-medal special-icon"></i>
+            <div class="podium-img-wrapper">
+                <img id="img-2" src="https://i.ibb.co/4pGm9S2/user-placeholder.png" class="podium-img">
+                <div id="status-2" class="podium-status"></div>
+            </div>
+            <div id="name-2" class="rank-name">Se încarcă...</div>
+            <div id="coins-2" class="rank-coins">0 <img src="https://iili.io/fhc1SKQ.png"></div>
+            <div id="streak-2" class="rank-streak"></div>
         </div>
-        <div id="name-2" class="rank-name">Se încarcă...</div>
-        <div id="coins-2" class="rank-coins">0 <img src="https://iili.io/fhc1SKQ.png"></div>
-        <div id="streak-2" class="rank-streak"></div>
-        <div class="podium-step">2</div> <!-- Added Step -->
+        <div class="pedestal-block">2</div>
     </div>
 
-    <!-- Rank 1 -->
+    <!-- Rank 1 (Center) -->
     <div class="podium-item rank-1" id="box-1">
-        <i class="fas fa-crown special-icon"></i>
-        <div class="podium-img-wrapper">
-            <img id="img-1" src="https://i.ibb.co/4pGm9S2/user-placeholder.png" class="podium-img">
-            <div id="status-1" class="podium-status"></div>
+        <div class="user-info">
+            <i class="fas fa-crown special-icon"></i>
+            <div class="podium-img-wrapper">
+                <img id="img-1" src="https://i.ibb.co/4pGm9S2/user-placeholder.png" class="podium-img">
+                <div id="status-1" class="podium-status"></div>
+            </div>
+            <div id="name-1" class="rank-name">Se încarcă...</div>
+            <div id="coins-1" class="rank-coins">0 <img src="https://iili.io/fhc1SKQ.png"></div>
+            <div id="streak-1" class="rank-streak"></div>
         </div>
-        <div id="name-1" class="rank-name">Se încarcă...</div>
-        <div id="coins-1" class="rank-coins">0 <img src="https://iili.io/fhc1SKQ.png"></div>
-        <div id="streak-1" class="rank-streak"></div>
-        <div class="podium-step">1</div> <!-- Added Step -->
+        <div class="pedestal-block">1</div>
     </div>
 
-    <!-- Rank 3 -->
+    <!-- Rank 3 (Right) -->
     <div class="podium-item rank-3" id="box-3">
-        <i class="fas fa-award special-icon"></i>
-        <div class="podium-img-wrapper">
-            <img id="img-3" src="https://i.ibb.co/4pGm9S2/user-placeholder.png" class="podium-img">
-            <div id="status-3" class="podium-status"></div>
+        <div class="user-info">
+            <i class="fas fa-award special-icon"></i>
+            <div class="podium-img-wrapper">
+                <img id="img-3" src="https://i.ibb.co/4pGm9S2/user-placeholder.png" class="podium-img">
+                <div id="status-3" class="podium-status"></div>
+            </div>
+            <div id="name-3" class="rank-name">Se încarcă...</div>
+            <div id="coins-3" class="rank-coins">0 <img src="https://iili.io/fhc1SKQ.png"></div>
+            <div id="streak-3" class="rank-streak"></div>
         </div>
-        <div id="name-3" class="rank-name">Se încarcă...</div>
-        <div id="coins-3" class="rank-coins">0 <img src="https://iili.io/fhc1SKQ.png"></div>
-        <div id="streak-3" class="rank-streak"></div>
-        <div class="podium-step">3</div> <!-- Added Step -->
+        <div class="pedestal-block">3</div>
     </div>
 </div>
 
