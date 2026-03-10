@@ -6935,103 +6935,134 @@ html {
 .pban_bluefire { background-image: url('https://media.giphy.com/media/3bc8pP1rVdfgN1uoMV/giphy.gif') !important; border-color: #00e5ff !important; }
 .pban_cash { background-image: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmo2ZHl0NXEyNzcxcG13b3VuNWw5cnV6bWhyZGV5NGRxOGk1NmdteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BfFFYPSVYr9UR6EtEL/giphy.gif') !important; border-color: #00ff00 !important; }
 
-
 /* Container Fix */
 .podium {
     display: flex;
     justify-content: center;
-    align-items: flex-end; /* Aligns blocks to bottom */
-    gap: 10px;
-    margin: 80px auto 50px;
-    max-width: 1000px;
+    align-items: flex-end; /* Keeps bases on the floor */
+    width: 100%;
+    max-width: 900px;
+    margin: 100px auto 40px;
     padding: 0 10px;
+    box-sizing: border-box;
 }
 
-/* Item Structure - Prevents collisions */
+/* Individual Column */
 .podium-item {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    max-width: 220px;
     position: relative;
-    z-index: 1;
+    min-width: 0; /* Prevents flex items from overflowing */
 }
 
-/* User Info Section (Above the block) */
-.user-info {
+/* User Info Section */
+.podium-data {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
-    margin-bottom: 10px;
+    z-index: 2;
+    margin-bottom: -5px; /* Slight overlap with base */
 }
 
-/* The Pedestal Blocks */
-.pedestal-block {
+/* The Solid Bases */
+.podium-base {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Orbitron', sans-serif;
-    font-size: 32px;
     font-weight: 900;
-    color: rgba(255, 255, 255, 0.2);
+    font-size: 32px;
+    color: rgba(255, 255, 255, 0.1);
     border-radius: 15px 15px 0 0;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(13, 25, 41, 0.9);
     position: relative;
 }
 
-/* Height logic for Staircase */
-.rank-1 .pedestal-block { 
-    height: 140px; 
-    background: linear-gradient(to bottom, rgba(245, 209, 0, 0.3), transparent);
+/* Base Heights & Colors */
+.rank-1 .podium-base { 
+    height: 160px; 
+    background: linear-gradient(180deg, rgba(245, 209, 0, 0.2) 0%, rgba(5, 11, 20, 1) 100%);
     border-top: 3px solid #f5d100;
+    box-shadow: 0 0 30px rgba(245, 209, 0, 0.15);
 }
-.rank-2 .pedestal-block { 
-    height: 100px; 
-    background: linear-gradient(to bottom, rgba(209, 209, 209, 0.2), transparent);
+.rank-2 .podium-base { 
+    height: 110px; 
+    background: linear-gradient(180deg, rgba(209, 209, 209, 0.1) 0%, rgba(5, 11, 20, 1) 100%);
     border-top: 3px solid #d1d1d1;
 }
-.rank-3 .pedestal-block { 
-    height: 70px; 
-    background: linear-gradient(to bottom, rgba(205, 127, 50, 0.2), transparent);
+.rank-3 .podium-base { 
+    height: 80px; 
+    background: linear-gradient(180deg, rgba(205, 127, 50, 0.1) 0%, rgba(5, 11, 20, 1) 100%);
     border-top: 3px solid #cd7f32;
 }
 
-/* Fixing Icon Position */
-.special-icon {
-    position: relative !important;
-    top: 0 !important;
-    left: 0 !important;
-    transform: none !important;
-    margin-bottom: -15px;
-    font-size: 30px !important;
-    z-index: 5;
-}
-
-/* Ensure images don't overlap */
+/* Image Wrappers */
 .podium-img-wrapper {
     position: relative;
-    z-index: 2;
-    margin: 0 auto;
+    width: 100px;
+    height: 100px;
+    margin-bottom: 10px;
+}
+.rank-1 .podium-img-wrapper {
+    width: 130px;
+    height: 130px;
 }
 
-.rank-1 .podium-img-wrapper { width: 120px; height: 120px; }
-.rank-2 .podium-img-wrapper, 
-.rank-3 .podium-img-wrapper { width: 100px; height: 100px; }
+/* Name & Coins Text */
+.rank-name {
+    margin-top: 5px;
+    font-size: 14px !important;
+    text-align: center;
+    width: 95%;
+    overflow: visible;
+}
+.rank-coins {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
 
-/* Responsive Mobile Fix */
+/* MOBILE FIX: NO COLLISION, 1 IN MIDDLE */
 @media (max-width: 768px) {
-    .podium { gap: 5px; margin-top: 40px; }
-    .podium-item { max-width: 33%; }
-    .rank-1 .podium-img-wrapper { width: 90px; height: 90px; }
-    .rank-2 .podium-img-wrapper, 
-    .rank-3 .podium-img-wrapper { width: 75px; height: 75px; }
-    .rank-name { font-size: 10px !important; white-space: normal; height: 40px; }
+    .podium {
+        margin-top: 50px;
+        gap: 5px;
+    }
+    .podium-item {
+        max-width: 33%; /* Force 3 columns side-by-side */
+    }
+    .podium-img-wrapper {
+        width: 70px;
+        height: 70px;
+    }
+    .rank-1 .podium-img-wrapper {
+        width: 90px;
+        height: 90px;
+    }
+    .rank-name {
+        font-size: 10px !important;
+        height: 45px; /* Allow space for 2 lines */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
     .rank-coins { font-size: 12px; }
-    .pedestal-block { font-size: 20px; }
+    .podium-base { font-size: 20px; }
+    
+    /* Adjust base heights for smaller screens */
+    .rank-1 .podium-base { height: 120px; }
+    .rank-2 .podium-base { height: 85px; }
+    .rank-3 .podium-base { height: 60px; }
+
+    /* Hide streak on podium for mobile to save space */
+    .rank-streak { display: none !important; }
 }
+
   </style>
 </head>
 <body>
@@ -7134,49 +7165,43 @@ html {
     </div>
 </main>
 <div class="podium" id="podiumContainer">
-    <!-- Rank 2 (Left) -->
+    <!-- Rank 2 (LEFT) -->
     <div class="podium-item rank-2" id="box-2">
-        <div class="user-info">
-            <i class="fas fa-medal special-icon"></i>
+        <div class="podium-data">
             <div class="podium-img-wrapper">
                 <img id="img-2" src="https://i.ibb.co/4pGm9S2/user-placeholder.png" class="podium-img">
                 <div id="status-2" class="podium-status"></div>
             </div>
-            <div id="name-2" class="rank-name">Se încarcă...</div>
+            <div id="name-2" class="rank-name">...</div>
             <div id="coins-2" class="rank-coins">0 <img src="https://iili.io/fhc1SKQ.png"></div>
-            <div id="streak-2" class="rank-streak"></div>
         </div>
-        <div class="pedestal-block">2</div>
+        <div class="podium-base">2</div>
     </div>
 
-    <!-- Rank 1 (Center) -->
+    <!-- Rank 1 (MIDDLE) -->
     <div class="podium-item rank-1" id="box-1">
-        <div class="user-info">
-            <i class="fas fa-crown special-icon"></i>
+        <div class="podium-data">
             <div class="podium-img-wrapper">
                 <img id="img-1" src="https://i.ibb.co/4pGm9S2/user-placeholder.png" class="podium-img">
                 <div id="status-1" class="podium-status"></div>
             </div>
-            <div id="name-1" class="rank-name">Se încarcă...</div>
-            <div id="coins-1" class="rank-coins">0 <img src="https://iili.io/fhc1SKQ.png"></div>
-            <div id="streak-1" class="rank-streak"></div>
+            <div id="name-1" class="rank-name">...</div>
+            <div id="coins-1" class="rank-coins">1 <img src="https://iili.io/fhc1SKQ.png"></div>
         </div>
-        <div class="pedestal-block">1</div>
+        <div class="podium-base">1</div>
     </div>
 
-    <!-- Rank 3 (Right) -->
+    <!-- Rank 3 (RIGHT) -->
     <div class="podium-item rank-3" id="box-3">
-        <div class="user-info">
-            <i class="fas fa-award special-icon"></i>
+        <div class="podium-data">
             <div class="podium-img-wrapper">
                 <img id="img-3" src="https://i.ibb.co/4pGm9S2/user-placeholder.png" class="podium-img">
                 <div id="status-3" class="podium-status"></div>
             </div>
-            <div id="name-3" class="rank-name">Se încarcă...</div>
+            <div id="name-3" class="rank-name">...</div>
             <div id="coins-3" class="rank-coins">0 <img src="https://iili.io/fhc1SKQ.png"></div>
-            <div id="streak-3" class="rank-streak"></div>
         </div>
-        <div class="pedestal-block">3</div>
+        <div class="podium-base">3</div>
     </div>
 </div>
 
