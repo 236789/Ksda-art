@@ -6935,26 +6935,112 @@ html {
 .pban_bluefire { background-image: url('https://media.giphy.com/media/3bc8pP1rVdfgN1uoMV/giphy.gif') !important; border-color: #00e5ff !important; }
 .pban_cash { background-image: url('https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcmo2ZHl0NXEyNzcxcG13b3VuNWw5cnV6bWhyZGV5NGRxOGk1NmdteiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/BfFFYPSVYr9UR6EtEL/giphy.gif') !important; border-color: #00ff00 !important; }
 
-/* Container Fix */
 .podium {
     display: flex;
     justify-content: center;
-    align-items: flex-end; /* Keeps bases on the floor */
+    align-items: flex-end; /* Aliniere la baza treptelor */
     width: 100%;
     max-width: 900px;
-    margin: 100px auto 40px;
+    margin: 80px auto 40px;
     padding: 0 10px;
-    box-sizing: border-box;
+    gap: 10px;
 }
 
-/* Individual Column */
 .podium-item {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     position: relative;
-    min-width: 0; /* Prevents flex items from overflowing */
+}
+
+.podium-data {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    z-index: 5;
+}
+
+/* Treptele (Bases) */
+.podium-base {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 40px;
+    color: rgba(255, 255, 255, 0.05);
+    border-radius: 15px 15px 0 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(180deg, rgba(13, 25, 41, 0.9) 0%, rgba(5, 11, 20, 1) 100%);
+}
+
+/* Inaltimi diferite pentru efectul de scara */
+.rank-1 .podium-base { 
+    height: 180px; 
+    border-top: 3px solid #ffd700; 
+    box-shadow: 0 -10px 25px rgba(255, 215, 0, 0.15);
+}
+.rank-2 .podium-base { 
+    height: 120px; 
+    border-top: 3px solid #d1d1d1;
+}
+.rank-3 .podium-base { 
+    height: 80px; 
+    border-top: 3px solid #cd7f32;
+}
+
+/* Avatarele */
+.podium-img-wrapper {
+    position: relative;
+    width: 90px;
+    height: 90px;
+    margin-bottom: 15px;
+    border-radius: 50%;
+}
+.rank-1 .podium-img-wrapper { width: 120px; height: 120px; }
+
+.rank-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px !important;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 5px;
+    height: 40px; /* Previne miscarea celorlalte elemente */
+}
+
+/* Mobile Fix - Top 1 ramane la mijloc si nu se suprapun */
+@media (max-width: 768px) {
+    .podium { gap: 5px; margin-top: 40px; }
+    .podium-item { max-width: 33%; }
+    .podium-img-wrapper { width: 65px; height: 65px; }
+    .rank-1 .podium-img-wrapper { width: 90px; height: 90px; }
+    .rank-name { font-size: 9px !important; height: 35px; }
+    .rank-coins { font-size: 11px; }
+    .podium-base { font-size: 24px; }
+    .rank-1 .podium-base { height: 130px; }
+    .rank-2 .podium-base { height: 90px; }
+    .rank-3 .podium-base { height: 60px; }
+}
+
+.podium {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end; /* Keeps them on the floor */
+    width: 100%;
+    max-width: 900px;
+    margin: 80px auto 40px;
+    gap: 10px;
+}
+
+.podium-item {
+    flex: 1; /* Ensures equal width columns */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
 }
 
 /* User Info Section */
@@ -6963,11 +7049,11 @@ html {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    z-index: 2;
-    margin-bottom: -5px; /* Slight overlap with base */
+    z-index: 5;
+    margin-bottom: 10px;
 }
 
-/* The Solid Bases */
+/* Pedestal Bases */
 .podium-base {
     width: 100%;
     display: flex;
@@ -6975,92 +7061,41 @@ html {
     justify-content: center;
     font-family: 'Orbitron', sans-serif;
     font-weight: 900;
-    font-size: 32px;
-    color: rgba(255, 255, 255, 0.1);
+    font-size: 40px;
+    color: rgba(255, 255, 255, 0.05);
     border-radius: 15px 15px 0 0;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(13, 25, 41, 0.9);
-    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(13, 25, 41, 0.8);
 }
 
-/* Base Heights & Colors */
-.rank-1 .podium-base { 
-    height: 160px; 
-    background: linear-gradient(180deg, rgba(245, 209, 0, 0.2) 0%, rgba(5, 11, 20, 1) 100%);
-    border-top: 3px solid #f5d100;
-    box-shadow: 0 0 30px rgba(245, 209, 0, 0.15);
-}
-.rank-2 .podium-base { 
-    height: 110px; 
-    background: linear-gradient(180deg, rgba(209, 209, 209, 0.1) 0%, rgba(5, 11, 20, 1) 100%);
-    border-top: 3px solid #d1d1d1;
-}
-.rank-3 .podium-base { 
-    height: 80px; 
-    background: linear-gradient(180deg, rgba(205, 127, 50, 0.1) 0%, rgba(5, 11, 20, 1) 100%);
-    border-top: 3px solid #cd7f32;
-}
+/* Staircase Heights */
+.rank-1 .podium-base { height: 180px; border-top: 3px solid #ffd700; box-shadow: 0 -5px 20px rgba(255, 215, 0, 0.1); }
+.rank-2 .podium-base { height: 120px; border-top: 3px solid #d1d1d1; }
+.rank-3 .podium-base { height: 80px; border-top: 3px solid #cd7f32; }
 
 /* Image Wrappers */
 .podium-img-wrapper {
     position: relative;
-    width: 100px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
     margin-bottom: 10px;
 }
-.rank-1 .podium-img-wrapper {
-    width: 130px;
-    height: 130px;
-}
+.rank-1 .podium-img-wrapper { width: 120px; height: 120px; }
 
-/* Name & Coins Text */
-.rank-name {
-    margin-top: 5px;
-    font-size: 14px !important;
-    text-align: center;
-    width: 95%;
-    overflow: visible;
-}
-.rank-coins {
-    font-size: 16px;
-    font-weight: 800;
-    margin-bottom: 5px;
-}
+.rank-name { font-size: 13px !important; text-align: center; height: 40px; }
 
-/* MOBILE FIX: NO COLLISION, 1 IN MIDDLE */
+/* Mobile Fix: No collisions, Top 1 still in middle */
 @media (max-width: 768px) {
-    .podium {
-        margin-top: 50px;
-        gap: 5px;
-    }
-    .podium-item {
-        max-width: 33%; /* Force 3 columns side-by-side */
-    }
-    .podium-img-wrapper {
-        width: 70px;
-        height: 70px;
-    }
-    .rank-1 .podium-img-wrapper {
-        width: 90px;
-        height: 90px;
-    }
-    .rank-name {
-        font-size: 10px !important;
-        height: 45px; /* Allow space for 2 lines */
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    .rank-coins { font-size: 12px; }
-    .podium-base { font-size: 20px; }
-    
-    /* Adjust base heights for smaller screens */
-    .rank-1 .podium-base { height: 120px; }
-    .rank-2 .podium-base { height: 85px; }
+    .podium { gap: 5px; margin-top: 50px; }
+    .podium-item { max-width: 33.33%; }
+    .podium-img-wrapper { width: 65px; height: 65px; }
+    .rank-1 .podium-img-wrapper { width: 90px; height: 90px; }
+    .rank-name { font-size: 9px !important; height: 35px; }
+    .rank-coins { font-size: 11px; }
+    .podium-base { font-size: 24px; height: 60px; }
+    .rank-1 .podium-base { height: 130px; }
+    .rank-2 .podium-base { height: 90px; }
     .rank-3 .podium-base { height: 60px; }
-
-    /* Hide streak on podium for mobile to save space */
-    .rank-streak { display: none !important; }
 }
 
   </style>
@@ -7165,7 +7200,7 @@ html {
     </div>
 </main>
 <div class="podium" id="podiumContainer">
-    <!-- Rank 2 (LEFT) -->
+    <!-- Rank 2 (Left) -->
     <div class="podium-item rank-2" id="box-2">
         <div class="podium-data">
             <div class="podium-img-wrapper">
@@ -7173,12 +7208,13 @@ html {
                 <div id="status-2" class="podium-status"></div>
             </div>
             <div id="name-2" class="rank-name">...</div>
-            <div id="coins-2" class="rank-coins">0 <img src="https://iili.io/fhc1SKQ.png"></div>
+            <div id="coins-2" class="rank-coins">...</div>
+            <div id="streak-2" style="display:none;"></div> <!-- Fixes line 8946 error -->
         </div>
         <div class="podium-base">2</div>
     </div>
 
-    <!-- Rank 1 (MIDDLE) -->
+    <!-- Rank 1 (Middle) -->
     <div class="podium-item rank-1" id="box-1">
         <div class="podium-data">
             <div class="podium-img-wrapper">
@@ -7186,12 +7222,13 @@ html {
                 <div id="status-1" class="podium-status"></div>
             </div>
             <div id="name-1" class="rank-name">...</div>
-            <div id="coins-1" class="rank-coins">1 <img src="https://iili.io/fhc1SKQ.png"></div>
+            <div id="coins-1" class="rank-coins">...</div>
+            <div id="streak-1" style="display:none;"></div> <!-- Fixes line 8946 error -->
         </div>
         <div class="podium-base">1</div>
     </div>
 
-    <!-- Rank 3 (RIGHT) -->
+    <!-- Rank 3 (Right) -->
     <div class="podium-item rank-3" id="box-3">
         <div class="podium-data">
             <div class="podium-img-wrapper">
@@ -7199,7 +7236,8 @@ html {
                 <div id="status-3" class="podium-status"></div>
             </div>
             <div id="name-3" class="rank-name">...</div>
-            <div id="coins-3" class="rank-coins">0 <img src="https://iili.io/fhc1SKQ.png"></div>
+            <div id="coins-3" class="rank-coins">...</div>
+            <div id="streak-3" style="display:none;"></div> <!-- Fixes line 8946 error -->
         </div>
         <div class="podium-base">3</div>
     </div>
