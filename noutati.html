@@ -1944,7 +1944,54 @@ header {
     text-shadow: 0 0 30px var(--theme-glow);
 }
 
+/* --- READ MORE TOGGLE SYSTEM --- */
+.post-text-container {
+    position: relative;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+}
 
+.post-text-container.collapsed {
+    max-height: 100px; /* How much text to show before "Read More" */
+    -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 60%, transparent 100%);
+}
+
+.read-more-btn {
+    background: rgba(41, 243, 255, 0.1);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    font-family: 'Orbitron';
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 5px;
+    display: none; /* Shown via JS if text is long */
+    width: fit-content;
+    text-transform: uppercase;
+}
+
+/* --- MOBILE COMPACT OPTIMIZATION --- */
+@media (max-width: 768px) {
+    .post-card { 
+        padding: 15px !important; 
+        gap: 10px !important; 
+    }
+    .post-content { 
+        font-size: 13px !important; 
+        line-height: 1.4 !important; 
+    }
+    .post-pfp { 
+        width: 35px !important; 
+        height: 35px !important; 
+    }
+    .media-box {
+        width: 100px !important;
+        height: 100px !important;
+    }
+}
   </style>
 </head>
 <body>
@@ -3231,112 +3278,120 @@ else if(email === 'norbyims@gmail.com' || email === 'promovarideafaceri7@gmail.c
     container.appendChild(div);
 }
 
-    function renderPost(data) {
-
+function renderPost(data) {
     const postAuthorImg = data.image || data.photo || "https://i.ibb.co/4pGm9S2/user-placeholder.png";
 
-        const div = document.createElement('div');
-        let cardClass = 'post-card';
-        let badge = '';
+    const div = document.createElement('div');
+    let cardClass = 'post-card';
+    let badge = '';
 
-        // --- UPDATED ROLE DETECTION LOGIC ---
-        const email = data.email || ""; 
+    // --- UPDATED ROLE DETECTION LOGIC (FULLY RESTORED) ---
+    const email = data.email || ""; 
 
-        if (email === 'nicaemmanuel433qe@gmail.com' || data.isOwner) { 
-            cardClass += ' owner-post'; 
-            badge = `<span class="owner-badge"><i class="fas fa-crown"></i> WEBSITE OWNER</span>`; 
-        } 
-        else if (email === 'kevin.trinity2020@gmail.com' || data.isAdmin) { 
-            cardClass += ' admin-post'; 
-            badge = `<span class="admin-badge"><i class="fas fa-shield-alt"></i> ADMIN</span>`; 
-        }
-        else if (email === 'mary.bughi@gmail.com' || email === 'emmanuel.nica83@gmail.com' || data.isMod) { 
-            cardClass += ' mod-post'; 
-            badge = `<span class="mod-badge"><i class="fas fa-star"></i> MODERATOR</span>`; 
-        }
-        else if (email === 'norbyims@gmail.com' || email === 'promovarideafaceri7@gmail.com' || email === 'violetaflorentinadima@gmail.com') {
-             cardClass += ' helper-post';
-             badge = `<span class="helper-badge"><i class="fas fa-hands-helping"></i> HELPER</span>`;
-        }
-        else {
-            cardClass += ' admin-post'; 
-            badge = `<span class="admin-badge"><i class="fas fa-shield-alt"></i> ADMIN</span>`;
-        }
-
-        const dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
-        const dateStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        const votes = data.votes || {};
-        let likes = 0, dislikes = 0; let myVote = votes[currentUid] || 0;
-        Object.values(votes).forEach(v => { if(v===1) likes++; else if(v===-1) dislikes++; });
-
-        // MEDIA RENDERING
-        let mediaHtml = "";
-        const imgs = data.images || [];
-        if (imgs.length > 0) {
-            mediaHtml += `<div class="post-media-grid">`;
-            mediaHtml += `<div class="media-box" onclick='openImageGallery(${JSON.stringify(imgs)}, 0)'><img src="${imgs[0]}"></div>`;
-            if (imgs.length > 1) {
-                mediaHtml += `<div class="media-box" onclick='openImageGallery(${JSON.stringify(imgs)}, 1)'>
-                                <img src="${imgs[1]}" style="opacity:0.3;">
-                                <div class="media-count-overlay"><span class="count-txt">+${imgs.length - 1}</span><span class="count-lbl">IMAGES</span></div>
-                              </div>`;
-            }
-            mediaHtml += `</div>`;
-        }
-
-        // --- NEW FEATURES LOGIC ---
-        // 1. DELETE BUTTON (OWNER ONLY)
-        const isMeOwner = auth.currentUser.email === 'nicaemmanuel433qe@gmail.com';
-        const deleteHtml = isMeOwner ? `<button class="btn-delete-post" onclick="deleteNewsPost('${data.id}')"><i class="fas fa-trash"></i></button>` : '';
-
-        // 2. SEEN BUTTON
-        const seenCount = data.seenBy ? data.seenBy.length : 0;
-        const alreadySeen = (data.seenBy || []).includes(currentUid);
-        
-        div.className = cardClass;
-        div.dataset.id = data.id; // For observer
-        div.dataset.seen = alreadySeen ? 'true' : 'false';
-
-        div.innerHTML = `
-            <div class="post-header">
-            <img src="${postAuthorImg}" class="post-pfp">
-                <div class="post-name">
-                    ${data.name} ${badge}
-                    <button class="view-profile-btn" onclick="openUserProfile('${data.uid}')"><i class="fas fa-user"></i></button>
-                </div>
-                ${deleteHtml} <!-- DELETE BTN HERE -->
-                <div class="post-date">${dateStr}</div>
-            </div>
-            <div class="post-content">${linkify(data.text)}</div>
-            ${mediaHtml}
-            <div class="post-footer">
-                <button class="comments-btn" onclick="toggleComments('${data.id}')"><i class="fas fa-comment-dots"></i> Comentarii</button>
-                <div class="vote-actions">
-                    <button class="seen-btn" onclick="openSeenByList('${data.id}')"><i class="fas fa-eye"></i> ${seenCount}</button>
-                    <button class="vote-btn ${myVote===1 ? 'active-like' : ''}" onclick="votePost('${data.id}', 1)"><i class="fas fa-thumbs-up"></i> ${likes}</button>
-                    <button class="vote-btn ${myVote===-1 ? 'active-dislike' : ''}" onclick="votePost('${data.id}', -1)"><i class="fas fa-thumbs-down"></i> ${dislikes}</button>
-                </div>
-            </div>
-            <div id="comments-${data.id}" class="comments-section-wrapper" data-loaded="false">
-                <div id="comList-${data.id}" class="comment-list"></div>
-                <div class="comment-input-area">
-                    <input id="comInput-${data.id}" class="com-input" placeholder="Scrie un comentariu...">
-                    <button onclick="postComment('${data.id}')" class="com-send-btn"><i class="fas fa-paper-plane"></i></button>
-                </div>
-            </div>
-        `;
-
-        // Start tracking visibility
-        seenObserver.observe(div);
-
-        // Global function helper for gallery
-        window.openImageGallery = (list, idx) => openLightbox(list, idx);
-
-        const comInput = div.querySelector(`#comInput-${data.id}`);
-        comInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); div.querySelector('.com-send-btn').click(); } });
-        messagesFeed.appendChild(div);
+    if (email === 'nicaemmanuel433qe@gmail.com' || data.isOwner) { 
+        cardClass += ' owner-post'; 
+        badge = `<span class="owner-badge"><i class="fas fa-crown"></i> WEBSITE OWNER</span>`; 
+    } 
+    else if (email === 'kevin.trinity2020@gmail.com' || data.isAdmin) { 
+        cardClass += ' admin-post'; 
+        badge = `<span class="admin-badge"><i class="fas fa-shield-alt"></i> ADMIN</span>`; 
     }
+    else if (email === 'mary.bughi@gmail.com' || email === 'emmanuel.nica83@gmail.com' || data.isMod) { 
+        cardClass += ' mod-post'; 
+        badge = `<span class="mod-badge"><i class="fas fa-star"></i> MODERATOR</span>`; 
+    }
+    else if (email === 'norbyims@gmail.com' || email === 'promovarideafaceri7@gmail.com' || email === 'violetaflorentinadima@gmail.com') {
+         cardClass += ' helper-post';
+         badge = `<span class="helper-badge"><i class="fas fa-hands-helping"></i> HELPER</span>`;
+    }
+    else {
+        cardClass += ' admin-post'; 
+        badge = `<span class="admin-badge"><i class="fas fa-shield-alt"></i> ADMIN</span>`;
+    }
+
+    const dateObj = data.createdAt ? data.createdAt.toDate() : new Date();
+    const dateStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    
+    const votes = data.votes || {};
+    let likes = 0, dislikes = 0; let myVote = votes[currentUid] || 0;
+    Object.values(votes).forEach(v => { if(v===1) likes++; else if(v===-1) dislikes++; });
+
+    // MEDIA RENDERING (FULLY RESTORED)
+    let mediaHtml = "";
+    const imgs = data.images || [];
+    if (imgs.length > 0) {
+        mediaHtml += `<div class="post-media-grid">`;
+        mediaHtml += `<div class="media-box" onclick='openImageGallery(${JSON.stringify(imgs)}, 0)'><img src="${imgs[0]}"></div>`;
+        if (imgs.length > 1) {
+            mediaHtml += `<div class="media-box" onclick='openImageGallery(${JSON.stringify(imgs)}, 1)'>
+                            <img src="${imgs[1]}" style="opacity:0.3;">
+                            <div class="media-count-overlay"><span class="count-txt">+${imgs.length - 1}</span><span class="count-lbl">IMAGES</span></div>
+                          </div>`;
+        }
+        mediaHtml += `</div>`;
+    }
+
+    // --- NEW FEATURES LOGIC ---
+    // 1. DELETE BUTTON (OWNER ONLY - RESTORED)
+    const isMeOwner = auth.currentUser.email === 'nicaemmanuel433qe@gmail.com';
+    const deleteHtml = isMeOwner ? `<button class="btn-delete-post" onclick="deleteNewsPost('${data.id}')"><i class="fas fa-trash"></i></button>` : '';
+
+    // 2. SEEN BUTTON (RESTORED)
+    const seenCount = data.seenBy ? data.seenBy.length : 0;
+    const alreadySeen = (data.seenBy || []).includes(currentUid);
+    
+    div.className = cardClass;
+    div.dataset.id = data.id; // For observer
+    div.dataset.seen = alreadySeen ? 'true' : 'false';
+
+    // --- READ MORE LOGIC CHECK ---
+    const isLongText = data.text && data.text.length > 300; // Trigger if over 300 chars
+
+    div.innerHTML = `
+        <div class="post-header">
+        <img src="${postAuthorImg}" class="post-pfp">
+            <div class="post-name">
+                ${data.name} ${badge}
+                <button class="view-profile-btn" onclick="openUserProfile('${data.uid}')"><i class="fas fa-user"></i></button>
+            </div>
+            ${deleteHtml}
+            <div class="post-date">${dateStr}</div>
+        </div>
+
+        <div class="post-content-container ${isLongText ? 'post-content-collapsed' : ''}" id="textCont-${data.id}">
+            <div class="post-content">${linkify(data.text)}</div>
+        </div>
+        
+        ${isLongText ? `<button class="read-more-btn" id="readBtn-${data.id}" onclick="toggleReadMore('${data.id}')" style="display:block;">Vezi mai multe</button>` : ''}
+
+        ${mediaHtml}
+        <div class="post-footer">
+            <button class="comments-btn" onclick="toggleComments('${data.id}')"><i class="fas fa-comment-dots"></i> Comentarii</button>
+            <div class="vote-actions">
+                <button class="seen-btn" onclick="openSeenByList('${data.id}')"><i class="fas fa-eye"></i> ${seenCount}</button>
+                <button class="vote-btn ${myVote===1 ? 'active-like' : ''}" onclick="votePost('${data.id}', 1)"><i class="fas fa-thumbs-up"></i> ${likes}</button>
+                <button class="vote-btn ${myVote===-1 ? 'active-dislike' : ''}" onclick="votePost('${data.id}', -1)"><i class="fas fa-thumbs-down"></i> ${dislikes}</button>
+            </div>
+        </div>
+        <div id="comments-${data.id}" class="comments-section-wrapper" data-loaded="false">
+            <div id="comList-${data.id}" class="comment-list"></div>
+            <div class="comment-input-area">
+                <input id="comInput-${data.id}" class="com-input" placeholder="Scrie un comentariu...">
+                <button onclick="postComment('${data.id}')" class="com-send-btn"><i class="fas fa-paper-plane"></i></button>
+            </div> 
+        </div>
+    `;
+
+    // Start tracking visibility
+    seenObserver.observe(div);
+
+    // Global function helper for gallery
+    window.openImageGallery = (list, idx) => openLightbox(list, idx);
+
+    const comInput = div.querySelector(`#comInput-${data.id}`);
+    comInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); div.querySelector('.com-send-btn').click(); } });
+    messagesFeed.appendChild(div);
+}
 
     function linkify(text) { if(!text) return ""; const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig; return text.replace(urlRegex, function(url) { return `<a href="${url}" target="_blank" style="color:#fff; text-decoration:underline;">${url}</a>`; }); }
 
@@ -3374,6 +3429,21 @@ adminPostBtn.onclick = async () => {
         }
     };
     adminPostInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); adminPostBtn.click(); } });
+
+window.toggleReadMore = (id) => {
+    const cont = document.getElementById(`textCont-${id}`);
+    const btn = document.getElementById(`readBtn-${id}`);
+    
+    if (cont.classList.contains('collapsed')) {
+        cont.classList.remove('collapsed');
+        cont.style.maxHeight = 'none';
+        btn.innerText = "Vezi mai puțin";
+    } else {
+        cont.classList.add('collapsed');
+        cont.style.maxHeight = '100px';
+        btn.innerText = "Vezi mai multe";
+    }
+};
 
 
 function showHijackToast(amount, type, name) {
