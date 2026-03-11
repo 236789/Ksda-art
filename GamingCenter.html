@@ -4441,19 +4441,22 @@ header {
         <span class="hub-card-title">Spin The Wheel</span>
     </div>
 
-    <!-- 4. CONNECT 4 (NEW) -->
-    <div id="game_connect4" class="hub-card locked-game" onclick="handleGameClick('connect4', 'connect4.html', 500)">
-        <div class="c4-anim-container">
-            <div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div>
-            <div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div>
-            <div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div>
-            <div class="c4-hole"><img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FCyan%20connect%204%20pice.png?alt=media&token=4546f719-8ed9-47de-8c5b-4f9421d1cb54" class="c4-piece-ghost p1-drop"></div>
-            <div class="c4-hole"><img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FCyan%20connect%204%20pice.png?alt=media&token=4546f719-8ed9-47de-8c5b-4f9421d1cb54" class="c4-piece-ghost p2-drop"></div>
-            <div class="c4-hole"><img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FCyan%20connect%204%20pice.png?alt=media&token=4546f719-8ed9-47de-8c5b-4f9421d1cb54" class="c4-piece-ghost p3-drop"></div>
-            <div class="c4-hole"><img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FCyan%20connect%204%20pice.png?alt=media&token=4546f719-8ed9-47de-8c5b-4f9421d1cb54" class="c4-piece-ghost p4-drop"></div>
-        </div>
-        <span class="hub-card-title">Connect 4</span>
+<!-- 4. CONNECT 4 (RANDOM COLORS) -->
+<div id="game_connect4" class="hub-card locked-game" onclick="handleGameClick('connect4', 'Connect-4.html', 500)">
+    <div class="c4-anim-container">
+        <!-- Fundalul tablei -->
+        <div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div>
+        <div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div>
+        <div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div>
+        
+        <!-- Piesele care cad (Sursa se schimbă din JS) -->
+        <div class="c4-hole"><img src="" class="c4-piece-ghost win1 c4-target"></div>
+        <div class="c4-hole"><img src="" class="c4-piece-ghost win2 c4-target"></div>
+        <div class="c4-hole"><img src="" class="c4-piece-ghost win3 c4-target"></div>
+        <div class="c4-hole"><img src="" class="c4-piece-ghost win4 c4-target"></div>
     </div>
+    <span class="hub-card-title">Connect 4</span>
+</div>
 
     <!-- 5. PUZZLE -->
     <div id="game_puzzle" class="hub-card locked-game" onclick="handleGameClick('puzzle', 'puzzle.html', 750)">
@@ -5708,7 +5711,8 @@ function createFallingIcon() {
         'https://iili.io/q7xldBt.png', 'https://iili.io/q7xl34n.png', 'https://iili.io/q7xlfYG.png',
         'https://iili.io/q7xlqvf.png', 'https://iili.io/q7xlBp4.png', 'https://iili.io/q7xlxQS.png',
         'https://iili.io/q7xlu4e.png', 'https://iili.io/q7xl7vj.png', 'https://iili.io/q7xl5Yb.png',
-        'https://iili.io/q7xlYyx.png', 'https://iili.io/q7xlljV.png', 'https://iili.io/q7xlECP.png'
+        'https://iili.io/q7xlYyx.png', 'https://iili.io/q7xlljV.png', 'https://iili.io/q7xlECP.png',
+
     ];
 
     const neonClasses = ['neon-blue', 'neon-purple', 'neon-pink', 'neon-green', 'neon-orange'];
@@ -5741,6 +5745,26 @@ function createFallingIcon() {
 
 // Generăm o iconiță nouă la fiecare secundă pentru un efect constant dar aerisit
 setInterval(createFallingIcon, 1000);
+
+function randomizeConnect4() {
+  const c4Images = [
+    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FYellow%20Connect%204%20Pice.png?alt=media&token=d56bb594-528e-466b-b163-545fe5417a9f',
+    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FSilver%20Connect%204%20Pice.png?alt=media&token=39481570-33a7-4345-a193-175efd3a1dd9',
+    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FRed%20Connect%204%20Pice.png?alt=media&token=c618f6ec-237a-42fd-8b76-5e78ffe3265a',
+    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FPurple%20Connect%204%20pice.png?alt=media&token=08feeefb-50f8-419d-9644-2d5a12d64568',
+    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FPink%20Connect%204%20pice.png?alt=media&token=b345d47d-6d6d-4be9-ae12-30e9178ef330',
+    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FOrange%20Connect%204%20Pice.png?alt=media&token=4fb75743-b6d5-4219-974a-aae2bcb6dfa9',
+    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FGreen%20Connect%204%20Pice.png?alt=media&token=a881f6cf-7a37-4c50-a513-892ab8474ed5',
+    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FCyan%20connect%204%20pice.png?alt=media&token=4546f719-8ed9-47de-8c5b-4f9421d1cb54',
+    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FBlue%20connec%204%20pice.png?alt=media&token=52862e9b-8102-4e7c-b91d-0a38cd05b2f5',
+    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FBlack%20Connect%204%20Pice.png?alt=media&token=3bfd4ac1-2901-41a7-ae2f-13055b6a42c3',
+    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FKevin%20Bot%20Connect%204%20pice.png?alt=media&token=fb91289c-149c-4c9e-9695-efa80b253d62',
+    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FOrange%20Connect%204%20pice.png?alt=media&token=4fb75743-b6d5-4219-974a-aae2bcb6dfa9'
+  ];
+
+  const randomImage = c4Images[Math.floor(Math.random() * c4Images.length)];
+  return randomImage;
+}
   </script>
 </body>
 </html>
