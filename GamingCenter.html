@@ -2621,6 +2621,63 @@
     box-shadow: 0 0 15px var(--primary);
 }
 
+/* --- CONNECT 4 MINI-BOARD ANIMATION --- */
+.c4-anim-container {
+    position: relative;
+    width: 80px;
+    height: 70px;
+    background: rgba(0, 85, 255, 0.2); /* Albastru transparent tipic tablei */
+    border: 2px solid #0055ff;
+    border-radius: 10px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 4px;
+    padding: 6px;
+    overflow: hidden;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.c4-hole {
+    background: #050b14;
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.c4-piece-ghost {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    top: -150%; /* Start de sus */
+    opacity: 0;
+}
+
+/* Secvența de animație pentru cele 4 piese câștigătoare */
+.p1-drop { animation: c4DropPiece 4s infinite 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.p2-drop { animation: c4DropPiece 4s infinite 1.0s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.p3-drop { animation: c4DropPiece 4s infinite 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.p4-drop { animation: c4DropPiece 4s infinite 2.0s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+@keyframes c4DropPiece {
+    0% { top: -150%; opacity: 0; transform: scale(0.5); }
+    10% { top: 0; opacity: 1; transform: scale(1); }
+    60% { top: 0; opacity: 1; filter: brightness(1); }
+    /* Animația de WIN (70% - 90%) */
+    70% { filter: brightness(1.8) drop-shadow(0 0 8px #fff); transform: scale(1.1); }
+    80% { filter: brightness(1.8) drop-shadow(0 0 15px var(--primary)); transform: scale(1.1); }
+    95% { top: 0; opacity: 1; }
+    100% { top: 150%; opacity: 0; } /* Reset */
+}
+
+/* Hover efect pe card */
+.hub-card:hover .c4-anim-container {
+    border-color: #fff;
+    box-shadow: 0 0 20px rgba(0, 85, 255, 0.6);
+}
+
   </style>
 </head>
 <body>
@@ -3024,11 +3081,22 @@
         <span style="font-family:'Orbitron'; font-weight:800; font-size:12px; text-align:center; color:#fff; position: relative; z-index: 2;">KSDA JUMPER</span>
     </div>
 
-    <!-- COMING SOON -->
-    <div class="hub-card locked">
-        <i class="fas fa-lock"></i>
-        <span style="font-family:'Orbitron'; font-weight:800; font-size:10px;">COMING SOON</span>
+<!-- 6. CONNECT 4 (LOCKED - 500 COINS) -->
+<div id="game_connect4" class="hub-card locked-game" onclick="handleGameClick('connect4', 'connect4.html', 500)">
+    <div class="c4-anim-container">
+        <!-- Rândul de jos unde se face conexiunea de 4 -->
+        <div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div>
+        <div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div>
+        <div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div><div class="c4-hole"></div>
+        
+        <!-- Piesele care cad (folosind imaginile tale) -->
+        <div class="c4-hole"><img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FCyan%20connect%204%20pice.png?alt=media&token=4546f719-8ed9-47de-8c5b-4f9421d1cb54" class="c4-piece-ghost p1-drop"></div>
+        <div class="c4-hole"><img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FCyan%20connect%204%20pice.png?alt=media&token=4546f719-8ed9-47de-8c5b-4f9421d1cb54" class="c4-piece-ghost p2-drop"></div>
+        <div class="c4-hole"><img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FCyan%20connect%204%20pice.png?alt=media&token=4546f719-8ed9-47de-8c5b-4f9421d1cb54" class="c4-piece-ghost p3-drop"></div>
+        <div class="c4-hole"><img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FCyan%20connect%204%20pice.png?alt=media&token=4546f719-8ed9-47de-8c5b-4f9421d1cb54" class="c4-piece-ghost p4-drop"></div>
     </div>
+    <span style="font-family:'Orbitron'; font-weight:800; font-size:12px; text-align:center; color:#fff;">Connect 4 KSDA</span>
+</div>
 
     <!-- COMING SOON -->
     <div class="hub-card locked">
@@ -3949,7 +4017,9 @@ const unlockedGames = data.unlockedGames || [];
 const lockableGames = [
     { id: 'spin', cardId: 'game_spin', url: 'SpinWeel.html' },
     { id: 'jumper', cardId: 'game_jumper', url: 'jump.html' },
-    { id: 'puzzle', cardId: 'game_puzzle', url: 'puzzle.html' }
+    { id: 'puzzle', cardId: 'game_puzzle', url: 'puzzle.html' },
+    { id: 'connect4', cardId: 'game_connect4', url: 'Connect-4.html' } // ADĂUGAT
+
 ];
 
 lockableGames.forEach(game => {
