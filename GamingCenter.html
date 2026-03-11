@@ -2610,10 +2610,38 @@
 .p3 { bottom: 0; left: 0; animation: buildP3 2.5s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .p4 { bottom: 0; right: 0; animation: buildP4 2.5s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-@keyframes buildP1 { 0%, 20% { transform: translate(-30px, -30px) rotate(-45deg); opacity: 0; } 40%, 80% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { opacity: 0; } }
-@keyframes buildP2 { 0%, 25% { transform: translate(30px, -30px) rotate(45deg); opacity: 0; } 45%, 80% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { opacity: 0; } }
-@keyframes buildP3 { 0%, 30% { transform: translate(-30px, 30px) rotate(45deg); opacity: 0; } 50%, 80% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { opacity: 0; } }
-@keyframes buildP4 { 0%, 35% { transform: translate(30px, 30px) rotate(-45deg); opacity: 0; } 55%, 80% { transform: translate(0,0) rotate(0); opacity: 1; } 100% { opacity: 0; } }
+/* --- UPDATED SICK PUZZLE BUILDING ANIMATION --- */
+@keyframes buildP1 { 
+    0%, 10% { transform: translate(-40px, -40px) rotate(-45deg); opacity: 0; } 
+    30%, 70% { transform: translate(0,0) rotate(0); opacity: 1; } 
+    90%, 100% { transform: translate(-40px, -40px) rotate(-45deg); opacity: 0; } 
+}
+@keyframes buildP2 { 
+    0%, 15% { transform: translate(40px, -40px) rotate(45deg); opacity: 0; } 
+    35%, 70% { transform: translate(0,0) rotate(0); opacity: 1; } 
+    90%, 100% { transform: translate(40px, -40px) rotate(45deg); opacity: 0; } 
+}
+@keyframes buildP3 { 
+    0%, 20% { transform: translate(-40px, 40px) rotate(45deg); opacity: 0; } 
+    40%, 70% { transform: translate(0,0) rotate(0); opacity: 1; } 
+    90%, 100% { transform: translate(-40px, 40px) rotate(45deg); opacity: 0; } 
+}
+@keyframes buildP4 { 
+    0%, 25% { transform: translate(40px, 40px) rotate(-45deg); opacity: 0; } 
+    45%, 70% { transform: translate(0,0) rotate(0); opacity: 1; } 
+    90%, 100% { transform: translate(40px, 40px) rotate(-45deg); opacity: 0; } 
+}
+
+/* Ensure the piece styling is sharp */
+.p-piece {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--primary);
+    background: rgba(41, 243, 255, 0.2);
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(41, 243, 255, 0.3);
+}
 
 /* Hover scale for the puzzle card */
 .hub-card:hover .p-piece {
@@ -4054,6 +4082,26 @@ header {
         order: 1; /* Pune imaginea Lost Soul prima sau ultima după preferință */
     }
 }
+
+.c4-piece-ghost {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform: translateY(-250%); /* Start way above */
+    opacity: 0;
+    object-fit: contain;
+    z-index: 10;
+}
+
+@keyframes c4Win {
+    0% { transform: translateY(-250%); opacity: 0; }
+    15% { transform: translateY(0); opacity: 1; filter: brightness(1); }
+    40% { filter: brightness(1.8) drop-shadow(0 0 10px var(--primary)); transform: scale(1.1); }
+    50% { filter: brightness(1); transform: scale(1); }
+    85% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(250%); opacity: 0; } /* Fall through bottom */
+}
+
   </style>
 </head>
 <body>
@@ -5748,8 +5796,8 @@ function createFallingIcon() {
 // Generăm o iconiță nouă la fiecare secundă pentru un efect constant dar aerisit
 setInterval(createFallingIcon, 1000);
 
-// 1. The function to pick random images
-function randomizeConnect4() {
+// --- FIXED CONNECT 4 RANDOMIZER ---
+function getC4Image() {
     const c4Images = [
         'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FYellow%20Connect%204%20Pice.png?alt=media&token=d56bb594-528e-466b-b163-545fe5417a9f',
         'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FSilver%20Connect%204%20Pice.png?alt=media&token=39481570-33a7-4345-a193-175efd3a1dd9',
@@ -5766,16 +5814,16 @@ function randomizeConnect4() {
     return c4Images[Math.floor(Math.random() * c4Images.length)];
 }
 
-// 2. Immediate Execution
-const c4Targets = document.querySelectorAll('.c4-target');
-const winningColor = randomizeConnect4();
+// Target each piece individually
+function initConnect4Animation() {
+    const c4Targets = document.querySelectorAll('.c4-target');
+    c4Targets.forEach(img => {
+        img.src = getC4Image(); // Gives each ghost its own random image
+    });
+}
 
-c4Targets.forEach(img => {
-    img.src = winningColor;
-    // Troubleshooting check: if image fails to load, log it to console
-    img.onerror = () => console.error("Failed to load Connect 4 piece:", winningColor);
-});
-
+// Run on load
+document.addEventListener('DOMContentLoaded', initConnect4Animation);
 
   </script>
 </body>
