@@ -11,7 +11,7 @@
   </script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Gamming Center</title>
+  <title>Trivia KSDA</title>
   <meta name="description" content="Pagina noua KSDA">
   <link rel="icon" type="image/png" href="https://iili.io/fXks1Dv.png">
 
@@ -2648,11 +2648,13 @@
 
 .c4-piece-ghost {
     position: absolute;
-    width: 100%;
+    width: 100%; /* Change from 110% to 100% to fit better */
     height: 100%;
-    object-fit: contain;
-    top: -150%; /* Start de sus */
+    top: -200%;
+    left: 0;
     opacity: 0;
+    object-fit: contain; /* Ensures the piece doesn't stretch */
+    z-index: 10;
 }
 
 /* Secvența de animație pentru cele 4 piese câștigătoare */
@@ -5746,25 +5748,35 @@ function createFallingIcon() {
 // Generăm o iconiță nouă la fiecare secundă pentru un efect constant dar aerisit
 setInterval(createFallingIcon, 1000);
 
+// 1. The function to pick random images
 function randomizeConnect4() {
-  const c4Images = [
-    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FYellow%20Connect%204%20Pice.png?alt=media&token=d56bb594-528e-466b-b163-545fe5417a9f',
-    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FSilver%20Connect%204%20Pice.png?alt=media&token=39481570-33a7-4345-a193-175efd3a1dd9',
-    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FRed%20Connect%204%20Pice.png?alt=media&token=c618f6ec-237a-42fd-8b76-5e78ffe3265a',
-    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FPurple%20Connect%204%20pice.png?alt=media&token=08feeefb-50f8-419d-9644-2d5a12d64568',
-    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FPink%20Connect%204%20pice.png?alt=media&token=b345d47d-6d6d-4be9-ae12-30e9178ef330',
-    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FOrange%20Connect%204%20Pice.png?alt=media&token=4fb75743-b6d5-4219-974a-aae2bcb6dfa9',
-    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FGreen%20Connect%204%20Pice.png?alt=media&token=a881f6cf-7a37-4c50-a513-892ab8474ed5',
-    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FCyan%20connect%204%20pice.png?alt=media&token=4546f719-8ed9-47de-8c5b-4f9421d1cb54',
-    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FBlue%20connec%204%20pice.png?alt=media&token=52862e9b-8102-4e7c-b91d-0a38cd05b2f5',
-    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FBlack%20Connect%204%20Pice.png?alt=media&token=3bfd4ac1-2901-41a7-ae2f-13055b6a42c3',
-    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FKevin%20Bot%20Connect%204%20pice.png?alt=media&token=fb91289c-149c-4c9e-9695-efa80b253d62',
-    'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FOrange%20Connect%204%20pice.png?alt=media&token=4fb75743-b6d5-4219-974a-aae2bcb6dfa9'
-  ];
-
-  const randomImage = c4Images[Math.floor(Math.random() * c4Images.length)];
-  return randomImage;
+    const c4Images = [
+        'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FYellow%20Connect%204%20Pice.png?alt=media&token=d56bb594-528e-466b-b163-545fe5417a9f',
+        'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FSilver%20Connect%204%20Pice.png?alt=media&token=39481570-33a7-4345-a193-175efd3a1dd9',
+        'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FRed%20Connect%204%20Pice.png?alt=media&token=c618f6ec-237a-42fd-8b76-5e78ffe3265a',
+        'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FPurple%20Connect%204%20pice.png?alt=media&token=08feeefb-50f8-419d-9644-2d5a12d64568',
+        'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FPink%20Connect%204%20pice.png?alt=media&token=b345d47d-6d6d-4be9-ae12-30e9178ef330',
+        'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FOrange%20Connect%204%20Pice.png?alt=media&token=4fb75743-b6d5-4219-974a-aae2bcb6dfa9',
+        'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FGreen%20Connect%204%20Pice.png?alt=media&token=a881f6cf-7a37-4c50-a513-892ab8474ed5',
+        'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FCyan%20connect%204%20pice.png?alt=media&token=4546f719-8ed9-47de-8c5b-4f9421d1cb54',
+        'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FBlue%20connec%204%20pice.png?alt=media&token=52862e9b-8102-4e7c-b91d-0a38cd05b2f5',
+        'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FBlack%20Connect%204%20Pice.png?alt=media&token=3bfd4ac1-2901-41a7-ae2f-13055b6a42c3',
+        'https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Connect%204%2FKevin%20Bot%20Connect%204%20pice.png?alt=media&token=fb91289c-149c-4c9e-9695-efa80b253d62'
+    ];
+    return c4Images[Math.floor(Math.random() * c4Images.length)];
 }
+
+// 2. Immediate Execution
+const c4Targets = document.querySelectorAll('.c4-target');
+const winningColor = randomizeConnect4();
+
+c4Targets.forEach(img => {
+    img.src = winningColor;
+    // Troubleshooting check: if image fails to load, log it to console
+    img.onerror = () => console.error("Failed to load Connect 4 piece:", winningColor);
+});
+
+
   </script>
 </body>
 </html>
