@@ -15913,16 +15913,16 @@ async function handleLoginFlow() {
             // --- KEVIN BOT WELCOME MESSAGE PE WALL ---
             try {
                 const welcomeMsg = `🎉 BUN VENIT, ${user.displayName || "Membru Nou"}! 🌟\n\nSalutare și bine ai venit în Comunitatea KSDA! Ești membrul cu numărul #${userNumber}. Primești 500 Coins și 10 Diamante cadou! 🚀`;
-                await addDoc(collection(db, "wall_messages"), {
-                    text: welcomeMsg,
-                    uid: 'kevin-bot',
-                    name: 'Kevin-Bot',
-                    photo: 'https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/345b1fcb-5942-4eb3-831f-b6a42b23051b/21584177-ae66-438a-a2cd-27dc4461a670_removalai_preview.png?format=300w',
-    type: 'msg', // This field is required by your rules
-                    isBot: true,
-                    createdAt: serverTimestamp(),
-                    isDeleted: false
-                });
+await addDoc(collection(db, "wall_messages"), {
+    text: welcomeMsg,
+    uid: 'kevin-bot',
+    name: 'Kevin-Bot',
+    type: 'msg',
+    isBot: true,
+    isFake: false,
+    photo: 'https://i.makeagif.com/media/3-03-2021/otrneG.gif',
+    createdAt: serverTimestamp()
+});
             } catch (e) { console.error("Wall welcome error:", e); }
 
             // --- FIXED: SHOW WELCOME MODAL FOR EVERY NEW USER ---
