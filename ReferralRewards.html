@@ -7850,6 +7850,157 @@ html {
     20% { left: 150%; }
     100% { left: 150%; }
 }
+
+
+/* IMPROVED BOX HEADER */
+.glass-header {
+    background: linear-gradient(180deg, rgba(41, 243, 255, 0.1) 0%, rgba(0, 0, 0, 0.6) 100%);
+    padding: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid rgba(41, 243, 255, 0.3);
+    position: relative;
+}
+
+.ref-pfp-ring {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    border: 2px solid #29f3ff;
+    padding: 3px;
+    background: #050b14;
+    box-shadow: 0 0 20px rgba(41, 243, 255, 0.4);
+    transition: 0.3s;
+}
+
+.ref-stats-text span {
+    font-family: 'Orbitron';
+    font-size: 24px; /* Larger number */
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+    text-shadow: 0 0 15px #29f3ff; /* Neon glow */
+}
+
+.ref-stats-text p {
+    font-family: 'Orbitron';
+    font-size: 9px;
+    color: #29f3ff;
+    margin: 4px 0 0 0;
+    letter-spacing: 2px;
+    font-weight: 800;
+    opacity: 0.8;
+}
+
+.ref-copy-btn {
+    background: #29f3ff;
+    color: #000;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 12px; /* Sharper technical look */
+    font-family: 'Orbitron';
+    font-weight: 900;
+    font-size: 11px;
+    box-shadow: 0 0 15px rgba(41, 243, 255, 0.3);
+}
+
+
+/* --- THE ULTIMATE REFERRAL WIDTH & GAP FIX --- */
+
+/* 1. ELIMINATE ALL TOP GAPS */
+.top-hero { 
+    padding-top: 40px !important; /* Pulls the title up */
+}
+
+#siteContent {
+    margin-top: 0px !important;   /* Removes secondary gap */
+    padding-top: 0px !important;
+}
+
+.referral-page-wrapper {
+    margin-top: 0px !important;   /* Removes third gap */
+}
+
+/* 2. MAKE THE CONTAINER WIDE (LEFT TO RIGHT) */
+.referral-glass-card {
+    max-width: 1200px !important; /* Stretches the box wide */
+    width: 95% !important;        /* Keeps it from touching screen edges */
+    margin: 0 auto !important;    /* Centers it */
+    border-radius: 40px !important;
+}
+
+/* 3. ADD SPACE INSIDE THE LEFT AND RIGHT SIDES */
+.glass-header {
+    padding: 30px 60px !important; /* Massive space on left/right inside the header */
+    justify-content: space-between !important;
+}
+
+.referral-scroll-list {
+    padding: 40px 60px !important; /* Massive space on left/right inside the list */
+    height: 450px !important;      /* Makes the list taller to look better wide */
+}
+
+/* 4. FIX THE TITLE SIZE FOR WIDE SCREENS */
+.metallic-title-big.hero-referrals {
+    margin-top: 0 !important;
+    margin-bottom: 5px !important;
+}
+
+/* 5. MOBILE OVERRIDE (Keep it from breaking on phones) */
+@media (max-width: 768px) {
+    .glass-header, .referral-scroll-list {
+        padding: 20px !important; /* Shrink padding only for small screens */
+    }
+    .top-hero {
+        padding-top: 80px !important; /* Add space for the mobile hamburger menu */
+    }
+} 
+
+/* --- THE ULTIMATE MOBILE SYMMETRY FIX --- */
+@media (max-width: 768px) {
+    /* 1. Pull everything UP and nuke side padding from the parent */
+    main.top-hero {
+        padding-top: 70px !important; /* Gap at the top */
+        padding-left: 0 !important;   /* Nuke parent side gaps */
+        padding-right: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important; /* Perfect Center */
+    }
+
+    /* 2. Wider Box (96% is the sweet spot for side gaps) */
+    .referral-glass-card {
+        width: 96% !important;         /* Almost edge to edge */
+        max-width: 100% !important;    /* Remove the 450px limit */
+        margin: 0 auto 20px !important; /* Centers it perfectly */
+        border-radius: 20px !important;
+    }
+
+    /* 3. Internal Header Spacing */
+    .glass-header {
+        padding: 15px 15px !important; /* Space inside the box */
+        justify-content: space-between !important;
+    }
+
+    .referral-scroll-list {
+        padding: 10px !important;
+        height: 500px !important; /* Makes it fill the screen better */
+    }
+
+    /* 4. Scale down the PFP and Text slightly to look more professional */
+    .ref-pfp-ring {
+        width: 45px !important;
+        height: 45px !important;
+    }
+    .ref-stats-text span {
+        font-size: 18px !important;
+    }
+    .ref-copy-btn {
+        padding: 8px 12px !important;
+        font-size: 10px !important;
+    }
+}
   </style>
 </head>
 <body>
@@ -7915,7 +8066,6 @@ html {
 
 <main class="top-hero"> 
 
-<div id="siteContent" style="margin-top: 0px; min-height: 70vh; padding: 20px; position: relative; z-index: 10;">
 <div class="referral-page-wrapper">
     <div class="rewards-hero">
         <h1 class="metallic-title-big hero-referrals animated-title">Referral Rewards</h1>
@@ -7955,7 +8105,6 @@ html {
         <!-- ANIMATED BORDER ELEMENT -->
         <div class="box-glow-line"></div>
     </div>
-</div>
  </main>
 
 <div id="accountModal" class="account-modal-overlay">
@@ -9801,6 +9950,24 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.style.setProperty('--theme-glow', 'rgba(41, 243, 255, 0.3)');
     }
 });
+
+
+window.copyReferralLink = () => {
+    const user = auth.currentUser;
+    if (!user) {
+        showToast("Te rugăm să te loghezi pentru a genera link-ul!");
+        return;
+    }
+
+    // Replace 'yourdomain.com' with your actual URL
+    const referralLink = `https://ksdapromovari.ro/index.html?ref=${user.uid}`;
+    
+    navigator.clipboard.writeText(referralLink).then(() => {
+        showToast("Link copiat în clipboard!");
+    }).catch(err => {
+        console.error('Eroare la copiere:', err);
+    });
+};
 </script> 
 </body>
 </html> 
