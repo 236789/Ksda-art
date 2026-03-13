@@ -8003,93 +8003,86 @@ html {
 }
 
 
-/* --- MILESTONE CARDS ENGINE --- */
+/* --- CLEAN STACKED MILESTONES --- */
 .milestone-card {
-    position: relative;
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 20px;
-    padding: 20px;
-    margin-bottom: 15px;
+    padding: 15px;
+    margin-bottom: 12px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    overflow: hidden;
+    flex-direction: column; /* Forces stacking */
+    gap: 8px;
     transition: 0.3s;
 }
 
-/* Gray overlay for uncompleted tasks */
 .milestone-locked {
-    filter: grayscale(1) opacity(0.5);
-    pointer-events: none;
+    filter: grayscale(1) opacity(0.4);
 }
 
-.milestone-info { flex: 1; }
+/* Header: Title and Reward on 1 row */
+.ms-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
 
 .milestone-title {
     font-family: 'Orbitron';
-    font-size: 14px;
+    font-size: 11px; /* Smaller as requested */
     font-weight: 800;
     color: #fff;
-    margin-bottom: 8px;
+    white-space: nowrap;
 }
 
 .milestone-reward-pill {
-    display: inline-flex;
-    gap: 10px;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 5px 12px;
-    border-radius: 50px;
-    border: 1px solid rgba(41, 243, 255, 0.2);
-}
-
-.reward-item {
     display: flex;
-    align-items: center;
-    gap: 5px;
-    font-family: 'Orbitron';
-    font-size: 11px;
-    font-weight: 900;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 4px 10px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* PROGRESS BAR */
+/* Progress bar in the middle */
 .ms-progress-container {
     width: 100%;
-    height: 6px;
+    height: 8px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
-    margin-top: 15px;
-    position: relative;
     overflow: hidden;
 }
 
 .ms-progress-fill {
     height: 100%;
     background: linear-gradient(90deg, #29f3ff, #00ff88);
-    box-shadow: 0 0 10px #29f3ff;
-    width: 0%; /* Dynamic */
-    transition: width 1s ease-in-out;
+    box-shadow: 0 0 10px rgba(41, 243, 255, 0.5);
+    transition: width 1s ease;
 }
 
-/* CLAIM BUTTON */
+/* Bottom Action: Centered below the bar */
+.milestone-action {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
+}
+
 .claim-reward-btn {
+    width: 100%; /* Full width button looks better on small cards */
+    max-width: 250px;
     background: #00ff88;
     color: #000;
     border: none;
-    padding: 10px 20px;
-    border-radius: 12px;
+    padding: 10px;
+    border-radius: 10px;
     font-family: 'Orbitron';
     font-weight: 900;
     font-size: 12px;
     cursor: pointer;
-    z-index: 10;
-    animation: bounceClaim 2s infinite;
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
-}
-
-@keyframes bounceClaim {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+    box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+    animation: bounceClaim 2.5s infinite;
 }
 
 .claimed-status {
@@ -8098,6 +8091,7 @@ html {
     font-size: 10px;
     font-weight: 900;
     text-transform: uppercase;
+    letter-spacing: 1px;
 }
   </style>
 </head>
@@ -10005,20 +9999,25 @@ REFERRAL_MILESTONES.forEach(ms => {
     card.className = `milestone-card ${!isCompleted ? 'milestone-locked' : ''}`;
     
     card.innerHTML = `
-        <div class="milestone-info">
+        <!-- Top Row: Title and Rewards -->
+        <div class="ms-header">
             <div class="milestone-title">INVITE ${ms.goal} FRIENDS</div>
             <div class="milestone-reward-pill">
-                ${ms.coins > 0 ? `<div class="reward-item" style="color:#ffd700;"><img src="https://iili.io/fhc1SKQ.png" width="14"> ${formatNumber(ms.coins)}</div>` : ''}
+                ${ms.coins > 0 ? `<div class="reward-item" style="color:#ffd700;"><img src="https://iili.io/fhc1SKQ.png" width="12"> ${formatNumber(ms.coins)}</div>` : ''}
                 ${ms.diamonds > 0 ? `<div class="reward-item" style="color:#00ff88;"><img src="https://iili.io/fv5bmtj.png" width="12"> ${ms.diamonds}</div>` : ''}
             </div>
-            <div class="ms-progress-container">
-                <div class="ms-progress-fill" style="width: ${progress}%"></div>
-            </div>
         </div>
+
+        <!-- Middle Row: Progress Bar -->
+        <div class="ms-progress-container">
+            <div class="ms-progress-fill" style="width: ${progress}%"></div>
+        </div>
+
+        <!-- Bottom Row: Action Button or Counter -->
         <div class="milestone-action">
-            ${isClaimed ? '<span class="claimed-status"><i class="fas fa-check-double"></i> Claimed</span>' : 
-              (isCompleted ? `<button class="claim-reward-btn" onclick="claimMilestone('${ms.id}')">CLAIM</button>` : 
-              `<span style="color:#666; font-family:'Orbitron'; font-size:10px;">${currentInvites}/${ms.goal}</span>`)}
+            ${isClaimed ? '<span class="claimed-status"><i class="fas fa-check-circle"></i> CLAIMED</span>' : 
+              (isCompleted ? `<button class="claim-reward-btn" onclick="claimMilestone('${ms.id}')">CLAIM REWARD</button>` : 
+              `<span style="color:#555; font-family:'Orbitron'; font-size:9px;">PROGRESS: ${currentInvites} / ${ms.goal}</span>`)}
         </div>
     `;
     listArea.appendChild(card);
