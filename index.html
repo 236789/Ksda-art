@@ -15808,17 +15808,26 @@ const UPDATE_INTERVAL = 3 * 60 * 1000;
 
 async function updateOnlineStatus() {
     if (!auth.currentUser) return;
+
+    // FIX: Stop status updates if we are in the middle of onboarding
+    const onb = document.getElementById('onboardingModal');
+    if (onb && onb.classList.contains('active')) return;
+
     const now = Date.now();
-    
     if (now - lastStatusUpdate > UPDATE_INTERVAL) {
         lastStatusUpdate = now;
         try {
-            await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
-                isOnline: true,
-                lastActive: serverTimestamp()
-            });
-            console.log("Status Online Actualizat");
-        } catch(e) { console.error("Status update error", e); }
+            const userRef = doc(db, "accounts", auth.currentUser.uid);
+            const snap = await getDoc(userRef);
+            
+            // Only update if the document actually exists
+            if (snap.exists()) {
+                await updateDoc(userRef, {
+                    isOnline: true,
+                    lastActive: serverTimestamp()
+                });
+            }
+        } catch(e) { /* Silently catch if account isn't ready yet */ }
     }
 }
 
@@ -16797,13 +16806,13 @@ async function finalizeUserSetup(user, customUsername = null) {
     const userRef = doc(db, "accounts", user.uid);
     const snap = await getDoc(userRef);
 
-    // ONLY RUNS IF THE USER IS NEW
+    // RULEAZĂ DOAR DACĂ UTILIZATORUL ESTE NOU
     if (!snap.exists()) {
         console.log("New User Detected: Starting IP-Validated Onboarding...");
 
         const countSnap = await getCountFromServer(collection(db, "accounts"));
         const userNumber = countSnap.data().count + 1;
-        const currentIp = await getIP(); // Get current user's IP
+        const currentIp = await getIP(); 
 
         const finalName = customUsername || user.displayName || "Membru Nou";
         const finalPfp = user.photoURL || "https://iili.io/fXks1Dv.png";
@@ -16821,12 +16830,9 @@ async function finalizeUserSetup(user, customUsername = null) {
                 const inviterData = inviterSnap.data();
                 const inviterIp = inviterData.ip;
 
-                // Check if IPs match or if one is unknown
                 if (inviterIp === currentIp && currentIp !== "Necunoscut") {
                     console.warn("Self-referral attempt blocked: Same IP address.");
-                    // We proceed with the account creation but WITHOUT the 1000 coin bonus
                 } else {
-                    // Success: Different IPs
                     startingCoins += 1000;
                     bonusGranted = true;
 
@@ -16843,13 +16849,12 @@ async function finalizeUserSetup(user, customUsername = null) {
                         })
                     });
                     
-                    // Log transaction for the Inviter
                     await logTransaction(1000, "COINS", `Referral Bonus (Invited ${finalName})`, "Referral System", referrerId);
                 }
             }
         }
 
-        // 3. Create the Database Entry for the New User
+        // 3. Creare Document în Baza de Date
         await setDoc(userRef, {
             uid: user.uid,
             username: finalName,
@@ -16863,13 +16868,13 @@ async function finalizeUserSetup(user, customUsername = null) {
             memberNumber: userNumber,
             totalReferrals: 0,
             pendingReferrals: 0,
-            ip: currentIp, // Store the IP for future comparison
+            ip: currentIp,
             kevinMessagesToday: 0,
             completedQuests: [],
             onboardingComplete: false
         });
 
-        // 4. Log transactions for the new user
+        // 4. Logare Tranzacții
         await logTransaction(500, "COINS", "Welcome Bonus", "Acasă", user.uid);
         await logTransaction(10, "DIAMONDS", "Welcome Bonus", "Acasă", user.uid);
         
@@ -16877,29 +16882,34 @@ async function finalizeUserSetup(user, customUsername = null) {
             await logTransaction(1000, "COINS", "Referral Bonus (Invited)", "Acasă", user.uid);
         }
 
-        // 5. Send Welcome Message to Wall
-        const welcomeMsg = `🎉 BUN VENIT, ${finalName}! 🌟\n\nS-a alăturat membrul #${userNumber}. A primit bonusul de bun venit! 🚀`;
+        // 5. Mesaj pe Wall de la Kevin
+        const welcomeMsg = `🎉 BUN VENIT, ${finalName}! 🌟\n\nS-a alăturat membrul #${userNumber}. A primit bonusul de bun venit (500 Coins & 10 Diamante)! 🚀`;
         await addDoc(collection(db, "wall_messages"), {
             text: welcomeMsg, uid: 'kevin-bot', name: 'Kevin-Bot', photo: 'https://i.makeagif.com/media/3-03-2021/otrneG.gif', isBot: true, createdAt: serverTimestamp()
         });
 
-        // 6. UI Setup
-        document.getElementById('onbStep1Pfp').src = finalPfp;
-        document.getElementById('onbStep2Preview').src = finalPfp;
-        document.getElementById('onbStep1Name').innerText = finalName;
-        document.getElementById('onbMemberCount').innerText = "#" + userNumber;
+        // 6. Setup UI și deschidere MODAL
+        const onbModal = document.getElementById('onboardingModal');
+        if (onbModal) {
+            document.getElementById('onbStep1Pfp').src = finalPfp;
+            document.getElementById('onbStep2Preview').src = finalPfp;
+            document.getElementById('onbStep1Name').innerText = finalName;
+            document.getElementById('onbMemberCount').innerText = "#" + userNumber;
+            
+            onbModal.classList.add('active');
+            if(typeof window.nextOnbStep === "function") window.nextOnbStep(1); 
+        }
         
-        window.nextOnbStep(1); 
-        document.getElementById('onboardingModal').classList.add('active');
-        
-        // Show specific toast if exploit was blocked
         if (referrerId && !bonusGranted) {
             setTimeout(() => {
-window.showToast("Bonusul de invitație a fost respins: contul invitat folosește aceeași adresă IP ca și tine. Auto-invitațiile nu sunt eligibile pentru recompense.");            }, 3000);
+                if(window.showToast) window.showToast("Bonus invitație respins: Aceeași adresă IP.");
+            }, 3000);
         }
     }
     
-    document.getElementById('authModal').style.display = 'none';
+    // Închidem modalul de Login
+    const authMod = document.getElementById('authModal');
+    if(authMod) authMod.style.display = 'none';
 }
 
 // --- HANDLERS ---
@@ -17022,12 +17032,21 @@ window.handleEmailLogin = async () => {
     } catch (e) { alert(e.message); }
 };
 
-// Update your existing header login button trigger
-headerLoginBtn.onclick = () => {
+headerLoginBtn.onclick = async () => {
     if (!auth.currentUser) {
         document.getElementById('authModal').style.display = 'flex';
     } else {
-        accountModal.classList.add('active');
+        // Fetch data first to make sure it's not empty
+        const userRef = doc(db, "accounts", auth.currentUser.uid);
+        const snap = await getDoc(userRef);
+        
+        if (snap.exists()) {
+            accountModal.classList.add('active');
+        } else {
+            // If user is auth'd but no doc exists, they probably missed onboarding
+            // Trigger onboarding/setup instead of showing an empty modal
+            finalizeUserSetup(auth.currentUser);
+        }
     }
 };
 
