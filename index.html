@@ -16887,33 +16887,48 @@ async function finalizeUserSetup(user, customUsername = null) {
             }
         } catch(e) { console.warn("Log failed but continuing..."); }
 
-        // 5. Mesaj pe Wall de la Kevin (Wrap this in try/catch!)
-        try {
-            const welcomeMsg = `🎉 BUN VENIT, ${finalName}! 🌟\n\nS-a alăturat membrul #${userNumber}. A primit bonusul de bun venit (500 Coins & 10 Diamante)! 🚀`;
-            await addDoc(collection(db, "wall_messages"), {
-                text: welcomeMsg, 
-                uid: 'kevin-bot', 
-                name: 'Kevin-Bot', 
-                photo: 'https://i.makeagif.com/media/3-03-2021/otrneG.gif', 
-                isBot: true, 
-                createdAt: serverTimestamp()
-            });
-        } catch (e) { 
-            console.error("Wall welcome blocked by rules, but we are opening the modal anyway:", e); 
-        }
+// --- KEVIN BOT WELCOME MESSAGE ---
+// We wrap this so if it fails, it doesn't "break" the rest of the site
+try {
+    const welcomeMsg = `🎉 BUN VENIT, ${finalName}! 🌟\n\nS-a alăturat membrul #${userNumber}. A primit bonusul de bun venit (500 Coins & 10 Diamante)! 🚀`;
+    await addDoc(collection(db, "wall_messages"), {
+        text: welcomeMsg,
+        uid: 'kevin-bot', // Rule now allows this because text contains "BUN VENIT"
+        name: 'Kevin-Bot',
+        photo: 'https://i.makeagif.com/media/3-03-2021/otrneG.gif',
+        isBot: true,
+        createdAt: serverTimestamp()
+    });
+} catch (e) {
+    console.warn("Wall message was blocked, but that's okay, opening modal anyway...", e);
+}
+// --- KEVIN BOT WELCOME MESSAGE ---
+// We wrap this so if it fails, it doesn't "break" the rest of the site
+try {
+    const welcomeMsg = `🎉 BUN VENIT, ${finalName}! 🌟\n\nS-a alăturat membrul #${userNumber}. A primit bonusul de bun venit (500 Coins & 10 Diamante)! 🚀`;
+    await addDoc(collection(db, "wall_messages"), {
+        text: welcomeMsg,
+        uid: 'kevin-bot', // Rule now allows this because text contains "BUN VENIT"
+        name: 'Kevin-Bot',
+        photo: 'https://i.makeagif.com/media/3-03-2021/otrneG.gif',
+        isBot: true,
+        createdAt: serverTimestamp()
+    });
+} catch (e) {
+    console.warn("Wall message was blocked, but that's okay, opening modal anyway...", e);
+}
 
-        // 6. Setup UI și deschidere MODAL
-        const onbModal = document.getElementById('onboardingModal');
-        if (onbModal) {
-            document.getElementById('onbStep1Pfp').src = finalPfp;
-            document.getElementById('onbStep2Preview').src = finalPfp;
-            document.getElementById('onbStep1Name').innerText = finalName;
-            document.getElementById('onbMemberCount').innerText = "#" + userNumber;
-            
-            onbModal.classList.add('active');
-            if(typeof window.nextOnbStep === "function") window.nextOnbStep(1); 
-        }
-        
+// 6. Setup UI și deschidere MODAL (THIS WILL NOW ALWAYS RUN)
+const onbModal = document.getElementById('onboardingModal');
+if (onbModal) {
+    document.getElementById('onbStep1Pfp').src = finalPfp;
+    document.getElementById('onbStep2Preview').src = finalPfp;
+    document.getElementById('onbStep1Name').innerText = finalName;
+    document.getElementById('onbMemberCount').innerText = "#" + userNumber;
+    
+    onbModal.classList.add('active');
+    if(typeof window.nextOnbStep === "function") window.nextOnbStep(1); 
+}
         if (referrerId && !bonusGranted) {
             setTimeout(() => {
                 if(window.showToast) window.showToast("Bonus invitație respins: Aceeași adresă IP.");
