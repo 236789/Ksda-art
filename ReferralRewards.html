@@ -8001,6 +8001,104 @@ html {
         font-size: 10px !important;
     }
 }
+
+
+/* --- MILESTONE CARDS ENGINE --- */
+.milestone-card {
+    position: relative;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    overflow: hidden;
+    transition: 0.3s;
+}
+
+/* Gray overlay for uncompleted tasks */
+.milestone-locked {
+    filter: grayscale(1) opacity(0.5);
+    pointer-events: none;
+}
+
+.milestone-info { flex: 1; }
+
+.milestone-title {
+    font-family: 'Orbitron';
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.milestone-reward-pill {
+    display: inline-flex;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 5px 12px;
+    border-radius: 50px;
+    border: 1px solid rgba(41, 243, 255, 0.2);
+}
+
+.reward-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Orbitron';
+    font-size: 11px;
+    font-weight: 900;
+}
+
+/* PROGRESS BAR */
+.ms-progress-container {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    margin-top: 15px;
+    position: relative;
+    overflow: hidden;
+}
+
+.ms-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #29f3ff, #00ff88);
+    box-shadow: 0 0 10px #29f3ff;
+    width: 0%; /* Dynamic */
+    transition: width 1s ease-in-out;
+}
+
+/* CLAIM BUTTON */
+.claim-reward-btn {
+    background: #00ff88;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-family: 'Orbitron';
+    font-weight: 900;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 10;
+    animation: bounceClaim 2s infinite;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+}
+
+@keyframes bounceClaim {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.claimed-status {
+    color: #00ff88;
+    font-family: 'Orbitron';
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
   </style>
 </head>
 <body>
@@ -9891,6 +9989,41 @@ onSnapshot(doc(db, "accounts", user.uid), (uSnap) => {
         if (refImg) refImg.src = finalProfilePic;
         // --- END FIX ---
 
+// --- RENDER REFERRAL MILESTONES ---
+const listArea = document.getElementById('referralListArea');
+const currentInvites = data.totalReferrals || 0;
+const claimed = data.claimedMilestones || []; // Array in Firebase: ['ref_1', 'ref_2']
+
+listArea.innerHTML = ''; // Clear scanning msg
+
+REFERRAL_MILESTONES.forEach(ms => {
+    const isCompleted = currentInvites >= ms.goal;
+    const isClaimed = claimed.includes(ms.id);
+    const progress = Math.min((currentInvites / ms.goal) * 100, 100);
+
+    const card = document.createElement('div');
+    card.className = `milestone-card ${!isCompleted ? 'milestone-locked' : ''}`;
+    
+    card.innerHTML = `
+        <div class="milestone-info">
+            <div class="milestone-title">INVITE ${ms.goal} FRIENDS</div>
+            <div class="milestone-reward-pill">
+                ${ms.coins > 0 ? `<div class="reward-item" style="color:#ffd700;"><img src="https://iili.io/fhc1SKQ.png" width="14"> ${formatNumber(ms.coins)}</div>` : ''}
+                ${ms.diamonds > 0 ? `<div class="reward-item" style="color:#00ff88;"><img src="https://iili.io/fv5bmtj.png" width="12"> ${ms.diamonds}</div>` : ''}
+            </div>
+            <div class="ms-progress-container">
+                <div class="ms-progress-fill" style="width: ${progress}%"></div>
+            </div>
+        </div>
+        <div class="milestone-action">
+            ${isClaimed ? '<span class="claimed-status"><i class="fas fa-check-double"></i> Claimed</span>' : 
+              (isCompleted ? `<button class="claim-reward-btn" onclick="claimMilestone('${ms.id}')">CLAIM</button>` : 
+              `<span style="color:#666; font-family:'Orbitron'; font-size:10px;">${currentInvites}/${ms.goal}</span>`)}
+        </div>
+    `;
+    listArea.appendChild(card);
+});
+
         document.getElementById('popUserImg').src = data.image;
         const popFrame = document.getElementById('popUserFrame');
         if(popFrame) {
@@ -9967,6 +10100,62 @@ window.copyReferralLink = () => {
     }).catch(err => {
         console.error('Eroare la copiere:', err);
     });
+};
+
+
+
+const REFERRAL_MILESTONES = [
+    { id: 'ref_1', goal: 1, coins: 1500, diamonds: 0 },
+    { id: 'ref_2', goal: 2, coins: 0, diamonds: 3 },
+    { id: 'ref_3', goal: 3, coins: 2000, diamonds: 0 },
+    { id: 'ref_4', goal: 4, coins: 2500, diamonds: 3 },
+    { id: 'ref_5', goal: 5, coins: 0, diamonds: 10 },
+    { id: 'ref_10', goal: 10, coins: 0, diamonds: 25 },
+    { id: 'ref_15', goal: 15, coins: 10000, diamonds: 0 },
+    { id: 'ref_20', goal: 20, coins: 0, diamonds: 50 },
+    { id: 'ref_35', goal: 35, coins: 35000, diamonds: 75 },
+    { id: 'ref_50', goal: 50, coins: 50000, diamonds: 100 },
+    { id: 'ref_100', goal: 100, coins: 100000, diamonds: 200 }
+];
+
+
+window.claimMilestone = async (milestoneId) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const ms = REFERRAL_MILESTONES.find(m => m.id === milestoneId);
+    if (!ms) return;
+
+    try {
+        const userRef = doc(db, "accounts", user.uid);
+        const snap = await getDoc(userRef);
+        const userData = snap.data();
+
+        // 1. Double check eligibility
+        if (userData.totalReferrals < ms.goal) {
+            showToast("Milestone nefinalizat!");
+            return;
+        }
+
+        // 2. Prevent multiple claims
+        if (userData.claimedMilestones && userData.claimedMilestones.includes(milestoneId)) {
+            showToast("Deja revendicat!");
+            return;
+        }
+
+        // 3. Update Firebase
+        await updateDoc(userRef, {
+            coins: increment(ms.coins || 0),
+            diamonds: increment(ms.diamonds || 0),
+            claimedMilestones: (userData.claimedMilestones || []).concat(milestoneId)
+        });
+
+        showToast("Reward Claimed! 🎁");
+        
+    } catch (e) {
+        console.error("Error claiming:", e);
+        alert("System Error. Try again.");
+    }
 };
 </script> 
 </body>
