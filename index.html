@@ -16797,28 +16797,59 @@ async function finalizeUserSetup(user, customUsername = null) {
     const userRef = doc(db, "accounts", user.uid);
     const snap = await getDoc(userRef);
 
-    // ONLY RUNS IF THE USER DOES NOT EXIST IN THE DATABASE (Strictly New Users)
+    // ONLY RUNS IF THE USER IS NEW
     if (!snap.exists()) {
-        console.log("New User Detected: Starting Onboarding...");
+        console.log("New User Detected: Starting IP-Validated Onboarding...");
 
-        // 1. Get User Number
         const countSnap = await getCountFromServer(collection(db, "accounts"));
         const userNumber = countSnap.data().count + 1;
-        const ip = await getIP();
+        const currentIp = await getIP(); // Get current user's IP
 
         const finalName = customUsername || user.displayName || "Membru Nou";
         const finalPfp = user.photoURL || "https://iili.io/fXks1Dv.png";
 
-        // 2. Rewards logic
         let startingCoins = 500;
+        let bonusGranted = false;
         let referrerId = localStorage.getItem('referrerUid');
+
+        // --- ANTI-EXPLOIT REFERRAL LOGIC ---
         if (referrerId && referrerId !== user.uid) {
-            startingCoins += 1000;
             const inviterRef = doc(db, "accounts", referrerId);
-            await updateDoc(inviterRef, { coins: increment(1000), pendingReferrals: increment(1), totalReferrals: increment(1) });
+            const inviterSnap = await getDoc(inviterRef);
+
+            if (inviterSnap.exists()) {
+                const inviterData = inviterSnap.data();
+                const inviterIp = inviterData.ip;
+
+                // Check if IPs match or if one is unknown
+                if (inviterIp === currentIp && currentIp !== "Necunoscut") {
+                    console.warn("Self-referral attempt blocked: Same IP address.");
+                    // We proceed with the account creation but WITHOUT the 1000 coin bonus
+                } else {
+                    // Success: Different IPs
+                    startingCoins += 1000;
+                    bonusGranted = true;
+
+                    // Reward the Inviter
+                    await updateDoc(inviterRef, {
+                        coins: increment(1000),
+                        pendingReferrals: increment(1),
+                        totalReferrals: increment(1),
+                        referralHistory: arrayUnion({
+                            name: finalName,
+                            uid: user.uid,
+                            timestamp: Date.now(),
+                            status: "Verified"
+                        })
+                    });
+                    
+                    // Log transaction for the Inviter
+                    await logTransaction(1000, "COINS", `Referral Bonus (Invited ${finalName})`, "Referral System", referrerId);
+                }
+            }
         }
 
-        // 3. Create Database Entry (Add the 500 coins and 10 diamonds here)
+        // 3. Create the Database Entry for the New User
         await setDoc(userRef, {
             uid: user.uid,
             username: finalName,
@@ -16826,39 +16857,48 @@ async function finalizeUserSetup(user, customUsername = null) {
             email: user.email,
             image: finalPfp,
             coins: startingCoins,
-            diamonds: 10, // GRANT 10 DIAMONDS
+            diamonds: 10,
             streak: 0,
             joinedAt: serverTimestamp(),
-            memberNumber: userNumber, // Store the # user number
+            memberNumber: userNumber,
             totalReferrals: 0,
             pendingReferrals: 0,
-            ip: ip,
+            ip: currentIp, // Store the IP for future comparison
             kevinMessagesToday: 0,
             completedQuests: [],
             onboardingComplete: false
         });
 
-        // 4. Logs and Wall Message
+        // 4. Log transactions for the new user
         await logTransaction(500, "COINS", "Welcome Bonus", "Acasă", user.uid);
         await logTransaction(10, "DIAMONDS", "Welcome Bonus", "Acasă", user.uid);
         
-        const welcomeMsg = `🎉 BUN VENIT, ${finalName}! 🌟\n\nS-a alăturat membrul #${userNumber}. A primit 500 Coins și 10 Diamante! 🚀`;
+        if (bonusGranted) {
+            await logTransaction(1000, "COINS", "Referral Bonus (Invited)", "Acasă", user.uid);
+        }
+
+        // 5. Send Welcome Message to Wall
+        const welcomeMsg = `🎉 BUN VENIT, ${finalName}! 🌟\n\nS-a alăturat membrul #${userNumber}. A primit bonusul de bun venit! 🚀`;
         await addDoc(collection(db, "wall_messages"), {
             text: welcomeMsg, uid: 'kevin-bot', name: 'Kevin-Bot', photo: 'https://i.makeagif.com/media/3-03-2021/otrneG.gif', isBot: true, createdAt: serverTimestamp()
         });
 
-        // 5. Populate the Modal UI for Step 1
-        document.getElementById('onbStep1Pfp').src = finalPfp; // Original Google PFP
-        document.getElementById('onbStep2Preview').src = finalPfp; // Set preview for Step 2 too
+        // 6. UI Setup
+        document.getElementById('onbStep1Pfp').src = finalPfp;
+        document.getElementById('onbStep2Preview').src = finalPfp;
         document.getElementById('onbStep1Name').innerText = finalName;
-        document.getElementById('onbMemberCount').innerText = "#" + userNumber; // SHOW # USER NUMBER
+        document.getElementById('onbMemberCount').innerText = "#" + userNumber;
         
-        // 6. SHOW THE MODAL (Only for this new user)
         window.nextOnbStep(1); 
         document.getElementById('onboardingModal').classList.add('active');
+        
+        // Show specific toast if exploit was blocked
+        if (referrerId && !bonusGranted) {
+            setTimeout(() => {
+window.showToast("Bonusul de invitație a fost respins: contul invitat folosește aceeași adresă IP ca și tine. Auto-invitațiile nu sunt eligibile pentru recompense.");            }, 3000);
+        }
     }
     
-    // Close the Login/Signup box
     document.getElementById('authModal').style.display = 'none';
 }
 
