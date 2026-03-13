@@ -16344,6 +16344,10 @@ onAuthStateChanged(auth, async (user) => {
             const snapCheck = await getDoc(userRef);
             const isDbBanned = snapCheck.exists() && snapCheck.data().isBanned === true;
 
+        const authMod = document.getElementById('authModal');
+        if(authMod) authMod.style.display = 'none';
+
+
             if (isDbBanned) {
                 // 1. EXECUTE BAN (If DB says banned)
                 console.log("ACCOUNT BANNED. NUKING INTERFACE.");
@@ -16874,19 +16878,29 @@ async function finalizeUserSetup(user, customUsername = null) {
             onboardingComplete: false
         });
 
-        // 4. Logare Tranzacții
-        await logTransaction(500, "COINS", "Welcome Bonus", "Acasă", user.uid);
-        await logTransaction(10, "DIAMONDS", "Welcome Bonus", "Acasă", user.uid);
-        
-        if (bonusGranted) {
-            await logTransaction(1000, "COINS", "Referral Bonus (Invited)", "Acasă", user.uid);
-        }
+// 4. Logare Tranzacții
+        try {
+            await logTransaction(500, "COINS", "Welcome Bonus", "Acasă", user.uid);
+            await logTransaction(10, "DIAMONDS", "Welcome Bonus", "Acasă", user.uid);
+            if (bonusGranted) {
+                await logTransaction(1000, "COINS", "Referral Bonus (Invited)", "Acasă", user.uid);
+            }
+        } catch(e) { console.warn("Log failed but continuing..."); }
 
-        // 5. Mesaj pe Wall de la Kevin
-        const welcomeMsg = `🎉 BUN VENIT, ${finalName}! 🌟\n\nS-a alăturat membrul #${userNumber}. A primit bonusul de bun venit (500 Coins & 10 Diamante)! 🚀`;
-        await addDoc(collection(db, "wall_messages"), {
-            text: welcomeMsg, uid: 'kevin-bot', name: 'Kevin-Bot', photo: 'https://i.makeagif.com/media/3-03-2021/otrneG.gif', isBot: true, createdAt: serverTimestamp()
-        });
+        // 5. Mesaj pe Wall de la Kevin (Wrap this in try/catch!)
+        try {
+            const welcomeMsg = `🎉 BUN VENIT, ${finalName}! 🌟\n\nS-a alăturat membrul #${userNumber}. A primit bonusul de bun venit (500 Coins & 10 Diamante)! 🚀`;
+            await addDoc(collection(db, "wall_messages"), {
+                text: welcomeMsg, 
+                uid: 'kevin-bot', 
+                name: 'Kevin-Bot', 
+                photo: 'https://i.makeagif.com/media/3-03-2021/otrneG.gif', 
+                isBot: true, 
+                createdAt: serverTimestamp()
+            });
+        } catch (e) { 
+            console.error("Wall welcome blocked by rules, but we are opening the modal anyway:", e); 
+        }
 
         // 6. Setup UI și deschidere MODAL
         const onbModal = document.getElementById('onboardingModal');
