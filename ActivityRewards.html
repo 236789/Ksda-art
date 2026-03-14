@@ -8239,6 +8239,66 @@ html {
         padding: 10px !important; /* Tighter padding for content */
     }
 }
+
+
+/* --- PERFORMANCE & SIZING PATCH --- */
+
+/* 1. Kill heavy animations on mobile to stop lag */
+@media (max-width: 768px) {
+    #bg-engine .bg-grid, 
+    #bg-engine .bg-nebula, 
+    #bg-engine .bg-particles,
+    .referral-glass-card,
+    .metallic-title-big {
+        animation: none !important; /* Stop movement */
+        filter: none !important;    /* Remove expensive blurs */
+    }
+
+    /* 2. Fix the container sizing */
+    .referral-glass-card {
+        width: 95% !important;
+        max-width: 100% !important;
+        margin: 10px auto !important;
+        border-radius: 20px !important; /* Smaller radius for mobile */
+    }
+
+    /* 3. Fix the massive title causing overflow */
+    .metallic-title-big {
+        font-size: 28px !important;
+        -webkit-text-stroke: 0.5px rgba(255, 255, 255, 0.4) !important;
+        letter-spacing: 0px !important;
+    }
+
+    /* 4. Fix the header layout so icons don't push out */
+    .glass-header {
+        padding: 10px 15px !important;
+    }
+
+    .ref-user-stats {
+        gap: 5px !important;
+    }
+
+    #refHeaderName {
+        font-size: 14px !important;
+        max-width: 100px; /* Force name to truncate if too long */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .currency-pill {
+        padding: 4px 8px !important;
+        gap: 4px !important;
+    }
+
+    .currency-pill img {
+        width: 14px !important;
+    }
+
+    .currency-pill span {
+        font-size: 10px !important;
+    }
+}
   </style>
 </head>
 <body>
