@@ -6,6 +6,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -7653,6 +7654,109 @@ html {
         font-size: 13px !important;
     }
 }
+
+
+/* --- PERFORMANCE & ALIGNMENT FIXES --- */
+
+/* 1. Reduce GPU load on the background engine */
+@media (max-width: 768px) {
+    #bg-engine .bg-grid, 
+    #bg-engine .bg-particles,
+    #bg-engine .bg-scanlines {
+        animation-duration: 30s !important; /* Slow down animations on mobile */
+        opacity: 0.2 !important;
+    }
+    .bg-nebula { filter: blur(50px) !important; } /* Hard blurs kill GPUs */
+}
+
+/* 2. Fix the Rewards Grid Layout */
+.rewards-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Dynamic fit for PC */
+    gap: 20px;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center; /* Center cards if they don't fill the row */
+}
+
+.reward-card-v6 {
+    background: rgba(13, 25, 41, 0.8);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    border-radius: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    padding: 30px 20px;
+    position: relative;
+    overflow: hidden;
+    /* REMOVED backdrop-filter for performance, added solid-ish color instead */
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+/* Optimize animations: Only run simple ones on mobile */
+.reward-card-v6::before {
+    display: none; /* Removed the GPU-killing shine sweep */
+}
+
+@keyframes constantFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+/* -----------------------------------------
+   MOBILE FIX: PERFECT CENTERING & SANE SIZES
+-------------------------------------------- */
+@media (max-width: 768px) {
+    .rewards-grid-container {
+        grid-template-columns: 1fr !important; /* Single column */
+        max-width: 340px !important; /* Sane width for mobile */
+        margin: 20px auto !important; /* Force center */
+        padding: 0 10px !important;
+        gap: 15px !important;
+    }
+
+    .reward-card-v6 {
+        min-height: auto !important;
+        padding: 20px !important;
+        /* Disable heavy pulse for better FPS */
+        animation: none !important; 
+        border-color: var(--primary) !important;
+    }
+
+    .reward-icon-box {
+        height: 80px !important; /* Smaller icon area */
+        margin-bottom: 10px !important;
+    }
+
+    /* Fixed Huge Icons */
+    .reward-img {
+        width: 70px !important; 
+    }
+    .reward-icon-box i {
+        font-size: 50px !important; 
+    }
+
+    .reward-label {
+        font-size: 16px !important; /* Readable but not huge */
+        margin-bottom: 4px !important;
+    }
+    
+    .reward-desc {
+        font-size: 11px !important;
+        width: 100% !important;
+        line-height: 1.4 !important;
+    }
+
+    /* Remove the moving shine effect entirely for mobile performance */
+    .reward-card-v6::before {
+        content: none !important;
+    }
+}
   </style>
 </head>
 <body>
@@ -9601,13 +9705,20 @@ onAuthStateChanged(auth, async (user) => {
     });
 
 
-// Force the Rewards Theme on the Background Engine
+// Force the Rewards Theme but check for mobile performance
 document.addEventListener('DOMContentLoaded', () => {
     const bg = document.getElementById('bg-engine');
+    const isMobile = window.innerWidth < 768;
+
     if(bg) {
-        bg.className = 'theme-sustinatori'; // This triggers your existing Purple/Elite theme
-        // Optionally update the neon scrollbar color to Purple
+        bg.className = 'theme-sustinatori'; 
         document.documentElement.style.setProperty('--theme-color', '#bf55ec');
+        
+        // If it's mobile, we can optionally stop the particle animation entirely
+        if(isMobile) {
+            const particles = bg.querySelector('.bg-particles');
+            if(particles) particles.style.display = 'none'; // Particles are huge FPS killers
+        }
     }
 });
 </script> 
