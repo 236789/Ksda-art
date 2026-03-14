@@ -8115,6 +8115,130 @@ html {
 
 /* Hide the old copy button styles */
 .ref-copy-btn { display: none !important; }
+
+
+/* --- RESPONSIVE HEADER ENGINE --- */
+.glass-header {
+    background: linear-gradient(180deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 0, 0, 0.7) 100%);
+    padding: 20px 25px;
+    border-bottom: 2px solid rgba(0, 255, 136, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ref-user-stats {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+/* User identity grouping */
+.header-identity {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 0; /* Important for ellipsis */
+}
+
+.ref-pfp-ring {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #00ff88;
+    padding: 2px;
+    background: #050b14;
+    flex-shrink: 0;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.ref-pfp-ring img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.ref-stats-text {
+    min-width: 0;
+}
+
+#refHeaderName {
+    font-family: 'Orbitron';
+    font-weight: 900;
+    font-size: 18px;
+    color: #fff;
+    text-shadow: 0 0 10px #00ff88;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Prevents name from pushing icons */
+}
+
+/* Currency Grouping */
+.header-currency-display {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.currency-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,0,0,0.5);
+    padding: 6px 12px;
+    border-radius: 12px;
+    border: 1.5px solid transparent;
+}
+
+/* MOBILE FIXES (Under 600px) */
+@media (max-width: 600px) {
+    .glass-header { padding: 12px 15px; }
+    .header-identity { gap: 10px; }
+    .ref-pfp-ring { width: 40px; height: 40px; }
+    #refHeaderName { font-size: 14px; }
+    .ref-stats-text p { display: none; } /* Hide "COMMUNITY MEMBER" to save space */
+    
+    .header-currency-display { gap: 5px; }
+    .currency-pill { padding: 4px 8px; border-radius: 8px; }
+    .currency-pill img { width: 14px; }
+    .currency-pill span { font-size: 11px !important; }
+}
+
+
+/* --- HIDE SCROLLBAR FOR CONTENT AREA --- */
+.referral-scroll-list {
+    /* Keeps scrolling active but hides the bar */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;     /* Firefox */
+    
+    /* Optional: Increase height to use more screen space */
+    height: 550px !important; 
+    padding: 20px !important;
+}
+
+/* Chrome, Safari and Opera */
+.referral-scroll-list::-webkit-scrollbar {
+    display: none;
+}
+
+/* Ensure the glass card itself doesn't have extra side padding on mobile */
+@media (max-width: 600px) {
+    .referral-glass-card {
+        width: 100% !important; /* Edge to edge for maximum space */
+        border-radius: 0;        /* Looks cleaner on small phones */
+        border-left: none;
+        border-right: none;
+    }
+    
+    .referral-scroll-list {
+        padding: 10px !important; /* Tighter padding for content */
+    }
+}
   </style>
 </head>
 <body>
@@ -8190,32 +8314,32 @@ html {
     <div class="referral-glass-card">
         
 <div class="glass-header">
-    <div class="ref-user-stats" style="width: 100%; justify-content: space-between; display: flex; align-items: center;">
-        
-        <!-- User Identity -->
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <div class="ref-pfp-ring" style="border-color: #00ff88; box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);">
-                <img id="refHeaderImg" src="https://i.ibb.co/4pGm9S2/user-placeholder.png">
-            </div>
-            <div class="ref-stats-text">
-                <span id="refHeaderName" style="font-size: 18px; color: #fff; text-shadow: 0 0 10px #00ff88;">Loading...</span>
-                <p style="color: #00ff88; font-size: 8px; letter-spacing: 2px; font-weight: 800; margin: 0;">COMMUNITY MEMBER</p>
-            </div>
+<div class="ref-user-stats">
+    
+    <!-- Left: Identity -->
+    <div class="header-identity">
+        <div class="ref-pfp-ring">
+            <img id="refHeaderImg" src="https://i.ibb.co/4pGm9S2/user-placeholder.png">
         </div>
-
-        <!-- Currencies -->
-        <div style="display: flex; gap: 10px;">
-            <div class="currency-pill" style="display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.5); padding: 6px 12px; border-radius: 12px; border: 1.5px solid #ffd700;">
-                <img src="https://iili.io/fhc1SKQ.png" width="18">
-                <span id="refHeaderCoins" style="font-family: 'Orbitron'; font-size: 13px; color: #fff; font-weight: 900;">0</span>
-            </div>
-            <div class="currency-pill" style="display: flex; align-items: center; gap: 6px; background: rgba(0,0,0,0.5); padding: 6px 12px; border-radius: 12px; border: 1.5px solid #00ff88;">
-                <img src="https://iili.io/fv5bmtj.png" width="16">
-                <span id="refHeaderDiamonds" style="font-family: 'Orbitron'; font-size: 13px; color: #fff; font-weight: 900;">0</span>
-            </div>
+        <div class="ref-stats-text">
+            <span id="refHeaderName">Loading...</span>
+            <p style="color: #00ff88; font-size: 8px; letter-spacing: 2px; font-weight: 800; margin: 0;">COMMUNITY MEMBER</p>
         </div>
-
     </div>
+
+    <!-- Right: Currencies -->
+    <div class="header-currency-display">
+        <div class="currency-pill" style="border-color: #ffd700;">
+            <img src="https://iili.io/fhc1SKQ.png" width="18">
+            <span id="refHeaderCoins" style="font-family: 'Orbitron'; font-size: 13px; color: #fff; font-weight: 900;">0</span>
+        </div>
+        <div class="currency-pill" style="border-color: #00ff88;">
+            <img src="https://iili.io/fv5bmtj.png" width="16">
+            <span id="refHeaderDiamonds" style="font-family: 'Orbitron'; font-size: 13px; color: #fff; font-weight: 900;">0</span>
+        </div>
+    </div>
+
+</div>
 </div>
 
         <!-- LIGHTER BODY: Empty for now -->
