@@ -5,6 +5,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -3977,7 +3978,7 @@ input:checked + .slider:before { transform: translateX(16px); }
 @keyframes voidSpin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
 
 
-/* ==========================
+/*  ==========================
    4. GOLD RUSH (Luxury)
    ========================== */
 .p-ban-gold {
@@ -7519,6 +7520,139 @@ html {
         white-space: normal !important; /* Allows text to wrap if it's too long */
     }
 }
+
+.reward-desc {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-align: center;
+    font-weight: 500;
+    max-width: 90%;
+    line-height: 1.2;
+    opacity: 0.8;
+}
+
+@media (max-width: 600px) {
+    .reward-desc {
+        font-size: 7.5px; /* Even smaller for mobile grid */
+        margin-top: 2px;
+    }
+}
+
+/* --- REWARDS CENTER: BALANCED PC ROW & MOBILE STACK --- */
+.rewards-grid-container {
+    display: grid;
+    /* PC View: 4 Columns */
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 15px; /* Perfect gap to prevent collision */
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 15px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.reward-card-v6 {
+    background: rgba(13, 25, 41, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    border-radius: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    padding: 25px 15px;
+    box-sizing: border-box;
+    min-height: 260px; /* Reduced to stop collision */
+}
+
+/* Static Centered Icons */
+.reward-icon-box {
+    height: 80px; 
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+/* PC Sizing */
+.reward-img { 
+    width: 80px; 
+    filter: drop-shadow(0 0 15px rgba(255,255,255,0.2)); 
+    animation: none !important;
+}
+.reward-icon-box i { 
+    font-size: 60px; 
+    animation: none !important;
+}
+
+/* Text Sizing PC */
+.reward-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px; /* Slightly smaller to fit 4 in a row */
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 5px;
+}
+.reward-desc {
+    font-family: 'Poppins', sans-serif;
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 95%;
+    line-height: 1.3;
+}
+
+/* Hover State */
+.reward-card-v6:hover {
+    transform: translateY(-8px);
+    border-color: var(--primary);
+    background: rgba(13, 25, 41, 0.95);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+}
+
+/* -----------------------------------------
+   MOBILE FIX: VERTICAL STACK & BIGGER ICONS
+-------------------------------------------- */
+@media (max-width: 950px) {
+    .rewards-grid-container {
+        grid-template-columns: 1fr !important; /* Stack vertically */
+        gap: 20px;
+        padding: 0 20px;
+        max-width: 500px; /* Centered narrow stack */
+    }
+
+    .reward-card-v6 {
+        min-height: 300px !important; /* Taller on mobile */
+        padding: 30px;
+    }
+
+    .reward-icon-box {
+        height: 140px !important; /* Large area for icon */
+    }
+
+    /* Big Mobile Icons */
+    .reward-img {
+        width: 130px !important; 
+    }
+    .reward-icon-box i {
+        font-size: 110px !important; 
+    }
+
+    .reward-label {
+        font-size: 20px !important;
+    }
+    .reward-desc {
+        font-size: 13px !important;
+    }
+}
   </style>
 </head>
 <body>
@@ -7590,7 +7724,6 @@ html {
     <p class="top-desc">Revendică recompensele tale zilnice, bonusurile de invitație și premiile pentru activitate.</p>
 </div>
 
-<!-- THE REWARDS GRID (Matches your Gaming Center image) -->
 <div class="rewards-grid-container">
     
     <!-- 1. Daily Rewards -->
@@ -7599,34 +7732,39 @@ html {
             <img src="https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/Pressents%2FMega%20Pressents%20_upscayl_5x_upscayl-standard-4x.png?alt=media&token=dd59f713-d721-4f6a-8b81-5e77615ca182" class="reward-img">
         </div>
         <span class="reward-label">Daily Rewards</span>
+<span class="reward-desc">Câștigă recompense zilnice. Fiecare zi în plus aduce recompense mai multe.</span>
         <div class="reward-glow"></div>
     </a>
 
     <!-- 2. Referral Rewards -->
     <a href="ReferralRewards.html" class="reward-card-v6">
         <div class="reward-icon-box">
-            <i class="fas fa-user-plus icon-neon-cyan"></i>
+            <i class="fas fa-user-plus" style="color: #29f3ff; text-shadow: 0 0 20px rgba(41, 243, 255, 0.5);"></i>
         </div>
         <span class="reward-label">Referral Rewards</span>
-        <div class="reward-glow blue-glow"></div>
+<span class="reward-desc">Primești recompense pentru fiecare prieten invitat.</span>
+        <div class="reward-glow" style="background: radial-gradient(circle, #29f3ff 0%, transparent 70%); opacity: 0.3;"></div>
     </a>
 
     <!-- 3. Activity Rewards -->
     <a href="ActivityRewards.html" class="reward-card-v6">
         <div class="reward-icon-box">
-            <i class="fas fa-chart-line icon-neon-green"></i>
+            <i class="fas fa-chart-line" style="color: #00ff88; text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);"></i>
         </div>
         <span class="reward-label">Activity Rewards</span>
-        <div class="reward-glow green-glow"></div>
+<span class="reward-desc">Câștigă recompense automat fiind activ.</span>
+        <div class="reward-glow" style="background: radial-gradient(circle, #00ff88 0%, transparent 70%); opacity: 0.3;"></div>
     </a>
 
-    <!-- 4. Coming Soon Slot (Optional, matches image style) -->
-    <div class="reward-card-v6 locked">
+    <!-- 4. Economy Info -->
+    <a href="EconomyInfo.html" class="reward-card-v6">
         <div class="reward-icon-box">
-            <i class="fas fa-lock" style="opacity: 0.3;"></i>
+            <i class="fas fa-sack-dollar" style="color: #ff9f43; text-shadow: 0 0 25px #ff9f43;"></i>
         </div>
-        <span class="reward-label" style="opacity: 0.3;">Coming Soon</span>
-    </div>
+        <span class="reward-label">Economy Info</span>
+<span class="reward-desc">Învață toate secretele pentru a câștiga și a cheltui diamantele și monedele tale.</span>
+        <div class="reward-glow" style="background: radial-gradient(circle, #ff9f43 0%, transparent 70%); opacity: 0.4;"></div>
+    </a>
 
 </div>
 
