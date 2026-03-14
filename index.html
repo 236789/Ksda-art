@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -15910,9 +15911,9 @@ async function handleLoginFlow() {
             await logTransaction(baseCoins, "COINS", "Welcome Bonus", "Acasă");
             await logTransaction(baseDiamonds, "DIAMONDS", "Welcome Bonus", "Acasă");
 
-            // --- KEVIN BOT WELCOME MESSAGE PE WALL ---
-            try {
-                const welcomeMsg = `🎉 BUN VENIT, ${user.displayName || "Membru Nou"}! 🌟\n\nSalutare și bine ai venit în Comunitatea KSDA! Ești membrul cu numărul #${userNumber}. Primești 500 Coins și 10 Diamante cadou! 🚀`;
+// --- KEVIN BOT WELCOME MESSAGE PE WALL ---
+try {
+    const welcomeMsg = `🎉 BUN VENIT, ${user.displayName || "Membru Nou"}! 🌟 Salutare și bine ai venit în Comunitatea KSDA! Ești membrul cu numărul #${userNumber}. Primești 500 Coins și 10 Diamante cadou! 🚀`;
 await addDoc(collection(db, "wall_messages"), {
     text: welcomeMsg,
     uid: 'kevin-bot',
@@ -16888,37 +16889,24 @@ async function finalizeUserSetup(user, customUsername = null) {
             }
         } catch(e) { console.warn("Log failed but continuing..."); }
 
-// --- KEVIN BOT WELCOME MESSAGE ---
-// We wrap this so if it fails, it doesn't "break" the rest of the site
+// --- KEVIN BOT WELCOME MESSAGE PE WALL ---
+// Îl protejăm cu try-catch ca să nu oprească restul codului dacă dă fail
 try {
-    const welcomeMsg = `🎉 BUN VENIT, ${finalName}! 🌟\n\nS-a alăturat membrul #${userNumber}. A primit bonusul de bun venit (500 Coins & 10 Diamante)! 🚀`;
+    const welcomeMsg = `🎉 BUN VENIT, ${finalName}! 🌟 S-a alăturat membrul #${userNumber}. A primit bonusul de bun venit (500 Coins & 10 Diamante)! 🚀`;
+    
     await addDoc(collection(db, "wall_messages"), {
         text: welcomeMsg,
-        uid: 'kevin-bot', // Rule now allows this because text contains "BUN VENIT"
+        uid: 'kevin-bot', 
         name: 'Kevin-Bot',
-        photo: 'https://i.makeagif.com/media/3-03-2021/otrneG.gif',
+        type: 'msg',
         isBot: true,
+        isFake: false,
+        photo: 'https://i.makeagif.com/media/3-03-2021/otrneG.gif',
         createdAt: serverTimestamp()
     });
 } catch (e) {
     console.warn("Wall message was blocked, but that's okay, opening modal anyway...", e);
 }
-// --- KEVIN BOT WELCOME MESSAGE ---
-// We wrap this so if it fails, it doesn't "break" the rest of the site
-try {
-    const welcomeMsg = `🎉 BUN VENIT, ${finalName}! 🌟\n\nS-a alăturat membrul #${userNumber}. A primit bonusul de bun venit (500 Coins & 10 Diamante)! 🚀`;
-    await addDoc(collection(db, "wall_messages"), {
-        text: welcomeMsg,
-        uid: 'kevin-bot', // Rule now allows this because text contains "BUN VENIT"
-        name: 'Kevin-Bot',
-        photo: 'https://i.makeagif.com/media/3-03-2021/otrneG.gif',
-        isBot: true,
-        createdAt: serverTimestamp()
-    });
-} catch (e) {
-    console.warn("Wall message was blocked, but that's okay, opening modal anyway...", e);
-}
-
 // 6. Setup UI și deschidere MODAL (THIS WILL NOW ALWAYS RUN)
 const onbModal = document.getElementById('onboardingModal');
 if (onbModal) {
