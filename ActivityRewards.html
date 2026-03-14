@@ -10012,7 +10012,9 @@ onSnapshot(doc(db, "accounts", user.uid), (uSnap) => {
         const popImg = document.getElementById('popUserImg');
         if (popImg) popImg.src = finalProfilePic;
         
-
+        // SYNC NEW HEADER PFP
+        const refHeaderImg = document.getElementById('refHeaderImg');
+        if (refHeaderImg) refHeaderImg.src = finalProfilePic;
 
         document.getElementById('popUserImg').src = data.image;
         const popFrame = document.getElementById('popUserFrame');
@@ -10037,9 +10039,25 @@ onSnapshot(doc(db, "accounts", user.uid), (uSnap) => {
             popName.innerText = myName;
         }
 
+        // SYNC NEW HEADER NAME
+        const refHeaderName = document.getElementById('refHeaderName');
+        if (refHeaderName) {
+            if (data.equippedText && data.equippedText.cssClass) {
+                refHeaderName.innerHTML = `<span class="${data.equippedText.cssClass}">${myName}</span>`;
+            } else {
+                refHeaderName.innerText = myName;
+            }
+        }
+
         document.getElementById('popUserEmail').innerText = data.email;
         document.getElementById('popUserCoins').innerText = formatNumber(data.coins || 0);
         document.getElementById('popUserDiamonds').innerText = formatNumber(data.diamonds || 0);
+        
+        // SYNC NEW HEADER CURRENCIES
+        const refHeaderCoins = document.getElementById('refHeaderCoins');
+        if (refHeaderCoins) refHeaderCoins.innerText = formatNumber(data.coins || 0);
+        const refHeaderDiamonds = document.getElementById('refHeaderDiamonds');
+        if (refHeaderDiamonds) refHeaderDiamonds.innerText = formatNumber(data.diamonds || 0);
         
         // >>> NEW: SYNC REFERRAL PAGE INVITE COUNT <<<
         const refCount = document.getElementById('refHeaderCount');
