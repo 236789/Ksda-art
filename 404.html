@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>404 — Kevin is Mad</title>
+    <link rel="icon" type="image/png" href="https://iili.io/fXks1Dv.png">
+    
+    <!-- Fonturile tale -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Montserrat:wght@900&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-dark: #02050a;
+            --primary: #29f3ff;
+            --theme-glow: rgba(41, 243, 255, 0.4);
+            --plasma-color: #29f3ff;
+            --rgb-color: 41, 243, 255;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: var(--bg-dark);
+            font-family: 'Poppins', sans-serif;
+            color: #fff; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* --- BACKGROUND ENGINE (GRIDUL TĂU DIN HERO) --- */
+        .hero-grid-floor {
+            position: absolute; width: 200%; height: 200%; top: 20%; left: -50%;
+            background-image: linear-gradient(rgba(41, 243, 255, 0.1) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(41, 243, 255, 0.1) 1px, transparent 1px);
+            background-size: 80px 80px;
+            transform: perspective(400px) rotateX(60deg);
+            animation: heroGridMove 20s linear infinite;
+            mask-image: radial-gradient(circle at center, black 0%, transparent 80%);
+            z-index: 0;
+        }
+
+        @keyframes heroGridMove {
+            from { background-position: 0 0; }
+            to { background-position: 0 80px; }
+        }
+
+        .nebula {
+            position: absolute; inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.1) 0%, transparent 70%);
+            filter: blur(100px); z-index: 1;
+        }
+
+        /* --- CONTENT WRAPPER --- */
+        .error-container {
+            position: relative; z-index: 10;
+            display: flex; flex-direction: column; align-items: center;
+            text-align: center; width: 100%; max-width: 600px;
+        }
+
+        /* 404 CRASH TITLE */
+        .code-404 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(80px, 15vw, 180px);
+            font-weight: 900;
+            margin: 0;
+            color: transparent;
+            -webkit-text-stroke: 2px rgba(255, 255, 255, 0.8);
+            filter: drop-shadow(0 0 30px var(--theme-glow));
+            animation: megaCrash 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes megaCrash {
+            0% { transform: scale(4); opacity: 0; filter: blur(20px); }
+            100% { transform: scale(1); opacity: 1; filter: blur(0); }
+        }
+
+        /* BULA LUI KEVIN (STIL TUTORIAL) */
+        .kevin-bubble {
+            background: rgba(8, 16, 27, 0.98);
+            border: 2px solid var(--primary);
+            color: #fff;
+            padding: 20px;
+            border-radius: 24px;
+            max-width: 320px;
+            width: 85%;
+            font-family: 'Poppins', sans-serif;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            font-size: 14px;
+            margin-bottom: 20px;
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .kevin-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -15px; left: 50%;
+            transform: translateX(-50%);
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 15px solid var(--primary);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* KEVIN IMAGE (POINTING) */
+        .kevin-img {
+            height: 250px;
+            width: auto;
+            filter: drop-shadow(0 0 20px rgba(41, 243, 255, 0.3));
+            margin-bottom: 30px;
+        }
+
+        /* --- BLUE PLASMA BUTTON (DIN HOME) --- */
+        .btn-plasma {
+            position: relative;
+            padding: 16px 50px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 14px;
+            text-transform: uppercase;
+            text-decoration: none;
+            letter-spacing: 2px;
+            color: #fff;
+            background: rgba(10, 20, 30, 0.4); 
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--plasma-color);
+            border-radius: 4px;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(var(--rgb-color), 0.2);
+        }
+
+        .btn-plasma::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 300%; height: 100%;
+            background: linear-gradient(115deg, transparent 30%, rgba(var(--rgb-color), 0.4) 45%, rgba(var(--rgb-color), 0.8) 50%, rgba(var(--rgb-color), 0.4) 55%, transparent 70%);
+            animation: plasmaFlow 4s infinite linear;
+        }
+
+        @keyframes plasmaFlow {
+            0% { transform: translateX(-50%) skewX(-20deg); }
+            100% { transform: translateX(20%) skewX(-20deg); }
+        }
+
+        .btn-plasma span { position: relative; z-index: 1; }
+
+        .btn-plasma:hover {
+            background: rgba(var(--rgb-color), 0.2);
+            box-shadow: 0 0 40px var(--plasma-color);
+            transform: translateY(-5px);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="hero-grid-floor"></div>
+    <div class="nebula"></div>
+
+    <div class="error-container">
+        <!-- Titlul 404 Stilizat -->
+        <h1 class="code-404">404</h1>
+
+<!-- Bula de mesaj Kevin -->
+<div class="kevin-bubble">
+    <b>KEVIN-BOT:</b><br>
+    "Bă, rătăcitule! Pagina asta nu există în baza mea de date 😅. Întoarce-te puțin și verifică ce ai vrut să cauți."
+</div>
+
+        <!-- Imaginea Pointing (din assets-ul tău) -->
+        <img src="https://iili.io/q2p0bKx.png" class="kevin-img" alt="Kevin Pointing">
+
+        <!-- Butonul Plasma Cyan -->
+        <a href="index.html" class="btn-plasma">
+            <i class="fas fa-arrow-left"></i>
+            <span>ÎNAPOI PE SITE</span>
+        </a>
+    </div>
+
+</body>
+</html>
