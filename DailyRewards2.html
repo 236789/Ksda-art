@@ -3834,125 +3834,182 @@
 }
 
 
-/* 1. Reset Body & Define Theme Variables */
+/* 1. NEW THEME VARIABLES (Neural Cyan) */
 :root {
-    --theme-color: #00ff88; /* Emerald Green for Rewards */
-    --theme-glow: rgba(0, 255, 136, 0.3);
+    --theme-color: #29f3ff; 
+    --theme-glow: rgba(41, 243, 255, 0.3);
+    --bg-dark: #050b14;
 }
 
-body {
-    margin: 0;
-    background-color: #050b14;
-    font-family: 'Poppins', sans-serif;
-    overflow-x: hidden;
+/* 2. DYNAMIC SCROLLBAR */
+::-webkit-scrollbar-thumb {
+    background: var(--theme-color) !important;
+    box-shadow: 0 0 15px var(--theme-color);
+    border: 2px solid #02050a;
+    border-radius: 10px;
 }
 
-/* 2. Background Engine */
-#bg-engine {
-    position: fixed; inset: 0; z-index: -1;
-    background: #02050a; overflow: hidden;
+/* 3. DYNAMIC HEADER & MENU */
+header {
+    border: 1px solid var(--theme-color) !important;
+    box-shadow: 0 0 20px var(--theme-glow), inset 0 0 10px var(--theme-glow) !important;
 }
+
+#sideMenu {
+    border-left: 4px solid var(--theme-color) !important;
+}
+
+/* 4. BACKGROUND ENGINE (Color Shift to Blue/Cyan) */
 .bg-grid {
-    position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
-    background-image: linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px), 
-                      linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px);
-    background-size: 60px 60px; transform: perspective(500px) rotateX(60deg);
-    animation: gridFlow 15s linear infinite;
-    mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+    background-image: linear-gradient(rgba(41, 243, 255, 0.08) 1px, transparent 1px), 
+                      linear-gradient(90deg, rgba(41, 243, 255, 0.08) 1px, transparent 1px);
 }
 .bg-nebula {
-    position: absolute; inset: 0; filter: blur(100px); opacity: 0.5;
-    background: radial-gradient(circle at 20% 30%, #002b1a 0%, transparent 45%),
-                radial-gradient(circle at 80% 70%, #001a1a 0%, transparent 45%);
-    animation: nebulaPulse 8s ease-in-out infinite alternate;
+    background: radial-gradient(circle at 20% 30%, #001a2b 0%, transparent 45%),
+                radial-gradient(circle at 80% 70%, #00111a 0%, transparent 45%);
 }
-.bg-scanlines {
-    position: absolute; inset: 0;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
-    background-size: 100% 4px; z-index: 10; pointer-events: none; opacity: 0.4;
+
+
+/* Move the whole content area up */
+.top-hero { 
+    padding: 90px 20px 20px !important; /* Reduced top padding */
+    text-align: center; 
 }
-@keyframes gridFlow { from { background-position: 0 0; } to { background-position: 0 60px; } }
-@keyframes nebulaPulse { from { transform: scale(1); opacity: 0.4; } to { transform: scale(1.1); opacity: 0.7; } }
 
 .metallic-title-big {
     font-family: 'Orbitron', sans-serif !important;
     font-weight: 900 !important;
-    font-size: clamp(32px, 8vw, 64px);
+    font-size: clamp(30px, 7vw, 60px) !important;
     text-transform: uppercase;
-    letter-spacing: -2px;
-    -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.6);
+    
+    /* FIX: INCREASE LETTER SPACING */
+    letter-spacing: 6px !important; 
+    
+    margin-top: 0 !important;
+    margin-bottom: 5px !important;
+    
+    /* NEW BLUE/CYAN GRADIENT */
+    background: linear-gradient(180deg, #ffffff 15%, #29f3ff 50%, #008891 100%) !important;
     -webkit-background-clip: text !important;
     -webkit-text-fill-color: transparent !important;
-    display: inline-block;
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5);
+    filter: drop-shadow(0 0 20px rgba(41, 243, 255, 0.5));
+    
     animation: titlePulse 3s infinite ease-in-out;
 }
-.hero-diamonds { 
-    background-image: linear-gradient(180deg, #fff 15%, #00ff88 50%, #008f4c 100%) !important; 
-    filter: drop-shadow(0 0 25px rgba(0, 255, 136, 0.6)); 
-}
-@keyframes titlePulse {
-    0%, 100% { transform: scale(1); filter: brightness(1); }
-    50% { transform: scale(1.05); filter: brightness(1.3); }
-}
 
 
-.day-card {
-    background: rgba(13, 25, 41, 0.6) !important;
-    border: 2px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 25px;
+.btn-outline {
+    background: rgba(41, 243, 255, 0.05) !important;
+    border: 2px solid var(--theme-color) !important;
+    color: var(--theme-color) !important;
+    padding: 12px 40px !important;
+    border-radius: 100px !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: 0.4s all !important;
+    margin-top: 50px !important;
+    box-shadow: 0 0 15px var(--theme-glow);
     position: relative;
     overflow: hidden;
-    backdrop-filter: blur(10px);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    /* NON-STOP OUTLINE PULSE */
-    animation: constantBorderPulse 3s infinite alternate ease-in-out !important;
 }
 
-/* THE SHINE SWEEP EFFECT */
-.day-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -150%;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-    animation: constantShine 4s linear infinite !important;
-    z-index: 2;
+.btn-outline:hover {
+    background: var(--theme-color) !important;
+    color: #000 !important;
+    transform: scale(1.05) translateY(-3px);
+    box-shadow: 0 0 30px var(--theme-color);
 }
 
-/* FLOATING ICONS INSIDE */
-.reward-img {
-    animation: constantFloat 2s ease-in-out infinite !important;
-    filter: drop-shadow(0 0 15px var(--theme-glow));
-}
 
-/* KEYFRAMES */
 @keyframes constantBorderPulse {
-    0% { border-color: rgba(255, 255, 255, 0.1); box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); }
-    100% { border-color: var(--theme-color); box-shadow: 0 0 20px var(--theme-glow); }
-}
-@keyframes constantShine {
-    0% { left: -150%; }
-    20% { left: 150%; }
-    100% { left: 150%; }
-}
-@keyframes constantFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+    0% { 
+        border-color: rgba(255, 255, 255, 0.1); 
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); 
+    }
+    100% { 
+        border-color: #29f3ff; /* Neural Cyan */
+        box-shadow: 0 0 20px rgba(41, 243, 255, 0.4); 
+    }
 }
 
-/* Day 7 Special */
-.day-card.mega-day {
-    --theme-color: #ffd700; /* Gold for Day 7 */
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(5, 11, 20, 0.9)) !important;
+/* 1. KINETIC WARP ENGINE - NO GRIDS */
+#warp-engine {
+    position: fixed; inset: 0; z-index: -1;
+    background: radial-gradient(circle at center, #0a192f 0%, #02050a 100%);
+    overflow: hidden;
 }
+
+.warp-space {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(2px 2px at 20px 30px, #fff, rgba(0,0,0,0)),
+                      radial-gradient(2px 2px at 40px 70px, #29f3ff, rgba(0,0,0,0)),
+                      radial-gradient(2px 2px at 50px 160px, #fff, rgba(0,0,0,0));
+    background-size: 200px 200px;
+    animation: warpStars 10s linear infinite;
+    opacity: 0.3;
+}
+
+.warp-rays {
+    position: absolute; inset: -100%;
+    background: repeating-conic-gradient(from 0deg, transparent 0deg 10deg, rgba(41, 243, 255, 0.05) 15deg 20deg);
+    animation: rayRotate 20s linear infinite;
+    mask-image: radial-gradient(circle, black 20%, transparent 80%);
+}
+
+.warp-dust {
+    position: absolute; inset: 0;
+    background: url('https://www.transparenttextures.com/patterns/stardust.png');
+    opacity: 0.2;
+    animation: dustMove 60s linear infinite;
+}
+
+@keyframes warpStars { from { transform: translateZ(0) scale(1); } to { transform: translateZ(100px) scale(1.5); } }
+@keyframes rayRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes dustMove { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
+
+
+:root {
+    --theme-color: #29f3ff; /* Neural Cyan */
+    --theme-glow: rgba(41, 243, 255, 0.4);
+}
+
+/* SYNC HEADER & SCROLLBAR */
+header { border: 1.5px solid var(--theme-color) !important; box-shadow: 0 0 20px var(--theme-glow) !important; }
+#sideMenu { border-left: 4px solid var(--theme-color) !important; }
+::-webkit-scrollbar-thumb { background: var(--theme-color) !important; box-shadow: 0 0 10px var(--theme-color); border-radius: 10px; }
+
+/* FIX TITLE POSITION & KERNING */
+.top-hero { 
+    padding-top: 80px !important; /* Pulls content up closer to header */
+}
+
+.metallic-title-big {
+    font-size: clamp(35px, 8vw, 65px) !important;
+    letter-spacing: 8px !important; /* FIX: Spreads letters so 'I' is visible */
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    margin-top: 0 !important;
+    background: linear-gradient(180deg, #fff 20%, #29f3ff 60%, #006b75 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    -webkit-text-stroke: 1px rgba(255,255,255,0.4);
+    filter: drop-shadow(0 0 25px var(--theme-glow));
+    animation: titlePulse 3s infinite ease-in-out;
+}
+
+
   </style>
 </head>
 <body>
 
-<div id="bg-engine">
-    <div class="bg-grid"></div>
-    <div class="bg-nebula"></div>
-    <div class="bg-scanlines"></div>
+<div id="warp-engine">
+    <div class="warp-space"></div>
+    <div class="warp-rays"></div>
+    <div class="warp-dust"></div>
 </div>
 <!-- BANNED OVERLAY -->
 <div id="bannedOverlay">
@@ -4282,21 +4339,28 @@ body {
 
 
 <!-- MAIN CONTENT AREA START -->
-<main class="blank-main-container">
     
 
 <main class="blank-main-container">
-<h1 class="metallic-title-big hero-diamonds animated-title">Daily Rewards</h1>
-    <p style="color:#aaa; font-size:12px; margin-bottom: 30px;">Revendică premiul zilnic! Dacă sari o zi, o iei de la capăt!</p>
+<!-- MAIN CONTENT AREA -->
+<main class="top-hero"> 
+    <div id="siteContent" style="margin-top: -20px;"> <!-- Negative margin to close the head gap -->
+        
+        <!-- 3. ANIMATED TITLE (FIXED SPACING) -->
+        <h1 class="metallic-title-big hero-referrals animated-title">DAILY REWARDS</h1>
+        
+        <p class="top-desc">Revendică premiul zilnic! Dacă sari o zi, o iei de la capăt!</p>
 
-    <!-- THE 7 DAYS GRID -->
-    <div id="rewardsGrid" class="rewards-grid">
-        <!-- Javascript will inject the days here -->
-        <div style="color:#fff;">Loading Calendar...</div>
+        <!-- 4. THE REWARDS GRID (Populated by JS) -->
+        <div id="rewardsGrid" class="rewards-grid">
+            <div style="color:var(--theme-color); font-family:'Orbitron';">Sincronizare Calendar...</div>
+        </div>
+
+        <!-- 5. REVAMPED BACK BUTTON -->
+        <button onclick="window.location.href='index.html'" class="btn-outline">
+            <i class="fas fa-home" style="margin-right: 10px;"></i> Înapoi Acasă
+        </button>
     </div>
-
-    <!-- BACK BUTTON -->
-    <button onclick="window.location.href='index.html'" class="btn-outline">Înapoi Acasă</button>
 </main>
 
 <!-- GIFT OPENING MINIGAME MODAL -->
