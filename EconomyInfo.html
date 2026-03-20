@@ -8641,6 +8641,130 @@ html {
         background-color: rgba(255, 71, 87, 0.05);
         background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="%23ff4757" viewBox="0 0 16 16"><path d="M4 6h8l-4 5z"/></svg>');
     }
+
+
+/* --- OVERFLOW FIX --- */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Ensure the main container doesn't push the screen */
+.referral-glass-card {
+    box-sizing: border-box;
+}
+
+
+/* --- SLICK INFO MODAL REWORK --- */
+#itemInfoModal .account-card {
+    background: rgba(8, 16, 27, 0.95); /* Deeper dark for contrast */
+    backdrop-filter: blur(20px);
+    border: 2px solid #29f3ff;
+    box-shadow: 0 0 40px rgba(41, 243, 255, 0.2);
+}
+
+/* Replace that weird black box with a subtle glass section */
+#itemInfoModal .tx-info-container {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 15px;
+}
+
+/* Better Transaction Pills */
+.info-tx-pill {
+    width: 100%;
+    border-radius: 50px !important; /* Oval looks more premium */
+    padding: 12px 20px !important;
+    font-size: 14px !important;
+    letter-spacing: 1px;
+    border-width: 2px !important;
+    background: rgba(0,0,0,0.3) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.info-tx-pill.tx-plus { 
+    border-color: #00ff88 !important; 
+    color: #00ff88 !important;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+}
+
+.info-tx-pill.tx-minus { 
+    border-color: #ff4757 !important; 
+    color: #ff4757 !important;
+    box-shadow: 0 0 15px rgba(255, 71, 87, 0.2);
+}
+
+/* Mobile adjustments for the modal */
+@media (max-width: 480px) {
+    #itemInfoModal .account-card {
+        padding: 25px 15px !important;
+        width: 90% !important;
+    }
+    #infoModalTitle { font-size: 16px !important; }
+    .info-tx-pill { font-size: 12px !important; padding: 10px !important; }
+}
+
+
+/* FIND THIS AND CHANGE width to 100% */
+.bg-grid {
+    position: absolute;
+    width: 100%; /* Changed from 200% */
+    height: 100%; /* Changed from 200% */
+    top: 0; 
+    left: 0;
+    /* ... rest of your code ... */
+}
+
+/* --- GLOBAL FIX FOR HORIZONTAL SCROLL --- */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden; /* Stops side-to-side scrolling */
+}
+
+/* --- INFO MODAL STYLING --- */
+
+/* The Dark area that fills the full width and bottom */
+.info-modal-footer {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 25px 20px;
+    
+    /* Negative margins to pull it to the edges of the parent .account-card */
+    margin-left: -20px;
+    margin-right: -20px;
+    width: calc(100% + 40px);
+    
+    box-sizing: border-box;
+}
+
+/* The Green/Red Pill - Small and centered */
+.info-tx-pill {
+    width: fit-content !important; /* Makes it small */
+    min-width: 150px;              /* Minimum size for a nice oval */
+    padding: 6px 18px !important;  /* Thinner height */
+    border-radius: 50px !important;/* Perfect oval shape */
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    font-family: 'Orbitron';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(0,0,0,0.3) !important;
+    border-width: 1.5px !important;
+}
+
+/* Ensures the icon/coin inside the pill stays small */
+.info-tx-pill img {
+    width: 16px !important;
+    height: 16px !important;
+}
   </style>
 </head>
 <body>
@@ -8897,24 +9021,26 @@ html {
 </div>
 
 <!-- ========================================== -->
-<!-- 4. ITEM INFO MODAL (WHEN CLICKED) -->
+<!-- 4. ITEM INFO MODAL (REMASTERED) -->
 <!-- ========================================== -->
 <div id="itemInfoModal" class="account-modal-overlay" style="z-index: 15000;">
-    <div class="account-card" style="border-color: #29f3ff; max-width: 380px; padding: 30px 20px;">
+    <div class="account-card" style="border-color: #29f3ff; max-width: 380px; padding: 30px 20px 0 20px; overflow: hidden;">
+        <!-- Padding bottom set to 0 and overflow hidden is required for the bottom footer -->
         <button class="close-pop" onclick="document.getElementById('itemInfoModal').classList.remove('active')">✕</button>
         
-        <div id="infoModalImgBox" style="width: 100px; height: 100px; border-radius: 25px; border: 2px solid #29f3ff; background: rgba(41,243,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 45px; color: #29f3ff; overflow: hidden; background-size: cover; background-position: center; box-shadow: 0 0 20px rgba(41, 243, 255, 0.3); margin: 0 auto 20px;">
+        <div id="infoModalImgBox" style="width: 90px; height: 90px; border-radius: 20px; border: 2px solid #29f3ff; background: rgba(41,243,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 40px; color: #29f3ff; overflow: hidden; background-size: cover; background-position: center; margin: 0 auto 15px;">
             <i id="infoModalIcon" class="fas fa-cube"></i>
         </div>
 
-        <h3 id="infoModalTitle" style="font-family:'Poppins', sans-serif; font-weight: 800; color:#fff; margin-bottom: 10px; font-size: 20px; text-transform: uppercase;">Titlu Item</h3>
-        <p id="infoModalDesc" style="font-family:'Poppins'; font-size: 12px; color: #aaa; margin-bottom: 25px; line-height: 1.4;">Descriere detaliată aici...</p>
+        <h3 id="infoModalTitle" style="font-family:'Orbitron'; font-weight: 800; color:#fff; margin-bottom: 5px; font-size: 18px; text-transform: uppercase; text-align: center;">Titlu Item</h3>
+        <p id="infoModalDesc" style="font-family:'Poppins'; font-size: 11px; color: #aaa; margin-bottom: 25px; line-height: 1.4; text-align: center;">Descriere...</p>
 
-        <div style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 15px; width: 100%;">
-            <div style="font-family:'Orbitron'; font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px;">RECOMPENSĂ / COST</div>
+        <!-- FULL WIDTH DARK FOOTER -->
+        <div class="info-modal-footer">
+            <div style="font-family:'Orbitron'; font-size: 8px; color: #666; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 2px; text-align: center;">RECOMPENSĂ / COST</div>
             
             <div id="infoModalTxContainer" style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
-                <!-- Transaction pills will be injected here -->
+                <!-- Transaction pills injected here -->
             </div>
         </div>
     </div>
@@ -10359,7 +10485,66 @@ const faIconsList = [
 
     // food / drink
     'fa-apple-alt','fa-hamburger','fa-pizza-slice','fa-ice-cream','fa-coffee',
-    'fa-beer','fa-glass-cheers','fa-utensils','fa-blender','fa-birthday-cake'
+    'fa-beer','fa-glass-cheers','fa-utensils','fa-blender','fa-birthday-cake',
+
+
+// reactions / emotions
+'fa-smile','fa-smile-beam','fa-laugh','fa-laugh-beam','fa-laugh-wink',
+'fa-surprise','fa-meh','fa-frown','fa-frown-open','fa-angry',
+'fa-grin-stars','fa-grin-squint','fa-grin-hearts','fa-kiss-wink-heart',
+'fa-dizzy','fa-tired','fa-grimace','fa-grin-tongue','fa-grin-tongue-wink',
+
+// spin / wheel / randomness
+'fa-sync','fa-sync-alt','fa-redo','fa-redo-alt','fa-undo','fa-random',
+'fa-dice-one','fa-dice-two','fa-dice-three','fa-dice-four','fa-dice-five','fa-dice-six',
+'fa-circle-notch','fa-spinner','fa-compact-disc','fa-record-vinyl',
+
+// trivia / quiz / knowledge
+'fa-question','fa-question-circle','fa-info','fa-info-circle',
+'fa-brain','fa-lightbulb','fa-book-reader','fa-clipboard','fa-clipboard-check',
+'fa-clipboard-list','fa-tasks','fa-poll','fa-poll-h','fa-chart-bar',
+'fa-spell-check','fa-pen-fancy','fa-user-edit',
+
+// game / actions (jump, movement, interaction)
+'fa-running','fa-walking','fa-child','fa-user-ninja','fa-user-astronaut',
+'fa-fist-raised','fa-hand-paper','fa-hand-rock','fa-hand-scissors',
+'fa-hand-pointer','fa-crosshairs','fa-bullseye','fa-dot-circle',
+'fa-angle-double-up','fa-angle-double-down','fa-angle-double-left','fa-angle-double-right',
+'fa-arrows-alt','fa-expand','fa-compress',
+
+// rewards / progress / fun
+'fa-star','fa-star-half','fa-trophy','fa-medal','fa-award',
+'fa-crown','fa-fire-alt','fa-bolt','fa-gem','fa-coins',
+'fa-level-up-alt','fa-percentage','fa-chart-pie','fa-chart-area',
+
+'fa-home','fa-exclamation-triangle',
+
+'fa-gift','fa-calendar-check','fa-calendar-day','fa-user-plus','fa-award','fa-coins',
+
+'fa-user-shield','fa-broom',
+
+'fa-users','fa-comment-dots','fa-stream','fa-star','fa-vote-yea',
+
+'fa-info-circle','fa-book','fa-file-alt','fa-newspaper',
+
+'fa-gamepad','fa-dice','fa-chess-board','fa-puzzle-piece','fa-brain',
+'fa-running','fa-mouse-pointer','fa-random','fa-sync-alt',
+
+'fa-store','fa-shopping-cart','fa-tags',
+
+'fa-tasks','fa-check-circle','fa-list',
+
+'fa-bell','fa-bullhorn','fa-broadcast-tower',
+
+'fa-images','fa-image','fa-camera',
+
+'fa-cogs','fa-wrench','fa-tools',
+
+'fa-robot','fa-comments','fa-envelope',
+
+'fa-history','fa-clock','fa-hourglass-half',
+
+'fa-thumbs-up','fa-heart','fa-fire','fa-bolt'
 ];
 window.openIconPicker = (target) => {
     currentPickerTarget = target;
