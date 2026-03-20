@@ -8536,6 +8536,59 @@ html {
     cursor: pointer; transition: 0.2s; text-align: center;
 }
 .picker-icon-btn:hover { background: #29f3ff; color: #000; transform: scale(1.1); }
+
+
+
+/* --- SICK ECONOMY ITEM CARDS (CYAN) --- */
+.eco-item-card {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(41, 243, 255, 0.2);
+    border-radius: 12px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    min-height: 110px;
+}
+
+.eco-item-card:hover {
+    background: rgba(41, 243, 255, 0.1);
+    border-color: #29f3ff;
+    transform: translateY(-4px);
+    box-shadow: 0 5px 15px rgba(41, 243, 255, 0.3);
+}
+
+.add-item-card {
+    border: 2px dashed #29f3ff !important;
+    background: rgba(41, 243, 255, 0.02) !important;
+}
+.add-item-card:hover {
+    background: rgba(41, 243, 255, 0.1) !important;
+    border-style: solid !important;
+}
+
+/* Transaction Mini-Badges on Cards */
+.tx-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 6px; border-radius: 6px;
+    font-family: 'Orbitron'; font-size: 9px; font-weight: 900;
+    margin-top: 5px;
+}
+.tx-plus { background: rgba(0, 255, 136, 0.15); color: #00ff88; border: 1px solid #00ff88; }
+.tx-minus { background: rgba(255, 71, 87, 0.15); color: #ff4757; border: 1px solid #ff4757; }
+
+/* Info Modal Transaction Pill */
+.info-tx-pill {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 8px 15px; border-radius: 10px; width: 100%;
+    font-family: 'Orbitron'; font-size: 16px; font-weight: 900;
+}
   </style>
 </head>
 <body>
@@ -8716,21 +8769,103 @@ html {
                 </div>
             </div>
 
-            <!-- VIEW 2: INSIDE A SPECIFIC GROUP -->
-            <div id="activeGroupView" style="display: none; flex: 1; padding: 10px 20px; overflow-y: auto; flex-direction: column; align-items: center;">
-                
-                <!-- OWNER ONLY: ADD ITEM TO THIS GROUP -->
-                <button id="ownerAddItemBtn" style="display: none; background: rgba(255,170,0,0.05); border: 2px dashed #ffaa00; color: #ffaa00; width: 100%; padding: 25px; border-radius: 15px; font-family: 'Orbitron'; font-weight: 800; cursor: pointer; transition: 0.3s; margin-bottom: 20px;">
-                    <i class="fas fa-plus fa-2x" style="margin-bottom: 10px;"></i><br>ADAUGĂ ITEM ÎN ACEST GRUP
-                </button>
-                
-                <div id="groupItemsContainer" style="width: 100%;">
-                    <!-- Placeholder for items later -->
-                    <p style="text-align: center; color: #555; font-family: 'Poppins'; font-size: 12px; margin-top: 40px;">
-                        Acest grup nu conține niciun element momentan.
-                    </p>
+<!-- VIEW 2: INSIDE A SPECIFIC GROUP -->
+            <div id="activeGroupView" style="display: none; flex: 1; padding: 10px 20px; overflow-y: auto;">
+                <div id="groupItemsContainer" class="economy-grid-layout">
+                    <!-- The Add Item Button will be injected here as a grid card -->
+                    <!-- Items will load here -->
                 </div>
             </div>
+        </div>
+        <!-- ANIMATED BORDER ELEMENT -->
+        <div class="box-glow-line"></div>
+    </div>
+</main>
+
+<!-- ========================================== -->
+<!-- 3. CREATE ITEM MODAL (CYAN THEME) -->
+<!-- ========================================== -->
+<div id="createItemModal" class="account-modal-overlay" style="z-index: 15000;">
+    <div class="account-card" style="border-color: #29f3ff; max-width: 400px; padding: 30px 20px;">
+        <button class="close-pop" onclick="document.getElementById('createItemModal').classList.remove('active')">✕</button>
+        <h3 style="font-family:'Poppins', sans-serif; font-weight: 800; color:#29f3ff; margin-bottom: 20px; font-size: 18px; text-transform: uppercase;">Adaugă Item Nou</h3>
+        
+        <!-- PREVIEW BOX -->
+        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+            <div id="itemPreviewBox" style="width: 80px; height: 80px; border-radius: 20px; border: 2px solid #29f3ff; background: rgba(41,243,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 35px; color: #29f3ff; overflow: hidden; background-size: cover; background-position: center; box-shadow: 0 0 15px rgba(41, 243, 255, 0.3);">
+                <i id="itemPreviewIcon" class="fas fa-cube"></i>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 20px; width: 100%;">
+            <button type="button" class="btn-util-v5" style="flex:1; background: rgba(41,243,255,0.1); border-color:#29f3ff; color:#29f3ff; padding: 10px;" onclick="openIconPicker('item')">
+                <i class="fas fa-icons"></i> Iconiță
+            </button>
+            <label class="btn-util-v5" style="flex:1; background: rgba(0,255,136,0.1); border-color:#00ff88; color:#00ff88; cursor: pointer; text-align: center; padding: 10px;">
+                <i class="fas fa-upload"></i> Imagine
+                <input type="file" id="itemImageUpload" accept="image/*" style="display: none;">
+            </label>
+        </div>
+
+        <div class="edit-profile-form" style="width: 100%; margin-top: 0;">
+            <div>
+                <label class="edit-label" style="color: #29f3ff;">Acțiune / Titlu</label>
+                <input type="text" id="newItemTitle" class="edit-input" placeholder="ex: Scrie o recenzie">
+            </div>
+            <div>
+                <label class="edit-label" style="color: #29f3ff;">Descriere</label>
+                <textarea id="newItemDesc" class="edit-input" rows="2" placeholder="Detalii despre această acțiune..."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <div style="flex: 1;">
+                    <label class="edit-label" style="color: #29f3ff;">Tip Tranzacție</label>
+                    <select id="newItemTxType" class="edit-input" style="font-family: 'Poppins'; font-weight: 700;">
+                        <option value="plus">Câștig (+)</option>
+                        <option value="minus">Cost (-)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <div style="flex: 1;">
+                    <label class="edit-label" style="color: #ffd700;">Coins</label>
+                    <input type="number" id="newItemCoins" class="edit-input" placeholder="0" min="0">
+                </div>
+                <div style="flex: 1;">
+                    <label class="edit-label" style="color: #00ff88;">Diamonds</label>
+                    <input type="number" id="newItemDiamonds" class="edit-input" placeholder="0" min="0">
+                </div>
+            </div>
+            
+            <button id="saveNewItemBtn" class="btn-save-profile" style="background: #29f3ff; color: #000; border: none; margin-top: 20px; width: 100%; padding: 12px; font-size: 14px; font-weight: 900;">SALVEAZĂ ITEM</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- 4. ITEM INFO MODAL (WHEN CLICKED) -->
+<!-- ========================================== -->
+<div id="itemInfoModal" class="account-modal-overlay" style="z-index: 15000;">
+    <div class="account-card" style="border-color: #29f3ff; max-width: 380px; padding: 30px 20px;">
+        <button class="close-pop" onclick="document.getElementById('itemInfoModal').classList.remove('active')">✕</button>
+        
+        <div id="infoModalImgBox" style="width: 100px; height: 100px; border-radius: 25px; border: 2px solid #29f3ff; background: rgba(41,243,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 45px; color: #29f3ff; overflow: hidden; background-size: cover; background-position: center; box-shadow: 0 0 20px rgba(41, 243, 255, 0.3); margin: 0 auto 20px;">
+            <i id="infoModalIcon" class="fas fa-cube"></i>
+        </div>
+
+        <h3 id="infoModalTitle" style="font-family:'Poppins', sans-serif; font-weight: 800; color:#fff; margin-bottom: 10px; font-size: 20px; text-transform: uppercase;">Titlu Item</h3>
+        <p id="infoModalDesc" style="font-family:'Poppins'; font-size: 12px; color: #aaa; margin-bottom: 25px; line-height: 1.4;">Descriere detaliată aici...</p>
+
+        <div style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 15px; width: 100%;">
+            <div style="font-family:'Orbitron'; font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 1px;">RECOMPENSĂ / COST</div>
+            
+            <div id="infoModalTxContainer" style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+                <!-- Transaction pills will be injected here -->
+            </div>
+        </div>
+    </div>
+</div>
             
         </div>
         <!-- ANIMATED BORDER ELEMENT -->
@@ -10080,54 +10215,86 @@ window.equipFrame = async (id, imgUrl, scale = 1.45) => {
 
 
 
-// --- ECONOMY GROUPS LOGIC (V2 UPGRADED) ---
+// --- ECONOMY GROUPS & ITEMS LOGIC (V3 - THE ULTIMATE UPDATE) ---
 const ownerAddGroupBtn = document.getElementById('ownerAddGroupBtn');
 const createGroupModal = document.getElementById('createGroupModal');
 const saveNewGroupBtn = document.getElementById('saveNewGroupBtn');
 const economyGroupsGrid = document.getElementById('economyGroupsGrid');
 const economyContainerTitle = document.getElementById('economyContainerTitle');
 
-// View Toggling Elements
 const groupsListView = document.getElementById('groupsListView');
 const activeGroupView = document.getElementById('activeGroupView');
 const backToGroupsBtn = document.getElementById('backToGroupsBtn');
-const ownerAddItemBtn = document.getElementById('ownerAddItemBtn');
+const groupItemsContainer = document.getElementById('groupItemsContainer');
 
-let selectedGroupMedia = 'fa-star'; // Default icon
-let isMediaImage = false; // Tracks if it's an image or an icon
+const createItemModal = document.getElementById('createItemModal');
+const saveNewItemBtn = document.getElementById('saveNewItemBtn');
+const itemInfoModal = document.getElementById('itemInfoModal');
 
-// 1. Populate Icon Picker Modal
+let currentGroupId = null; 
+
+// --- ICON PICKER LOGIC (REUSABLE) ---
+let currentPickerTarget = 'group'; // 'group' or 'item'
+let selectedGroupMedia = 'fa-star'; 
+let isGroupMediaImage = false;
+let selectedItemMedia = 'fa-cube';
+let isItemMediaImage = false;
+
 const iconGridContainer = document.getElementById('iconGridContainer');
+// MASSIVE ICON LIST
 const faIconsList = [
     'fa-comments', 'fa-shopping-cart', 'fa-gift', 'fa-coins', 'fa-gem', 'fa-trophy', 
     'fa-fire', 'fa-bolt', 'fa-star', 'fa-crown', 'fa-shield-alt', 'fa-gamepad', 
     'fa-box-open', 'fa-wallet', 'fa-money-bill-wave', 'fa-chart-line', 'fa-users',
-    'fa-robot', 'fa-skull', 'fa-ghost'
+    'fa-robot', 'fa-skull', 'fa-ghost', 'fa-heart', 'fa-video', 'fa-camera', 'fa-music',
+    'fa-paint-brush', 'fa-thumbs-up', 'fa-user-plus', 'fa-paper-plane', 'fa-envelope',
+    'fa-gavel', 'fa-hand-holding-usd', 'fa-handshake', 'fa-medal', 'fa-star-half-alt',
+    'fa-dice', 'fa-chess-knight', 'fa-dragon', 'fa-hat-wizard', 'fa-magic', 'fa-scroll',
+    'fa-ticket-alt', 'fa-store', 'fa-level-up-alt', 'fa-user-graduate', 'fa-award'
 ];
 
+window.openIconPicker = (target) => {
+    currentPickerTarget = target;
+    
+    // Fix font on the modal title for Romanian support
+    document.querySelector('#iconPickerModal h3').style.fontFamily = "'Poppins', sans-serif";
+    document.querySelector('#iconPickerModal h3').style.fontWeight = "800";
+    
+    document.getElementById('iconPickerModal').classList.add('active');
+};
+
+// Build Icon Grid once
 faIconsList.forEach(icon => {
     const btn = document.createElement('div');
     btn.className = 'picker-icon-btn';
     btn.innerHTML = `<i class="fas ${icon}"></i>`;
     btn.onclick = () => {
-        selectedGroupMedia = icon;
-        isMediaImage = false;
-        document.getElementById('groupPreviewIcon').className = `fas ${icon}`;
-        document.getElementById('groupPreviewIcon').style.display = 'block';
-        document.getElementById('previewBox').style.backgroundImage = 'none';
+        if (currentPickerTarget === 'group') {
+            selectedGroupMedia = icon;
+            isGroupMediaImage = false;
+            document.getElementById('groupPreviewIcon').className = `fas ${icon}`;
+            document.getElementById('groupPreviewIcon').style.display = 'block';
+            document.getElementById('previewBox').style.backgroundImage = 'none';
+        } else {
+            selectedItemMedia = icon;
+            isItemMediaImage = false;
+            document.getElementById('itemPreviewIcon').className = `fas ${icon}`;
+            document.getElementById('itemPreviewIcon').style.display = 'block';
+            document.getElementById('itemPreviewBox').style.backgroundImage = 'none';
+        }
         document.getElementById('iconPickerModal').classList.remove('active');
     };
     iconGridContainer.appendChild(btn);
 });
 
-// 2. Handle Image Upload (Base64)
+// Image Upload Handlers
 document.getElementById('groupImageUpload').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
         const reader = new FileReader();
         reader.onload = function(event) {
             selectedGroupMedia = event.target.result;
-            isMediaImage = true;
+            isGroupMediaImage = true;
             document.getElementById('groupPreviewIcon').style.display = 'none';
             document.getElementById('previewBox').style.backgroundImage = `url(${selectedGroupMedia})`;
         }
@@ -10135,13 +10302,32 @@ document.getElementById('groupImageUpload').addEventListener('change', function(
     }
 });
 
-// 3. Open Create Modal
+document.getElementById('itemImageUpload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            selectedItemMedia = event.target.result;
+            isItemMediaImage = true;
+            document.getElementById('itemPreviewIcon').style.display = 'none';
+            document.getElementById('itemPreviewBox').style.backgroundImage = `url(${selectedItemMedia})`;
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+// --- GROUP CREATION ---
 if (ownerAddGroupBtn) {
     ownerAddGroupBtn.onclick = () => {
         document.getElementById('newGroupName').value = "";
         document.getElementById('newGroupDesc').value = "";
         selectedGroupMedia = 'fa-star';
-        isMediaImage = false;
+        isGroupMediaImage = false;
+        
+        // Fix font on modal title
+        document.querySelector('#createGroupModal h3').style.fontFamily = "'Poppins', sans-serif";
+        document.querySelector('#createGroupModal h3').style.fontWeight = "800";
+        
         document.getElementById('groupPreviewIcon').className = 'fas fa-star';
         document.getElementById('groupPreviewIcon').style.display = 'block';
         document.getElementById('previewBox').style.backgroundImage = 'none';
@@ -10149,62 +10335,197 @@ if (ownerAddGroupBtn) {
     };
 }
 
-// 4. Save Group to Firestore
 if (saveNewGroupBtn) {
     saveNewGroupBtn.onclick = async () => {
         const name = document.getElementById('newGroupName').value.trim();
         const desc = document.getElementById('newGroupDesc').value.trim();
-        
-        if (!name) {
-            alert("Te rog adaugă un nume pentru grup!");
-            return;
-        }
-        
+        if (!name) return alert("Adaugă un nume!");
         saveNewGroupBtn.innerText = "SE SALVEAZĂ...";
         try {
             await addDoc(collection(db, "economy_groups"), {
                 title: name,
-                description: desc || "Nicio descriere adăugată.",
+                description: desc || "",
                 media: selectedGroupMedia,
-                isImage: isMediaImage,
+                isImage: isGroupMediaImage,
                 createdAt: serverTimestamp()
             });
             createGroupModal.classList.remove('active');
-            if (window.showToast) window.showToast("Grup creat cu succes!");
-        } catch (error) {
-            console.error("Eroare la creare grup:", error);
-            alert("Eroare: " + error.message);
-        } finally {
-            saveNewGroupBtn.innerText = "SALVEAZĂ GRUPUL";
-        }
+        } catch (error) { alert("Eroare: " + error.message); } 
+        finally { saveNewGroupBtn.innerText = "SALVEAZĂ GRUPUL"; }
     };
 }
 
-// 5. Back Button Logic
+// --- ITEM CREATION ---
+window.openCreateItemModal = () => {
+    document.getElementById('newItemTitle').value = "";
+    document.getElementById('newItemDesc').value = "";
+    document.getElementById('newItemCoins').value = "";
+    document.getElementById('newItemDiamonds').value = "";
+    document.getElementById('newItemTxType').value = "plus";
+    
+    selectedItemMedia = 'fa-cube';
+    isItemMediaImage = false;
+    document.getElementById('itemPreviewIcon').className = 'fas fa-cube';
+    document.getElementById('itemPreviewIcon').style.display = 'block';
+    document.getElementById('itemPreviewBox').style.backgroundImage = 'none';
+    
+    createItemModal.classList.add('active');
+};
+
+if (saveNewItemBtn) {
+    saveNewItemBtn.onclick = async () => {
+        if(!currentGroupId) return;
+        
+        const title = document.getElementById('newItemTitle').value.trim();
+        const desc = document.getElementById('newItemDesc').value.trim();
+        const txType = document.getElementById('newItemTxType').value;
+        const coins = parseInt(document.getElementById('newItemCoins').value) || 0;
+        const diamonds = parseInt(document.getElementById('newItemDiamonds').value) || 0;
+        
+        if (!title || (coins === 0 && diamonds === 0)) return alert("Adaugă un titlu și o valoare!");
+        
+        saveNewItemBtn.innerText = "SE SALVEAZĂ...";
+        try {
+            await addDoc(collection(db, `economy_groups/${currentGroupId}/items`), {
+                title: title,
+                description: desc || "",
+                media: selectedItemMedia,
+                isImage: isItemMediaImage,
+                txType: txType,
+                coins: coins,
+                diamonds: diamonds,
+                createdAt: serverTimestamp()
+            });
+            createItemModal.classList.remove('active');
+        } catch (error) { alert("Eroare: " + error.message); } 
+        finally { saveNewItemBtn.innerText = "SALVEAZĂ ITEM"; }
+    };
+}
+
+// --- OPEN ITEM INFO MODAL ---
+window.openItemInfo = (title, desc, media, isImage, txType, coins, diamonds) => {
+    document.getElementById('infoModalTitle').innerText = title;
+    document.getElementById('infoModalDesc').innerText = desc || "Nu există o descriere pentru această acțiune.";
+    
+    const iconEl = document.getElementById('infoModalIcon');
+    const boxEl = document.getElementById('infoModalImgBox');
+    
+    if (isImage === 'true' || isImage === true) {
+        iconEl.style.display = 'none';
+        boxEl.style.backgroundImage = `url(${media})`;
+    } else {
+        iconEl.className = `fas ${media}`;
+        iconEl.style.display = 'block';
+        boxEl.style.backgroundImage = 'none';
+    }
+
+    // Build Transaction Pills
+    const txContainer = document.getElementById('infoModalTxContainer');
+    txContainer.innerHTML = '';
+    
+    const sign = txType === 'plus' ? '+' : '-';
+    const colorClass = txType === 'plus' ? 'tx-plus' : 'tx-minus';
+    
+    if (coins > 0) {
+        txContainer.innerHTML += `
+            <div class="info-tx-pill ${colorClass}">
+                ${sign}${formatNumber(coins)} <img src="https://iili.io/fhc1SKQ.png" width="22"> KSDA Coins
+            </div>`;
+    }
+    if (diamonds > 0) {
+        txContainer.innerHTML += `
+            <div class="info-tx-pill ${colorClass}">
+                ${sign}${formatNumber(diamonds)} <img src="https://iili.io/fv5bmtj.png" width="20"> Diamonds
+            </div>`;
+    }
+
+    itemInfoModal.classList.add('active');
+};
+
+// --- RENDER ITEMS INSIDE A GROUP ---
+let itemsUnsubscribe = null;
+function loadGroupItems(groupId) {
+    currentGroupId = groupId;
+    if(itemsUnsubscribe) itemsUnsubscribe(); // Stop listening to old group
+    
+    const q = query(collection(db, `economy_groups/${groupId}/items`), orderBy("createdAt", "asc"));
+    itemsUnsubscribe = onSnapshot(q, (snapshot) => {
+        groupItemsContainer.innerHTML = '';
+        
+        // Add "New Item" Card first (if Owner)
+        if (auth.currentUser && auth.currentUser.email === 'nicaemmanuel433qe@gmail.com') {
+            const addBtn = document.createElement('div');
+            addBtn.className = 'eco-item-card add-item-card';
+            addBtn.onclick = openCreateItemModal;
+            addBtn.innerHTML = `
+                <div class="eco-card-icon-wrap" style="border-color: #29f3ff; color: #29f3ff; background: rgba(41,243,255,0.1); width: 40px; height: 40px; font-size: 18px;"><i class="fas fa-plus"></i></div>
+                <div class="eco-card-info"><div class="eco-card-title" style="color:#29f3ff;">ADAUGA ITEM</div></div>
+            `;
+            groupItemsContainer.appendChild(addBtn);
+        }
+
+        if (snapshot.empty && groupItemsContainer.children.length === 0) {
+            groupItemsContainer.innerHTML = `<div style="width:100%; text-align:center; color:#666; font-family:'Orbitron'; grid-column:1/-1;">Grupul este gol.</div>`;
+            return;
+        }
+
+        snapshot.forEach((docSnap) => {
+            const d = docSnap.data();
+            const isImg = d.isImage === true || d.isImage === 'true';
+            
+            // Build Mini Badges
+            let badgesHtml = '';
+            const sign = d.txType === 'plus' ? '+' : '-';
+            const colorClass = d.txType === 'plus' ? 'tx-plus' : 'tx-minus';
+            
+            if (d.coins > 0) badgesHtml += `<span class="tx-badge ${colorClass}">${sign}${formatNumber(d.coins)} <img src="https://iili.io/fhc1SKQ.png" width="10"></span>`;
+            if (d.diamonds > 0) badgesHtml += `<span class="tx-badge ${colorClass}">${sign}${formatNumber(d.diamonds)} <img src="https://iili.io/fv5bmtj.png" width="9"></span>`;
+
+            const mediaHtml = isImg 
+                ? `<div class="eco-card-icon-wrap" style="border-color: #29f3ff; color: #29f3ff; background: rgba(41,243,255,0.1); background-image: url('${d.media}');"></div>`
+                : `<div class="eco-card-icon-wrap" style="border-color: #29f3ff; color: #29f3ff; background: rgba(41,243,255,0.1);"><i class="fas ${d.media}"></i></div>`;
+
+            const card = document.createElement('div');
+            card.className = 'eco-item-card';
+            // Escaping single quotes in description for the onclick handler
+            const safeDesc = (d.description || "").replace(/'/g, "\\'");
+            card.onclick = () => window.openItemInfo(d.title, safeDesc, d.media, d.isImage, d.txType, d.coins || 0, d.diamonds || 0);
+            
+            card.innerHTML = `
+                ${mediaHtml}
+                <div class="eco-card-info">
+                    <div class="eco-card-title">${d.title}</div>
+                    <div style="display:flex; gap:4px; flex-wrap:wrap; justify-content:center;">${badgesHtml}</div>
+                </div>
+            `;
+            groupItemsContainer.appendChild(card);
+        });
+    });
+}
+
+// --- RENDER GROUPS LIST ---
 backToGroupsBtn.onclick = () => {
     activeGroupView.style.display = "none";
     groupsListView.style.display = "block";
     backToGroupsBtn.style.display = "none";
     economyContainerTitle.innerText = "SELECTEAZĂ O CATEGORIE";
+    currentGroupId = null;
+    if(itemsUnsubscribe) itemsUnsubscribe(); // Stop listening
 };
 
-// 6. Load Groups in Realtime & Handle Click
 const groupsQuery = query(collection(db, "economy_groups"), orderBy("createdAt", "asc"));
 onSnapshot(groupsQuery, (snapshot) => {
     economyGroupsGrid.innerHTML = "";
-    
     if (snapshot.empty) {
-        economyGroupsGrid.innerHTML = `<div style="width:100%; text-align:center; color:#666; font-family:'Orbitron'; padding: 40px 0;">Nu există niciun grup momentan.</div>`;
+        economyGroupsGrid.innerHTML = `<div style="width:100%; text-align:center; color:#666; font-family:'Orbitron'; font-size:12px; grid-column:1/-1;">Nu există niciun grup creat momentan.</div>`;
         return;
     }
     
     snapshot.forEach((docSnap) => {
         const data = docSnap.data();
-        
         const card = document.createElement('div');
         card.className = 'eco-group-card';
         
-        // Generate Media HTML
         let mediaHtml = data.isImage 
             ? `<div class="eco-card-icon-wrap" style="background-image: url('${data.media}');"></div>`
             : `<div class="eco-card-icon-wrap"><i class="fas ${data.media}"></i></div>`;
@@ -10213,26 +10534,17 @@ onSnapshot(groupsQuery, (snapshot) => {
             ${mediaHtml}
             <div class="eco-card-info">
                 <div class="eco-card-title">${data.title}</div>
-<div class="eco-card-desc">${data.description && data.description !== 'undefined' ? data.description : 'Fără descriere'}</div>
+                <div class="eco-card-desc">${data.description && data.description !== 'undefined' ? data.description : 'Fără descriere'}</div>
             </div>
-            <i class="fas fa-chevron-right eco-arrow"></i>
         `;
         
-        // Click to enter Group
         card.onclick = () => {
             economyContainerTitle.innerText = data.title;
             groupsListView.style.display = "none";
-            activeGroupView.style.display = "flex";
+            activeGroupView.style.display = "block"; // Changed from flex to block since grid is inside
             backToGroupsBtn.style.display = "block";
-            
-            // Check if Owner to show "+" button inside group
-            if (auth.currentUser && auth.currentUser.email === 'nicaemmanuel433qe@gmail.com') {
-                ownerAddItemBtn.style.display = "block";
-            } else {
-                ownerAddItemBtn.style.display = "none";
-            }
+            loadGroupItems(docSnap.id);
         };
-        
         economyGroupsGrid.appendChild(card);
     });
 });
