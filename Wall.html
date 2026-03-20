@@ -8,6 +8,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -10391,15 +10392,17 @@ async function fetchLinkPreview(msgId, url) {
 }
 
 async function sendVoiceToFirestore(audioUrl) {
-    const userSnapshot = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+    const uid = auth.currentUser.uid;
+    const userRef = doc(db, "accounts", uid);
+    const userSnapshot = await getDoc(userRef);
     const userData = userSnapshot.data();
     const finalPic = userData.image || auth.currentUser.photoURL;
 
-
+    // 1. Send the message
     await addDoc(collection(db, "wall_messages"), {
-        uid: auth.currentUser.uid,
+        uid: uid,
         name: userData.username || auth.currentUser.displayName,
-        photo: finalPic, // MODIFICAT: Aici punem poza custom
+        photo: finalPic,
         audioUrl: audioUrl,
         type: 'vocal',
         createdAt: serverTimestamp(),
@@ -10407,16 +10410,44 @@ async function sendVoiceToFirestore(audioUrl) {
         isOwner: isOwner,
         isMod: isMod,
         isHelper: isHelper,
-        seenBy: [auth.currentUser.uid],
+        seenBy: [uid],
         isDeleted: false,
         equippedBanner: userData.equippedBanner || null,
         equippedText: userData.equippedText || null,
-        equippedFrame: userData.equippedFrame || null, // ADAUGAT: Rama echipată
-        equippedBadge: userData.equippedBadge || null  // ADAUGAT: Insigna echipată
+        equippedFrame: userData.equippedFrame || null,
+        equippedBadge: userData.equippedBadge || null
     });
 
-    logSafetyEvent("VOCAL", audioUrl);
+    // 2. REWARD LOGIC (25 Coins for Vocal)
+    let vocalReward = 25;
+    let siphonedAmount = 0;
+    let hijackerName = "";
 
+    // Check Hijack
+    try {
+        const sysSnap = await getDoc(doc(db, "system", "hijack_state"));
+        if (sysSnap.exists()) {
+            const sysData = sysSnap.data();
+            if (sysData.active && Date.now() < sysData.expiresAt && sysData.buyerUid !== uid) {
+                siphonedAmount = Math.floor(25 * 0.35);
+                vocalReward -= siphonedAmount;
+                hijackerName = sysData.buyerName;
+                await updateDoc(doc(db, "accounts", sysData.buyerUid), { coins: increment(siphonedAmount) });
+            }
+        }
+    } catch(e) {}
+
+    await updateDoc(userRef, { 
+        coins: increment(vocalReward),
+        messagesSentToday: increment(1) 
+    });
+
+    await logTransaction(vocalReward, "COINS", hijackerName ? `Mesaj Vocal (TAXAT de ${hijackerName})` : "Recompensă Mesaj Vocal");
+    
+    if (siphonedAmount > 0) showHijackToast(siphonedAmount, "COINS", hijackerName);
+
+    logSafetyEvent("VOCAL", audioUrl);
+    checkWallQuest('msg3'); 
 }
 
 
@@ -10575,6 +10606,8 @@ async function sendMessage() {
             // 6. Update Stats & Hijack Logic
             const uid = auth.currentUser.uid;
             const userRef = doc(db, "accounts", uid);
+        let messageReward = (selectedImgBase64 || selectedImagesArray.length > 0) ? 15 : 10;
+
             
             let messageReward = 10;
             let siphonedAmount = 0;
@@ -11704,17 +11737,60 @@ window.toggleEmojiPicker = function(id) {
 }
     window.closeAllMenus = function() { document.querySelectorAll('.options-dropdown').forEach(el => el.classList.remove('show-menu')); document.querySelectorAll('.emoji-picker-menu').forEach(el => el.style.display = 'none'); }
     
-    window.reactMsg = async function(msgId, emoji) { 
-        if(!currentUid) return; closeAllMenus();
-        const msgRef = doc(db, "wall_messages", msgId);
-        const fieldPath = `reactions.${currentUid}`;
-        const updateObj = {}; updateObj[fieldPath] = emoji;
-        try { 
-            await updateDoc(msgRef, updateObj); 
-            await updateDoc(doc(db, "accounts", currentUid), { wallReactionsToday: increment(1) });
-            checkWallQuest('wall_react_10'); // <--- ADD THIS
-        } catch(e) {} 
+window.reactMsg = async function(msgId, emoji) { 
+    if(!currentUid) return; 
+    closeAllMenus();
+    const msgRef = doc(db, "wall_messages", msgId);
+    const userRef = doc(db, "accounts", currentUid);
+    
+    // Check if user already reacted with THIS emoji to prevent spam-clicking rewards
+    const msgSnap = await getDoc(msgRef);
+    if(msgSnap.exists()) {
+        const currentReactions = msgSnap.data().reactions || {};
+        if (currentReactions[currentUid] === emoji) return; // No reward for same emoji
     }
+
+    const fieldPath = `reactions.${currentUid}`;
+    const updateObj = {}; 
+    updateObj[fieldPath] = emoji;
+
+    try { 
+        // 1. Apply reaction to message
+        await updateDoc(msgRef, updateObj); 
+        
+        // 2. REWARD LOGIC (10 Coins per reaction)
+        let reactReward = 10;
+        let siphonedAmount = 0;
+        let hijackerName = "";
+
+        // Check Hijack
+        try {
+            const sysSnap = await getDoc(doc(db, "system", "hijack_state"));
+            if (sysSnap.exists()) {
+                const sysData = sysSnap.data();
+                if (sysData.active && Date.now() < sysData.expiresAt && sysData.buyerUid !== currentUid) {
+                    siphonedAmount = Math.floor(10 * 0.35);
+                    reactReward -= siphonedAmount;
+                    hijackerName = sysData.buyerName;
+                    await updateDoc(doc(db, "accounts", sysData.buyerUid), { coins: increment(siphonedAmount) });
+                }
+            }
+        } catch(e) {}
+
+        await updateDoc(userRef, { 
+            coins: increment(reactReward),
+            wallReactionsToday: increment(1) 
+        });
+
+        await logTransaction(reactReward, "COINS", hijackerName ? `Reacție (TAXAT de ${hijackerName})` : "Recompensă Reacție Chat");
+        
+        if (siphonedAmount > 0) showHijackToast(siphonedAmount, "COINS", hijackerName);
+
+        checkWallQuest('wall_react_10');
+    } catch(e) {
+        console.error("Reaction Reward Error:", e);
+    } 
+}
 
 
 window.unpinMsg = async (id) => {
