@@ -7,6 +7,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -8765,6 +8766,83 @@ html, body {
     width: 16px !important;
     height: 16px !important;
 }
+
+
+
+/* --- 1. STOP HORIZONTAL SCROLL --- */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* --- 2. ECONOMY HEADER GRID --- */
+.eco-nav-container {
+    display: grid;
+    /* Col 1: 85px for button, Col 2: flexible title, Col 3: 85px empty space */
+    grid-template-columns: 85px 1fr 85px; 
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    padding: 0 10px;
+}
+
+.eco-nav-side {
+    display: flex;
+    justify-content: flex-start;
+}
+
+#backToGroupsBtn {
+    /* Hard reset to override your previous absolute positioning */
+    position: static !important;
+    transform: none !important;
+    
+    background: transparent;
+    border: 1.5px solid #ffaa00;
+    color: #ffaa00;
+    border-radius: 50px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-family: 'Orbitron';
+    font-size: 10px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: 0.3s;
+}
+
+#economyContainerTitle {
+    text-align: center;
+    color: #ffaa00;
+    font-family: 'Orbitron', sans-serif;
+    /* CLAMP: Responsive font - min 10px, scales with screen, max 16px */
+    font-size: clamp(10px, 3.5vw, 16px) !important;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(255, 170, 0, 0.4);
+    margin: 0 !important;
+    line-height: 1.2;
+}
+
+/* --- 3. VERY SMALL SCREEN REPAIR (Under 400px) --- */
+@media (max-width: 400px) {
+    .eco-nav-container {
+        grid-template-columns: 40px 1fr 40px; /* Shrink side columns */
+    }
+    
+    .btn-text-hide {
+        display: none; /* Hide 'INAPOI' text, keep only the arrow icon */
+    }
+    
+    #backToGroupsBtn {
+        padding: 8px;
+        border-radius: 50%; /* Turn button into a circle */
+        justify-content: center;
+    }
+}
   </style>
 </head>
 <body>
@@ -10738,38 +10816,48 @@ window.openItemInfo = (title, desc, media, isImage, txType, coins, diamonds) => 
     itemInfoModal.classList.add('active');
 };
 
-// --- RENDER ITEMS INSIDE A GROUP ---
+// --- RENDER ITEMS INSIDE A GROUP (FIXED) ---
 let itemsUnsubscribe = null;
 function loadGroupItems(groupId) {
     currentGroupId = groupId;
-    if(itemsUnsubscribe) itemsUnsubscribe(); // Stop listening to old group
+    if(itemsUnsubscribe) itemsUnsubscribe(); // Oprim ascultătorul vechi dacă există
     
     const q = query(collection(db, `economy_groups/${groupId}/items`), orderBy("createdAt", "asc"));
+    
     itemsUnsubscribe = onSnapshot(q, (snapshot) => {
+        // 1. Curățăm containerul
         groupItemsContainer.innerHTML = '';
         
-        // Add "New Item" Card first (if Owner)
+        // 2. Adăugăm butonul "ADĂUGĂ ITEM" doar dacă ești OWNER
+        // Verificăm email-ul tău
         if (auth.currentUser && auth.currentUser.email === 'nicaemmanuel433qe@gmail.com') {
             const addBtn = document.createElement('div');
             addBtn.className = 'eco-item-card add-item-card';
             addBtn.onclick = openCreateItemModal;
             addBtn.innerHTML = `
-                <div class="eco-card-icon-wrap" style="border-color: #29f3ff; color: #29f3ff; background: rgba(41,243,255,0.1); width: 40px; height: 40px; font-size: 18px;"><i class="fas fa-plus"></i></div>
-                <div class="eco-card-info"><div class="eco-card-title" style="color:#29f3ff;">ADAUGA ITEM</div></div>
+                <div class="eco-card-icon-wrap" style="border-color: #29f3ff; color: #29f3ff; background: rgba(41,243,255,0.1); width: 40px; height: 40px; font-size: 18px;">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="eco-card-info">
+                    <div class="eco-card-title" style="color:#29f3ff;">ADAUGA ITEM</div>
+                </div>
             `;
             groupItemsContainer.appendChild(addBtn);
         }
 
+        // 3. Verificăm dacă snapshot-ul este gol (nu există iteme în DB)
+        // Dacă e gol și NU ești owner, afișăm mesajul de "Grup Gol"
         if (snapshot.empty && groupItemsContainer.children.length === 0) {
-            groupItemsContainer.innerHTML = `<div style="width:100%; text-align:center; color:#666; font-family:'Orbitron'; grid-column:1/-1;">Grupul este gol.</div>`;
+            groupItemsContainer.innerHTML = `<div style="width:100%; text-align:center; color:#666; font-family:'Orbitron'; grid-column:1/-1; padding: 20px;">Grupul este gol.</div>`;
             return;
         }
 
+        // 4. Randăm itemele existente
         snapshot.forEach((docSnap) => {
             const d = docSnap.data();
             const isImg = d.isImage === true || d.isImage === 'true';
             
-            // Build Mini Badges
+            // Construim badge-urile de preț (+ / -)
             let badgesHtml = '';
             const sign = d.txType === 'plus' ? '+' : '-';
             const colorClass = d.txType === 'plus' ? 'tx-plus' : 'tx-minus';
@@ -10783,7 +10871,6 @@ function loadGroupItems(groupId) {
 
             const card = document.createElement('div');
             card.className = 'eco-item-card';
-            // Escaping single quotes in description for the onclick handler
             const safeDesc = (d.description || "").replace(/'/g, "\\'");
             card.onclick = () => window.openItemInfo(d.title, safeDesc, d.media, d.isImage, d.txType, d.coins || 0, d.diamonds || 0);
             
