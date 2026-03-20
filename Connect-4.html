@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -13350,6 +13351,30 @@ onAuthStateChanged(auth, user => {
 });
 
 
+// --- TRANSACTION LOGGER FUNCTION (FIXED) ---
+window.logTransaction = async (amount, type, desc) => {
+    if (!auth.currentUser) return;
+    try {
+        const userSnap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
+        const userData = userSnap.exists() ? userSnap.data() : {};
+
+        await addDoc(collection(db, "transactions"), {
+            userId: auth.currentUser.uid,
+            username: userData.username || auth.currentUser.displayName || "Unknown",
+            userImage: userData.image || auth.currentUser.photoURL || "https://iili.io/fXks1Dv.png",
+            amount: amount,
+            type: type,
+            source: "Connect 4", // Sursa actualizată pentru a fi clar de unde vin banii
+            description: desc,
+            timestamp: serverTimestamp()
+        });
+        console.log("Transaction logged successfully:", desc, amount);
+    } catch (e) {
+        console.error("Failed to log transaction:", e);
+    }
+};
+
+
 function formatCurrency(num) {
     if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
     if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
@@ -13965,6 +13990,9 @@ async function triggerWin(res) {
                         coins: increment(d.betCoins || 0),
                         diamonds: increment(d.betDiamonds || 0)
                     });
+
+                    if (d.betCoins > 0) window.logTransaction(d.betCoins, "Refund", "Retur Miză Remiză Connect 4");
+
                     reward.innerHTML = `RETUR: ${d.betCoins > 0 ? d.betCoins + ' ' + coinImg : ''} ${d.betDiamonds > 0 ? d.betDiamonds + ' ' + diamondImg : ''}`;
                 } else { reward.innerText = "MECI AMICAL"; }
             } else { reward.innerHTML = `${coinImg} +100 KSDA`; }
@@ -14007,6 +14035,8 @@ async function triggerWin(res) {
                 title.style.color = "var(--primary)";
                 reward.innerHTML = `${coinImg} +${config.reward} KSDA`;
                 await updateDoc(doc(db, "accounts", auth.currentUser.uid), { coins: increment(config.reward) });
+                window.logTransaction(config.reward, "Win", `Victorie Connect 4 (${currentC4Difficulty.toUpperCase()})`);
+
             } else { 
                 title.innerText = "ÎNFRÂNGERE!";
                 title.style.color = "#ff4757";
@@ -14093,7 +14123,7 @@ window.handleGiveUp = async () => {
             }
 
             await updateDoc(userRef, { coins: increment(penalty) });
-            await logTransaction(penalty, "Penalty", "Abandonat meci Connect 4 (Give Up)");
+            await window.logTransaction(penalty, "Penalty", "Abandonat meci Connect 4 (Give Up)");
             location.reload(); 
         } catch(e) {
             console.error(e);
