@@ -8589,6 +8589,58 @@ html {
     padding: 8px 15px; border-radius: 10px; width: 100%;
     font-family: 'Orbitron'; font-size: 16px; font-weight: 900;
 }
+
+
+/* --- FIX: EDIT PROFILE & MODAL INPUTS --- */
+    .edit-label { font-size: 10px; color: var(--primary); text-transform: uppercase; margin-bottom: 4px; margin-left: 5px; font-family: 'Orbitron'; display: block; }
+    
+    .edit-input { 
+        background: rgba(255,255,255,0.05); 
+        border: 1px solid rgba(255,255,255,0.1); 
+        color: #fff; 
+        padding: 12px 15px; 
+        border-radius: 12px; 
+        width: 100%; 
+        font-family: 'Poppins', sans-serif;
+        box-sizing: border-box !important; /* CRITICAL: Prevents overflowing the modal */
+        outline: none;
+        transition: 0.3s;
+    }
+    .edit-input:focus {
+        border-color: #29f3ff;
+        background: rgba(41, 243, 255, 0.05);
+    }
+
+    /* --- SICK SELECT DROPDOWN --- */
+    select.edit-input {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="%23ffffff" viewBox="0 0 16 16"><path d="M4 6h8l-4 5z"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 15px center;
+        cursor: pointer;
+    }
+    
+    select.edit-input option {
+        background: #08101b; /* Dark background for dropdown options */
+        color: #fff;
+    }
+
+    /* Dynamic Colors for Select */
+    select.tx-plus-select {
+        color: #00ff88;
+        border-color: #00ff88;
+        background-color: rgba(0, 255, 136, 0.05);
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="%2300ff88" viewBox="0 0 16 16"><path d="M4 6h8l-4 5z"/></svg>');
+    }
+    
+    select.tx-minus-select {
+        color: #ff4757;
+        border-color: #ff4757;
+        background-color: rgba(255, 71, 87, 0.05);
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="%23ff4757" viewBox="0 0 16 16"><path d="M4 6h8l-4 5z"/></svg>');
+    }
   </style>
 </head>
 <body>
@@ -8786,18 +8838,18 @@ html {
 <!-- 3. CREATE ITEM MODAL (CYAN THEME) -->
 <!-- ========================================== -->
 <div id="createItemModal" class="account-modal-overlay" style="z-index: 15000;">
-    <div class="account-card" style="border-color: #29f3ff; max-width: 400px; padding: 30px 20px;">
+    <div class="account-card" style="border-color: #29f3ff; max-width: 400px; padding: 25px 20px;">
         <button class="close-pop" onclick="document.getElementById('createItemModal').classList.remove('active')">✕</button>
         <h3 style="font-family:'Poppins', sans-serif; font-weight: 800; color:#29f3ff; margin-bottom: 20px; font-size: 18px; text-transform: uppercase;">Adaugă Item Nou</h3>
         
         <!-- PREVIEW BOX -->
-        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-            <div id="itemPreviewBox" style="width: 80px; height: 80px; border-radius: 20px; border: 2px solid #29f3ff; background: rgba(41,243,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 35px; color: #29f3ff; overflow: hidden; background-size: cover; background-position: center; box-shadow: 0 0 15px rgba(41, 243, 255, 0.3);">
+        <div style="display: flex; justify-content: center; margin-bottom: 15px;">
+            <div id="itemPreviewBox" style="width: 70px; height: 70px; border-radius: 15px; border: 2px solid #29f3ff; background: rgba(41,243,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 30px; color: #29f3ff; overflow: hidden; background-size: cover; background-position: center; box-shadow: 0 0 15px rgba(41, 243, 255, 0.3);">
                 <i id="itemPreviewIcon" class="fas fa-cube"></i>
             </div>
         </div>
 
-        <div style="display: flex; gap: 10px; margin-bottom: 20px; width: 100%;">
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; width: 100%;">
             <button type="button" class="btn-util-v5" style="flex:1; background: rgba(41,243,255,0.1); border-color:#29f3ff; color:#29f3ff; padding: 10px;" onclick="openIconPicker('item')">
                 <i class="fas fa-icons"></i> Iconiță
             </button>
@@ -8807,38 +8859,39 @@ html {
             </label>
         </div>
 
-        <div class="edit-profile-form" style="width: 100%; margin-top: 0;">
-            <div>
+        <div class="edit-profile-form" style="width: 100%; margin-top: 0; display: flex; flex-direction: column; gap: 12px;">
+            
+            <div style="width: 100%;">
                 <label class="edit-label" style="color: #29f3ff;">Acțiune / Titlu</label>
                 <input type="text" id="newItemTitle" class="edit-input" placeholder="ex: Scrie o recenzie">
             </div>
-            <div>
+            
+            <div style="width: 100%;">
                 <label class="edit-label" style="color: #29f3ff;">Descriere</label>
                 <textarea id="newItemDesc" class="edit-input" rows="2" placeholder="Detalii despre această acțiune..."></textarea>
             </div>
             
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <div style="flex: 1;">
-                    <label class="edit-label" style="color: #29f3ff;">Tip Tranzacție</label>
-                    <select id="newItemTxType" class="edit-input" style="font-family: 'Poppins'; font-weight: 700;">
-                        <option value="plus">Câștig (+)</option>
-                        <option value="minus">Cost (-)</option>
-                    </select>
-                </div>
+            <div style="width: 100%;">
+                <label class="edit-label" style="color: #29f3ff;">Tip Tranzacție</label>
+                <select id="newItemTxType" class="edit-input tx-plus-select" style="font-weight: 700; text-transform: uppercase;">
+                    <option value="plus" style="color: #00ff88;">Câștig (+)</option>
+                    <option value="minus" style="color: #ff4757;">Cost (-)</option>
+                </select>
             </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <div style="flex: 1;">
+            <!-- CURRENCY ROW: min-width:0 stops flex items from overflowing -->
+            <div style="display: flex; gap: 15px; width: 100%;">
+                <div style="flex: 1; min-width: 0;">
                     <label class="edit-label" style="color: #ffd700;">Coins</label>
                     <input type="number" id="newItemCoins" class="edit-input" placeholder="0" min="0">
                 </div>
-                <div style="flex: 1;">
+                <div style="flex: 1; min-width: 0;">
                     <label class="edit-label" style="color: #00ff88;">Diamonds</label>
                     <input type="number" id="newItemDiamonds" class="edit-input" placeholder="0" min="0">
                 </div>
             </div>
             
-            <button id="saveNewItemBtn" class="btn-save-profile" style="background: #29f3ff; color: #000; border: none; margin-top: 20px; width: 100%; padding: 12px; font-size: 14px; font-weight: 900;">SALVEAZĂ ITEM</button>
+            <button id="saveNewItemBtn" class="btn-save-profile" style="background: #29f3ff; color: #000; border: none; margin-top: 10px; width: 100%; padding: 12px; font-size: 14px; font-weight: 900; letter-spacing: 1px;">SALVEAZĂ ITEM</button>
         </div>
     </div>
 </div>
@@ -10243,16 +10296,71 @@ let isItemMediaImage = false;
 const iconGridContainer = document.getElementById('iconGridContainer');
 // MASSIVE ICON LIST
 const faIconsList = [
-    'fa-comments', 'fa-shopping-cart', 'fa-gift', 'fa-coins', 'fa-gem', 'fa-trophy', 
-    'fa-fire', 'fa-bolt', 'fa-star', 'fa-crown', 'fa-shield-alt', 'fa-gamepad', 
-    'fa-box-open', 'fa-wallet', 'fa-money-bill-wave', 'fa-chart-line', 'fa-users',
-    'fa-robot', 'fa-skull', 'fa-ghost', 'fa-heart', 'fa-video', 'fa-camera', 'fa-music',
-    'fa-paint-brush', 'fa-thumbs-up', 'fa-user-plus', 'fa-paper-plane', 'fa-envelope',
-    'fa-gavel', 'fa-hand-holding-usd', 'fa-handshake', 'fa-medal', 'fa-star-half-alt',
-    'fa-dice', 'fa-chess-knight', 'fa-dragon', 'fa-hat-wizard', 'fa-magic', 'fa-scroll',
-    'fa-ticket-alt', 'fa-store', 'fa-level-up-alt', 'fa-user-graduate', 'fa-award'
-];
+    // original
+    'fa-comments','fa-shopping-cart','fa-gift','fa-coins','fa-gem','fa-trophy',
+    'fa-fire','fa-bolt','fa-star','fa-crown','fa-shield-alt','fa-gamepad',
+    'fa-box-open','fa-wallet','fa-money-bill-wave','fa-chart-line','fa-users',
+    'fa-robot','fa-skull','fa-ghost','fa-heart','fa-video','fa-camera','fa-music',
+    'fa-paint-brush','fa-thumbs-up','fa-user-plus','fa-paper-plane','fa-envelope',
+    'fa-gavel','fa-hand-holding-usd','fa-handshake','fa-medal','fa-star-half-alt',
+    'fa-dice','fa-chess-knight','fa-dragon','fa-hat-wizard','fa-magic','fa-scroll',
+    'fa-ticket-alt','fa-store','fa-level-up-alt','fa-user-graduate','fa-award',
 
+    // system / ui
+    'fa-home','fa-house','fa-user','fa-user-circle','fa-users','fa-bars','fa-list',
+    'fa-th-large','fa-th','fa-folder','fa-folder-open','fa-file','fa-file-alt',
+    'fa-image','fa-images','fa-inbox','fa-bell','fa-bell-slash',
+    'fa-search','fa-plus','fa-minus','fa-check','fa-times',
+    'fa-arrow-left','fa-arrow-right','fa-arrow-up','fa-arrow-down',
+    'fa-sync','fa-sync-alt','fa-redo','fa-undo',
+    'fa-power-off','fa-sign-in-alt','fa-sign-out-alt',
+    'fa-lock','fa-unlock','fa-key',
+
+    // tools / dev
+    'fa-cog','fa-cogs','fa-wrench','fa-tools','fa-sliders-h','fa-filter','fa-bug',
+    'fa-code','fa-terminal','fa-database','fa-server',
+
+    // cloud / network
+    'fa-cloud','fa-cloud-upload-alt','fa-cloud-download-alt',
+    'fa-upload','fa-download','fa-random','fa-exchange-alt',
+    'fa-link','fa-unlink','fa-share','fa-share-alt','fa-share-square',
+
+    // editing
+    'fa-copy','fa-paste','fa-save','fa-print','fa-trash','fa-trash-alt',
+    'fa-edit','fa-pen','fa-pencil-alt','fa-marker','fa-highlighter','fa-eraser',
+
+    // education / brain
+    'fa-sticky-note','fa-notes-medical','fa-book','fa-book-open','fa-bookmark',
+    'fa-graduation-cap','fa-school','fa-brain','fa-lightbulb',
+
+    // media / audio
+    'fa-microphone','fa-microphone-slash','fa-headphones','fa-volume-up','fa-volume-mute',
+    'fa-play','fa-pause','fa-stop','fa-forward','fa-backward',
+    'fa-fast-forward','fa-fast-backward','fa-step-forward','fa-step-backward',
+    'fa-photo-video','fa-film','fa-clapperboard',
+
+    // time
+    'fa-calendar','fa-calendar-check','fa-clock','fa-hourglass-half','fa-stopwatch',
+
+    // maps / location
+    'fa-map','fa-map-marker','fa-map-marker-alt','fa-location-arrow',
+    'fa-compass','fa-globe','fa-flag','fa-flag-checkered','fa-route','fa-road',
+
+    // transport / space
+    'fa-car','fa-truck','fa-bicycle','fa-plane','fa-ship','fa-anchor',
+    'fa-space-shuttle','fa-rocket','fa-satellite','fa-meteor',
+
+    // weather / nature
+    'fa-sun','fa-moon','fa-cloud-sun','fa-cloud-moon','fa-snowflake','fa-wind',
+    'fa-umbrella','fa-tree','fa-leaf','fa-seedling',
+
+    // animals
+    'fa-paw','fa-dog','fa-cat','fa-fish','fa-feather',
+
+    // food / drink
+    'fa-apple-alt','fa-hamburger','fa-pizza-slice','fa-ice-cream','fa-coffee',
+    'fa-beer','fa-glass-cheers','fa-utensils','fa-blender','fa-birthday-cake'
+];
 window.openIconPicker = (target) => {
     currentPickerTarget = target;
     
@@ -11070,6 +11178,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+
+// --- DYNAMIC SELECT DROPDOWN COLOR ---
+const txSelectDropdown = document.getElementById('newItemTxType');
+if (txSelectDropdown) {
+    txSelectDropdown.addEventListener('change', function() {
+        if (this.value === 'plus') {
+            this.className = 'edit-input tx-plus-select';
+        } else {
+            this.className = 'edit-input tx-minus-select';
+        }
+    });
+}
 </script> 
 </body>
 </html> 
