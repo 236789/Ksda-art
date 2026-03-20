@@ -8441,32 +8441,115 @@ html {
     letter-spacing: 1px;
     line-height: 1.3;
 }
+
+
+
+/* --- SICK ECONOMY GROUPS CARDS --- */
+.economy-grid-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.eco-group-card {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 170, 0, 0.2);
+    border-radius: 15px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    cursor: pointer;
+    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+}
+
+.eco-group-card:hover {
+    background: rgba(255, 170, 0, 0.1);
+    border-color: #ffaa00;
+    transform: scale(1.02) translateX(5px);
+    box-shadow: 0 5px 20px rgba(255, 170, 0, 0.2);
+}
+
+.eco-card-icon-wrap {
+    width: 55px; height: 55px;
+    border-radius: 12px;
+    background: rgba(255, 170, 0, 0.1);
+    border: 1px solid #ffaa00;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 26px; color: #ffaa00; flex-shrink: 0;
+    background-size: cover; background-position: center;
+    box-shadow: inset 0 0 10px rgba(255, 170, 0, 0.3);
+}
+
+.eco-card-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.eco-card-title { font-family: 'Orbitron'; font-weight: 800; font-size: 15px; color: #fff; margin-bottom: 4px; text-transform: uppercase; }
+.eco-card-desc { font-family: 'Poppins'; font-size: 11px; color: #aaa; line-height: 1.3; }
+
+.eco-arrow { color: #ffaa00; font-size: 20px; opacity: 0.5; transition: 0.3s; }
+.eco-group-card:hover .eco-arrow { opacity: 1; transform: translateX(5px); }
+
+/* Picker Icons */
+.picker-icon-btn {
+    background: rgba(41, 243, 255, 0.05); border: 1px solid rgba(41, 243, 255, 0.2);
+    border-radius: 10px; color: #29f3ff; font-size: 20px; padding: 12px 0;
+    cursor: pointer; transition: 0.2s; text-align: center;
+}
+.picker-icon-btn:hover { background: #29f3ff; color: #000; transform: scale(1.1); }
   </style>
 </head>
 <body>
 
 
-<!-- CREATE ECONOMY GROUP MODAL (OWNER ONLY) -->
+<!-- 1. CREATE ECONOMY GROUP MODAL (REDESIGNED) -->
 <div id="createGroupModal" class="account-modal-overlay" style="z-index: 15000;">
-    <div class="account-card" style="border-color: #ffaa00; max-width: 400px;">
+    <div class="account-card" style="border-color: #ffaa00; max-width: 400px; padding: 30px 20px;">
         <button class="close-pop" onclick="document.getElementById('createGroupModal').classList.remove('active')">✕</button>
-        <h3 style="font-family:'Orbitron'; color:#ffaa00; margin-bottom: 20px;">CREEAZĂ GRUP NOU</h3>
+        <h3 style="font-family:'Orbitron'; color:#ffaa00; margin-bottom: 20px; font-size: 18px;">CREEAZĂ GRUP NOU</h3>
         
-        <div class="edit-profile-form">
+        <!-- PREVIEW BOX -->
+        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+            <div id="previewBox" style="width: 80px; height: 80px; border-radius: 20px; border: 2px solid #ffaa00; background: rgba(255,170,0,0.05); display: flex; align-items: center; justify-content: center; font-size: 35px; color: #ffaa00; overflow: hidden; background-size: cover; background-position: center; box-shadow: 0 0 15px rgba(255, 170, 0, 0.3);">
+                <i id="groupPreviewIcon" class="fas fa-question"></i>
+            </div>
+        </div>
+
+        <!-- SELECTION BUTTONS -->
+        <div style="display: flex; gap: 10px; margin-bottom: 20px; width: 100%;">
+            <button type="button" class="btn-util-v5" style="flex:1; background: rgba(41,243,255,0.1); border-color:#29f3ff; color:#29f3ff; padding: 10px;" onclick="document.getElementById('iconPickerModal').classList.add('active')">
+                <i class="fas fa-icons"></i> Alege Iconiță
+            </button>
+            <label class="btn-util-v5" style="flex:1; background: rgba(0,255,136,0.1); border-color:#00ff88; color:#00ff88; cursor: pointer; text-align: center; padding: 10px;">
+                <i class="fas fa-upload"></i> Upload Imagine
+                <input type="file" id="groupImageUpload" accept="image/*" style="display: none;">
+            </label>
+        </div>
+
+        <div class="edit-profile-form" style="width: 100%; margin-top: 0;">
             <div>
-                <label class="edit-label" style="color: #ffaa00;">Nume Grup (ex: Wall Info)</label>
-                <input type="text" id="newGroupName" class="edit-input" placeholder="Numele grupului...">
+                <label class="edit-label" style="color: #ffaa00;">Nume Grup</label>
+                <input type="text" id="newGroupName" class="edit-input" placeholder="ex: Comunity Wall Info">
+            </div>
+            <div>
+                <label class="edit-label" style="color: #ffaa00;">Descriere Grup</label>
+                <textarea id="newGroupDesc" class="edit-input" rows="2" placeholder="Scrie o scurtă descriere..."></textarea>
             </div>
             
-            <div>
-                <label class="edit-label" style="color: #ffaa00;">Iconiță / Imagine</label>
-                <input type="text" id="newGroupIcon" class="edit-input" placeholder="fa-comments SAU link imagine (http...)">
-                <span style="font-size: 9px; color: #888; margin-top: 5px; display: block; text-align: left; padding-left: 5px;">
-                    Scrie o clasă FontAwesome (ex: "fa-bullhorn", "fa-coins") SAU pune un link direct către o imagine (https://...).
-                </span>
-            </div>
-            
-            <button id="saveNewGroupBtn" class="btn-save-profile" style="background: #ffaa00; color: #000; border: none; margin-top: 15px;">SALVEAZĂ GRUPUL</button>
+            <button id="saveNewGroupBtn" class="btn-save-profile" style="background: #ffaa00; color: #000; border: none; margin-top: 20px; width: 100%; padding: 12px; font-size: 14px;">SALVEAZĂ GRUPUL</button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. ICON PICKER MODAL -->
+<div id="iconPickerModal" class="account-modal-overlay" style="z-index: 16000;">
+    <div class="account-card" style="border-color: #29f3ff; max-width: 350px;">
+        <button class="close-pop" onclick="document.getElementById('iconPickerModal').classList.remove('active')">✕</button>
+        <h3 style="font-family:'Orbitron'; color:#29f3ff; margin-bottom: 15px; font-size: 16px;">ALEGE O ICONIȚĂ</h3>
+        
+        <!-- Icons injected via JS -->
+        <div id="iconGridContainer" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; max-height: 300px; overflow-y: auto; padding: 5px; width: 100%;">
         </div>
     </div>
 </div>
@@ -8575,20 +8658,39 @@ html {
 </div>
 
 <!-- LIGHTER BODY: ECONOMY GROUPS -->
+<!-- LIGHTER BODY: ECONOMY GROUPS -->
         <div class="glass-body" style="min-height: 400px; display: flex; flex-direction: column;">
             
-            <!-- Dynamic Container Title -->
-            <div id="economyContainerTitle" style="text-align: center; color: #ffaa00; font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; letter-spacing: 2px; margin-top: 20px; text-transform: uppercase; text-shadow: 0 0 10px rgba(255, 170, 0, 0.5);">
-                SELECTEAZĂ O CATEGORIE
+            <!-- HEADER (Title + Back Button) -->
+            <div style="position: relative; margin-top: 20px; margin-bottom: 15px;">
+                <button id="backToGroupsBtn" style="display: none; position: absolute; left: 15px; top: 50%; transform: translateY(-50%); background: transparent; border: 1px solid #ffaa00; color: #ffaa00; border-radius: 8px; padding: 5px 10px; cursor: pointer; font-family: 'Orbitron'; font-size: 10px; transition: 0.3s;">
+                    <i class="fas fa-arrow-left"></i> ÎNAPOI
+                </button>
+                <div id="economyContainerTitle" style="text-align: center; color: #ffaa00; font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 10px rgba(255, 170, 0, 0.5);">
+                    SELECTEAZĂ O CATEGORIE
+                </div>
             </div>
 
-            <!-- Group Grid Area -->
-            <div class="economy-scroll-list" style="flex: 1; padding: 20px; overflow-y: auto;">
+            <!-- VIEW 1: THE GROUPS GRID -->
+            <div id="groupsListView" class="economy-scroll-list" style="flex: 1; padding: 10px 20px; overflow-y: auto;">
                 <div id="economyGroupsGrid" class="economy-grid-layout">
-                    <!-- Groups will load here -->
-                    <div style="width: 100%; text-align: center; color: #666; font-family: 'Orbitron'; font-size: 12px; grid-column: 1 / -1;">
-                        Se încarcă categoriile...
-                    </div>
+                    <div style="width: 100%; text-align: center; color: #666; font-family: 'Orbitron'; font-size: 12px; grid-column: 1 / -1;">Se încarcă...</div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: INSIDE A SPECIFIC GROUP -->
+            <div id="activeGroupView" style="display: none; flex: 1; padding: 10px 20px; overflow-y: auto; flex-direction: column; align-items: center;">
+                
+                <!-- OWNER ONLY: ADD ITEM TO THIS GROUP -->
+                <button id="ownerAddItemBtn" style="display: none; background: rgba(255,170,0,0.05); border: 2px dashed #ffaa00; color: #ffaa00; width: 100%; padding: 25px; border-radius: 15px; font-family: 'Orbitron'; font-weight: 800; cursor: pointer; transition: 0.3s; margin-bottom: 20px;">
+                    <i class="fas fa-plus fa-2x" style="margin-bottom: 10px;"></i><br>ADAUGĂ ITEM ÎN ACEST GRUP
+                </button>
+                
+                <div id="groupItemsContainer" style="width: 100%;">
+                    <!-- Placeholder for items later -->
+                    <p style="text-align: center; color: #555; font-family: 'Poppins'; font-size: 12px; margin-top: 40px;">
+                        Acest grup nu conține niciun element momentan.
+                    </p>
                 </div>
             </div>
             
@@ -9940,39 +10042,93 @@ window.equipFrame = async (id, imgUrl, scale = 1.45) => {
 
 
 
-// --- ECONOMY GROUPS LOGIC ---
+// --- ECONOMY GROUPS LOGIC (V2 UPGRADED) ---
 const ownerAddGroupBtn = document.getElementById('ownerAddGroupBtn');
 const createGroupModal = document.getElementById('createGroupModal');
 const saveNewGroupBtn = document.getElementById('saveNewGroupBtn');
 const economyGroupsGrid = document.getElementById('economyGroupsGrid');
 const economyContainerTitle = document.getElementById('economyContainerTitle');
 
-// Open Modal
+// View Toggling Elements
+const groupsListView = document.getElementById('groupsListView');
+const activeGroupView = document.getElementById('activeGroupView');
+const backToGroupsBtn = document.getElementById('backToGroupsBtn');
+const ownerAddItemBtn = document.getElementById('ownerAddItemBtn');
+
+let selectedGroupMedia = 'fa-star'; // Default icon
+let isMediaImage = false; // Tracks if it's an image or an icon
+
+// 1. Populate Icon Picker Modal
+const iconGridContainer = document.getElementById('iconGridContainer');
+const faIconsList = [
+    'fa-comments', 'fa-shopping-cart', 'fa-gift', 'fa-coins', 'fa-gem', 'fa-trophy', 
+    'fa-fire', 'fa-bolt', 'fa-star', 'fa-crown', 'fa-shield-alt', 'fa-gamepad', 
+    'fa-box-open', 'fa-wallet', 'fa-money-bill-wave', 'fa-chart-line', 'fa-users',
+    'fa-robot', 'fa-skull', 'fa-ghost'
+];
+
+faIconsList.forEach(icon => {
+    const btn = document.createElement('div');
+    btn.className = 'picker-icon-btn';
+    btn.innerHTML = `<i class="fas ${icon}"></i>`;
+    btn.onclick = () => {
+        selectedGroupMedia = icon;
+        isMediaImage = false;
+        document.getElementById('groupPreviewIcon').className = `fas ${icon}`;
+        document.getElementById('groupPreviewIcon').style.display = 'block';
+        document.getElementById('previewBox').style.backgroundImage = 'none';
+        document.getElementById('iconPickerModal').classList.remove('active');
+    };
+    iconGridContainer.appendChild(btn);
+});
+
+// 2. Handle Image Upload (Base64)
+document.getElementById('groupImageUpload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            selectedGroupMedia = event.target.result;
+            isMediaImage = true;
+            document.getElementById('groupPreviewIcon').style.display = 'none';
+            document.getElementById('previewBox').style.backgroundImage = `url(${selectedGroupMedia})`;
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+// 3. Open Create Modal
 if (ownerAddGroupBtn) {
     ownerAddGroupBtn.onclick = () => {
         document.getElementById('newGroupName').value = "";
-        document.getElementById('newGroupIcon').value = "";
+        document.getElementById('newGroupDesc').value = "";
+        selectedGroupMedia = 'fa-star';
+        isMediaImage = false;
+        document.getElementById('groupPreviewIcon').className = 'fas fa-star';
+        document.getElementById('groupPreviewIcon').style.display = 'block';
+        document.getElementById('previewBox').style.backgroundImage = 'none';
         createGroupModal.classList.add('active');
     };
 }
 
-// Save Group to Firestore
+// 4. Save Group to Firestore
 if (saveNewGroupBtn) {
     saveNewGroupBtn.onclick = async () => {
         const name = document.getElementById('newGroupName').value.trim();
-        const icon = document.getElementById('newGroupIcon').value.trim();
+        const desc = document.getElementById('newGroupDesc').value.trim();
         
-        if (!name || !icon) {
-            alert("Completează ambele câmpuri!");
+        if (!name) {
+            alert("Te rog adaugă un nume pentru grup!");
             return;
         }
         
         saveNewGroupBtn.innerText = "SE SALVEAZĂ...";
-        
         try {
             await addDoc(collection(db, "economy_groups"), {
                 title: name,
-                iconOrImg: icon,
+                description: desc || "Nicio descriere adăugată.",
+                media: selectedGroupMedia,
+                isImage: isMediaImage,
                 createdAt: serverTimestamp()
             });
             createGroupModal.classList.remove('active');
@@ -9986,38 +10142,62 @@ if (saveNewGroupBtn) {
     };
 }
 
-// Load Groups in Realtime
+// 5. Back Button Logic
+backToGroupsBtn.onclick = () => {
+    activeGroupView.style.display = "none";
+    groupsListView.style.display = "block";
+    backToGroupsBtn.style.display = "none";
+    economyContainerTitle.innerText = "SELECTEAZĂ O CATEGORIE";
+};
+
+// 6. Load Groups in Realtime & Handle Click
 const groupsQuery = query(collection(db, "economy_groups"), orderBy("createdAt", "asc"));
 onSnapshot(groupsQuery, (snapshot) => {
     economyGroupsGrid.innerHTML = "";
     
     if (snapshot.empty) {
-        economyGroupsGrid.innerHTML = `<div style="width:100%; text-align:center; color:#666; font-family:'Orbitron'; font-size:12px; grid-column:1/-1;">Nu există niciun grup creat momentan.</div>`;
+        economyGroupsGrid.innerHTML = `<div style="width:100%; text-align:center; color:#666; font-family:'Orbitron'; padding: 40px 0;">Nu există niciun grup momentan.</div>`;
         return;
     }
     
     snapshot.forEach((docSnap) => {
         const data = docSnap.data();
-        const isImage = data.iconOrImg.startsWith('http');
         
-        // Build card
         const card = document.createElement('div');
         card.className = 'eco-group-card';
+        
+        // Generate Media HTML
+        let mediaHtml = data.isImage 
+            ? `<div class="eco-card-icon-wrap" style="background-image: url('${data.media}');"></div>`
+            : `<div class="eco-card-icon-wrap"><i class="fas ${data.media}"></i></div>`;
+
         card.innerHTML = `
-            ${isImage ? `<img src="${data.iconOrImg}" class="eco-group-img">` : `<i class="fas ${data.iconOrImg} eco-group-icon"></i>`}
-            <span class="eco-group-title">${data.title}</span>
+            ${mediaHtml}
+            <div class="eco-card-info">
+                <div class="eco-card-title">${data.title}</div>
+                <div class="eco-card-desc">${data.description}</div>
+            </div>
+            <i class="fas fa-chevron-right eco-arrow"></i>
         `;
         
-        // On Click -> Change Title (Later we will load content here)
+        // Click to enter Group
         card.onclick = () => {
             economyContainerTitle.innerText = data.title;
-            // TODO in Step 2: Hide grid, show content for this specific group
+            groupsListView.style.display = "none";
+            activeGroupView.style.display = "flex";
+            backToGroupsBtn.style.display = "block";
+            
+            // Check if Owner to show "+" button inside group
+            if (auth.currentUser && auth.currentUser.email === 'nicaemmanuel433qe@gmail.com') {
+                ownerAddItemBtn.style.display = "block";
+            } else {
+                ownerAddItemBtn.style.display = "none";
+            }
         };
         
         economyGroupsGrid.appendChild(card);
     });
 });
-
 // --- LIVE LEADERBOARD LOGIC (FIXED) ---
     function checkIsOnline(user) {
         // 1. Dacă este utilizatorul curent, e mereu online
