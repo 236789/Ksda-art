@@ -7,7 +7,7 @@
 
   <!-- Fonturi -->
   <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
@@ -15,14 +15,32 @@
 
   <style>
     /* ==========================================
-       STILURI GLOBALE
+       STILURI GLOBALE & BACKGROUND
        ========================================== */
     * { box-sizing: border-box; user-select: none; }
     body, html {
       margin: 0; padding: 0; width: 100%; height: 100%;
-      background-color: #1a183d;
+      background: radial-gradient(circle at center, #0f0c29, #302b63, #24243e);
       font-family: 'Oswald', sans-serif;
       overflow: hidden;
+    }
+
+    /* Particule animate pe fundal */
+    .particles-container {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 1; overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 50%;
+      animation: floatUp linear infinite;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(100vh) scale(0); opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
     }
 
     /* ==========================================
@@ -32,72 +50,149 @@
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       width: 100%; height: 100%; z-index: 100; position: relative;
     }
+    
     .logo-img {
-      width: 350px; max-width: 90vw; margin-bottom: 20px;
-      filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
-      animation: float 3s ease-in-out infinite;
+      width: 380px; max-width: 90vw; margin-bottom: 40px; z-index: 10;
+      filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
+      animation: floatLogo 4s ease-in-out infinite;
     }
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-      100% { transform: translateY(0px); }
+    @keyframes floatLogo {
+      0% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-15px) rotate(2deg); }
+      100% { transform: translateY(0px) rotate(0deg); }
     }
 
     #welcomeText {
-      color: #0eddc1; font-size: 24px; margin-bottom: 20px; display: none;
-      text-shadow: 0 0 10px rgba(14, 221, 193, 0.5);
+      color: #0eddc1; font-size: 28px; margin-bottom: 30px; display: none; z-index: 10;
+      text-shadow: 0 0 15px rgba(14, 221, 193, 0.8), 0 0 30px rgba(14, 221, 193, 0.4);
+      letter-spacing: 2px; text-transform: uppercase;
     }
 
     .button-container {
-      display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; align-items: center; padding: 0 20px;
+      display: flex; flex-direction: column; gap: 20px; justify-content: center; align-items: center; 
+      z-index: 10;
     }
 
-    .menu-btn {
-      background-color: #283048; color: #ffffff;
-      border: 4px solid #facc15; border-radius: 12px;
-      padding: 12px 25px; font-size: 22px; font-family: 'Oswald', sans-serif; font-weight: 700;
-      text-transform: uppercase; cursor: pointer;
-      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
-      transition: transform 0.1s ease, filter 0.2s; text-align: center; line-height: 1.2;
-    }
-    .menu-btn:active { transform: scale(0.95); }
-    .menu-btn:hover { filter: brightness(1.15); }
+.menu-btn.play {
+  position: relative;
+  /* Rich 3-step gradient: Highlight -> Main -> Deep Orange */
+  background: linear-gradient(180deg, #ffdc43 0%, #ffaa00 50%, #e67300 100%);
+  
+  color: #1a1c33; /* Dark text for high contrast */
+  border: 4px solid #ffffff;
+  border-radius: 20px;
+  padding: 20px 80px;
+  
+  font-size: 38px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  letter-spacing: 3px;
+  
+  /* The "Side": Darkened burnt-orange for a heavy 3D effect */
+  box-shadow: 
+    0 12px 0 #4d2600,            /* Dark side of the button */
+    0 20px 30px rgba(0, 0, 0, 0.5); /* Shadow on the floor */
     
-    .menu-btn.teal { background-color: #0b808e; border-color: #0eddc1; padding: 8px 20px; font-size: 18px; }
-    .menu-btn.red { background-color: #8e0b0b; border-color: #dd0e0e; padding: 8px 20px; font-size: 18px; }
+  transition: all 0.1s ease;
+  overflow: hidden;
+}
 
-    /* Butonul de Login cu Google din Meniul Principal */
-    #loginGoogleBtn {
-      background-color: #ffffff; color: #333; border: 4px solid #fff;
-      display: flex; align-items: center; gap: 10px;
+/* --- HOVER EFFECT --- */
+.menu-btn.play:hover {
+  transform: translateY(-4px); /* Lift up slightly */
+  filter: brightness(1.05);
+  box-shadow: 
+    0 16px 0 #4d2600,            /* Side gets thicker as it lifts */
+    0 25px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Light sweep animation on hover */
+.menu-btn.play::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  transition: 0.6s;
+}
+
+.menu-btn.play:hover::before {
+  left: 150%;
+}
+
+/* --- CLICK EFFECT --- */
+.menu-btn.play:active {
+  transform: translateY(10px); /* Pushes down almost to the floor */
+  box-shadow: 
+    0 2px 0 #4d2600,             /* Side disappears */
+    0 5px 10px rgba(0, 0, 0, 0.7);
+  transition: all 0.05s ease;
+}
+
+    /* Buton LOGOUT */
+    #logoutBtn {
+      background: transparent; color: #ff4444; border: none; font-family: 'Oswald', sans-serif;
+      font-size: 18px; cursor: pointer; text-decoration: underline; display: none;
     }
-    #loginGoogleBtn img { width: 28px; height: 28px; }
-
-    /* Ascundem butonul de PLAY si LOGOUT la început */
-    #playBtn, #logoutBtn { display: none; }
+    #logoutBtn:hover { color: #ff6666; }
 
     /* ==========================================
-       MODAL: ALEGERE USERNAME
+       MODALS (OVERLAYS)
        ========================================== */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(10, 8, 30, 0.95); z-index: 99999;
+      background: rgba(10, 8, 30, 0.9); z-index: 99999;
       justify-content: center; align-items: center; flex-direction: column;
+      backdrop-filter: blur(5px);
     }
     .modal-box {
-      background-color: #283048; border: 4px solid #facc15; border-radius: 16px;
-      padding: 30px; text-align: center; color: white; width: 90vw; max-width: 400px;
-      box-shadow: 0 0 20px rgba(250, 204, 21, 0.3);
+      background: linear-gradient(to bottom, #2a2d4c, #1a1c33);
+      border: 4px solid #facc15; border-radius: 20px;
+      padding: 40px; text-align: center; color: white; width: 90vw; max-width: 450px;
+      box-shadow: 0 0 30px rgba(250, 204, 21, 0.4), inset 0 0 20px rgba(0,0,0,0.8);
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .modal-box h2 { margin-top: 0; font-size: 28px; color: #facc15; }
-    .modal-box p { font-size: 18px; margin-bottom: 20px; }
+    @keyframes popIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .modal-box h2 { margin-top: 0; font-size: 32px; color: #facc15; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+    .modal-box p { font-size: 18px; margin-bottom: 25px; color: #d1d5db; }
+
+    /* Buton Login Google Customizat */
+    .custom-google-btn {
+      display: flex; align-items: center; justify-content: center; gap: 15px;
+      width: 100%; background-color: #ffffff; color: #333333;
+      border: 3px solid #cccccc; border-radius: 12px; padding: 15px 20px;
+      font-size: 20px; font-family: 'Oswald', sans-serif; font-weight: 700;
+      cursor: pointer; box-shadow: 0 8px 0 #999999, 0 15px 20px rgba(0, 0, 0, 0.5);
+      transition: all 0.15s ease; text-transform: uppercase;
+    }
+    .custom-google-btn img { width: 28px; height: 28px; }
+    .custom-google-btn:hover { background-color: #f5f5f5; }
+    .custom-google-btn:active {
+      transform: translateY(8px);
+      box-shadow: 0 0 0 #999999, 0 5px 10px rgba(0, 0, 0, 0.5);
+    }
 
     .input-field {
-      width: 100%; padding: 12px; font-size: 20px; font-family: 'Oswald', sans-serif; font-weight: 600;
-      border: 3px solid #facc15; border-radius: 8px; background: #1a183d; color: white;
-      text-align: center; margin-bottom: 20px; outline: none;
+      width: 100%; padding: 15px; font-size: 22px; font-family: 'Oswald', sans-serif; font-weight: 600;
+      border: 3px solid #5a6288; border-radius: 12px; background: #131526; color: #0eddc1;
+      text-align: center; margin-bottom: 25px; outline: none; box-shadow: inset 0 4px 6px rgba(0,0,0,0.5);
+      transition: all 0.3s;
     }
-    .input-field:focus { border-color: #0eddc1; }
+    .input-field:focus { border-color: #facc15; box-shadow: inset 0 4px 6px rgba(0,0,0,0.5), 0 0 15px rgba(250, 204, 21, 0.5); }
+
+    .cancel-btn {
+      background: transparent; border: none; color: #9aa0b8; font-family: 'Oswald', sans-serif;
+      font-size: 16px; margin-top: 20px; text-decoration: underline; cursor: pointer;
+    }
+    .cancel-btn:hover { color: #ffffff; }
 
     /* ==========================================
        GAME AREA
@@ -107,12 +202,12 @@
       background-color: #1a183d; overflow: hidden;
     }
     #scoreBoard {
-      position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.6); color: white;
-      font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: bold;
-      padding: 10px 20px; border: 3px solid #ffd700; border-radius: 12px;
-      box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); z-index: 10; display: flex; align-items: center; gap: 10px;
+      position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.8); color: white;
+      font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: bold;
+      padding: 12px 25px; border: 3px solid #ffd700; border-radius: 16px;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); z-index: 10; display: flex; align-items: center; gap: 12px;
     }
-    .score-icon { height: 30px; }
+    .score-icon { height: 35px; }
     
     #kevin {
       position: absolute; width: 120px; height: 120px; background-size: contain;
@@ -120,36 +215,122 @@
       transition: left 0.3s ease-out, top 0.3s ease-out;
     }
     .combo-text {
-      position: absolute; color: #00d4ff; font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: bold;
+      position: absolute; color: #00d4ff; font-family: 'Orbitron', sans-serif; font-size: 38px; font-weight: bold;
       z-index: 1000; pointer-events: none; transform: translate(-50%, -50%);
-      text-shadow: 0 0 8px #00d4ff, 0 0 16px #00d4ff; transition: transform 1.2s ease-out, opacity 1.2s ease-out;
+      text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 30px #ffffff; transition: transform 1.2s ease-out, opacity 1.2s ease-out;
     }
     #backBtn {
-      position: absolute; bottom: 20px; left: 20px; padding: 10px 20px; background: #ff4444;
-      color: white; border: 3px solid #ffaaaa; border-radius: 10px; font-size: 16px;
+      position: absolute; bottom: 20px; left: 20px; padding: 12px 25px; background: #ff4444;
+      color: white; border: 3px solid #ffaaaa; border-radius: 12px; font-size: 18px;
       font-family: 'Oswald', sans-serif; font-weight: bold; cursor: pointer; z-index: 9999;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: 0.2s;
     }
+    #backBtn:active { transform: scale(0.95); }
+
+
+.custom-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  width: 100%;
+  
+  /* Fundal închis pentru a se potrivi cu jocul */
+  background: #1a1c33; 
+  color: #ffffff;
+  
+  /* Border auriu ca restul ferestrelor */
+  border: 3px solid #facc15; 
+  border-radius: 12px;
+  padding: 15px 20px;
+  
+  font-size: 20px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  
+  /* Umbră 3D și strălucire */
+  box-shadow: 0 6px 0 #b39200, 0 0 20px rgba(250, 204, 21, 0.2);
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Stil pentru iconița Google (Colorată nativ) */
+.custom-google-btn i {
+  font-size: 24px;
+  background: conic-gradient(from -45deg, #ea4335 110deg, #4285f4 90deg 180deg, #34a853 180deg 270deg, #fbbc05 270deg) 73% 55%/150% 150% no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));
+}
+
+.custom-google-btn:hover {
+  background: #242745;
+  box-shadow: 0 6px 0 #b39200, 0 0 30px rgba(250, 204, 21, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Efectul de apăsare (se duce în jos) */
+.custom-google-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #b39200, 0 0 10px rgba(250, 204, 21, 0.2);
+}
+
+/* Un mic efect de reflexie care trece peste buton */
+.custom-google-btn::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 20%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: rotate(30deg);
+  transition: all 0.5s;
+}
+
+.custom-google-btn:hover::after {
+  left: 120%;
+}
   </style>
 </head>
 <body>
 
   <!-- ==========================================
-       MODAL: ALEGERE USERNAME (Apare doar pt conturi noi)
+       MODALS (OVERLAYS)
        ========================================== -->
-  <div id="usernameModal" class="modal-overlay">
+  
+  <!-- MODAL: LOGIN VIA GOOGLE -->
+  <div id="loginModal" class="modal-overlay">
     <div class="modal-box">
-      <h2>CONT NOU!</h2>
-      <p>Logarea cu Google a reușit. Alege-ți un nume de jucător:</p>
-      <input type="text" id="usernameInput" class="input-field" placeholder="Ex: KevinBoss" maxlength="15">
-      <button class="menu-btn" style="width: 100%;" onclick="saveNewUsername()">SALVEAZĂ</button>
+      <h2>CONECTARE</h2>
+      <p>Trebuie să te conectezi pentru a salva progresul!</p>
+<button class="custom-google-btn" onclick="signInWithGoogle()">
+  <i class="fa-brands fa-google"></i>
+  <span>LOG IN CU GOOGLE</span>
+</button>
+      <button class="cancel-btn" onclick="closeLoginModal()">Anulează</button>
     </div>
   </div>
 
-  <!-- Loading Overlay -->
-  <div id="loadingModal" class="modal-overlay">
+  <!-- MODAL: ALEGERE USERNAME -->
+  <div id="usernameModal" class="modal-overlay">
     <div class="modal-box">
-      <h2>SE ÎNCARCĂ...</h2>
-      <p>Te conectăm la serverele Kevinuță!</p>
+      <h2>CREARE CONT</h2>
+      <p>Alege-ți un nume de legendă:</p>
+      <input type="text" id="usernameInput" class="input-field" placeholder="Ex: KevinBoss" maxlength="15">
+      <button class="menu-btn play" style="width: 100%; font-size: 24px; padding: 10px;" onclick="saveNewUsername()">SALVEAZĂ</button>
+    </div>
+  </div>
+
+  <!-- MODAL: LOADING -->
+  <div id="loadingModal" class="modal-overlay">
+    <div class="modal-box" style="border-color: #0eddc1; box-shadow: 0 0 30px rgba(14, 221, 193, 0.4);">
+      <h2 style="color: #0eddc1;">SE ÎNCARCĂ...</h2>
+      <p>Sincronizare cu serverul...</p>
     </div>
   </div>
 
@@ -157,27 +338,19 @@
        MAIN MENU
        ========================================== -->
   <div id="mainMenu">
+    <!-- Fundal particule -->
+    <div class="particles-container" id="particles"></div>
+
     <img class="logo-img" src="https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/449320c0-9960-4b26-9c96-a544c858cd78/ChatGPT+Image+May+30%2C+2025%2C+12_48_36+PM.png?format=500w" alt="Prindel pe Kevinuță">
     
     <div id="welcomeText">Salut, Jucătorule!</div>
 
     <div class="button-container">
-      <!-- Butonul de Login (Vizibil când ești delogat) -->
-      <button id="loginGoogleBtn" class="menu-btn" onclick="signInWithGoogle()">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/Google_%22G%22_Logo.svg" alt="Google">
-        LOG IN CU GOOGLE
-      </button>
-
-      <!-- Butonul de Play (Vizibil când ești logat) -->
-      <button id="playBtn" class="menu-btn" onclick="startGameUI()">PLAY</button>
-
-      <!-- Celelalte butoane -->
-      <button class="menu-btn" onclick="alert('Funcție viitoare')">SETTINGS</button>
-      <button class="menu-btn teal" onclick="alert('Funcție viitoare')">SUSȚINE<br>CREATORUL</button>
-      <button class="menu-btn" onclick="alert('Funcție viitoare')">ABOUT</button>
-
-      <!-- Butonul de Logout (Vizibil când ești logat) -->
-      <button id="logoutBtn" class="menu-btn red" onclick="logoutGoogle()">LOG OUT</button>
+<button class="menu-btn play" onclick="handlePlayClick()">
+  <i class="fa-solid fa-play"></i>
+  <span>PLAY</span>
+</button>​
+      <button id="logoutBtn" onclick="logoutGoogle()">LOG OUT</button>
     </div>
   </div>
 
@@ -197,8 +370,22 @@
        JAVASCRIPT
        ========================================== -->
   <script>
+    // Generare particule pentru fundal
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 40; i++) {
+      let p = document.createElement('div');
+      p.className = 'particle';
+      let size = Math.random() * 4 + 2;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.animationDuration = (Math.random() * 5 + 5) + 's';
+      p.style.animationDelay = (Math.random() * 5) + 's';
+      particlesContainer.appendChild(p);
+    }
+
     // =====================================
-    // 1. FIREBASE INITIALIZATION
+    // FIREBASE INITIALIZATION
     // =====================================
     const firebaseConfig = {
       apiKey: "AIzaSyBihv3wYvDUo6DejSLec9U0DfOiR6g7VuQ",
@@ -215,7 +402,7 @@
     const googleProvider = new firebase.auth.GoogleAuthProvider();
 
     // =====================================
-    // 2. VARIABILE GLOBALE
+    // VARIABILE GLOBALE
     // =====================================
     let currentUID = null;
     let currentUsername = "";
@@ -233,36 +420,39 @@
     const normalKevinImage = "url('https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w')";
     const tiredKevinImage = "url('https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/0b5ac0f4-618a-4346-9684-8c1f3c0a5fcb/20716c49-4365-417d-97e9-fc8601ae5403_removalai_preview.png?format=500w')";
 
-    // Referințe Butoane Meniu
-    const loginGoogleBtn = document.getElementById('loginGoogleBtn');
-    const playBtn = document.getElementById('playBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const welcomeText = document.getElementById('welcomeText');
-    const loadingModal = document.getElementById('loadingModal');
-
     // =====================================
-    // 3. AUTHENTICATION & LOGIN FLOW
+    // AUTHENTICATION & UI FLOW
     // =====================================
-
-    // Ascultăm automat dacă userul e logat sau nu (dacă a intrat pe site)
     auth.onAuthStateChanged(async (user) => {
       if (user) {
         currentUID = user.uid;
         await checkUserInFirestore(currentUID);
       } else {
-        // Delogat
         currentUID = null;
         currentUsername = "";
         showLoggedOutUI();
       }
     });
 
+    function handlePlayClick() {
+      if (currentUID) {
+        startGameUI();
+      } else {
+        document.getElementById('loginModal').style.display = 'flex';
+      }
+    }
+
+    function closeLoginModal() {
+      document.getElementById('loginModal').style.display = 'none';
+    }
+
     function signInWithGoogle() {
-      loadingModal.style.display = 'flex';
+      document.getElementById('loginModal').style.display = 'none';
+      document.getElementById('loadingModal').style.display = 'flex';
       auth.signInWithPopup(googleProvider).catch((error) => {
         console.error("Eroare la logare:", error);
         alert("Eroare la logare Google!");
-        loadingModal.style.display = 'none';
+        document.getElementById('loadingModal').style.display = 'none';
       });
     }
 
@@ -272,34 +462,30 @@
       });
     }
 
-    // Verifică baza de date pt acest cont Google
     async function checkUserInFirestore(uid) {
-      loadingModal.style.display = 'flex';
+      document.getElementById('loadingModal').style.display = 'flex';
       try {
         const docRef = db.collection("players").doc(uid);
         const docSnap = await docRef.get();
 
         if (docSnap.exists) {
-          // Cont existent -> Preluăm datele și arătăm butonul de PLAY
           const data = docSnap.data();
           currentUsername = data.username;
           score = data.score || 0;
           lastSavedScore = score;
           
-          loadingModal.style.display = 'none';
+          document.getElementById('loadingModal').style.display = 'none';
           showLoggedInUI();
         } else {
-          // Cont nou Google -> Trebuie să aleagă username
-          loadingModal.style.display = 'none';
+          document.getElementById('loadingModal').style.display = 'none';
           document.getElementById('usernameModal').style.display = 'flex';
         }
       } catch (e) {
         console.error("Eroare Firestore:", e);
-        loadingModal.style.display = 'none';
+        document.getElementById('loadingModal').style.display = 'none';
       }
     }
 
-    // Salvarea unui nume NOU
     async function saveNewUsername() {
       const input = document.getElementById('usernameInput').value.trim();
       if (input.length < 3) {
@@ -308,19 +494,17 @@
       }
 
       document.getElementById('usernameModal').style.display = 'none';
-      loadingModal.style.display = 'flex';
+      document.getElementById('loadingModal').style.display = 'flex';
 
       try {
-        // Verificăm dacă altcineva are deja numele ăsta
         const querySnapshot = await db.collection("players").where("username", "==", input).get();
         if (!querySnapshot.empty) {
           alert("Numele este deja luat! Alege altul.");
-          loadingModal.style.display = 'none';
+          document.getElementById('loadingModal').style.display = 'none';
           document.getElementById('usernameModal').style.display = 'flex';
           return;
         }
 
-        // Salvăm datele inițiale în contul legat de Google (UID)
         currentUsername = input;
         score = 0;
         lastSavedScore = 0;
@@ -332,39 +516,33 @@
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        loadingModal.style.display = 'none';
+        document.getElementById('loadingModal').style.display = 'none';
         showLoggedInUI();
-
       } catch (e) {
         console.error("Eroare creare cont:", e);
         alert("Eroare. Încearcă din nou.");
-        loadingModal.style.display = 'none';
+        document.getElementById('loadingModal').style.display = 'none';
       }
     }
 
-    // =====================================
-    // 4. UI UPDATES (Meniul Principal)
-    // =====================================
     function showLoggedInUI() {
-      loginGoogleBtn.style.display = 'none';
-      playBtn.style.display = 'block';
-      logoutBtn.style.display = 'block';
+      document.getElementById('loginModal').style.display = 'none';
+      const welcomeText = document.getElementById('welcomeText');
+      const logoutBtn = document.getElementById('logoutBtn');
       
-      welcomeText.innerText = `Salut, ${currentUsername}!`;
+      welcomeText.innerText = `SALUT, ${currentUsername}!`;
       welcomeText.style.display = 'block';
+      logoutBtn.style.display = 'block';
     }
 
     function showLoggedOutUI() {
-      loginGoogleBtn.style.display = 'flex';
-      playBtn.style.display = 'none';
-      logoutBtn.style.display = 'none';
-      welcomeText.style.display = 'none';
+      document.getElementById('welcomeText').style.display = 'none';
+      document.getElementById('logoutBtn').style.display = 'none';
     }
 
     // =====================================
-    // 5. GAME SYSTEM & SYNC
+    // GAME SYSTEM & SYNC
     // =====================================
-
     function startGameUI() {
       document.getElementById('mainMenu').style.display = 'none';
       document.getElementById('gameArea').style.display = 'block';
@@ -379,7 +557,6 @@
       startKevinMovement();
       startTiredCycle();
 
-      // Salvare scor in background la 5s
       saveScoreInterval = setInterval(syncScoreToFirestore, 5000);
     }
 
@@ -391,9 +568,7 @@
             score: score,
             lastActive: firebase.firestore.FieldValue.serverTimestamp()
           });
-        } catch (e) {
-          console.error("Eroare la salvarea scorului:", e);
-        }
+        } catch (e) {}
       }
     }
 
@@ -402,7 +577,6 @@
       clearTimeout(tiredTimeout);
       clearInterval(saveScoreInterval);
 
-      // Salvare forțată la ieșire
       await syncScoreToFirestore();
 
       document.getElementById('gameArea').style.display = 'none';
@@ -414,9 +588,8 @@
     }
 
     // =====================================
-    // 6. GAMEPLAY LOGIC (Mișcare Kevin)
+    // GAMEPLAY LOGIC
     // =====================================
-
     function startKevinMovement() {
       if (moveKevinInterval) clearInterval(moveKevinInterval);
       moveKevinInterval = setInterval(() => {
@@ -494,7 +667,6 @@
       }, 10);
       setTimeout(() => { el.remove(); }, 1200);
     }
-
   </script>
 </body>
 </html>
