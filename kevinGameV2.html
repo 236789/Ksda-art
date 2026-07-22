@@ -246,7 +246,7 @@
        ========================================== */
     #gameArea {
       display: none; position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
-      background-color: #1a183d; overflow: hidden;
+      background-color: #1a183d; overflow: hidden;   z-index: 500; /* Added this */
     }
     #scoreBoard {
       position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.8); color: white;
@@ -452,13 +452,17 @@
     <div id="welcomeText">Salut, Jucătorule!</div>
 
     <div class="button-container">
-<button class="menu-btn play" onclick="handlePlayClick()">
-  <i class="fa-solid fa-play"></i>
-  <span>PLAY</span>
-<button id="logoutBtn" onclick="logoutGoogle()">
-  <i class="fa-solid fa-right-from-bracket"></i>
-  <span>LOG OUT</span>
-</button>
+      <button class="menu-btn play" onclick="handlePlayClick()">
+        <i class="fa-solid fa-play"></i>
+        <span>PLAY</span>
+      </button> <!-- Added missing </button> -->
+
+      <button id="logoutBtn" onclick="logoutGoogle()">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>LOG OUT</span>
+      </button>
+    </div> <!-- Added missing </div> for button-container -->
+  </div> <!-- Added missing </div> for mainMenu -->
 
   <!-- ==========================================
        GAME AREA
@@ -471,7 +475,6 @@
     <div id="kevin"></div>
     <button id="backBtn" onclick="returnToMenu()">Înapoi la Meniu</button>
   </div>
-
   <!-- ==========================================
        JAVASCRIPT
        ========================================== -->
@@ -646,25 +649,28 @@
       document.getElementById('logoutBtn').style.display = 'none';
     }
 
-    // =====================================
-    // GAME SYSTEM & SYNC
-    // =====================================
-    function startGameUI() {
-      document.getElementById('mainMenu').style.display = 'none';
-      document.getElementById('gameArea').style.display = 'block';
+function startGameUI() {
+  document.getElementById('mainMenu').style.display = 'none';
+  document.getElementById('gameArea').style.display = 'block';
 
-      comboCount = 0;
-      updateScoreUI();
-      const kevin = document.getElementById('kevin');
-      kevin.style.backgroundImage = normalKevinImage;
-      isKevinTired = false;
+  comboCount = 0;
+  updateScoreUI();
+  
+  const kevin = document.getElementById('kevin');
+  kevin.style.backgroundImage = normalKevinImage;
+  
+  // Force Kevin to be visible and have a starting size
+  kevin.style.width = "120px";
+  kevin.style.height = "120px";
+  
+  isKevinTired = false;
 
-      moveKevinAway();
-      startKevinMovement();
-      startTiredCycle();
+  moveKevinAway(); // Initial jump
+  startKevinMovement();
+  startTiredCycle();
 
-      saveScoreInterval = setInterval(syncScoreToFirestore, 5000);
-    }
+  saveScoreInterval = setInterval(syncScoreToFirestore, 5000);
+}
 
     async function syncScoreToFirestore() {
       if (currentUID && score !== lastSavedScore) {
