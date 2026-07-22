@@ -1021,6 +1021,56 @@
   width: 44px;
   height: 44px;
 }
+
+
+/* PAUSE MENU SPECIFIC */
+.pause-modal-box {
+  max-width: 500px;
+  padding: 50px 30px;
+}
+
+.pause-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+/* Pause Items inherit the Play Button style */
+.pause-item {
+  width: 100% !important;
+  max-width: 350px !important;
+  height: 60px !important;
+  font-size: 22px !important;
+  padding: 0 30px !important;
+  display: flex;
+  justify-content: flex-start; /* Icons on the left */
+  gap: 20px;
+}
+
+/* THE RED LEAVE BUTTON VARIANT */
+.menu-btn.red {
+  background: linear-gradient(180deg, #ff3333 0%, #cc0000 50%, #a30000 100%);
+  color: white;
+  border: 4px solid #ffffff;
+  box-shadow: 0 10px 0 #5c0000, 0 15px 25px rgba(0, 0, 0, 0.4);
+}
+
+.menu-btn.red:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 13px 0 #5c0000, 0 20px 30px rgba(204, 0, 0, 0.3);
+}
+
+.menu-btn.red:active {
+  transform: translateY(8px);
+  box-shadow: 0 2px 0 #5c0000;
+}
+
+.pause-item i {
+  width: 30px;
+  text-align: center;
+}
   </style>
 </head>
 <body>
@@ -1085,24 +1135,49 @@
     </div> <!-- Added missing </div> for button-container -->
   </div> <!-- Added missing </div> for mainMenu -->
 
+<!-- Inside <div id="gameArea"> -->
 <div id="gameArea">
-  <!-- SCOREBOARD WITH NEW GLOW -->
   <div id="scoreBoard" class="electric-container">
-    <div class="score-icon-wrapper">
-      <i class="fa-solid fa-bolt"></i>
-    </div>
+    <div class="score-icon-wrapper"><i class="fa-solid fa-bolt"></i></div>
     <span id="scoreText">0</span>
   </div>
 
-  <!-- GAME CONTROLS WITH NEW GLOW -->
   <div class="game-controls">
+    <!-- Updated: Only pauses, doesn't resume -->
     <button class="control-btn electric-container" title="Pause" onclick="togglePause()">
       <i class="fa-solid fa-pause"></i>
     </button>
   </div>
 
   <div id="kevin"></div>
-  <button id="backBtn" onclick="returnToMenu()">Înapoi la Meniu</button>
+  <!-- OLD BACK BUTTON REMOVED -->
+</div>
+
+<!-- NEW: PAUSE MODAL -->
+<div id="pauseModal" class="modal-overlay">
+  <div class="modal-box pause-modal-box">
+    <h2>JOC ÎNTRERUPT</h2>
+    <p>Kevin profită de pauză să răsufle...</p>
+
+    <div class="pause-menu-list">
+      <button class="menu-btn play pause-item" onclick="resumeGame()">
+        <i class="fa-solid fa-play"></i> <span>REIA JOCUL</span>
+      </button>
+      
+      <button class="menu-btn play pause-item">
+        <i class="fa-solid fa-gear"></i> <span>SETĂRI</span>
+      </button>
+
+      <button class="menu-btn play pause-item">
+        <i class="fa-solid fa-shirt"></i> <span>COSMETICE</span>
+      </button>
+
+      <!-- The Red "Leave" Button -->
+      <button class="menu-btn red pause-item" onclick="leaveGame()">
+        <i class="fa-solid fa-house"></i> <span>MENIU PRINCIPAL</span>
+      </button>
+    </div>
+  </div>
 </div>
   <!-- ==========================================
        JAVASCRIPT
@@ -1455,24 +1530,38 @@ document.getElementById('kevin').addEventListener('pointerdown', (e) => { // 'po
 let isPaused = false;
 
 function togglePause() {
-    isPaused = !isPaused;
-    const pauseBtnIcon = document.querySelector('.control-btn i');
+  if (isPaused) return; // Prevent double pausing
+  
+  isPaused = true;
+  // Stop Kevin
+  clearInterval(moveKevinInterval);
+  clearTimeout(tiredTimeout);
+  
+  // Show Modal
+  document.getElementById('pauseModal').style.display = 'flex';
+  
+  // Disable clicking the character in the background
+  document.getElementById('kevin').style.pointerEvents = 'none';
+}
 
-    if (isPaused) {
-        // STOP GAME
-        clearInterval(moveKevinInterval);
-        clearTimeout(tiredTimeout);
-        pauseBtnIcon.className = "fa-solid fa-play"; // Change icon to Play
-        document.getElementById('kevin').style.pointerEvents = 'none'; // Disable clicking Kevin
-        console.log("Game Paused");
-    } else {
-        // RESUME GAME
-        startKevinMovement();
-        startTiredCycle();
-        pauseBtnIcon.className = "fa-solid fa-pause"; // Change icon back to Pause
-        document.getElementById('kevin').style.pointerEvents = 'auto'; // Enable clicking Kevin
-        console.log("Game Resumed");
-    }
+function resumeGame() {
+  isPaused = false;
+  // Hide Modal
+  document.getElementById('pauseModal').style.display = 'none';
+  
+  // Re-enable character and restart movement
+  document.getElementById('kevin').style.pointerEvents = 'auto';
+  startKevinMovement();
+  startTiredCycle();
+}
+
+async function leaveGame() {
+  // Hide modal first
+  document.getElementById('pauseModal').style.display = 'none';
+  isPaused = false;
+  
+  // Use your existing function to clean up and save score
+  await returnToMenu();
 }
   </script>
 </body>
