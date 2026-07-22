@@ -1665,9 +1665,8 @@ for (let i = 0; i < particleCount; i++) {
     let isKevinTired = false;
     let canClickKevin = true; 
 
-    const normalKevinImage = "url('https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w')";
-    const tiredKevinImage = "url('https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/0b5ac0f4-618a-4346-9684-8c1f3c0a5fcb/20716c49-4365-417d-97e9-fc8601ae5403_removalai_preview.png?format=500w')";
-
+let currentPlayImg = "";
+let currentTiredImg = "";
     // =====================================
     // AUTHENTICATION & UI FLOW
     // =====================================
@@ -1710,29 +1709,43 @@ for (let i = 0; i < particleCount; i++) {
       });
     }
 
-    async function checkUserInFirestore(uid) {
-      document.getElementById('loadingModal').style.display = 'flex';
-      try {
+async function checkUserInFirestore(uid) {
+    document.getElementById('loadingModal').style.display = 'flex';
+    try {
         const docRef = db.collection("players").doc(uid);
         const docSnap = await docRef.get();
 
         if (docSnap.exists) {
-          const data = docSnap.data();
-          currentUsername = data.username;
-          score = data.score || 0;
-          lastSavedScore = score;
-          
-          document.getElementById('loadingModal').style.display = 'none';
-          showLoggedInUI();
+            const data = docSnap.data();
+            currentUsername = data.username;
+            score = data.score || 0;
+            lastSavedScore = score;
+            
+            // --- LOGICA DE ÎNCĂRCARE CARACTER SALVAT ---
+            if (data.hasSetupFinished) {
+                const savedCharId = data.selectedChar || "kevin";
+                // Căutăm datele personajului în lista noastră folosind ID-ul salvat
+                const charData = characterList.find(c => c.id === savedCharId) || characterList[0];
+                
+                // Setăm variabilele globale pentru imagini
+                currentPlayImg = `url('${charData.playImg}')`;
+                currentTiredImg = `url('${charData.tiredImg}')`;
+                
+                // Aplicăm imaginea pe obiectul din joc
+                document.getElementById('kevin').style.backgroundImage = currentPlayImg;
+            }
+
+            document.getElementById('loadingModal').style.display = 'none';
+            showLoggedInUI();
         } else {
-          document.getElementById('loadingModal').style.display = 'none';
-          document.getElementById('usernameModal').style.display = 'flex';
+            document.getElementById('loadingModal').style.display = 'none';
+            document.getElementById('usernameModal').style.display = 'flex';
         }
-      } catch (e) {
+    } catch (e) {
         console.error("Eroare Firestore:", e);
         document.getElementById('loadingModal').style.display = 'none';
-      }
     }
+}
 
     async function saveNewUsername() {
       const input = document.getElementById('usernameInput').value.trim();
@@ -1800,7 +1813,7 @@ function startGameUI() {
   // Această linie se asigură că imaginea este cea aleasă de tine, nu doar Kevin:
   // Dacă nu există o imagine salvată încă, pune-o pe cea default
   if (!kevin.style.backgroundImage) {
-      kevin.style.backgroundImage = normalKevinImage;
+      kevin.style.backgroundImage = currentPlayImg;
   }
   
   kevin.style.width = "120px";
@@ -1875,22 +1888,21 @@ function startKevinMovement() {
       kevin.style.top = `${newY}px`;
     }
 
-    function startTiredCycle() {
-      clearTimeout(tiredTimeout);
-      tiredTimeout = setTimeout(() => {
+function startTiredCycle() {
+    clearTimeout(tiredTimeout);
+    tiredTimeout = setTimeout(() => {
         const kevin = document.getElementById('kevin');
         isKevinTired = true;
-        kevin.style.backgroundImage = tiredKevinImage;
+        kevin.style.backgroundImage = currentTiredImg; // POZA DE OBOSEALĂ DINAMICĂ
         
         setTimeout(() => {
-          isKevinTired = false;
-          kevin.style.backgroundImage = normalKevinImage;
-          moveKevinAway(); 
-          startTiredCycle();
+            isKevinTired = false;
+            kevin.style.backgroundImage = currentPlayImg; // POZA NORMALĂ DINAMICĂ
+            moveKevinAway(); 
+            startTiredCycle();
         }, 5000);
-      }, 60000);
-    }
-
+    }, 60000);
+}
     document.getElementById('kevin').addEventListener('click', (e) => {
       e.stopPropagation(); 
       if (!canClickKevin) return;
@@ -2036,25 +2048,25 @@ const characterList = [
         id: "kevin", 
         name: "KEVINUȚĂ", 
         desc: "Un puști plin de energie din cartier. Viteza este arma lui secretă!",
-        img: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w" 
+        displayImg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w",
+        playImg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w",
+        tiredImg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/0b5ac0f4-618a-4346-9684-8c1f3c0a5fcb/20716c49-4365-417d-97e9-fc8601ae5403_removalai_preview.png?format=500w"
     },
     { 
         id: "emmanuel", 
         name: "EMMANUEL", 
         desc: "Are 18 ani și e foarte politicos... până când îl enervezi. Atunci mai bine fugi!",
-        img: "https://iili.io/CNUBdIj.png" 
+        displayImg: "https://iili.io/CNUBdIj.png", 
+        playImg: "https://iili.io/CNURdSR.png",
+        tiredImg: "https://iili.io/CNURciu.png"
     },
     { 
         id: "antonio", 
         name: "ANTONIO", 
         desc: "Vorbește doar în engleză. Sper că ai Google Translate la îndemână, altfel ești pierdut!",
-        img: "https://iili.io/CNUnzsR.png" 
-    },
-    { 
-        id: "mystery", 
-        name: "???", 
-        desc: "Un luptător misterios care va sosi curând. Continuă să joci pentru a-l debloca!",
-        img: "https://cdn-icons-png.flaticon.com/512/365/365825.png" 
+        displayImg: "https://iili.io/CNUnzsR.png",
+        playImg: "https://iili.io/CNURvUv.png",
+        tiredImg: "https://iili.io/CNU5Fgj.png"
     }
 ];
 
@@ -2079,15 +2091,17 @@ async function confirmCharacter() {
     document.getElementById('loadingModal').style.display = 'flex';
     
     try {
+        // Setăm imaginile de joc pentru sesiunea curentă
+        currentPlayImg = `url('${selected.playImg}')`;
+        currentTiredImg = `url('${selected.tiredImg}')`;
+
         await db.collection("players").doc(currentUID).update({
-            selectedChar: selected.id,
-            selectedCharImg: selected.img, // Salvăm și imaginea
+            selectedChar: selected.id, // Salvăm doar ID-ul, e mai sigur
             hasSetupFinished: true
         });
         
-        // --- ACEASTA ESTE LINIA IMPORTANTĂ ---
-        // Actualizăm imaginea personajului din joc înainte de start
-        document.getElementById('kevin').style.backgroundImage = `url(${selected.img})`;
+        // Aplicăm imaginea pe caracterul din joc
+        document.getElementById('kevin').style.backgroundImage = currentPlayImg;
         
         document.getElementById('charSelectorModal').style.display = 'none';
         document.getElementById('loadingModal').style.display = 'none';
@@ -2095,6 +2109,7 @@ async function confirmCharacter() {
     } catch (e) {
         console.error(e);
         alert("Eroare la salvarea caracterului!");
+        document.getElementById('loadingModal').style.display = 'none';
     }
 }
 
