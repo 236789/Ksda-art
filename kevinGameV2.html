@@ -266,85 +266,7 @@
   overflow: hidden;
   z-index: 500;
 }
-/* ==========================================
-   PREMIUM GAMER HUD (SCOREBOARD)
-   ========================================== */
-#scoreBoard {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  
-  /* Matches the Welcome Badge & Logo colors */
-  background: linear-gradient(to bottom, #4d2600, #261300); 
-  border: 3px solid #facc15;
-  border-radius: 50px; /* Pill shape */
-  
-  display: flex;
-  align-items: center;
-  padding: 5px 25px 5px 10px; /* Extra padding on the right for the numbers */
-  gap: 15px;
-  
-  box-shadow: 
-    0 8px 0 #1a0a00,              /* 3D Depth */
-    0 10px 20px rgba(0, 0, 0, 0.6); 
-    
-  z-index: 1000;
-  transition: transform 0.1s ease;
-}
 
-/* THE ICON SLOT (Circular Highlight) */
-.score-icon-wrapper {
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(250, 204, 21, 0.5);
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-}
-
-.score-icon {
-  height: 40px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-}
-
-/* THE SCORE NUMBERS */
-#scoreText {
-  font-family: 'Orbitron', sans-serif; /* Sci-fi digital look */
-  font-size: 32px;
-  font-weight: 900;
-  color: #ffea00; /* Bright gold */
-  text-shadow: 0 0 10px rgba(255, 234, 0, 0.5), 2px 2px 0px #1a0a00;
-  letter-spacing: 2px;
-}
-
-/* Label above the score */
-#scoreBoard::after {
-  content: "SCORE";
-  position: absolute;
-  top: -12px;
-  left: 65px;
-  background: #facc15;
-  color: #1a0a00;
-  font-size: 10px;
-  font-weight: 900;
-  padding: 2px 8px;
-  border-radius: 4px;
-  letter-spacing: 1px;
-}
-
-/* ANIMATION: Bumps the scoreboard when you score */
-.score-bump {
-  animation: scorePop 0.2s ease-out;
-}
-
-@keyframes scorePop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); }
-}
     .score-icon { height: 35px; }
     
     #kevin {
@@ -758,151 +680,212 @@
     max-width: 320px; /* Perfectly sized for phones */
   }
 }
+
 /* ==========================================
-   MOBILE OPTIMIZATION (Screens < 600px)
+   PREMIUM HUD — TOP SCORE PANEL (REDESIGN)
    ========================================== */
-@media (max-width: 600px) {
-  #scoreBoard {
-    top: 10px;    /* Move closer to edge */
-    left: 10px;
-    padding: 4px 15px 4px 6px;
-    gap: 8px;
-    border-width: 2px;
-    box-shadow: 0 4px 0 #1a0a00, 0 6px 12px rgba(0, 0, 0, 0.5);
-  }
 
-  .score-icon-wrapper {
-    width: 34px;  /* Much smaller for mobile */
-    height: 34px;
-  }
+/* Slim ambient top strip — replaces the old thick header bar */
+.game-header {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 18px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.35), transparent);
+  z-index: 900;
+  pointer-events: none;
+}
 
-  .score-icon {
-    height: 24px;
-  }
+/* THE HUD CARD */
+#scoreBoard {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
 
-  #scoreText {
-    font-size: 20px; /* Clean and readable but compact */
-  }
+  display: flex;
+  align-items: center;
+  gap: 12px;
 
-  #scoreBoard::after {
-    top: -8px;
-    left: 40px;
-    font-size: 8px;
+  padding: 8px 22px 8px 8px;
+  border-radius: 999px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02) 40%),
+    linear-gradient(135deg, #2c2a55 0%, #1b1a37 60%, #14132b 100%);
+  border: 1px solid rgba(255,255,255,0.16);
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.25) inset,
+    0 -10px 16px rgba(0,0,0,0.25) inset,
+    0 8px 18px rgba(0,0,0,0.45),
+    0 0 0 4px rgba(10,8,25,0.35);
+
+  backdrop-filter: blur(6px);
+  animation: hudFloat 4s ease-in-out infinite, hudBreathe 3.2s ease-in-out infinite;
+  transition: transform 0.15s ease;
+  overflow: hidden;
+}
+
+/* Soft ambient glow ring, breathes slowly */
+@keyframes hudBreathe {
+  0%, 100% {
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.25) inset,
+      0 -10px 16px rgba(0,0,0,0.25) inset,
+      0 8px 18px rgba(0,0,0,0.45),
+      0 0 0 4px rgba(10,8,25,0.35),
+      0 0 14px rgba(255,196,60,0.18);
+  }
+  50% {
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.25) inset,
+      0 -10px 16px rgba(0,0,0,0.25) inset,
+      0 8px 18px rgba(0,0,0,0.5),
+      0 0 0 4px rgba(10,8,25,0.35),
+      0 0 24px rgba(255,196,60,0.38);
   }
 }
 
-/* Animation remains the same */
-.score-bump { animation: scorePop 0.2s ease-out; }
-@keyframes scorePop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+/* Gentle idle bob, like a live UI element rather than a static image */
+@keyframes hudFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* Glossy light sweep, sweeps across the pill every few seconds */
+#scoreBoard::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -60%;
+  width: 40%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: skewX(-25deg);
+  animation: hudSheen 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes hudSheen {
+  0%   { left: -60%; opacity: 0; }
+  8%   { opacity: 1; }
+  30%  { left: 130%; opacity: 0; }
+  100% { left: 130%; opacity: 0; }
+}
+
+#scoreBoard:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* THE COIN/ICON MEDALLION */
+.score-icon-wrapper {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: radial-gradient(circle at 32% 28%, #fff6cf 0%, #ffd25a 28%, #f5a623 62%, #c9780f 100%);
+  border: 2px solid rgba(255,255,255,0.85);
+
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.4),
+    0 0 10px rgba(255,196,60,0.55),
+    inset 0 2px 3px rgba(255,255,255,0.6),
+    inset 0 -3px 4px rgba(120,60,0,0.45);
+}
+
+.score-icon-wrapper i {
+  font-size: 20px;
+  color: #7a3e00;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
+}
+
+/* subtle rotating shine ring on the medallion */
+.score-icon-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 60%, rgba(255,255,255,0.55) 68%, transparent 76% 100%);
+  animation: coinSpin 3.2s linear infinite;
+  mix-blend-mode: overlay;
+}
+@keyframes coinSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* THE SCORE NUMBER */
+#scoreText {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  line-height: 1;
+
+  color: #fff6df;
+  background: linear-gradient(180deg, #fffdf5 0%, #ffe27a 60%, #ffc63c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  text-shadow: 0 2px 6px rgba(0,0,0,0.35);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: inline-block;
+}
+
+/* Score pop animation — replaces the old crude scorePop */
+.score-bump #scoreText {
+  animation: scoreValuePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes scoreValuePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
   100% { transform: scale(1); }
 }
 
+/* Ring pulse on the coin whenever score bumps */
+.score-bump .score-icon-wrapper {
+  animation: coinPulse 0.35s ease-out;
+}
+@keyframes coinPulse {
+  0%   { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 10px rgba(255,196,60,0.55), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -3px 4px rgba(120,60,0,0.45); }
+  50%  { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 26px rgba(255,196,60,0.9), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -3px 4px rgba(120,60,0,0.45); }
+  100% { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 10px rgba(255,196,60,0.55), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -3px 4px rgba(120,60,0,0.45); }
+}
 
 /* ==========================================
-   THE ARCADE CABINET FRAME
+   HUD MOBILE FIXES
    ========================================== */
+@media (max-width: 600px) {
+  #scoreBoard {
+    top: 10px;
+    left: 10px;
+    padding: 6px 16px 6px 6px;
+    gap: 8px;
+  }
+  .score-icon-wrapper { width: 36px; height: 36px; }
+  .score-icon-wrapper i { font-size: 16px; }
+  #scoreText { font-size: 19px; }
+}
 
-/* Subtle Side & Bottom Rails */
+@media (prefers-reduced-motion: reduce) {
+  #scoreBoard, #scoreBoard::before, .score-icon-wrapper::after {
+    animation: none !important;
+  }
+}
+
+/* Subtle side frame kept for the arcade feel */
 .game-frame-overlay {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
   pointer-events: none;
-  border: 4px solid rgba(250, 204, 21, 0.15); /* Very subtle gold border */
+  border: 4px solid rgba(250, 204, 21, 0.15);
   box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
-  z-index: 400; /* Behind Kevin */
-}
-
-/* THICK STYLIZED TOP BAR (The Beam) */
-.game-header {
-  position: absolute;
-  top: 0; left: 0; 
-  width: 100%; 
-  height: 50px; /* Thick bar */
-  background: linear-gradient(to bottom, #3d1e00, #1a0a00);
-  border-bottom: 3px solid #facc15;
-  display: flex;
-  justify-content: center; /* Centers the shield */
-  z-index: 1000; /* Above everything */
-  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-}
-
-/* THE JUTTING SHIELD (Asymmetrical & Sick) */
-#scoreBoard {
-  position: absolute;
-  top: -5px; /* Sits slightly higher than the bar */
-  
-  /* Dimensions: It's taller than the header so it goes OUT */
-  width: 200px;
-  height: 85px; 
-  
-  background: linear-gradient(135deg, #facc15 0%, #ffaa00 100%);
-  
-  /* THE SICK ASYMMETRICAL SHAPE */
-  clip-path: polygon(0 0, 100% 0, 95% 75%, 50% 100%, 5% 85%);
-  
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding-bottom: 10px; /* Space for the bottom point */
-  
-  border-bottom: 3px solid #ffffff;
-  filter: drop-shadow(0 8px 10px rgba(0,0,0,0.5));
-}
-
-/* Internal elements adjustments */
-.score-icon-wrapper {
-  background: #1a0a00;
-  border: 2px solid #fff;
-  border-radius: 50%;
-  width: 42px;
-  height: 42px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.score-icon {
-  height: 30px;
-}
-
-#scoreText {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 32px;
-  font-weight: 900;
-  color: #1a0a00;
-  text-shadow: 1px 1px 0px rgba(255,255,255,0.4);
-}
-
-/* Added a small "LIVE" indicator on the side for detail */
-.game-header::after {
-  content: "● LIVE";
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #ff4444;
-  font-size: 12px;
-  font-weight: bold;
-  letter-spacing: 2px;
-}
-
-/* ==========================================
-   MOBILE FIXES
-   ========================================== */
-@media (max-width: 600px) {
-  .game-header { height: 40px; }
-  #scoreBoard {
-    width: 150px;
-    height: 65px;
-    clip-path: polygon(0 0, 100% 0, 95% 80%, 50% 100%, 5% 90%);
-  }
-  #scoreText { font-size: 24px; }
-  .score-icon-wrapper { width: 32px; height: 32px; }
-  .score-icon { height: 22px; }
-  .game-header::after { display: none; }
+  z-index: 400;
 }
   </style>
 </head>
@@ -975,15 +958,15 @@
   <!-- 1. The side frame rail -->
   <div class="game-frame-overlay"></div>
 
-  <!-- 2. The Header Beam -->
-  <div class="game-header">
-    <!-- 3. The Shield inside the beam -->
-    <div id="scoreBoard">
-      <div class="score-icon-wrapper">
-        <img src="https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/3838e9be-f08a-4e78-815f-4b1688594e17/ce291931-bdae-4385-a65e-fea28b922266_removalai_preview.png?format=500w" class="score-icon" alt="Score Icon">
-      </div>
-      <span id="scoreText">0</span>
+  <!-- 2. Slim ambient top strip -->
+  <div class="game-header"></div>
+
+  <!-- 3. Premium HUD score panel -->
+  <div id="scoreBoard">
+    <div class="score-icon-wrapper">
+      <i class="fa-solid fa-bolt"></i>
     </div>
+    <span id="scoreText">0</span>
   </div>
 
   <div id="kevin"></div>
