@@ -635,49 +635,54 @@
 }
 @keyframes plaquePop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
-/* THE LOGO WRAPPER */
+/* THE LOGO WRAPPER - Centered exactly */
 .logo-wrapper {
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 30px;
-  width: 100%;
+  width: 100%; /* Ensures it spans the full menu width */
+  margin-bottom: 25px;
   z-index: 10;
+  
+  /* Resetting the offset so it is dead center */
+  transform: translateX(0); 
+  
   /* Screen shake on impact */
   animation: logoSlamShake 0.2s 0.6s 2; 
 }
 
 /* THE MAIN LOGO */
 .logo-main {
-  width: 100%;
-  max-width: 480px; /* Big and bold for PC */
+  width: 90%;          /* Responsive width */
+  max-width: 480px;    /* Max size on PC */
   height: auto;
+  display: block;
   filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8));
   
   /* Fall and Crash Animation */
   animation: crashSlam 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-/* ANIMATION: FALL AND SQUASH */
+/* --- ANIMATION KEYFRAMES --- */
+
 @keyframes crashSlam {
-  0% { transform: translateY(-1000px) scaleY(2); opacity: 0; }
-  60% { transform: translateY(0) scaleY(0.7); opacity: 1; } /* Hits the floor */
-  80% { transform: translateY(-20px) scaleY(1.1); }          /* Bounces */
+  0% { transform: translateY(-800px) scaleY(2); opacity: 0; }
+  60% { transform: translateY(0) scaleY(0.7); opacity: 1; } /* Squash */
+  85% { transform: translateY(-20px) scaleY(1.1); }          /* Bounce */
   100% { transform: translateY(0) scaleY(1); opacity: 1; }
 }
 
-/* ANIMATION: SHAKE THE WHOLE MENU */
 @keyframes logoSlamShake {
-  0% { transform: translate(0,0); }
-  50% { transform: translate(10px, 10px); }
-  100% { transform: translate(0,0); }
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(8px, 8px); }
+  100% { transform: translate(0, 0); }
 }
 
 /* MOBILE FIX */
 @media (max-width: 600px) {
   .logo-main {
-    max-width: 320px; /* Shrinks for phone screens */
+    max-width: 320px; /* Perfectly sized for phones */
   }
 }
   </style>
