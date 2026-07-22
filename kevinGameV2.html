@@ -275,68 +275,61 @@
       transition: left 0.3s ease-out, top 0.3s ease-out;
     }
 /* ==========================================
-   ARCADE COMBO STYLING (REVAMPED)
-/* ==========================================
-   V2 COMBO SYSTEM (ROMANIAN & EVOLVING)
+   MINI-ARCADE COMBO (COMPACT & SNAPPY)
    ========================================== */
 .combo-text {
   position: absolute;
   pointer-events: none;
   z-index: 2000;
   font-family: 'Oswald', sans-serif;
-  font-weight: 900;
+  font-weight: 800;
   text-transform: uppercase;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  /* Scaled down for mobile/PC balance */
-  font-size: 28px; 
+  /* Compact sizes */
+  font-size: 18px; 
   color: #fff;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  line-height: 1;
+  letter-spacing: 0.5px;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.8));
 }
 
 .combo-rank-word {
-  font-size: 22px;
-  letter-spacing: 1px;
-  margin-bottom: -4px;
+  font-size: 13px; /* Very small sub-text */
+  display: block;
+  margin-bottom: 2px;
+  opacity: 0.9;
 }
 
-/* COLOR TIERS */
-.tier-verde { color: #4ade80; text-shadow: 0 0 10px #166534; }
-.tier-albastru { color: #3b82f6; text-shadow: 0 0 10px #1e3a8a; }
-.tier-cyan { color: #22d3ee; text-shadow: 0 0 10px #0891b2; }
-.tier-galben { color: #facc15; text-shadow: 0 0 10px #854d0e; }
-.tier-portocaliu { color: #fb923c; text-shadow: 0 0 10px #9a3412; }
-.tier-rosu { color: #ef4444; text-shadow: 0 0 15px #7f1d1d; }
-.tier-roz { color: #f472b6; text-shadow: 0 0 15px #831843; }
-.tier-lava { 
-  background: linear-gradient(to bottom, #ff4500, #ff8c00); 
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 5px #ff0000);
-}
-.tier-celestial { 
-  color: #ffffff; text-shadow: 0 0 15px #00d4ff, 0 0 25px #ffffff; 
-}
+/* COMPACT TIERS */
+.tier-verde { color: #4ade80; }
+.tier-albastru { color: #3b82f6; }
+.tier-cyan { color: #22d3ee; }
+.tier-galben { color: #facc15; }
+.tier-portocaliu { color: #fb923c; }
+.tier-rosu { color: #ef4444; }
+.tier-lava { color: #ff4500; text-shadow: 0 0 8px #ff4500; }
+.tier-celestial { color: #fff; text-shadow: 0 0 10px #00d4ff; }
 .tier-rainbow {
-  background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-size: 400% 400%;
-  animation: rainbowText 2s linear infinite;
-  filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));
+  background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  animation: miniRainbow 1.5s linear infinite;
+  font-size: 22px; /* Slightly bigger for final tier, but still small */
 }
 
-@keyframes rainbowText {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
+@keyframes miniRainbow { to { background-position: 200% center; } }
+
+/* SNAPPY COMPACT ANIMATION */
+@keyframes comboMiniPop {
+  0% { transform: translate(-50%, -20%) scale(0.5); opacity: 0; }
+  20% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+  100% { transform: translate(-50%, -60px) scale(0.9); opacity: 0; }
 }
 
-@keyframes comboPop {
-  0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
-  20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-  100% { transform: translate(-50%, -120px) scale(0.8); opacity: 0; }
+.animate-combo-mini {
+  animation: comboMiniPop 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
-
 .animate-combo-v2 {
   animation: comboPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
