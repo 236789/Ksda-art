@@ -276,6 +276,8 @@
     }
 /* ==========================================
    ARCADE COMBO STYLING (REVAMPED)
+/* ==========================================
+   V2 COMBO SYSTEM (ROMANIAN & EVOLVING)
    ========================================== */
 .combo-text {
   position: absolute;
@@ -284,58 +286,60 @@
   font-family: 'Oswald', sans-serif;
   font-weight: 900;
   text-transform: uppercase;
-  font-size: 42px;
-  
-  /* 3D Layered Text Look */
-  color: #ffffff;
-  text-shadow: 
-    0 2px 0 #000, 
-    0 4px 0 #000, 
-    0 6px 20px rgba(0,0,0,0.5),
-    0 0 10px rgba(255,255,255,0.5);
-
-  /* Start state for animation */
-  transform: translate(-50%, -50%) scale(0.5) rotate(-10deg);
-  opacity: 0;
-  
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  line-height: 0.9;
+  /* Scaled down for mobile/PC balance */
+  font-size: 28px; 
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.8);
 }
 
-/* Ranking Word (The smaller text above the number) */
-.combo-rank {
-  font-size: 18px;
-  letter-spacing: 2px;
-  margin-bottom: -5px;
+.combo-rank-word {
+  font-size: 22px;
+  letter-spacing: 1px;
+  margin-bottom: -4px;
 }
 
-/* COMBO COLOR TIERS */
-.combo-tier-cool { color: #00d4ff; text-shadow: 0 4px 0 #005a6e, 0 0 15px #00d4ff; }
-.combo-tier-hot { color: #facc15; text-shadow: 0 4px 0 #8a6d00, 0 0 15px #facc15; }
-.combo-tier-fire { color: #ff3333; text-shadow: 0 4px 0 #7a0000, 0 0 20px #ff3333; }
-
-/* ANIMATION: Snappy Pop followed by a slow float up */
-@keyframes comboPopFloat {
-  0% { transform: translate(-50%, -20%) scale(0.3) rotate(-20deg); opacity: 0; }
-  20% { transform: translate(-50%, -50%) scale(1.4) rotate(5deg); opacity: 1; }
-  35% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
-  100% { transform: translate(-50%, -150px) scale(0.8) rotate(-5deg); opacity: 0; }
+/* COLOR TIERS */
+.tier-verde { color: #4ade80; text-shadow: 0 0 10px #166534; }
+.tier-albastru { color: #3b82f6; text-shadow: 0 0 10px #1e3a8a; }
+.tier-cyan { color: #22d3ee; text-shadow: 0 0 10px #0891b2; }
+.tier-galben { color: #facc15; text-shadow: 0 0 10px #854d0e; }
+.tier-portocaliu { color: #fb923c; text-shadow: 0 0 10px #9a3412; }
+.tier-rosu { color: #ef4444; text-shadow: 0 0 15px #7f1d1d; }
+.tier-roz { color: #f472b6; text-shadow: 0 0 15px #831843; }
+.tier-lava { 
+  background: linear-gradient(to bottom, #ff4500, #ff8c00); 
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 5px #ff0000);
+}
+.tier-celestial { 
+  color: #ffffff; text-shadow: 0 0 15px #00d4ff, 0 0 25px #ffffff; 
+}
+.tier-rainbow {
+  background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-size: 400% 400%;
+  animation: rainbowText 2s linear infinite;
+  filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));
 }
 
-.animate-combo {
-  animation: comboPopFloat 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+@keyframes rainbowText {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
 }
-    #backBtn {
-      position: absolute; bottom: 20px; left: 20px; padding: 12px 25px; background: #ff4444;
-      color: white; border: 3px solid #ffaaaa; border-radius: 12px; font-size: 18px;
-      font-family: 'Oswald', sans-serif; font-weight: bold; cursor: pointer; z-index: 9999;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: 0.2s;
-    }
-    #backBtn:active { transform: scale(0.95); }
 
+@keyframes comboPop {
+  0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+  20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -120px) scale(0.8); opacity: 0; }
+}
 
+.animate-combo-v2 {
+  animation: comboPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
 .custom-google-btn {
   display: flex;
   align-items: center;
@@ -1189,6 +1193,33 @@
   box-shadow: 0 6px 0 #4a0000, 0 8px 15px rgba(0,0,0,0.4);
   text-transform: uppercase;
 }
+
+
+/* Update your CSS to include this shake animation */
+@keyframes comboSlam {
+  0% { transform: translate(-50%, -50%) scale(2); opacity: 0; filter: blur(10px); }
+  20% { transform: translate(-50%, -50%) scale(1); opacity: 1; filter: blur(0px); }
+  30% { transform: translate(-52%, -48%); } /* Shake start */
+  40% { transform: translate(-48%, -52%); }
+  50% { transform: translate(-50%, -50%); } /* Shake end */
+  100% { transform: translate(-50%, -180px) scale(0.8); opacity: 0; }
+}
+
+.animate-combo-v2 {
+  animation: comboSlam 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Make Lava and Rainbow tiers stand out more with an outline */
+.tier-lava {
+  color: #ff4500 !important;
+  -webkit-text-stroke: 1px #ffffff;
+  text-shadow: 0 0 20px #ff0000, 0 0 40px #ff8c00;
+}
+
+.tier-rainbow {
+  -webkit-text-stroke: 1px #000;
+  font-size: 34px !important; /* Make it slightly bigger at the end */
+}
   </style>
 </head>
 <body>
@@ -1604,47 +1635,67 @@ function startKevinMovement() {
       setTimeout(() => { canClickKevin = true; }, 100); 
     });
 
+const comboMilestones = {
+    5:   { word: "BINE TICĂ!", tier: "tier-verde" },
+    10:  { word: "MARE BOSS!", tier: "tier-verde" },
+    15:  { word: "REFLEXE!", tier: "tier-albastru" },
+    25:  { word: "DĂ-I TEROARE!", tier: "tier-albastru" },
+    40:  { word: "TE-AI ÎNCĂLZIT!", tier: "tier-cyan" },
+    60:  { word: "MARE VALOARE!", tier: "tier-cyan" },
+    80:  { word: "KEVIN DISPERĂ!", tier: "tier-galben" },
+    100: { word: "MÂNĂ DE AUR!", tier: "tier-galben" },
+    125: { word: "RUPI MOUSE-UL!", tier: "tier-portocaliu" },
+    150: { word: "VITEZĂ MAXIMĂ!", tier: "tier-portocaliu" },
+    175: { word: "DEMON PE CLICK!", tier: "tier-rosu" },
+    200: { word: "EȘTI TEROARE!", tier: "tier-rosu" },
+    250: { word: "KEVINUȚĂ PLÂNGE!", tier: "tier-lava" },
+    300: { word: "MODUL AVION!", tier: "tier-lava" }, // Slang for untouchable speed
+    400: { word: "ZEU PE SATE!", tier: "tier-celestial" },
+    500: { word: "VORBEȘTI CU ZEII!", tier: "tier-celestial" },
+    750: { word: "HACKER?!", tier: "tier-rainbow" },
+    1000: { word: "BANNED FOR SKILL!", tier: "tier-rainbow" }
+};
+
 function showComboText(x, y, count) {
-  // Create element
-  const el = document.createElement("div");
-  el.className = "combo-text animate-combo";
-  
-  // 1. Determine Tier and Word
-  let rankWord = "";
-  let tierClass = "";
+    const el = document.createElement("div");
+    el.className = "combo-text animate-combo-v2";
+    
+    // Find Tier color based on the count
+    let currentTier = "tier-verde";
+    if (count >= 750) currentTier = "tier-rainbow";
+    else if (count >= 400) currentTier = "tier-celestial";
+    else if (count >= 250) currentTier = "tier-lava";
+    else if (count >= 175) currentTier = "tier-rosu";
+    else if (count >= 125) currentTier = "tier-portocaliu";
+    else if (count >= 80) currentTier = "tier-galben";
+    else if (count >= 40) currentTier = "tier-cyan";
+    else if (count >= 15) currentTier = "tier-albastru";
 
-  if (count < 5) {
-    rankWord = "NICE!";
-    tierClass = "combo-tier-cool";
-  } else if (count < 10) {
-    rankWord = "AMAZING!";
-    tierClass = "combo-tier-hot";
-  } else if (count < 20) {
-    rankWord = "UNSTOPPABLE!";
-    tierClass = "combo-tier-fire";
-  } else {
-    rankWord = "KEVIN-GOD!";
-    tierClass = "combo-tier-fire";
-    el.style.fontSize = "52px"; // Make it even bigger
-  }
+    const milestone = comboMilestones[count];
+    let rankWord = milestone ? milestone.word : "";
+    
+    // If we hit a milestone, we can override the tier with the specific milestone tier
+    if (milestone) currentTier = milestone.tier;
 
-  el.classList.add(tierClass);
+    el.classList.add(currentTier);
 
-  // 2. Set Content
-  el.innerHTML = `
-    <span class="combo-rank">${rankWord}</span>
-    <span class="combo-count">x${count}</span>
-  `;
+    // If it's a milestone, we make the text bold and big
+    if (rankWord) {
+        el.innerHTML = `
+            <span class="combo-rank-word" style="font-size: 1.4em; display: block;">${rankWord}</span>
+            <span class="combo-count">x${count}</span>
+        `;
+    } else {
+        // Only show the multiplier for non-milestones to keep it clean
+        el.innerHTML = `<span class="combo-count">x${count}</span>`;
+    }
 
-  // 3. Randomize Tilt slightly for "Juiciness"
-  const randomRotate = (Math.random() * 20 - 10).toFixed(2);
-  el.style.left = `${x}px`;
-  el.style.top = `${y}px`;
-  
-  document.body.appendChild(el);
-
-  // 4. Remove after animation
-  setTimeout(() => { el.remove(); }, 1000);
+    // Position it at the click
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+    
+    document.body.appendChild(el);
+    setTimeout(() => { el.remove(); }, 900);
 }
 
 
