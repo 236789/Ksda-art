@@ -1016,6 +1016,62 @@
     height: 65px;
   }
 }
+
+/* 1. THE WRAPPER: Now flush at the top */
+.header-center-container {
+  position: absolute;
+  top: 0; /* Moves it all the way up */
+  left: 0;
+  width: 100%; /* Spans all the way left to right */
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* 2. THE HEADER PANEL: Full width "Bar" style */
+.premium-header {
+  pointer-events: auto;
+  width: 100%; /* All the way left and right */
+  height: 80px; /* Keeping it thick as requested */
+  
+  /* Rounding only the bottom corners for a "HUD Bar" look */
+  border-radius: 0 0 30px 30px; 
+  
+  /* IDENTICAL PREMIUM STYLES */
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02) 40%),
+    linear-gradient(135deg, #2c2a55 0%, #1b1a37 60%, #14132b 100%);
+  
+  /* Border only on the bottom and sides (not top) */
+  border: 1px solid rgba(255,255,255,0.16);
+  border-top: none; 
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.15) inset,
+    0 -10px 20px rgba(0,0,0,0.3) inset, /* Deep bottom shadow */
+    0 10px 25px rgba(0,0,0,0.5); /* Big shadow on the world */
+
+  backdrop-filter: blur(8px);
+  
+  /* Keep the floating and breathing animations */
+  /* Note: hudFloat was moved to the wrapper or adjusted so it doesn't leave gaps at top */
+  animation: hudBreathe 3.2s ease-in-out infinite;
+  
+  position: relative;
+  overflow: hidden;
+}
+
+/* 3. THE SHEEN: Full width light sweep */
+.premium-header::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 30%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.4), transparent);
+  transform: skewX(-25deg);
+  animation: hudSheen 5s ease-in-out infinite;
+}
   </style>
 </head>
 <body>
