@@ -954,123 +954,75 @@
   }
 }
 
+/* ==========================================
+   STEP 1: PREMIUM FULL-WIDTH TOP BAR
+   ========================================== */
 
-/* 1. THE WRAPPER: Handles the centering so the animation doesn't break it */
+/* 1. THE WRAPPER: Handles centering and absolute top placement */
 .header-center-container {
   position: absolute;
-  top: 16px;
+  top: 0; 
   left: 0;
-  width: 100%;
+  width: 100%; 
   display: flex;
   justify-content: center;
-  pointer-events: none; /* Allows you to click Kevin through the empty space */
+  pointer-events: none; /* Allows clicks to pass through to Kevin */
   z-index: 1000;
 }
 
-/* 2. THE HEADER PANEL: Identical style to scoreBoard */
+/* 2. THE HEADER PANEL: Edge-to-edge "Thick" HUD Bar */
 .premium-header {
-  pointer-events: auto; /* Makes the box solid again */
-  width: 60%;
-  max-width: 700px;
-  height: 85px; /* Increased height for that "thick" look */
+  pointer-events: auto; /* Makes the bar itself solid/clickable */
+  width: 100%;          /* Spans all the way Left to Right */
+  height: 85px;         /* Thick chunky look */
   
-  border-radius: 25px; /* Round cornered as requested */
+  /* Rounding only the bottom corners; Top and sides are flat to hit the edges */
+  border-radius: 0 0 35px 35px; 
   
-  /* EXACT STYLES FROM SCOREBOARD */
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02) 40%),
-    linear-gradient(135deg, #2c2a55 0%, #1b1a37 60%, #14132b 100%);
-  border: 1px solid rgba(255,255,255,0.16);
-
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.25) inset,
-    0 -10px 16px rgba(0,0,0,0.25) inset,
-    0 8px 18px rgba(0,0,0,0.45),
-    0 0 0 4px rgba(10,8,25,0.35);
-
-  backdrop-filter: blur(6px);
-  
-  /* ANIMATIONS: Identical to scoreboard */
-  animation: hudFloat 4s ease-in-out infinite, hudBreathe 3.2s ease-in-out infinite;
-  
-  position: relative;
-  overflow: hidden;
-}
-
-/* 3. THE SHEEN: Identical light sweep effect */
-.premium-header::before {
-  content: "";
-  position: absolute;
-  top: 0; left: -60%;
-  width: 40%; height: 100%;
-  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
-  transform: skewX(-25deg);
-  animation: hudSheen 4.5s ease-in-out infinite;
-  pointer-events: none;
-}
-
-/* Mobile adjustments */
-@media (max-width: 600px) {
-  .premium-header {
-    width: 85%;
-    height: 65px;
-  }
-}
-
-/* 1. THE WRAPPER: Now flush at the top */
-.header-center-container {
-  position: absolute;
-  top: 0; /* Moves it all the way up */
-  left: 0;
-  width: 100%; /* Spans all the way left to right */
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 1000;
-}
-
-/* 2. THE HEADER PANEL: Full width "Bar" style */
-.premium-header {
-  pointer-events: auto;
-  width: 100%; /* All the way left and right */
-  height: 80px; /* Keeping it thick as requested */
-  
-  /* Rounding only the bottom corners for a "HUD Bar" look */
-  border-radius: 0 0 30px 30px; 
-  
-  /* IDENTICAL PREMIUM STYLES */
+  /* IDENTICAL PREMIUM GRADIENTS FROM SCOREBOARD */
   background:
     linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02) 40%),
     linear-gradient(135deg, #2c2a55 0%, #1b1a37 60%, #14132b 100%);
   
-  /* Border only on the bottom and sides (not top) */
-  border: 1px solid rgba(255,255,255,0.16);
+  /* Border only on the bottom and sides */
+  border: 1px solid rgba(255,255,255,0.18);
   border-top: none; 
 
+  /* High-end 3D Shadows & Glass Effect */
   box-shadow:
-    0 1px 0 rgba(255,255,255,0.15) inset,
-    0 -10px 20px rgba(0,0,0,0.3) inset, /* Deep bottom shadow */
-    0 10px 25px rgba(0,0,0,0.5); /* Big shadow on the world */
+    0 1px 0 rgba(255,255,255,0.2) inset,      /* Top inner highlight */
+    0 -12px 20px rgba(0,0,0,0.3) inset,      /* Bottom inner depth shadow */
+    0 10px 30px rgba(0,0,0,0.6);             /* Large shadow on the game world */
 
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
   
-  /* Keep the floating and breathing animations */
-  /* Note: hudFloat was moved to the wrapper or adjusted so it doesn't leave gaps at top */
+  /* Active UI: Breathing Glow */
   animation: hudBreathe 3.2s ease-in-out infinite;
   
   position: relative;
   overflow: hidden;
 }
 
-/* 3. THE SHEEN: Full width light sweep */
+/* 3. THE PREMIUM SHEEN: Glossy light sweep */
 .premium-header::before {
   content: "";
   position: absolute;
-  top: 0; left: -100%;
-  width: 30%; height: 100%;
+  top: 0; 
+  left: -120%; /* Wide start for full width bar */
+  width: 35%; 
+  height: 100%;
   background: linear-gradient(100deg, transparent, rgba(255,255,255,0.4), transparent);
   transform: skewX(-25deg);
-  animation: hudSheen 5s ease-in-out infinite;
+  animation: hudSheen 5.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* MOBILE FIX: Adjust thickness for phones */
+@media (max-width: 600px) {
+  .premium-header {
+    height: 65px;
+    border-radius: 0 0 25px 25px;
+  }
 }
   </style>
 </head>
