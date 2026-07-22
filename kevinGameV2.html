@@ -30,18 +30,22 @@
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       pointer-events: none; z-index: 1; overflow: hidden;
     }
-    .particle {
-      position: absolute;
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 50%;
-      animation: floatUp linear infinite;
-    }
-    @keyframes floatUp {
-      0% { transform: translateY(100vh) scale(0); opacity: 0; }
-      20% { opacity: 1; }
-      80% { opacity: 1; }
-      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
-    }
+.particle {
+  position: absolute;
+  top: 100vh; /* Start them at the bottom, off-screen */
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  opacity: 0; /* Hidden until animation starts */
+  animation: floatUp linear infinite;
+  pointer-events: none;
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-110vh) scale(1); opacity: 0; }
+}
 
     /* ==========================================
        MAIN MENU
@@ -630,6 +634,52 @@
   50% { transform: translateX(-30px) translateY(5px); }
 }
 @keyframes plaquePop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+/* THE LOGO WRAPPER */
+.logo-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+  width: 100%;
+  z-index: 10;
+  /* Screen shake on impact */
+  animation: logoSlamShake 0.2s 0.6s 2; 
+}
+
+/* THE MAIN LOGO */
+.logo-main {
+  width: 100%;
+  max-width: 480px; /* Big and bold for PC */
+  height: auto;
+  filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8));
+  
+  /* Fall and Crash Animation */
+  animation: crashSlam 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* ANIMATION: FALL AND SQUASH */
+@keyframes crashSlam {
+  0% { transform: translateY(-1000px) scaleY(2); opacity: 0; }
+  60% { transform: translateY(0) scaleY(0.7); opacity: 1; } /* Hits the floor */
+  80% { transform: translateY(-20px) scaleY(1.1); }          /* Bounces */
+  100% { transform: translateY(0) scaleY(1); opacity: 1; }
+}
+
+/* ANIMATION: SHAKE THE WHOLE MENU */
+@keyframes logoSlamShake {
+  0% { transform: translate(0,0); }
+  50% { transform: translate(10px, 10px); }
+  100% { transform: translate(0,0); }
+}
+
+/* MOBILE FIX */
+@media (max-width: 600px) {
+  .logo-main {
+    max-width: 320px; /* Shrinks for phone screens */
+  }
+}
   </style>
 </head>
 <body>
@@ -676,8 +726,9 @@
     <!-- Fundal particule -->
     <div class="particles-container" id="particles"></div>
 
-    <img class="logo-img" src="https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/449320c0-9960-4b26-9c96-a544c858cd78/ChatGPT+Image+May+30%2C+2025%2C+12_48_36+PM.png?format=500w" alt="Prindel pe Kevinuță">
-    
+<div class="logo-wrapper">
+  <img class="logo-main" src="https://iili.io/CNVgL7a.png" alt="PRINDEL PE KEVINUȚĂ">
+</div>    
     <div id="welcomeText">Salut, Jucătorule!</div>
 
     <div class="button-container">
@@ -708,19 +759,30 @@
        JAVASCRIPT
        ========================================== -->
   <script>
-    // Generare particule pentru fundal
-    const particlesContainer = document.getElementById('particles');
-    for (let i = 0; i < 40; i++) {
-      let p = document.createElement('div');
-      p.className = 'particle';
-      let size = Math.random() * 4 + 2;
-      p.style.width = size + 'px';
-      p.style.height = size + 'px';
-      p.style.left = Math.random() * 100 + 'vw';
-      p.style.animationDuration = (Math.random() * 5 + 5) + 's';
-      p.style.animationDelay = (Math.random() * 5) + 's';
-      particlesContainer.appendChild(p);
-    }
+const particlesContainer = document.getElementById('particles');
+const particleCount = 40;
+
+for (let i = 0; i < particleCount; i++) {
+  let p = document.createElement('div');
+  p.className = 'particle';
+  
+  // Randomize size
+  let size = Math.random() * 4 + 2;
+  p.style.width = size + 'px';
+  p.style.height = size + 'px';
+  
+  // Randomize horizontal position
+  p.style.left = Math.random() * 100 + 'vw';
+  
+  // Speed and Delay
+  let duration = Math.random() * 5 + 5; // 5 to 10 seconds
+  let delay = Math.random() * 5;
+  
+  p.style.animationDuration = duration + 's';
+  p.style.animationDelay = '-' + delay + 's'; // The "-" makes them start "mid-way" so they aren't stuck at the bottom/top on load
+  
+  particlesContainer.appendChild(p);
+}
 
     // =====================================
     // FIREBASE INITIALIZATION
