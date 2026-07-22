@@ -696,7 +696,7 @@
   pointer-events: none;
 }
 
-/* THE HUD CARD */
+/* THE HUD CARD — streamer frame pill */
 #scoreBoard {
   position: absolute;
   top: 16px;
@@ -705,61 +705,110 @@
 
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 
-  padding: 8px 22px 8px 8px;
+  padding: 10px 26px 10px 10px;
   border-radius: 999px;
 
   background:
     linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02) 40%),
     linear-gradient(135deg, #2c2a55 0%, #1b1a37 60%, #14132b 100%);
-  border: 1px solid rgba(255,255,255,0.16);
+  border: 1px solid rgba(255,255,255,0.18);
 
   box-shadow:
-    0 1px 0 rgba(255,255,255,0.25) inset,
-    0 -10px 16px rgba(0,0,0,0.25) inset,
-    0 8px 18px rgba(0,0,0,0.45),
-    0 0 0 4px rgba(10,8,25,0.35);
+    0 1px 0 rgba(255,255,255,0.28) inset,
+    0 -12px 20px rgba(0,0,0,0.32) inset,
+    0 10px 24px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(255,255,255,0.08),
+    0 0 0 5px rgba(10,8,25,0.35),
+    0 0 18px rgba(255,196,60,0.22);
 
-  backdrop-filter: blur(6px);
+  backdrop-filter: blur(8px) saturate(130%);
   animation: hudFloat 4s ease-in-out infinite, hudBreathe 3.2s ease-in-out infinite;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
   overflow: hidden;
+}
+
+/* Frame corner brackets — inner L-brackets at all 4 corners */
+#scoreBoard::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  pointer-events: none;
+  border-radius: 999px;
+
+  background-image:
+    /* Top-left */
+    linear-gradient(to right, rgba(255,215,100,0.95) 12px, transparent 12px),
+    linear-gradient(to bottom, rgba(255,215,100,0.95) 12px, transparent 12px),
+    /* Top-right */
+    linear-gradient(to left, rgba(255,215,100,0.95) 12px, transparent 12px),
+    linear-gradient(to bottom, rgba(255,215,100,0.95) 12px, transparent 12px),
+    /* Bottom-left */
+    linear-gradient(to right, rgba(255,215,100,0.95) 12px, transparent 12px),
+    linear-gradient(to top, rgba(255,215,100,0.95) 12px, transparent 12px),
+    /* Bottom-right */
+    linear-gradient(to left, rgba(255,215,100,0.95) 12px, transparent 12px),
+    linear-gradient(to top, rgba(255,215,100,0.95) 12px, transparent 12px);
+
+  background-size:
+    12px 3px, 3px 12px,
+    12px 3px, 3px 12px,
+    12px 3px, 3px 12px,
+    12px 3px, 3px 12px;
+
+  background-position:
+    0 0, 0 0,
+    100% 0, 100% 0,
+    0 100%, 0 100%,
+    100% 100%, 100% 100%;
+
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 0 3px rgba(255,196,60,0.7));
+  opacity: 0.95;
+  transition: all 0.2s ease;
+}
+
+#scoreBoard:hover::after {
+  filter: drop-shadow(0 0 7px rgba(255,210,80,0.95));
+  opacity: 1;
 }
 
 /* Soft ambient glow ring, breathes slowly */
 @keyframes hudBreathe {
   0%, 100% {
     box-shadow:
-      0 1px 0 rgba(255,255,255,0.25) inset,
-      0 -10px 16px rgba(0,0,0,0.25) inset,
-      0 8px 18px rgba(0,0,0,0.45),
-      0 0 0 4px rgba(10,8,25,0.35),
-      0 0 14px rgba(255,196,60,0.18);
+      0 1px 0 rgba(255,255,255,0.28) inset,
+      0 -12px 20px rgba(0,0,0,0.32) inset,
+      0 10px 24px rgba(0,0,0,0.5),
+      0 0 0 1px rgba(255,255,255,0.08),
+      0 0 0 5px rgba(10,8,25,0.35),
+      0 0 18px rgba(255,196,60,0.22);
   }
   50% {
     box-shadow:
-      0 1px 0 rgba(255,255,255,0.25) inset,
-      0 -10px 16px rgba(0,0,0,0.25) inset,
-      0 8px 18px rgba(0,0,0,0.5),
-      0 0 0 4px rgba(10,8,25,0.35),
-      0 0 24px rgba(255,196,60,0.38);
+      0 1px 0 rgba(255,255,255,0.28) inset,
+      0 -12px 20px rgba(0,0,0,0.32) inset,
+      0 12px 28px rgba(0,0,0,0.55),
+      0 0 0 1px rgba(255,255,255,0.1),
+      0 0 0 5px rgba(10,8,25,0.35),
+      0 0 30px rgba(255,196,60,0.45);
   }
 }
 
-/* Gentle idle bob, like a live UI element rather than a static image */
+/* Gentle idle bob */
 @keyframes hudFloat {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-3px); }
 }
 
-/* Glossy light sweep, sweeps across the pill every few seconds */
+/* Glossy light sweep */
 #scoreBoard::before {
   content: "";
   position: absolute;
   top: 0; left: -60%;
   width: 40%; height: 100%;
-  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.4), transparent);
   transform: skewX(-25deg);
   animation: hudSheen 4.5s ease-in-out infinite;
   pointer-events: none;
@@ -778,8 +827,8 @@
 /* THE COIN/ICON MEDALLION */
 .score-icon-wrapper {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   flex-shrink: 0;
 
@@ -788,12 +837,12 @@
   justify-content: center;
 
   background: radial-gradient(circle at 32% 28%, #fff6cf 0%, #ffd25a 28%, #f5a623 62%, #c9780f 100%);
-  border: 2px solid rgba(255,255,255,0.85);
+  border: 2px solid rgba(255,255,255,0.9);
 
   box-shadow:
     0 2px 4px rgba(0,0,0,0.4),
-    0 0 10px rgba(255,196,60,0.55),
-    inset 0 2px 3px rgba(255,255,255,0.6),
+    0 0 12px rgba(255,196,60,0.6),
+    inset 0 2px 3px rgba(255,255,255,0.65),
     inset 0 -3px 4px rgba(120,60,0,0.45);
 }
 
@@ -804,7 +853,7 @@
   filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
 }
 
-/* subtle rotating shine ring on the medallion */
+/* Subtle rotating shine ring on the medallion */
 .score-icon-wrapper::after {
   content: "";
   position: absolute;
@@ -821,9 +870,9 @@
 /* THE SCORE NUMBER */
 #scoreText {
   font-family: 'Orbitron', sans-serif;
-  font-size: 24px;
+  font-size: 25px;
   font-weight: 900;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
   line-height: 1;
 
   color: #fff6df;
@@ -837,7 +886,7 @@
   display: inline-block;
 }
 
-/* Score pop animation — replaces the old crude scorePop */
+/* Score pop animation */
 .score-bump #scoreText {
   animation: scoreValuePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -852,9 +901,9 @@
   animation: coinPulse 0.35s ease-out;
 }
 @keyframes coinPulse {
-  0%   { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 10px rgba(255,196,60,0.55), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -3px 4px rgba(120,60,0,0.45); }
-  50%  { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 26px rgba(255,196,60,0.9), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -3px 4px rgba(120,60,0,0.45); }
-  100% { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 10px rgba(255,196,60,0.55), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -3px 4px rgba(120,60,0,0.45); }
+  0%   { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 12px rgba(255,196,60,0.6), inset 0 2px 3px rgba(255,255,255,0.65), inset 0 -3px 4px rgba(120,60,0,0.45); }
+  50%  { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 30px rgba(255,196,60,1), inset 0 2px 3px rgba(255,255,255,0.65), inset 0 -3px 4px rgba(120,60,0,0.45); }
+  100% { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 12px rgba(255,196,60,0.6), inset 0 2px 3px rgba(255,255,255,0.65), inset 0 -3px 4px rgba(120,60,0,0.45); }
 }
 
 /* ==========================================
@@ -864,16 +913,29 @@
   #scoreBoard {
     top: 10px;
     left: 10px;
-    padding: 6px 16px 6px 6px;
-    gap: 8px;
+    padding: 7px 18px 7px 7px;
+    gap: 9px;
   }
-  .score-icon-wrapper { width: 36px; height: 36px; }
-  .score-icon-wrapper i { font-size: 16px; }
-  #scoreText { font-size: 19px; }
+  .score-icon-wrapper { width: 38px; height: 38px; }
+  .score-icon-wrapper i { font-size: 17px; }
+  #scoreText { font-size: 20px; }
+  #scoreBoard::after {
+    inset: 3px;
+    background-size: 10px 2.5px, 2.5px 10px, 10px 2.5px, 2.5px 10px, 10px 2.5px, 2.5px 10px, 10px 2.5px, 2.5px 10px;
+    background-image:
+      linear-gradient(to right, rgba(255,215,100,0.95) 10px, transparent 10px),
+      linear-gradient(to bottom, rgba(255,215,100,0.95) 10px, transparent 10px),
+      linear-gradient(to left, rgba(255,215,100,0.95) 10px, transparent 10px),
+      linear-gradient(to bottom, rgba(255,215,100,0.95) 10px, transparent 10px),
+      linear-gradient(to right, rgba(255,215,100,0.95) 10px, transparent 10px),
+      linear-gradient(to top, rgba(255,215,100,0.95) 10px, transparent 10px),
+      linear-gradient(to left, rgba(255,215,100,0.95) 10px, transparent 10px),
+      linear-gradient(to top, rgba(255,215,100,0.95) 10px, transparent 10px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #scoreBoard, #scoreBoard::before, .score-icon-wrapper::after {
+  #scoreBoard, #scoreBoard::before, #scoreBoard::after, .score-icon-wrapper::after {
     animation: none !important;
   }
 }
@@ -886,206 +948,6 @@
   border: 4px solid rgba(250, 204, 21, 0.15);
   box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
   z-index: 400;
-}
-
-
-/* ==========================================
-   PREMIUM HUD v2 — Score Panel
-   ========================================== */
-#scoreBoard {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  z-index: 1000;
-
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 18px 6px 6px;
-
-  border-radius: 999px;
-  isolation: isolate;
-  overflow: hidden;
-
-  /* Layered panel: glossy top sheen + deep gradient body */
-  background:
-    linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.04) 45%, rgba(0,0,0,0.15) 100%),
-    linear-gradient(135deg, #3a2f7a 0%, #241a52 55%, #14102e 100%);
-
-  border: 1px solid rgba(255,255,255,0.22);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.45),
-    inset 0 -6px 12px rgba(0,0,0,0.35),
-    0 6px 14px rgba(0,0,0,0.4),
-    0 0 0 3px rgba(10,8,25,0.35),
-    0 0 22px rgba(120,90,255,0.25);
-
-  backdrop-filter: blur(10px) saturate(140%);
-  -webkit-backdrop-filter: blur(10px) saturate(140%);
-
-  animation: hudFloat 5s ease-in-out infinite, hudGlow 4s ease-in-out infinite;
-  transition: transform .18s ease, box-shadow .18s ease;
-}
-
-#scoreBoard:hover {
-  transform: translateY(-2px);
-}
-
-/* Animated gradient border-glow layer */
-#scoreBoard::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(120deg,
-    rgba(255,210,90,0.9),
-    rgba(255,120,200,0.75),
-    rgba(120,180,255,0.85),
-    rgba(255,210,90,0.9));
-  background-size: 300% 300%;
-  animation: hudBorder 6s linear infinite;
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-  pointer-events: none;
-  opacity: .55;
-  z-index: -1;
-}
-
-/* Glossy light sweep */
-#scoreBoard::before {
-  content: "";
-  position: absolute;
-  top: 0; left: -60%;
-  width: 45%; height: 100%;
-  background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,0.35) 50%, transparent 80%);
-  transform: skewX(-22deg);
-  animation: hudSheen 5s ease-in-out infinite;
-  pointer-events: none;
-}
-
-/* Coin medallion */
-.score-icon-wrapper {
-  position: relative;
-  width: 42px; height: 42px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  display: grid; place-items: center;
-
-  background:
-    radial-gradient(circle at 32% 28%, #fff4c2 0%, #ffd257 30%, #f5a623 65%, #b56a0a 100%);
-  border: 2px solid rgba(255,255,255,0.9);
-  box-shadow:
-    inset 0 2px 3px rgba(255,255,255,0.7),
-    inset 0 -4px 5px rgba(120,60,0,0.55),
-    0 3px 6px rgba(0,0,0,0.5),
-    0 0 14px rgba(255,190,60,0.55);
-}
-
-.score-icon-wrapper i {
-  font-size: 20px;
-  color: #6b3200;
-  filter: drop-shadow(0 1px 0 rgba(255,255,255,0.45));
-}
-
-/* Rotating shine ring on the coin */
-.score-icon-wrapper::after {
-  content: "";
-  position: absolute; inset: -3px;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg,
-    transparent 0 55%,
-    rgba(255,255,255,0.75) 65%,
-    transparent 78% 100%);
-  animation: coinSpin 3.5s linear infinite;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-}
-
-/* Score number */
-#scoreText {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 22px;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: 1px;
-  min-width: 22px;
-  text-align: left;
-
-  background: linear-gradient(180deg, #ffffff 0%, #ffeba0 55%, #ffc244 100%);
-  -webkit-background-clip: text;
-          background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.45));
-
-  transition: transform .2s cubic-bezier(0.34, 1.56, 0.64, 1);
-  display: inline-block;
-}
-
-/* Score bump */
-.score-bump #scoreText { animation: scoreValuePop .38s cubic-bezier(0.34, 1.56, 0.64, 1); }
-.score-bump .score-icon-wrapper { animation: coinPulse .45s ease-out; }
-
-/* ---- Keyframes ---- */
-@keyframes hudFloat {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-3px); }
-}
-@keyframes hudGlow {
-  0%, 100% {
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.45),
-      inset 0 -6px 12px rgba(0,0,0,0.35),
-      0 6px 14px rgba(0,0,0,0.4),
-      0 0 0 3px rgba(10,8,25,0.35),
-      0 0 20px rgba(120,90,255,0.22);
-  }
-  50% {
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.45),
-      inset 0 -6px 12px rgba(0,0,0,0.35),
-      0 8px 18px rgba(0,0,0,0.45),
-      0 0 0 3px rgba(10,8,25,0.35),
-      0 0 32px rgba(255,180,80,0.35);
-  }
-}
-@keyframes hudSheen {
-  0%   { left: -60%; }
-  55%  { left: 130%; }
-  100% { left: 130%; }
-}
-@keyframes hudBorder {
-  0%   { background-position: 0% 50%; }
-  100% { background-position: 300% 50%; }
-}
-@keyframes coinSpin { to { transform: rotate(360deg); } }
-@keyframes scoreValuePop {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.4); }
-  100% { transform: scale(1); }
-}
-@keyframes coinPulse {
-  0%   { box-shadow: inset 0 2px 3px rgba(255,255,255,.7), inset 0 -4px 5px rgba(120,60,0,.55), 0 3px 6px rgba(0,0,0,.5), 0 0 14px rgba(255,190,60,.55); }
-  50%  { box-shadow: inset 0 2px 3px rgba(255,255,255,.7), inset 0 -4px 5px rgba(120,60,0,.55), 0 3px 6px rgba(0,0,0,.5), 0 0 32px rgba(255,210,90,1); }
-  100% { box-shadow: inset 0 2px 3px rgba(255,255,255,.7), inset 0 -4px 5px rgba(120,60,0,.55), 0 3px 6px rgba(0,0,0,.5), 0 0 14px rgba(255,190,60,.55); }
-}
-
-/* Mobile */
-@media (max-width: 600px) {
-  #scoreBoard { top: 10px; left: 10px; padding: 5px 14px 5px 5px; gap: 8px; }
-  .score-icon-wrapper { width: 34px; height: 34px; }
-  .score-icon-wrapper i { font-size: 16px; }
-  #scoreText { font-size: 18px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  #scoreBoard,
-  #scoreBoard::before,
-  #scoreBoard::after,
-  .score-icon-wrapper::after { animation: none !important; }
 }
 
   </style>
