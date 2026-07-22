@@ -274,11 +274,59 @@
       background-repeat: no-repeat; background-position: center; cursor: pointer; z-index: 999;
       transition: left 0.3s ease-out, top 0.3s ease-out;
     }
-    .combo-text {
-      position: absolute; color: #00d4ff; font-family: 'Orbitron', sans-serif; font-size: 38px; font-weight: bold;
-      z-index: 1000; pointer-events: none; transform: translate(-50%, -50%);
-      text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 30px #ffffff; transition: transform 1.2s ease-out, opacity 1.2s ease-out;
-    }
+/* ==========================================
+   ARCADE COMBO STYLING (REVAMPED)
+   ========================================== */
+.combo-text {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2000;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 42px;
+  
+  /* 3D Layered Text Look */
+  color: #ffffff;
+  text-shadow: 
+    0 2px 0 #000, 
+    0 4px 0 #000, 
+    0 6px 20px rgba(0,0,0,0.5),
+    0 0 10px rgba(255,255,255,0.5);
+
+  /* Start state for animation */
+  transform: translate(-50%, -50%) scale(0.5) rotate(-10deg);
+  opacity: 0;
+  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 0.9;
+}
+
+/* Ranking Word (The smaller text above the number) */
+.combo-rank {
+  font-size: 18px;
+  letter-spacing: 2px;
+  margin-bottom: -5px;
+}
+
+/* COMBO COLOR TIERS */
+.combo-tier-cool { color: #00d4ff; text-shadow: 0 4px 0 #005a6e, 0 0 15px #00d4ff; }
+.combo-tier-hot { color: #facc15; text-shadow: 0 4px 0 #8a6d00, 0 0 15px #facc15; }
+.combo-tier-fire { color: #ff3333; text-shadow: 0 4px 0 #7a0000, 0 0 20px #ff3333; }
+
+/* ANIMATION: Snappy Pop followed by a slow float up */
+@keyframes comboPopFloat {
+  0% { transform: translate(-50%, -20%) scale(0.3) rotate(-20deg); opacity: 0; }
+  20% { transform: translate(-50%, -50%) scale(1.4) rotate(5deg); opacity: 1; }
+  35% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate(-50%, -150px) scale(0.8) rotate(-5deg); opacity: 0; }
+}
+
+.animate-combo {
+  animation: comboPopFloat 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
     #backBtn {
       position: absolute; bottom: 20px; left: 20px; padding: 12px 25px; background: #ff4444;
       color: white; border: 3px solid #ffaaaa; border-radius: 12px; font-size: 18px;
@@ -1556,20 +1604,48 @@ function startKevinMovement() {
       setTimeout(() => { canClickKevin = true; }, 100); 
     });
 
-    function showComboText(x, y, count) {
-      const el = document.createElement("div");
-      el.className = "combo-text";
-      el.textContent = `x${count}`;
-      el.style.left = `${x}px`;
-      el.style.top = `${y}px`;
-      document.body.appendChild(el);
+function showComboText(x, y, count) {
+  // Create element
+  const el = document.createElement("div");
+  el.className = "combo-text animate-combo";
+  
+  // 1. Determine Tier and Word
+  let rankWord = "";
+  let tierClass = "";
 
-      setTimeout(() => {
-        el.style.transform = "translate(-50%, -150px) scale(1.5)";
-        el.style.opacity = "0";
-      }, 10);
-      setTimeout(() => { el.remove(); }, 1200);
-    }
+  if (count < 5) {
+    rankWord = "NICE!";
+    tierClass = "combo-tier-cool";
+  } else if (count < 10) {
+    rankWord = "AMAZING!";
+    tierClass = "combo-tier-hot";
+  } else if (count < 20) {
+    rankWord = "UNSTOPPABLE!";
+    tierClass = "combo-tier-fire";
+  } else {
+    rankWord = "KEVIN-GOD!";
+    tierClass = "combo-tier-fire";
+    el.style.fontSize = "52px"; // Make it even bigger
+  }
+
+  el.classList.add(tierClass);
+
+  // 2. Set Content
+  el.innerHTML = `
+    <span class="combo-rank">${rankWord}</span>
+    <span class="combo-count">x${count}</span>
+  `;
+
+  // 3. Randomize Tilt slightly for "Juiciness"
+  const randomRotate = (Math.random() * 20 - 10).toFixed(2);
+  el.style.left = `${x}px`;
+  el.style.top = `${y}px`;
+  
+  document.body.appendChild(el);
+
+  // 4. Remove after animation
+  setTimeout(() => { el.remove(); }, 1000);
+}
 
 
 let isPaused = false;
