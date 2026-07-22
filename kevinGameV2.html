@@ -758,6 +758,46 @@
     max-width: 320px; /* Perfectly sized for phones */
   }
 }
+/* ==========================================
+   MOBILE OPTIMIZATION (Screens < 600px)
+   ========================================== */
+@media (max-width: 600px) {
+  #scoreBoard {
+    top: 10px;    /* Move closer to edge */
+    left: 10px;
+    padding: 4px 15px 4px 6px;
+    gap: 8px;
+    border-width: 2px;
+    box-shadow: 0 4px 0 #1a0a00, 0 6px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  .score-icon-wrapper {
+    width: 34px;  /* Much smaller for mobile */
+    height: 34px;
+  }
+
+  .score-icon {
+    height: 24px;
+  }
+
+  #scoreText {
+    font-size: 20px; /* Clean and readable but compact */
+  }
+
+  #scoreBoard::after {
+    top: -8px;
+    left: 40px;
+    font-size: 8px;
+  }
+}
+
+/* Animation remains the same */
+.score-bump { animation: scorePop 0.2s ease-out; }
+@keyframes scorePop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
   </style>
 </head>
 <body>
