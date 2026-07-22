@@ -1687,7 +1687,26 @@ function showComboText(x, y, count) {
     const el = document.createElement("div");
     el.className = "combo-text animate-combo-v2";
     
-    // Find Tier color based on the count
+    // 1. BOUNDARY CHECKING (Preventing text from leaving the screen)
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    
+    let safeX = x;
+    let safeY = y;
+
+    // Horizontal Safety (Keep away from left/right walls)
+    const sideMargin = 80; // Enough space for half a word
+    if (safeX < sideMargin) safeX = sideMargin;
+    if (safeX > screenWidth - sideMargin) safeX = screenWidth - sideMargin;
+
+    // Vertical Safety (Keep away from top/bottom)
+    // We need 200px at the top because the animation floats UP
+    const topMargin = 200; 
+    const bottomMargin = 50;
+    if (safeY < topMargin) safeY = topMargin;
+    if (safeY > screenHeight - bottomMargin) safeY = screenHeight - bottomMargin;
+
+    // 2. TIER LOGIC (Keep your existing color logic)
     let currentTier = "tier-verde";
     if (count >= 750) currentTier = "tier-rainbow";
     else if (count >= 400) currentTier = "tier-celestial";
@@ -1700,26 +1719,23 @@ function showComboText(x, y, count) {
 
     const milestone = comboMilestones[count];
     let rankWord = milestone ? milestone.word : "";
-    
-    // If we hit a milestone, we can override the tier with the specific milestone tier
     if (milestone) currentTier = milestone.tier;
 
     el.classList.add(currentTier);
 
-    // If it's a milestone, we make the text bold and big
+    // 3. SET CONTENT
     if (rankWord) {
         el.innerHTML = `
-            <span class="combo-rank-word" style="font-size: 1.4em; display: block;">${rankWord}</span>
+            <span class="combo-rank-word">${rankWord}</span>
             <span class="combo-count">x${count}</span>
         `;
     } else {
-        // Only show the multiplier for non-milestones to keep it clean
         el.innerHTML = `<span class="combo-count">x${count}</span>`;
     }
 
-    // Position it at the click
-    el.style.left = `${x}px`;
-    el.style.top = `${y}px`;
+    // 4. APPLY SAFE POSITION
+    el.style.left = `${safeX}px`;
+    el.style.top = `${safeY}px`;
     
     document.body.appendChild(el);
     setTimeout(() => { el.remove(); }, 900);
