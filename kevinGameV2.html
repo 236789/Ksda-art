@@ -266,12 +266,85 @@
   overflow: hidden;
   z-index: 500;
 }
-    #scoreBoard {
-      position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.8); color: white;
-      font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: bold;
-      padding: 12px 25px; border: 3px solid #ffd700; border-radius: 16px;
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); z-index: 10; display: flex; align-items: center; gap: 12px;
-    }
+/* ==========================================
+   PREMIUM GAMER HUD (SCOREBOARD)
+   ========================================== */
+#scoreBoard {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  
+  /* Matches the Welcome Badge & Logo colors */
+  background: linear-gradient(to bottom, #4d2600, #261300); 
+  border: 3px solid #facc15;
+  border-radius: 50px; /* Pill shape */
+  
+  display: flex;
+  align-items: center;
+  padding: 5px 25px 5px 10px; /* Extra padding on the right for the numbers */
+  gap: 15px;
+  
+  box-shadow: 
+    0 8px 0 #1a0a00,              /* 3D Depth */
+    0 10px 20px rgba(0, 0, 0, 0.6); 
+    
+  z-index: 1000;
+  transition: transform 0.1s ease;
+}
+
+/* THE ICON SLOT (Circular Highlight) */
+.score-icon-wrapper {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(250, 204, 21, 0.5);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+}
+
+.score-icon {
+  height: 40px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+/* THE SCORE NUMBERS */
+#scoreText {
+  font-family: 'Orbitron', sans-serif; /* Sci-fi digital look */
+  font-size: 32px;
+  font-weight: 900;
+  color: #ffea00; /* Bright gold */
+  text-shadow: 0 0 10px rgba(255, 234, 0, 0.5), 2px 2px 0px #1a0a00;
+  letter-spacing: 2px;
+}
+
+/* Label above the score */
+#scoreBoard::after {
+  content: "SCORE";
+  position: absolute;
+  top: -12px;
+  left: 65px;
+  background: #facc15;
+  color: #1a0a00;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+}
+
+/* ANIMATION: Bumps the scoreboard when you score */
+.score-bump {
+  animation: scorePop 0.2s ease-out;
+}
+
+@keyframes scorePop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
     .score-icon { height: 35px; }
     
     #kevin {
@@ -753,10 +826,12 @@
        GAME AREA
        ========================================== -->
   <div id="gameArea">
-    <div id="scoreBoard">
-      <img src="https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/3838e9be-f08a-4e78-815f-4b1688594e17/ce291931-bdae-4385-a65e-fea28b922266_removalai_preview.png?format=500w" class="score-icon" alt="Click Icon">
-      <span id="scoreText">0</span>
-    </div>
+<div id="scoreBoard">
+  <div class="score-icon-wrapper">
+    <img src="https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/3838e9be-f08a-4e78-815f-4b1688594e17/ce291931-bdae-4385-a65e-fea28b922266_removalai_preview.png?format=500w" class="score-icon" alt="Avatar">
+  </div>
+  <span id="scoreText">0</span>
+</div>
     <div id="kevin"></div>
     <button id="backBtn" onclick="returnToMenu()">Înapoi la Meniu</button>
   </div>
@@ -991,10 +1066,17 @@ function startGameUI() {
       document.getElementById('mainMenu').style.display = 'flex';
     }
 
-    function updateScoreUI() {
-      document.getElementById('scoreText').innerText = score;
-    }
+function updateScoreUI() {
+  const sb = document.getElementById('scoreBoard');
+  const st = document.getElementById('scoreText');
+  
+  st.innerText = score;
 
+  // Add the bump animation class
+  sb.classList.remove('score-bump');
+  void sb.offsetWidth; // This is a "hack" to reset the animation
+  sb.classList.add('score-bump');
+}
     // =====================================
     // GAMEPLAY LOGIC
     // =====================================
