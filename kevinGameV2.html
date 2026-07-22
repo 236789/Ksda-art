@@ -891,163 +891,6 @@
 }
 
 
-
-/* ==========================================
-   PREMIUM AAA HUD - DESIGN SYSTEM
-   ========================================== */
-
-:root {
-  --hud-bg: rgba(20, 21, 45, 0.85);
-  --hud-border: rgba(255, 255, 255, 0.15);
-  --gold-primary: #ffd25a;
-  --gold-glow: rgba(255, 196, 60, 0.5);
-  --accent-blue: #3a3f8c;
-}
-
-.hud-top-root {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 1000;
-  pointer-events: none; /* Let clicks pass through to game */
-}
-
-/* TOP RAIL */
-.hud-top-bar {
-  width: 100%;
-  height: 12px;
-  background: linear-gradient(to bottom, #1b1a37, #0d0d1f);
-  border-bottom: 2px solid var(--accent-blue);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-  position: relative;
-  overflow: hidden;
-}
-
-.bar-sheen {
-  position: absolute;
-  top: 0; left: -100%;
-  width: 50%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-  animation: barSweep 6s infinite linear;
-}
-
-/* SCORE MEDALLION */
-.hud-score-medallion {
-  position: relative;
-  top: -2px; /* Slight overlap with bar */
-  height: 64px;
-  min-width: 200px;
-  background: linear-gradient(180deg, #2c2a55 0%, #15152e 100%);
-  border: 2px solid var(--hud-border);
-  border-top: none;
-  border-radius: 0 0 30px 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 25px;
-  box-shadow: 
-    0 10px 25px rgba(0,0,0,0.5),
-    inset 0 -2px 8px rgba(255,255,255,0.05);
-  backdrop-filter: blur(10px);
-  pointer-events: auto; /* Allow interaction if needed */
-  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* The Connection Piece */
-.medallion-connector {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 4px;
-  background: var(--gold-primary);
-  box-shadow: 0 0 15px var(--gold-glow);
-}
-
-.score-content-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  z-index: 2;
-}
-
-/* BOLT ICON STYLE */
-.score-icon-container {
-  width: 42px;
-  height: 42px;
-  background: radial-gradient(circle at 30% 30%, #fff6cf 0%, #ffd25a 40%, #f5a623 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 15px var(--gold-glow), inset 0 2px 4px rgba(255,255,255,0.8);
-  position: relative;
-  overflow: hidden;
-}
-
-.score-icon-container i {
-  color: #5c3a00;
-  font-size: 20px;
-  filter: drop-shadow(0 1px 1px rgba(255,255,255,0.4));
-}
-
-/* SCORE TEXT STYLE */
-#scoreText {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 28px;
-  font-weight: 800;
-  color: #ffffff;
-  text-shadow: 0 0 10px rgba(255,255,255,0.3), 0 2px 4px rgba(0,0,0,0.5);
-  background: linear-gradient(to bottom, #fff, #bbb);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* ANIMATIONS */
-@keyframes barSweep {
-  0% { left: -100%; }
-  20% { left: 100%; }
-  100% { left: 100%; }
-}
-
-/* Physics-based Score Pop */
-.score-bump {
-  animation: scorePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes scorePop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.15); filter: brightness(1.3); }
-  100% { transform: scale(1); }
-}
-
-/* Side Wings Decor */
-.medallion-wing {
-  position: absolute;
-  width: 10px;
-  height: 30px;
-  background: var(--accent-blue);
-  top: 0;
-  opacity: 0.5;
-}
-.wing-left { left: -10px; clip-path: polygon(100% 0, 0 0, 100% 100%); }
-.wing-right { right: -10px; clip-path: polygon(0 0, 100% 0, 0 100%); }
-
-/* Mobile HUD scaling */
-@media (max-width: 600px) {
-  .hud-score-medallion {
-    height: 50px;
-    min-width: 160px;
-    padding: 0 15px;
-  }
-  #scoreText { font-size: 20px; }
-  .score-icon-container { width: 32px; height: 32px; }
-}
-
   </style>
 </head>
 <body>
@@ -1113,32 +956,11 @@
   </div> <!-- Added missing </div> for mainMenu -->
 
 <div id="gameArea">
-  <!-- THE PREMIUM HUD ROOT -->
-  <div class="hud-top-root">
-    <!-- The sleek top rail -->
-    <div class="hud-top-bar">
-      <div class="bar-sheen"></div>
+  <div id="scoreBoard">
+    <div class="score-icon-wrapper">
+      <i class="fa-solid fa-bolt"></i>
     </div>
-
-    <!-- The Score Medallion (Hanging below the bar) -->
-    <div id="scoreBoard" class="hud-score-medallion">
-      <div class="medallion-connector"></div>
-      <div class="medallion-glow"></div>
-      
-      <div class="score-content-wrapper">
-        <div class="score-icon-container">
-          <i class="fa-solid fa-bolt"></i>
-          <div class="icon-shine"></div>
-        </div>
-        <div class="score-value-container">
-          <span id="scoreText">0</span>
-        </div>
-      </div>
-      
-      <!-- Aesthetic side wings -->
-      <div class="medallion-wing wing-left"></div>
-      <div class="medallion-wing wing-right"></div>
-    </div>
+    <span id="scoreText">0</span>
   </div>
 
   <div id="kevin"></div>
@@ -1379,13 +1201,11 @@ function updateScoreUI() {
   const sb = document.getElementById('scoreBoard');
   const st = document.getElementById('scoreText');
   
-  if (!sb || !st) return;
-
   st.innerText = score;
 
-  // Trigger the premium AAA animation
+  // Add the bump animation class
   sb.classList.remove('score-bump');
-  void sb.offsetWidth; // Force reflow
+  void sb.offsetWidth; // This is a "hack" to reset the animation
   sb.classList.add('score-bump');
 }
     // =====================================
