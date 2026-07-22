@@ -897,7 +897,56 @@
 }
 
 
+/* THE FLOATING CONTROLS CONTAINER */
+.game-controls {
+  position: absolute;
+  top: 16px;
+  right: 16px; /* Opposite side of the score */
+  z-index: 1000;
+  display: flex;
+  gap: 10px;
+}
 
+/* INDIVIDUAL ROUND BUTTONS */
+.control-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  
+  /* Matches your ScoreBoard style */
+  background: linear-gradient(135deg, #2c2a55 0%, #1b1a37 100%);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff6df;
+  font-size: 18px;
+  cursor: pointer;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  box-shadow: 
+    0 4px 10px rgba(0,0,0,0.4), 
+    inset 0 1px 0 rgba(255,255,255,0.2);
+  backdrop-filter: blur(5px);
+  transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #3d3b75 0%, #24234a 100%);
+  border-color: #facc15; /* Gold glow on hover */
+  color: #facc15;
+}
+
+.control-btn:active {
+  transform: translateY(2px) scale(0.9);
+}
+
+/* Mobile Fix */
+@media (max-width: 600px) {
+  .game-controls { top: 10px; right: 10px; }
+  .control-btn { width: 38px; height: 38px; font-size: 16px; }
+}
   </style>
 </head>
 <body>
@@ -963,14 +1012,24 @@
   </div> <!-- Added missing </div> for mainMenu -->
 
 <div id="gameArea">
+  <!-- EXISTING SCOREBOARD -->
   <div id="scoreBoard">
-    <div class="score-icon-wrapper">
-      <i class="fa-solid fa-bolt"></i>
-    </div>
+    <div class="score-icon-wrapper"><i class="fa-solid fa-bolt"></i></div>
     <span id="scoreText">0</span>
   </div>
 
+  <!-- NEW: FLOATING CONTROLS (Top Right) -->
+  <div class="game-controls">
+    <button class="control-btn" title="Pause" onclick="togglePause()">
+      <i class="fa-solid fa-pause"></i>
+    </button>
+    <button class="control-btn" title="Settings">
+      <i class="fa-solid fa-gear"></i>
+    </button>
+  </div>
+
   <div id="kevin"></div>
+  <!-- You can keep or remove the big red back button now -->
   <button id="backBtn" onclick="returnToMenu()">Înapoi la Meniu</button>
 </div>
   <!-- ==========================================
