@@ -1498,31 +1498,7 @@ function startKevinMovement() {
     }, 1800); // Slightly slower movement for better playability
 }
 
-// Update the click event
-document.getElementById('kevin').addEventListener('pointerdown', (e) => { // 'pointerdown' is faster on mobile
-    e.stopPropagation(); 
-    if (!canClickKevin) return;
-    
-    // Add a "Squeeze" effect when clicked
-    const kevin = document.getElementById('kevin');
-    kevin.style.transform = "scale(0.8)";
-    setTimeout(() => { kevin.style.transform = "scale(1)"; }, 100);
 
-    score++;
-    updateScoreUI();
-
-    comboCount++;
-    showComboText(e.clientX, e.clientY, comboCount);
-
-    clearTimeout(comboTimer);
-    comboTimer = setTimeout(() => { comboCount = 0; }, 2000);
-
-    // RESET the timer whenever he is caught so he doesn't jump immediately after
-    if (!isKevinTired) {
-        moveKevinAway();
-        startKevinMovement(); 
-    }
-});
 
     function moveKevinAway() {
       if (isKevinTired) return;
