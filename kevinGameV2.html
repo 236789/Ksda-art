@@ -953,6 +953,69 @@
     min-height: 50px;
   }
 }
+
+
+/* 1. THE WRAPPER: Handles the centering so the animation doesn't break it */
+.header-center-container {
+  position: absolute;
+  top: 16px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none; /* Allows you to click Kevin through the empty space */
+  z-index: 1000;
+}
+
+/* 2. THE HEADER PANEL: Identical style to scoreBoard */
+.premium-header {
+  pointer-events: auto; /* Makes the box solid again */
+  width: 60%;
+  max-width: 700px;
+  height: 85px; /* Increased height for that "thick" look */
+  
+  border-radius: 25px; /* Round cornered as requested */
+  
+  /* EXACT STYLES FROM SCOREBOARD */
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02) 40%),
+    linear-gradient(135deg, #2c2a55 0%, #1b1a37 60%, #14132b 100%);
+  border: 1px solid rgba(255,255,255,0.16);
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.25) inset,
+    0 -10px 16px rgba(0,0,0,0.25) inset,
+    0 8px 18px rgba(0,0,0,0.45),
+    0 0 0 4px rgba(10,8,25,0.35);
+
+  backdrop-filter: blur(6px);
+  
+  /* ANIMATIONS: Identical to scoreboard */
+  animation: hudFloat 4s ease-in-out infinite, hudBreathe 3.2s ease-in-out infinite;
+  
+  position: relative;
+  overflow: hidden;
+}
+
+/* 3. THE SHEEN: Identical light sweep effect */
+.premium-header::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -60%;
+  width: 40%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: skewX(-25deg);
+  animation: hudSheen 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .premium-header {
+    width: 85%;
+    height: 65px;
+  }
+}
   </style>
 </head>
 <body>
@@ -1018,8 +1081,10 @@
   </div> <!-- Added missing </div> for mainMenu -->
 
 <div id="gameArea">
-  <!-- THE NEW HEADER (Step 1: Empty) -->
-  <div id="mainHeader" class="premium-header"></div>
+  <!-- THE NEW HEADER WRAPPER (Centers the header) -->
+  <div class="header-center-container">
+    <div id="mainHeader" class="premium-header"></div>
+  </div>
 
   <div id="scoreBoard">
     <div class="score-icon-wrapper">
