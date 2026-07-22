@@ -1247,6 +1247,74 @@
   -webkit-text-stroke: 1px #000;
   font-size: 34px !important; /* Make it slightly bigger at the end */
 }
+
+
+/* CHARACTER SELECTOR STYLES */
+.char-box {
+  max-width: 380px !important;
+  padding: 30px 20px !important;
+}
+
+.char-display-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.char-spotlight {
+  width: 180px;
+  height: 220px;
+  background: radial-gradient(circle at center, #2c2a55 0%, #14132b 100%);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  position: relative;
+}
+
+#charDisplayImg {
+  width: 120px;
+  height: 120px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin-bottom: 15px;
+  filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+}
+
+#charDisplayName {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  color: #facc15;
+  text-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
+}
+
+.nav-arrow {
+  background: linear-gradient(180deg, #4d2600, #261300);
+  border: 2px solid #facc15;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 0 #1a0a00;
+  transition: 0.1s;
+}
+
+.nav-arrow:active { transform: translateY(3px); box-shadow: 0 1px 0 #1a0a00; }
+.nav-arrow:disabled { opacity: 0.3; cursor: default; }
+
+@media (max-width: 600px) {
+  .char-spotlight { width: 150px; height: 180px; }
+  #charDisplayImg { width: 100px; height: 100px; }
+}
   </style>
 </head>
 <body>
@@ -1310,6 +1378,36 @@
       </button>
     </div> <!-- Added missing </div> for button-container -->
   </div> <!-- Added missing </div> for mainMenu -->
+  
+
+
+<!-- OVERLAY: CHARACTER SELECTION -->
+<div id="charSelectorModal" class="modal-overlay">
+  <div class="modal-box char-box">
+    <h2>ALEGE-ȚI EROUL</h2>
+    
+    <div class="char-display-container">
+      <!-- Arrows -->
+      <button class="nav-arrow left" onclick="changeChar(-1)">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
+      <!-- Spotlight -->
+      <div class="char-spotlight electric-container">
+        <div id="charDisplayImg"></div>
+        <div id="charDisplayName">KEVINUȚĂ</div>
+      </div>
+
+      <button class="nav-arrow right" onclick="changeChar(1)">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+
+    <button class="menu-btn play" style="width: 100%; margin-top: 20px;" onclick="confirmCharacter()">
+      <span>SELECTEAZĂ</span>
+    </button>
+  </div>
+</div>
 
 <!-- Inside <div id="gameArea"> -->
 <div id="gameArea">
@@ -1776,7 +1874,85 @@ async function leaveGame() {
   isPaused = false;
   
   // Use your existing function to clean up and save score
-  await returnToMenu();
+  await returnToMenu(); 
+}
+
+
+// 1. CHARACTER DATA
+const characterList = [
+    { 
+        id: "kevin", 
+        name: "KEVINUȚĂ", 
+        img: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w" 
+    },
+    { 
+        id: "mystery", 
+        name: "???", 
+        img: "https://i.ibb.co/vYfVqZz/mystery-char.png" // You can replace this with a placeholder
+    }
+];
+
+let charIndex = 0;
+let hasSelectedChar = false; // Flag to check if we show the modal
+
+// 2. SHOW CHARACTER SELECTOR
+function changeChar(dir) {
+    charIndex += dir;
+    if (charIndex < 0) charIndex = characterList.length - 1;
+    if (charIndex >= characterList.length) charIndex = 0;
+
+    document.getElementById('charDisplayImg').style.backgroundImage = `url(${characterList[charIndex].img})`;
+    document.getElementById('charDisplayName').innerText = characterList[charIndex].name;
+}
+
+// 3. CONFIRM SELECTION
+async function confirmCharacter() {
+    const selected = characterList[charIndex];
+    if (selected.id === "mystery") {
+        alert("Acest personaj este încă blocat!");
+        return;
+    }
+
+    document.getElementById('loadingModal').style.display = 'flex';
+    
+    try {
+        await db.collection("players").doc(currentUID).update({
+            selectedChar: selected.id,
+            hasSetupFinished: true
+        });
+        
+        hasSelectedChar = true;
+        document.getElementById('charSelectorModal').style.display = 'none';
+        document.getElementById('loadingModal').style.display = 'none';
+        startGameUI(); // Now start the game
+    } catch (e) {
+        console.error(e);
+        alert("Eroare la salvarea caracterului!");
+    }
+}
+
+// 4. UPDATE handlePlayClick (The brain of the logic)
+async function handlePlayClick() {
+    if (!currentUID) {
+        document.getElementById('loginModal').style.display = 'flex';
+        return;
+    }
+
+    // Check Firebase to see if they've already chosen a character
+    document.getElementById('loadingModal').style.display = 'flex';
+    const doc = await db.collection("players").doc(currentUID).get();
+    const data = doc.data();
+
+    document.getElementById('loadingModal').style.display = 'none';
+
+    if (data.hasSetupFinished) {
+        startGameUI();
+    } else {
+        // First time! Show the selector
+        charIndex = 0;
+        changeChar(0); // Set initial display
+        document.getElementById('charSelectorModal').style.display = 'flex';
+    }
 }
   </script>
 </body>
