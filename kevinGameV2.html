@@ -1796,18 +1796,20 @@ function startGameUI() {
   updateScoreUI();
   
   const kevin = document.getElementById('kevin');
-  kevin.style.backgroundImage = normalKevinImage;
   
-  // Force Kevin to be visible and have a starting size
+  // Această linie se asigură că imaginea este cea aleasă de tine, nu doar Kevin:
+  // Dacă nu există o imagine salvată încă, pune-o pe cea default
+  if (!kevin.style.backgroundImage) {
+      kevin.style.backgroundImage = normalKevinImage;
+  }
+  
   kevin.style.width = "120px";
   kevin.style.height = "120px";
   
   isKevinTired = false;
-
-  moveKevinAway(); // Initial jump
+  moveKevinAway(); 
   startKevinMovement();
   startTiredCycle();
-
   saveScoreInterval = setInterval(syncScoreToFirestore, 5000);
 }
 
@@ -2037,10 +2039,22 @@ const characterList = [
         img: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w" 
     },
     { 
+        id: "emmanuel", 
+        name: "EMMANUEL", 
+        desc: "Are 18 ani și e foarte politicos... până când îl enervezi. Atunci mai bine fugi!",
+        img: "https://iili.io/CNUBdIj.png" 
+    },
+    { 
+        id: "antonio", 
+        name: "ANTONIO", 
+        desc: "Vorbește doar în engleză. Sper că ai Google Translate la îndemână, altfel ești pierdut!",
+        img: "https://iili.io/CNUnzsR.png" 
+    },
+    { 
         id: "mystery", 
         name: "???", 
         desc: "Un luptător misterios care va sosi curând. Continuă să joci pentru a-l debloca!",
-        img: "https://cdn-icons-png.flaticon.com/512/365/365825.png" // Placeholder
+        img: "https://cdn-icons-png.flaticon.com/512/365/365825.png" 
     }
 ];
 
@@ -2055,7 +2069,6 @@ function changeChar(dir) {
     document.getElementById('charHeroDesc').innerText = char.desc;
 }
 
-// 3. CONFIRM SELECTION
 async function confirmCharacter() {
     const selected = characterList[charIndex];
     if (selected.id === "mystery") {
@@ -2068,13 +2081,17 @@ async function confirmCharacter() {
     try {
         await db.collection("players").doc(currentUID).update({
             selectedChar: selected.id,
+            selectedCharImg: selected.img, // Salvăm și imaginea
             hasSetupFinished: true
         });
         
-        hasSelectedChar = true;
+        // --- ACEASTA ESTE LINIA IMPORTANTĂ ---
+        // Actualizăm imaginea personajului din joc înainte de start
+        document.getElementById('kevin').style.backgroundImage = `url(${selected.img})`;
+        
         document.getElementById('charSelectorModal').style.display = 'none';
         document.getElementById('loadingModal').style.display = 'none';
-        startGameUI(); // Now start the game
+        startGameUI(); 
     } catch (e) {
         console.error(e);
         alert("Eroare la salvarea caracterului!");
