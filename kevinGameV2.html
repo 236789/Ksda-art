@@ -799,110 +799,110 @@
   100% { transform: scale(1); }
 }
 
+
 /* ==========================================
-   GAME FRAME & HEADER
+   THE ARCADE CABINET FRAME
    ========================================== */
 
-/* Subtle inner border for sides and bottom */
+/* Subtle Side & Bottom Rails */
 .game-frame-overlay {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
   pointer-events: none;
-  border-left: 8px solid rgba(250, 204, 21, 0.2);
-  border-right: 8px solid rgba(250, 204, 21, 0.2);
-  border-bottom: 8px solid rgba(250, 204, 21, 0.2);
-  box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
-  z-index: 100;
+  border: 4px solid rgba(250, 204, 21, 0.15); /* Very subtle gold border */
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
+  z-index: 400; /* Behind Kevin */
 }
 
-/* THICK STYLISH TOP BAR */
+/* THICK STYLIZED TOP BAR (The Beam) */
 .game-header {
   position: absolute;
-  top: 0; left: 0; width: 100%;
-  height: 60px; /* Thick top bar */
-  background: linear-gradient(to bottom, #4d2600, #261300);
-  border-bottom: 4px solid #facc15;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+  top: 0; left: 0; 
+  width: 100%; 
+  height: 50px; /* Thick bar */
+  background: linear-gradient(to bottom, #3d1e00, #1a0a00);
+  border-bottom: 3px solid #facc15;
   display: flex;
-  justify-content: center;
-  z-index: 101;
+  justify-content: center; /* Centers the shield */
+  z-index: 1000; /* Above everything */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
 }
 
-/* THE "SHIELD" SCOREBOARD (Centred and jutting out) */
+/* THE JUTTING SHIELD (Asymmetrical & Sick) */
 #scoreBoard {
   position: absolute;
-  top: 0; /* Starts at the very top */
+  top: -5px; /* Sits slightly higher than the bar */
   
-  /* The "Vibe": Not symmetrical and going out */
-  height: 95px; /* Taller than the header so it hangs out */
-  min-width: 180px;
+  /* Dimensions: It's taller than the header so it goes OUT */
+  width: 200px;
+  height: 85px; 
+  
   background: linear-gradient(135deg, #facc15 0%, #ffaa00 100%);
   
-  /* Sick Asymmetrical Shield Shape */
-  clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 50% 100%, 0% 85%);
+  /* THE SICK ASYMMETRICAL SHAPE */
+  clip-path: polygon(0 0, 100% 0, 95% 75%, 50% 100%, 5% 85%);
   
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 0 20px 15px 20px; /* Padding bottom so text sits higher than the point */
+  gap: 10px;
+  padding-bottom: 10px; /* Space for the bottom point */
   
-  border-bottom: 4px solid #ffffff;
-  filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
-  z-index: 102;
+  border-bottom: 3px solid #ffffff;
+  filter: drop-shadow(0 8px 10px rgba(0,0,0,0.5));
 }
 
-/* Adjusting elements inside the new shield */
+/* Internal elements adjustments */
 .score-icon-wrapper {
   background: #1a0a00;
-  border: 2px solid #ffffff;
+  border: 2px solid #fff;
   border-radius: 50%;
-  width: 45px;
-  height: 45px;
+  width: 42px;
+  height: 42px;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.score-icon {
+  height: 30px;
 }
 
 #scoreText {
   font-family: 'Orbitron', sans-serif;
   font-size: 32px;
   font-weight: 900;
-  color: #1a0a00; /* Dark text on the yellow shield */
-  text-shadow: 1px 1px 0px rgba(255,255,255,0.5);
+  color: #1a0a00;
+  text-shadow: 1px 1px 0px rgba(255,255,255,0.4);
 }
 
-/* SCORE LABEL (Placed on the wooden header beam) */
-.game-header::before {
-  content: "RECORDING SCORE...";
+/* Added a small "LIVE" indicator on the side for detail */
+.game-header::after {
+  content: "● LIVE";
   position: absolute;
-  left: 25px;
+  right: 20px;
   top: 50%;
   transform: translateY(-50%);
-  color: #facc15;
+  color: #ff4444;
   font-size: 12px;
+  font-weight: bold;
   letter-spacing: 2px;
-  font-family: 'Orbitron', sans-serif;
-  opacity: 0.6;
 }
 
 /* ==========================================
-   MOBILE SCALING
+   MOBILE FIXES
    ========================================== */
 @media (max-width: 600px) {
-  .game-header { height: 45px; }
-  
+  .game-header { height: 40px; }
   #scoreBoard {
-    height: 70px;
-    min-width: 140px;
-    clip-path: polygon(0% 0%, 100% 0%, 100% 75%, 50% 100%, 0% 88%);
-    padding: 0 10px 10px 10px;
+    width: 150px;
+    height: 65px;
+    clip-path: polygon(0 0, 100% 0, 95% 80%, 50% 100%, 5% 90%);
   }
-  
-  #scoreText { font-size: 22px; }
-  .score-icon-wrapper { width: 35px; height: 35px; }
-  .score-icon { height: 25px; }
-  .game-header::before { display: none; } /* Hide text on mobile to save space */
+  #scoreText { font-size: 24px; }
+  .score-icon-wrapper { width: 32px; height: 32px; }
+  .score-icon { height: 22px; }
+  .game-header::after { display: none; }
 }
   </style>
 </head>
@@ -972,14 +972,15 @@
        GAME AREA
        ========================================== -->
 <div id="gameArea">
-  <!-- Subtile side/bottom frame -->
+  <!-- 1. The side frame rail -->
   <div class="game-frame-overlay"></div>
 
-  <!-- Thick Stylish Top Bar -->
+  <!-- 2. The Header Beam -->
   <div class="game-header">
+    <!-- 3. The Shield inside the beam -->
     <div id="scoreBoard">
       <div class="score-icon-wrapper">
-        <img src="https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/3838e9be-f08a-4e78-815f-4b1688594e17/ce291931-bdae-4385-a65e-fea28b922266_removalai_preview.png?format=500w" class="score-icon" alt="Avatar">
+        <img src="https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/3838e9be-f08a-4e78-815f-4b1688594e17/ce291931-bdae-4385-a65e-fea28b922266_removalai_preview.png?format=500w" class="score-icon" alt="Score Icon">
       </div>
       <span id="scoreText">0</span>
     </div>
