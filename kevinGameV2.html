@@ -62,11 +62,49 @@
       100% { transform: translateY(0px) rotate(0deg); }
     }
 
-    #welcomeText {
-      color: #0eddc1; font-size: 28px; margin-bottom: 30px; display: none; z-index: 10;
-      text-shadow: 0 0 15px rgba(14, 221, 193, 0.8), 0 0 30px rgba(14, 221, 193, 0.4);
-      letter-spacing: 2px; text-transform: uppercase;
-    }
+#welcomeText {
+  display: none; /* Managed by JS */
+  background: rgba(0, 0, 0, 0.4);
+  border-left: 4px solid #0eddc1;
+  padding: 12px 30px;
+  border-radius: 4px 20px 20px 4px;
+  
+  font-family: 'Orbitron', sans-serif; /* Using the sci-fi font */
+  font-size: 18px;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  
+  /* Layout and Shadow */
+  margin-bottom: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(14, 221, 193, 0.1);
+  backdrop-filter: blur(5px);
+  
+  /* Animation */
+  animation: slideInBadge 0.5s ease-out, glowPulse 2s infinite alternate;
+  z-index: 10;
+}
+
+/* Small label above the name */
+#welcomeText::before {
+  content: "ACTIVE PLAYER";
+  display: block;
+  font-size: 10px;
+  color: #0eddc1;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+  opacity: 0.8;
+}
+
+@keyframes slideInBadge {
+  from { opacity: 0; transform: translateX(-50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes glowPulse {
+  from { border-color: #0eddc1; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+  to { border-color: #ffffff; box-shadow: 0 5px 20px rgba(14, 221, 193, 0.4); }
+}
 
     .button-container {
       display: flex; flex-direction: column; gap: 20px; justify-content: center; align-items: center; 
