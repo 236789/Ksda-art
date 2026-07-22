@@ -949,51 +949,77 @@
 }
 
 
-/* THE ELECTRIC GLOW EFFECT */
-.electric-glow {
-  /* We strengthen the border so the light has a place to "live" */
-  border: 2px solid #facc15 !important; 
-  animation: 
-    hudFloat 4s ease-in-out infinite, 
-    yellowLighting 2s ease-in-out infinite !important;
+/* ==========================================
+   MOVING ELECTRIC OUTLINE EFFECT
+   ========================================== */
+
+.electric-container {
+  position: relative;
+  z-index: 1;
+  /* This creates the "hole" in the middle so we only see the border */
+  overflow: hidden;
+  border: none !important; /* We use the pseudo-element for the border now */
+  background: #1b1a37; /* Base fallback */
 }
 
-/* THE LIGHTING ANIMATION */
-@keyframes yellowLighting {
-  0% {
-    border-color: #facc15;
-    box-shadow: 
-      0 0 5px #facc15, 
-      inset 0 0 5px rgba(250, 204, 21, 0.5),
-      0 8px 18px rgba(0,0,0,0.45); /* Keep original floor shadow */
-  }
-  50% {
-    border-color: #ffffff; /* Turns white-hot in the middle of the pulse */
-    box-shadow: 
-      0 0 20px #facc15, 
-      0 0 40px rgba(250, 204, 21, 0.4), 
-      inset 0 0 10px #facc15,
-      0 8px 18px rgba(0,0,0,0.45);
-  }
-  100% {
-    border-color: #facc15;
-    box-shadow: 
-      0 0 5px #facc15, 
-      inset 0 0 5px rgba(250, 204, 21, 0.5),
-      0 8px 18px rgba(0,0,0,0.45);
-  }
+/* The "Moving Electricity" Layer */
+.electric-container::before {
+  content: "";
+  position: absolute;
+  /* Make it much larger than the box so it covers corners as it rotates */
+  top: -150%; left: -150%;
+  width: 400%; height: 400%;
+  
+  /* The "Electric Bolts" - bright yellow and white spikes */
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 150deg,
+    #facc15 160deg,
+    #ffffff 165deg,
+    #facc15 170deg,
+    transparent 180deg,
+    transparent 330deg,
+    #facc15 340deg,
+    #ffffff 345deg,
+    #facc15 350deg,
+    transparent 360deg
+  );
+  
+  animation: rotateElectric 1.5s linear infinite;
+  z-index: -2;
 }
 
-/* Adjusting the Pause Button specifically to look like the ScoreBoard icon */
-.control-btn.electric-glow {
-  background: radial-gradient(circle at center, #2c2a55 0%, #14132b 100%);
-  color: #facc15;
-  transition: transform 0.2s;
+/* The Center Mask (The dark part inside the border) */
+.electric-container::after {
+  content: "";
+  position: absolute;
+  /* This creates a 2px "Electric" border thickness */
+  inset: 2px; 
+  background: inherit; /* Takes the purple gradient background */
+  background: linear-gradient(135deg, #2c2a55 0%, #14132b 100%);
+  border-radius: inherit; /* Keeps the pill or circle shape */
+  z-index: -1;
 }
 
-.control-btn.electric-glow:hover {
-  filter: brightness(1.2);
-  transform: scale(1.1);
+@keyframes rotateElectric {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* SPECIFIC TWEAKS FOR SCOREBOARD (Pill) */
+#scoreBoard.electric-container {
+  background: #1b1a37;
+  border-radius: 999px;
+  padding: 8px 22px 8px 8px; /* Restoring your original padding */
+}
+
+/* SPECIFIC TWEAKS FOR PAUSE BUTTON (Circle) */
+.control-btn.electric-container {
+  background: #1b1a37;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
 }
   </style>
 </head>
@@ -1061,7 +1087,7 @@
 
 <div id="gameArea">
   <!-- SCOREBOARD WITH NEW GLOW -->
-  <div id="scoreBoard" class="electric-glow">
+  <div id="scoreBoard" class="electric-container">
     <div class="score-icon-wrapper">
       <i class="fa-solid fa-bolt"></i>
     </div>
@@ -1070,7 +1096,7 @@
 
   <!-- GAME CONTROLS WITH NEW GLOW -->
   <div class="game-controls">
-    <button class="control-btn electric-glow" title="Pause" onclick="togglePause()">
+    <button class="control-btn electric-container" title="Pause" onclick="togglePause()">
       <i class="fa-solid fa-pause"></i>
     </button>
   </div>
