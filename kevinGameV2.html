@@ -1458,6 +1458,36 @@
   .nav-arrow-v2 { font-size: 30px; }
 }
 .nav-arrow-v2:hover { color: #fff; transform: scale(1.2); }
+
+
+
+.kevin-speech-bubble {
+  position: fixed;
+  background: white;
+  color: black;
+  padding: 8px 12px;
+  border-radius: 15px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  z-index: 10000;
+  pointer-events: none;
+  transform: translate(-50%, -100%) scale(1);
+  transition: opacity 0.5s, transform 0.5s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  text-align: center;
+  border: 2px solid #333;
+}
+.kevin-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 10px 10px 0 10px;
+  border-style: solid;
+  border-color: white transparent transparent transparent;
+}
   </style>
 </head>
 <body>
@@ -1722,17 +1752,16 @@ async function checkUserInFirestore(uid) {
             score = data.score || 0;
             lastSavedScore = score;
             
-            // --- LOGICA DE ÎNCĂRCARE CARACTER SALVAT ---
             if (data.hasSetupFinished) {
                 const savedCharId = data.selectedChar || "kevin";
-                // Căutăm datele personajului în lista noastră folosind ID-ul salvat
                 const charData = characterList.find(c => c.id === savedCharId) || characterList[0];
                 
-                // Setăm variabilele globale pentru imagini
                 currentPlayImg = `url('${charData.playImg}')`;
                 currentTiredImg = `url('${charData.tiredImg}')`;
                 
-                // Aplicăm imaginea pe obiectul din joc
+                // --- IMPORTANT: Reținem ID-ul și aici ---
+                window.currentPlayingCharId = savedCharId;
+
                 document.getElementById('kevin').style.backgroundImage = currentPlayImg;
             }
 
@@ -2096,18 +2125,18 @@ async function confirmCharacter() {
     document.getElementById('loadingModal').style.display = 'flex';
     
     try {
-        // Setăm imaginile de joc pentru sesiunea curentă
         currentPlayImg = `url('${selected.playImg}')`;
         currentTiredImg = `url('${selected.tiredImg}')`;
+        
+        // --- IMPORTANT: Setăm ID-ul pentru sistemul de dialog ---
+        window.currentPlayingCharId = selected.id;
 
         await db.collection("players").doc(currentUID).update({
-            selectedChar: selected.id, // Salvăm doar ID-ul, e mai sigur
+            selectedChar: selected.id,
             hasSetupFinished: true
         });
         
-        // Aplicăm imaginea pe caracterul din joc
         document.getElementById('kevin').style.backgroundImage = currentPlayImg;
-        
         document.getElementById('charSelectorModal').style.display = 'none';
         document.getElementById('loadingModal').style.display = 'none';
         startGameUI(); 
@@ -2117,7 +2146,6 @@ async function confirmCharacter() {
         document.getElementById('loadingModal').style.display = 'none';
     }
 }
-
 // 4. UPDATE handlePlayClick (The brain of the logic)
 async function handlePlayClick() {
     if (!currentUID) {
@@ -2143,6 +2171,122 @@ if (data.hasSetupFinished) {
 
 
 let charIndex = 0; // Adaugă această linie dacă nu există
+
+
+// 📢 BIBLIOTECA DE REPLICI (Trash Talk)
+const characterDialogues = {
+  kevin: [
+    "Asta e tot ce poți? 😂",
+    "Click mai repede, bunicule!",
+    "Ce-i asta, un gameplay sau un eșec live?",
+    "💀 Rușine scorului tău.",
+    "Mă doare RAM-ul când te văd jucând.",
+    "Bro, un hamster beat te întrece.",
+    "Kevinuta.exe: *pls kill me*",
+    "Ai lag? Sau ești doar trist?",
+    "De ce încă joci? 😭",
+    "🥴 Joacă Fortnite, poate acolo ai noroc.",
+    "Sunt prea rapid pentru degetele tale de unt!",
+    "Zici că dai click cu mămăligă...",
+    "Nici bunica nu rata așa mult!",
+    "Ești praf, lasă-te de meserie!"
+  ],
+  antonio: [
+    "Git gud, scrub! 🎮",
+    "Is that your best? Pathetic.",
+    "My grandma clicks faster than you.",
+    "Lags? No, just lack of skill.",
+    "Ez game, ez life. You're too slow!",
+    "Noob alert! 🚨",
+    "Are you even trying to catch me?",
+    "I could do this in my sleep.",
+    "Rookie numbers! Need more speed.",
+    "Go back to the tutorial, kid.",
+    "Stop missing, start hitting!",
+    "You're like a turtle with a broken leg.",
+    "Skill issue detected! 📉",
+    "What's the matter? Too fast for you?",
+    "Keep dreaming about catching me.",
+    "LOL, my cat has better reflexes.",
+    "You click like a bot, but a bad one.",
+    "Error 404: Player skill not found.",
+    "I'm bored... can you move faster?",
+    "Sit down, be humble! 🤫"
+  ],
+  emmanuel: [
+    "Bună ziua! Sunteți cam slab în p*** mea... 😇",
+    "Mă scuzați, dar ești un f**** încurcat!",
+    "O zi minunată! Să te ia d***** de leneș! ✨",
+    "Vă rog frumos să mă lăsați în p*** mea!",
+    "Domnule, ești cam p*** la jocul ăsta.",
+    "Ce c**** încerci să faci aici?",
+    "Să aveți o seară bună... de m****!",
+    "Mă simt jignit de cât de prost țintești. 😤",
+    "Ești un om deosebit... de i****!",
+    "Vă mulțumesc pentru eșecul acesta fascinant.",
+    "Sunteți politicos, dar jucați ca o p****!",
+    "O mizerie de gameplay, cu tot respectul. 👋",
+    "Îmi pare rău, ești prea f**** să mă prinzi.",
+    "O duminică binecuvântată... în iad! 🔥"
+  ]
+};
+
+// 🧠 INTERVALUL DE TRASH TALK (Actualizat pentru V2)
+setInterval(() => {
+  if (window.isGamePaused) return;
+
+  // 1. Identificăm ID-ul caracterului curent (setat la confirmare sau încărcare)
+  // Folosim o variabilă globală window.currentPlayingCharId pe care o setăm mai jos
+  const charId = window.currentPlayingCharId || "kevin";
+  
+  // 2. Alegem lista potrivită (sau kevin ca fallback)
+  const lines = characterDialogues[charId] || characterDialogues.kevin;
+  
+  // 3. Alegem o replică random
+  const msg = lines[Math.floor(Math.random() * lines.length)];
+  
+  // 4. Afișăm bula
+  showKevinutaBubble(msg);
+}, 12000); // Apare o replică la fiecare 12 secunde
+
+// --- FUNCȚIA CARE CREEAZĂ BULA DE TEXT ---
+function showKevinutaBubble(text) {
+  const kevin = document.getElementById("kevin");
+  if (!kevin) return;
+
+  // Ștergem bula veche dacă există
+  if (window.activeKevinBubble) window.activeKevinBubble.remove();
+
+  const bubble = document.createElement("div");
+  bubble.className = "kevin-speech-bubble";
+  bubble.textContent = text;
+
+  document.body.appendChild(bubble);
+  window.activeKevinBubble = bubble;
+
+  // Funcție care actualizează poziția bulei ca să stea fix deasupra capului personajului
+  const updatePosition = () => {
+    const rect = kevin.getBoundingClientRect();
+    bubble.style.left = `${rect.left + rect.width / 2}px`;
+    bubble.style.top = `${rect.top - 20}px`;
+  };
+
+  updatePosition();
+  const positionInterval = setInterval(updatePosition, 50);
+
+  // Animăm dispariția bulei după 3 secunde
+  setTimeout(() => {
+    bubble.style.opacity = "0";
+    bubble.style.transform = "translate(-50%, -120%) scale(0.8)";
+    setTimeout(() => {
+      clearInterval(positionInterval);
+      bubble.remove();
+    }, 500);
+  }, 3000);
+}
+
+
+
   </script>
 </body>
 </html>
