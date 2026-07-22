@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -6,14 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PRINDEL PE KEVINUȚĂ V2</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
+  <!-- Fonturi -->
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
 
   <style>
+    /* ==========================================
+       STILURI GLOBALE & BACKGROUND
+       ========================================== */
     * { box-sizing: border-box; user-select: none; }
     body, html {
       margin: 0; padding: 0; width: 100%; height: 100%;
@@ -22,124 +25,176 @@
       overflow: hidden;
     }
 
+    /* Particule animate pe fundal */
     .particles-container {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       pointer-events: none; z-index: 1; overflow: hidden;
     }
-    .particle {
-      position: absolute; top: 100vh;
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 50%; opacity: 0;
-      animation: floatUp linear infinite;
-      pointer-events: none;
-    }
-    @keyframes floatUp {
-      0% { transform: translateY(0) scale(0); opacity: 0; }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { transform: translateY(-110vh) scale(1); opacity: 0; }
-    }
+.particle {
+  position: absolute;
+  top: 100vh; /* Start them at the bottom, off-screen */
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  opacity: 0; /* Hidden until animation starts */
+  animation: floatUp linear infinite;
+  pointer-events: none;
+}
 
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-110vh) scale(1); opacity: 0; }
+}
+
+    /* ==========================================
+       MAIN MENU
+       ========================================== */
     #mainMenu {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      width: 100%; height: 100%; padding: 20px; gap: 20px;
-      z-index: 100; position: relative; text-align: center;
+      width: 100%; height: 100%; z-index: 100; position: relative;
+    }
+    
+    .logo-img {
+      width: 380px; max-width: 90vw; margin-bottom: 40px; z-index: 10;
+      filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
+      animation: floatLogo 4s ease-in-out infinite;
+    }
+    @keyframes floatLogo {
+      0% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-15px) rotate(2deg); }
+      100% { transform: translateY(0px) rotate(0deg); }
     }
 
-    .logo-wrapper {
-      position: relative; display: flex; justify-content: center; align-items: center;
-      width: 100%; margin-bottom: 25px; z-index: 10;
-      animation: logoSlamShake 0.2s 0.6s 2;
-    }
-    .logo-main {
-      width: 90%; max-width: 480px; height: auto; display: block;
-      filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8));
-      animation: crashSlam 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    }
-    .v2-badge {
-      position: absolute; width: 30%; bottom: -5%; right: -10%;
-      opacity: 0; transform: scale(4);
-      filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
-      animation: stampV2 0.5s 1.2s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
-    }
+#welcomeText {
+  display: none; /* Managed by JS */
+  
+  /* Matches the Logo/Button vibe */
+  background: linear-gradient(to bottom, #4d2600, #261300); /* Deep chocolate wood vibe */
+  border: 3px solid #facc15; /* Chunky Gold border */
+  border-radius: 50px; /* Fully rounded pill shape */
+  
+  padding: 10px 40px;
+  margin-bottom: 30px;
+  
+  /* Text Styling */
+  font-family: 'Oswald', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  
+  /* High-end shadows */
+  box-shadow: 
+    0 6px 0 #1a0a00,              /* 3D Depth */
+    0 10px 20px rgba(0, 0, 0, 0.5); /* Shadow on floor */
+    
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.5); /* Depth on letters */
+  
+  z-index: 10;
+  position: relative;
+  animation: plaquePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
 
-    @keyframes crashSlam {
-      0% { transform: translateY(-800px) scaleY(2); opacity: 0; }
-      60% { transform: translateY(0) scaleY(0.7); opacity: 1; }
-      85% { transform: translateY(-20px) scaleY(1.1); }
-      100% { transform: translateY(0) scaleY(1); opacity: 1; }
-    }
-    @keyframes stampV2 {
-      0% { transform: scale(4) rotate(-20deg); opacity: 0; }
-      100% { transform: scale(1) rotate(8deg); opacity: 1; }
-    }
-    @keyframes logoSlamShake {
-      0% { transform: translate(0, 0); }
-      50% { transform: translate(8px, 8px); }
-      100% { transform: translate(0, 0); }
-    }
+/* Add a small gold star icon before the name */
+#welcomeText::before {
+  content: "⭐";
+  margin-right: 10px;
+  filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5));
+}
 
-    #welcomeText {
-      display: none;
-      background: linear-gradient(to bottom, #4d2600, #261300);
-      border: 3px solid #facc15; border-radius: 50px;
-      padding: 8px 30px;
-      font-size: clamp(16px, 4vw, 22px);
-      font-family: 'Oswald', sans-serif; font-weight: 700;
-      color: #ffffff; text-transform: uppercase;
-      box-shadow: 0 6px 0 #1a0a00, 0 10px 20px rgba(0, 0, 0, 0.5);
-      animation: plaquePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    #welcomeText::before { content: "⭐"; margin-right: 10px; }
-    @keyframes plaquePop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes plaquePop {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideInBadge {
+  from { opacity: 0; transform: translateX(-50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes glowPulse {
+  from { border-color: #0eddc1; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+  to { border-color: #ffffff; box-shadow: 0 5px 20px rgba(14, 221, 193, 0.4); }
+}
 
     .button-container {
-      display: flex; flex-direction: column; gap: 15px;
-      width: 100%; align-items: center;
+      display: flex; flex-direction: column; gap: 20px; justify-content: center; align-items: center; 
+      z-index: 10;
     }
 
-    .menu-btn.play {
-      width: 100%; max-width: 280px; height: 70px;
-      background: linear-gradient(180deg, #ffdc43 0%, #ffaa00 50%, #e67300 100%);
-      color: #1a1c33;
-      border: 4px solid #ffffff; border-radius: 20px;
-      font-size: 32px; font-family: 'Oswald', sans-serif; font-weight: 800;
-      text-transform: uppercase; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 15px;
-      box-shadow: 0 10px 0 #4d2600, 0 15px 25px rgba(0, 0, 0, 0.4);
-      transition: all 0.1s ease; position: relative; overflow: hidden;
-      letter-spacing: 3px;
-    }
-    .menu-btn.play::before {
-      content: ""; position: absolute; top: 0; left: -150%;
-      width: 50%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-      transform: skewX(-20deg); transition: 0.6s;
-    }
-    .menu-btn.play:hover::before { left: 150%; }
-    .menu-btn.play:hover { transform: translateY(-3px); box-shadow: 0 13px 0 #4d2600, 0 20px 30px rgba(0, 0, 0, 0.5); filter: brightness(1.05); }
-    .menu-btn.play:active { transform: translateY(8px); box-shadow: 0 2px 0 #4d2600, 0 5px 10px rgba(0,0,0,0.7); }
+.menu-btn.play {
+  position: relative;
+  /* Rich 3-step gradient: Highlight -> Main -> Deep Orange */
+  background: linear-gradient(180deg, #ffdc43 0%, #ffaa00 50%, #e67300 100%);
+  
+  color: #1a1c33; /* Dark text for high contrast */
+  border: 4px solid #ffffff;
+  border-radius: 20px;
+  padding: 20px 80px;
+  
+  font-size: 38px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  letter-spacing: 3px;
+  
+  /* The "Side": Darkened burnt-orange for a heavy 3D effect */
+  box-shadow: 
+    0 12px 0 #4d2600,            /* Dark side of the button */
+    0 20px 30px rgba(0, 0, 0, 0.5); /* Shadow on the floor */
+    
+  transition: all 0.1s ease;
+  overflow: hidden;
+}
 
+/* --- HOVER EFFECT --- */
+.menu-btn.play:hover {
+  transform: translateY(-4px); /* Lift up slightly */
+  filter: brightness(1.05);
+  box-shadow: 
+    0 16px 0 #4d2600,            /* Side gets thicker as it lifts */
+    0 25px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Light sweep animation on hover */
+.menu-btn.play::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  transition: 0.6s;
+}
+
+.menu-btn.play:hover::before {
+  left: 150%;
+}
+
+/* --- CLICK EFFECT --- */
+.menu-btn.play:active {
+  transform: translateY(10px); /* Pushes down almost to the floor */
+  box-shadow: 
+    0 2px 0 #4d2600,             /* Side disappears */
+    0 5px 10px rgba(0, 0, 0, 0.7);
+  transition: all 0.05s ease;
+}
+
+    /* Buton LOGOUT */
     #logoutBtn {
-      display: none; align-items: center; justify-content: center; gap: 10px;
-      background: linear-gradient(180deg, #ff3333 0%, #cc0000 50%, #a30000 100%);
-      color: white;
-      border: 3px solid #ffffff; border-radius: 12px;
-      padding: 10px 25px;
-      font-family: 'Oswald', sans-serif; font-size: 16px; font-weight: 800;
-      text-transform: uppercase; cursor: pointer;
-      box-shadow: 0 6px 0 #5c0000, 0 10px 20px rgba(0, 0, 0, 0.4);
-      transition: all 0.1s ease;
+      background: transparent; color: #ff4444; border: none; font-family: 'Oswald', sans-serif;
+      font-size: 18px; cursor: pointer; text-decoration: underline; display: none;
     }
-    #logoutBtn:hover { filter: brightness(1.1); transform: translateY(-3px); box-shadow: 0 9px 0 #5c0000, 0 12px 22px rgba(204,0,0,0.4); }
-    #logoutBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 #5c0000; }
+    #logoutBtn:hover { color: #ff6666; }
 
-    @media (max-width: 600px) {
-      .logo-main { max-width: 320px; }
-      .v2-badge { width: 35%; right: -5%; }
-      .menu-btn.play { max-width: 240px; height: 60px; font-size: 26px; border-width: 3px; }
-    }
-
+    /* ==========================================
+       MODALS (OVERLAYS)
+       ========================================== */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(10, 8, 30, 0.9); z-index: 99999;
@@ -153,29 +208,36 @@
       box-shadow: 0 0 30px rgba(250, 204, 21, 0.4), inset 0 0 20px rgba(0,0,0,0.8);
       animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes popIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
     .modal-box h2 { margin-top: 0; font-size: 32px; color: #facc15; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
     .modal-box p { font-size: 18px; margin-bottom: 25px; color: #d1d5db; }
 
+    /* Buton Login Google Customizat */
     .custom-google-btn {
       display: flex; align-items: center; justify-content: center; gap: 15px;
-      width: 100%; background: #1a1c33; color: #ffffff;
-      border: 3px solid #facc15; border-radius: 12px; padding: 15px 20px;
+      width: 100%; background-color: #ffffff; color: #333333;
+      border: 3px solid #cccccc; border-radius: 12px; padding: 15px 20px;
       font-size: 20px; font-family: 'Oswald', sans-serif; font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 6px 0 #b39200, 0 0 20px rgba(250,204,21,0.2);
-      transition: all 0.1s ease; text-transform: uppercase; position: relative; overflow: hidden;
+      cursor: pointer; box-shadow: 0 8px 0 #999999, 0 15px 20px rgba(0, 0, 0, 0.5);
+      transition: all 0.15s ease; text-transform: uppercase;
     }
-    .custom-google-btn i { font-size: 24px; }
-    .custom-google-btn:hover { background: #242745; transform: translateY(-2px); box-shadow: 0 6px 0 #b39200, 0 0 30px rgba(250,204,21,0.4); }
-    .custom-google-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #b39200; }
+    .custom-google-btn img { width: 28px; height: 28px; }
+    .custom-google-btn:hover { background-color: #f5f5f5; }
+    .custom-google-btn:active {
+      transform: translateY(8px);
+      box-shadow: 0 0 0 #999999, 0 5px 10px rgba(0, 0, 0, 0.5);
+    }
 
     .input-field {
       width: 100%; padding: 15px; font-size: 22px; font-family: 'Oswald', sans-serif; font-weight: 600;
       border: 3px solid #5a6288; border-radius: 12px; background: #131526; color: #0eddc1;
       text-align: center; margin-bottom: 25px; outline: none; box-shadow: inset 0 4px 6px rgba(0,0,0,0.5);
+      transition: all 0.3s;
     }
-    .input-field:focus { border-color: #facc15; box-shadow: inset 0 4px 6px rgba(0,0,0,0.5), 0 0 15px rgba(250,204,21,0.5); }
+    .input-field:focus { border-color: #facc15; box-shadow: inset 0 4px 6px rgba(0,0,0,0.5), 0 0 15px rgba(250, 204, 21, 0.5); }
 
     .cancel-btn {
       background: transparent; border: none; color: #9aa0b8; font-family: 'Oswald', sans-serif;
@@ -183,262 +245,858 @@
     }
     .cancel-btn:hover { color: #ffffff; }
 
-    #gameArea {
-      display: none;
-      position: absolute; top: 0; left: 0;
-      width: 100vw; height: 100vh;
-      background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
-                  url('https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/e7c37518-746f-42d6-9ea6-e3f7b028ffdb/ChatGPT+Image+Jun+16%2C+2025%2C+10_03_26+PM.png');
-      background-size: cover; background-position: center; background-repeat: no-repeat;
-      overflow: hidden; z-index: 500;
-    }
+    /* ==========================================
+       GAME AREA
+       ========================================== */
+#gameArea {
+  display: none; 
+  position: absolute; 
+  top: 0; left: 0; 
+  width: 100vw; height: 100vh;
+  
+  /* --- BACKGROUND IMAGE SETTINGS --- */
+  /* This adds a 40% dark tint so the character stands out */
+  background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+              url('https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/e7c37518-746f-42d6-9ea6-e3f7b028ffdb/ChatGPT+Image+Jun+16%2C+2025%2C+10_03_26+PM.png'); 
+  
+  background-size: cover;      /* Makes the image fill the whole screen */
+  background-position: center; /* Centers the image */
+  background-repeat: no-repeat;
+  
+  overflow: hidden;
+  z-index: 500;
+}
 
+    .score-icon { height: 35px; }
+    
     #kevin {
-      position: absolute; width: 120px; height: 120px;
-      background-size: contain; background-repeat: no-repeat; background-position: center;
-      cursor: pointer; z-index: 999;
+      position: absolute; width: 120px; height: 120px; background-size: contain;
+      background-repeat: no-repeat; background-position: center; cursor: pointer; z-index: 999;
       transition: left 0.3s ease-out, top 0.3s ease-out;
     }
     .combo-text {
-      position: absolute; color: #00d4ff; font-family: 'Orbitron', sans-serif;
-      font-size: 38px; font-weight: bold;
+      position: absolute; color: #00d4ff; font-family: 'Orbitron', sans-serif; font-size: 38px; font-weight: bold;
       z-index: 1000; pointer-events: none; transform: translate(-50%, -50%);
-      text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 30px #ffffff;
-      transition: transform 1.2s ease-out, opacity 1.2s ease-out;
+      text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 30px #ffffff; transition: transform 1.2s ease-out, opacity 1.2s ease-out;
     }
     #backBtn {
-      position: absolute; bottom: 20px; left: 20px; padding: 12px 25px;
-      background: #ff4444; color: white; border: 3px solid #ffaaaa;
-      border-radius: 12px; font-size: 18px;
-      font-family: 'Oswald', sans-serif; font-weight: bold; cursor: pointer;
-      z-index: 9999; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: 0.2s;
+      position: absolute; bottom: 20px; left: 20px; padding: 12px 25px; background: #ff4444;
+      color: white; border: 3px solid #ffaaaa; border-radius: 12px; font-size: 18px;
+      font-family: 'Oswald', sans-serif; font-weight: bold; cursor: pointer; z-index: 9999;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: 0.2s;
     }
     #backBtn:active { transform: scale(0.95); }
 
-    /* ==========================================
-       PREMIUM STREAMER-FRAME HUD
-       ========================================== */
-    .game-header {
-      position: absolute; top: 0; left: 0; width: 100%; height: 18px;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.35), transparent);
-      z-index: 900; pointer-events: none;
-    }
 
-    #scoreBoard {
-      position: absolute;
-      top: 16px; left: 16px; z-index: 1000;
-      display: flex; align-items: center; gap: 14px;
-      padding: 10px 26px 10px 10px;
-      border-radius: 999px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02) 40%),
-        linear-gradient(135deg, #2c2a55 0%, #1b1a37 60%, #14132b 100%);
-      border: 1px solid rgba(255,255,255,0.18);
-      box-shadow:
-        0 1px 0 rgba(255,255,255,0.28) inset,
-        0 -12px 20px rgba(0,0,0,0.32) inset,
-        0 10px 24px rgba(0,0,0,0.5),
-        0 0 0 1px rgba(255,255,255,0.08),
-        0 0 0 5px rgba(10,8,25,0.35),
-        0 0 18px rgba(255,196,60,0.22);
-      backdrop-filter: blur(8px) saturate(130%);
-      animation: hudFloat 4s ease-in-out infinite, hudBreathe 3.2s ease-in-out infinite;
-      transition: transform 0.15s ease;
-      overflow: hidden;
-    }
+.custom-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  width: 100%;
+  
+  /* Fundal închis pentru a se potrivi cu jocul */
+  background: #1a1c33; 
+  color: #ffffff;
+  
+  /* Border auriu ca restul ferestrelor */
+  border: 3px solid #facc15; 
+  border-radius: 12px;
+  padding: 15px 20px;
+  
+  font-size: 20px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  
+  /* Umbră 3D și strălucire */
+  box-shadow: 0 6px 0 #b39200, 0 0 20px rgba(250, 204, 21, 0.2);
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+}
 
-    /* Streamer corner brackets (all 4 corners) */
-    #scoreBoard::after {
-      content: ""; position: absolute; inset: 4px; pointer-events: none;
-      border-radius: 999px;
-      background-image:
-        linear-gradient(to right, rgba(255,215,100,0.95) 12px, transparent 12px),
-        linear-gradient(to bottom, rgba(255,215,100,0.95) 12px, transparent 12px),
-        linear-gradient(to left, rgba(255,215,100,0.95) 12px, transparent 12px),
-        linear-gradient(to bottom, rgba(255,215,100,0.95) 12px, transparent 12px),
-        linear-gradient(to right, rgba(255,215,100,0.95) 12px, transparent 12px),
-        linear-gradient(to top, rgba(255,215,100,0.95) 12px, transparent 12px),
-        linear-gradient(to left, rgba(255,215,100,0.95) 12px, transparent 12px),
-        linear-gradient(to top, rgba(255,215,100,0.95) 12px, transparent 12px);
-      background-size:
-        12px 3px, 3px 12px, 12px 3px, 3px 12px,
-        12px 3px, 3px 12px, 12px 3px, 3px 12px;
-      background-position:
-        0 0, 0 0, 100% 0, 100% 0,
-        0 100%, 0 100%, 100% 100%, 100% 100%;
-      background-repeat: no-repeat;
-      filter: drop-shadow(0 0 3px rgba(255,196,60,0.7));
-      opacity: 0.95;
-    }
+/* Stil pentru iconița Google (Colorată nativ) */
+.custom-google-btn i {
+  font-size: 24px;
+  background: conic-gradient(from -45deg, #ea4335 110deg, #4285f4 90deg 180deg, #34a853 180deg 270deg, #fbbc05 270deg) 73% 55%/150% 150% no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));
+}
 
-    #scoreBoard::before {
-      content: ""; position: absolute; top: 0; left: -60%;
-      width: 40%; height: 100%;
-      background: linear-gradient(100deg, transparent, rgba(255,255,255,0.4), transparent);
-      transform: skewX(-25deg);
-      animation: hudSheen 4.5s ease-in-out infinite;
-      pointer-events: none;
-    }
+.custom-google-btn:hover {
+  background: #242745;
+  box-shadow: 0 6px 0 #b39200, 0 0 30px rgba(250, 204, 21, 0.4);
+  transform: translateY(-2px);
+}
 
-    @keyframes hudSheen {
-      0% { left: -60%; opacity: 0; }
-      8% { opacity: 1; }
-      30% { left: 130%; opacity: 0; }
-      100% { left: 130%; opacity: 0; }
-    }
-    @keyframes hudFloat {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-3px); }
-    }
-    @keyframes hudBreathe {
-      0%, 100% {
-        box-shadow:
-          0 1px 0 rgba(255,255,255,0.28) inset,
-          0 -12px 20px rgba(0,0,0,0.32) inset,
-          0 10px 24px rgba(0,0,0,0.5),
-          0 0 0 1px rgba(255,255,255,0.08),
-          0 0 0 5px rgba(10,8,25,0.35),
-          0 0 18px rgba(255,196,60,0.22);
-      }
-      50% {
-        box-shadow:
-          0 1px 0 rgba(255,255,255,0.28) inset,
-          0 -12px 20px rgba(0,0,0,0.32) inset,
-          0 12px 28px rgba(0,0,0,0.55),
-          0 0 0 1px rgba(255,255,255,0.1),
-          0 0 0 5px rgba(10,8,25,0.35),
-          0 0 30px rgba(255,196,60,0.45);
-      }
-    }
+/* Efectul de apăsare (se duce în jos) */
+.custom-google-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #b39200, 0 0 10px rgba(250, 204, 21, 0.2);
+}
 
-    .score-icon-wrapper {
-      position: relative; width: 46px; height: 46px; border-radius: 50%;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      background: radial-gradient(circle at 32% 28%, #fff6cf 0%, #ffd25a 28%, #f5a623 62%, #c9780f 100%);
-      border: 2px solid rgba(255,255,255,0.9);
-      box-shadow:
-        0 2px 4px rgba(0,0,0,0.4),
-        0 0 12px rgba(255,196,60,0.6),
-        inset 0 2px 3px rgba(255,255,255,0.65),
-        inset 0 -3px 4px rgba(120,60,0,0.45);
-    }
-    .score-icon-wrapper i {
-      font-size: 20px; color: #7a3e00;
-      text-shadow: 0 1px 0 rgba(255,255,255,0.4);
-      filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
-    }
-    .score-icon-wrapper::after {
-      content: ""; position: absolute; inset: -2px; border-radius: 50%;
-      background: conic-gradient(from 0deg, transparent 0 60%, rgba(255,255,255,0.55) 68%, transparent 76% 100%);
-      animation: coinSpin 3.2s linear infinite;
-      mix-blend-mode: overlay;
-    }
-    @keyframes coinSpin { to { transform: rotate(360deg); } }
+/* Un mic efect de reflexie care trece peste buton */
+.custom-google-btn::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 20%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: rotate(30deg);
+  transition: all 0.5s;
+}
 
-    #scoreText {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 25px; font-weight: 900; letter-spacing: 1.2px; line-height: 1;
-      background: linear-gradient(180deg, #fffdf5 0%, #ffe27a 60%, #ffc63c 100%);
-      -webkit-background-clip: text; background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 2px 6px rgba(0,0,0,0.35);
-      display: inline-block;
-    }
+.custom-google-btn:hover::after {
+  left: 120%;
+}
 
-    .score-bump #scoreText { animation: scoreValuePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
-    @keyframes scoreValuePop {
-      0% { transform: scale(1); }
-      40% { transform: scale(1.35); }
-      100% { transform: scale(1); }
-    }
-    .score-bump .score-icon-wrapper { animation: coinPulse 0.35s ease-out; }
-    @keyframes coinPulse {
-      0%, 100% { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 12px rgba(255,196,60,0.6), inset 0 2px 3px rgba(255,255,255,0.65), inset 0 -3px 4px rgba(120,60,0,0.45); }
-      50% { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 30px rgba(255,196,60,1), inset 0 2px 3px rgba(255,255,255,0.65), inset 0 -3px 4px rgba(120,60,0,0.45); }
-    }
+#logoutBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  
+  /* Pure Punchy Red Gradient */
+  background: linear-gradient(180deg, #ff3333 0%, #cc0000 50%, #a30000 100%);
+  color: white;
+  
+  /* Styling */
+  border: 4px solid #ffffff;
+  border-radius: 12px;
+  padding: 12px 35px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  text-decoration: none !important; /* Forces the underline to disappear */
+  cursor: pointer;
+  
+  /* Deep 3D Shadow - Pure Dark Maroon */
+  box-shadow: 0 8px 0 #5c0000, 0 12px 20px rgba(0, 0, 0, 0.5);
+  transition: all 0.1s ease;
+  
+  margin-top: 25px;
+  z-index: 10;
+}
 
-    @media (max-width: 600px) {
-      #scoreBoard { top: 10px; left: 10px; padding: 7px 18px 7px 7px; gap: 9px; }
-      .score-icon-wrapper { width: 38px; height: 38px; }
-      .score-icon-wrapper i { font-size: 17px; }
-      #scoreText { font-size: 20px; }
-    }
+/* Remove underline from the text span inside the button */
+#logoutBtn span {
+  text-decoration: none !important;
+}
 
-    @media (prefers-reduced-motion: reduce) {
-      #scoreBoard, #scoreBoard::before, #scoreBoard::after, .score-icon-wrapper::after { animation: none !important; }
-    }
+/* Icon Styling */
+#logoutBtn i {
+  font-size: 20px;
+  color: white;
+}
 
-    .game-frame-overlay {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      pointer-events: none;
-      border: 4px solid rgba(250, 204, 21, 0.15);
-      box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
-      z-index: 400;
-    }
+/* --- HOVER EFFECTS --- */
+#logoutBtn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-3px);
+  box-shadow: 0 11px 0 #5c0000, 0 15px 25px rgba(204, 0, 0, 0.4);
+}
+
+/* Move icon on hover */
+#logoutBtn:hover i {
+  transform: translateX(4px);
+}
+
+/* --- CLICK EFFECT --- */
+#logoutBtn:active {
+  transform: translateY(6px); /* Moves down significantly */
+  box-shadow: 0 2px 0 #5c0000, 0 5px 10px rgba(0, 0, 0, 0.6);
+  transition: all 0.05s ease;
+}
+
+
+.logo-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 40px;
+  z-index: 10;
+}
+
+/* MAIN LOGO: THE CRASH */
+.logo-img {
+  width: 380px; 
+  max-width: 90vw;
+  filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
+  
+  /* Fall and Crash Animation */
+  animation: fallAndCrash 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* V2 BADGE: THE POP */
+.v2-badge {
+  position: absolute;
+  width: 120px;
+  bottom: -20px;
+  right: -10px;
+  opacity: 0;
+  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+  
+  /* Pop in after the main logo hits */
+  animation: popInV2 0.6s 1.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* ANIMATION: LOGO SLAMMING DOWN */
+@keyframes fallAndCrash {
+  0% { transform: translateY(-1000px) scaleY(1.2); opacity: 0; }
+  60% { transform: translateY(0) scaleY(0.8); opacity: 1; } /* Hits the bottom and squishes */
+  75% { transform: translateY(-30px) scaleY(1.1); }          /* Bounces up */
+  90% { transform: translateY(0) scaleY(1); }               /* Final impact */
+  100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+}
+
+/* ANIMATION: V2 STAMP POP */
+@keyframes popInV2 {
+  0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+  70% { transform: scale(1.3) rotate(10deg); opacity: 1; }
+  100% { transform: scale(1) rotate(5deg); opacity: 1; }
+}
+
+/* Optional: Subtle floating effect AFTER they land */
+.logo-container:hover {
+    animation: gentleFloat 3s ease-in-out infinite;
+}
+
+@keyframes gentleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* ==========================================
+   MAIN MENU & RESPONSIVE CONTAINER
+   ========================================== */
+#mainMenu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  gap: 20px; /* Vertical spacing between elements */
+  z-index: 100;
+  position: relative;
+  text-align: center;
+}
+
+/* LOGO WRAPPER (For Logo + V2 Badge) */
+.logo-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 10px;
+  /* Balanced shift for PC, resets on mobile */
+  transform: translateX(-30px); 
+  animation: logoSlamShake 0.2s 0.7s 2;
+}
+
+.logo-img {
+  width: 100%;
+  max-width: 400px; /* Prevents logo from being too big on PC */
+  height: auto;
+  filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
+  animation: crashSlam 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.v2-badge {
+  position: absolute;
+  width: 30%; /* Scales relative to logo size */
+  bottom: -5%;
+  right: -10%;
+  opacity: 0;
+  transform: scale(4);
+  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+  animation: stampV2 0.5s 1.2s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+
+/* WELCOME BADGE */
+#welcomeText {
+  display: none;
+  background: linear-gradient(to bottom, #4d2600, #261300);
+  border: 3px solid #facc15;
+  border-radius: 50px;
+  padding: 8px 30px;
+  
+  /* Responsive Font: Min 16px, Max 22px */
+  font-size: clamp(16px, 4vw, 22px); 
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  box-shadow: 0 6px 0 #1a0a00, 0 10px 20px rgba(0, 0, 0, 0.5);
+  animation: plaquePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* BUTTONS CONTAINER */
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  align-items: center;
+}
+
+/* PRECISE PLAY BUTTON */
+.menu-btn.play {
+  width: 100%;
+  max-width: 280px; /* Limits width on PC */
+  height: 70px;    /* Fixed height for better control */
+  
+  background: linear-gradient(180deg, #ffdc43 0%, #ffaa00 50%, #e67300 100%);
+  color: #1a1c33;
+  border: 4px solid #ffffff;
+  border-radius: 20px;
+  
+  font-size: 32px; /* Smaller than before for PC */
+  font-family: 'Oswald', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  
+  box-shadow: 0 10px 0 #4d2600, 0 15px 25px rgba(0, 0, 0, 0.4);
+  transition: all 0.1s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* LOGOUT BUTTON REDESIGN */
+#logoutBtn {
+  display: none; /* Managed by JS */
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(180deg, #ff3333 0%, #cc0000 50%, #a30000 100%);
+  color: white;
+  border: 3px solid #ffffff;
+  border-radius: 12px;
+  padding: 10px 25px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #5c0000, 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* --- INTERACTIVITY --- */
+.menu-btn.play:hover { transform: translateY(-3px); box-shadow: 0 13px 0 #4d2600, 0 20px 30px rgba(0, 0, 0, 0.5); }
+.menu-btn.play:active { transform: translateY(8px); box-shadow: 0 2px 0 #4d2600; }
+#logoutBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 #5c0000; }
+
+/* ==========================================
+   MOBILE FIXES (Screens smaller than 600px)
+   ========================================== */
+@media (max-width: 600px) {
+  .logo-wrapper { transform: translateX(0); } /* Center logo on mobile */
+  .logo-main { max-width: 80vw; }
+  .v2-badge { width: 35%; right: -5%; }
+  
+  .menu-btn.play {
+    max-width: 240px; /* Shrinks button for phones */
+    height: 60px;
+    font-size: 26px;
+    border-width: 3px;
+  }
+}
+
+/* --- ANIMATION KEYFRAMES --- */
+@keyframes crashSlam {
+  0% { transform: translateY(-800px) scaleY(2); opacity: 0; }
+  60% { transform: translateY(0) scaleY(0.7); opacity: 1; }
+  100% { transform: translateY(0) scaleY(1); opacity: 1; }
+}
+@keyframes stampV2 {
+  0% { transform: scale(4) rotate(-20deg); opacity: 0; }
+  100% { transform: scale(1) rotate(8deg); opacity: 1; }
+}
+@keyframes logoSlamShake {
+  0%, 100% { transform: translateX(-30px); }
+  50% { transform: translateX(-30px) translateY(5px); }
+}
+@keyframes plaquePop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+/* THE LOGO WRAPPER - Centered exactly */
+.logo-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%; /* Ensures it spans the full menu width */
+  margin-bottom: 25px;
+  z-index: 10;
+  
+  /* Resetting the offset so it is dead center */
+  transform: translateX(0); 
+  
+  /* Screen shake on impact */
+  animation: logoSlamShake 0.2s 0.6s 2; 
+}
+
+/* THE MAIN LOGO */
+.logo-main {
+  width: 90%;          /* Responsive width */
+  max-width: 480px;    /* Max size on PC */
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8));
+  
+  /* Fall and Crash Animation */
+  animation: crashSlam 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* --- ANIMATION KEYFRAMES --- */
+
+@keyframes crashSlam {
+  0% { transform: translateY(-800px) scaleY(2); opacity: 0; }
+  60% { transform: translateY(0) scaleY(0.7); opacity: 1; } /* Squash */
+  85% { transform: translateY(-20px) scaleY(1.1); }          /* Bounce */
+  100% { transform: translateY(0) scaleY(1); opacity: 1; }
+}
+
+@keyframes logoSlamShake {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(8px, 8px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* MOBILE FIX */
+@media (max-width: 600px) {
+  .logo-main {
+    max-width: 320px; /* Perfectly sized for phones */
+  }
+}
+
+/* ==========================================
+   PREMIUM HUD — TOP SCORE PANEL (REDESIGN)
+   ========================================== */
+
+/* Slim ambient top strip — replaces the old thick header bar */
+.game-header {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 18px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.35), transparent);
+  z-index: 900;
+  pointer-events: none;
+}
+
+/* THE HUD CARD */
+#scoreBoard {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 8px 22px 8px 8px;
+  border-radius: 999px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02) 40%),
+    linear-gradient(135deg, #2c2a55 0%, #1b1a37 60%, #14132b 100%);
+  border: 1px solid rgba(255,255,255,0.16);
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.25) inset,
+    0 -10px 16px rgba(0,0,0,0.25) inset,
+    0 8px 18px rgba(0,0,0,0.45),
+    0 0 0 4px rgba(10,8,25,0.35);
+
+  backdrop-filter: blur(6px);
+  animation: hudFloat 4s ease-in-out infinite, hudBreathe 3.2s ease-in-out infinite;
+  transition: transform 0.15s ease;
+  overflow: hidden;
+}
+
+/* Soft ambient glow ring, breathes slowly */
+@keyframes hudBreathe {
+  0%, 100% {
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.25) inset,
+      0 -10px 16px rgba(0,0,0,0.25) inset,
+      0 8px 18px rgba(0,0,0,0.45),
+      0 0 0 4px rgba(10,8,25,0.35),
+      0 0 14px rgba(255,196,60,0.18);
+  }
+  50% {
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.25) inset,
+      0 -10px 16px rgba(0,0,0,0.25) inset,
+      0 8px 18px rgba(0,0,0,0.5),
+      0 0 0 4px rgba(10,8,25,0.35),
+      0 0 24px rgba(255,196,60,0.38);
+  }
+}
+
+/* Gentle idle bob, like a live UI element rather than a static image */
+@keyframes hudFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* Glossy light sweep, sweeps across the pill every few seconds */
+#scoreBoard::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -60%;
+  width: 40%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: skewX(-25deg);
+  animation: hudSheen 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes hudSheen {
+  0%   { left: -60%; opacity: 0; }
+  8%   { opacity: 1; }
+  30%  { left: 130%; opacity: 0; }
+  100% { left: 130%; opacity: 0; }
+}
+
+#scoreBoard:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* THE COIN/ICON MEDALLION */
+.score-icon-wrapper {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: radial-gradient(circle at 32% 28%, #fff6cf 0%, #ffd25a 28%, #f5a623 62%, #c9780f 100%);
+  border: 2px solid rgba(255,255,255,0.85);
+
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.4),
+    0 0 10px rgba(255,196,60,0.55),
+    inset 0 2px 3px rgba(255,255,255,0.6),
+    inset 0 -3px 4px rgba(120,60,0,0.45);
+}
+
+.score-icon-wrapper i {
+  font-size: 20px;
+  color: #7a3e00;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
+}
+
+/* subtle rotating shine ring on the medallion */
+.score-icon-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 60%, rgba(255,255,255,0.55) 68%, transparent 76% 100%);
+  animation: coinSpin 3.2s linear infinite;
+  mix-blend-mode: overlay;
+}
+@keyframes coinSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* THE SCORE NUMBER */
+#scoreText {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  line-height: 1;
+
+  color: #fff6df;
+  background: linear-gradient(180deg, #fffdf5 0%, #ffe27a 60%, #ffc63c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  text-shadow: 0 2px 6px rgba(0,0,0,0.35);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: inline-block;
+}
+
+/* Score pop animation — replaces the old crude scorePop */
+.score-bump #scoreText {
+  animation: scoreValuePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes scoreValuePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+/* Ring pulse on the coin whenever score bumps */
+.score-bump .score-icon-wrapper {
+  animation: coinPulse 0.35s ease-out;
+}
+@keyframes coinPulse {
+  0%   { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 10px rgba(255,196,60,0.55), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -3px 4px rgba(120,60,0,0.45); }
+  50%  { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 26px rgba(255,196,60,0.9), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -3px 4px rgba(120,60,0,0.45); }
+  100% { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 10px rgba(255,196,60,0.55), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -3px 4px rgba(120,60,0,0.45); }
+}
+
+/* ==========================================
+   HUD MOBILE FIXES
+   ========================================== */
+@media (max-width: 600px) {
+  #scoreBoard {
+    top: 10px;
+    left: 10px;
+    padding: 6px 16px 6px 6px;
+    gap: 8px;
+  }
+  .score-icon-wrapper { width: 36px; height: 36px; }
+  .score-icon-wrapper i { font-size: 16px; }
+  #scoreText { font-size: 19px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #scoreBoard, #scoreBoard::before, .score-icon-wrapper::after {
+    animation: none !important;
+  }
+}
+
+/* Subtle side frame kept for the arcade feel */
+.game-frame-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+  border: 4px solid rgba(250, 204, 21, 0.15);
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
+  z-index: 400;
+}
+
+/* ==========================================
+   CYBER-STREAMER FRAME OVERLAY
+   ========================================== */
+
+.game-frame-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* Crucial: Kevin stays clickable behind the frame */
+  z-index: 850;
+  overflow: hidden;
+}
+
+/* The Main Glowing Border */
+.frame-edge {
+  position: absolute;
+  inset: 15px;
+  border: 2px solid rgba(14, 221, 193, 0.3);
+  box-shadow: inset 0 0 20px rgba(14, 221, 193, 0.1);
+  pointer-events: none;
+}
+
+/* Corner Tech Brackets */
+.corner {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border: 4px solid #0eddc1;
+  filter: drop-shadow(0 0 8px #0eddc1);
+}
+
+.top-left     { top: 0; left: 0; border-right: none; border-bottom: none; clip-path: polygon(0 0, 100% 0, 100% 20%, 20% 20%, 20% 100%, 0 100%); }
+.top-right    { top: 0; right: 0; border-left: none; border-bottom: none; clip-path: polygon(0 0, 100% 0, 100% 100%, 80% 100%, 80% 20%, 0 20%); }
+.bottom-left  { bottom: 0; left: 0; border-right: none; border-top: none; clip-path: polygon(0 0, 20% 0, 20% 80%, 100% 80%, 100% 100%, 0 100%); }
+.bottom-right { bottom: 0; right: 0; border-left: none; border-top: none; clip-path: polygon(80% 0, 100% 0, 100% 100%, 0 100%, 0 80%, 80% 80%); }
+
+/* Top Center Tech Bar */
+.top-bar-tech {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 40px;
+  background: #131526;
+  border: 2px solid #0eddc1;
+  border-top: none;
+  clip-path: polygon(0 0, 100% 0, 90% 100%, 10% 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 5px 15px rgba(14, 221, 193, 0.4);
+}
+
+/* Subtle Animated Scanline */
+.scanline {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: rgba(14, 221, 193, 0.1);
+  top: 0;
+  animation: scanMove 8s linear infinite;
+}
+
+@keyframes scanMove {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+/* Ambient Pulse for the whole frame */
+.frame-pulse {
+  animation: frameBreathe 3s ease-in-out infinite;
+}
+
+@keyframes frameBreathe {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.005); }
+}
   </style>
 </head>
 <body>
 
-  <div class="particles-container" id="particles"></div>
-
-  <!-- MAIN MENU -->
-  <div id="mainMenu">
-    <div class="logo-wrapper">
-      <img class="logo-main" src="https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/1a3ff2c0-5b26-4a5d-9c0a-b7c7b3d4b789/kevin-logo.png" alt="Kevin Logo">
-    </div>
-    <div id="welcomeText">Salut, Jucătorule!</div>
-    <div class="button-container">
-      <button class="menu-btn play" onclick="handlePlayClick()"><i class="fa-solid fa-play"></i> PLAY</button>
-      <button id="logoutBtn" onclick="logoutGoogle()"><i class="fa-solid fa-right-from-bracket"></i> <span>LOG OUT</span></button>
-    </div>
-  </div>
-
-  <!-- LOGIN MODAL -->
-  <div class="modal-overlay" id="loginModal">
+  <!-- ==========================================
+       MODALS (OVERLAYS)
+       ========================================== -->
+  
+  <!-- MODAL: LOGIN VIA GOOGLE -->
+  <div id="loginModal" class="modal-overlay">
     <div class="modal-box">
       <h2>CONECTARE</h2>
       <p>Trebuie să te conectezi pentru a salva progresul!</p>
-      <button class="custom-google-btn" onclick="signInWithGoogle()"><i class="fa-brands fa-google"></i> LOG IN CU GOOGLE</button>
+<button class="custom-google-btn" onclick="signInWithGoogle()">
+  <i class="fa-brands fa-google"></i>
+  <span>LOG IN CU GOOGLE</span>
+</button>
       <button class="cancel-btn" onclick="closeLoginModal()">Anulează</button>
     </div>
   </div>
 
-  <!-- USERNAME MODAL -->
-  <div class="modal-overlay" id="usernameModal">
+  <!-- MODAL: ALEGERE USERNAME -->
+  <div id="usernameModal" class="modal-overlay">
     <div class="modal-box">
       <h2>CREARE CONT</h2>
       <p>Alege-ți un nume de legendă:</p>
-      <input type="text" class="input-field" id="usernameInput" maxlength="15" placeholder="NUMELE TĂU">
-      <button class="custom-google-btn" onclick="saveNewUsername()">SALVEAZĂ</button>
+      <input type="text" id="usernameInput" class="input-field" placeholder="Ex: KevinBoss" maxlength="15">
+      <button class="menu-btn play" style="width: 100%; font-size: 24px; padding: 10px;" onclick="saveNewUsername()">SALVEAZĂ</button>
     </div>
   </div>
 
-  <!-- LOADING MODAL -->
-  <div class="modal-overlay" id="loadingModal">
-    <div class="modal-box">
-      <h2>SE ÎNCARCĂ...</h2>
+  <!-- MODAL: LOADING -->
+  <div id="loadingModal" class="modal-overlay">
+    <div class="modal-box" style="border-color: #0eddc1; box-shadow: 0 0 30px rgba(14, 221, 193, 0.4);">
+      <h2 style="color: #0eddc1;">SE ÎNCARCĂ...</h2>
       <p>Sincronizare cu serverul...</p>
     </div>
   </div>
 
-  <!-- GAME AREA -->
-  <div id="gameArea">
-    <div class="game-header"></div>
+  <!-- ==========================================
+       MAIN MENU
+       ========================================== -->
+  <div id="mainMenu">
+    <!-- Fundal particule -->
+    <div class="particles-container" id="particles"></div>
 
-    <div id="scoreBoard" role="status" aria-label="Score">
-      <div class="score-icon-wrapper"><i class="fa-solid fa-star"></i></div>
-      <span id="scoreText">0</span>
+<div class="logo-wrapper">
+  <img class="logo-main" src="https://iili.io/CNVgL7a.png" alt="PRINDEL PE KEVINUȚĂ">
+</div>    
+    <div id="welcomeText">Salut, Jucătorule!</div>
+
+    <div class="button-container">
+      <button class="menu-btn play" onclick="handlePlayClick()">
+        <i class="fa-solid fa-play"></i>
+        <span>PLAY</span>
+      </button> <!-- Added missing </button> -->
+
+      <button id="logoutBtn" onclick="logoutGoogle()">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>LOG OUT</span>
+      </button>
+    </div> <!-- Added missing </div> for button-container -->
+  </div> <!-- Added missing </div> for mainMenu -->
+
+<div id="gameArea">
+  <!-- THE NEW CYBER FRAME -->
+  <div class="game-frame-container frame-pulse">
+    <div class="frame-edge"></div>
+    <div class="scanline"></div>
+    
+    <!-- Tech Corners -->
+    <div class="corner top-left"></div>
+    <div class="corner top-right"></div>
+    <div class="corner bottom-left"></div>
+    <div class="corner bottom-right"></div>
+
+    <!-- Top Rail (Matches your Orbitron font) -->
+    <div class="top-bar-tech">
+      <span style="color: #0eddc1; font-family: 'Orbitron'; font-size: 12px; letter-spacing: 3px; font-weight: bold;">
+        SYSTEM ACTIVE
+      </span>
     </div>
-
-    <div id="kevin"></div>
-    <div class="game-frame-overlay"></div>
-    <button id="backBtn" onclick="returnToMenu()">Înapoi la Meniu</button>
   </div>
 
+  <!-- Rest of your code below (Scoreboard, Kevin, etc) -->
+  <div class="game-frame-overlay"></div>
+  <div class="game-header"></div>
+  
+  <div id="scoreBoard">
+    <div class="score-icon-wrapper">
+      <i class="fa-solid fa-bolt"></i>
+    </div>
+    <span id="scoreText">0</span>
+  </div>
+
+  <div id="kevin"></div>
+  <button id="backBtn" onclick="returnToMenu()">Înapoi la Meniu</button>
+</div>
+  <!-- ==========================================
+       JAVASCRIPT
+       ========================================== -->
   <script>
+const particlesContainer = document.getElementById('particles');
+const particleCount = 40;
+
+for (let i = 0; i < particleCount; i++) {
+  let p = document.createElement('div');
+  p.className = 'particle';
+  
+  // Randomize size
+  let size = Math.random() * 4 + 2;
+  p.style.width = size + 'px';
+  p.style.height = size + 'px';
+  
+  // Randomize horizontal position
+  p.style.left = Math.random() * 100 + 'vw';
+  
+  // Speed and Delay
+  let duration = Math.random() * 5 + 5; // 5 to 10 seconds
+  let delay = Math.random() * 5;
+  
+  p.style.animationDuration = duration + 's';
+  p.style.animationDelay = '-' + delay + 's'; // The "-" makes them start "mid-way" so they aren't stuck at the bottom/top on load
+  
+  particlesContainer.appendChild(p);
+}
+
+    // =====================================
+    // FIREBASE INITIALIZATION
+    // =====================================
     const firebaseConfig = {
-      apiKey: "@secret:GOOGLE_API_KEY",
+      apiKey: "AIzaSyBihv3wYvDUo6DejSLec9U0DfOiR6g7VuQ",
       authDomain: "kevin-game-f9cf8.firebaseapp.com",
       projectId: "kevin-game-f9cf8",
       storageBucket: "kevin-game-f9cf8.firebasestorage.app",
@@ -451,51 +1109,79 @@
     const db = firebase.firestore();
     const googleProvider = new firebase.auth.GoogleAuthProvider();
 
+    // =====================================
+    // VARIABILE GLOBALE
+    // =====================================
     let currentUID = null;
     let currentUsername = "";
     let score = 0;
     let lastSavedScore = 0;
+    
     let comboCount = 0;
     let comboTimer = null;
     let moveKevinInterval = null;
     let tiredTimeout = null;
     let saveScoreInterval = null;
     let isKevinTired = false;
-    let canClickKevin = true;
+    let canClickKevin = true; 
 
     const normalKevinImage = "url('https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w')";
     const tiredKevinImage = "url('https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/0b5ac0f4-618a-4346-9684-8c1f3c0a5fcb/20716c49-4365-417d-97e9-fc8601ae5403_removalai_preview.png?format=500w')";
 
+    // =====================================
+    // AUTHENTICATION & UI FLOW
+    // =====================================
     auth.onAuthStateChanged(async (user) => {
-      if (user) { currentUID = user.uid; await checkUserInFirestore(currentUID); }
-      else { currentUID = null; currentUsername = ""; showLoggedOutUI(); }
+      if (user) {
+        currentUID = user.uid;
+        await checkUserInFirestore(currentUID);
+      } else {
+        currentUID = null;
+        currentUsername = "";
+        showLoggedOutUI();
+      }
     });
 
     function handlePlayClick() {
-      if (currentUID) startGameUI();
-      else document.getElementById('loginModal').style.display = 'flex';
+      if (currentUID) {
+        startGameUI();
+      } else {
+        document.getElementById('loginModal').style.display = 'flex';
+      }
     }
-    function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
+
+    function closeLoginModal() {
+      document.getElementById('loginModal').style.display = 'none';
+    }
 
     function signInWithGoogle() {
       document.getElementById('loginModal').style.display = 'none';
       document.getElementById('loadingModal').style.display = 'flex';
       auth.signInWithPopup(googleProvider).catch((error) => {
+        console.error("Eroare la logare:", error);
         alert("Eroare la logare Google!");
         document.getElementById('loadingModal').style.display = 'none';
       });
     }
-    function logoutGoogle() { auth.signOut().then(showLoggedOutUI); }
+
+    function logoutGoogle() {
+      auth.signOut().then(() => {
+        showLoggedOutUI();
+      });
+    }
 
     async function checkUserInFirestore(uid) {
       document.getElementById('loadingModal').style.display = 'flex';
       try {
-        const docSnap = await db.collection("players").doc(uid).get();
+        const docRef = db.collection("players").doc(uid);
+        const docSnap = await docRef.get();
+
         if (docSnap.exists) {
           const data = docSnap.data();
           currentUsername = data.username;
           score = data.score || 0;
           lastSavedScore = score;
+          
           document.getElementById('loadingModal').style.display = 'none';
           showLoggedInUI();
         } else {
@@ -503,31 +1189,45 @@
           document.getElementById('usernameModal').style.display = 'flex';
         }
       } catch (e) {
+        console.error("Eroare Firestore:", e);
         document.getElementById('loadingModal').style.display = 'none';
       }
     }
 
     async function saveNewUsername() {
       const input = document.getElementById('usernameInput').value.trim();
-      if (input.length < 3) { alert("Numele trebuie să aibă minim 3 caractere!"); return; }
+      if (input.length < 3) {
+        alert("Numele trebuie să aibă minim 3 caractere!");
+        return;
+      }
+
       document.getElementById('usernameModal').style.display = 'none';
       document.getElementById('loadingModal').style.display = 'flex';
+
       try {
         const querySnapshot = await db.collection("players").where("username", "==", input).get();
         if (!querySnapshot.empty) {
-          alert("Numele este deja luat!");
+          alert("Numele este deja luat! Alege altul.");
           document.getElementById('loadingModal').style.display = 'none';
           document.getElementById('usernameModal').style.display = 'flex';
           return;
         }
-        currentUsername = input; score = 0; lastSavedScore = 0;
+
+        currentUsername = input;
+        score = 0;
+        lastSavedScore = 0;
+
         await db.collection("players").doc(currentUID).set({
-          uid: currentUID, username: currentUsername, score: 0,
+          uid: currentUID,
+          username: currentUsername,
+          score: 0,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
+
         document.getElementById('loadingModal').style.display = 'none';
         showLoggedInUI();
       } catch (e) {
+        console.error("Eroare creare cont:", e);
         alert("Eroare. Încearcă din nou.");
         document.getElementById('loadingModal').style.display = 'none';
       }
@@ -537,29 +1237,39 @@
       document.getElementById('loginModal').style.display = 'none';
       const welcomeText = document.getElementById('welcomeText');
       const logoutBtn = document.getElementById('logoutBtn');
+      
       welcomeText.innerText = `SALUT, ${currentUsername}!`;
       welcomeText.style.display = 'block';
-      logoutBtn.style.display = 'flex';
+      logoutBtn.style.display = 'block';
     }
+
     function showLoggedOutUI() {
       document.getElementById('welcomeText').style.display = 'none';
       document.getElementById('logoutBtn').style.display = 'none';
     }
 
-    function startGameUI() {
-      document.getElementById('mainMenu').style.display = 'none';
-      document.getElementById('gameArea').style.display = 'block';
-      comboCount = 0;
-      updateScoreUI();
-      const kevin = document.getElementById('kevin');
-      kevin.style.backgroundImage = normalKevinImage;
-      kevin.style.width = "120px"; kevin.style.height = "120px";
-      isKevinTired = false;
-      moveKevinAway();
-      startKevinMovement();
-      startTiredCycle();
-      saveScoreInterval = setInterval(syncScoreToFirestore, 5000);
-    }
+function startGameUI() {
+  document.getElementById('mainMenu').style.display = 'none';
+  document.getElementById('gameArea').style.display = 'block';
+
+  comboCount = 0;
+  updateScoreUI();
+  
+  const kevin = document.getElementById('kevin');
+  kevin.style.backgroundImage = normalKevinImage;
+  
+  // Force Kevin to be visible and have a starting size
+  kevin.style.width = "120px";
+  kevin.style.height = "120px";
+  
+  isKevinTired = false;
+
+  moveKevinAway(); // Initial jump
+  startKevinMovement();
+  startTiredCycle();
+
+  saveScoreInterval = setInterval(syncScoreToFirestore, 5000);
+}
 
     async function syncScoreToFirestore() {
       if (currentUID && score !== lastSavedScore) {
@@ -577,34 +1287,48 @@
       clearInterval(moveKevinInterval);
       clearTimeout(tiredTimeout);
       clearInterval(saveScoreInterval);
+
       await syncScoreToFirestore();
+
       document.getElementById('gameArea').style.display = 'none';
       document.getElementById('mainMenu').style.display = 'flex';
     }
 
-    function updateScoreUI() {
-      const sb = document.getElementById('scoreBoard');
-      const st = document.getElementById('scoreText');
-      st.innerText = score;
-      sb.classList.remove('score-bump');
-      void sb.offsetWidth;
-      sb.classList.add('score-bump');
-    }
+function updateScoreUI() {
+  const sb = document.getElementById('scoreBoard');
+  const st = document.getElementById('scoreText');
+  
+  st.innerText = score;
 
+  // Add the bump animation class
+  sb.classList.remove('score-bump');
+  void sb.offsetWidth; // This is a "hack" to reset the animation
+  sb.classList.add('score-bump');
+}
+    // =====================================
+    // GAMEPLAY LOGIC
+    // =====================================
     function startKevinMovement() {
       if (moveKevinInterval) clearInterval(moveKevinInterval);
-      moveKevinInterval = setInterval(() => { moveKevinAway(); }, 1500);
+      moveKevinInterval = setInterval(() => {
+        moveKevinAway();
+      }, 1500);
     }
 
     function moveKevinAway() {
       if (isKevinTired) return;
+
       const kevin = document.getElementById('kevin');
       const gameArea = document.getElementById('gameArea');
+
       const maxX = gameArea.clientWidth - kevin.offsetWidth;
       const maxY = gameArea.clientHeight - kevin.offsetHeight;
+      
       let newX = Math.random() * maxX;
       let newY = Math.random() * maxY;
-      if (newY < 80 && newX < 200) newY += 80;
+
+      if(newY < 80 && newX < 200) newY += 80;
+
       kevin.style.left = `${newX}px`;
       kevin.style.top = `${newY}px`;
     }
@@ -615,27 +1339,36 @@
         const kevin = document.getElementById('kevin');
         isKevinTired = true;
         kevin.style.backgroundImage = tiredKevinImage;
+        
         setTimeout(() => {
           isKevinTired = false;
           kevin.style.backgroundImage = normalKevinImage;
-          moveKevinAway();
+          moveKevinAway(); 
           startTiredCycle();
         }, 5000);
       }, 60000);
     }
 
     document.getElementById('kevin').addEventListener('click', (e) => {
-      e.stopPropagation();
+      e.stopPropagation(); 
       if (!canClickKevin) return;
       canClickKevin = false;
+
       score++;
       updateScoreUI();
+
       comboCount++;
       showComboText(e.clientX, e.clientY, comboCount);
+
       clearTimeout(comboTimer);
       comboTimer = setTimeout(() => { comboCount = 0; }, 2000);
-      if (!isKevinTired) { moveKevinAway(); startKevinMovement(); }
-      setTimeout(() => { canClickKevin = true; }, 100);
+
+      if (!isKevinTired) {
+        moveKevinAway();
+        startKevinMovement(); 
+      }
+
+      setTimeout(() => { canClickKevin = true; }, 100); 
     });
 
     function showComboText(x, y, count) {
@@ -645,6 +1378,7 @@
       el.style.left = `${x}px`;
       el.style.top = `${y}px`;
       document.body.appendChild(el);
+
       setTimeout(() => {
         el.style.transform = "translate(-50%, -150px) scale(1.5)";
         el.style.opacity = "0";
