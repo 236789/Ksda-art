@@ -947,6 +947,54 @@
   .game-controls { top: 10px; right: 10px; }
   .control-btn { width: 38px; height: 38px; font-size: 16px; }
 }
+
+
+/* THE ELECTRIC GLOW EFFECT */
+.electric-glow {
+  /* We strengthen the border so the light has a place to "live" */
+  border: 2px solid #facc15 !important; 
+  animation: 
+    hudFloat 4s ease-in-out infinite, 
+    yellowLighting 2s ease-in-out infinite !important;
+}
+
+/* THE LIGHTING ANIMATION */
+@keyframes yellowLighting {
+  0% {
+    border-color: #facc15;
+    box-shadow: 
+      0 0 5px #facc15, 
+      inset 0 0 5px rgba(250, 204, 21, 0.5),
+      0 8px 18px rgba(0,0,0,0.45); /* Keep original floor shadow */
+  }
+  50% {
+    border-color: #ffffff; /* Turns white-hot in the middle of the pulse */
+    box-shadow: 
+      0 0 20px #facc15, 
+      0 0 40px rgba(250, 204, 21, 0.4), 
+      inset 0 0 10px #facc15,
+      0 8px 18px rgba(0,0,0,0.45);
+  }
+  100% {
+    border-color: #facc15;
+    box-shadow: 
+      0 0 5px #facc15, 
+      inset 0 0 5px rgba(250, 204, 21, 0.5),
+      0 8px 18px rgba(0,0,0,0.45);
+  }
+}
+
+/* Adjusting the Pause Button specifically to look like the ScoreBoard icon */
+.control-btn.electric-glow {
+  background: radial-gradient(circle at center, #2c2a55 0%, #14132b 100%);
+  color: #facc15;
+  transition: transform 0.2s;
+}
+
+.control-btn.electric-glow:hover {
+  filter: brightness(1.2);
+  transform: scale(1.1);
+}
   </style>
 </head>
 <body>
@@ -1012,21 +1060,22 @@
   </div> <!-- Added missing </div> for mainMenu -->
 
 <div id="gameArea">
-  <!-- EXISTING SCOREBOARD -->
-  <div id="scoreBoard">
-    <div class="score-icon-wrapper"><i class="fa-solid fa-bolt"></i></div>
+  <!-- SCOREBOARD WITH NEW GLOW -->
+  <div id="scoreBoard" class="electric-glow">
+    <div class="score-icon-wrapper">
+      <i class="fa-solid fa-bolt"></i>
+    </div>
     <span id="scoreText">0</span>
   </div>
 
-  <!-- NEW: FLOATING CONTROLS (Top Right) -->
+  <!-- GAME CONTROLS WITH NEW GLOW -->
   <div class="game-controls">
-    <button class="control-btn" title="Pause" onclick="togglePause()">
+    <button class="control-btn electric-glow" title="Pause" onclick="togglePause()">
       <i class="fa-solid fa-pause"></i>
     </button>
   </div>
 
   <div id="kevin"></div>
-  <!-- You can keep or remove the big red back button now -->
   <button id="backBtn" onclick="returnToMenu()">Înapoi la Meniu</button>
 </div>
   <!-- ==========================================
@@ -1375,6 +1424,30 @@ document.getElementById('kevin').addEventListener('pointerdown', (e) => { // 'po
       }, 10);
       setTimeout(() => { el.remove(); }, 1200);
     }
+
+
+let isPaused = false;
+
+function togglePause() {
+    isPaused = !isPaused;
+    const pauseBtnIcon = document.querySelector('.control-btn i');
+
+    if (isPaused) {
+        // STOP GAME
+        clearInterval(moveKevinInterval);
+        clearTimeout(tiredTimeout);
+        pauseBtnIcon.className = "fa-solid fa-play"; // Change icon to Play
+        document.getElementById('kevin').style.pointerEvents = 'none'; // Disable clicking Kevin
+        console.log("Game Paused");
+    } else {
+        // RESUME GAME
+        startKevinMovement();
+        startTiredCycle();
+        pauseBtnIcon.className = "fa-solid fa-pause"; // Change icon back to Pause
+        document.getElementById('kevin').style.pointerEvents = 'auto'; // Enable clicking Kevin
+        console.log("Game Resumed");
+    }
+}
   </script>
 </body>
 </html>
