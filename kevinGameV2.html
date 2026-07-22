@@ -253,7 +253,7 @@
   /* --- BACKGROUND IMAGE SETTINGS --- */
   /* This adds a 40% dark tint so the character stands out */
   background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
-              url('https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/e7c37518-746f-42d6-9ea6-e3f7b028ffdb/ChatGPT+Image+Jun+16%2C+2025%2C+10_03_26+PM.png');
+              url('https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/e7c37518-746f-42d6-9ea6-e3f7b028ffdb/ChatGPT+Image+Jun+16%2C+2025%2C+10_03_26+PM.png'); 
   
   background-size: cover;      /* Makes the image fill the whole screen */
   background-position: center; /* Centers the image */
@@ -415,6 +415,221 @@
   box-shadow: 0 2px 0 #5c0000, 0 5px 10px rgba(0, 0, 0, 0.6);
   transition: all 0.05s ease;
 }
+
+
+.logo-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 40px;
+  z-index: 10;
+}
+
+/* MAIN LOGO: THE CRASH */
+.logo-img {
+  width: 380px; 
+  max-width: 90vw;
+  filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
+  
+  /* Fall and Crash Animation */
+  animation: fallAndCrash 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* V2 BADGE: THE POP */
+.v2-badge {
+  position: absolute;
+  width: 120px;
+  bottom: -20px;
+  right: -10px;
+  opacity: 0;
+  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+  
+  /* Pop in after the main logo hits */
+  animation: popInV2 0.6s 1.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* ANIMATION: LOGO SLAMMING DOWN */
+@keyframes fallAndCrash {
+  0% { transform: translateY(-1000px) scaleY(1.2); opacity: 0; }
+  60% { transform: translateY(0) scaleY(0.8); opacity: 1; } /* Hits the bottom and squishes */
+  75% { transform: translateY(-30px) scaleY(1.1); }          /* Bounces up */
+  90% { transform: translateY(0) scaleY(1); }               /* Final impact */
+  100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+}
+
+/* ANIMATION: V2 STAMP POP */
+@keyframes popInV2 {
+  0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+  70% { transform: scale(1.3) rotate(10deg); opacity: 1; }
+  100% { transform: scale(1) rotate(5deg); opacity: 1; }
+}
+
+/* Optional: Subtle floating effect AFTER they land */
+.logo-container:hover {
+    animation: gentleFloat 3s ease-in-out infinite;
+}
+
+@keyframes gentleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* ==========================================
+   MAIN MENU & RESPONSIVE CONTAINER
+   ========================================== */
+#mainMenu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  gap: 20px; /* Vertical spacing between elements */
+  z-index: 100;
+  position: relative;
+  text-align: center;
+}
+
+/* LOGO WRAPPER (For Logo + V2 Badge) */
+.logo-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 10px;
+  /* Balanced shift for PC, resets on mobile */
+  transform: translateX(-30px); 
+  animation: logoSlamShake 0.2s 0.7s 2;
+}
+
+.logo-img {
+  width: 100%;
+  max-width: 400px; /* Prevents logo from being too big on PC */
+  height: auto;
+  filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
+  animation: crashSlam 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.v2-badge {
+  position: absolute;
+  width: 30%; /* Scales relative to logo size */
+  bottom: -5%;
+  right: -10%;
+  opacity: 0;
+  transform: scale(4);
+  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+  animation: stampV2 0.5s 1.2s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+
+/* WELCOME BADGE */
+#welcomeText {
+  display: none;
+  background: linear-gradient(to bottom, #4d2600, #261300);
+  border: 3px solid #facc15;
+  border-radius: 50px;
+  padding: 8px 30px;
+  
+  /* Responsive Font: Min 16px, Max 22px */
+  font-size: clamp(16px, 4vw, 22px); 
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  box-shadow: 0 6px 0 #1a0a00, 0 10px 20px rgba(0, 0, 0, 0.5);
+  animation: plaquePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* BUTTONS CONTAINER */
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  align-items: center;
+}
+
+/* PRECISE PLAY BUTTON */
+.menu-btn.play {
+  width: 100%;
+  max-width: 280px; /* Limits width on PC */
+  height: 70px;    /* Fixed height for better control */
+  
+  background: linear-gradient(180deg, #ffdc43 0%, #ffaa00 50%, #e67300 100%);
+  color: #1a1c33;
+  border: 4px solid #ffffff;
+  border-radius: 20px;
+  
+  font-size: 32px; /* Smaller than before for PC */
+  font-family: 'Oswald', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  
+  box-shadow: 0 10px 0 #4d2600, 0 15px 25px rgba(0, 0, 0, 0.4);
+  transition: all 0.1s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* LOGOUT BUTTON REDESIGN */
+#logoutBtn {
+  display: none; /* Managed by JS */
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(180deg, #ff3333 0%, #cc0000 50%, #a30000 100%);
+  color: white;
+  border: 3px solid #ffffff;
+  border-radius: 12px;
+  padding: 10px 25px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #5c0000, 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* --- INTERACTIVITY --- */
+.menu-btn.play:hover { transform: translateY(-3px); box-shadow: 0 13px 0 #4d2600, 0 20px 30px rgba(0, 0, 0, 0.5); }
+.menu-btn.play:active { transform: translateY(8px); box-shadow: 0 2px 0 #4d2600; }
+#logoutBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 #5c0000; }
+
+/* ==========================================
+   MOBILE FIXES (Screens smaller than 600px)
+   ========================================== */
+@media (max-width: 600px) {
+  .logo-wrapper { transform: translateX(0); } /* Center logo on mobile */
+  .logo-main { max-width: 80vw; }
+  .v2-badge { width: 35%; right: -5%; }
+  
+  .menu-btn.play {
+    max-width: 240px; /* Shrinks button for phones */
+    height: 60px;
+    font-size: 26px;
+    border-width: 3px;
+  }
+}
+
+/* --- ANIMATION KEYFRAMES --- */
+@keyframes crashSlam {
+  0% { transform: translateY(-800px) scaleY(2); opacity: 0; }
+  60% { transform: translateY(0) scaleY(0.7); opacity: 1; }
+  100% { transform: translateY(0) scaleY(1); opacity: 1; }
+}
+@keyframes stampV2 {
+  0% { transform: scale(4) rotate(-20deg); opacity: 0; }
+  100% { transform: scale(1) rotate(8deg); opacity: 1; }
+}
+@keyframes logoSlamShake {
+  0%, 100% { transform: translateX(-30px); }
+  50% { transform: translateX(-30px) translateY(5px); }
+}
+@keyframes plaquePop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
   </style>
 </head>
 <body>
