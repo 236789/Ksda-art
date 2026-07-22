@@ -890,7 +890,69 @@
   z-index: 400;
 }
 
+/* Prevents Kevin from going behind the score or back button on small screens */
+#gameArea {
+    padding: 80px 20px 80px 20px; /* Creates a 'safe zone' */
+    box-sizing: border-box;
+}
 
+
+/* THE NEW HEADER PANEL */
+.premium-header-panel {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%); /* Centers it horizontally */
+  
+  width: 60%;         /* Adjust this if you want it wider or narrower */
+  min-height: 60px;   /* Makes it "thick" */
+  z-index: 1000;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* EXACT STYLES FROM SCOREBOARD */
+  padding: 10px 25px;
+  border-radius: 24px; /* Thick rounded corners */
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02) 40%),
+    linear-gradient(135deg, #2c2a55 0%, #1b1a37 60%, #14132b 100%);
+  border: 1px solid rgba(255,255,255,0.16);
+  
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.25) inset,
+    0 -10px 16px rgba(0,0,0,0.25) inset,
+    0 8px 18px rgba(0,0,0,0.45),
+    0 0 0 4px rgba(10,8,25,0.35);
+
+  backdrop-filter: blur(6px);
+  
+  /* EXACT ANIMATIONS FROM SCOREBOARD */
+  animation: hudFloat 4s ease-in-out infinite, hudBreathe 3.2s ease-in-out infinite;
+  overflow: hidden; /* Required for the sheen effect below */
+}
+
+/* THE GLOSSY SHEEN EFFECT (Light sweep) */
+.premium-header-panel::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -60%;
+  width: 40%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: skewX(-25deg);
+  animation: hudSheen 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Responsive fix for mobile */
+@media (max-width: 600px) {
+  .premium-header-panel {
+    width: 85%;
+    top: 10px;
+    min-height: 50px;
+  }
+}
   </style>
 </head>
 <body>
@@ -956,6 +1018,9 @@
   </div> <!-- Added missing </div> for mainMenu -->
 
 <div id="gameArea">
+  <!-- THE NEW HEADER (Step 1: Empty) -->
+  <div id="mainHeader" class="premium-header"></div>
+
   <div id="scoreBoard">
     <div class="score-icon-wrapper">
       <i class="fa-solid fa-bolt"></i>
@@ -1208,15 +1273,39 @@ function updateScoreUI() {
   void sb.offsetWidth; // This is a "hack" to reset the animation
   sb.classList.add('score-bump');
 }
-    // =====================================
-    // GAMEPLAY LOGIC
-    // =====================================
-    function startKevinMovement() {
-      if (moveKevinInterval) clearInterval(moveKevinInterval);
-      moveKevinInterval = setInterval(() => {
+// Change the movement function to clear the interval properly
+function startKevinMovement() {
+    if (moveKevinInterval) clearInterval(moveKevinInterval);
+    moveKevinInterval = setInterval(() => {
         moveKevinAway();
-      }, 1500);
+    }, 1800); // Slightly slower movement for better playability
+}
+
+// Update the click event
+document.getElementById('kevin').addEventListener('pointerdown', (e) => { // 'pointerdown' is faster on mobile
+    e.stopPropagation(); 
+    if (!canClickKevin) return;
+    
+    // Add a "Squeeze" effect when clicked
+    const kevin = document.getElementById('kevin');
+    kevin.style.transform = "scale(0.8)";
+    setTimeout(() => { kevin.style.transform = "scale(1)"; }, 100);
+
+    score++;
+    updateScoreUI();
+
+    comboCount++;
+    showComboText(e.clientX, e.clientY, comboCount);
+
+    clearTimeout(comboTimer);
+    comboTimer = setTimeout(() => { comboCount = 0; }, 2000);
+
+    // RESET the timer whenever he is caught so he doesn't jump immediately after
+    if (!isKevinTired) {
+        moveKevinAway();
+        startKevinMovement(); 
     }
+});
 
     function moveKevinAway() {
       if (isKevinTired) return;
