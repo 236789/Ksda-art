@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -2147,26 +2148,17 @@ async function confirmCharacter() {
     }
 }
 // 4. UPDATE handlePlayClick (The brain of the logic)
-async function handlePlayClick() {
+function handlePlayClick() {
     if (!currentUID) {
+        // Dacă nu e logat, îi cerem să se logheze
         document.getElementById('loginModal').style.display = 'flex';
         return;
     }
 
-    // Check Firebase to see if they've already chosen a character
-    document.getElementById('loadingModal').style.display = 'flex';
-    const doc = await db.collection("players").doc(currentUID).get();
-    const data = doc.data();
-
-    document.getElementById('loadingModal').style.display = 'none';
-
-if (data.hasSetupFinished) {
-    startGameUI();
-} else {
+    // ARATĂ MEREU MENIUL DE CARACTERE (Indiferent dacă a mai jucat)
     charIndex = 0;
     document.getElementById('charSelectorModal').style.display = 'flex';
-    changeChar(0); // Această linie va încărca imaginea lui Kevinuta imediat
-   }
+    changeChar(0); // Încarcă imaginea primului caracter (Kevin)
 }
 
 
