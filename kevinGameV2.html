@@ -1859,28 +1859,33 @@ function startGameUI() {
 
 async function syncScoreToFirestore() {
   if (currentUID && score !== lastSavedScore) {
-    // We don't update lastSavedScore yet! 
-    // We wait to see if the server likes the new score first.
-    const scoreToTry = score; 
+    const scoreToTry = score;
 
     try {
+      // 1. Get the Identity Token (The Passport)
+      // This proves the user is actually logged in through your app
+      const idToken = await firebase.auth().currentUser.getIdToken(true);
+
       const response = await fetch('http://127.0.0.1:3000/update-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid: currentUID, score: scoreToTry }),
+        body: JSON.stringify({ 
+          idToken: idToken, // We send the token, not the UID
+          score: scoreToTry 
+        }),
       });
 
       if (response.ok) {
-        // ONLY update lastSavedScore if the server says "Saved!"
         lastSavedScore = scoreToTry;
-        console.log("✅ Score synced successfully.");
+        console.log("✅ Verified & Saved.");
       } else if (response.status === 403) {
-        // 🚨 SERVER DETECTED CHEATING!
-        // We force the local score back to the last known good score.
-        console.warn("🚨 Cheat detected! Rolling back visual score...");
+        // 🚨 BACKEND CAUGHT A CHEATER
+        console.warn("🚨 Cheat detected! Rolling back...");
         score = lastSavedScore; 
-        updateScoreUI(); // This updates the number at the top of your screen
-        alert("⚠️ Modificare neautorizată detectată! Scorul a fost resetat.");
+        updateScoreUI();
+        alert("⚠️ Modificare neautorizată! Scorul a fost resetat.");
+      } else if (response.status === 401) {
+        console.error("🚨 Sesiune expirată. Te rugăm să te re-loghezi.");
       }
     } catch (e) {
       console.error("Connection error:", e);
