@@ -1743,37 +1743,43 @@ let currentTiredImg = "";
 
 async function checkUserInFirestore(uid) {
     document.getElementById('loadingModal').style.display = 'flex';
+    
     try {
-        const docRef = db.collection("players").doc(uid);
-        const docSnap = await docRef.get();
+        // 1. Get the ID Token
+        const idToken = await firebase.auth().currentUser.getIdToken(true);
 
-        if (docSnap.exists) {
-            const data = docSnap.data();
-            currentUsername = data.username;
+        // 2. Ask the BACKEND for the user data (instead of Firebase)
+        const response = await fetch('http://127.0.0.1:3000/get-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken: idToken })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            currentUsername = data.username || "Jucător";
             score = data.score || 0;
             lastSavedScore = score;
             
-            if (data.hasSetupFinished) {
-                const savedCharId = data.selectedChar || "kevin";
-                const charData = characterList.find(c => c.id === savedCharId) || characterList[0];
-                
+            // Character setup logic
+            if (data.selectedChar) {
+                const charData = characterList.find(c => c.id === data.selectedChar) || characterList[0];
                 currentPlayImg = `url('${charData.playImg}')`;
                 currentTiredImg = `url('${charData.tiredImg}')`;
-                
-                // --- IMPORTANT: Reținem ID-ul și aici ---
-                window.currentPlayingCharId = savedCharId;
-
+                window.currentPlayingCharId = data.selectedChar;
                 document.getElementById('kevin').style.backgroundImage = currentPlayImg;
             }
 
             document.getElementById('loadingModal').style.display = 'none';
             showLoggedInUI();
         } else {
+            console.error("Backend failed to load user.");
+            // Handle if account needs setup
             document.getElementById('loadingModal').style.display = 'none';
             document.getElementById('usernameModal').style.display = 'flex';
         }
     } catch (e) {
-        console.error("Eroare Firestore:", e);
+        console.error("Error loading via backend:", e);
         document.getElementById('loadingModal').style.display = 'none';
     }
 }
