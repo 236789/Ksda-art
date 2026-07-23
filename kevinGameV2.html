@@ -1784,44 +1784,44 @@ async function checkUserInFirestore(uid) {
     }
 }
 
-    async function saveNewUsername() {
-      const input = document.getElementById('usernameInput').value.trim();
-      if (input.length < 3) {
-        alert("Numele trebuie să aibă minim 3 caractere!");
-        return;
-      }
+async function saveNewUsername() {
+  const input = document.getElementById('usernameInput').value.trim();
+  if (input.length < 3) {
+    alert("Numele trebuie să aibă minim 3 caractere!");
+    return;
+  }
 
-      document.getElementById('usernameModal').style.display = 'none';
-      document.getElementById('loadingModal').style.display = 'flex';
+  document.getElementById('usernameModal').style.display = 'none';
+  document.getElementById('loadingModal').style.display = 'flex';
 
-      try {
-        const querySnapshot = await db.collection("players").where("username", "==", input).get();
-        if (!querySnapshot.empty) {
-          alert("Numele este deja luat! Alege altul.");
-          document.getElementById('loadingModal').style.display = 'none';
-          document.getElementById('usernameModal').style.display = 'flex';
-          return;
-        }
+  try {
+    // Luăm pașaportul de la Google
+    const idToken = await firebase.auth().currentUser.getIdToken(true);
+    
+    // Trimitem cererea la Backend-ul nostru (nu la Firebase direct)
+    const response = await fetch('http://127.0.0.1:3000/create-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken: idToken, username: input })
+    });
 
-        currentUsername = input;
-        score = 0;
-        lastSavedScore = 0;
-
-        await db.collection("players").doc(currentUID).set({
-          uid: currentUID,
-          username: currentUsername,
-          score: 0,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        document.getElementById('loadingModal').style.display = 'none';
-        showLoggedInUI();
-      } catch (e) {
-        console.error("Eroare creare cont:", e);
-        alert("Eroare. Încearcă din nou.");
-        document.getElementById('loadingModal').style.display = 'none';
-      }
+    if (response.ok) {
+      const data = await response.json();
+      currentUsername = data.username;
+      score = 0;
+      lastSavedScore = 0;
+      document.getElementById('loadingModal').style.display = 'none';
+      showLoggedInUI();
+      // Pornim jocul
+      startGameUI();
+    } else {
+      alert("Eroare la crearea contului pe server.");
+      document.getElementById('usernameModal').style.display = 'flex';
     }
+  } catch (e) {
+    console.error("Eroare fatală:", e);
+  }
+}
 
     function showLoggedInUI() {
       document.getElementById('loginModal').style.display = 'none';
