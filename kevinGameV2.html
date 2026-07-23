@@ -1858,33 +1858,33 @@ function startGameUI() {
 }
 
 async function syncScoreToFirestore() {
-  console.log("Checking sync... Current UID:", currentUID, "Score:", score);
-
   if (currentUID && score !== lastSavedScore) {
-    console.log("Attempting to send score to backend...");
-    const oldScore = score;
-    lastSavedScore = score;
+    // We don't update lastSavedScore yet! 
+    // We wait to see if the server likes the new score first.
+    const scoreToTry = score; 
 
     try {
-const response = await fetch('http://127.0.0.1:3000/update-score', {
+      const response = await fetch('http://127.0.0.1:3000/update-score', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          uid: currentUID,
-          score: oldScore
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid: currentUID, score: scoreToTry }),
       });
 
-      const result = await response.text();
-      console.log("Backend responded:", result);
-
+      if (response.ok) {
+        // ONLY update lastSavedScore if the server says "Saved!"
+        lastSavedScore = scoreToTry;
+        console.log("✅ Score synced successfully.");
+      } else if (response.status === 403) {
+        // 🚨 SERVER DETECTED CHEATING!
+        // We force the local score back to the last known good score.
+        console.warn("🚨 Cheat detected! Rolling back visual score...");
+        score = lastSavedScore; 
+        updateScoreUI(); // This updates the number at the top of your screen
+        alert("⚠️ Modificare neautorizată detectată! Scorul a fost resetat.");
+      }
     } catch (e) {
-      console.error("Backend Error:", e);
+      console.error("Connection error:", e);
     }
-  } else {
-    console.log("Sync skipped: Not logged in or score hasn't changed.");
   }
 }
 
