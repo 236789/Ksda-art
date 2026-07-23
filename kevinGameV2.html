@@ -1842,13 +1842,15 @@ function startGameUI() {
   document.getElementById('mainMenu').style.display = 'none';
   document.getElementById('gameArea').style.display = 'block';
 
+  // --- THE BUG FIXES START HERE ---
+  isPaused = false; // Reset the pause flag
+  const kevin = document.getElementById('kevin');
+  kevin.style.pointerEvents = 'auto'; // RE-ENABLE CLICKS
+  // --------------------------------
+
   comboCount = 0;
   updateScoreUI();
   
-  const kevin = document.getElementById('kevin');
-  
-  // Această linie se asigură că imaginea este cea aleasă de tine, nu doar Kevin:
-  // Dacă nu există o imagine salvată încă, pune-o pe cea default
   if (!kevin.style.backgroundImage) {
       kevin.style.backgroundImage = currentPlayImg;
   }
@@ -1860,6 +1862,9 @@ function startGameUI() {
   moveKevinAway(); 
   startKevinMovement();
   startTiredCycle();
+  
+  // Clear old intervals if they exist to prevent speed-up bugs
+  if (saveScoreInterval) clearInterval(saveScoreInterval);
   saveScoreInterval = setInterval(syncScoreToFirestore, 5000);
 }
 
