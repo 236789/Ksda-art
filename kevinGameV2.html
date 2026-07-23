@@ -1745,23 +1745,21 @@ async function checkUserInFirestore(uid) {
     document.getElementById('loadingModal').style.display = 'flex';
     
     try {
-        // 1. Get the ID Token
         const idToken = await firebase.auth().currentUser.getIdToken(true);
 
-        // 2. Ask the BACKEND for the user data (instead of Firebase)
         const response = await fetch('http://127.0.0.1:3000/get-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ idToken: idToken })
         });
 
-        if (response.ok) {
+        if (response.status === 200) {
             const data = await response.json();
-            currentUsername = data.username || "Jucător";
+            currentUsername = data.username;
             score = data.score || 0;
             lastSavedScore = score;
             
-            // Character setup logic
+            // Aceasta este partea care îți aduce înapoi caracterul și scorul vechi
             if (data.selectedChar) {
                 const charData = characterList.find(c => c.id === data.selectedChar) || characterList[0];
                 currentPlayImg = `url('${charData.playImg}')`;
@@ -1772,15 +1770,17 @@ async function checkUserInFirestore(uid) {
 
             document.getElementById('loadingModal').style.display = 'none';
             showLoggedInUI();
-        } else {
-            console.error("Backend failed to load user.");
-            // Handle if account needs setup
+        } else if (response.status === 404) {
+            // DOAR dacă utilizatorul nu există deloc, creăm unul nou
             document.getElementById('loadingModal').style.display = 'none';
             document.getElementById('usernameModal').style.display = 'flex';
+        } else {
+            // Dacă e 401 sau altceva, înseamnă că e o eroare de conexiune
+            console.error("Eroare de server. Cod:", response.status);
+            alert("Eroare la conectarea cu backend-ul!");
         }
     } catch (e) {
-        console.error("Error loading via backend:", e);
-        document.getElementById('loadingModal').style.display = 'none';
+        console.error(e);
     }
 }
 
@@ -2316,6 +2316,6 @@ function showKevinutaBubble(text) {
 
 
 
-  </script> 
+  </script>
 </body>
 </html>
