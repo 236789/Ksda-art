@@ -1858,12 +1858,14 @@ function startGameUI() {
 }
 
 async function syncScoreToFirestore() {
+  console.log("Checking sync... Current UID:", currentUID, "Score:", score);
+
   if (currentUID && score !== lastSavedScore) {
-    const oldScore = score; // Keep track of what we are saving
+    console.log("Attempting to send score to backend...");
+    const oldScore = score;
     lastSavedScore = score;
 
     try {
-      // Instead of talking to Firebase, we talk to YOUR server
       const response = await fetch('http://localhost:3000/update-score', {
         method: 'POST',
         headers: {
@@ -1875,14 +1877,14 @@ async function syncScoreToFirestore() {
         }),
       });
 
-      if (response.ok) {
-        console.log("Score saved securely by the backend!");
-      } else {
-        console.error("Backend refused to save score.");
-      }
+      const result = await response.text();
+      console.log("Backend responded:", result);
+
     } catch (e) {
-      console.error("Could not reach the backend:", e);
+      console.error("Backend Error:", e);
     }
+  } else {
+    console.log("Sync skipped: Not logged in or score hasn't changed.");
   }
 }
 
