@@ -1857,17 +1857,34 @@ function startGameUI() {
   saveScoreInterval = setInterval(syncScoreToFirestore, 5000);
 }
 
-    async function syncScoreToFirestore() {
-      if (currentUID && score !== lastSavedScore) {
-        lastSavedScore = score;
-        try {
-          await db.collection("players").doc(currentUID).update({
-            score: score,
-            lastActive: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        } catch (e) {}
+async function syncScoreToFirestore() {
+  if (currentUID && score !== lastSavedScore) {
+    const oldScore = score; // Keep track of what we are saving
+    lastSavedScore = score;
+
+    try {
+      // Instead of talking to Firebase, we talk to YOUR server
+      const response = await fetch('http://localhost:3000/update-score', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uid: currentUID,
+          score: oldScore
+        }),
+      });
+
+      if (response.ok) {
+        console.log("Score saved securely by the backend!");
+      } else {
+        console.error("Backend refused to save score.");
       }
+    } catch (e) {
+      console.error("Could not reach the backend:", e);
     }
+  }
+}
 
     async function returnToMenu() {
       clearInterval(moveKevinInterval);
