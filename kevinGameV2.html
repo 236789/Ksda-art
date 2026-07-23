@@ -2153,32 +2153,42 @@ function changeChar(dir) {
 
 async function confirmCharacter() {
     const selected = characterList[charIndex];
-    if (selected.id === "mystery") {
-        alert("Acest personaj este încă blocat!");
-        return;
-    }
-
+    
     document.getElementById('loadingModal').style.display = 'flex';
     
     try {
-        currentPlayImg = `url('${selected.playImg}')`;
-        currentTiredImg = `url('${selected.tiredImg}')`;
+        // 1. Get the Passport (Token)
+        const idToken = await firebase.auth().currentUser.getIdToken(true);
         
-        // --- IMPORTANT: Setăm ID-ul pentru sistemul de dialog ---
-        window.currentPlayingCharId = selected.id;
-
-        await db.collection("players").doc(currentUID).update({
-            selectedChar: selected.id,
-            hasSetupFinished: true
+        // 2. Ask the Backend to change the skin
+        const response = await fetch('http://127.0.0.1:3000/set-character', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken: idToken, charId: selected.id })
         });
-        
-        document.getElementById('kevin').style.backgroundImage = currentPlayImg;
-        document.getElementById('charSelectorModal').style.display = 'none';
-        document.getElementById('loadingModal').style.display = 'none';
-        startGameUI(); 
+
+        if (response.ok) {
+            // Success! Update the visuals
+            currentPlayImg = `url('${selected.playImg}')`;
+            currentTiredImg = `url('${selected.tiredImg}')`;
+            window.currentPlayingCharId = selected.id;
+
+            document.getElementById('kevin').style.backgroundImage = currentPlayImg;
+            document.getElementById('charSelectorModal').style.display = 'none';
+            document.getElementById('loadingModal').style.display = 'none';
+            
+            // Start the game
+            startGameUI(); 
+        } else if (response.status === 429) {
+            // Caught by the Rate Limiter (Cooldown)
+            alert("⚠️ Prea multe schimbări! Așteaptă 10 secunde.");
+            document.getElementById('loadingModal').style.display = 'none';
+        } else {
+            alert("Eroare la salvarea caracterului!");
+            document.getElementById('loadingModal').style.display = 'none';
+        }
     } catch (e) {
-        console.error(e);
-        alert("Eroare la salvarea caracterului!");
+        console.error("Connection Error:", e);
         document.getElementById('loadingModal').style.display = 'none';
     }
 }
