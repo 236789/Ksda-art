@@ -1744,21 +1744,32 @@ let currentTiredImg = "";
 async function checkUserInFirestore(uid) {
     document.getElementById('loadingModal').style.display = 'flex';
     
-    try {
-        const idToken = await firebase.auth().currentUser.getIdToken(true);
+    // 1. Wait until the user is actually ready
+    let user = firebase.auth().currentUser;
+    if (!user) {
+        console.log("Waiting for user session...");
+        setTimeout(() => checkUserInFirestore(uid), 1000);
+        return;
+    }
 
-const response = await fetch('https://kevin-backend-qodc.onrender.com/get-user', {
+    try {
+        // 2. Get the Identity Token
+        const idToken = await user.getIdToken(true);
+        console.log("Token obtained! sending to cloud...");
+
+        // 3. Talk to Render
+        const response = await fetch('https://kevin-backend-qodc.onrender.com/get-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ idToken: idToken })
         });
+
         if (response.status === 200) {
             const data = await response.json();
             currentUsername = data.username;
             score = data.score || 0;
             lastSavedScore = score;
             
-            // Aceasta este partea care îți aduce înapoi caracterul și scorul vechi
             if (data.selectedChar) {
                 const charData = characterList.find(c => c.id === data.selectedChar) || characterList[0];
                 currentPlayImg = `url('${charData.playImg}')`;
@@ -1770,16 +1781,16 @@ const response = await fetch('https://kevin-backend-qodc.onrender.com/get-user',
             document.getElementById('loadingModal').style.display = 'none';
             showLoggedInUI();
         } else if (response.status === 404) {
-            // DOAR dacă utilizatorul nu există deloc, creăm unul nou
             document.getElementById('loadingModal').style.display = 'none';
             document.getElementById('usernameModal').style.display = 'flex';
         } else {
-            // Dacă e 401 sau altceva, înseamnă că e o eroare de conexiune
-            console.error("Eroare de server. Cod:", response.status);
-            alert("Eroare la conectarea cu backend-ul!");
+            const errorMsg = await response.text();
+            console.error("Cloud Error:", errorMsg);
+            alert("Eroare de autorizare (401). Încearcă un Refresh!");
         }
     } catch (e) {
-        console.error(e);
+        console.error("Connection failed:", e);
+        alert("Serverul este ocupat. Te rugăm să revii în 1 minut.");
     }
 }
 
