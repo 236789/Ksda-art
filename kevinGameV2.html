@@ -2646,37 +2646,19 @@ document.getElementById('menuWrapper').addEventListener('click', (e) => {
 
 
 function openShop() {
-    // 1. Oprim jocul
-    isPaused = true;
-    clearInterval(moveKevinInterval);
-    clearTimeout(tiredTimeout);
-    clearTimeout(trapSpawnTimeout); // Oprim și bombele
-
-    // 2. Blocăm click-ul pe Kevin în spate
-    document.getElementById('kevin').style.pointerEvents = 'none';
-
-    // 3. Afișăm modalul
-    document.getElementById('shopModal').style.display = 'flex';
-    document.getElementById('menuWrapper').classList.remove('active');
+    // Optional: Pause game movement while shopping
+    // isPaused = true; 
     
-    console.log("⏸️ Joc întrerupt pentru cumpărături.");
+    document.getElementById('shopModal').style.display = 'flex';
+    
+    // Close the floating menu automatically when shop opens
+    document.getElementById('menuWrapper').classList.remove('active');
 }
 
 function closeShop() {
-    // 1. Pornim jocul înapoi
-    isPaused = false;
-    document.getElementById('kevin').style.pointerEvents = 'auto';
-
-    // 2. Repornim mișcarea și buclele
-    startKevinMovement();
-    startTiredCycle();
-    spawnTrap(); // Reîncepe ciclul de bombe
-
-    // 3. Închidem modalul
     document.getElementById('shopModal').style.display = 'none';
-    
-    console.log("▶️ Joc reluat.");
 }
+
 // Ensure clicks on the shop modal don't count as "Misses"
 document.getElementById('shopModal').addEventListener('click', (e) => {
     e.stopPropagation();
