@@ -1495,67 +1495,91 @@
 /* THE MENU CONTAINER */
 .menu-container {
   position: absolute;
-  bottom: 20px; /* Positioned at bottom-right corner */
-  right: 20px;
+  bottom: 25px;
+  right: 25px;
   z-index: 2000;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse; /* Flows upwards */
   align-items: center;
-  gap: 12px;
+  gap: 15px;
 }
 
-/* THE BUTTONS BASE STYLE */
+/* BASE BUTTON STYLE */
 .control-btn {
-  width: 54px;
-  height: 54px;
+  position: relative;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #2c2a55 0%, #14132b 100%);
-  border: 2px solid #facc15;
+  background: rgba(44, 42, 85, 0.8); /* Semi-transparent blue */
+  backdrop-filter: blur(8px); /* Glass effect */
+  border: 2px solid rgba(250, 204, 21, 0.4);
   color: #fff;
-  font-size: 20px;
+  font-size: 22px;
   cursor: pointer;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 8px 15px rgba(0,0,0,0.4), inset 0 2px 2px rgba(255,255,255,0.1);
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
 
-/* MAIN TOGGLE ANIMATION */
+/* MAIN TOGGLE (The "Bars" Button) */
 .main-toggle {
-  background: linear-gradient(135deg, #facc15 0%, #d97706 100%);
-  color: #1a1c33;
+  background: linear-gradient(180deg, #facc15 0%, #d97706 100%);
   border-color: #ffffff;
-  z-index: 2001;
+  color: #1a1c33;
+  z-index: 5;
+  box-shadow: 0 0 20px rgba(250, 204, 21, 0.3), 0 10px 0 #92400e;
 }
 
+/* Active State for Toggle */
 .menu-container.active .main-toggle {
-  transform: rotate(90deg);
-  background: #ff4444; /* Changes to red when open */
+  transform: rotate(135deg); /* Turns the X into a Cross */
+  background: #ef4444; /* Turns Red */
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.5), 0 4px 0 #7f1d1d;
   color: white;
 }
 
-/* SUB-BUTTONS ANIMATION */
-.menu-options {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.main-toggle:active { transform: translateY(6px); box-shadow: 0 4px 0 #92400e; }
+
+/* SUB-BUTTONS HIDDEN STATE */
+.sub-btn {
   opacity: 0;
-  transform: translateY(20px) scale(0);
+  transform: translateY(100px) scale(0); /* Start inside the main button */
   pointer-events: none;
-  transition: all 0.3s ease;
+  transition-delay: calc(0.05s * var(--i)); /* STAGGER EFFECT */
 }
 
-.menu-container.active .menu-options {
+/* SUB-BUTTONS REVEALED STATE */
+.menu-container.active .sub-btn {
   opacity: 1;
   transform: translateY(0) scale(1);
   pointer-events: auto;
+  border-color: rgba(250, 204, 21, 1);
 }
 
-/* Hover effects */
-.control-btn:hover { transform: scale(1.1); box-shadow: 0 0 20px rgba(250, 204, 21, 0.4); }
-.sub-btn:active { transform: scale(0.9); }
+.sub-btn:hover {
+  background: #facc15;
+  color: #1a1c33;
+  transform: scale(1.15) !important;
+}
 
+/* PULSING RING ANIMATION */
+.pulse-ring {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 50%;
+  border: 4px solid #facc15;
+  animation: menuPulse 2s infinite;
+  pointer-events: none;
+}
+
+@keyframes menuPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+.menu-container.active .pulse-ring { display: none; }
 
   </style>
 </head>
@@ -1669,16 +1693,17 @@
 <div class="menu-container" id="menuWrapper">
   <!-- The sub-buttons (Hidden by default) -->
   <div class="menu-options" id="menuOptions">
-    <button class="control-btn sub-btn" title="Inventory"><i class="fa-solid fa-briefcase"></i></button>
-    <button class="control-btn sub-btn" title="Achievements"><i class="fa-solid fa-trophy"></i></button>
-    <button class="control-btn sub-btn" title="Settings"><i class="fa-solid fa-gear"></i></button>
-    <button class="control-btn sub-btn" title="Fullscreen" onclick="toggleFullScreen()"><i id="fsIcon" class="fa-solid fa-expand"></i></button>
-    <button class="control-btn sub-btn" title="Pause" onclick="togglePause()"><i class="fa-solid fa-pause"></i></button>
+    <button class="control-btn sub-btn" style="--i:1" title="Inventory"><i class="fa-solid fa-briefcase"></i></button>
+    <button class="control-btn sub-btn" style="--i:2" title="Achievements"><i class="fa-solid fa-trophy"></i></button>
+    <button class="control-btn sub-btn" style="--i:3" title="Settings"><i class="fa-solid fa-gear"></i></button>
+    <button class="control-btn sub-btn" style="--i:4" title="Fullscreen" onclick="toggleFullScreen()"><i id="fsIcon" class="fa-solid fa-expand"></i></button>
+    <button class="control-btn sub-btn" style="--i:5" title="Pause" onclick="togglePause()"><i class="fa-solid fa-pause"></i></button>
   </div>
 
   <!-- The Main Toggle Button -->
   <button class="control-btn main-toggle" onclick="toggleMenu()" id="menuToggleBtn">
     <i class="fa-solid fa-bars"></i>
+    <span class="pulse-ring"></span>
   </button>
 </div>
 
@@ -1953,15 +1978,22 @@ function startGameUI() {
   if (saveScoreInterval) clearInterval(saveScoreInterval);
   saveScoreInterval = setInterval(syncScoreToFirestore, 5000);
 
-  // --- NEW: MISS PENALTY LISTENER ---
+  // --- UPDATED MISS PENALTY (With UI Protection) ---
   document.getElementById('gameArea').onclick = (e) => {
     if (isPaused) return;
 
-    comboCount = 0; // Reset combo on miss
-    if (score > 0) score--; // Remove 1 point (don't go below 0)
+    // Check if the click was actually on the UI Menu or any Button
+    // If it was, we "return" (do nothing) so you don't lose score
+    if (e.target.closest('#menuWrapper') || e.target.closest('.control-btn')) {
+        return; 
+    }
+
+    // Otherwise, it's a real miss!
+    comboCount = 0; 
+    if (score > 0) score--; 
 
     updateScoreUI();
-    showComboText(e.clientX, e.clientY, 0, true); // Show red MISS text
+    showComboText(e.clientX, e.clientY, 0, true); 
   };
 }
 
@@ -2472,6 +2504,12 @@ function toggleFullScreen() {
         }
     }
 }
+
+
+// This tells the Menu: "If I am clicked, don't tell the Game Area about it."
+document.getElementById('menuWrapper').addEventListener('click', (e) => {
+    e.stopPropagation();
+});
   </script>
 </body>
 </html>
