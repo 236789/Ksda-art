@@ -1747,12 +1747,11 @@ async function checkUserInFirestore(uid) {
     try {
         const idToken = await firebase.auth().currentUser.getIdToken(true);
 
-        const response = await fetch('http://127.0.0.1:3000/get-user', {
+const response = await fetch('https://kevin-backend-qodc.onrender.com/get-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ idToken: idToken })
         });
-
         if (response.status === 200) {
             const data = await response.json();
             currentUsername = data.username;
@@ -1799,7 +1798,7 @@ async function saveNewUsername() {
     const idToken = await firebase.auth().currentUser.getIdToken(true);
     
     // Trimitem cererea la Backend-ul nostru (nu la Firebase direct)
-    const response = await fetch('http://127.0.0.1:3000/create-user', {
+    const response = await fetch('https://kevin-backend-qodc.onrender.com/create-user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ idToken: idToken, username: input })
@@ -1877,7 +1876,7 @@ async function syncScoreToFirestore() {
       // This proves the user is actually logged in through your app
       const idToken = await firebase.auth().currentUser.getIdToken(true);
 
-      const response = await fetch('http://127.0.0.1:3000/update-score', {
+      const response = await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -2161,7 +2160,7 @@ async function confirmCharacter() {
         const idToken = await firebase.auth().currentUser.getIdToken(true);
         
         // 2. Ask the Backend to change the skin
-        const response = await fetch('http://127.0.0.1:3000/set-character', {
+        const response = await fetch('https://kevin-backend-qodc.onrender.com/set-character', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ idToken: idToken, charId: selected.id })
