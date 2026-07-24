@@ -1990,8 +1990,17 @@ function startTiredCycle() {
         }, 5000);
     }, 60000);
 }
-    document.getElementById('kevin').addEventListener('click', (e) => {
+document.getElementById('kevin').addEventListener('click', (e) => {
       e.stopPropagation(); 
+
+      // --- THE ANTI-AIMBOT SHIELD ---
+      // This ignores any click that was created by a script or console code
+      if (!e.isTrusted) {
+          console.warn("🚨 Synthetic click detected and blocked!");
+          return; 
+      }
+      // ------------------------------
+
       if (!canClickKevin) return;
       canClickKevin = false;
 
