@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -1852,11 +1853,11 @@ function startGameUI() {
   document.getElementById('mainMenu').style.display = 'none';
   document.getElementById('gameArea').style.display = 'block';
 
-  // --- THE BUG FIXES START HERE ---
-  isPaused = false; // Reset the pause flag
+  // --- THE BUG FIXES ---
+  isPaused = false; 
   const kevin = document.getElementById('kevin');
-  kevin.style.pointerEvents = 'auto'; // RE-ENABLE CLICKS
-  // --------------------------------
+  kevin.style.pointerEvents = 'auto'; 
+  // ---------------------
 
   comboCount = 0;
   updateScoreUI();
@@ -1873,9 +1874,19 @@ function startGameUI() {
   startKevinMovement();
   startTiredCycle();
   
-  // Clear old intervals if they exist to prevent speed-up bugs
   if (saveScoreInterval) clearInterval(saveScoreInterval);
   saveScoreInterval = setInterval(syncScoreToFirestore, 5000);
+
+  // --- NEW: MISS PENALTY LISTENER ---
+  document.getElementById('gameArea').onclick = (e) => {
+    if (isPaused) return;
+
+    comboCount = 0; // Reset combo on miss
+    if (score > 0) score--; // Remove 1 point (don't go below 0)
+
+    updateScoreUI();
+    showComboText(e.clientX, e.clientY, 0, true); // Show red MISS text
+  };
 }
 
 async function syncScoreToFirestore() {
@@ -2022,54 +2033,59 @@ const comboMilestones = {
     1000: { word: "BANNED FOR SKILL!", tier: "tier-rainbow" }
 };
 
-function showComboText(x, y, count) {
+function showComboText(x, y, count, isMiss = false) {
     const el = document.createElement("div");
     el.className = "combo-text animate-combo-v2";
     
-    // 1. BOUNDARY CHECKING (Preventing text from leaving the screen)
+    // 1. BOUNDARY CHECKING
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
     
     let safeX = x;
     let safeY = y;
 
-    // Horizontal Safety (Keep away from left/right walls)
-    const sideMargin = 80; // Enough space for half a word
+    const sideMargin = 80; 
     if (safeX < sideMargin) safeX = sideMargin;
     if (safeX > screenWidth - sideMargin) safeX = screenWidth - sideMargin;
 
-    // Vertical Safety (Keep away from top/bottom)
-    // We need 200px at the top because the animation floats UP
     const topMargin = 200; 
     const bottomMargin = 50;
     if (safeY < topMargin) safeY = topMargin;
     if (safeY > screenHeight - bottomMargin) safeY = screenHeight - bottomMargin;
 
-    // 2. TIER LOGIC (Keep your existing color logic)
-    let currentTier = "tier-verde";
-    if (count >= 750) currentTier = "tier-rainbow";
-    else if (count >= 400) currentTier = "tier-celestial";
-    else if (count >= 250) currentTier = "tier-lava";
-    else if (count >= 175) currentTier = "tier-rosu";
-    else if (count >= 125) currentTier = "tier-portocaliu";
-    else if (count >= 80) currentTier = "tier-galben";
-    else if (count >= 40) currentTier = "tier-cyan";
-    else if (count >= 15) currentTier = "tier-albastru";
-
-    const milestone = comboMilestones[count];
-    let rankWord = milestone ? milestone.word : "";
-    if (milestone) currentTier = milestone.tier;
-
-    el.classList.add(currentTier);
-
-    // 3. SET CONTENT
-    if (rankWord) {
+    // 2. MISS VS HIT LOGIC
+    if (isMiss) {
+        el.classList.add("tier-rosu"); // Force Red
         el.innerHTML = `
-            <span class="combo-rank-word">${rankWord}</span>
-            <span class="combo-count">x${count}</span>
+            <span class="combo-rank-word">MISS!</span>
+            <span class="combo-count">-1</span>
         `;
     } else {
-        el.innerHTML = `<span class="combo-count">x${count}</span>`;
+        // ORIGINAL TIER LOGIC
+        let currentTier = "tier-verde";
+        if (count >= 750) currentTier = "tier-rainbow";
+        else if (count >= 400) currentTier = "tier-celestial";
+        else if (count >= 250) currentTier = "tier-lava";
+        else if (count >= 175) currentTier = "tier-rosu";
+        else if (count >= 125) currentTier = "tier-portocaliu";
+        else if (count >= 80) currentTier = "tier-galben";
+        else if (count >= 40) currentTier = "tier-cyan";
+        else if (count >= 15) currentTier = "tier-albastru";
+
+        const milestone = comboMilestones[count];
+        let rankWord = milestone ? milestone.word : "";
+        if (milestone) currentTier = milestone.tier;
+
+        el.classList.add(currentTier);
+
+        if (rankWord) {
+            el.innerHTML = `
+                <span class="combo-rank-word">${rankWord}</span>
+                <span class="combo-count">x${count}</span>
+            `;
+        } else {
+            el.innerHTML = `<span class="combo-count">x${count}</span>`;
+        }
     }
 
     // 4. APPLY SAFE POSITION
