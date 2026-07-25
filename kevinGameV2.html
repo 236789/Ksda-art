@@ -1766,83 +1766,117 @@
       transform: scale(1.05);
     }
 
-/* ==========================================
-   FIXED SETTINGS LAYOUT V3
-   ========================================== */
-
-.settings-box {
-    max-width: 350px !important;
-    padding: 25px !important;
+/* --- SETTINGS V3 OVERHAUL --- */
+.settings-v3 {
+    width: 90vw !important;
+    max-width: 320px !important; /* Forces a slim, professional box */
+    padding: 20px !important;
     display: flex !important;
     flex-direction: column !important;
-    align-items: center !important;
+    gap: 12px !important;
 }
 
-/* RADIO FIX (Issue 1) */
-.radio-controls-row {
+.settings-group {
+    width: 100%;
+    background: rgba(0,0,0,0.25);
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Radio Row Fix */
+.radio-flex {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 15px;
+    justify-content: space-between;
     width: 100%;
 }
 
-.radio-btn {
+.s-track-display {
+    flex: 1;
+    text-align: center;
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    color: #fff;
+    background: #0f0c29;
+    padding: 8px;
+    margin: 0 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(250, 204, 21, 0.2);
+}
+
+.s-arrow {
     background: linear-gradient(180deg, #4d2600, #261300);
     border: 2px solid #facc15;
     color: white;
-    width: 40px;
-    height: 40px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     cursor: pointer;
+    box-shadow: 0 3px 0 #1a0a00;
+}
+
+/* Slider Row Fix */
+.s-label-row {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    box-shadow: 0 4px 0 #1a0a00;
+    justify-content: space-between; /* This stops "MUZICĂ0%" from touching */
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    color: #9aa0b8;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
 }
 
-.radio-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #1a0a00; }
-
-.track-info-box {
-    background: #0f0c29;
-    padding: 10px 20px;
-    border-radius: 12px;
-    min-width: 150px;
-    text-align: center;
-    border: 1px solid rgba(255,255,255,0.1);
+.s-percent {
+    color: #facc15;
+    font-weight: bold;
 }
 
-/* BUTTON TEXT FIX (Issue 2) */
-.settings-item {
-    flex-direction: row !important; /* Force icons and text side-by-side */
-    white-space: nowrap !important; /* Prevent text wrap */
-    padding: 0 20px !important;
-    width: 100% !important;
-}
-
-.no-wrap-text {
-    white-space: nowrap;
-    display: inline-block;
-}
-
-/* CLEAN SLIDER FIX */
-.arcade-slider {
+.s-range {
+    width: 100%;
     -webkit-appearance: none;
-    background: #131526 !important;
-    height: 8px !important;
+    background: #131526;
+    height: 8px;
+    border-radius: 5px;
+    outline: none;
 }
 
-/* Knob Fix - Removing ghost images */
-.arcade-slider::-webkit-slider-thumb {
+.s-range::-webkit-slider-thumb {
     -webkit-appearance: none;
-    height: 20px;
-    width: 20px;
-    border-radius: 50%;
+    width: 18px;
+    height: 18px;
     background: #facc15;
-    border: 2px solid white;
+    border: 2px solid #fff;
+    border-radius: 50%;
     cursor: pointer;
-    margin-top: 0;
+}
+
+/* Footer & Buttons Fix */
+.s-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.s-btn {
+    width: 100% !important;
+    height: 44px !important; /* Controlled height */
+    font-size: 16px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px;
+    border-radius: 12px !important;
+}
+
+.s-red {
+    background: linear-gradient(180deg, #ff5c5c 0%, #d10000 100%) !important;
+    box-shadow: 0 5px 0 #4a0000 !important;
+    color: white !important;
+    border-color: white !important;
 }
   </style>
 </head>
@@ -2064,51 +2098,53 @@
   </div>
 </div>
 
-
-<div id="settingsModal" class="modal-overlay" style="display: none;">
-  <div class="modal-box settings-box">
+<div id="settingsModal" class="modal-overlay">
+  <div class="modal-box settings-v3">
     
     <div class="selection-header">
       <h2><i class="fa-solid fa-gear"></i> SETĂRI</h2>
       <div class="selection-line"></div>
     </div>
 
-    <div class="settings-section">
-      <h3 class="section-title"><i class="fa-solid fa-music"></i> SUNET ȘI MUZICĂ</h3>
-      
-      <!-- Radio UI (FIXED ARROWS) -->
-      <div class="radio-container">
-        <div class="radio-controls-row">
-          <button class="radio-btn" onclick="changeTrack(-1)"><i class="fa-solid fa-caret-left"></i></button>
-          <div class="track-info-box">
-            <span id="currentTrackName">MELODIA #1</span>
-          </div>
-          <button class="radio-btn" onclick="changeTrack(1)"><i class="fa-solid fa-caret-right"></i></button>
+    <!-- RADIO SECTION -->
+    <div class="settings-group">
+      <div class="radio-flex">
+        <button class="s-arrow" onclick="changeTrack(-1)"><i class="fa-solid fa-caret-left"></i></button>
+        <div class="s-track-display">
+          <span id="currentTrackName">MELODIA #1</span>
         </div>
+        <button class="s-arrow" onclick="changeTrack(1)"><i class="fa-solid fa-caret-right"></i></button>
       </div>
+    </div>
 
-      <!-- Sliders -->
-      <div class="slider-group">
-        <div class="slider-label"><span>MUZICĂ</span><span id="musicVolValue">8%</span></div>
-        <input type="range" min="0" max="100" value="8" class="arcade-slider" id="musicRange" oninput="updateMusicVolume(this.value)">
+    <!-- SLIDERS SECTION -->
+    <div class="settings-group">
+      <div class="s-label-row">
+        <span>MUZICĂ</span>
+        <span id="musicVolValue" class="s-percent">8%</span>
       </div>
+      <input type="range" min="0" max="100" value="8" class="s-range" id="musicRange" oninput="updateMusicVolume(this.value)">
+    </div>
 
-      <div class="slider-group">
-        <div class="slider-label"><span>EFECTE (SFX)</span><span id="sfxVolValue">50%</span></div>
-        <input type="range" min="0" max="100" value="50" class="arcade-slider" id="sfxRange" oninput="updateSFXVolume(this.value)">
+    <div class="settings-group">
+      <div class="s-label-row">
+        <span>EFECTE (SFX)</span>
+        <span id="sfxVolValue" class="s-percent">50%</span>
       </div>
+      <input type="range" min="0" max="100" value="50" class="s-range" id="sfxRange" oninput="updateSFXVolume(this.value)">
+    </div>
 
-      <!-- Mute Button (FIXED TEXT ROW) -->
-      <button class="menu-btn play settings-item mute-btn-active" onclick="toggleMuteAll()" id="muteAllBtn">
-        <i class="fa-solid fa-volume-xmark"></i> 
-        <span class="no-wrap-text">OPREȘTE TOT</span>
+    <!-- BUTTONS SECTION -->
+    <div class="s-footer">
+      <button class="menu-btn play s-btn s-red" onclick="toggleMuteAll()" id="muteAllBtn">
+        <i class="fa-solid fa-volume-xmark"></i> <span>OPREȘTE TOT</span>
+      </button>
+
+      <button class="menu-btn play s-btn" onclick="closeSettings()">
+        <i class="fa-solid fa-check"></i> <span>SALVEAZĂ</span>
       </button>
     </div>
 
-    <!-- Save Button (FIXED SAVE ACTION) -->
-    <button class="menu-btn play settings-item save-btn" onclick="closeSettings()">
-      <i class="fa-solid fa-check"></i> <span>SALVEAZĂ</span>
-    </button>
   </div>
 </div>
   <!-- ==========================================
@@ -3057,8 +3093,17 @@ function changeTrack(dir) {
 }
 
 function updateRadioText() {
-    // We can extract a name from the URL or just use numbers
-    document.getElementById('currentTrackName').innerText = "MELODIA #" + (lastTrackIndex + 1);
+    const trackNames = [
+        "Afternoon Coffee", 
+        "High Score Hustle", 
+        "Late Night Library", 
+        "Pizzicato", 
+        "Quiet Reflection", 
+        "Whisker Pursuit", 
+        "Window Views"
+    ];
+    // This displays the name from the list, or "Track 1" if something is wrong
+    document.getElementById('currentTrackName').innerText = trackNames[lastTrackIndex] || "TRACK " + (lastTrackIndex + 1);
 }
 
 // Ensure settings clicks don't miss
