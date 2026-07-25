@@ -2530,32 +2530,39 @@ async function leaveGame() {
   await returnToMenu(); 
 }
 
-// --- SISTEM MUZICĂ (VARIANTA FINALĂ) ---
+// --- SISTEM MUZICĂ (VARIANTA CORECTATĂ) ---
 const playlist = [
-    "https://drive.google.com/uc?export=download&id=1SnQv25f6GmKKalhVVacxoM-nU49pta8o",
-    "https://drive.google.com/uc?export=download&id=1UZBw6NIBeZP_je-hhMOdlmScl2nLxcHO",
-    "https://drive.google.com/uc?export=download&id=1KBSd7yWJNL8iv-IUGgf2Vte5KNydZcdQ",
-    "https://drive.google.com/uc?export=download&id=1rbzfphOFr2s8j9QbVCMaGksis0kV6c9j",
-    "https://drive.google.com/uc?export=download&id=1cGw1F74hlavb8FI7GW15oJTDt-rSN6y8",
-    "https://drive.google.com/uc?export=download&id=1YjWO3VZ7UXOmfmqjscITa-BCxSmBIM2R",
-    "https://drive.google.com/uc?export=download&id=14chjni8RED7mNbNfcml761Y11bevCXB9"
+    "1SnQv25f6GmKKalhVVacxoM-nU49pta8o",
+    "1UZBw6NIBeZP_je-hhMOdlmScl2nLxcHO",
+    "1KBSd7yWJNL8iv-IUGgf2Vte5KNydZcdQ",
+    "1rbzfphOFr2s8j9QbVCMaGksis0kV6c9j",
+    "1cGw1F74hlavb8FI7GW15oJTDt-rSN6y8",
+    "1YjWO3VZ7UXOmfmqjscITa-BCxSmBIM2R",
+    "14chjni8RED7mNbNfcml761Y11bevCXB9"
 ];
 
 let bgMusic = new Audio();
-bgMusic.volume = 0.3; // Volum la 30%
-let musicStarted = false; // Folosim acest nume peste tot
+bgMusic.volume = 0.3; 
+let musicStarted = false;
 
 function playRandomTrack() {
     const randomIndex = Math.floor(Math.random() * playlist.length);
-    bgMusic.src = playlist[randomIndex];
-    bgMusic.play().catch(e => console.log("Muzica așteaptă click-ul utilizatorului..."));
+    const trackId = playlist[randomIndex];
+    
+    // Folosim docs.google.com pentru un stream mai stabil
+    bgMusic.src = `https://docs.google.com/uc?id=${trackId}&export=download`;
+    
+    console.log("📡 Încercăm să redăm piesa ID: " + trackId);
+    
+    bgMusic.play()
+        .then(() => console.log("🎵 Muzica a pornit cu succes!"))
+        .catch(e => console.error("🚨 Eroare la pornirea muzicii:", e));
 
-    // Când se termină piesa, pornește alta automat
     bgMusic.onended = () => {
+        console.log("🔄 Piesa s-a terminat, trecem la următoarea...");
         playRandomTrack();
     };
 }
-
 const characterList = [
     { 
         id: "kevin", 
