@@ -2529,7 +2529,7 @@ async function leaveGame() {
   // Use your existing function to clean up and save score
   await returnToMenu(); 
 }
-// --- SISTEM MUZICĂ (VARIANTA FINALĂ - FĂRĂ SPAM) ---
+// --- SISTEM MUZICĂ (VARIANTA V1 ADAPTATĂ PENTRU V2 - FĂRĂ SPAM) ---
 const playlist = [
     "https://files.catbox.moe/swb3yu.mp3",
     "https://files.catbox.moe/8bx2ck.mp3",
@@ -2542,50 +2542,44 @@ const playlist = [
 
 let bgMusic = new Audio();
 bgMusic.volume = 0.3;
-bgMusic.crossOrigin = "anonymous"; // 1. Rezolvă problemele de CORS menționate în screenshot
+bgMusic.crossOrigin = "anonymous"; // Rezolvă problemele de securitate CORS
 
 let musicStarted = false;
-let retryTimer = null; // 2. Variabilă pentru a preveni pornirea mai multor timere deodată
+let musicRetryTimer = null; // Previne pornirea mai multor melodii deodată
 
 function playRandomTrack() {
     // Dacă muzica deja cântă, nu mai facem nimic
     if (!bgMusic.paused && bgMusic.src !== "") return;
 
-    // Curățăm orice timer de retry existent pentru a evita spam-ul
-    if (retryTimer) {
-        clearTimeout(retryTimer);
-        retryTimer = null;
+    // Curățăm orice încercare de reîncărcare anterioară
+    if (musicRetryTimer) {
+        clearTimeout(musicRetryTimer);
+        musicRetryTimer = null;
     }
 
-    // Alegem o melodie
     const randomIndex = Math.floor(Math.random() * playlist.length);
     const trackUrl = playlist[randomIndex];
-
-    // 3. Resetăm complet obiectul Audio înainte de noua încărcare
+    
+    // Resetăm obiectul audio pentru a evita eroarea 416 (Partial Content)
     bgMusic.pause();
     bgMusic.src = trackUrl;
-    bgMusic.load(); // Forțează browserul să reînceapă încărcarea de la zero
+    bgMusic.load(); 
 
-    console.log("🎵 Încercăm melodia: " + trackUrl);
+    console.log("🎵 Melodie V1 pornită în V2: " + trackUrl);
 
     bgMusic.play()
         .then(() => {
-            console.log("✅ Muzica a pornit cu succes!");
+            console.log("✅ Muzica se aude acum!");
         })
         .catch(e => {
-            console.warn("⚠️ Eroare redare la: " + trackUrl);
+            console.warn("⚠️ Eroare redare. Serverul e ocupat. Reîncercăm în 5 secunde...");
+            bgMusic.src = ""; // Oprim încercările automate ale browserului
             
-            // 4. Resetăm src-ul pentru a opri browserul din a mai încerca automat în fundal
-            bgMusic.pause();
-            bgMusic.src = ""; 
-
-            // Reîncercăm peste 5 secunde, dar salvăm timer-ul
-            retryTimer = setTimeout(() => {
-                console.log("🔄 Reîncercăm redarea...");
-                playRandomTrack();
-            }, 5000);
+            // Reîncercăm civilizat peste 5 secunde
+            musicRetryTimer = setTimeout(playRandomTrack, 5000);
         });
 
+    // Când melodia se termină, pornește automat alta
     bgMusic.onended = () => {
         console.log("🔄 Melodie terminată. Următoarea...");
         playRandomTrack();
