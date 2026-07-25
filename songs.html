@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lost Soul - Music Manager</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1c33;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px 20px;
+            margin: 0;
+        }
+        .container {
+            background: #242745;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            border: 2px solid #facc15;
+        }
+        h1 { color: #facc15; margin-bottom: 10px; }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+        }
+        button {
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .add-btn { background: #facc15; color: #1a1c33; }
+        .add-btn:hover { background: #ffe045; }
+        
+        .playlist {
+            margin-top: 30px;
+            text-align: left;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .song-item {
+            background: rgba(255,255,255,0.05);
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        .song-url {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 80%;
+            color: #ccc;
+        }
+        .del-btn {
+            background: #ff4444;
+            color: white;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .del-btn:hover { background: #ff6666; }
+
+        .info {
+            font-size: 12px;
+            color: #888;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎵 Music Manager</h1>
+        <p>Adaugă link-uri .mp3 pentru jocul Kevinuță</p>
+
+        <div class="input-group">
+            <input type="text" id="songUrl" placeholder="Introduceți URL-ul fișierului .mp3...">
+            <button class="add-btn" onclick="addSong()">ADĂUGĂ</button>
+        </div>
+
+        <div id="playlist" class="playlist">
+            <p style="text-align: center; color: #888;">Se încarcă melodiile...</p>
+        </div>
+
+        <div class="info">
+            Sfat: Dacă folosești Dropbox, schimbă finalul din <b>dl=0</b> în <b>raw=1</b>.
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURAȚIA TA FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyBihv3wYvDUo6DejSLec9U0DfOiR6g7VuQ",
+            databaseURL: "https://kevin-game-f9cf8-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "kevin-game-f9cf8",
+            storageBucket: "kevin-game-f9cf8.firebasestorage.app",
+            messagingSenderId: "867549783547",
+            appId: "1:867549783547:web:b12b915b2ed3129907175e"
+        };
+
+        // Inițializare Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const songsRef = db.ref("music_playlist");
+
+        // Citire melodii în timp real
+        songsRef.on("value", (snapshot) => {
+            const data = snapshot.val();
+            const playlistDiv = document.getElementById("playlist");
+            playlistDiv.innerHTML = "";
+
+            if (!data) {
+                playlistDiv.innerHTML = '<p style="text-align: center; color: #888;">Nicio melodie în listă.</p>';
+                return;
+            }
+
+            for (let id in data) {
+                const song = data[id];
+                const div = document.createElement("div");
+                div.className = "song-item";
+                div.innerHTML = `
+                    <div class="song-url">${song.url}</div>
+                    <button class="del-btn" onclick="deleteSong('${id}')">ȘTERGE</button>
+                `;
+                playlistDiv.appendChild(div);
+            }
+        });
+
+        // Adăugare melodie
+        function addSong() {
+            const urlInput = document.getElementById("songUrl");
+            const url = urlInput.value.trim();
+
+            if (url === "") {
+                alert("Te rog introdu un link!");
+                return;
+            }
+
+            if (!url.startsWith("http")) {
+                alert("Link-ul trebuie să înceapă cu http:// sau https://");
+                return;
+            }
+
+            songsRef.push({
+                url: url,
+                timestamp: Date.now()
+            }).then(() => {
+                urlInput.value = ""; // Curăță input-ul
+            }).catch((err) => {
+                alert("Eroare: " + err.message);
+            });
+        }
+
+        // Ștergere melodie
+        function deleteSong(id) {
+            if (confirm("Sigur vrei să ștergi această melodie din playlist?")) {
+                songsRef.child(id).remove();
+            }
+        }
+    </script>
+</body>
+</html>
