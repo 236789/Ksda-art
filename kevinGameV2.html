@@ -1767,126 +1767,82 @@
     }
 
 /* ==========================================
-   FIXED SETTINGS MODAL (OVERHAUL)
+   FIXED SETTINGS LAYOUT V3
    ========================================== */
 
 .settings-box {
-    max-width: 340px !important; /* Slimmer for better fit */
-    padding: 20px !important;
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+    max-width: 350px !important;
+    padding: 25px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
 }
 
-.settings-section {
-    width: 100%;
-    text-align: left;
-    background: rgba(0, 0, 0, 0.2);
-    padding: 15px;
-    border-radius: 15px;
-    border: 1px solid rgba(250, 204, 21, 0.1);
-}
-
-.section-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 14px;
-    color: #facc15;
-    margin: 0 0 15px 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-transform: uppercase;
-}
-
-/* RADIO COMPONENT */
-.radio-container {
-    background: #0f0c29;
-    border-radius: 12px;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid rgba(255,255,255,0.05);
-}
-
-.radio-controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.track-info {
-    font-family: 'Oswald', sans-serif;
-    font-size: 14px;
-    color: #fff;
-    text-align: center;
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* SLIDERS (CLEAN ARCADE STYLE) */
-.slider-group { margin-bottom: 15px; }
-
-.slider-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: #9aa0b8;
-    margin-bottom: 5px;
-    font-family: 'Orbitron', sans-serif;
-}
-
-.arcade-slider {
-    width: 100%;
-    height: 6px;
-    -webkit-appearance: none;
-    background: #131526;
-    border-radius: 10px;
-    outline: none;
-}
-
-/* The Knob */
-.arcade-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 18px;
-    height: 18px;
-    background: #facc15;
-    border: 2px solid #fff;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 0 8px rgba(250, 204, 21, 0.6);
-}
-
-/* BUTTONS FIX (Matching Pause Menu) */
-.settings-item {
-    width: 100% !important;
-    height: 48px !important;
-    font-size: 16px !important;
-    margin-bottom: 10px;
+/* RADIO FIX (Issue 1) */
+.radio-controls-row {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    text-decoration: none;
+    gap: 15px;
+    width: 100%;
 }
 
-/* Mute button (Red style) */
-.mute-btn-active {
-    background: linear-gradient(180deg, #ff5c5c 0%, #d10000 100%) !important;
-    box-shadow: 0 6px 0 #4a0000 !important;
-    color: white !important;
+.radio-btn {
+    background: linear-gradient(180deg, #4d2600, #261300);
+    border: 2px solid #facc15;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 4px 0 #1a0a00;
 }
 
-/* Save button (Gold style) */
-.save-btn {
-    margin-top: 5px;
+.radio-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #1a0a00; }
+
+.track-info-box {
+    background: #0f0c29;
+    padding: 10px 20px;
+    border-radius: 12px;
+    min-width: 150px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
-@media (max-width: 600px) {
-    .settings-box { width: 90vw !important; max-width: 300px !important; }
-    .section-title { font-size: 12px; }
+/* BUTTON TEXT FIX (Issue 2) */
+.settings-item {
+    flex-direction: row !important; /* Force icons and text side-by-side */
+    white-space: nowrap !important; /* Prevent text wrap */
+    padding: 0 20px !important;
+    width: 100% !important;
+}
+
+.no-wrap-text {
+    white-space: nowrap;
+    display: inline-block;
+}
+
+/* CLEAN SLIDER FIX */
+.arcade-slider {
+    -webkit-appearance: none;
+    background: #131526 !important;
+    height: 8px !important;
+}
+
+/* Knob Fix - Removing ghost images */
+.arcade-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #facc15;
+    border: 2px solid white;
+    cursor: pointer;
+    margin-top: 0;
 }
   </style>
 </head>
@@ -2109,7 +2065,7 @@
 </div>
 
 
-<div id="settingsModal" class="modal-overlay">
+<div id="settingsModal" class="modal-overlay" style="display: none;">
   <div class="modal-box settings-box">
     
     <div class="selection-header">
@@ -2120,14 +2076,14 @@
     <div class="settings-section">
       <h3 class="section-title"><i class="fa-solid fa-music"></i> SUNET ȘI MUZICĂ</h3>
       
-      <!-- Radio UI -->
+      <!-- Radio UI (FIXED ARROWS) -->
       <div class="radio-container">
-        <div class="radio-controls">
-          <button class="nav-arrow-v2" onclick="changeTrack(-1)"><i class="fa-solid fa-caret-left"></i></button>
-          <div class="track-info">
+        <div class="radio-controls-row">
+          <button class="radio-btn" onclick="changeTrack(-1)"><i class="fa-solid fa-caret-left"></i></button>
+          <div class="track-info-box">
             <span id="currentTrackName">MELODIA #1</span>
           </div>
-          <button class="nav-arrow-v2" onclick="changeTrack(1)"><i class="fa-solid fa-caret-right"></i></button>
+          <button class="radio-btn" onclick="changeTrack(1)"><i class="fa-solid fa-caret-right"></i></button>
         </div>
       </div>
 
@@ -2140,15 +2096,16 @@
       <div class="slider-group">
         <div class="slider-label"><span>EFECTE (SFX)</span><span id="sfxVolValue">50%</span></div>
         <input type="range" min="0" max="100" value="50" class="arcade-slider" id="sfxRange" oninput="updateSFXVolume(this.value)">
-      </div> 
+      </div>
 
-      <!-- Red Mute Button -->
+      <!-- Mute Button (FIXED TEXT ROW) -->
       <button class="menu-btn play settings-item mute-btn-active" onclick="toggleMuteAll()" id="muteAllBtn">
-        <i class="fa-solid fa-volume-xmark"></i> <span>OPREȘTE TOT</span>
+        <i class="fa-solid fa-volume-xmark"></i> 
+        <span class="no-wrap-text">OPREȘTE TOT</span>
       </button>
     </div>
 
-    <!-- Gold Save Button -->
+    <!-- Save Button (FIXED SAVE ACTION) -->
     <button class="menu-btn play settings-item save-btn" onclick="closeSettings()">
       <i class="fa-solid fa-check"></i> <span>SALVEAZĂ</span>
     </button>
