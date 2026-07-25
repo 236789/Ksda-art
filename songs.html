@@ -3,114 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lost Soul - Music Manager</title>
+    <title>Kevinuță V2 - Music Uploader</title>
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-database-compat.js"></script>
 
     <style>
+        * { box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1a1c33;
+            background: #0f0c29;
+            background: radial-gradient(circle at center, #1a1c33, #0f0c29);
             color: white;
+            font-family: 'Segoe UI', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 50px 20px;
+            justify-content: center;
+            min-height: 100vh;
             margin: 0;
         }
         .container {
-            background: #242745;
+            background: #1a1c33;
+            padding: 40px;
+            border-radius: 20px;
+            border: 3px solid #facc15;
+            box-shadow: 0 0 30px rgba(250, 204, 21, 0.2);
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+        }
+        h1 { color: #facc15; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
+        .file-zone {
+            border: 2px dashed #5a6288;
             padding: 30px;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 600px;
-            text-align: center;
-            border: 2px solid #facc15;
-        }
-        h1 { color: #facc15; margin-bottom: 10px; }
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        input {
-            flex: 1;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            outline: none;
-            font-size: 16px;
-        }
-        button {
-            padding: 12px 20px;
-            border-radius: 8px;
-            border: none;
+            margin-bottom: 20px;
             cursor: pointer;
+            transition: 0.3s;
+        }
+        .file-zone:hover { border-color: #facc15; background: rgba(255,255,255,0.05); }
+        input[type="file"] { display: none; }
+        .btn-upload {
+            background: #facc15;
+            color: #1a1c33;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 12px;
             font-weight: bold;
-            transition: 0.2s;
+            font-size: 18px;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 5px 0 #b39200;
+            transition: 0.1s;
         }
-        .add-btn { background: #facc15; color: #1a1c33; }
-        .add-btn:hover { background: #ffe045; }
-        
-        .playlist {
-            margin-top: 30px;
-            text-align: left;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .song-item {
-            background: rgba(255,255,255,0.05);
-            padding: 10px 15px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 14px;
-        }
-        .song-url {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            max-width: 80%;
-            color: #ccc;
-        }
-        .del-btn {
-            background: #ff4444;
-            color: white;
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-        .del-btn:hover { background: #ff6666; }
-
-        .info {
-            font-size: 12px;
-            color: #888;
-            margin-top: 20px;
-        }
+        .btn-upload:active { transform: translateY(4px); box-shadow: 0 1px 0 #b39200; }
+        .btn-upload:disabled { background: #555; box-shadow: 0 5px 0 #333; cursor: not-allowed; }
+        #status { margin-top: 20px; font-weight: bold; font-size: 14px; }
+        .success { color: #0eddc1; }
+        .error { color: #ff4444; }
+        .file-name { margin-top: 10px; font-style: italic; color: #888; display: block; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>🎵 Music Manager</h1>
-        <p>Adaugă link-uri .mp3 pentru jocul Kevinuță</p>
+        <h1>MP3 UPLOADER</h1>
+        <p>Alege o melodie din PC pentru joc</p>
 
-        <div class="input-group">
-            <input type="text" id="songUrl" placeholder="Introduceți URL-ul fișierului .mp3...">
-            <button class="add-btn" onclick="addSong()">ADĂUGĂ</button>
-        </div>
+        <label class="file-zone" for="fileInput">
+            <span id="labelTxt">Click aici pentru a alege fișierul</span>
+            <span id="fileName" class="file-name"></span>
+            <input type="file" id="fileInput" accept="audio/mpeg" onchange="updateFileName()">
+        </label>
 
-        <div id="playlist" class="playlist">
-            <p style="text-align: center; color: #888;">Se încarcă melodiile...</p>
-        </div>
-
-        <div class="info">
-            Sfat: Dacă folosești Dropbox, schimbă finalul din <b>dl=0</b> în <b>raw=1</b>.
-        </div>
+        <button id="uploadBtn" class="btn-upload" onclick="startUpload()">URCĂ ÎN JOC</button>
+        
+        <div id="status">Așteptare selecție...</div>
     </div>
 
     <script>
@@ -124,63 +93,71 @@
             appId: "1:867549783547:web:b12b915b2ed3129907175e"
         };
 
-        // Inițializare Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const songsRef = db.ref("music_playlist");
+        
+        // WEBHOOK-UL TĂU (Păstrează-l privat!)
+        const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1530529831421214883/upnKnL5-c-Gpg8pilUz0P4wZXhnXs3xLKjHrxVVa_oKMI_3RRoxICOH0PuXdpiKXU0rO";
 
-        // Citire melodii în timp real
-        songsRef.on("value", (snapshot) => {
-            const data = snapshot.val();
-            const playlistDiv = document.getElementById("playlist");
-            playlistDiv.innerHTML = "";
-
-            if (!data) {
-                playlistDiv.innerHTML = '<p style="text-align: center; color: #888;">Nicio melodie în listă.</p>';
-                return;
+        function updateFileName() {
+            const input = document.getElementById('fileInput');
+            const nameDisplay = document.getElementById('fileName');
+            const labelTxt = document.getElementById('labelTxt');
+            if (input.files[0]) {
+                nameDisplay.innerText = "Selectat: " + input.files[0].name;
+                labelTxt.innerText = "Fișier pregătit!";
             }
-
-            for (let id in data) {
-                const song = data[id];
-                const div = document.createElement("div");
-                div.className = "song-item";
-                div.innerHTML = `
-                    <div class="song-url">${song.url}</div>
-                    <button class="del-btn" onclick="deleteSong('${id}')">ȘTERGE</button>
-                `;
-                playlistDiv.appendChild(div);
-            }
-        });
-
-        // Adăugare melodie
-        function addSong() {
-            const urlInput = document.getElementById("songUrl");
-            const url = urlInput.value.trim();
-
-            if (url === "") {
-                alert("Te rog introdu un link!");
-                return;
-            }
-
-            if (!url.startsWith("http")) {
-                alert("Link-ul trebuie să înceapă cu http:// sau https://");
-                return;
-            }
-
-            songsRef.push({
-                url: url,
-                timestamp: Date.now()
-            }).then(() => {
-                urlInput.value = ""; // Curăță input-ul
-            }).catch((err) => {
-                alert("Eroare: " + err.message);
-            });
         }
 
-        // Ștergere melodie
-        function deleteSong(id) {
-            if (confirm("Sigur vrei să ștergi această melodie din playlist?")) {
-                songsRef.child(id).remove();
+        async function startUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const status = document.getElementById('status');
+            const btn = document.getElementById('uploadBtn');
+
+            if (!fileInput.files[0]) return alert("Te rog selectează un fișier MP3!");
+
+            const file = fileInput.files[0];
+            btn.disabled = true;
+            status.className = "";
+            status.innerText = "⏳ Se trimite către Discord CDN...";
+
+            // Pasul 1: Trimitem fișierul către Webhook-ul tău de Discord
+            const formData = new FormData();
+            formData.append("file", file);
+
+            try {
+                const response = await fetch(DISCORD_WEBHOOK, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    // Discord returnează un array de "attachments". Luăm URL-ul primului fișier.
+                    const discordUrl = result.attachments[0].url;
+
+                    // Pasul 2: Salvăm acest URL stabil în baza ta de date Firebase
+                    await db.ref("music_playlist").push({
+                        url: discordUrl,
+                        name: file.name,
+                        timestamp: Date.now()
+                    });
+
+                    status.className = "success";
+                    status.innerText = "✅ GATA! Melodia este acum în playlist-ul jocului.";
+                    fileInput.value = "";
+                    document.getElementById('fileName').innerText = "";
+                    document.getElementById('labelTxt').innerText = "Click aici pentru alt fișier";
+                } else {
+                    throw new Error("Discord a refuzat fișierul (posibil prea mare, limita e 25MB).");
+                }
+            } catch (err) {
+                status.className = "error";
+                status.innerText = "❌ EROARE: " + err.message;
+                console.error(err);
+            } finally {
+                btn.disabled = false;
             }
         }
     </script>
