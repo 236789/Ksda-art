@@ -1,649 +1,2749 @@
-<<!DOCTYPE html>
+
+
+
+<!DOCTYPE html>
 <html lang="ro">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRINDEL PE KEVINUȚĂ V2</title>
 
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B6DWPJ4T2C"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-B6DWPJ4T2C');
-  </script>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Despre Kevin Trinity — KSDAPromovari</title>
-  <link rel="icon" type="image/png" href="https://iili.io/fXks1Dv.png"> 
-
-  <!-- Google Fonts: Orbitron (UI) & Poppins (Text) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Fonturi -->
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
 
   <style>
-    :root {
-      --bg-dark: #050b14;
-      --primary: #29f3ff; /* Neon Blue */
-      --primary-dim: rgba(41, 243, 255, 0.15);
-      --secondary: #0082c8;
-      --text-main: #ffffff;
-      --text-muted: #a5b1c2;
-      --glass-bg: rgba(13, 25, 41, 0.7);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --card-radius: 24px;
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      --discord-color: #5865F2;
+    /* ==========================================
+       STILURI GLOBALE & BACKGROUND
+       ========================================== */
+    * { box-sizing: border-box; user-select: none; }
+    body, html {
+      margin: 0; padding: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle at center, #0f0c29, #302b63, #24243e);
+      font-family: 'Oswald', sans-serif;
+      overflow: hidden;
     }
 
-    * { box-sizing: border-box; outline: none; }
-    html { scroll-behavior: smooth; }
-
-    body {
-      margin: 0;
-      background-color: var(--bg-dark);
-      background-image: linear-gradient(to bottom, rgba(5, 11, 20, 0.9), var(--bg-dark)), url('https://i.makeagif.com/media/3-03-2021/otrneG.gif');
-      background-size: cover;
-      background-attachment: fixed;
-      font-family: 'Poppins', sans-serif;
-      color: var(--text-main);
-      overflow-x: hidden;
+    /* Particule animate pe fundal */
+    .particles-container {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 1; overflow: hidden;
     }
+.particle {
+  position: absolute;
+  top: 100vh; /* Start them at the bottom, off-screen */
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  opacity: 0; /* Hidden until animation starts */
+  animation: floatUp linear infinite;
+  pointer-events: none;
+}
 
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
+@keyframes floatUp {
+  0% { transform: translateY(0) scale(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-110vh) scale(1); opacity: 0; }
+}
 
-    /* Orbitron pe UI Elements */
-    h1, h2, h3, .logo, .stat-number, .menu-links a, .login-btn-header, .ban-title, .side-menu-login-btn, .pop-user, .streak-txt, .coins-count { 
-        font-family: 'Orbitron', sans-serif; 
+    /* ==========================================
+       MAIN MENU
+       ========================================== */
+    #mainMenu {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      width: 100%; height: 100%; z-index: 100; position: relative;
     }
     
-    /* --- BANNED SCREEN STYLES --- */
-    #bannedOverlay {
-        display: none;
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(10, 0, 0, 0.98);
-        z-index: 10000;
-        flex-direction: column; justify-content: center; align-items: center;
-        text-align: center; padding: 20px;
+    .logo-img {
+      width: 380px; max-width: 90vw; margin-bottom: 40px; z-index: 10;
+      filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
+      animation: floatLogo 4s ease-in-out infinite;
     }
-    .ban-icon { font-size: 80px; color: #ff4757; margin-bottom: 20px; animation: pulseRed 2s infinite; }
-    @keyframes pulseRed { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
-    .ban-title { font-size: 32px; color: #ff4757; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
-    .ban-details { background: rgba(255, 0, 0, 0.1); border: 1px solid #ff4757; padding: 30px; border-radius: 20px; max-width: 500px; width: 100%; }
-
-    /* --- ACCOUNT POPUP MODAL STYLES --- */
-    .account-modal-overlay {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-        display: none; justify-content: center; align-items: center;
-        z-index: 11000; backdrop-filter: blur(10px);
-    }
-    .account-modal-overlay.active { display: flex; }
-
-    .account-card {
-        background: #08101b; border: 1px solid var(--primary);
-        width: 90%; max-width: 380px; border-radius: 30px;
-        padding: 40px 25px; text-align: center; position: relative;
-        box-shadow: 0 0 50px rgba(41, 243, 255, 0.3);
-        animation: jumpIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    }
-    @keyframes jumpIn {
-        0% { transform: scale(0.3) translateY(100px); opacity: 0; }
-        100% { transform: scale(1) translateY(0); opacity: 1; }
+    @keyframes floatLogo {
+      0% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-15px) rotate(2deg); }
+      100% { transform: translateY(0px) rotate(0deg); }
     }
 
-    .close-pop { position: absolute; top: 15px; right: 20px; color: #fff; cursor: pointer; font-size: 24px; background: none; border: none; opacity: 0.5; }
-    .pop-img { width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--primary); margin-bottom: 12px; box-shadow: 0 0 20px var(--primary-dim); }
-    .pop-user { font-size: 18px; color: #fff; margin: 0; letter-spacing: 1px; }
-    .pop-mail { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
-
-    .streak-box {
-        display: inline-flex; align-items: center; gap: 8px;
-        background: rgba(255, 69, 0, 0.1); border-radius: 50px;
-        padding: 6px 16px; margin-bottom: 15px; border: 1px solid rgba(255, 69, 0, 0.2);
-    }
-    .streak-box i { color: #ff4500; font-size: 18px; animation: fireBurn 1.5s infinite; }
-    @keyframes fireBurn { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.5) drop-shadow(0 0 5px #ff4500); } }
-    .streak-txt { font-weight: 800; color: #ff4500; font-size: 13px; }
-
-    .coins-section {
-        display: flex; flex-direction: column; align-items: center; gap: 5px;
-        margin-bottom: 25px; background: rgba(255, 255, 255, 0.03);
-        padding: 12px; border-radius: 20px; border: 1px solid var(--glass-border);
-    }
-    .coins-label { font-family: 'Orbitron'; font-size: 10px; color: var(--primary); text-transform: uppercase; }
-    .coins-display { display: flex; align-items: center; gap: 10px; }
-    .coins-icon-img { width: 30px; height: 30px; object-fit: contain; }
-    .coins-count { font-size: 20px; font-weight: 900; color: #fff; }
-
-    .btn-tasks {
-        background: rgba(41, 243, 255, 0.05); border: 1px solid var(--primary); color: var(--primary);
-        padding: 16px; border-radius: 18px; text-decoration: none; display: flex;
-        flex-direction: column; align-items: center; gap: 5px; transition: 0.3s; margin-bottom: 15px;
-    }
-    .btn-tasks:hover { background: var(--primary); color: #000; box-shadow: 0 0 20px var(--primary-dim); }
-    .tasks-title { font-family: 'Orbitron'; font-weight: 800; font-size: 14px; text-transform: uppercase; }
-    .tasks-desc { font-family: 'Poppins'; font-size: 10px; opacity: 0.8; }
-
-    .btn-logout-pop {
-        background: transparent; border: 1.5px solid #ff4757; color: #ff4757;
-        padding: 10px 25px; border-radius: 12px; font-family: 'Orbitron'; font-weight: 700;
-        cursor: pointer; transition: 0.3s; font-size: 12px; text-transform: uppercase;
-    }
-    .btn-logout-pop:hover { background: #ff4757; color: #fff; box-shadow: 0 0 15px rgba(255, 71, 87, 0.4); }
-
-    /* --- NEW EDIT PROFILE STYLES --- */
-    .edit-profile-form { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; text-align: left; }
-    .edit-label { font-size: 10px; color: var(--primary); text-transform: uppercase; margin-bottom: 2px; margin-left: 5px; font-family: 'Orbitron'; }
-    .edit-input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 10px; border-radius: 12px; width: 100%; font-family: 'Poppins'; font-size: 12px; }
-    .edit-input:focus { border-color: var(--primary); }
-    .btn-save-profile { background: var(--primary); color: #000; font-family: 'Orbitron'; font-weight: 700; border: none; padding: 10px; border-radius: 12px; cursor: pointer; margin-top: 10px; text-transform: uppercase; }
-    .btn-edit-profile { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 50px; font-size: 10px; cursor: pointer; display: flex; align-items: center; gap: 5px; margin: 0 auto 15px; transition: 0.3s; font-family: 'Orbitron'; text-transform: uppercase; }
-    .btn-edit-profile:hover { background: var(--primary); color: #000; }
-
-    /* --- HEADER --- */
-    .header-container { position: fixed; top: 0; width: 100%; padding: 15px; z-index: 1000; display: flex; justify-content: center; }
-    header {
-      width: 100%; max-width: 1200px; display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 25px; background: rgba(5, 11, 20, 0.7); border: 1px solid var(--glass-border);
-      border-radius: 100px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    }
-    .logo { 
-      font-weight: 900; font-size: 24px; letter-spacing: 1px;
-      background: linear-gradient(90deg, #fff, var(--primary)); 
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
-      text-decoration: none; text-transform: uppercase; 
-    }
-    .logo img { height: 40px; vertical-align: middle; }
-
-    nav { display: flex; gap: 25px; align-items: center; }
-    nav a { color: var(--text-muted); text-decoration: none; font-size: 13px; font-weight: 600; transition: 0.3s; }
-    nav a:hover { color: var(--primary); }
+#welcomeText {
+  display: none; /* Managed by JS */
+  
+  /* Matches the Logo/Button vibe */
+  background: linear-gradient(to bottom, #4d2600, #261300); /* Deep chocolate wood vibe */
+  border: 3px solid #facc15; /* Chunky Gold border */
+  border-radius: 50px; /* Fully rounded pill shape */
+  
+  padding: 10px 40px;
+  margin-bottom: 30px;
+  
+  /* Text Styling */
+  font-family: 'Oswald', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  
+  /* High-end shadows */
+  box-shadow: 
+    0 6px 0 #1a0a00,              /* 3D Depth */
+    0 10px 20px rgba(0, 0, 0, 0.5); /* Shadow on floor */
     
-    /* LOGIN BUTTON IN HEADER */
-    .login-btn-header {
-        background: transparent;
-        border: 1.5px solid var(--primary);
-        color: var(--primary);
-        padding: 8px 20px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 700;
-        cursor: pointer;
-        text-transform: uppercase;
-        transition: 0.3s;
-        display: flex; align-items: center; gap: 8px;
-    }
-    .login-btn-header:hover {
-        background: var(--primary); color: #000;
-        box-shadow: 0 0 15px rgba(41, 243, 255, 0.4);
-    }
-    .user-avatar-small {
-        width: 24px; height: 24px; border-radius: 50%;
-        border: 1px solid #fff; display: none;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.5); /* Depth on letters */
+  
+  z-index: 10;
+  position: relative;
+  animation: plaquePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Add a small gold star icon before the name */
+#welcomeText::before {
+  content: "⭐";
+  margin-right: 10px;
+  filter: drop-shadow(0 2px 0 rgba(0,0,0,0.5));
+}
+
+@keyframes plaquePop {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideInBadge {
+  from { opacity: 0; transform: translateX(-50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes glowPulse {
+  from { border-color: #0eddc1; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+  to { border-color: #ffffff; box-shadow: 0 5px 20px rgba(14, 221, 193, 0.4); }
+}
+
+    .button-container {
+      display: flex; flex-direction: column; gap: 20px; justify-content: center; align-items: center; 
+      z-index: 10;
     }
 
-    .hamburger { display: none; background: none; border: none; color: #fff; font-size: 26px; cursor: pointer; }
-
-    /* --- SIDE MENU --- */
-    #sideMenu { 
-        position: fixed; inset: 0; left: auto; width: 320px; 
-        background: #080f1a; border-left: 1px solid rgba(255,255,255,0.05); 
-        z-index: 2000; padding: 40px 30px; transform: translateX(100%); 
-        transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1); display: flex; flex-direction: column; 
-    }
-    #sideMenu.open { transform: translateX(0); }
-    .menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-    .menu-logo { font-size: 38px; font-weight: 900; letter-spacing: 2px; }
-    .closeBtn { font-size: 40px; background: none; border: none; color: #fff; cursor: pointer; }
-    .menu-divider { width: 100%; height: 1px; background: rgba(255,255,255,0.08); margin-bottom: 50px; }
-    .menu-links { display: flex; flex-direction: column; gap: 35px; }
-    .menu-links a { color: #fff; text-decoration: none; font-size: 26px; font-weight: 600; transition: 0.3s; }
-    .menu-links a.cyan-link { color: var(--primary); }
-    .menu-links a:hover { color: var(--primary); transform: translateX(10px); }
-
-    /* SIDE MENU LOGIN BTN */
-    .side-menu-login-btn {
-        background: rgba(41, 243, 255, 0.1);
-        border: 1px solid var(--primary);
-        color: var(--primary);
-        width: 100%;
-        padding: 15px;
-        margin-top: 20px;
-        border-radius: 12px;
-        font-size: 16px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: 0.3s;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-    }
-    .side-menu-login-btn:hover {
-        background: var(--primary); color: #000; box-shadow: 0 0 20px rgba(41, 243, 255, 0.4);
-    }
-
-    /* --- BIO SECTION (BLUE THEME) --- */
-    .hero-section { padding: 140px 20px 60px; display: flex; flex-direction: column; align-items: center; text-align: center; }
-    .main-avatar {
-      width: 160px; height: 160px; border-radius: 50%; margin-bottom: 30px; object-fit: cover;
-      filter: drop-shadow(0 0 20px rgba(41, 243, 255, 0.5));
-    }
-    .bio-card {
-      width: 100%; max-width: 850px;
-      background: linear-gradient(135deg, rgba(0, 130, 200, 0.3), rgba(41, 243, 255, 0.2));
-      backdrop-filter: blur(15px); border: 2.5px solid var(--primary); border-radius: 30px;
-      padding: 40px; position: relative; box-shadow: 0 0 40px rgba(41, 243, 255, 0.25);
-    }
-    .card-title { font-size: 32px; font-weight: 900; color: #fff; margin: 0 0 30px 0; text-transform: uppercase; }
-    .card-body p { 
-      font-size: 16px; line-height: 1.8; margin-bottom: 25px; color: #fff; text-align: left; 
-    }
-
-    /* --- SERVICES SECTION (FIXED TO MATCH HOMEPAGE) --- */
-    .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 60px 24px; }
-    .section-title {
-      font-size: 32px; text-align: center; margin-bottom: 60px;
-      background: linear-gradient(180deg, #ffffff 0%, var(--primary) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      position: relative; display: inline-block; left: 50%; transform: translateX(-50%);
-    }
-    .section-title::after {
-      content:''; display: block; width: 60px; height: 3px; background: var(--primary);
-      margin: 10px auto 0; box-shadow: 0 0 20px rgba(41, 243, 255, 0.3);
-    }
-
-    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-bottom: 120px; }
+.menu-btn.play {
+  position: relative;
+  /* Rich 3-step gradient: Highlight -> Main -> Deep Orange */
+  background: linear-gradient(180deg, #ffdc43 0%, #ffaa00 50%, #e67300 100%);
+  
+  color: #1a1c33; /* Dark text for high contrast */
+  border: 4px solid #ffffff;
+  border-radius: 20px;
+  padding: 20px 80px;
+  
+  font-size: 38px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  letter-spacing: 3px;
+  
+  /* The "Side": Darkened burnt-orange for a heavy 3D effect */
+  box-shadow: 
+    0 12px 0 #4d2600,            /* Dark side of the button */
+    0 20px 30px rgba(0, 0, 0, 0.5); /* Shadow on the floor */
     
-    .feature-card {
-      background: rgba(13, 25, 41, 0.7); border: 1px solid var(--glass-border);
-      border-radius: 24px; padding: 40px 30px; text-align: center;
-      transition: var(--transition); backdrop-filter: blur(10px);
-      display: flex; flex-direction: column; align-items: center;
+  transition: all 0.1s ease;
+  overflow: hidden;
+}
+
+/* --- HOVER EFFECT --- */
+.menu-btn.play:hover {
+  transform: translateY(-4px); /* Lift up slightly */
+  filter: brightness(1.05);
+  box-shadow: 
+    0 16px 0 #4d2600,            /* Side gets thicker as it lifts */
+    0 25px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Light sweep animation on hover */
+.menu-btn.play::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  transition: 0.6s;
+}
+
+.menu-btn.play:hover::before {
+  left: 150%;
+}
+
+/* --- CLICK EFFECT --- */
+.menu-btn.play:active {
+  transform: translateY(10px); /* Pushes down almost to the floor */
+  box-shadow: 
+    0 2px 0 #4d2600,             /* Side disappears */
+    0 5px 10px rgba(0, 0, 0, 0.7);
+  transition: all 0.05s ease;
+}
+
+    /* Buton LOGOUT */
+    #logoutBtn {
+      background: transparent; color: #ff4444; border: none; font-family: 'Oswald', sans-serif;
+      font-size: 18px; cursor: pointer; text-decoration: underline; display: none;
     }
-    .feature-card:hover { transform: translateY(-10px); background: rgba(20, 40, 60, 0.8); border-color: var(--primary); box-shadow: 0 20px 50px rgba(0,0,0,0.4); }
+    #logoutBtn:hover { color: #ff6666; }
+
+    /* ==========================================
+       MODALS (OVERLAYS)
+       ========================================== */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(10, 8, 30, 0.9); z-index: 99999;
+      justify-content: center; align-items: center; flex-direction: column;
+      backdrop-filter: blur(5px);
+    }
+    .modal-box {
+      background: linear-gradient(to bottom, #2a2d4c, #1a1c33);
+      border: 4px solid #facc15; border-radius: 20px;
+      padding: 40px; text-align: center; color: white; width: 90vw; max-width: 450px;
+      box-shadow: 0 0 30px rgba(250, 204, 21, 0.4), inset 0 0 20px rgba(0,0,0,0.8);
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .modal-box h2 { margin-top: 0; font-size: 32px; color: #facc15; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+    .modal-box p { font-size: 18px; margin-bottom: 25px; color: #d1d5db; }
+
+    /* Buton Login Google Customizat */
+    .custom-google-btn {
+      display: flex; align-items: center; justify-content: center; gap: 15px;
+      width: 100%; background-color: #ffffff; color: #333333;
+      border: 3px solid #cccccc; border-radius: 12px; padding: 15px 20px;
+      font-size: 20px; font-family: 'Oswald', sans-serif; font-weight: 700;
+      cursor: pointer; box-shadow: 0 8px 0 #999999, 0 15px 20px rgba(0, 0, 0, 0.5);
+      transition: all 0.15s ease; text-transform: uppercase;
+    }
+    .custom-google-btn img { width: 28px; height: 28px; }
+    .custom-google-btn:hover { background-color: #f5f5f5; }
+    .custom-google-btn:active {
+      transform: translateY(8px);
+      box-shadow: 0 0 0 #999999, 0 5px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .input-field {
+      width: 100%; padding: 15px; font-size: 22px; font-family: 'Oswald', sans-serif; font-weight: 600;
+      border: 3px solid #5a6288; border-radius: 12px; background: #131526; color: #0eddc1;
+      text-align: center; margin-bottom: 25px; outline: none; box-shadow: inset 0 4px 6px rgba(0,0,0,0.5);
+      transition: all 0.3s;
+    }
+    .input-field:focus { border-color: #facc15; box-shadow: inset 0 4px 6px rgba(0,0,0,0.5), 0 0 15px rgba(250, 204, 21, 0.5); }
+
+    .cancel-btn {
+      background: transparent; border: none; color: #9aa0b8; font-family: 'Oswald', sans-serif;
+      font-size: 16px; margin-top: 20px; text-decoration: underline; cursor: pointer;
+    }
+    .cancel-btn:hover { color: #ffffff; }
+
+    /* ==========================================
+       GAME AREA
+       ========================================== */
+#gameArea {
+  display: none; 
+  position: absolute; 
+  top: 0; left: 0; 
+  width: 100vw; height: 100vh;
+  
+  /* --- BACKGROUND IMAGE SETTINGS --- */
+  /* This adds a 40% dark tint so the character stands out */
+  background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
+              url('https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/e7c37518-746f-42d6-9ea6-e3f7b028ffdb/ChatGPT+Image+Jun+16%2C+2025%2C+10_03_26+PM.png'); 
+  
+  background-size: cover;      /* Makes the image fill the whole screen */
+  background-position: center; /* Centers the image */
+  background-repeat: no-repeat;
+  
+  overflow: hidden;
+  z-index: 500;
+}
+
+    .score-icon { height: 35px; }
     
-    .feature-img { width: 100px; height: auto; margin-bottom: 24px; filter: drop-shadow(0 0 10px rgba(41,243,255,0.3)); transition: var(--transition); }
-    @media (min-width: 1024px) {
-      .feature-img { width: 350px; margin-top: -20px; animation: float 4s ease-in-out infinite; }
+    #kevin {
+      position: absolute; width: 120px; height: 120px; background-size: contain;
+      background-repeat: no-repeat; background-position: center; cursor: pointer; z-index: 999;
+      transition: left 0.3s ease-out, top 0.3s ease-out;
     }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+/* ==========================================
+   ARCADE COMBO STYLING (REVAMPED)
+/* ==========================================
+   V2 COMBO SYSTEM (ROMANIAN & EVOLVING)
+   ========================================== */
+/* ==========================================
+   RESPONSIVE ARCADE COMBO (PC: BIG | MOBILE: SMALL)
+   ========================================== */
+.combo-text {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2000;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 900;
+  text-transform: uppercase;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 0.85;
 
-    .feature-card h3 { margin: 0 0 12px; font-size: 22px; color: #fff; font-family: 'Orbitron'; }
-    .feature-card p { font-size: 15px; color: var(--text-muted); line-height: 1.6; margin: 0 0 20px; }
+  /* 
+     CLAMP LOGIC: 
+     - Minimum 24px (Mobile)
+     - Scales with screen width (5vw)
+     - Maximum 52px (PC)
+  */
+  font-size: clamp(24px, 6vw, 52px); 
+  
+  color: #fff;
+  /* Thick Arcade Outline */
+  text-shadow: 
+    0 2px 0 #000, 
+    0 4px 0 #000,
+    0 6px 15px rgba(0,0,0,0.6);
+}
 
-    .bubbleBtn { 
-      padding: 10px 24px; border-radius: 50px; font-weight: 700; border: none; 
-      font-family: 'Orbitron', sans-serif; font-size: 12px; 
-      background: linear-gradient(90deg, #1df7ff, #59ffd9); color: #05212a; 
-      margin-top: 15px; text-decoration: none; transition: 0.3s; display: inline-block;
-      box-shadow: 0 8px 22px rgba(41, 243, 255,.35);
+.combo-rank-word {
+  /* Scales between 16px and 32px */
+  font-size: clamp(16px, 4vw, 32px);
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+}
+
+/* ANIMATION: Travels further on PC, shorter on Mobile */
+@keyframes comboPop {
+  0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
+  20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  100% { 
+    /* clamp(-80px, -15vh, -180px) makes it float higher on big screens */
+    transform: translate(-50%, clamp(-80px, -15vh, -180px)) scale(0.9); 
+    opacity: 0; 
+  }
+}
+/* COLOR TIERS */
+.tier-verde { color: #4ade80; text-shadow: 0 0 10px #166534; }
+.tier-albastru { color: #3b82f6; text-shadow: 0 0 10px #1e3a8a; }
+.tier-cyan { color: #22d3ee; text-shadow: 0 0 10px #0891b2; }
+.tier-galben { color: #facc15; text-shadow: 0 0 10px #854d0e; }
+.tier-portocaliu { color: #fb923c; text-shadow: 0 0 10px #9a3412; }
+.tier-rosu { color: #ef4444; text-shadow: 0 0 15px #7f1d1d; }
+.tier-roz { color: #f472b6; text-shadow: 0 0 15px #831843; }
+.tier-lava { 
+  background: linear-gradient(to bottom, #ff4500, #ff8c00); 
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 5px #ff0000);
+}
+.tier-celestial { 
+  color: #ffffff; text-shadow: 0 0 15px #00d4ff, 0 0 25px #ffffff; 
+}
+.tier-rainbow {
+  background: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-size: 400% 400%;
+  animation: rainbowText 2s linear infinite;
+  filter: drop-shadow(0 0 5px rgba(255,255,255,0.5));
+}
+
+@keyframes rainbowText {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+@keyframes comboPop {
+  0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+  20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -120px) scale(0.8); opacity: 0; }
+}
+
+.animate-combo-v2 {
+  animation: comboPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+.custom-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  width: 100%;
+  
+  /* Fundal închis pentru a se potrivi cu jocul */
+  background: #1a1c33; 
+  color: #ffffff;
+  
+  /* Border auriu ca restul ferestrelor */
+  border: 3px solid #facc15; 
+  border-radius: 12px;
+  padding: 15px 20px;
+  
+  font-size: 20px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  
+  /* Umbră 3D și strălucire */
+  box-shadow: 0 6px 0 #b39200, 0 0 20px rgba(250, 204, 21, 0.2);
+  transition: all 0.1s ease;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Stil pentru iconița Google (Colorată nativ) */
+.custom-google-btn i {
+  font-size: 24px;
+  background: conic-gradient(from -45deg, #ea4335 110deg, #4285f4 90deg 180deg, #34a853 180deg 270deg, #fbbc05 270deg) 73% 55%/150% 150% no-repeat;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));
+}
+
+.custom-google-btn:hover {
+  background: #242745;
+  box-shadow: 0 6px 0 #b39200, 0 0 30px rgba(250, 204, 21, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Efectul de apăsare (se duce în jos) */
+.custom-google-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #b39200, 0 0 10px rgba(250, 204, 21, 0.2);
+}
+
+/* Un mic efect de reflexie care trece peste buton */
+.custom-google-btn::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 20%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: rotate(30deg);
+  transition: all 0.5s;
+}
+
+.custom-google-btn:hover::after {
+  left: 120%;
+}
+
+#logoutBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  
+  /* Pure Punchy Red Gradient */
+  background: linear-gradient(180deg, #ff3333 0%, #cc0000 50%, #a30000 100%);
+  color: white;
+  
+  /* Styling */
+  border: 4px solid #ffffff;
+  border-radius: 12px;
+  padding: 12px 35px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  text-transform: uppercase;
+  text-decoration: none !important; /* Forces the underline to disappear */
+  cursor: pointer;
+  
+  /* Deep 3D Shadow - Pure Dark Maroon */
+  box-shadow: 0 8px 0 #5c0000, 0 12px 20px rgba(0, 0, 0, 0.5);
+  transition: all 0.1s ease;
+  
+  margin-top: 25px;
+  z-index: 10;
+}
+
+/* Remove underline from the text span inside the button */
+#logoutBtn span {
+  text-decoration: none !important;
+}
+
+/* Icon Styling */
+#logoutBtn i {
+  font-size: 20px;
+  color: white;
+}
+
+/* --- HOVER EFFECTS --- */
+#logoutBtn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-3px);
+  box-shadow: 0 11px 0 #5c0000, 0 15px 25px rgba(204, 0, 0, 0.4);
+}
+
+/* Move icon on hover */
+#logoutBtn:hover i {
+  transform: translateX(4px);
+}
+
+/* --- CLICK EFFECT --- */
+#logoutBtn:active {
+  transform: translateY(6px); /* Moves down significantly */
+  box-shadow: 0 2px 0 #5c0000, 0 5px 10px rgba(0, 0, 0, 0.6);
+  transition: all 0.05s ease;
+}
+
+
+.logo-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 40px;
+  z-index: 10;
+}
+
+/* MAIN LOGO: THE CRASH */
+.logo-img {
+  width: 380px; 
+  max-width: 90vw;
+  filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
+  
+  /* Fall and Crash Animation */
+  animation: fallAndCrash 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* V2 BADGE: THE POP */
+.v2-badge {
+  position: absolute;
+  width: 120px;
+  bottom: -20px;
+  right: -10px;
+  opacity: 0;
+  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+  
+  /* Pop in after the main logo hits */
+  animation: popInV2 0.6s 1.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* ANIMATION: LOGO SLAMMING DOWN */
+@keyframes fallAndCrash {
+  0% { transform: translateY(-1000px) scaleY(1.2); opacity: 0; }
+  60% { transform: translateY(0) scaleY(0.8); opacity: 1; } /* Hits the bottom and squishes */
+  75% { transform: translateY(-30px) scaleY(1.1); }          /* Bounces up */
+  90% { transform: translateY(0) scaleY(1); }               /* Final impact */
+  100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+}
+
+/* ANIMATION: V2 STAMP POP */
+@keyframes popInV2 {
+  0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+  70% { transform: scale(1.3) rotate(10deg); opacity: 1; }
+  100% { transform: scale(1) rotate(5deg); opacity: 1; }
+}
+
+/* Optional: Subtle floating effect AFTER they land */
+.logo-container:hover {
+    animation: gentleFloat 3s ease-in-out infinite;
+}
+
+@keyframes gentleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+/* ==========================================
+   MAIN MENU & RESPONSIVE CONTAINER
+   ========================================== */
+#mainMenu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  gap: 20px; /* Vertical spacing between elements */
+  z-index: 100;
+  position: relative;
+  text-align: center;
+}
+
+/* LOGO WRAPPER (For Logo + V2 Badge) */
+.logo-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 10px;
+  /* Balanced shift for PC, resets on mobile */
+  transform: translateX(-30px); 
+  animation: logoSlamShake 0.2s 0.7s 2;
+}
+
+.logo-img {
+  width: 100%;
+  max-width: 400px; /* Prevents logo from being too big on PC */
+  height: auto;
+  filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
+  animation: crashSlam 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.v2-badge {
+  position: absolute;
+  width: 30%; /* Scales relative to logo size */
+  bottom: -5%;
+  right: -10%;
+  opacity: 0;
+  transform: scale(4);
+  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+  animation: stampV2 0.5s 1.2s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+
+/* WELCOME BADGE */
+#welcomeText {
+  display: none;
+  background: linear-gradient(to bottom, #4d2600, #261300);
+  border: 3px solid #facc15;
+  border-radius: 50px;
+  padding: 8px 30px;
+  
+  /* Responsive Font: Min 16px, Max 22px */
+  font-size: clamp(16px, 4vw, 22px); 
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  color: #ffffff;
+  text-transform: uppercase;
+  box-shadow: 0 6px 0 #1a0a00, 0 10px 20px rgba(0, 0, 0, 0.5);
+  animation: plaquePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* BUTTONS CONTAINER */
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  align-items: center;
+}
+
+/* PRECISE PLAY BUTTON */
+.menu-btn.play {
+  width: 100%;
+  max-width: 280px; /* Limits width on PC */
+  height: 70px;    /* Fixed height for better control */
+  margin: 0 auto;       /* Centers it in the box */
+  transform: none;
+  
+  background: linear-gradient(180deg, #ffdc43 0%, #ffaa00 50%, #e67300 100%);
+  color: #1a1c33;
+  border: 4px solid #ffffff;
+  border-radius: 20px;
+  
+  font-size: 32px; /* Smaller than before for PC */
+  font-family: 'Oswald', sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  
+  box-shadow: 0 10px 0 #4d2600, 0 15px 25px rgba(0, 0, 0, 0.4);
+  transition: all 0.1s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* LOGOUT BUTTON REDESIGN */
+#logoutBtn {
+  display: none; /* Managed by JS */
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(180deg, #ff3333 0%, #cc0000 50%, #a30000 100%);
+  color: white;
+  border: 3px solid #ffffff;
+  border-radius: 12px;
+  padding: 10px 25px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #5c0000, 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* --- INTERACTIVITY --- */
+.menu-btn.play:hover { transform: translateY(-3px); box-shadow: 0 13px 0 #4d2600, 0 20px 30px rgba(0, 0, 0, 0.5); }
+.menu-btn.play:active { transform: translateY(8px); box-shadow: 0 2px 0 #4d2600; }
+#logoutBtn:active { transform: translateY(4px); box-shadow: 0 2px 0 #5c0000; }
+
+/* ==========================================
+   MOBILE FIXES (Screens smaller than 600px)
+   ========================================== */
+@media (max-width: 600px) {
+  .logo-wrapper { transform: translateX(0); } /* Center logo on mobile */
+  .logo-main { max-width: 80vw; }
+  .v2-badge { width: 35%; right: -5%; }
+  
+  .menu-btn.play {
+    max-width: 240px; /* Shrinks button for phones */
+    height: 60px;
+    font-size: 26px;
+    border-width: 3px;
+  }
+}
+
+/* --- ANIMATION KEYFRAMES --- */
+@keyframes crashSlam {
+  0% { transform: translateY(-800px) scaleY(2); opacity: 0; }
+  60% { transform: translateY(0) scaleY(0.7); opacity: 1; }
+  100% { transform: translateY(0) scaleY(1); opacity: 1; }
+}
+@keyframes stampV2 {
+  0% { transform: scale(4) rotate(-20deg); opacity: 0; }
+  100% { transform: scale(1) rotate(8deg); opacity: 1; }
+}
+@keyframes logoSlamShake {
+  0%, 100% { transform: translateX(-30px); }
+  50% { transform: translateX(-30px) translateY(5px); }
+}
+@keyframes plaquePop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+/* THE LOGO WRAPPER - Centered exactly */
+.logo-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%; /* Ensures it spans the full menu width */
+  margin-bottom: 25px;
+  z-index: 10;
+  
+  /* Resetting the offset so it is dead center */
+  transform: translateX(0); 
+  
+  /* Screen shake on impact */
+  animation: logoSlamShake 0.2s 0.6s 2; 
+}
+
+/* THE MAIN LOGO */
+.logo-main {
+  width: 90%;          /* Responsive width */
+  max-width: 480px;    /* Max size on PC */
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8));
+  
+  /* Fall and Crash Animation */
+  animation: crashSlam 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* --- ANIMATION KEYFRAMES --- */
+
+@keyframes crashSlam {
+  0% { transform: translateY(-800px) scaleY(2); opacity: 0; }
+  60% { transform: translateY(0) scaleY(0.7); opacity: 1; } /* Squash */
+  85% { transform: translateY(-20px) scaleY(1.1); }          /* Bounce */
+  100% { transform: translateY(0) scaleY(1); opacity: 1; }
+}
+
+@keyframes logoSlamShake {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(8px, 8px); }
+  100% { transform: translate(0, 0); }
+}
+
+/* MOBILE FIX */
+@media (max-width: 600px) {
+  .logo-main {
+    max-width: 320px; /* Perfectly sized for phones */
+  }
+}
+
+/* ==========================================
+   PREMIUM HUD — TOP SCORE PANEL (REDESIGN)
+   ========================================== */
+
+/* Slim ambient top strip — replaces the old thick header bar */
+.game-header {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 18px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.35), transparent);
+  z-index: 900;
+  pointer-events: none;
+}
+
+/* THE HUD CARD */
+#scoreBoard {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 8px 22px 8px 8px;
+  border-radius: 999px;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0.02) 40%),
+    linear-gradient(135deg, #2c2a55 0%, #1b1a37 60%, #14132b 100%);
+  border: 1px solid rgba(255,255,255,0.16);
+
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.25) inset,
+    0 -10px 16px rgba(0,0,0,0.25) inset,
+    0 8px 18px rgba(0,0,0,0.45),
+    0 0 0 4px rgba(10,8,25,0.35);
+
+  backdrop-filter: blur(6px);
+  animation: hudFloat 4s ease-in-out infinite, hudBreathe 3.2s ease-in-out infinite;
+  transition: transform 0.15s ease;
+  overflow: hidden;
+}
+
+/* Soft ambient glow ring, breathes slowly */
+@keyframes hudBreathe {
+  0%, 100% {
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.25) inset,
+      0 -10px 16px rgba(0,0,0,0.25) inset,
+      0 8px 18px rgba(0,0,0,0.45),
+      0 0 0 4px rgba(10,8,25,0.35),
+      0 0 14px rgba(255,196,60,0.18);
+  }
+  50% {
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.25) inset,
+      0 -10px 16px rgba(0,0,0,0.25) inset,
+      0 8px 18px rgba(0,0,0,0.5),
+      0 0 0 4px rgba(10,8,25,0.35),
+      0 0 24px rgba(255,196,60,0.38);
+  }
+}
+
+/* Gentle idle bob, like a live UI element rather than a static image */
+@keyframes hudFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* Glossy light sweep, sweeps across the pill every few seconds */
+#scoreBoard::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -60%;
+  width: 40%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+  transform: skewX(-25deg);
+  animation: hudSheen 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes hudSheen {
+  0%   { left: -60%; opacity: 0; }
+  8%   { opacity: 1; }
+  30%  { left: 130%; opacity: 0; }
+  100% { left: 130%; opacity: 0; }
+}
+
+#scoreBoard:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* THE COIN/ICON MEDALLION */
+.score-icon-wrapper {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: radial-gradient(circle at 32% 28%, #fff6cf 0%, #ffd25a 28%, #f5a623 62%, #c9780f 100%);
+  border: 2px solid rgba(255,255,255,0.85);
+
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.4),
+    0 0 10px rgba(255,196,60,0.55),
+    inset 0 2px 3px rgba(255,255,255,0.6),
+    inset 0 -3px 4px rgba(120,60,0,0.45);
+}
+
+.score-icon-wrapper i {
+  font-size: 20px;
+  color: #7a3e00;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
+}
+
+/* subtle rotating shine ring on the medallion */
+.score-icon-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 60%, rgba(255,255,255,0.55) 68%, transparent 76% 100%);
+  animation: coinSpin 3.2s linear infinite;
+  mix-blend-mode: overlay;
+}
+@keyframes coinSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* THE SCORE NUMBER */
+#scoreText {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  line-height: 1;
+
+  color: #fff6df;
+  background: linear-gradient(180deg, #fffdf5 0%, #ffe27a 60%, #ffc63c 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  text-shadow: 0 2px 6px rgba(0,0,0,0.35);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: inline-block;
+}
+
+/* Score pop animation — replaces the old crude scorePop */
+.score-bump #scoreText {
+  animation: scoreValuePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes scoreValuePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+/* Ring pulse on the coin whenever score bumps */
+.score-bump .score-icon-wrapper {
+  animation: coinPulse 0.35s ease-out;
+}
+@keyframes coinPulse {
+  0%   { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 10px rgba(255,196,60,0.55), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -3px 4px rgba(120,60,0,0.45); }
+  50%  { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 26px rgba(255,196,60,0.9), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -3px 4px rgba(120,60,0,0.45); }
+  100% { box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 0 10px rgba(255,196,60,0.55), inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -3px 4px rgba(120,60,0,0.45); }
+}
+
+/* ==========================================
+   HUD MOBILE FIXES
+   ========================================== */
+@media (max-width: 600px) {
+  #scoreBoard {
+    top: 10px;
+    left: 10px;
+    padding: 6px 16px 6px 6px;
+    gap: 8px;
+  }
+  .score-icon-wrapper { width: 36px; height: 36px; }
+  .score-icon-wrapper i { font-size: 16px; }
+  #scoreText { font-size: 19px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #scoreBoard, #scoreBoard::before, .score-icon-wrapper::after {
+    animation: none !important;
+  }
+}
+
+/* Subtle side frame kept for the arcade feel */
+.game-frame-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+  border: 4px solid rgba(250, 204, 21, 0.15);
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
+  z-index: 400;
+}
+
+/* Prevents Kevin from going behind the score or back button on small screens */
+#gameArea {
+    padding: 80px 20px 80px 20px; /* Creates a 'safe zone' */
+    box-sizing: border-box;
+}
+
+
+/* THE FLOATING CONTROLS CONTAINER */
+.game-controls {
+  position: absolute;
+  top: 16px;
+  right: 16px; /* Opposite side of the score */
+  z-index: 1000;
+  display: flex;
+  gap: 10px;
+}
+
+/* INDIVIDUAL ROUND BUTTONS */
+.control-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  
+  /* Matches your ScoreBoard style */
+  background: linear-gradient(135deg, #2c2a55 0%, #1b1a37 100%);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff6df;
+  font-size: 18px;
+  cursor: pointer;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  box-shadow: 
+    0 4px 10px rgba(0,0,0,0.4), 
+    inset 0 1px 0 rgba(255,255,255,0.2);
+  backdrop-filter: blur(5px);
+  transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #3d3b75 0%, #24234a 100%);
+  border-color: #facc15; /* Gold glow on hover */
+  color: #facc15;
+}
+
+.control-btn:active {
+  transform: translateY(2px) scale(0.9);
+}
+
+/* Mobile Fix */
+@media (max-width: 600px) {
+  .game-controls { top: 10px; right: 10px; }
+  .control-btn { width: 38px; height: 38px; font-size: 16px; }
+}
+
+
+/* ==========================================
+   MOVING ELECTRIC OUTLINE EFFECT
+   ========================================== */
+
+.electric-container {
+  position: relative;
+  z-index: 1;
+  /* This creates the "hole" in the middle so we only see the border */
+  overflow: hidden;
+  border: none !important; /* We use the pseudo-element for the border now */
+  background: #1b1a37; /* Base fallback */
+}
+
+/* The "Moving Electricity" Layer */
+.electric-container::before {
+  content: "";
+  position: absolute;
+  /* Make it much larger than the box so it covers corners as it rotates */
+  top: -150%; left: -150%;
+  width: 400%; height: 400%;
+  
+  /* The "Electric Bolts" - bright yellow and white spikes */
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 150deg,
+    #facc15 160deg,
+    #ffffff 165deg,
+    #facc15 170deg,
+    transparent 180deg,
+    transparent 330deg,
+    #facc15 340deg,
+    #ffffff 345deg,
+    #facc15 350deg,
+    transparent 360deg
+  );
+  
+  animation: rotateElectric 1.5s linear infinite;
+  z-index: -2;
+}
+
+/* The Center Mask (The dark part inside the border) */
+.electric-container::after {
+  content: "";
+  position: absolute;
+  /* This creates a 2px "Electric" border thickness */
+  inset: 2px; 
+  background: inherit; /* Takes the purple gradient background */
+  background: linear-gradient(135deg, #2c2a55 0%, #14132b 100%);
+  border-radius: inherit; /* Keeps the pill or circle shape */
+  z-index: -1;
+}
+
+@keyframes rotateElectric {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* SPECIFIC TWEAKS FOR SCOREBOARD (Pill) */
+#scoreBoard.electric-container {
+  background: #1b1a37;
+  border-radius: 999px;
+  padding: 8px 22px 8px 8px; /* Restoring your original padding */
+}
+
+/* SPECIFIC TWEAKS FOR PAUSE BUTTON (Circle) */
+.control-btn.electric-container {
+  background: #1b1a37;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+}
+
+/* PAUSE MODAL SCALING */
+.pause-modal-box {
+  width: 90vw;
+  max-width: 320px; /* Much slimmer for mobile and PC */
+  padding: 25px 20px;
+  border-width: 3px;
+}
+
+.pause-modal-box h2 {
+  font-size: 26px; /* Smaller title */
+  margin-bottom: 5px;
+}
+
+.pause-modal-box p {
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.pause-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Tighter gap */
+  width: 100%;
+}
+
+/* UNIVERSAL BUTTON STYLE FOR PAUSE MENU */
+.pause-item {
+  width: 100% !important;
+  height: 50px !important; /* Slimmer buttons */
+  font-size: 18px !important;
+  padding: 0 20px !important;
+  border-radius: 12px !important; /* Tighter corners */
+  border-width: 3px !important;
+  
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 15px;
+  
+  /* Standardized 3D Shadow */
+  box-shadow: 0 6px 0 #4d2600, 0 8px 15px rgba(0,0,0,0.4);
+  transition: all 0.1s ease;
+}
+
+/* THE RED BUTTON FIXED */
+.menu-btn.red-exit {
+  background: linear-gradient(180deg, #ff5c5c 0%, #d10000 50%, #8b0000 100%);
+  color: white;
+  border: 3px solid #ffffff;
+  box-shadow: 0 6px 0 #4a0000, 0 8px 15px rgba(0,0,0,0.4); /* Custom dark red 3D side */
+  text-transform: uppercase;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* INTERACTIVITY FIXES */
+.pause-item:hover {
+  transform: translateY(-2px);
+}
+
+.pause-item:active {
+  transform: translateY(4px) !important;
+  box-shadow: 0 2px 0 #4d2600 !important;
+}
+
+.menu-btn.red-exit:active {
+  box-shadow: 0 2px 0 #4a0000 !important;
+}
+
+/* Icon Alignment */
+.pause-item i {
+  font-size: 18px;
+  width: 25px;
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 600px) {
+  .pause-modal-box {
+    max-width: 280px; /* Even smaller on tiny phones */
+    padding: 20px 15px;
+  }
+}
+
+/* UNIVERSAL BUTTON STYLE FOR PAUSE MENU (CENTERED) */
+.pause-item {
+  width: 100% !important;
+  height: 50px !important;
+  font-size: 18px !important;
+  padding: 0 20px !important;
+  border-radius: 12px !important;
+  border-width: 3px !important;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center; /* FIXED: Changed from flex-start to center */
+  gap: 12px;               /* Space between icon and text */
+  
+  box-shadow: 0 6px 0 #4d2600, 0 8px 15px rgba(0,0,0,0.4);
+  transition: all 0.1s ease;
+}
+
+/* Ensure icons don't push the text away from the center */
+.pause-item i {
+  font-size: 18px;
+  width: auto !important; /* Removed fixed width to allow true centering */
+  display: inline-block;
+}
+
+/* Keep the Red Button's unique shadow color while centering */
+.menu-btn.red-exit {
+  justify-content: center; /* Ensure this is also centered */
+  background: linear-gradient(180deg, #ff5c5c 0%, #d10000 50%, #8b0000 100%);
+  color: white;
+  border: 3px solid #ffffff;
+  box-shadow: 0 6px 0 #4a0000, 0 8px 15px rgba(0,0,0,0.4);
+  text-transform: uppercase;
+}
+
+
+/* Update your CSS to include this shake animation */
+@keyframes comboSlam {
+  0% { transform: translate(-50%, -50%) scale(2); opacity: 0; filter: blur(10px); }
+  20% { transform: translate(-50%, -50%) scale(1); opacity: 1; filter: blur(0px); }
+  30% { transform: translate(-52%, -48%); } /* Shake start */
+  40% { transform: translate(-48%, -52%); }
+  50% { transform: translate(-50%, -50%); } /* Shake end */
+  100% { transform: translate(-50%, -180px) scale(0.8); opacity: 0; }
+}
+
+.animate-combo-v2 {
+  animation: comboSlam 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Make Lava and Rainbow tiers stand out more with an outline */
+.tier-lava {
+  color: #ff4500 !important;
+  -webkit-text-stroke: 1px #ffffff;
+  text-shadow: 0 0 20px #ff0000, 0 0 40px #ff8c00;
+}
+
+.tier-rainbow {
+  -webkit-text-stroke: 1px #000;
+  font-size: 34px !important; /* Make it slightly bigger at the end */
+}
+
+
+/* CHARACTER SELECTOR STYLES */
+.char-box {
+  max-width: 380px !important;
+  padding: 30px 20px !important;
+}
+
+.char-display-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.char-spotlight {
+  width: 180px;
+  height: 220px;
+  background: radial-gradient(circle at center, #2c2a55 0%, #14132b 100%);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  position: relative;
+}
+
+#charDisplayImg {
+  width: 120px;
+  height: 120px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  margin-bottom: 15px;
+  filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+}
+
+#charDisplayName {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  color: #facc15;
+  text-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
+}
+
+.nav-arrow {
+  background: linear-gradient(180deg, #4d2600, #261300);
+  border: 2px solid #facc15;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 0 #1a0a00;
+  transition: 0.1s;
+}
+
+.nav-arrow:active { transform: translateY(3px); box-shadow: 0 1px 0 #1a0a00; }
+.nav-arrow:disabled { opacity: 0.3; cursor: default; }
+
+@media (max-width: 600px) {
+  .char-spotlight { width: 150px; height: 180px; }
+  #charDisplayImg { width: 100px; height: 100px; }
+}
+
+
+/* CINEMATIC CHARACTER SELECTION - UPDATED & CENTERED */
+.char-selection-v2 {
+  background: radial-gradient(circle at center, #2a2d4c 0%, #101123 100%) !important;
+  width: 90vw !important; /* Ensures it fits perfectly on mobile */
+  max-width: 400px !important;
+  border: 3px solid #facc15 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.8) !important;
+  padding: 30px 15px !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.selection-header h2 {
+  font-size: 24px;
+  color: #facc15;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.selection-line {
+  width: 50px;
+  height: 3px;
+  background: #facc15;
+  margin: 12px auto;
+  border-radius: 2px;
+}
+
+/* THE VIEWPORT - Centering Logic */
+.char-viewport {
+  position: relative; /* Container for absolute arrows */
+  width: 100%;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.char-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+#charHeroImg {
+  width: 150px;
+  height: 150px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 2;
+  animation: heroFloat 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(250, 204, 21, 0.2));
+}
+
+.char-shadow {
+  width: 70px;
+  height: 12px;
+  background: rgba(0,0,0,0.4);
+  border-radius: 50%;
+  margin-top: -5px;
+  filter: blur(5px);
+  animation: shadowPulse 3s ease-in-out infinite;
+}
+
+/* ARROWS - Fixed to the edges */
+.nav-arrow-v2 {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #facc15;
+  font-size: 35px;
+  cursor: pointer;
+  z-index: 10;
+  padding: 10px;
+  transition: 0.2s;
+  -webkit-tap-highlight-color: transparent; /* No blue highlight on mobile */
+}
+
+.nav-arrow-v2.left { left: -5px; }
+.nav-arrow-v2.right { right: -5px; }
+
+.nav-arrow-v2:hover { color: #fff; transform: translateY(-50%) scale(1.1); }
+.nav-arrow-v2:active { scale: 0.9; }
+
+/* DESCRIPTION TEXT */
+.char-details {
+  text-align: center;
+  margin-bottom: 25px;
+  width: 100%;
+}
+
+#charHeroName {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px;
+  color: #fff;
+  margin-bottom: 8px;
+  letter-spacing: 2px;
+}
+
+#charHeroDesc {
+  font-family: 'Oswald', sans-serif;
+  font-size: 15px;
+  color: #9aa0b8;
+  line-height: 1.4;
+  padding: 0 15px;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+/* ANIMATIONS */
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes shadowPulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.3); opacity: 0.2; }
+}
+
+.select-hero-btn {
+  width: 100%;
+  max-width: 280px;
+  height: 55px !important;
+}
+
+/* MOBILE ADJUSTMENT */
+@media (max-width: 600px) {
+  .char-selection-v2 { padding: 25px 10px !important; }
+  #charHeroImg { width: 130px; height: 130px; }
+  .char-viewport { height: 180px; }
+  .nav-arrow-v2 { font-size: 30px; }
+}
+.nav-arrow-v2:hover { color: #fff; transform: scale(1.2); }
+
+
+
+.kevin-speech-bubble {
+  position: fixed;
+  background: white;
+  color: black;
+  padding: 8px 12px;
+  border-radius: 15px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  z-index: 10000;
+  pointer-events: none;
+  transform: translate(-50%, -100%) scale(1);
+  transition: opacity 0.5s, transform 0.5s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  text-align: center;
+  border: 2px solid #333;
+}
+.kevin-speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 10px 10px 0 10px;
+  border-style: solid;
+  border-color: white transparent transparent transparent;
+}
+
+
+/* THE MENU CONTAINER */
+.menu-container {
+  position: absolute;
+  bottom: 20px; /* Positioned at bottom-right corner */
+  right: 20px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* THE BUTTONS BASE STYLE */
+.control-btn {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2c2a55 0%, #14132b 100%);
+  border: 2px solid #facc15;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* MAIN TOGGLE ANIMATION */
+.main-toggle {
+  background: linear-gradient(135deg, #facc15 0%, #d97706 100%);
+  color: #1a1c33;
+  border-color: #ffffff;
+  z-index: 2001;
+}
+
+.menu-container.active .main-toggle {
+  transform: rotate(90deg);
+  background: #ff4444; /* Changes to red when open */
+  color: white;
+}
+
+/* SUB-BUTTONS ANIMATION */
+.menu-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(20px) scale(0);
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.menu-container.active .menu-options {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* Hover effects */
+.control-btn:hover { transform: scale(1.1); box-shadow: 0 0 20px rgba(250, 204, 21, 0.4); }
+.sub-btn:active { transform: scale(0.9); }
+
+
+
+/* SHOP MODAL SPECIFICS */
+.shop-box {
+    max-width: 500px !important;
+    padding: 30px 20px !important;
+    background: radial-gradient(circle at top, #2a2d4c 0%, #131526 100%) !important;
+}
+
+.shop-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2x2 Grid */
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.shop-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(250, 204, 21, 0.2);
+    border-radius: 15px;
+    padding: 15px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.2s ease;
+    color: white;
+}
+
+.shop-card:hover {
+    background: rgba(250, 204, 21, 0.1);
+    border-color: #facc15;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+}
+
+.shop-icon {
+    font-size: 28px;
+    color: #facc15;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.5));
+}
+
+.shop-info h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    margin: 0 0 5px 0;
+    letter-spacing: 1px;
+}
+
+.shop-info p {
+    font-size: 11px !important;
+    color: #9aa0b8 !important;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.close-shop-btn {
+    width: 100%;
+    height: 50px !important;
+    font-size: 20px !important;
+}
+
+/* Mobile Tweak */
+@media (max-width: 600px) {
+    .shop-grid { gap: 10px; }
+    .shop-info h3 { font-size: 14px; }
+    .shop-info p { font-size: 10px !important; }
+}
+
+
+/* Burst ring on the coin every time score increases */
+.score-icon-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid #facc15;
+  opacity: 0;
+  transform: scale(1);
+}
+
+.score-bump .score-icon-wrapper::before {
+  animation: ringBurst 0.5s ease-out;
+}
+
+@keyframes ringBurst {
+  0%   { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.1); }
+}
+
+
+/* Custom image icon inside the scoreboard medallion */
+.score-icon-img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4));
+  position: relative;
+  z-index: 1;
+}
+
+
+/* MODAL ÎNCĂRCARE - COMPACT & TEMATIC */
+    .loading-box {
+      max-width: 320px !important; /* Mai mic pentru mobile */
+      padding: 25px 15px !important;
+      border: 3px solid #facc15 !important; /* Aur ca restul modale-lor */
+      box-shadow: 0 0 25px rgba(250, 204, 21, 0.2) !important;
     }
-    .bubbleBtn:hover { transform: scale(1.07); filter: brightness(1.05); }
 
-    /* --- FOOTER --- */
-    footer { padding: 60px 20px; text-align: center; border-top: 1px solid var(--glass-border); background: #02050a; }
-    .footer-links { display: flex; justify-content: center; gap: 30px; margin: 25px 0; flex-wrap: wrap; }
-    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 14px; transition: 0.2s; font-weight: 500; }
-    .footer-links a:hover { color: var(--primary); }
-    .footer-pfp-img { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--primary); margin-bottom: 15px; transition: 0.3s; }
-    .discord-footer { width: 45px; filter: drop-shadow(0 0 8px var(--discord-color)); margin-top: 10px; transition: 0.3s; }
+    .loading-box h2 {
+      font-size: 22px;
+      margin-top: 0;
+      color: #facc15;
+      letter-spacing: 2px;
+    }
 
-    @media (max-width: 768px) {
-      nav { display: none; }
-      .hamburger { display: block; }
-      .card-body p { font-size: 14px; text-align: center; }
-      .card-title { font-size: 26px; }
-      .bio-card { padding: 30px 20px; }
+    .loading-box p {
+      font-size: 14px !important;
+      color: #9aa0b8;
+      margin-bottom: 0;
+    }
+
+    /* BARA DE ÎNCĂRCARE */
+    .loader-container {
+      width: 100%;
+      height: 10px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
+      margin: 20px 0;
+      overflow: hidden;
+      border: 1px solid rgba(250, 204, 21, 0.3);
+      position: relative;
+    }
+
+    .loader-bar {
+      height: 100%;
+      width: 40%; /* Lungimea segmentului care se mișcă */
+      background: linear-gradient(90deg, transparent, #facc15, transparent);
+      box-shadow: 0 0 15px #facc15;
+      position: absolute;
+      left: -40%;
+      animation: sweep 1.5s infinite linear;
+    }
+
+    @keyframes sweep {
+      0% { left: -40%; }
+      100% { left: 110%; }
+    }
+
+    /* FIX PENTRU TEXT PE MOBILE */
+    @media (max-width: 600px) {
+      .loading-box { width: 85vw; }
+      .loading-box h2 { font-size: 18px; }
     }
   </style>
 </head>
 <body>
 
-<!-- BANNED OVERLAY -->
-<div id="bannedOverlay">
-    <i class="fas fa-ban ban-icon"></i>
-    <h1 class="ban-title">ACCES INTERZIS</h1>
-    <div class="ban-details">
-        <span class="ban-info-label">Statut Cont:</span>
-        <span class="ban-info-val" style="color:#ff4757;">BANAT PERMANENT</span>
-        <span class="ban-info-label">Motiv:</span>
-        <span class="ban-info-val" id="globalBanReason">Nespecificat</span>
-        <p style="font-size:12px; color:#999; margin:0;">Adresa IP (<span id="globalBanIp">...</span>) blocată.</p>
+  <!-- ==========================================
+       MODALS (OVERLAYS)
+       ========================================== -->
+  
+  <!-- MODAL: LOGIN VIA GOOGLE -->
+  <div id="loginModal" class="modal-overlay">
+    <div class="modal-box">
+      <h2>CONECTARE</h2>
+      <p>Trebuie să te conectezi pentru a salva progresul!</p>
+<button class="custom-google-btn" onclick="signInWithGoogle()">
+  <i class="fa-brands fa-google"></i>
+  <span>LOG IN CU GOOGLE</span>
+</button>
+      <button class="cancel-btn" onclick="closeLoginModal()">Anulează</button>
     </div>
-</div>
-
-<!-- EDIT PROFILE MODAL -->
-<div id="editProfileModal" class="account-modal-overlay">
-    <div class="account-card">
-        <button id="closeEditProfile" class="close-pop">✕</button>
-        <h3 style="font-family:'Orbitron'; color:var(--primary);">EDITEAZĂ PROFIL</h3>
-        <div class="edit-profile-form">
-            <div><label class="edit-label">Data Nașterii</label><input type="date" id="editBirth" class="edit-input"></div>
-            <div><label class="edit-label">Despre Tine (Bio)</label><textarea id="editBio" class="edit-input" rows="3" placeholder="Scrie ceva despre tine..."></textarea></div>
-            <div><label class="edit-label">Link TikTok</label><input type="text" id="editTikTok" class="edit-input" placeholder="https://tiktok.com/@user"></div>
-            <button id="saveProfileBtn" class="btn-save-profile">SALVEAZĂ</button>
-        </div>
-    </div>
-</div>
-
-<!-- ACCOUNT MODAL -->
-<div id="accountModal" class="account-modal-overlay">
-    <div class="account-card">
-        <button id="closeAccountPop" class="close-pop">✕</button>
-        <img id="popUserImg" src="" class="pop-img">
-        <h3 id="popUserName" class="pop-user">Utilizator</h3>
-        <p id="popUserEmail" class="pop-mail">email@exemplu.com</p>
-        
-        <button id="openEditProfileBtn" class="btn-edit-profile"><i class="fas fa-edit"></i> Editează Profil</button>
-
-        <div class="streak-box"><i class="fas fa-fire"></i><span class="streak-txt">Daily Streak: 0</span></div>
-        <div class="coins-section">
-            <span class="coins-label">Puncte KSDA</span>
-            <div class="coins-display"><img src="https://iili.io/fhc1SKQ.png" class="coins-icon-img" alt="Coins"><span id="popUserCoins" class="coins-count">0</span></div>
-        </div>
-        <div class="pop-btns">
-            <a href="DailyTasks.html" class="btn-tasks">
-                <span class="tasks-title"><i class="fas fa-tasks"></i> Daily Tasks</span>
-                <span class="tasks-desc">Câștigă puncte</span>
-            </a>
-            <button id="popLogoutBtn" class="btn-logout-pop">Log Out</button>
-        </div>
-    </div>
-</div>
-
-<div id="siteContent">
-
-  <!-- Navigation -->
-  <div class="header-container">
-    <header>
-<a href="index.html" class="logo">
-    <img src="https://iili.io/fXvBEiB.png" alt="KSDA Logo" style="height: 40px; vertical-align: middle;">
-</a>      <nav>
-        <a href="index.html">Acasă</a>
-        <a href="index.html#services">Servicii</a>
-        <a href="despre_noi.html">Despre Noi</a>
-        <a href="help.html">Susține-ne</a>
-        <!-- NEW LOGIN BUTTON -->
-        <button id="headerLoginBtn" class="login-btn-header">
-            <img id="headerUserImg" src="" class="user-avatar-small">
-            <span id="headerLoginText">LOGIN</span>
-        </button>
-      </nav>
-      <button id="menuBtn" class="hamburger">☰</button>
-    </header>
   </div>
 
-  <!-- SIDE MENU -->
-  <aside id="sideMenu">
-    <div class="menu-header">
-<div class="logo menu-logo">
-    <img src="https://iili.io/fXvBEiB.png" alt="KSDA Logo" style="height: 50px;">
-</div>      <button id="closeMenu" class="closeBtn">✕</button>
+  <!-- MODAL: ALEGERE USERNAME -->
+  <div id="usernameModal" class="modal-overlay">
+    <div class="modal-box">
+      <h2>CREARE CONT</h2>
+      <p>Alege-ți un nume de legendă:</p>
+      <input type="text" id="usernameInput" class="input-field" placeholder="Ex: KevinBoss" maxlength="15">
+      <button class="menu-btn play" style="width: 100%; font-size: 24px; padding: 10px;" onclick="saveNewUsername()">SALVEAZĂ</button>
     </div>
-    <div class="menu-divider"></div>
-    <div class="menu-links">
-      <a href="index.html">Acasă</a>
-      <a href="index.html#services">Servicii</a>
-      <a href="despre_noi.html">Despre Noi</a>
-      <a href="help.html" class="cyan-link">Susține-ne</a>
+  </div>
+
+<!-- MODAL: LOADING (STILIZAT) -->
+  <div id="loadingModal" class="modal-overlay">
+    <div class="modal-box loading-box">
+      <h2>SE ÎNCARCĂ...</h2>
       
-      <!-- NEW BUTTON FOR MOBILE -->
-      <button id="mobileLoginBtn" class="side-menu-login-btn">
-          <i class="fas fa-sign-in-alt"></i> Autentificare
+      <!-- Containerul barei -->
+      <div class="loader-container">
+        <div class="loader-bar"></div>
+      </div>
+      
+      <p id="loadingStatus">Sincronizare cu serverul...</p>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MAIN MENU
+       ========================================== -->
+  <div id="mainMenu">
+    <!-- Fundal particule -->
+    <div class="particles-container" id="particles"></div>
+
+<div class="logo-wrapper">
+  <img class="logo-main" src="https://iili.io/CNVgL7a.png" alt="PRINDEL PE KEVINUȚĂ">
+</div>    
+    <div id="welcomeText">Salut, Jucătorule!</div>
+
+    <div class="button-container">
+      <button class="menu-btn play" onclick="handlePlayClick()">
+        <i class="fa-solid fa-play"></i>
+        <span>PLAY</span>
+      </button> <!-- Added missing </button> -->
+
+      <button id="logoutBtn" onclick="logoutGoogle()">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>LOG OUT</span>
       </button>
+    </div> <!-- Added missing </div> for button-container -->
+  </div> <!-- Added missing </div> for mainMenu -->
+  
 
+
+<!-- OVERLAY: CHARACTER SELECTION V2 (Cinematic) -->
+<div id="charSelectorModal" class="modal-overlay">
+  <div class="modal-box char-selection-v2">
+    
+    <!-- Title at the top -->
+    <div class="selection-header">
+      <h2>ALEGE-ȚI EROUL</h2>
+      <div class="selection-line"></div>
     </div>
-  </aside>
 
-  <main class="hero-section">
-    <!-- Kevin Trinity Avatar -->
-    <img src="https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/345b1fcb-5942-4eb3-831f-b6a42b23051b/21584177-ae66-438a-a2cd-27dc4461a670_removalai_preview.png?format=300w" alt="Kevin Trinity" class="main-avatar">
-
-    <div class="bio-card">
-        <h2 class="card-title">Povestea Mea</h2>
+    <!-- Main Character Area (No Box) -->
+    <div class="char-viewport">
+      <button class="nav-arrow-v2 left" onclick="changeChar(-1)"><i class="fa-solid fa-chevron-left"></i></button>
       
-      <div class="card-body">
-        <p>Încă din copilărie, am avut o pasiune pentru artă și desen. Mi-am petrecut mult timp desenând, pictând și creând lucruri noi, iar acest lucru a devenit o formă de evadare pentru mine.</p>
-        
-        <p>Am început să lucrez, să economisesc și să învăț cât mai multe despre artă. Am petrecut multe ore desenând și am avut norocul să atrag atenția oamenilor prin modul meu de a fi.</p>
-        
-        <p>Ceea ce mă face diferit de alți artiști este faptul că desenez cu sufletul și îmi exprim propriile sentimente și trăiri în fiecare operă.</p>
-        
-        <p>Am avut multe obstacole de depășit, dar am învățat să iau lucrurile pas cu pas și să îmi păstrez optimismul și pasiunea pentru artă.</p>
-        
-        <p>Astăzi, indiferent de orice, voi rămâne un om modest, ce îmi dedic întreaga viață artei și familiei mele.</p>
-        
-        <p>Lucrând de acasă, îmi pot petrece timpul alături de copiii mei și îmi pot transpune sentimentele și trăirile în creațiile mele, creând astfel lucrări cu adevărat emoționante și inspiratoare.</p>
+      <div class="char-stage">
+        <!-- The character image (Floating freely) -->
+        <div id="charHeroImg"></div>
+        <!-- Subtle shadow on the "ground" -->
+        <div class="char-shadow"></div>
       </div>
-    </div>
-  </main>
 
-  <section id="services" class="container">
-    <h2 class="section-title">Ce Oferim</h2>
-    <div class="features-grid">
-      <div class="feature-card">
-        <img src="https://iili.io/f0l7wml.md.png" alt="Community" class="feature-img">
-        <h3>Comunitate Unită</h3>
-        <p>O comunitate vibrantă de artiști și creatori. Ne bazăm pe ajutor reciproc pentru a crește împreună.</p>
-        <a href="comunitate.html" class="bubbleBtn">Detalii</a>
-      </div>
-      <div class="feature-card">
-        <img src="https://iili.io/f0lYO8J.md.png" alt="Art" class="feature-img">
-        <h3>Artă și Portrete</h3>
-        <p>Realizăm portrete digitale personalizate care surprind emoția și detaliile fiecărei persoane.</p>
-        <a href="kevin.html" class="bubbleBtn">Prețuri</a>
-      </div>
-      <div class="feature-card">
-        <img src="https://iili.io/f0lk194.md.png" alt="Live" class="feature-img">
-        <h3>Entertainment Live</h3>
-        <p>Amuzament zilnic în live pe social media unde discutăm și ne simțim bine împreună.</p>
-        <a href="social.html" class="bubbleBtn">Urmărește</a>
-      </div>
+      <button class="nav-arrow-v2 right" onclick="changeChar(1)"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
-  </section>
 
-  <footer>
-    <a href="index.html" class="logo" style="font-size: 28px; display: block; margin-bottom: 20px;">KSDA</a>
-    <div class="footer-links">
-      <a href="index.html">Acasă</a>
-      <a href="despre_noi.html">Echipă</a>
-      <a href="contact.html">Contact</a>
-      <a href="help.html">Susține-ne</a>
+    <!-- Description Area -->
+    <div class="char-details">
+      <h3 id="charHeroName">KEVINUȚĂ</h3>
+      <p id="charHeroDesc">Un puști plin de energie care nu poate sta locului. Viteza este aliatul lui principal!</p>
     </div>
-    <div class="made-by-wrapper">
-        <p style="color: var(--text-muted); font-size: 15px;">Website made by Lost Soul/Nica emmanuel</p>
-        <a href="https://www.tiktok.com/@lost_soul_zzz" target="_blank">
-          <img src="https://iili.io/f1ddIfe.png" alt="Lost Soul Profile" class="footer-pfp-img">
-        </a>
-        <br>
-        <a href="https://discord.com/users/1063511180376817755" target="_blank">
-          <img src="https://logo.svgcdn.com/logos/discord.svg" alt="Discord" class="discord-footer">
-        </a>
-    </div>
-    <p style="color: #445; font-size: 11px; margin-top: 30px;">&copy; 2024 KSDAPromovari. Toate drepturile rezervate.</p>
-  </footer>
 
+    <button class="menu-btn play select-hero-btn" onclick="confirmCharacter()">
+      <span>SELECTEAZĂ</span>
+    </button>
+  </div>
 </div>
 
+<!-- Inside <div id="gameArea"> -->
+<div id="gameArea">
+  <div id="scoreBoard" class="electric-container">
+<div class="score-icon-wrapper">
+  <img src="https://iili.io/COrCopj.png" alt="score icon" class="score-icon-img">
+</div>
+
+    <span id="scoreText">0</span>
+  </div>
+
+<div class="menu-container" id="menuWrapper">
+  <!-- The sub-buttons (Hidden by default) -->
+  <div class="menu-options" id="menuOptions">
+    <button class="control-btn sub-btn" title="Inventory"><i class="fa-solid fa-briefcase"></i></button>
+    <button class="control-btn sub-btn" title="Achievements"><i class="fa-solid fa-trophy"></i></button>
+<button class="control-btn sub-btn" style="--i:3" title="Shop" onclick="openShop()">
+  <i class="fa-solid fa-cart-shopping"></i>
+</button>
+    <button class="control-btn sub-btn" title="Fullscreen" onclick="toggleFullScreen()"><i id="fsIcon" class="fa-solid fa-expand"></i></button>
+    <button class="control-btn sub-btn" title="Pause" onclick="togglePause()"><i class="fa-solid fa-pause"></i></button>
+  </div>
+
+  <!-- The Main Toggle Button -->
+  <button class="control-btn main-toggle" onclick="toggleMenu()" id="menuToggleBtn">
+    <i class="fa-solid fa-bars"></i>
+  </button>
+</div>
+
+  <div id="kevin"></div>
+  <!-- OLD BACK BUTTON REMOVED -->
+</div>
+
+<div id="pauseModal" class="modal-overlay">
+  <div class="modal-box pause-modal-box">
+    <h2>PAUZĂ</h2> <!-- Shorter title for better fit -->
+    <p>Jocul este întrerupt.</p>
+
+    <div class="pause-menu-list">
+      <button class="menu-btn play pause-item" onclick="resumeGame()">
+        <i class="fa-solid fa-play"></i> <span>REIA JOCUL</span>
+      </button>
+      
+      <button class="menu-btn play pause-item">
+        <i class="fa-solid fa-gear"></i> <span>SETĂRI</span>
+      </button>
+
+      <button class="menu-btn play pause-item">
+        <i class="fa-solid fa-shirt"></i> <span>DULAP</span>
+      </button>
+
+      <!-- Fixed Red Button -->
+      <button class="menu-btn red-exit pause-item" onclick="leaveGame()">
+        <i class="fa-solid fa-house"></i> <span>MENIU</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: MAGAZIN -->
+<div id="shopModal" class="modal-overlay">
+  <div class="modal-box shop-box">
+    <div class="shop-header">
+      <h2><i class="fa-solid fa-cart-shopping"></i> MAGAZIN</h2>
+      <div class="selection-line"></div>
+    </div>
+
+    <div class="shop-grid">
+      <!-- EROI -->
+      <button class="shop-card">
+        <i class="fa-solid fa-mask shop-icon"></i>
+        <div class="shop-info">
+          <h3>EROI</h3>
+          <p>Deblochează legende noi.</p>
+        </div>
+      </button>
+
+      <!-- UPGRADES -->
+      <button class="shop-card">
+        <i class="fa-solid fa-bolt shop-icon"></i>
+        <div class="shop-info">
+          <h3>UPGRADE-URI</h3>
+          <p>Boost la click-uri și multiplicatori.</p>
+        </div>
+      </button>
+
+      <!-- COSMETICE -->
+      <button class="shop-card">
+        <i class="fa-solid fa-shirt shop-icon"></i>
+        <div class="shop-info">
+          <h3>COSMETICE</h3>
+          <p>Pălării rare și efecte vizuale.</p>
+        </div>
+      </button>
+
+      <!-- PETS -->
+      <button class="shop-card">
+        <i class="fa-solid fa-egg shop-icon"></i>
+        <div class="shop-info">
+          <h3>PETS & OUĂ</h3>
+          <p>Însoțitori care strâng puncte pentru tine.</p>
+        </div>
+      </button>
+    </div>
+
+    <button class="menu-btn play close-shop-btn" onclick="closeShop()">
+      <span>ÎNAPOI</span>
+    </button>
+  </div>
+</div>
+  <!-- ==========================================
+       JAVASCRIPT
+       ========================================== -->
   <script>
-    const menuBtn = document.getElementById("menuBtn");
-    const closeMenu = document.getElementById("closeMenu");
-    const sideMenu = document.getElementById("sideMenu");
+const particlesContainer = document.getElementById('particles');
+const particleCount = 40;
 
-    if (menuBtn && closeMenu && sideMenu) {
-        menuBtn.addEventListener("click", () => sideMenu.classList.add("open"));
-        closeMenu.addEventListener("click", () => sideMenu.classList.remove("open"));
-    }
-    
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if(target) target.scrollIntoView({ behavior: 'smooth' });
-        });
-    });
-  </script>
+for (let i = 0; i < particleCount; i++) {
+  let p = document.createElement('div');
+  p.className = 'particle';
+  
+  // Randomize size
+  let size = Math.random() * 4 + 2;
+  p.style.width = size + 'px';
+  p.style.height = size + 'px';
+  
+  // Randomize horizontal position
+  p.style.left = Math.random() * 100 + 'vw';
+  
+  // Speed and Delay
+  let duration = Math.random() * 5 + 5; // 5 to 10 seconds
+  let delay = Math.random() * 5;
+  
+  p.style.animationDuration = duration + 's';
+  p.style.animationDelay = '-' + delay + 's'; // The "-" makes them start "mid-way" so they aren't stuck at the bottom/top on load
+  
+  particlesContainer.appendChild(p);
+}
 
-  <!-- FIREBASE LOGIC -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, onSnapshot, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
+    // =====================================
+    // FIREBASE INITIALIZATION
+    // =====================================
     const firebaseConfig = {
-      apiKey: "AIzaSyDoH80kffNrzFAcyRqsTVdifs-whUhwH9A",
-      authDomain: "ksda-7546f.firebaseapp.com",
-      projectId: "ksda-7546f",
-      storageBucket: "ksda-7546f.firebasestorage.app",
-      messagingSenderId: "306437513808",
-      appId: "1:306437513808:web:28479810e3fdf71b32e755"
+      apiKey: "AIzaSyBihv3wYvDUo6DejSLec9U0DfOiR6g7VuQ",
+      authDomain: "kevin-game-f9cf8.firebaseapp.com",
+      projectId: "kevin-game-f9cf8",
+      storageBucket: "kevin-game-f9cf8.firebasestorage.app",
+      messagingSenderId: "867549783547",
+      appId: "1:867549783547:web:b12b915b2ed3129907175e"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const provider = new GoogleAuthProvider();
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-    const siteContent = document.getElementById('siteContent');
-    const bannedOverlay = document.getElementById('bannedOverlay');
-    const headerLoginBtn = document.getElementById('headerLoginBtn');
-    const mobileLoginBtn = document.getElementById('mobileLoginBtn');
-    const accountModal = document.getElementById('accountModal');
-    const closeAccountPop = document.getElementById('closeAccountPop');
+    // =====================================
+    // VARIABILE GLOBALE
+    // =====================================
+    let currentUID = null;
+    let currentUsername = "";
+    let score = 0;
+    let lastSavedScore = 0;
+    
+    let comboCount = 0;
+    let comboTimer = null;
+    let moveKevinInterval = null;
+    let tiredTimeout = null;
+    let saveScoreInterval = null;
+    let isKevinTired = false;
+    let canClickKevin = true; 
 
-    const editProfileModal = document.getElementById('editProfileModal');
-    const openEditProfileBtn = document.getElementById('openEditProfileBtn');
-    const closeEditProfile = document.getElementById('closeEditProfile');
-    const saveProfileBtn = document.getElementById('saveProfileBtn');
-    const editBirth = document.getElementById('editBirth');
-    const editBio = document.getElementById('editBio');
-    const editTikTok = document.getElementById('editTikTok');
+let currentPlayImg = "";
+let currentTiredImg = "";
 
-    let userIP = null;
-    fetch('https://api.ipify.org?format=json').then(r => r.json()).then(d => {
-        userIP = d.ip;
-        checkBan(d.ip);
+    // =====================================
+    // AUTHENTICATION & UI FLOW
+    // =====================================
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        currentUID = user.uid;
+        await checkUserInFirestore(currentUID);
+      } else {
+        currentUID = null;
+        currentUsername = "";
+        showLoggedOutUI();
+      }
     });
 
-    async function checkBan(ip) {
-        const snap = await getDoc(doc(db, "banned_ips", ip));
-        if (snap.exists()) {
-            siteContent.style.display = 'none';
-            bannedOverlay.style.display = 'flex';
-            document.getElementById('globalBanReason').innerText = snap.data().reason || "Nespecificat";
-            document.getElementById('globalBanIp').innerText = ip;
+    function handlePlayClick() {
+      if (currentUID) {
+        startGameUI();
+      } else {
+        document.getElementById('loginModal').style.display = 'flex';
+      }
+    }
+
+    function closeLoginModal() {
+      document.getElementById('loginModal').style.display = 'none';
+    }
+
+    function signInWithGoogle() {
+      document.getElementById('loginModal').style.display = 'none';
+      document.getElementById('loadingModal').style.display = 'flex';
+      auth.signInWithPopup(googleProvider).catch((error) => {
+        console.error("Eroare la logare:", error);
+        alert("Eroare la logare Google!");
+        document.getElementById('loadingModal').style.display = 'none';
+      });
+    }
+
+    function logoutGoogle() {
+      auth.signOut().then(() => {
+        showLoggedOutUI();
+      });
+    }
+
+async function checkUserInFirestore(uid) {
+    const loadingModal = document.getElementById('loadingModal');
+    const statusText = document.getElementById('loadingStatus');
+
+    loadingModal.style.display = 'flex';
+    if (statusText) statusText.innerText = "Sincronizare cu serverul...";
+
+    // --- LOGICA PENTRU SERVER ADORMIT ---
+    // Dacă după 8 secunde modalul e tot deschis, schimbăm textul
+    let wakeUpTimer = setTimeout(() => {
+        if (loadingModal.style.display === 'flex' && statusText) {
+            statusText.innerText = "Serverul se trezește... te rugăm să aștepți.";
+            statusText.style.color = "#facc15"; // Îl facem galben să iasă în evidență
         }
+    }, 8000);
+
+    // 1. Wait until the user is actually ready
+    let user = firebase.auth().currentUser;
+    if (!user) {
+        console.log("Waiting for user session...");
+        setTimeout(() => checkUserInFirestore(uid), 1000);
+        return;
     }
 
-    async function handleLogin() {
-        try {
-            const result = await signInWithPopup(auth, provider);
-            const userRef = doc(db, "accounts", result.user.uid);
-            const snap = await getDoc(userRef);
-            if(!snap.exists()) {
-                await setDoc(userRef, { uid: result.user.uid, username: result.user.displayName, email: result.user.email, image: result.user.photoURL, coins: 250, streak: 0, ip: userIP || "unknown", joinedAt: new Date() });
-            }
-            resetIdleTimer();
-        } catch(e) { console.error(e); }
-    }
+    try {
+        // 2. Get the Identity Token
+        const idToken = await user.getIdToken(true);
+        console.log("Token obtained! sending to cloud...");
 
-    // --- SMART ONLINE TRACKER ---
-    let idleTimer;
-    let lastStatusUpdate = 0;
-    const UPDATE_INTERVAL = 3 * 60 * 1000;
-    const IDLE_TIMEOUT = 5 * 60 * 1000;
+        // 3. Talk to Render
+        const response = await fetch('https://kevin-backend-qodc.onrender.com/get-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken: idToken })
+        });
 
-    async function setStatusOnline() {
-        if (!auth.currentUser) return;
-        const now = Date.now();
-        if (now - lastStatusUpdate > UPDATE_INTERVAL) {
-            lastStatusUpdate = now;
-            try {
-                await updateDoc(doc(db, "accounts", auth.currentUser.uid), { isOnline: true, lastActive: serverTimestamp() });
-            } catch(e) {}
-        }
-    }
-    async function setStatusOffline() {
-        if (!auth.currentUser) return;
-        try {
-            await updateDoc(doc(db, "accounts", auth.currentUser.uid), { isOnline: false, lastActive: serverTimestamp() });
-        } catch(e) {}
-    }
-    function resetIdleTimer() {
-        clearTimeout(idleTimer);
-        setStatusOnline();
-        idleTimer = setTimeout(setStatusOffline, IDLE_TIMEOUT);
-    }
-    window.onload = resetIdleTimer;
-    document.onmousemove = resetIdleTimer;
-    document.onkeypress = resetIdleTimer;
-    document.ontouchstart = resetIdleTimer;
-    document.onclick = resetIdleTimer;
-    document.onscroll = resetIdleTimer;
+        // Oprim timer-ul de "wake up" pentru că serverul a răspuns
+        clearTimeout(wakeUpTimer);
 
-    headerLoginBtn.onclick = () => !auth.currentUser ? handleLogin() : accountModal.classList.add('active');
-    mobileLoginBtn.onclick = () => !auth.currentUser ? handleLogin() : accountModal.classList.add('active');
-    closeAccountPop.onclick = () => accountModal.classList.remove('active');
-    document.getElementById('popLogoutBtn').onclick = () => signOut(auth).then(() => location.reload());
-
-    openEditProfileBtn.onclick = async () => {
-        accountModal.classList.remove('active');
-        editProfileModal.classList.add('active');
-        if(auth.currentUser) {
-            const snap = await getDoc(doc(db, "accounts", auth.currentUser.uid));
-            if(snap.exists()) {
-                const data = snap.data();
-                editBirth.value = data.birthDate || "";
-                editBio.value = data.bio || "";
-                editTikTok.value = data.tiktokLink || "";
-            }
-        }
-    };
-    closeEditProfile.onclick = () => { editProfileModal.classList.remove('active'); accountModal.classList.add('active'); };
-    saveProfileBtn.onclick = async () => {
-        if(!auth.currentUser) return;
-        try {
-            await updateDoc(doc(db, "accounts", auth.currentUser.uid), {
-                birthDate: editBirth.value,
-                bio: editBio.value.trim(),
-                tiktokLink: editTikTok.value.trim()
-            });
-            alert("Profil salvat!");
-            editProfileModal.classList.remove('active');
-            accountModal.classList.add('active');
-        } catch(e) { alert("Eroare: " + e.message); }
-    };
-
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            document.getElementById('headerLoginText').innerText = "ACCOUNT";
-            document.getElementById('headerUserImg').src = user.photoURL;
-            document.getElementById('headerUserImg').style.display = "block";
-            mobileLoginBtn.innerHTML = '<i class="fas fa-user-circle"></i> Cont';
+        if (response.status === 200) {
+            const data = await response.json();
+            currentUsername = data.username;
+            score = data.score || 0;
+            lastSavedScore = score;
             
-            onSnapshot(doc(db, "accounts", user.uid), (snap) => {
-                if (snap.exists()) {
-                    const data = snap.data();
-                    document.getElementById('popUserImg').src = data.image;
-                    document.getElementById('popUserName').innerText = data.username;
-                    document.getElementById('popUserEmail').innerText = data.email;
-                    document.getElementById('popUserCoins').innerText = data.coins || 0;
-                    document.querySelector('.streak-txt').innerText = `Daily Streak: ${data.streak || 0}`;
-                }
-            });
-            resetIdleTimer();
-        } else {
-            document.getElementById('headerLoginText').innerText = "LOGIN";
-            document.getElementById('headerUserImg').style.display = "none";
-            mobileLoginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Autentificare';
-        }
-    });
-  </script>
+            if (data.selectedChar) {
+                const charData = characterList.find(c => c.id === data.selectedChar) || characterList[0];
+                currentPlayImg = `url('${charData.playImg}')`;
+                currentTiredImg = `url('${charData.tiredImg}')`;
+                window.currentPlayingCharId = data.selectedChar;
+                document.getElementById('kevin').style.backgroundImage = currentPlayImg;
+            }
 
+            loadingModal.style.display = 'none';
+            showLoggedInUI();
+        } else if (response.status === 404) {
+            loadingModal.style.display = 'none';
+            document.getElementById('usernameModal').style.display = 'flex';
+        } else {
+            const errorMsg = await response.text();
+            console.error("Cloud Error:", errorMsg);
+            alert("Eroare de autorizare (401). Încearcă un Refresh!");
+            loadingModal.style.display = 'none';
+        }
+    } catch (e) {
+        clearTimeout(wakeUpTimer);
+        console.error("Connection failed:", e);
+        loadingModal.style.display = 'none';
+        alert("Serverul este ocupat. Te rugăm să revii în 1 minut.");
+    }
+}
+
+async function saveNewUsername() {
+  const input = document.getElementById('usernameInput').value.trim();
+  if (input.length < 3) {
+    alert("Numele trebuie să aibă minim 3 caractere!");
+    return;
+  }
+
+  document.getElementById('usernameModal').style.display = 'none';
+  document.getElementById('loadingModal').style.display = 'flex';
+
+  try {
+    // Luăm pașaportul de la Google
+    const idToken = await firebase.auth().currentUser.getIdToken(true);
+    
+    // Trimitem cererea la Backend-ul nostru (nu la Firebase direct)
+    const response = await fetch('https://kevin-backend-qodc.onrender.com/create-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken: idToken, username: input })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      currentUsername = data.username;
+      score = 0;
+      lastSavedScore = 0;
+      document.getElementById('loadingModal').style.display = 'none';
+      showLoggedInUI();
+      // Pornim jocul
+      startGameUI();
+    } else {
+      alert("Eroare la crearea contului pe server.");
+      document.getElementById('usernameModal').style.display = 'flex';
+    }
+  } catch (e) {
+    console.error("Eroare fatală:", e);
+  }
+}
+
+    function showLoggedInUI() {
+      document.getElementById('loginModal').style.display = 'none';
+      const welcomeText = document.getElementById('welcomeText');
+      const logoutBtn = document.getElementById('logoutBtn');
+      
+      welcomeText.innerText = `SALUT, ${currentUsername}!`;
+      welcomeText.style.display = 'block';
+      logoutBtn.style.display = 'block';
+    }
+
+    function showLoggedOutUI() {
+      document.getElementById('welcomeText').style.display = 'none';
+      document.getElementById('logoutBtn').style.display = 'none';
+    }
+
+function startGameUI() {
+  document.getElementById('mainMenu').style.display = 'none';
+  document.getElementById('gameArea').style.display = 'block';
+
+  // --- THE BUG FIXES ---
+  isPaused = false; 
+  const kevin = document.getElementById('kevin');
+  kevin.style.pointerEvents = 'auto'; 
+  // ---------------------
+
+  comboCount = 0;
+  updateScoreUI();
+  
+  if (!kevin.style.backgroundImage) {
+      kevin.style.backgroundImage = currentPlayImg;
+  }
+  
+  kevin.style.width = "120px";
+  kevin.style.height = "120px";
+  
+  isKevinTired = false;
+  moveKevinAway(); 
+  startKevinMovement();
+  startTiredCycle();
+  
+  if (saveScoreInterval) clearInterval(saveScoreInterval);
+  saveScoreInterval = setInterval(syncScoreToFirestore, 5000);
+
+  // --- UPDATED MISS PENALTY (With UI Protection) ---
+  document.getElementById('gameArea').onclick = (e) => {
+    if (isPaused) return;
+
+    // Check if the click was actually on the UI Menu or any Button
+    // If it was, we "return" (do nothing) so you don't lose score
+    if (e.target.closest('#menuWrapper') || e.target.closest('.control-btn')) {
+        return; 
+    }
+
+    // Otherwise, it's a real miss!
+    comboCount = 0; 
+    if (score > 0) score--; 
+
+    updateScoreUI();
+    showComboText(e.clientX, e.clientY, 0, true); 
+  };
+}
+
+async function syncScoreToFirestore() {
+  if (currentUID && score !== lastSavedScore) {
+    const scoreToTry = score;
+
+    try {
+      // 1. Get the Identity Token (The Passport)
+      // This proves the user is actually logged in through your app
+      const idToken = await firebase.auth().currentUser.getIdToken(true);
+
+      const response = await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          idToken: idToken, // We send the token, not the UID
+          score: scoreToTry 
+        }),
+      });
+
+      if (response.ok) {
+        lastSavedScore = scoreToTry;
+        console.log("✅ Verified & Saved.");
+      } else if (response.status === 403) {
+        // 🚨 BACKEND CAUGHT A CHEATER
+        console.warn("🚨 Cheat detected! Rolling back...");
+        score = lastSavedScore; 
+        updateScoreUI();
+        alert("⚠️ Modificare neautorizată! Scorul a fost resetat.");
+      } else if (response.status === 401) {
+        console.error("🚨 Sesiune expirată. Te rugăm să te re-loghezi.");
+      }
+    } catch (e) {
+      console.error("Connection error:", e);
+    }
+  }
+}
+
+    async function returnToMenu() {
+      clearInterval(moveKevinInterval);
+      clearTimeout(tiredTimeout);
+      clearInterval(saveScoreInterval);
+
+      await syncScoreToFirestore();
+
+      document.getElementById('gameArea').style.display = 'none';
+      document.getElementById('mainMenu').style.display = 'flex';
+    }
+
+function updateScoreUI() {
+  const sb = document.getElementById('scoreBoard');
+  const st = document.getElementById('scoreText');
+  
+  st.innerText = score;
+
+  // Add the bump animation class
+  sb.classList.remove('score-bump');
+  void sb.offsetWidth; // This is a "hack" to reset the animation
+  sb.classList.add('score-bump');
+}
+// Change the movement function to clear the interval properly
+function startKevinMovement() {
+    if (moveKevinInterval) clearInterval(moveKevinInterval);
+    moveKevinInterval = setInterval(() => {
+        moveKevinAway();
+    }, 1800); // Slightly slower movement for better playability
+}
+
+
+
+    function moveKevinAway() {
+      if (isKevinTired) return;
+
+      const kevin = document.getElementById('kevin');
+      const gameArea = document.getElementById('gameArea');
+
+      const maxX = gameArea.clientWidth - kevin.offsetWidth;
+      const maxY = gameArea.clientHeight - kevin.offsetHeight;
+      
+      let newX = Math.random() * maxX;
+      let newY = Math.random() * maxY;
+
+      if(newY < 80 && newX < 200) newY += 80;
+
+      kevin.style.left = `${newX}px`;
+      kevin.style.top = `${newY}px`;
+    }
+
+function startTiredCycle() {
+    clearTimeout(tiredTimeout);
+    tiredTimeout = setTimeout(() => {
+        const kevin = document.getElementById('kevin');
+        isKevinTired = true;
+        kevin.style.backgroundImage = currentTiredImg; // POZA DE OBOSEALĂ DINAMICĂ
+        
+        setTimeout(() => {
+            isKevinTired = false;
+            kevin.style.backgroundImage = currentPlayImg; // POZA NORMALĂ DINAMICĂ
+            moveKevinAway(); 
+            startTiredCycle();
+        }, 5000);
+    }, 60000);
+}
+document.getElementById('kevin').addEventListener('click', (e) => {
+      e.stopPropagation(); 
+
+      // --- THE ANTI-AIMBOT SHIELD ---
+      // This ignores any click that was created by a script or console code
+      if (!e.isTrusted) {
+          console.warn("🚨 Synthetic click detected and blocked!");
+          return; 
+      }
+      // ------------------------------
+
+      if (!canClickKevin) return;
+      canClickKevin = false;
+
+      score++;
+      updateScoreUI();
+
+      comboCount++;
+      showComboText(e.clientX, e.clientY, comboCount);
+
+      clearTimeout(comboTimer);
+      comboTimer = setTimeout(() => { comboCount = 0; }, 2000);
+
+      if (!isKevinTired) {
+        moveKevinAway();
+        startKevinMovement(); 
+      }
+
+      setTimeout(() => { canClickKevin = true; }, 100); 
+    });
+
+const comboMilestones = {
+    5:   { word: "BINE TICĂ!", tier: "tier-verde" },
+    10:  { word: "MARE BOSS!", tier: "tier-verde" },
+    15:  { word: "REFLEXE!", tier: "tier-albastru" },
+    25:  { word: "DĂ-I TEROARE!", tier: "tier-albastru" },
+    40:  { word: "TE-AI ÎNCĂLZIT!", tier: "tier-cyan" },
+    60:  { word: "MARE VALOARE!", tier: "tier-cyan" },
+    80:  { word: "KEVIN DISPERĂ!", tier: "tier-galben" },
+    100: { word: "MÂNĂ DE AUR!", tier: "tier-galben" },
+    125: { word: "RUPI MOUSE-UL!", tier: "tier-portocaliu" },
+    150: { word: "VITEZĂ MAXIMĂ!", tier: "tier-portocaliu" },
+    175: { word: "DEMON PE CLICK!", tier: "tier-rosu" },
+    200: { word: "EȘTI TEROARE!", tier: "tier-rosu" },
+    250: { word: "KEVINUȚĂ PLÂNGE!", tier: "tier-lava" },
+    300: { word: "MODUL AVION!", tier: "tier-lava" }, // Slang for untouchable speed
+    400: { word: "ZEU PE SATE!", tier: "tier-celestial" },
+    500: { word: "VORBEȘTI CU ZEII!", tier: "tier-celestial" },
+    750: { word: "HACKER?!", tier: "tier-rainbow" },
+    1000: { word: "BANNED FOR SKILL!", tier: "tier-rainbow" }
+};
+
+function showComboText(x, y, count, isMiss = false) {
+    const el = document.createElement("div");
+    el.className = "combo-text animate-combo-v2";
+    
+    // 1. BOUNDARY CHECKING
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    
+    let safeX = x;
+    let safeY = y;
+
+    const sideMargin = 80; 
+    if (safeX < sideMargin) safeX = sideMargin;
+    if (safeX > screenWidth - sideMargin) safeX = screenWidth - sideMargin;
+
+    const topMargin = 200; 
+    const bottomMargin = 50;
+    if (safeY < topMargin) safeY = topMargin;
+    if (safeY > screenHeight - bottomMargin) safeY = screenHeight - bottomMargin;
+
+    // 2. MISS VS HIT LOGIC
+    if (isMiss) {
+        el.classList.add("tier-rosu"); // Force Red
+        el.innerHTML = `
+            <span class="combo-rank-word">MISS!</span>
+            <span class="combo-count">-1</span>
+        `;
+    } else {
+        // ORIGINAL TIER LOGIC
+        let currentTier = "tier-verde";
+        if (count >= 750) currentTier = "tier-rainbow";
+        else if (count >= 400) currentTier = "tier-celestial";
+        else if (count >= 250) currentTier = "tier-lava";
+        else if (count >= 175) currentTier = "tier-rosu";
+        else if (count >= 125) currentTier = "tier-portocaliu";
+        else if (count >= 80) currentTier = "tier-galben";
+        else if (count >= 40) currentTier = "tier-cyan";
+        else if (count >= 15) currentTier = "tier-albastru";
+
+        const milestone = comboMilestones[count];
+        let rankWord = milestone ? milestone.word : "";
+        if (milestone) currentTier = milestone.tier;
+
+        el.classList.add(currentTier);
+
+        if (rankWord) {
+            el.innerHTML = `
+                <span class="combo-rank-word">${rankWord}</span>
+                <span class="combo-count">x${count}</span>
+            `;
+        } else {
+            el.innerHTML = `<span class="combo-count">x${count}</span>`;
+        }
+    }
+
+    // 4. APPLY SAFE POSITION
+    el.style.left = `${safeX}px`;
+    el.style.top = `${safeY}px`;
+    
+    document.body.appendChild(el);
+    setTimeout(() => { el.remove(); }, 900);
+}
+
+
+let isPaused = false;
+
+function togglePause() {
+  if (isPaused) return; // Prevent double pausing
+  
+  isPaused = true;
+  // Stop Kevin
+  clearInterval(moveKevinInterval);
+  clearTimeout(tiredTimeout);
+  
+  // Show Modal
+  document.getElementById('pauseModal').style.display = 'flex';
+  
+  // Disable clicking the character in the background
+  document.getElementById('kevin').style.pointerEvents = 'none';
+}
+
+function resumeGame() {
+  isPaused = false;
+  // Hide Modal
+  document.getElementById('pauseModal').style.display = 'none';
+  
+  // Re-enable character and restart movement
+  document.getElementById('kevin').style.pointerEvents = 'auto';
+  startKevinMovement();
+  startTiredCycle();
+}
+
+async function leaveGame() {
+  // Hide modal first
+  document.getElementById('pauseModal').style.display = 'none';
+  isPaused = false;
+  
+  // Use your existing function to clean up and save score
+  await returnToMenu(); 
+}
+
+
+const characterList = [
+    { 
+        id: "kevin", 
+        name: "KEVINUȚĂ", 
+        desc: "Un puști plin de energie din cartier. Viteza este arma lui secretă!",
+        displayImg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w",
+        playImg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w",
+        tiredImg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/0b5ac0f4-618a-4346-9684-8c1f3c0a5fcb/20716c49-4365-417d-97e9-fc8601ae5403_removalai_preview.png?format=500w"
+    },
+    { 
+        id: "emmanuel", 
+        name: "EMMANUEL", 
+        desc: "Are 18 ani și e foarte politicos... până când îl enervezi. Atunci mai bine fugi!",
+        displayImg: "https://iili.io/CNUBdIj.png", 
+        playImg: "https://iili.io/CNURdSR.png",
+        tiredImg: "https://iili.io/CNURciu.png"
+    },
+    { 
+        id: "antonio", 
+        name: "ANTONIO", 
+        desc: "Vorbește doar în engleză. Sper că ai Google Translate la îndemână, altfel ești pierdut!",
+        displayImg: "https://iili.io/CNUnzsR.png",
+        playImg: "https://iili.io/CNURvUv.png",
+        tiredImg: "https://iili.io/CNU5Fgj.png"
+    }
+];
+
+function changeChar(dir) {
+    charIndex += dir;
+    if (charIndex < 0) charIndex = characterList.length - 1;
+    if (charIndex >= characterList.length) charIndex = 0;
+
+    const char = characterList[charIndex];
+    
+    // CORECCȚIE: Folosim displayImg pentru că așa e numit în listă
+    const heroImgEl = document.getElementById('charHeroImg');
+    heroImgEl.style.backgroundImage = `url('${char.displayImg}')`;
+    
+    document.getElementById('charHeroName').innerText = char.name;
+    document.getElementById('charHeroDesc').innerText = char.desc;
+}
+
+async function confirmCharacter() {
+    const selected = characterList[charIndex];
+    
+    document.getElementById('loadingModal').style.display = 'flex';
+    
+    try {
+        // 1. Get the Passport (Token)
+        const idToken = await firebase.auth().currentUser.getIdToken(true);
+        
+        // 2. Ask the Backend to change the skin
+        const response = await fetch('https://kevin-backend-qodc.onrender.com/set-character', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken: idToken, charId: selected.id })
+        });
+
+        if (response.ok) {
+            // Success! Update the visuals
+            currentPlayImg = `url('${selected.playImg}')`;
+            currentTiredImg = `url('${selected.tiredImg}')`;
+            window.currentPlayingCharId = selected.id;
+
+            document.getElementById('kevin').style.backgroundImage = currentPlayImg;
+            document.getElementById('charSelectorModal').style.display = 'none';
+            document.getElementById('loadingModal').style.display = 'none';
+            
+            // Start the game
+            startGameUI(); 
+        } else if (response.status === 429) {
+            // Caught by the Rate Limiter (Cooldown)
+            alert("⚠️ Prea multe schimbări! Așteaptă 10 secunde.");
+            document.getElementById('loadingModal').style.display = 'none';
+        } else {
+            alert("Eroare la salvarea caracterului!");
+            document.getElementById('loadingModal').style.display = 'none';
+        }
+    } catch (e) {
+        console.error("Connection Error:", e);
+        document.getElementById('loadingModal').style.display = 'none';
+    }
+}
+// 4. UPDATE handlePlayClick (The brain of the logic)
+function handlePlayClick() {
+    if (!currentUID) {
+        // Dacă nu e logat, îi cerem să se logheze
+        document.getElementById('loginModal').style.display = 'flex';
+        return;
+    }
+
+    // ARATĂ MEREU MENIUL DE CARACTERE (Indiferent dacă a mai jucat)
+    charIndex = 0;
+    document.getElementById('charSelectorModal').style.display = 'flex';
+    changeChar(0); // Încarcă imaginea primului caracter (Kevin)
+}
+
+
+let charIndex = 0; // Adaugă această linie dacă nu există
+
+
+// 📢 BIBLIOTECA DE REPLICI (Trash Talk)
+const characterDialogues = {
+  kevin: [
+    "Asta e tot ce poți? 😂",
+    "Click mai repede, bunicule!",
+    "Ce-i asta, un gameplay sau un eșec live?",
+    "💀 Rușine scorului tău.",
+    "Mă doare RAM-ul când te văd jucând.",
+    "Bro, un hamster beat te întrece.",
+    "Kevinuta.exe: *pls kill me*",
+    "Ai lag? Sau ești doar trist?",
+    "De ce încă joci? 😭",
+    "🥴 Joacă Fortnite, poate acolo ai noroc.",
+    "Sunt prea rapid pentru degetele tale de unt!",
+    "Zici că dai click cu mămăligă...",
+    "Nici bunica nu rata așa mult!",
+    "Ești praf, lasă-te de meserie!"
+  ],
+  antonio: [
+    "Git gud, scrub! 🎮",
+    "Is that your best? Pathetic.",
+    "My grandma clicks faster than you.",
+    "Lags? No, just lack of skill.",
+    "Ez game, ez life. You're too slow!",
+    "Noob alert! 🚨",
+    "Are you even trying to catch me?",
+    "I could do this in my sleep.",
+    "Rookie numbers! Need more speed.",
+    "Go back to the tutorial, kid.",
+    "Stop missing, start hitting!",
+    "You're like a turtle with a broken leg.",
+    "Skill issue detected! 📉",
+    "What's the matter? Too fast for you?",
+    "Keep dreaming about catching me.",
+    "LOL, my cat has better reflexes.",
+    "You click like a bot, but a bad one.",
+    "Error 404: Player skill not found.",
+    "I'm bored... can you move faster?",
+    "Sit down, be humble! 🤫"
+  ],
+emmanuel: [
+    // --- Momente Polite / De Business ---
+    "Bună ziua! Cu ce vă pot ajuta?",
+    "Un portret costă 150 RON. Cash sau Revolut? 🎨",
+    "Vă rog frumos, nu atingeți exponatele.",
+    "O zi plină de inspirație să aveți! ✨",
+    "Arta cere sacrificii, domnule.",
+    "Vă mulțumesc pentru timpul acordat.",
+    "Sunt un artist serios, vă rog să rețineți.",
+
+    // --- Momente de „nervi” degeaba (Cenzurate) ---
+    "P*** mea, ce cald e azi...",
+    "Băgămi-aș **** în ea de treabă!",
+    "F***-i gura mă-sii de viață...",
+    "Să-mi p*** picioarele în tot!",
+    "Mă p*** pe el de stres!",
+    "C**** dracului, iar s-a blocat ceva...",
+    "Băgămi-aș ****, nu mai pot!",
+    "P*** mea, m-am plictisit de moarte...",
+    "F****-i morții ei de situație!",
+    "Să mă b*** în el de ghinion!",
+    "P*** mea... pur și simplu p*** mea."
+  ]
+};
+
+// 🧠 INTERVALUL DE TRASH TALK (Actualizat pentru V2)
+setInterval(() => {
+  if (window.isGamePaused) return;
+
+  // 1. Identificăm ID-ul caracterului curent (setat la confirmare sau încărcare)
+  // Folosim o variabilă globală window.currentPlayingCharId pe care o setăm mai jos
+  const charId = window.currentPlayingCharId || "kevin";
+  
+  // 2. Alegem lista potrivită (sau kevin ca fallback)
+  const lines = characterDialogues[charId] || characterDialogues.kevin;
+  
+  // 3. Alegem o replică random
+  const msg = lines[Math.floor(Math.random() * lines.length)];
+  
+  // 4. Afișăm bula
+  showKevinutaBubble(msg);
+}, 12000); // Apare o replică la fiecare 12 secunde
+
+// --- FUNCȚIA CARE CREEAZĂ BULA DE TEXT ---
+function showKevinutaBubble(text) {
+  const kevin = document.getElementById("kevin");
+  if (!kevin) return;
+
+  // Ștergem bula veche dacă există
+  if (window.activeKevinBubble) window.activeKevinBubble.remove();
+
+  const bubble = document.createElement("div");
+  bubble.className = "kevin-speech-bubble";
+  bubble.textContent = text;
+
+  document.body.appendChild(bubble);
+  window.activeKevinBubble = bubble;
+
+  // Funcție care actualizează poziția bulei ca să stea fix deasupra capului personajului
+  const updatePosition = () => {
+    const rect = kevin.getBoundingClientRect();
+    bubble.style.left = `${rect.left + rect.width / 2}px`;
+    bubble.style.top = `${rect.top - 20}px`;
+  };
+
+  updatePosition();
+  const positionInterval = setInterval(updatePosition, 50);
+
+  // Animăm dispariția bulei după 3 secunde
+  setTimeout(() => {
+    bubble.style.opacity = "0";
+    bubble.style.transform = "translate(-50%, -120%) scale(0.8)";
+    setTimeout(() => {
+      clearInterval(positionInterval);
+      bubble.remove();
+    }, 500);
+  }, 3000);
+}
+
+
+// 1. Toggle Menu Open/Close
+function toggleMenu() {
+    const wrapper = document.getElementById('menuWrapper');
+    const icon = document.querySelector('#menuToggleBtn i');
+    
+    wrapper.classList.toggle('active');
+    
+    // Change icon from Bars to X
+    if(wrapper.classList.contains('active')) {
+        icon.className = "fa-solid fa-xmark";
+    } else {
+        icon.className = "fa-solid fa-bars";
+    }
+}
+
+// 2. Fullscreen Logic
+function toggleFullScreen() {
+    const icon = document.getElementById('fsIcon');
+    
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            alert(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
+        icon.className = "fa-solid fa-compress";
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+            icon.className = "fa-solid fa-expand";
+        }
+    }
+}
+
+
+// This tells the Menu: "If I am clicked, don't tell the Game Area about it."
+document.getElementById('menuWrapper').addEventListener('click', (e) => {
+    e.stopPropagation();
+});
+
+
+function openShop() {
+    // Optional: Pause game movement while shopping
+    // isPaused = true; 
+    
+    document.getElementById('shopModal').style.display = 'flex';
+    
+    // Close the floating menu automatically when shop opens
+    document.getElementById('menuWrapper').classList.remove('active');
+}
+
+function closeShop() {
+    document.getElementById('shopModal').style.display = 'none';
+}
+
+// Ensure clicks on the shop modal don't count as "Misses"
+document.getElementById('shopModal').addEventListener('click', (e) => {
+    e.stopPropagation();
+});
+  </script>
 </body>
 </html>
