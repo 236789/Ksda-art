@@ -1714,6 +1714,57 @@
       .loading-box { width: 85vw; }
       .loading-box h2 { font-size: 18px; }
     }
+
+
+/* SCOREBOARD - STIL BUTON PREMIUM */
+    #scoreBoard {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 25px 8px 10px;
+      border-radius: 50px;
+      
+      /* Stil identic cu butoanele */
+      background: rgba(44, 42, 85, 0.9);
+      backdrop-filter: blur(8px);
+      border: 2px solid #facc15;
+      
+      /* Glow pulsant pe margini */
+      box-shadow: 0 0 15px rgba(250, 204, 21, 0.3), inset 0 0 10px rgba(0,0,0,0.5);
+      animation: boardGlow 3s infinite alternate;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes boardGlow {
+      from { box-shadow: 0 0 10px rgba(250, 204, 21, 0.2); }
+      to { box-shadow: 0 0 25px rgba(250, 204, 21, 0.5); border-color: #ffffff; }
+    }
+
+    #scoreText {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 26px;
+      font-weight: 900;
+      color: #facc15;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      transition: color 0.3s, transform 0.2s;
+      display: inline-block;
+    }
+
+    /* EFECT CÂND PIERZI PUNCTE */
+    .score-loss #scoreText {
+      color: #ef4444 !important; /* Roșu intens */
+      text-shadow: 0 0 15px #ef4444;
+      transform: scale(0.9); /* Se micșorează puțin de "durere" */
+    }
+
+    /* EFECT CÂND CÂȘTIGI (PUMP) */
+    .score-bump {
+      transform: scale(1.05);
+    }
   </style>
 </head>
 <body>
@@ -2205,6 +2256,7 @@ function startGameUI() {
     // Otherwise, it's a real miss!
     comboCount = 0; 
     if (score > 0) score--; 
+    updateScoreUI(true); // <--- Am adăugat 'true' aici pentru roșu
 
     updateScoreUI();
     showComboText(e.clientX, e.clientY, 0, true); 
@@ -2236,7 +2288,7 @@ async function syncScoreToFirestore() {
         // 🚨 BACKEND CAUGHT A CHEATER
         console.warn("🚨 Cheat detected! Rolling back...");
         score = lastSavedScore; 
-        updateScoreUI();
+    updateScoreUI(true); // <--- 'true' pentru roșu
         alert("⚠️ Modificare neautorizată! Scorul a fost resetat.");
       } else if (response.status === 401) {
         console.error("🚨 Sesiune expirată. Te rugăm să te re-loghezi.");
@@ -2258,16 +2310,26 @@ async function syncScoreToFirestore() {
       document.getElementById('mainMenu').style.display = 'flex';
     }
 
-function updateScoreUI() {
+function updateScoreUI(isLoss = false) {
   const sb = document.getElementById('scoreBoard');
   const st = document.getElementById('scoreText');
   
   st.innerText = score;
 
-  // Add the bump animation class
-  sb.classList.remove('score-bump');
-  void sb.offsetWidth; // This is a "hack" to reset the animation
-  sb.classList.add('score-bump');
+  if (isLoss) {
+    // Adăugăm clasa de roșu
+    sb.classList.add('score-loss');
+    // O scoatem după 500ms
+    setTimeout(() => {
+      sb.classList.remove('score-loss');
+    }, 500);
+  } else {
+    // Efect de "pump" galben la câștig
+    sb.classList.add('score-bump');
+    setTimeout(() => {
+      sb.classList.remove('score-bump');
+    }, 200);
+  }
 }
 // Change the movement function to clear the interval properly
 function startKevinMovement() {
