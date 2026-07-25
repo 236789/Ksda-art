@@ -2115,6 +2115,14 @@
       <input type="range" min="0" max="100" value="8" class="s-range" id="musicRange" oninput="updateMusicVolume(this.value)">
     </div>
 
+    <div class="settings-group">
+      <div class="s-label-row">
+        <span>EFECTE (SFX)</span>
+        <span id="sfxVolValue" class="s-percent">50%</span>
+      </div>
+      <input type="range" min="0" max="100" value="50" class="s-range" id="sfxRange" oninput="updateSFXVolume(this.value)">
+    </div>
+
     <!-- RADIO SECTION -->
     <div class="settings-group">
       <div class="radio-flex">
@@ -2124,14 +2132,6 @@
         </div>
         <button class="s-arrow" onclick="changeTrack(1)"><i class="fa-solid fa-caret-right"></i></button>
       </div>
-    </div>
-
-    <div class="settings-group">
-      <div class="s-label-row">
-        <span>EFECTE (SFX)</span>
-        <span id="sfxVolValue" class="s-percent">50%</span>
-      </div>
-      <input type="range" min="0" max="100" value="50" class="s-range" id="sfxRange" oninput="updateSFXVolume(this.value)">
     </div>
 
     <!-- BUTTONS SECTION -->
@@ -3145,33 +3145,41 @@ document.getElementById('settingsModal').addEventListener('click', (e) => { e.st
 
 
 async function syncSettingsToCloud() {
-    if (!currentUID) return;
+    if (!currentUID) {
+        console.warn("🛑 Cannot save to Firestore: No User UID found.");
+        return;
+    }
+
+    console.group("🔥 FIRESTORE SYNC: SETTINGS");
+    
+    const settingsPayload = {
+        musicVolume: musicVolume,
+        sfxVolume: sfxVolume,
+        isMuted: isMuted,
+        lastTrackIndex: lastTrackIndex
+    };
+
+    console.log("📤 Writing to Firestore for UID:", currentUID, settingsPayload);
 
     try {
-        const idToken = await firebase.auth().currentUser.getIdToken(true);
+        // Direct write to your 'users' collection
+        await db.collection('users').doc(currentUID).set({
+            settings: settingsPayload
+        }, { merge: true }); // 'merge: true' ensures we don't delete their score/username
+
+        console.log("✅ FIRESTORE SUCCESS: Settings updated!");
         
-        const settingsPayload = {
-            musicVolume: musicVolume,
-            sfxVolume: sfxVolume,
-            isMuted: isMuted,
-            lastTrackIndex: lastTrackIndex
-        };
-
-        const response = await fetch('https://kevin-backend-qodc.onrender.com/update-settings', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                idToken: idToken, 
-                settings: settingsPayload 
-            })
-        });
-
-        if (response.ok) {
-            console.log("☁️ Settings saved successfully!");
+        // Visual feedback on the button
+        const saveBtn = document.querySelector('.s-btn span');
+        if(saveBtn) {
+            const oldText = saveBtn.innerText;
+            saveBtn.innerText = "SALVAT! ✅";
+            setTimeout(() => { saveBtn.innerText = oldText; }, 2000);
         }
-    } catch (e) {
-        console.error("Cloud sync failed:", e);
+    } catch (error) {
+        console.error("❌ FIRESTORE ERROR:", error);
     }
+    console.groupEnd();
 }
   </script>
 </body>
