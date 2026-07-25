@@ -2530,39 +2530,43 @@ async function leaveGame() {
   await returnToMenu(); 
 }
 
-// --- SISTEM MUZICĂ (VARIANTA CORECTATĂ) ---
+// --- SISTEM MUZICĂ (VARIANTA FILES.FM) ---
 const playlist = [
-    "1SnQv25f6GmKKalhVVacxoM-nU49pta8o",
-    "1UZBw6NIBeZP_je-hhMOdlmScl2nLxcHO",
-    "1KBSd7yWJNL8iv-IUGgf2Vte5KNydZcdQ",
-    "1rbzfphOFr2s8j9QbVCMaGksis0kV6c9j",
-    "1cGw1F74hlavb8FI7GW15oJTDt-rSN6y8",
-    "1YjWO3VZ7UXOmfmqjscITa-BCxSmBIM2R",
-    "14chjni8RED7mNbNfcml761Y11bevCXB9"
+    "96gdcprjpb",
+    "kcaqnuhfyc",
+    "38h5av63cg",
+    "sxsgqew4r4",
+    "k2rm9k3n6f",
+    "sc9sg2bp3d",
+    "x8ateh5s25"
 ];
 
 let bgMusic = new Audio();
-bgMusic.volume = 0.3; 
+bgMusic.volume = 0.3; // Volum 30%
 let musicStarted = false;
 
 function playRandomTrack() {
     const randomIndex = Math.floor(Math.random() * playlist.length);
     const trackId = playlist[randomIndex];
     
-    // Folosim docs.google.com pentru un stream mai stabil
-    bgMusic.src = `https://docs.google.com/uc?id=${trackId}&export=download`;
+    // FORMATUL PENTRU FILES.FM DIRECT DOWNLOAD
+    bgMusic.src = `https://files.fm/down.php?i=${trackId}`;
     
-    console.log("📡 Încercăm să redăm piesa ID: " + trackId);
-    
+    console.log("🎵 Se încarcă piesa Files.fm: " + trackId);
+
     bgMusic.play()
-        .then(() => console.log("🎵 Muzica a pornit cu succes!"))
-        .catch(e => console.error("🚨 Eroare la pornirea muzicii:", e));
+        .then(() => console.log("✅ Muzica rulează acum!"))
+        .catch(e => {
+            console.warn("⚠️ Eroare la redare, încercăm următoarea...");
+            playRandomTrack(); // Dacă piesa dă eroare, sari la alta
+        });
 
     bgMusic.onended = () => {
-        console.log("🔄 Piesa s-a terminat, trecem la următoarea...");
+        console.log("🔄 Melodia s-a terminat, băgăm alta...");
         playRandomTrack();
     };
 }
+
 const characterList = [
     { 
         id: "kevin", 
