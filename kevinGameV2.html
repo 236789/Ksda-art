@@ -2529,7 +2529,7 @@ async function leaveGame() {
   // Use your existing function to clean up and save score
   await returnToMenu(); 
 }
-// --- SISTEM MUZICĂ (VARIANTA FINALĂ CATBOX) ---
+// --- SISTEM MUZICĂ (VARIANTA FINALĂ - FĂRĂ SPAM) ---
 const playlist = [
     "https://files.catbox.moe/swb3yu.mp3",
     "https://files.catbox.moe/8bx2ck.mp3",
@@ -2541,25 +2541,33 @@ const playlist = [
 ];
 
 let bgMusic = new Audio();
-bgMusic.volume = 0.3; // Volum 30%
+bgMusic.volume = 0.3;
 let musicStarted = false;
 
 function playRandomTrack() {
+    // Dacă muzica deja cântă, nu mai facem nimic
+    if (!bgMusic.paused && bgMusic.src !== "") return;
+
     const randomIndex = Math.floor(Math.random() * playlist.length);
-    const trackUrl = playlist[randomIndex];
+    bgMusic.src = playlist[randomIndex];
     
-    bgMusic.src = trackUrl;
-    console.log("🎵 Melodie nouă: " + trackUrl);
+    console.log("🎵 Încercăm melodia: " + bgMusic.src);
 
     bgMusic.play()
-        .then(() => console.log("✅ Muzica merge brici!"))
+        .then(() => {
+            console.log("✅ Muzica a pornit cu succes!");
+        })
         .catch(e => {
-            console.warn("🚨 Eroare la redare, încercăm alta...");
-            playRandomTrack();
+            // AICI ERA PLM-ul: chema funcția instant înapoi.
+            // Acum așteptăm 5 secunde dacă dă eroare, să nu mai facă spam.
+            console.warn("⚠️ Eroare redare. Reîncercăm în 5 secunde...");
+            setTimeout(playRandomTrack, 5000);
         });
 
-    // Când se termină melodia, bagă alta random
-    bgMusic.onended = () => playRandomTrack();
+    bgMusic.onended = () => {
+        console.log("🔄 Melodie terminată. Următoarea...");
+        playRandomTrack();
+    };
 }
 
 const characterList = [
@@ -2607,8 +2615,8 @@ function changeChar(dir) {
 async function confirmCharacter() {
     // --- START MUZICĂ ---
   if (!musicStarted) {
-        playRandomTrack();
         musicStarted = true;
+        playRandomTrack();
     }
     // --------------------
 
