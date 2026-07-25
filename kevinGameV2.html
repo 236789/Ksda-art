@@ -2530,15 +2530,15 @@ async function leaveGame() {
   await returnToMenu(); 
 }
 // --- SISTEM MUZICĂ V2 (DIRECT PLAYBACK - FĂRĂ FETCH/BLOB) ---
-// --- SISTEM MUZICĂ V3 (BLOB FIX FOR 416 ERRORS) ---
+// --- SISTEM MUZICĂ V3 (DROPBOX DIRECT LINKS) ---
 const playlist = [
-    "https://files.catbox.moe/swb3yu.mp3",
-    "https://files.catbox.moe/8bx2ck.mp3",
-    "https://files.catbox.moe/3zcwhc.mp3",
-    "https://files.catbox.moe/86n3r4.mp3",
-    "https://files.catbox.moe/tjpdjb.mp3",
-    "https://files.catbox.moe/2a0xlm.mp3",
-    "https://files.catbox.moe/kdbvqk.mp3"
+    "https://dl.dropboxusercontent.com/scl/fi/d7p98bqmxzeb56civq01m/Leaderboard-Legend-Afternoon-Coffee-Treblo.mp3?rlkey=plxmqug0swly4dzskwf5p4h9p&dl=1",
+    "https://dl.dropboxusercontent.com/scl/fi/v52swpep7r50qotro55u3/Leaderboard-Legend-High-Score-Hustle-Treblo.mp3?rlkey=leehhh6l70ts93rur2ln2e4fi&dl=1",
+    "https://dl.dropboxusercontent.com/scl/fi/c5yz5j3jzqu34f3i4ui60/Leaderboard-Legend-Late-Night-Library-Treblo.mp3?rlkey=i2rnd3005pko0nb4q9nta0bpb&dl=1",
+    "https://dl.dropboxusercontent.com/scl/fi/6dd5fry75zsx4sxdihymy/Leaderboard-Legend-Pizzicato-Pandemonium-Treblo.mp3?rlkey=c3qrrdlyiv9zpad1nkufwz737&dl=1",
+    "https://dl.dropboxusercontent.com/scl/fi/155fpxgl56njxgdv3bdeo/Leaderboard-Legend-Quiet-Reflection-Treblo.mp3?rlkey=idq52xvxcexv5j9730zq9xbvo&dl=1",
+    "https://dl.dropboxusercontent.com/scl/fi/lzjphkzgrsorktj8y0ctf/Leaderboard-Legend-Whisker-Pursuit-Treblo.mp3?rlkey=ex2b4e6fwdz4mvegubg8abje4&dl=1",
+    "https://dl.dropboxusercontent.com/scl/fi/rugxsboxi93h8ms4n1qds/Leaderboard-Legend-Window-Seat-Views-Treblo.mp3?rlkey=52enlkxt13jgrcxd52tm1nalm&dl=1"
 ];
 
 let bgMusic = new Audio();
@@ -2546,7 +2546,7 @@ bgMusic.volume = 0.3;
 let musicStarted = false;
 let lastTrackIndex = -1;
 
-async function playRandomTrack() {
+function playRandomTrack() {
     let randomIndex;
     do {
         randomIndex = Math.floor(Math.random() * playlist.length);
@@ -2555,36 +2555,24 @@ async function playRandomTrack() {
     lastTrackIndex = randomIndex;
     const trackUrl = playlist[randomIndex];
 
-    console.log("🎵 Descarcăm piesa: " + trackUrl);
+    console.log("🎵 Redăm piesa nouă de pe Dropbox: " + trackUrl);
 
-    try {
-        // FETCH the file as a blob to bypass "Range Request" issues (Error 416)
-        const response = await fetch(trackUrl);
-        if (!response.ok) throw new Error("Server error: " + response.status);
-        
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-
-        // Assign the local blob URL to the audio player
-        bgMusic.src = blobUrl;
-        
-        // Wait for it to load, then play
-        bgMusic.oncanplaythrough = () => {
-            bgMusic.play().catch(e => console.warn("Autoplay block:", e));
-        };
-
-    } catch (err) {
-        console.error("❌ Eroare la încărcarea muzicii:", err);
-        // Retry with a different track in 3 seconds if it fails
-        setTimeout(playRandomTrack, 3000);
-    }
+    bgMusic.src = trackUrl;
+    // Preload set to 'auto' helps with Dropbox streaming
+    bgMusic.preload = "auto"; 
+    
+    bgMusic.play().catch((e) => {
+        console.warn("⚠️ Eroare la redare. Dacă e prima dată când joci, trebuie să apeși un buton pentru muzică.", e);
+    });
 }
 
-// Ensure it loops to next track
 bgMusic.onended = () => {
-    // Clean up memory
-    URL.revokeObjectURL(bgMusic.src); 
     playRandomTrack();
+};
+
+bgMusic.onerror = (e) => {
+    console.error("❌ Eroare la fișierul audio:", bgMusic.src);
+    setTimeout(playRandomTrack, 2000); // Încearcă următoarea piesă după 2 secunde
 };
 const characterList = [
     { 
