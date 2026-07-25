@@ -1765,6 +1765,127 @@
     .score-bump {
       transform: scale(1.05);
     }
+
+/* SETTINGS MODAL SPECIFICS */
+.settings-box {
+    max-height: 85vh; /* Fixed height */
+    overflow-y: auto; /* Scrollable inside */
+    padding-top: 20px !important;
+}
+
+/* Custom Scrollbar for the Settings Modal */
+.scrollable-content::-webkit-scrollbar { width: 8px; }
+.scrollable-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+.scrollable-content::-webkit-scrollbar-thumb { background: #facc15; border-radius: 10px; }
+
+.settings-section {
+    text-align: left;
+    margin-bottom: 30px;
+    padding: 0 10px;
+}
+
+.section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    color: #facc15;
+    border-bottom: 1px solid rgba(250, 204, 21, 0.3);
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+}
+
+/* RADIO UI */
+.radio-container {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.radio-waves {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 4px;
+    height: 30px;
+    margin-bottom: 15px;
+}
+
+.radio-waves span {
+    width: 4px;
+    height: 10px;
+    background: #facc15;
+    border-radius: 2px;
+    animation: waveAnim 1s ease-in-out infinite alternate;
+}
+
+.radio-waves span:nth-child(2) { animation-delay: 0.2s; height: 20px; }
+.radio-waves span:nth-child(3) { animation-delay: 0.4s; height: 15px; }
+.radio-waves span:nth-child(4) { animation-delay: 0.1s; height: 25px; }
+
+@keyframes waveAnim {
+    from { transform: scaleY(0.5); opacity: 0.5; }
+    to { transform: scaleY(1.5); opacity: 1; }
+}
+
+.radio-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.track-info {
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    max-width: 150px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* ARCADE SLIDERS */
+.slider-group { margin-bottom: 20px; }
+
+.slider-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #9aa0b8;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.arcade-slider {
+    width: 100%;
+    -webkit-appearance: none;
+    background: #1b1a37;
+    height: 10px;
+    border-radius: 5px;
+    outline: none;
+    border: 1px solid rgba(250, 204, 21, 0.3);
+}
+
+.arcade-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #facc15;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px #facc15;
+}
+
+.mute-btn {
+    width: 100%;
+    height: 45px !important;
+    font-size: 16px !important;
+    background: linear-gradient(180deg, #4d2600, #261300) !important;
+    margin-top: 10px;
+}
+
+.close-settings-btn { width: 100%; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -1905,6 +2026,61 @@
   <!-- OLD BACK BUTTON REMOVED -->
 </div>
 
+<!-- MODAL: SETĂRI -->
+<div id="settingsModal" class="modal-overlay">
+  <div class="modal-box settings-box scrollable-content">
+    <div class="selection-header">
+      <h2><i class="fa-solid fa-gear"></i> SETĂRI</h2>
+      <div class="selection-line"></div>
+    </div>
+
+    <!-- SECȚIUNEA 1: SUNET ȘI MUZICĂ -->
+    <div class="settings-section">
+      <h3 class="section-title"><i class="fa-solid fa-volume-high"></i> SUNET ȘI MUZICĂ</h3>
+      
+      <!-- RADIO UI -->
+      <div class="radio-container">
+        <div class="radio-waves">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="radio-controls">
+          <button class="nav-arrow-v2" onclick="changeTrack(-1)"><i class="fa-solid fa-backward-step"></i></button>
+          <div class="track-info">
+            <span id="currentTrackName">POST RADIO: Lofi Kevin</span>
+          </div>
+          <button class="nav-arrow-v2" onclick="changeTrack(1)"><i class="fa-solid fa-forward-step"></i></button>
+        </div>
+      </div>
+
+      <!-- VOLUME SLIDERS -->
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>MUZICĂ</span>
+          <span id="musicVolValue">8%</span>
+        </div>
+        <input type="range" min="0" max="100" value="8" class="arcade-slider" id="musicRange" oninput="updateMusicVolume(this.value)">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>EFECTE (SFX)</span>
+          <span id="sfxVolValue">50%</span>
+        </div>
+        <input type="range" min="0" max="100" value="50" class="arcade-slider" id="sfxRange" oninput="updateSFXVolume(this.value)">
+      </div>
+
+      <button class="menu-btn play mute-btn" onclick="toggleMuteAll()" id="muteAllBtn">
+        <i class="fa-solid fa-volume-xmark"></i> <span>OPREȘTE TOT</span>
+      </button>
+    </div>
+
+    <!-- BUTON ÎNAPOI -->
+    <button class="menu-btn play close-settings-btn" onclick="closeSettings()">
+      <span>SALVEAZĂ & ÎNAPOI</span>
+    </button>
+  </div>
+</div>
+
 <div id="pauseModal" class="modal-overlay">
   <div class="modal-box pause-modal-box">
     <h2>PAUZĂ</h2> <!-- Shorter title for better fit -->
@@ -1915,9 +2091,9 @@
         <i class="fa-solid fa-play"></i> <span>REIA JOCUL</span>
       </button>
       
-      <button class="menu-btn play pause-item">
-        <i class="fa-solid fa-gear"></i> <span>SETĂRI</span>
-      </button>
+<button class="menu-btn play pause-item" onclick="openSettings()">
+    <i class="fa-solid fa-gear"></i> <span>SETĂRI</span>
+</button>
 
       <button class="menu-btn play pause-item">
         <i class="fa-solid fa-shirt"></i> <span>DULAP</span>
@@ -2857,6 +3033,83 @@ function closeShop() {
 document.getElementById('shopModal').addEventListener('click', (e) => {
     e.stopPropagation();
 });
+
+
+// --- SETTINGS LOGIC ---
+let isMuted = false;
+let savedVolume = 0.08;
+
+function openSettings() {
+    // If game is active, ensure it stays paused
+    if (document.getElementById('gameArea').style.display === 'block') {
+        isPaused = true;
+        clearInterval(moveKevinInterval);
+        clearTimeout(tiredTimeout);
+        document.getElementById('kevin').style.pointerEvents = 'none';
+    }
+    
+    document.getElementById('pauseModal').style.display = 'none'; // Hide pause if coming from there
+    document.getElementById('settingsModal').style.display = 'flex';
+    
+    // Update Radio text to current song index
+    updateRadioText();
+}
+
+function closeSettings() {
+    document.getElementById('settingsModal').style.display = 'none';
+    // Return to pause menu if we were in a game
+    if (document.getElementById('gameArea').style.display === 'block') {
+        document.getElementById('pauseModal').style.display = 'flex';
+    }
+}
+
+function updateMusicVolume(val) {
+    let volume = val / 100;
+    bgMusic.volume = volume;
+    savedVolume = volume;
+    document.getElementById('musicVolValue').innerText = val + "%";
+    if(val > 0) isMuted = false;
+}
+
+function updateSFXVolume(val) {
+    document.getElementById('sfxVolValue').innerText = val + "%";
+    // Future SFX logic goes here
+}
+
+function toggleMuteAll() {
+    isMuted = !isMuted;
+    const btn = document.getElementById('muteAllBtn');
+    if (isMuted) {
+        bgMusic.volume = 0;
+        btn.querySelector('span').innerText = "PORNEȘTE SUNET";
+        btn.querySelector('i').className = "fa-solid fa-volume-high";
+    } else {
+        bgMusic.volume = savedVolume;
+        btn.querySelector('span').innerText = "OPREȘTE TOT";
+        btn.querySelector('i').className = "fa-solid fa-volume-xmark";
+    }
+}
+
+// RADIO LOGIC: Switch tracks from settings
+function changeTrack(dir) {
+    lastTrackIndex += dir;
+    if (lastTrackIndex < 0) lastTrackIndex = playlist.length - 1;
+    if (lastTrackIndex >= playlist.length) lastTrackIndex = 0;
+    
+    const trackUrl = playlist[lastTrackIndex];
+    bgMusic.src = trackUrl;
+    bgMusic.play().catch(e => console.warn("Radio switch error", e));
+    
+    updateRadioText();
+}
+
+function updateRadioText() {
+    // We can extract a name from the URL or just use numbers
+    document.getElementById('currentTrackName').innerText = "MELODIA #" + (lastTrackIndex + 1);
+}
+
+// Ensure settings clicks don't miss
+document.getElementById('settingsModal').addEventListener('click', (e) => { e.stopPropagation(); });
   </script>
 </body>
 </html>
