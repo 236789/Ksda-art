@@ -2505,6 +2505,8 @@ function togglePause() {
   
   // Disable clicking the character in the background
   document.getElementById('kevin').style.pointerEvents = 'none';
+
+bgMusic.volume = 0.1; // Se aude încet pe fundal când ești în meniuri
 }
 
 function resumeGame() {
@@ -2516,6 +2518,7 @@ function resumeGame() {
   document.getElementById('kevin').style.pointerEvents = 'auto';
   startKevinMovement();
   startTiredCycle();
+bgMusic.volume = 0.4; // Revine la volumul normal când joci
 }
 
 async function leaveGame() {
@@ -2525,6 +2528,33 @@ async function leaveGame() {
   
   // Use your existing function to clean up and save score
   await returnToMenu(); 
+}
+
+// --- SISTEM MUZICĂ ---
+const playlist = [
+    "https://drive.google.com/uc?export=download&id=1SnQv25f6GmKKalhVVacxoM-nU49pta8o",
+    "https://drive.google.com/uc?export=download&id=1UZBw6NIBeZP_je-hhMOdlmScl2nLxcHO",
+    "https://drive.google.com/uc?export=download&id=1KBSd7yWJNL8iv-IUGgf2Vte5KNydZcdQ",
+    "https://drive.google.com/uc?export=download&id=1rbzfphOFr2s8j9QbVCMaGksis0kV6c9j",
+    "https://drive.google.com/uc?export=download&id=1cGw1F74hlavb8FI7GW15oJTDt-rSN6y8",
+    "https://drive.google.com/uc?export=download&id=1YjWO3VZ7UXOmfmqjscITa-BCxSmBIM2R",
+    "https://drive.google.com/uc?export=download&id=14chjni8RED7mNbNfcml761Y11bevCXB9"
+];
+
+let bgMusic = new Audio();
+bgMusic.volume = 0.4; // Volum la 40% să nu spargă timpanele
+let isMusicStarted = false;
+
+function playRandomTrack() {
+    // Alegem o piesă la întâmplare
+    const randomIndex = Math.floor(Math.random() * playlist.length);
+    bgMusic.src = playlist[randomIndex];
+    bgMusic.play().catch(e => console.log("Muzica așteaptă interacțiune..."));
+
+    // Când se termină piesa, pornește alta automat
+    bgMusic.onended = () => {
+        playRandomTrack();
+    };
 }
 
 
@@ -2571,8 +2601,15 @@ function changeChar(dir) {
 }
 
 async function confirmCharacter() {
+    // --- START MUZICĂ ---
+    // Pornim muzica doar dacă nu a pornit deja (să nu se suprapună melodiile)
+    if (!musicStarted) {
+        playRandomSong();
+        musicStarted = true;
+    }
+    // --------------------
+
     const selected = characterList[charIndex];
-    
     document.getElementById('loadingModal').style.display = 'flex';
     
     try {
@@ -2599,7 +2636,6 @@ async function confirmCharacter() {
             // Start the game
             startGameUI(); 
         } else if (response.status === 429) {
-            // Caught by the Rate Limiter (Cooldown)
             alert("⚠️ Prea multe schimbări! Așteaptă 10 secunde.");
             document.getElementById('loadingModal').style.display = 'none';
         } else {
