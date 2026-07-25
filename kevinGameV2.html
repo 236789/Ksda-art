@@ -2209,6 +2209,11 @@ for (let i = 0; i < particleCount; i++) {
     let isKevinTired = false;
     let canClickKevin = true; 
 
+// --- SETTINGS GLOBALS --- 
+let musicVolume = 0.08; // Default 8%
+let sfxVolume = 0.5;   // Default 50%
+// lastTrackIndex is already declared below in your code
+
 let currentPlayImg = "";
 let currentTiredImg = "";
 
@@ -2261,16 +2266,13 @@ async function checkUserInFirestore(uid) {
     loadingModal.style.display = 'flex';
     if (statusText) statusText.innerText = "Sincronizare cu serverul...";
 
-    // --- LOGICA PENTRU SERVER ADORMIT ---
-    // Dacă după 8 secunde modalul e tot deschis, schimbăm textul
     let wakeUpTimer = setTimeout(() => {
         if (loadingModal.style.display === 'flex' && statusText) {
             statusText.innerText = "Serverul se trezește... te rugăm să aștepți.";
-            statusText.style.color = "#facc15"; // Îl facem galben să iasă în evidență
+            statusText.style.color = "#facc15"; 
         }
     }, 8000);
 
-    // 1. Wait until the user is actually ready
     let user = firebase.auth().currentUser;
     if (!user) {
         console.log("Waiting for user session...");
@@ -2279,18 +2281,15 @@ async function checkUserInFirestore(uid) {
     }
 
     try {
-        // 2. Get the Identity Token
         const idToken = await user.getIdToken(true);
         console.log("Token obtained! sending to cloud...");
 
-        // 3. Talk to Render
         const response = await fetch('https://kevin-backend-qodc.onrender.com/get-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ idToken: idToken })
         });
 
-        // Oprim timer-ul de "wake up" pentru că serverul a răspuns
         clearTimeout(wakeUpTimer);
 
         if (response.status === 200) {
@@ -2299,6 +2298,39 @@ async function checkUserInFirestore(uid) {
             score = data.score || 0;
             lastSavedScore = score;
             
+            // --- LOAD SAVED SETTINGS ---
+            if (data.settings) {
+                musicVolume = data.settings.musicVolume ?? 0.08;
+                sfxVolume = data.settings.sfxVolume ?? 0.5;
+                isMuted = data.settings.isMuted ?? false;
+                lastTrackIndex = data.settings.lastTrackIndex ?? 0;
+
+                // 1. Apply to Audio Object
+                bgMusic.volume = isMuted ? 0 : musicVolume;
+                
+                // 2. Update the UI Sliders and Text
+                if(document.getElementById('musicRange')) {
+                    document.getElementById('musicRange').value = musicVolume * 100;
+                    document.getElementById('musicVolValue').innerText = Math.round(musicVolume * 100) + "%";
+                    document.getElementById('sfxRange').value = sfxVolume * 100;
+                    document.getElementById('sfxVolValue').innerText = Math.round(sfxVolume * 100) + "%";
+                }
+
+                // 3. Update Mute Button State
+                const mBtn = document.getElementById('muteAllBtn');
+                if (mBtn) {
+                    if (isMuted) {
+                        mBtn.classList.add('s-red'); // Keep it red
+                        mBtn.querySelector('span').innerText = "PORNEȘTE SUNET";
+                        mBtn.querySelector('i').className = "fa-solid fa-volume-high";
+                    } else {
+                        mBtn.classList.remove('s-red');
+                        mBtn.querySelector('span').innerText = "OPREȘTE TOT";
+                        mBtn.querySelector('i').className = "fa-solid fa-volume-xmark";
+                    }
+                }
+            }
+
             if (data.selectedChar) {
                 const charData = characterList.find(c => c.id === data.selectedChar) || characterList[0];
                 currentPlayImg = `url('${charData.playImg}')`;
@@ -3044,38 +3076,40 @@ function openSettings() {
     updateRadioText();
 }
 
-function closeSettings() {
-    document.getElementById('settingsModal').style.display = 'none';
-    // Return to pause menu if we were in a game
-    if (document.getElementById('gameArea').style.display === 'block') {
-        document.getElementById('pauseModal').style.display = 'flex';
-    }
-}
-
 function updateMusicVolume(val) {
-    let volume = val / 100;
-    bgMusic.volume = volume;
-    savedVolume = volume;
+    musicVolume = val / 100; // Update Global
+    if (!isMuted) bgMusic.volume = musicVolume;
     document.getElementById('musicVolValue').innerText = val + "%";
-    if(val > 0) isMuted = false;
 }
 
 function updateSFXVolume(val) {
+    sfxVolume = val / 100; // Update Global
     document.getElementById('sfxVolValue').innerText = val + "%";
-    // Future SFX logic goes here
 }
 
 function toggleMuteAll() {
-    isMuted = !isMuted;
+    isMuted = !isMuted; // Update Global
     const btn = document.getElementById('muteAllBtn');
     if (isMuted) {
         bgMusic.volume = 0;
         btn.querySelector('span').innerText = "PORNEȘTE SUNET";
-        btn.querySelector('i').className = "fa-solid fa-volume-high";
+        btn.classList.add('mute-btn-active');
     } else {
-        bgMusic.volume = savedVolume;
+        bgMusic.volume = musicVolume;
         btn.querySelector('span').innerText = "OPREȘTE TOT";
-        btn.querySelector('i').className = "fa-solid fa-volume-xmark";
+        btn.classList.remove('mute-btn-active');
+    }
+}
+
+// UPDATE THE CLOSE FUNCTION TO SAVE
+function closeSettings() {
+    document.getElementById('settingsModal').style.display = 'none';
+    
+    // SAVE TO FIREBASE RIGHT NOW
+    syncSettingsToCloud();
+
+    if (document.getElementById('gameArea').style.display === 'block') {
+        document.getElementById('pauseModal').style.display = 'flex';
     }
 }
 
@@ -3108,6 +3142,37 @@ function updateRadioText() {
 
 // Ensure settings clicks don't miss
 document.getElementById('settingsModal').addEventListener('click', (e) => { e.stopPropagation(); });
+
+
+async function syncSettingsToCloud() {
+    if (!currentUID) return;
+
+    try {
+        const idToken = await firebase.auth().currentUser.getIdToken(true);
+        
+        const settingsPayload = {
+            musicVolume: musicVolume,
+            sfxVolume: sfxVolume,
+            isMuted: isMuted,
+            lastTrackIndex: lastTrackIndex
+        };
+
+        const response = await fetch('https://kevin-backend-qodc.onrender.com/update-settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                idToken: idToken, 
+                settings: settingsPayload 
+            })
+        });
+
+        if (response.ok) {
+            console.log("☁️ Settings saved successfully!");
+        }
+    } catch (e) {
+        console.error("Cloud sync failed:", e);
+    }
+}
   </script>
 </body>
 </html>
