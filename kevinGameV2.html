@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -1658,6 +1659,61 @@
   position: relative;
   z-index: 1;
 }
+
+
+/* MODAL ÎNCĂRCARE - COMPACT & TEMATIC */
+    .loading-box {
+      max-width: 320px !important; /* Mai mic pentru mobile */
+      padding: 25px 15px !important;
+      border: 3px solid #facc15 !important; /* Aur ca restul modale-lor */
+      box-shadow: 0 0 25px rgba(250, 204, 21, 0.2) !important;
+    }
+
+    .loading-box h2 {
+      font-size: 22px;
+      margin-top: 0;
+      color: #facc15;
+      letter-spacing: 2px;
+    }
+
+    .loading-box p {
+      font-size: 14px !important;
+      color: #9aa0b8;
+      margin-bottom: 0;
+    }
+
+    /* BARA DE ÎNCĂRCARE */
+    .loader-container {
+      width: 100%;
+      height: 10px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
+      margin: 20px 0;
+      overflow: hidden;
+      border: 1px solid rgba(250, 204, 21, 0.3);
+      position: relative;
+    }
+
+    .loader-bar {
+      height: 100%;
+      width: 40%; /* Lungimea segmentului care se mișcă */
+      background: linear-gradient(90deg, transparent, #facc15, transparent);
+      box-shadow: 0 0 15px #facc15;
+      position: absolute;
+      left: -40%;
+      animation: sweep 1.5s infinite linear;
+    }
+
+    @keyframes sweep {
+      0% { left: -40%; }
+      100% { left: 110%; }
+    }
+
+    /* FIX PENTRU TEXT PE MOBILE */
+    @media (max-width: 600px) {
+      .loading-box { width: 85vw; }
+      .loading-box h2 { font-size: 18px; }
+    }
   </style>
 </head>
 <body>
@@ -1689,11 +1745,17 @@
     </div>
   </div>
 
-  <!-- MODAL: LOADING -->
+<!-- MODAL: LOADING (STILIZAT) -->
   <div id="loadingModal" class="modal-overlay">
-    <div class="modal-box" style="border-color: #0eddc1; box-shadow: 0 0 30px rgba(14, 221, 193, 0.4);">
-      <h2 style="color: #0eddc1;">SE ÎNCARCĂ...</h2>
-      <p>Sincronizare cu serverul...</p>
+    <div class="modal-box loading-box">
+      <h2>SE ÎNCARCĂ...</h2>
+      
+      <!-- Containerul barei -->
+      <div class="loader-container">
+        <div class="loader-bar"></div>
+      </div>
+      
+      <p id="loadingStatus">Sincronizare cu serverul...</p>
     </div>
   </div>
 
@@ -1977,8 +2039,21 @@ let currentTiredImg = "";
     }
 
 async function checkUserInFirestore(uid) {
-    document.getElementById('loadingModal').style.display = 'flex';
-    
+    const loadingModal = document.getElementById('loadingModal');
+    const statusText = document.getElementById('loadingStatus');
+
+    loadingModal.style.display = 'flex';
+    if (statusText) statusText.innerText = "Sincronizare cu serverul...";
+
+    // --- LOGICA PENTRU SERVER ADORMIT ---
+    // Dacă după 8 secunde modalul e tot deschis, schimbăm textul
+    let wakeUpTimer = setTimeout(() => {
+        if (loadingModal.style.display === 'flex' && statusText) {
+            statusText.innerText = "Serverul se trezește... te rugăm să aștepți.";
+            statusText.style.color = "#facc15"; // Îl facem galben să iasă în evidență
+        }
+    }, 8000);
+
     // 1. Wait until the user is actually ready
     let user = firebase.auth().currentUser;
     if (!user) {
@@ -1999,6 +2074,9 @@ async function checkUserInFirestore(uid) {
             body: JSON.stringify({ idToken: idToken })
         });
 
+        // Oprim timer-ul de "wake up" pentru că serverul a răspuns
+        clearTimeout(wakeUpTimer);
+
         if (response.status === 200) {
             const data = await response.json();
             currentUsername = data.username;
@@ -2013,18 +2091,21 @@ async function checkUserInFirestore(uid) {
                 document.getElementById('kevin').style.backgroundImage = currentPlayImg;
             }
 
-            document.getElementById('loadingModal').style.display = 'none';
+            loadingModal.style.display = 'none';
             showLoggedInUI();
         } else if (response.status === 404) {
-            document.getElementById('loadingModal').style.display = 'none';
+            loadingModal.style.display = 'none';
             document.getElementById('usernameModal').style.display = 'flex';
         } else {
             const errorMsg = await response.text();
             console.error("Cloud Error:", errorMsg);
             alert("Eroare de autorizare (401). Încearcă un Refresh!");
+            loadingModal.style.display = 'none';
         }
     } catch (e) {
+        clearTimeout(wakeUpTimer);
         console.error("Connection failed:", e);
+        loadingModal.style.display = 'none';
         alert("Serverul este ocupat. Te rugăm să revii în 1 minut.");
     }
 }
