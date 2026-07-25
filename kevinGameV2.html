@@ -2529,7 +2529,7 @@ async function leaveGame() {
   // Use your existing function to clean up and save score
   await returnToMenu(); 
 }
-// --- SISTEM MUZICĂ V1 ADAPTAT (VERSIUNEA BLOB - ELIMINĂ EROAREA 416) ---
+// --- SISTEM MUZICĂ V2 (DIRECT PLAYBACK - FĂRĂ FETCH/BLOB) ---
 const playlist = [
     "https://files.catbox.moe/swb3yu.mp3",
     "https://files.catbox.moe/8bx2ck.mp3",
@@ -2542,60 +2542,44 @@ const playlist = [
 
 let bgMusic = new Audio();
 bgMusic.volume = 0.3;
-bgMusic.crossOrigin = "anonymous"; 
+// NU mai punem crossOrigin - asta cerea CORS + range handling special
+// pe care Catbox nu îl suportă corect, provocând erorile 416.
 
 let musicStarted = false;
 let musicRetryTimer = null;
+let lastTrackIndex = -1;
 
-async function playRandomTrack() {
-    if (!bgMusic.paused && bgMusic.src !== "") return;
-
+function playRandomTrack() {
     if (musicRetryTimer) {
         clearTimeout(musicRetryTimer);
         musicRetryTimer = null;
     }
 
-    const randomIndex = Math.floor(Math.random() * playlist.length);
+    // Evită să repete aceeași piesă de două ori la rând
+    let randomIndex;
+    do {
+        randomIndex = Math.floor(Math.random() * playlist.length);
+    } while (randomIndex === lastTrackIndex && playlist.length > 1);
+    lastTrackIndex = randomIndex;
+
     const trackUrl = playlist[randomIndex];
+    console.log("🎵 Redăm direct: " + trackUrl);
 
-    console.log("📥 Descărcăm melodia (Anti-416): " + trackUrl);
-
-    try {
-        // PASUL 1: Descarcă tot fișierul în fundal ca date brute (Blob)
-        // Adăugăm un parametru random ca să ignorăm cache-ul stricat al browserului
-        const response = await fetch(trackUrl + "?v=" + Math.random().toString(36).substring(7));
-        
-        if (!response.ok) throw new Error("Eroare server");
-
-        const blob = await response.blob();
-        
-        // PASUL 2: Convertim datele în obiect redabil local
-        const blobUrl = URL.createObjectURL(blob);
-
-        // PASUL 3: Redăm melodia din memoria locală
-        bgMusic.src = blobUrl;
-        await bgMusic.play();
-        
-        console.log("✅ Muzica a pornit corect prin memorie locală!");
-
-    } catch (e) {
-        console.warn("⚠️ Catbox a refuzat conexiunea. Reîncercăm altă piesă în 5 secunde...");
-        
-        // Resetăm src-ul ca browserul să nu mai încerce singur
-        bgMusic.pause();
-        bgMusic.src = ""; 
-
+    bgMusic.src = trackUrl; // fără query string, fără fetch — direct
+    bgMusic.play().catch((e) => {
+        console.warn("⚠️ Eroare la redare, reîncercăm în 5 secunde...", e);
         musicRetryTimer = setTimeout(playRandomTrack, 5000);
-    }
-
-    bgMusic.onended = () => {
-        // Curățăm memoria după ce melodia s-a terminat
-        if (bgMusic.src.startsWith('blob:')) {
-            URL.revokeObjectURL(bgMusic.src);
-        }
-        playRandomTrack();
-    };
+    });
 }
+
+bgMusic.onended = () => {
+    playRandomTrack();
+};
+
+bgMusic.onerror = () => {
+    console.warn("⚠️ Eroare pe piesa curentă, sărim la următoarea în 5 secunde...");
+    musicRetryTimer = setTimeout(playRandomTrack, 5000);
+};
 const characterList = [
     { 
         id: "kevin", 
