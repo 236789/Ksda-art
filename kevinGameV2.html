@@ -2542,26 +2542,48 @@ const playlist = [
 
 let bgMusic = new Audio();
 bgMusic.volume = 0.3;
+bgMusic.crossOrigin = "anonymous"; // 1. Rezolvă problemele de CORS menționate în screenshot
+
 let musicStarted = false;
+let retryTimer = null; // 2. Variabilă pentru a preveni pornirea mai multor timere deodată
 
 function playRandomTrack() {
     // Dacă muzica deja cântă, nu mai facem nimic
     if (!bgMusic.paused && bgMusic.src !== "") return;
 
+    // Curățăm orice timer de retry existent pentru a evita spam-ul
+    if (retryTimer) {
+        clearTimeout(retryTimer);
+        retryTimer = null;
+    }
+
+    // Alegem o melodie
     const randomIndex = Math.floor(Math.random() * playlist.length);
-    bgMusic.src = playlist[randomIndex];
-    
-    console.log("🎵 Încercăm melodia: " + bgMusic.src);
+    const trackUrl = playlist[randomIndex];
+
+    // 3. Resetăm complet obiectul Audio înainte de noua încărcare
+    bgMusic.pause();
+    bgMusic.src = trackUrl;
+    bgMusic.load(); // Forțează browserul să reînceapă încărcarea de la zero
+
+    console.log("🎵 Încercăm melodia: " + trackUrl);
 
     bgMusic.play()
         .then(() => {
             console.log("✅ Muzica a pornit cu succes!");
         })
         .catch(e => {
-            // AICI ERA PLM-ul: chema funcția instant înapoi.
-            // Acum așteptăm 5 secunde dacă dă eroare, să nu mai facă spam.
-            console.warn("⚠️ Eroare redare. Reîncercăm în 5 secunde...");
-            setTimeout(playRandomTrack, 5000);
+            console.warn("⚠️ Eroare redare la: " + trackUrl);
+            
+            // 4. Resetăm src-ul pentru a opri browserul din a mai încerca automat în fundal
+            bgMusic.pause();
+            bgMusic.src = ""; 
+
+            // Reîncercăm peste 5 secunde, dar salvăm timer-ul
+            retryTimer = setTimeout(() => {
+                console.log("🔄 Reîncercăm redarea...");
+                playRandomTrack();
+            }, 5000);
         });
 
     bgMusic.onended = () => {
