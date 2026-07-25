@@ -2530,6 +2530,7 @@ async function leaveGame() {
   await returnToMenu(); 
 }
 // --- SISTEM MUZICĂ V2 (DIRECT PLAYBACK - FĂRĂ FETCH/BLOB) ---
+// --- SISTEM MUZICĂ V3 (BLOB FIX FOR 416 ERRORS) ---
 const playlist = [
     "https://files.catbox.moe/swb3yu.mp3",
     "https://files.catbox.moe/8bx2ck.mp3",
@@ -2542,43 +2543,48 @@ const playlist = [
 
 let bgMusic = new Audio();
 bgMusic.volume = 0.3;
-// NU mai punem crossOrigin - asta cerea CORS + range handling special
-// pe care Catbox nu îl suportă corect, provocând erorile 416.
-
 let musicStarted = false;
-let musicRetryTimer = null;
 let lastTrackIndex = -1;
 
-function playRandomTrack() {
-    if (musicRetryTimer) {
-        clearTimeout(musicRetryTimer);
-        musicRetryTimer = null;
-    }
-
-    // Evită să repete aceeași piesă de două ori la rând
+async function playRandomTrack() {
     let randomIndex;
     do {
         randomIndex = Math.floor(Math.random() * playlist.length);
     } while (randomIndex === lastTrackIndex && playlist.length > 1);
+    
     lastTrackIndex = randomIndex;
-
     const trackUrl = playlist[randomIndex];
-    console.log("🎵 Redăm direct: " + trackUrl);
 
-    bgMusic.src = trackUrl; // fără query string, fără fetch — direct
-    bgMusic.play().catch((e) => {
-        console.warn("⚠️ Eroare la redare, reîncercăm în 5 secunde...", e);
-        musicRetryTimer = setTimeout(playRandomTrack, 5000);
-    });
+    console.log("🎵 Descarcăm piesa: " + trackUrl);
+
+    try {
+        // FETCH the file as a blob to bypass "Range Request" issues (Error 416)
+        const response = await fetch(trackUrl);
+        if (!response.ok) throw new Error("Server error: " + response.status);
+        
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+
+        // Assign the local blob URL to the audio player
+        bgMusic.src = blobUrl;
+        
+        // Wait for it to load, then play
+        bgMusic.oncanplaythrough = () => {
+            bgMusic.play().catch(e => console.warn("Autoplay block:", e));
+        };
+
+    } catch (err) {
+        console.error("❌ Eroare la încărcarea muzicii:", err);
+        // Retry with a different track in 3 seconds if it fails
+        setTimeout(playRandomTrack, 3000);
+    }
 }
 
+// Ensure it loops to next track
 bgMusic.onended = () => {
+    // Clean up memory
+    URL.revokeObjectURL(bgMusic.src); 
     playRandomTrack();
-};
-
-bgMusic.onerror = () => {
-    console.warn("⚠️ Eroare pe piesa curentă, sărim la următoarea în 5 secunde...");
-    musicRetryTimer = setTimeout(playRandomTrack, 5000);
 };
 const characterList = [
     { 
