@@ -2529,16 +2529,15 @@ async function leaveGame() {
   // Use your existing function to clean up and save score
   await returnToMenu(); 
 }
-
-// --- SISTEM MUZICĂ (VARIANTA FILES.FM) ---
+// --- SISTEM MUZICĂ (VARIANTA FINALĂ CATBOX) ---
 const playlist = [
-    "96gdcprjpb",
-    "kcaqnuhfyc",
-    "38h5av63cg",
-    "sxsgqew4r4",
-    "k2rm9k3n6f",
-    "sc9sg2bp3d",
-    "x8ateh5s25"
+    "https://files.catbox.moe/swb3yu.mp3",
+    "https://files.catbox.moe/8bx2ck.mp3",
+    "https://files.catbox.moe/3zcwhc.mp3",
+    "https://files.catbox.moe/86n3r4.mp3",
+    "https://files.catbox.moe/tjpdjb.mp3",
+    "https://files.catbox.moe/2a0xlm.mp3",
+    "https://files.catbox.moe/kdbvqk.mp3"
 ];
 
 let bgMusic = new Audio();
@@ -2547,24 +2546,20 @@ let musicStarted = false;
 
 function playRandomTrack() {
     const randomIndex = Math.floor(Math.random() * playlist.length);
-    const trackId = playlist[randomIndex];
+    const trackUrl = playlist[randomIndex];
     
-    // FORMATUL PENTRU FILES.FM DIRECT DOWNLOAD
-    bgMusic.src = `https://files.fm/down.php?i=${trackId}`;
-    
-    console.log("🎵 Se încarcă piesa Files.fm: " + trackId);
+    bgMusic.src = trackUrl;
+    console.log("🎵 Melodie nouă: " + trackUrl);
 
     bgMusic.play()
-        .then(() => console.log("✅ Muzica rulează acum!"))
+        .then(() => console.log("✅ Muzica merge brici!"))
         .catch(e => {
-            console.warn("⚠️ Eroare la redare, încercăm următoarea...");
-            playRandomTrack(); // Dacă piesa dă eroare, sari la alta
+            console.warn("🚨 Eroare la redare, încercăm alta...");
+            playRandomTrack();
         });
 
-    bgMusic.onended = () => {
-        console.log("🔄 Melodia s-a terminat, băgăm alta...");
-        playRandomTrack();
-    };
+    // Când se termină melodia, bagă alta random
+    bgMusic.onended = () => playRandomTrack();
 }
 
 const characterList = [
