@@ -2805,22 +2805,21 @@ function startGameUI() {
   if (saveScoreInterval) clearInterval(saveScoreInterval);
   saveScoreInterval = setInterval(syncScoreToFirestore, 5000);
 
-  // --- UPDATED MISS PENALTY (With UI Protection) ---
+  // --- UPDATED MISS PENALTY (With Sound) ---
   document.getElementById('gameArea').onclick = (e) => {
     if (isPaused) return;
 
-    // Check if the click was actually on the UI Menu or any Button
-    // If it was, we "return" (do nothing) so you don't lose score
     if (e.target.closest('#menuWrapper') || e.target.closest('.control-btn')) {
         return; 
     }
 
-    // Otherwise, it's a real miss!
+    // Efect sonor de MISS
+    playMissSFX(); 
+
     comboCount = 0; 
     if (score > 0) score--; 
-    updateScoreUI(true); // <--- Am adăugat 'true' aici pentru roșu
+    updateScoreUI(true); 
 
-    updateScoreUI();
     showComboText(e.clientX, e.clientY, 0, true); 
   };
 }
@@ -2940,7 +2939,6 @@ document.getElementById('kevin').addEventListener('click', (e) => {
       e.stopPropagation(); 
 
       // --- THE ANTI-AIMBOT SHIELD ---
-      // This ignores any click that was created by a script or console code
       if (!e.isTrusted) {
           console.warn("🚨 Synthetic click detected and blocked!");
           return; 
@@ -2949,6 +2947,9 @@ document.getElementById('kevin').addEventListener('click', (e) => {
 
       if (!canClickKevin) return;
       canClickKevin = false;
+
+      // Efect sonor de HIT (Un POP random din cele 5)
+      playRandomPop(); 
 
       score++;
       updateScoreUI();
@@ -2965,7 +2966,7 @@ document.getElementById('kevin').addEventListener('click', (e) => {
       }
 
       setTimeout(() => { canClickKevin = true; }, 100); 
-    });
+});
 
 const comboMilestones = {
     5:   { word: "BINE TICĂ!", tier: "tier-verde" },
@@ -3775,6 +3776,35 @@ function startFeedbackCountdown(targetTime) {
         document.getElementById('feedbackTimer').innerText = 
             `${h}h ${m}m ${s}s`;
     }, 1000);
+}
+
+// --- SISTEM EFECTE SONORE (SFX) ---
+const popSounds = [
+    "https://www.dropbox.com/scl/fi/hpzn6q59thrxvcwkac567/POP-1.mp3?rlkey=grpkrvd5oy7iv7t1yyfm94fbi&st=6jfgnuac&dl=1",
+    "https://www.dropbox.com/scl/fi/mq14jxxk1z6k8l2xk0xkf/POP-2.mp3?rlkey=erw4neneykkcimlujpws45gt5&st=jaluboe6&dl=1",
+    "https://www.dropbox.com/scl/fi/94phfhsrq3mjfchm69xr4/POP-3.mp3?rlkey=pvnbp8kama3iage3f6ldww5a9&st=prkzycj5&dl=1",
+    "https://www.dropbox.com/scl/fi/daddzwo7ypfestr9g4sni/POP-4.mp3?rlkey=l7p5f26lt8o6k5jaw23vvlorb&st=hnfw8jqo&dl=1",
+    "https://www.dropbox.com/scl/fi/drmje2gavv65b3qwyowa5/POP-5.mp3?rlkey=8x8hqqivqpbnp12qpz6mqtm8t&st=839zj2xg&dl=1"
+];
+
+const missSoundUrl = "https://www.dropbox.com/scl/fi/ggz3cmweur2hgdrm0dc3j/Miss.mp3?rlkey=dv0lgzrt4f294pxfegrhirmna&st=vfn6uotb&dl=1";
+
+// Funcție universală pentru a reda un sunet scurt (fără să se întrerupă dacă dai click rapid)
+function playSFX(url) {
+    if (isMuted) return; // Nu cânta dacă e pe Mute
+    
+    let sound = new Audio(url);
+    sound.volume = sfxVolume; // Folosim volumul din setări
+    sound.play().catch(e => {}); // Ignorăm erorile de browser
+}
+
+function playRandomPop() {
+    const randomIndex = Math.floor(Math.random() * popSounds.length);
+    playSFX(popSounds[randomIndex]);
+}
+
+function playMissSFX() {
+    playSFX(missSoundUrl);
 }
   </script>
 </body>
