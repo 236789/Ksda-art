@@ -2155,6 +2155,38 @@ input:checked + .s-slider:before {
     flex-shrink: 0;
     margin-left: 20px;
 }
+
+
+/* Stil pentru evenimentele cu imagini */
+.special-event-item {
+    position: absolute;
+    width: 65px;
+    height: 65px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    z-index: 1000;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+    transition: transform 0.2s;
+}
+
+/* Animația de rotație pentru topor */
+@keyframes spinningAxe {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.axe-active {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    background-image: url('https://iili.io/Ck27fPs.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 1001;
+    pointer-events: none; /* Nu poți da click pe el după ce a pornit evenimentul */
+    animation: spinningAxe 0.5s infinite linear;
+}
   </style>
 </head>
 <body>
@@ -2821,7 +2853,10 @@ function startGameUI() {
     if (score > 0) score--; 
     updateScoreUI(true); 
 
+
     showComboText(e.clientX, e.clientY, 0, true); 
+
+spawnSpecialEvent();
   };
 }
 
@@ -2865,6 +2900,7 @@ async function syncScoreToFirestore() {
       clearInterval(moveKevinInterval);
       clearTimeout(tiredTimeout);
       clearInterval(saveScoreInterval);
+      clearTimeout(eventTimeout);
 
       await syncScoreToFirestore();
 
@@ -3089,6 +3125,7 @@ async function leaveGame() {
   
   // Use your existing function to clean up and save score
   await returnToMenu(); 
+clearTimeout(eventTimeout);
 }
 // --- SISTEM MUZICĂ V2 (DIRECT PLAYBACK - FĂRĂ FETCH/BLOB) ---
 // --- SISTEM MUZICĂ V3 (DROPBOX DIRECT LINKS) ---
@@ -3821,6 +3858,117 @@ function playRandomPop() {
 
 function playMissSFX() {
     playSFX(missSoundUrl);
+}
+
+
+
+// 📦 CONFIGURARE OBIECTE SPECIALE
+const specialRegistry = {
+    "axe": {
+        name: "Toporul Nebun",
+        image: "https://iili.io/Ck27fPs.png",
+        type: "bad",
+        description: "Un topor care ricoșează și îți fură scorul dacă îl lovește pe Kevin!",
+        action: (e) => startAxeEvent()
+    }
+    // Aici vom adăuga "bonus_coin", "shield", etc. mai târziu
+};
+
+
+
+function startAxeEvent() {
+    const axe = document.createElement('div');
+    axe.className = 'axe-active';
+    document.getElementById('gameArea').appendChild(axe);
+
+    // Poziție de start (unde s-a dat click sau random)
+    let posX = Math.random() * (window.innerWidth - 100);
+    let posY = Math.random() * (window.innerHeight - 100);
+    
+    // Direcție și viteză
+    let dx = (Math.random() > 0.5 ? 1 : -1) * 12;
+    let dy = (Math.random() > 0.5 ? 1 : -1) * 12;
+    let bounces = 0;
+
+    const moveInterval = setInterval(() => {
+        if (isPaused) return; // Toporul îngheață dacă jocul e pus pe pauză
+
+        posX += dx;
+        posY += dy;
+
+        // Ricoșeu din pereți
+        if (posX <= 0 || posX >= window.innerWidth - 70) { dx *= -1; bounces++; }
+        if (posY <= 0 || posY >= window.innerHeight - 70) { dy *= -1; bounces++; }
+
+        axe.style.left = posX + 'px';
+        axe.style.top = posY + 'px';
+
+        // Verificăm dacă lovește caracterul (Kevin)
+        const axeRect = axe.getBoundingClientRect();
+        const kevinRect = document.getElementById('kevin').getBoundingClientRect();
+
+        if (axeRect.left < kevinRect.right && axeRect.right > kevinRect.left &&
+            axeRect.top < kevinRect.bottom && axeRect.bottom > kevinRect.top) {
+            
+            // L-A LOVIT!
+            score = Math.max(0, score - 10);
+            updateScoreUI(true); // Flash roșu
+            
+            // Efect vizual de lovitură pe Kevin
+            document.getElementById('kevin').style.filter = "brightness(2) sepia(1) hue-rotate(-50deg)";
+            setTimeout(() => { document.getElementById('kevin').style.filter = ""; }, 200);
+        }
+
+        // Toporul dispare după 10 ricoșeuri
+        if (bounces >= 10) {
+            clearInterval(moveInterval);
+            axe.remove();
+        }
+    }, 30);
+}
+
+
+
+let eventTimeout = null;
+
+function spawnSpecialEvent() {
+    if (isPaused) return;
+
+    // Curățăm evenimentul vechi de pe ecran (dacă nu a fost apăsat)
+    const existing = document.querySelector('.special-event-item');
+    if (existing) existing.remove();
+
+    // Alegem un eveniment din listă (momentan avem doar toporul)
+    const eventKeys = Object.keys(specialRegistry);
+    const chosenKey = eventKeys[Math.floor(Math.random() * eventKeys.length)];
+    const eventData = specialRegistry[chosenKey];
+
+    const item = document.createElement('div');
+    item.className = 'special-event-item';
+    item.style.backgroundImage = `url('${eventData.image}')`;
+    
+    // Poziție random
+    const area = document.getElementById('gameArea');
+    item.style.left = Math.random() * (area.clientWidth - 70) + "px";
+    item.style.top = Math.random() * (area.clientHeight - 70) + "px";
+    
+    area.appendChild(item);
+
+    // Logică de click
+    item.onclick = (e) => {
+        e.stopPropagation();
+        if (!e.isTrusted) return;
+
+        // Executăm acțiunea evenimentului (ex: pornește toporul care sare)
+        eventData.action(e);
+        item.remove();
+    };
+
+    // Dispare după 4 secunde dacă nu e apăsat
+    setTimeout(() => { if (item) item.remove(); }, 4000);
+
+    // Planificăm următorul spawn
+    eventTimeout = setTimeout(spawnSpecialEvent, Math.random() * 7000 + 8000);
 }
   </script>
 </body>
