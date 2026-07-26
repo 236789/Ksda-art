@@ -1895,6 +1895,84 @@
     color: white !important;
     border-color: white !important;
 }
+
+
+/* --- SETTINGS TABS UI --- */
+.settings-tabs {
+    display: flex;
+    justify-content: space-between;
+    gap: 4px; /* Tight gap so 4 tabs fit */
+    width: 100%;
+    margin-bottom: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #9aa0b8;
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px; /* Small text for mobile fit */
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    padding: 8px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.tab-btn i { font-size: 18px; }
+
+/* Active Tab Style */
+.tab-btn.active {
+    background: rgba(250, 204, 21, 0.15);
+    color: #facc15;
+    box-shadow: inset 0 0 10px rgba(250, 204, 21, 0.2);
+}
+
+/* Hide inactive content */
+.tab-content {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    animation: fadeInTab 0.2s ease;
+    
+    /* Min height so the modal doesn't aggressively shrink on empty tabs */
+    min-height: 250px; 
+}
+
+.tab-content.active-content {
+    display: flex;
+}
+
+@keyframes fadeInTab {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Empty Tab Placeholder Style */
+.placeholder-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    flex: 1;
+    font-family: 'Oswald', sans-serif;
+    font-size: 16px;
+    color: #9aa0b8;
+    text-align: center;
+    opacity: 0.6;
+}
   </style>
 </head>
 <body>
@@ -2122,41 +2200,92 @@
       <h2><i class="fa-solid fa-gear"></i> SETĂRI</h2>
     </div>
 
-
-    <!-- SLIDERS SECTION -->
-    <div class="settings-group">
-      <div class="s-label-row">
-        <span>MUZICĂ</span>
-        <span id="musicVolValue" class="s-percent">8%</span>
-      </div>
-      <input type="range" min="0" max="100" value="8" class="s-range" id="musicRange" oninput="updateMusicVolume(this.value)">
+    <!-- TABS NAVIGATION (4 Tabs) -->
+    <div class="settings-tabs">
+      <button class="tab-btn active" onclick="switchTab('sunete', this)">
+        <i class="fa-solid fa-music"></i> <span>SUNETE</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('vizual', this)">
+        <i class="fa-solid fa-eye"></i> <span>VIZUAL</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('feedback', this)">
+        <i class="fa-solid fa-comment-dots"></i> <span>FEEDBACK</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('diverse', this)">
+        <i class="fa-solid fa-box-open"></i> <span>DIVERSE</span>
+      </button>
     </div>
 
-    <div class="settings-group">
-      <div class="s-label-row">
-        <span>EFECTE (SFX)</span>
-        <span id="sfxVolValue" class="s-percent">50%</span>
-      </div>
-      <input type="range" min="0" max="100" value="50" class="s-range" id="sfxRange" oninput="updateSFXVolume(this.value)">
-    </div>
-
-    <!-- RADIO SECTION -->
-    <div class="settings-group">
-      <div class="radio-flex">
-        <button class="s-arrow" onclick="changeTrack(-1)"><i class="fa-solid fa-caret-left"></i></button>
-        <div class="s-track-display">
-          <span id="currentTrackName">MELODIA #1</span>
+    <!-- =========================
+         TAB 1: SUNETE (Your current audio settings)
+         ========================= -->
+    <div id="tab-sunete" class="tab-content active-content">
+      <div class="settings-group">
+        <div class="s-label-row">
+          <span>MUZICĂ</span>
+          <span id="musicVolValue" class="s-percent">8%</span>
         </div>
-        <button class="s-arrow" onclick="changeTrack(1)"><i class="fa-solid fa-caret-right"></i></button>
+        <input type="range" min="0" max="100" value="8" class="s-range" id="musicRange" oninput="updateMusicVolume(this.value)">
       </div>
-    </div>
 
-    <!-- BUTTONS SECTION -->
-    <div class="s-footer">
-      <button class="menu-btn play s-btn s-red" onclick="toggleMuteAll()" id="muteAllBtn">
+      <div class="settings-group">
+        <div class="s-label-row">
+          <span>EFECTE (SFX)</span>
+          <span id="sfxVolValue" class="s-percent">50%</span>
+        </div>
+        <input type="range" min="0" max="100" value="50" class="s-range" id="sfxRange" oninput="updateSFXVolume(this.value)">
+      </div>
+
+      <div class="settings-group">
+        <div class="radio-flex">
+          <button class="s-arrow" onclick="changeTrack(-1)"><i class="fa-solid fa-caret-left"></i></button>
+          <div class="s-track-display">
+            <span id="currentTrackName">MELODIA #1</span>
+          </div>
+          <button class="s-arrow" onclick="changeTrack(1)"><i class="fa-solid fa-caret-right"></i></button>
+        </div>
+      </div>
+      
+      <!-- MUTE BUTTON -->
+      <button class="menu-btn play s-btn s-red" style="margin-top: 5px !important;" onclick="toggleMuteAll()" id="muteAllBtn">
         <i class="fa-solid fa-volume-xmark"></i> <span>OPREȘTE TOT</span>
       </button>
+    </div>
 
+    <!-- =========================
+         TAB 2: VIZUAL (Empty Placeholder)
+         ========================= -->
+    <div id="tab-vizual" class="tab-content">
+      <div class="placeholder-text">
+        <i class="fa-solid fa-paint-roller" style="font-size: 30px; margin-bottom: 10px; color:#facc15;"></i>
+        <p>Setări vizuale în curând...</p>
+      </div>
+    </div>
+
+    <!-- =========================
+         TAB 3: FEEDBACK (Empty Placeholder)
+         ========================= -->
+    <div id="tab-feedback" class="tab-content">
+      <div class="placeholder-text">
+        <i class="fa-solid fa-paper-plane" style="font-size: 30px; margin-bottom: 10px; color:#facc15;"></i>
+        <p>Sistemul de feedback în curând...</p>
+      </div>
+    </div>
+
+    <!-- =========================
+         TAB 4: DIVERSE (Empty Placeholder)
+         ========================= -->
+    <div id="tab-diverse" class="tab-content">
+      <div class="placeholder-text">
+        <i class="fa-solid fa-screwdriver-wrench" style="font-size: 30px; margin-bottom: 10px; color:#facc15;"></i>
+        <p>Alte setări în curând...</p>
+      </div>
+    </div>
+
+    <!-- =========================
+         FOOTER (ALWAYS VISIBLE)
+         ========================= -->
+    <div class="s-footer" style="margin-top: 15px;">
       <button class="menu-btn play s-btn" onclick="closeSettings()">
         <i class="fa-solid fa-check"></i> <span>SALVEAZĂ</span>
       </button>
@@ -3221,6 +3350,27 @@ async function syncSettingsToCloud() {
         console.error("❌ FIRESTORE ERROR:", error);
     }
     console.groupEnd();
+}
+
+
+
+// --- TAB SWITCHING LOGIC ---
+function switchTab(tabId, btnElement) {
+    // 1. Remove 'active' class from all buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // 2. Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active-content');
+    });
+
+    // 3. Add 'active' to the clicked button
+    btnElement.classList.add('active');
+
+    // 4. Show the correct tab content
+    document.getElementById(`tab-${tabId}`).classList.add('active-content');
 }
   </script>
 </body>
