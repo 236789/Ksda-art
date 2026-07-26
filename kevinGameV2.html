@@ -3516,78 +3516,58 @@ async function submitFeedback() {
     const btn = document.getElementById('submitFeedbackBtn');
     const rawText = inputEl.value.trim();
 
-    // 1. Validare de Bază
+    // 1. Validări rapide la nivel de client (pentru UX)
     if (rawText.length < 10) {
         alert("Te rugăm să scrii un mesaj de minim 10 caractere.");
         return;
     }
-    if (rawText.length > 500) {
-        alert("Mesajul tău a depășit limita de 500 de caractere.");
-        return;
-    }
-
-    // 2. Validare Link-uri și Cod
-    const linkRegex = /(https?:\/\/[^\s]+|www\.[^\s]+|\.com|\.ro)/gi;
-    const codeRegex = /<[^>]*>?/gm;
-    if (linkRegex.test(rawText) || codeRegex.test(rawText)) {
-        alert("⚠️ Mesajul tău nu poate conține link-uri sau cod!");
-        return;
-    }
-
-    // 3. Validare Limbaj Inadecvat
+    
     const lowerText = rawText.toLowerCase();
     for (let word of badWordsList) {
         if (lowerText.includes(word.toLowerCase())) {
-            alert("⚠️ Limbaj inadecvat detectat. Te rugăm să păstrezi un limbaj civilizat.");
+            alert("⚠️ Limbaj inadecvat detectat.");
             return;
         }
     }
 
+    // Blocăm butonul să nu dea spam în timp ce se trimite
     btn.disabled = true;
-    btn.querySelector('span').innerText = "SE VERIFICĂ...";
+    btn.querySelector('span').innerText = "SE TRIMITE...";
 
     try {
-        const playerRef = db.collection('players').doc(currentUID);
-        const playerDoc = await playerRef.get();
+        // 2. Luăm Token-ul (Pașaportul) de la Google
+        const idToken = await firebase.auth().currentUser.getIdToken(true);
         
-        // 4. Verificare 24 de ore (Backend Check)
-        if (playerDoc.exists) {
-            const lastTime = playerDoc.data().lastFeedbackTime;
-            if (lastTime) {
-                const diff = Date.now() - lastTime;
-                if (diff < 24 * 60 * 60 * 1000) {
-                    alert("⏳ Poți trimite un singur feedback la 24 de ore!");
-                    btn.disabled = false;
-                    btn.querySelector('span').innerText = "TRIMITE";
-                    checkFeedbackCooldown(); // Activează overlay-ul dacă s-a dat refresh la pagină
-                    return;
-                }
-            }
-        }
-
-        // 5. Trimitere propriu-zisă
-        btn.querySelector('span').innerText = "SE TRIMITE...";
-        await db.collection('feedbacks').add({
-            uid: currentUID,
-            username: currentUsername,
-            message: rawText,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        // 3. Trimitem cererea către BACKEND
+        const response = await fetch('https://kevin-backend-qodc.onrender.com/submit-feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken: idToken, message: rawText })
         });
 
-        // 6. Salvare timp în profil
-        const now = Date.now();
-        await playerRef.set({ lastFeedbackTime: now }, { merge: true });
-
-        // 7. Succes! Resetăm input și activăm Overlay-ul de blocare
-        inputEl.value = "";
-        updateFeedbackCounter();
-        
-        // Activăm vizual blocarea
-        showFeedbackLock(now);
+        if (response.ok) {
+            // 4. SUCCES!
+            inputEl.value = "";
+            updateFeedbackCounter();
+            
+            // Activăm overlay-ul vizual cu cronometru (pornind de la momentul actual)
+            showFeedbackLock(Date.now());
+            
+            alert("✅ Feedback trimis cu succes! Mulțumim.");
+        } else {
+            // 5. EROARE (Cooldown, Spam, sau Token invalid)
+            const errorMsg = await response.text();
+            alert("❌ " + errorMsg);
+            
+            // Dacă eroarea e de Cooldown (403), împrospătăm lock-ul vizual
+            if (response.status === 403) checkFeedbackCooldown();
+        }
 
     } catch (error) {
-        console.error("Eroare server:", error);
-        alert("Eroare la trimitere. Încearcă din nou!");
+        console.error("Connection Error:", error);
+        alert("⚠️ Serverul nu răspunde. Verifică conexiunea la internet!");
+    } finally {
+        // Deblocăm butonul indiferent de rezultat
         btn.disabled = false;
         btn.querySelector('span').innerText = "TRIMITE";
     }
