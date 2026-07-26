@@ -3790,13 +3790,28 @@ const popSounds = [
 
 const missSoundUrl = "https://www.dropbox.com/scl/fi/ggz3cmweur2hgdrm0dc3j/Miss.mp3?rlkey=dv0lgzrt4f294pxfegrhirmna&st=vfn6uotb&dl=1";
 
-// Funcție universală pentru a reda un sunet scurt (fără să se întrerupă dacă dai click rapid)
+// --- LOGICA DE PRE-LOAD (REZOLVĂ DELAY-UL) ---
+const sfxCache = {};
+
+// Încărcăm toate sunetele în memorie imediat ce se deschide pagina
+[...popSounds, missSoundUrl].forEach(url => {
+    const audio = new Audio(url);
+    audio.preload = "auto";
+    sfxCache[url] = audio;
+});
+
+// Funcția ta playSFX, acum mult mai rapidă
 function playSFX(url) {
-    if (isMuted) return; // Nu cânta dacă e pe Mute
+    if (isMuted) return; 
     
-    let sound = new Audio(url);
-    sound.volume = sfxVolume; // Folosim volumul din setări
-    sound.play().catch(e => {}); // Ignorăm erorile de browser
+    // În loc să creăm "new Audio", luăm sunetul deja descărcat
+    const masterAudio = sfxCache[url];
+    if (masterAudio) {
+        // Facem o copie rapidă ca să putem da spam la click-uri
+        const soundClone = masterAudio.cloneNode();
+        soundClone.volume = sfxVolume;
+        soundClone.play().catch(e => {});
+    }
 }
 
 function playRandomPop() {
