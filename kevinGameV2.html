@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -1878,6 +1879,22 @@
     color: white !important;
     border-color: white !important;
 }
+
+
+.s-red {
+    background: linear-gradient(180deg, #ff5c5c 0%, #d10000 100%) !important;
+    box-shadow: 0 5px 0 #4a0000 !important;
+    color: white !important;
+    border-color: white !important;
+}
+
+/* NEW: Add this right under .s-red */
+.s-green {
+    background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%) !important;
+    box-shadow: 0 5px 0 #14532d !important;
+    color: white !important;
+    border-color: white !important;
+}
   </style>
 </head>
 <body>
@@ -2275,15 +2292,12 @@ async function checkUserInFirestore(uid) {
 
     let user = firebase.auth().currentUser;
     if (!user) {
-        console.log("Waiting for user session...");
         setTimeout(() => checkUserInFirestore(uid), 1000);
         return;
     }
 
     try {
         const idToken = await user.getIdToken(true);
-        console.log("Token obtained! sending to cloud...");
-
         const response = await fetch('https://kevin-backend-qodc.onrender.com/get-user', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -2298,6 +2312,16 @@ async function checkUserInFirestore(uid) {
             score = data.score || 0;
             lastSavedScore = score;
             
+            // 🎯 FIX: Manually fetch settings directly from 'players' to fix the backend mismatch!
+            try {
+                const playerDoc = await db.collection('players').doc(uid).get();
+                if (playerDoc.exists && playerDoc.data().settings) {
+                    data.settings = playerDoc.data().settings;
+                }
+            } catch (err) {
+                console.warn("Could not fetch direct player settings:", err);
+            }
+
             // --- LOAD SAVED SETTINGS ---
             if (data.settings) {
                 musicVolume = data.settings.musicVolume ?? 0.08;
@@ -2320,11 +2344,13 @@ async function checkUserInFirestore(uid) {
                 const mBtn = document.getElementById('muteAllBtn');
                 if (mBtn) {
                     if (isMuted) {
-                        mBtn.classList.add('s-red'); // Keep it red
+                        mBtn.classList.remove('s-red');
+                        mBtn.classList.add('s-green');
                         mBtn.querySelector('span').innerText = "PORNEȘTE SUNET";
                         mBtn.querySelector('i').className = "fa-solid fa-volume-high";
                     } else {
-                        mBtn.classList.remove('s-red');
+                        mBtn.classList.remove('s-green');
+                        mBtn.classList.add('s-red');
                         mBtn.querySelector('span').innerText = "OPREȘTE TOT";
                         mBtn.querySelector('i').className = "fa-solid fa-volume-xmark";
                     }
@@ -2345,14 +2371,11 @@ async function checkUserInFirestore(uid) {
             loadingModal.style.display = 'none';
             document.getElementById('usernameModal').style.display = 'flex';
         } else {
-            const errorMsg = await response.text();
-            console.error("Cloud Error:", errorMsg);
             alert("Eroare de autorizare (401). Încearcă un Refresh!");
             loadingModal.style.display = 'none';
         }
     } catch (e) {
         clearTimeout(wakeUpTimer);
-        console.error("Connection failed:", e);
         loadingModal.style.display = 'none';
         alert("Serverul este ocupat. Te rugăm să revii în 1 minut.");
     }
@@ -2690,32 +2713,29 @@ function showComboText(x, y, count, isMiss = false) {
 let isPaused = false;
 
 function togglePause() {
-  if (isPaused) return; // Prevent double pausing
+  if (isPaused) return; 
   
   isPaused = true;
-  // Stop Kevin
   clearInterval(moveKevinInterval);
   clearTimeout(tiredTimeout);
   
-  // Show Modal
   document.getElementById('pauseModal').style.display = 'flex';
-  
-  // Disable clicking the character in the background
   document.getElementById('kevin').style.pointerEvents = 'none';
 
-if (musicStarted) bgMusic.volume = 0.1;
+  // FIX: Drop volume proportionally to user settings, not hardcoded!
+  if (musicStarted && !isMuted) bgMusic.volume = musicVolume * 0.3; 
 }
 
 function resumeGame() {
   isPaused = false;
-  // Hide Modal
   document.getElementById('pauseModal').style.display = 'none';
   
-  // Re-enable character and restart movement
   document.getElementById('kevin').style.pointerEvents = 'auto';
   startKevinMovement();
   startTiredCycle();
-if (musicStarted) bgMusic.volume = 0.3;
+
+  // FIX: Restore volume to the user's exact settings
+  if (musicStarted && !isMuted) bgMusic.volume = musicVolume; 
 }
 
 async function leaveGame() {
@@ -3090,15 +3110,36 @@ function updateSFXVolume(val) {
 function toggleMuteAll() {
     isMuted = !isMuted; // Update Global
     const btn = document.getElementById('muteAllBtn');
+    
     if (isMuted) {
         bgMusic.volume = 0;
         btn.querySelector('span').innerText = "PORNEȘTE SUNET";
-        btn.classList.add('mute-btn-active');
+        btn.querySelector('i').className = "fa-solid fa-volume-high";
+        btn.classList.remove('s-red');
+        btn.classList.add('s-green');
     } else {
         bgMusic.volume = musicVolume;
         btn.querySelector('span').innerText = "OPREȘTE TOT";
-        btn.classList.remove('mute-btn-active');
+        btn.querySelector('i').className = "fa-solid fa-volume-xmark";
+        btn.classList.remove('s-green');
+        btn.classList.add('s-red');
     }
+}
+
+function changeTrack(dir) {
+    lastTrackIndex += dir;
+    if (lastTrackIndex < 0) lastTrackIndex = playlist.length - 1;
+    if (lastTrackIndex >= playlist.length) lastTrackIndex = 0;
+    
+    const trackUrl = playlist[lastTrackIndex];
+    bgMusic.src = trackUrl;
+    
+    // FIX: Apply volume correctly when switching songs!
+    bgMusic.volume = isMuted ? 0 : musicVolume;
+    
+    bgMusic.play().catch(e => console.warn("Radio switch error", e));
+    
+    updateRadioText();
 }
 
 // UPDATE THE CLOSE FUNCTION TO SAVE
