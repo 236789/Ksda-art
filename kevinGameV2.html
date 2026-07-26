@@ -2068,6 +2068,47 @@
     font-weight: bold;
     color: #fff;
 }
+
+/* STIL PENTRU TOGGLE SWITCH */
+.s-switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 26px;
+}
+
+.s-switch input { opacity: 0; width: 0; height: 0; }
+
+.s-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #131526;
+  border: 2px solid rgba(255,255,255,0.1);
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.s-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px; width: 18px;
+  left: 2px; bottom: 2px;
+  background-color: #9aa0b8;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .s-slider {
+  background-color: rgba(250, 204, 21, 0.2);
+  border-color: #facc15;
+}
+
+input:checked + .s-slider:before {
+  transform: translateX(24px);
+  background-color: #facc15;
+  box-shadow: 0 0 10px #facc15;
+}
   </style>
 </head>
 <body>
@@ -2347,15 +2388,25 @@
       </button>
     </div>
 
-    <!-- =========================
-         TAB 2: VIZUAL (Empty Placeholder)
-         ========================= -->
-    <div id="tab-vizual" class="tab-content">
-      <div class="placeholder-text">
-        <i class="fa-solid fa-paint-roller" style="font-size: 30px; margin-bottom: 10px; color:#facc15;"></i>
-        <p>Setări vizuale în curând...</p>
+<!-- =========================
+     TAB 2: VIZUAL
+     ========================= -->
+<div id="tab-vizual" class="tab-content">
+  <div class="settings-group">
+    <div class="s-label-row" style="justify-content: space-between; align-items: center;">
+      <div style="display:flex; flex-direction:column; text-align:left;">
+          <span style="font-size: 14px; color: #fff;">DIALOGURI</span>
+          <span style="font-size: 10px; color: #9aa0b8;">Afișează bulele de text ale eroilor</span>
       </div>
+      
+      <!-- TOGGLE SWITCH -->
+      <label class="s-switch">
+        <input type="checkbox" id="bubblesToggle" checked onchange="updateBubblesSetting(this.checked)">
+        <span class="s-slider"></span>
+      </label>
     </div>
+  </div>
+</div>
 
 <!-- =========================
      TAB 3: FEEDBACK
@@ -2556,7 +2607,6 @@ async function checkUserInFirestore(uid) {
             score = data.score || 0;
             lastSavedScore = score;
             
-            // 🎯 FIX: Manually fetch settings directly from 'players' to fix the backend mismatch!
             try {
                 const playerDoc = await db.collection('players').doc(uid).get();
                 if (playerDoc.exists && playerDoc.data().settings) {
@@ -2572,19 +2622,23 @@ async function checkUserInFirestore(uid) {
                 sfxVolume = data.settings.sfxVolume ?? 0.5;
                 isMuted = data.settings.isMuted ?? false;
                 lastTrackIndex = data.settings.lastTrackIndex ?? 0;
+                
+                // 👁️ LOAD BUBBLES SETTING
+                showBubbles = data.settings.showBubbles ?? true;
 
-                // 1. Apply to Audio Object
                 bgMusic.volume = isMuted ? 0 : musicVolume;
                 
-                // 2. Update the UI Sliders and Text
                 if(document.getElementById('musicRange')) {
                     document.getElementById('musicRange').value = musicVolume * 100;
                     document.getElementById('musicVolValue').innerText = Math.round(musicVolume * 100) + "%";
                     document.getElementById('sfxRange').value = sfxVolume * 100;
                     document.getElementById('sfxVolValue').innerText = Math.round(sfxVolume * 100) + "%";
+                    
+                    // Update the Switch UI
+                    const bToggle = document.getElementById('bubblesToggle');
+                    if(bToggle) bToggle.checked = showBubbles;
                 }
 
-                // 3. Update Mute Button State
                 const mBtn = document.getElementById('muteAllBtn');
                 if (mBtn) {
                     if (isMuted) {
@@ -3206,9 +3260,16 @@ emmanuel: [
   ]
 };
 
+function updateBubblesSetting(val) {
+    showBubbles = val;
+    console.log("Dialoguri eroi:", showBubbles ? "PORNITE" : "OPRITE");
+}
+
 // 🧠 INTERVALUL DE TRASH TALK (Actualizat pentru V2)
 setInterval(() => {
   if (window.isGamePaused) return;
+  if (isPaused || !showBubbles) return;
+
 
   // 1. Identificăm ID-ul caracterului curent (setat la confirmare sau încărcare)
   // Folosim o variabilă globală window.currentPlayingCharId pe care o setăm mai jos
@@ -3438,29 +3499,33 @@ async function syncSettingsToCloud() {
 
     console.group("🔥 FIRESTORE SYNC: SETTINGS");
     
+    // Obiectul cu toate setările tale
     const settingsPayload = {
         musicVolume: musicVolume,
         sfxVolume: sfxVolume,
         isMuted: isMuted,
-        lastTrackIndex: lastTrackIndex
+        lastTrackIndex: lastTrackIndex, // FIX: Am adăugat virgula aici
+        showBubbles: showBubbles        // Acum se salvează dacă bulele sunt On sau Off
     };
 
     console.log("📤 Writing to Firestore for UID:", currentUID, settingsPayload);
 
     try {
-        // Direct write to your 'users' collection
+        // Scriem direct în documentul jucătorului
         await db.collection('players').doc(currentUID).set({
             settings: settingsPayload
-        }, { merge: true }); // 'merge: true' ensures we don't delete their score/username
+        }, { merge: true }); // merge: true păstrează scorul și restul datelor intacte
 
         console.log("✅ FIRESTORE SUCCESS: Settings updated!");
         
-        // Visual feedback on the button
+        // Feedback vizual pe butonul de salvare din modal
         const saveBtn = document.querySelector('.s-btn span');
         if(saveBtn) {
             const oldText = saveBtn.innerText;
             saveBtn.innerText = "SALVAT! ✅";
-            setTimeout(() => { saveBtn.innerText = oldText; }, 2000);
+            setTimeout(() => { 
+                if(saveBtn) saveBtn.innerText = oldText; 
+            }, 2000);
         }
     } catch (error) {
         console.error("❌ FIRESTORE ERROR:", error);
