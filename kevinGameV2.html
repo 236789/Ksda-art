@@ -2257,6 +2257,43 @@ input:checked + .s-slider:before {
 @media (max-width: 600px) {
     .event-tooltip { display: none !important; }
 }
+
+
+/* Moves the indicator container up slightly */
+#active-events-container {
+    bottom: 30px !important; 
+    left: 20px;
+    z-index: 2000; /* Ensures it stays above other elements */
+}
+
+/* Adjusts the PC Tooltip position so it's not "too low" */
+.event-tooltip {
+    bottom: 0; /* Align bottom of tooltip with bottom of box */
+    top: auto !important;
+    transform: translateX(10px) translateY(0) !important;
+    left: 100%;
+    margin-bottom: 0;
+}
+
+/* Add a "Click for info" hint for mobile on the indicator */
+@media (max-width: 600px) {
+    .active-event-box::after {
+        content: "ℹ️";
+        font-size: 10px;
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #facc15;
+        border-radius: 50%;
+        width: 15px;
+        height: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: black;
+        border: 1px solid black;
+    }
+}
   </style>
 </head>
 <body>
@@ -4119,42 +4156,33 @@ function spawnSpecialEvent() {
     
     area.appendChild(item);
 
-    // Click Logic
+    // Click Logic - STARTS IMMEDIATELY NOW
     item.onclick = (e) => {
         e.stopPropagation();
         if (!e.isTrusted) return;
         item.remove();
 
-        // This is the function that actually starts the event and UI
-        const executeEvent = () => {
-            eventData.action(e);
-            if (eventData.duration) {
-                showEventIndicator(chosenKey, eventData.duration);
-            }
-        };
-
-        // If on mobile, show the pause modal first. If on PC, execute immediately!
-        if (window.innerWidth <= 600) {
-            showMobileEventModal(eventData, executeEvent);
-        } else {
-            executeEvent();
+        // Start the logic and the UI indicator immediately on both PC and Mobile
+        eventData.action(e);
+        if (eventData.duration) {
+            showEventIndicator(chosenKey, eventData.duration);
         }
     };
 
     setTimeout(() => { if (item) item.remove(); }, 4000);
 
     clearTimeout(eventTimeout);
-    eventTimeout = setTimeout(spawnSpecialEvent, 30000); // Exactly 30 seconds
+    eventTimeout = setTimeout(spawnSpecialEvent, 30000); 
 }
 
 // --- MOBILE EVENT MODAL ---
-function showMobileEventModal(eventData, onConfirm) {
-    isPaused = true; // Pause the game
+function showMobileEventModal(eventData) {
+    isPaused = true; // Pause while user reads info
     
     const modalOverlay = document.createElement('div');
     modalOverlay.className = 'modal-overlay';
     modalOverlay.style.display = 'flex';
-    modalOverlay.style.zIndex = '100000'; // Make sure it's on top
+    modalOverlay.style.zIndex = '100000';
     
     const typeColor = eventData.type === 'bad' ? '#ff4444' : '#00ff88';
     const typeText = eventData.type === 'bad' ? 'PERICOL' : 'BONUS';
@@ -4165,16 +4193,15 @@ function showMobileEventModal(eventData, onConfirm) {
             <h2 style="font-size: 24px; margin-bottom: 5px;">${eventData.name}</h2>
             <div style="color: ${typeColor}; font-size: 14px; font-weight: bold; margin-bottom: 15px; border: 2px solid ${typeColor}; display: inline-block; padding: 4px 10px; border-radius: 8px;">${typeText}</div>
             <p style="font-size: 15px; line-height: 1.4; margin-bottom: 20px;">${eventData.description}</p>
-            <button class="menu-btn play" id="mobileEventOkBtn" style="width: 100%; height: 50px; font-size: 20px; padding: 0;">AM ÎNȚELES</button>
+            <button class="menu-btn play" id="mobileEventCloseBtn" style="width: 100%; height: 50px; font-size: 20px; padding: 0;">ÎNCHIDE</button>
         </div>
     `;
 
     document.body.appendChild(modalOverlay);
 
-    document.getElementById('mobileEventOkBtn').onclick = () => {
+    document.getElementById('mobileEventCloseBtn').onclick = () => {
         modalOverlay.remove();
-        isPaused = false; // Unpause the game
-        onConfirm(); // Start the event!
+        isPaused = false; 
     };
 }
 
@@ -4227,13 +4254,14 @@ function showEventIndicator(eventKey, durationSeconds) {
     const box = document.createElement('div');
     box.className = 'active-event-box';
     box.id = 'event-box-' + eventKey; 
+    box.style.pointerEvents = 'auto'; // Make sure the box can be clicked
     
     const typeColor = eventData.type === 'bad' ? '#ff4444' : '#00ff88';
     const typeText = eventData.type === 'bad' ? 'PERICOL' : 'BONUS';
 
     box.innerHTML = `
         <img src="${eventData.image}" style="width: 24px; height: 24px; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">
-        <span class="event-timer" style="font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 16px;">${durationSeconds}s</span>
+        <span class="event-timer" style="font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 16px; margin-left: 8px;">${durationSeconds}s</span>
         
         <div class="event-tooltip">
             <div style="font-family: 'Orbitron'; color: #facc15; font-size: 15px; margin-bottom: 6px;">${eventData.name}</div>
@@ -4241,6 +4269,14 @@ function showEventIndicator(eventKey, durationSeconds) {
             <div style="font-family: 'Oswald'; font-size: 13px; color: #d1d5db; line-height: 1.3;">${eventData.description}</div>
         </div>
     `;
+
+    // MOBILE MODAL TRIGGER: Click the indicator icon to see info
+    box.onclick = (e) => {
+        e.stopPropagation();
+        if (window.innerWidth <= 600) {
+            showMobileEventModal(eventData); 
+        }
+    };
 
     container.appendChild(box);
 
