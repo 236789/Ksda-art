@@ -3980,60 +3980,58 @@ const specialRegistry = {
     },
     "glitchMouse": {
         name: "Mouse Glicat",
-        image: "https://iili.io/Ck0qyMX.png", // Imaginea cu mouse-ul colorat
+        image: "https://iili.io/Ck0qyMX.png",
         type: "good",
         duration: 15,
-        description: "Un mouse glicat care apasă singur și îți crește scorul!",
+        description: "Un mouse glicat care urmărește personajul și dă click-uri automate!",
         action: (e) => startAutoClickEvent()
     }
 };
-
 
 function startAutoClickEvent() {
     const gameArea = document.getElementById('gameArea');
     const kevin = document.getElementById('kevin');
     
-    // Creăm cursorul vizual care va urmări personajul
     const autoCursor = document.createElement('img');
-    autoCursor.src = "https://iili.io/Ck07Z1R.png"; // Imaginea cursorului alb
+    autoCursor.src = "https://iili.io/Ck07Z1R.png"; 
     autoCursor.style.position = 'absolute';
     autoCursor.style.width = '50px';
     autoCursor.style.zIndex = '1005';
-    autoCursor.style.pointerEvents = 'none'; // Să nu blocheze click-urile tale
+    autoCursor.style.pointerEvents = 'none'; 
     autoCursor.style.transition = 'left 0.1s linear, top 0.1s linear';
     autoCursor.style.filter = "drop-shadow(0 0 10px rgba(255,255,255,0.8))";
     gameArea.appendChild(autoCursor);
 
-    // 1. Logica de urmărire (Cursorul stă pe personaj)
+    // 1. URRMĂRIRE PERSONAJ
     const followInterval = setInterval(() => {
         if (isPaused) return;
         const rect = kevin.getBoundingClientRect();
-        // Poziționăm cursorul în centrul personajului
-        autoCursor.style.left = (rect.left + rect.width / 2) + 'px';
-        autoCursor.style.top = (rect.top + rect.height / 2) + 'px';
+        autoCursor.style.left = (rect.left + rect.width / 3) + 'px'; // Poziționat ușor la stânga centrului
+        autoCursor.style.top = (rect.top + rect.height / 3) + 'px';
     }, 50);
 
-    // 2. Logica de Auto-Click (Apasă la fiecare 400ms)
+    // 2. LOGICA DE AUTO-CLICK
     const clickInterval = setInterval(() => {
         if (isPaused) return;
 
-        // Creștem scorul și combo-ul
         score++;
         comboCount++;
         updateScoreUI();
-        playRandomPop(); // Sunet de hit
+        playRandomPop(); 
 
-        // Afișăm textul de combo chiar deasupra personajului
+        // Resetăm timer-ul de combo pentru a preveni resetarea combo-ului manual
+        clearTimeout(comboTimer);
+        comboTimer = setTimeout(() => { comboCount = 0; }, 2000);
+
         const rect = kevin.getBoundingClientRect();
         showComboText(rect.left + rect.width / 2, rect.top, comboCount);
 
-        // Efect vizual de "pulse" pe cursor la fiecare click
+        // Efect vizual de click
         autoCursor.style.transform = "scale(0.8)";
         setTimeout(() => { autoCursor.style.transform = "scale(1)"; }, 100);
+    }, 450); 
 
-    }, 400); // Viteza de click (aprox 2.5 click-uri pe secundă)
-
-    // 3. Oprirea evenimentului după 15 secunde
+    // 3. CURĂȚARE DUPĂ 15 SECUNDE
     setTimeout(() => {
         clearInterval(followInterval);
         clearInterval(clickInterval);
@@ -4193,9 +4191,7 @@ let eventTimeout = null;
 function spawnSpecialEvent() {
     if (isPaused) return;
 
-    const existing = document.querySelector('.special-event-item');
-    if (existing) existing.remove();
-
+    // ALEGEM UN EVENIMENT RANDOM
     const eventKeys = Object.keys(specialRegistry);
     const chosenKey = eventKeys[Math.floor(Math.random() * eventKeys.length)];
     const eventData = specialRegistry[chosenKey];
@@ -4205,7 +4201,7 @@ function spawnSpecialEvent() {
     item.style.backgroundImage = `url('${eventData.image}')`;
     
     const isMobile = window.innerWidth <= 600;
-    const itemSize = isMobile ? 40 : 65;
+    const itemSize = isMobile ? 45 : 65;
     item.style.width = itemSize + 'px';
     item.style.height = itemSize + 'px';
     
@@ -4215,23 +4211,28 @@ function spawnSpecialEvent() {
     
     area.appendChild(item);
 
-    // Click Logic - STARTS IMMEDIATELY NOW
+    // CLICK PE EMOJI
     item.onclick = (e) => {
         e.stopPropagation();
         if (!e.isTrusted) return;
         item.remove();
 
-        // Start the logic and the UI indicator immediately on both PC and Mobile
+        // Pornim evenimentul imediat
         eventData.action(e);
         if (eventData.duration) {
             showEventIndicator(chosenKey, eventData.duration);
         }
     };
 
-    setTimeout(() => { if (item) item.remove(); }, 4000);
+    // FIECARE EMOJI DISPARE DUPĂ 4 SECUNDE DACĂ NU E APĂSAT
+    setTimeout(() => { 
+        if (item && item.parentElement) item.remove(); 
+    }, 4000);
 
+    // REPROGRAMĂM URMĂTORUL SPAWN (Între 15 și 25 secunde)
+    // Putem avea mai multe spawn-uri active deodată dacă micșorăm timpul
     clearTimeout(eventTimeout);
-    eventTimeout = setTimeout(spawnSpecialEvent, 30000); 
+    eventTimeout = setTimeout(spawnSpecialEvent, Math.random() * 10000 + 15000); 
 }
 
 // --- MOBILE EVENT MODAL ---
