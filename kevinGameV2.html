@@ -2295,28 +2295,30 @@ input:checked + .s-slider:before {
     }
 }
 
-
-/* Overlay pentru Slow Motion */
+/* Overlay for Slow Motion - FIXED Z-INDEX & EFFECT */
 #slowMoOverlay {
     position: fixed;
     top: 0; left: 0;
     width: 100vw; height: 100vh;
-    background: rgba(0, 100, 255, 0.1); /* O tentă ușoară de albastru */
-    backdrop-filter: blur(2px);
+    /* A desaturated blue/gray tint */
+    background: rgba(44, 62, 80, 0.3); 
+    backdrop-filter: grayscale(80%) contrast(1.1) blur(1px);
     pointer-events: none;
-    z-index: 450;
+    z-index: 800; /* Above gameArea (500) but below Kevin (999) */
     display: none;
-    animation: pulseSlowMo 2s infinite alternate;
+    animation: slowMoPulse 3s infinite alternate;
 }
 
-@keyframes pulseSlowMo {
-    from { background: rgba(0, 100, 255, 0.05); }
-    to { background: rgba(0, 100, 255, 0.15); }
+@keyframes slowMoPulse {
+    from { opacity: 0.6; }
+    to { opacity: 1; }
 }
 
-/* Clasa aplicată personajului în slow-motion */
+/* Character in Slow Motion - FIXED TRANSITION */
 .kevin-slowed {
-    transition: left 1.5s linear !important, top 1.5s linear !important;
+    /* Very slow, linear movement for a "floating" effect */
+    transition: left 3s linear !important, top 3s linear !important;
+    filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.5)) saturate(0.5) !important;
 }
   </style>
 </head>
@@ -4075,41 +4077,52 @@ function startAutoClickEvent() {
     }, 15000);
 }
 
+// Variable to track state
+window.isSlowMoActive = false;
 
 function startSlowMoEvent() {
     const overlay = document.getElementById('slowMoOverlay');
     const kevin = document.getElementById('kevin');
 
-    // 1. Activăm efectul vizual
+    if (window.isSlowMoActive) return; // Prevent double trigger
+    window.isSlowMoActive = true;
+
+    // 1. Show the visual effect
     overlay.style.display = 'block';
 
-    // 2. Încetinim muzica (0.6 din viteza normală)
+    // 2. Slow down Music (Playback speed)
     if (bgMusic) {
-        bgMusic.playbackRate = 0.6;
+        bgMusic.playbackRate = 0.5; // Half speed
     }
 
-    // 3. Încetinim personajul
+    // 3. Apply CSS class for slow transition
     kevin.classList.add('kevin-slowed');
     
-    // Oprim mișcarea normală și pornim una foarte rară (la 4 secunde)
+    // 4. Force immediate movement to start the slow transition
     clearInterval(moveKevinInterval);
+    moveKevinAway(); 
+
+    // 5. Change the move interval to be very slow (move every 4 seconds)
     moveKevinInterval = setInterval(() => {
-        if (!isKevinTired) moveKevinAway();
+        if (!isPaused && !isKevinTired) {
+            moveKevinAway();
+        }
     }, 4000);
 
-    // 4. Revenire la normal după 10 secunde
+    // 6. Return to normal after 10 seconds
     setTimeout(() => {
+        window.isSlowMoActive = false;
         overlay.style.display = 'none';
 
-        // Resetăm muzica
+        // Music back to normal
         if (bgMusic) {
             bgMusic.playbackRate = 1.0;
         }
 
-        // Resetăm personajul
+        // Character back to normal
         kevin.classList.remove('kevin-slowed');
         
-        // Repornim mișcarea normală
+        // Restart normal fast movement
         if (!isPaused) {
             startKevinMovement(); 
         }
