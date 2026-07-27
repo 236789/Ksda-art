@@ -2189,19 +2189,18 @@ input:checked + .s-slider:before {
     animation: spinningAxe 0.5s infinite linear;
 }
 
-
 /* ==========================================
-   ACTIVE EVENT INDICATOR UI
+   ACTIVE EVENT INDICATOR UI (BOTTOM-LEFT)
    ========================================== */
 #active-events-container {
     position: absolute;
-    top: 80px;
-    right: 16px;
+    bottom: 20px;   /* Moved to bottom */
+    left: 20px;     /* Moved to left */
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse; /* New boxes stack UPWARDS */
     gap: 10px;
     z-index: 1000;
-    pointer-events: none; /* Allows clicking through the empty space */
+    pointer-events: none; 
 }
 
 .active-event-box {
@@ -2213,10 +2212,10 @@ input:checked + .s-slider:before {
     align-items: center;
     gap: 10px;
     color: white;
-    pointer-events: auto; /* Makes the box itself hoverable */
+    pointer-events: auto; 
     position: relative;
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    animation: slideInEvent 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation: slideInEventLeft 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     cursor: help;
 }
 
@@ -2224,7 +2223,7 @@ input:checked + .s-slider:before {
     visibility: hidden;
     opacity: 0;
     position: absolute;
-    right: 110%; /* Pops out to the left of the indicator */
+    left: 110%; /* Pops out to the RIGHT now */
     top: 50%;
     transform: translateY(-50%) scale(0.9);
     background: rgba(10, 8, 30, 0.95);
@@ -2244,14 +2243,19 @@ input:checked + .s-slider:before {
     transform: translateY(-50%) scale(1);
 }
 
-@keyframes slideInEvent {
-    from { transform: translateX(100px); opacity: 0; }
+@keyframes slideInEventLeft {
+    from { transform: translateX(-100px); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
 }
 
-@keyframes slideOutEvent {
+@keyframes slideOutEventLeft {
     from { transform: translateX(0); opacity: 1; }
-    to { transform: translateX(100px); opacity: 0; }
+    to { transform: translateX(-100px); opacity: 0; }
+}
+
+/* HIDE TOOLTIP ON MOBILE (Mobile will use the modal instead) */
+@media (max-width: 600px) {
+    .event-tooltip { display: none !important; }
 }
   </style>
 </head>
@@ -4088,7 +4092,6 @@ function showEventIndicator(eventKey, durationSeconds) {
     }, 1000);
 }
 
-// --- SPAWN SYSTEM ---
 let eventTimeout = null;
 
 function spawnSpecialEvent() {
@@ -4120,22 +4123,122 @@ function spawnSpecialEvent() {
     item.onclick = (e) => {
         e.stopPropagation();
         if (!e.isTrusted) return;
-
-        eventData.action(e);
-        
-        // 🔥 Trigger the UI Indicator here!
-        if (eventData.duration) {
-            showEventIndicator(chosenKey, eventData.duration);
-        }
-        
         item.remove();
+
+        // This is the function that actually starts the event and UI
+        const executeEvent = () => {
+            eventData.action(e);
+            if (eventData.duration) {
+                showEventIndicator(chosenKey, eventData.duration);
+            }
+        };
+
+        // If on mobile, show the pause modal first. If on PC, execute immediately!
+        if (window.innerWidth <= 600) {
+            showMobileEventModal(eventData, executeEvent);
+        } else {
+            executeEvent();
+        }
     };
 
     setTimeout(() => { if (item) item.remove(); }, 4000);
 
     clearTimeout(eventTimeout);
-    eventTimeout = setTimeout(spawnSpecialEvent, 30000);
+    eventTimeout = setTimeout(spawnSpecialEvent, 30000); // Exactly 30 seconds
 }
+
+
+// --- MOBILE EVENT MODAL ---
+function showMobileEventModal(eventData, onConfirm) {
+    isPaused = true; // Pause the game
+    
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay';
+    modalOverlay.style.display = 'flex';
+    modalOverlay.style.zIndex = '100000'; // Make sure it's on top
+    
+    const typeColor = eventData.type === 'bad' ? '#ff4444' : '#00ff88';
+    const typeText = eventData.type === 'bad' ? 'PERICOL' : 'BONUS';
+
+    modalOverlay.innerHTML = `
+        <div class="modal-box" style="padding: 25px 20px; max-width: 320px;">
+            <img src="${eventData.image}" style="width: 60px; height: 60px; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));">
+            <h2 style="font-size: 24px; margin-bottom: 5px;">${eventData.name}</h2>
+            <div style="color: ${typeColor}; font-size: 14px; font-weight: bold; margin-bottom: 15px; border: 2px solid ${typeColor}; display: inline-block; padding: 4px 10px; border-radius: 8px;">${typeText}</div>
+            <p style="font-size: 15px; line-height: 1.4; margin-bottom: 20px;">${eventData.description}</p>
+            <button class="menu-btn play" id="mobileEventOkBtn" style="width: 100%; height: 50px; font-size: 20px; padding: 0;">AM ÎNȚELES</button>
+        </div>
+    `;
+
+    document.body.appendChild(modalOverlay);
+
+    document.getElementById('mobileEventOkBtn').onclick = () => {
+        modalOverlay.remove();
+        isPaused = false; // Unpause the game
+        onConfirm(); // Start the event!
+    };
+}
+
+// --- SMART EVENT INDICATOR (PREVENTS DUPLICATES) ---
+let activeEventTimers = {}; // Tracks running events
+
+function showEventIndicator(eventKey, durationSeconds) {
+    const eventData = specialRegistry[eventKey];
+    if (!eventData) return;
+
+    // 1. CHECK IF EVENT IS ALREADY RUNNING (Refresh it instead of duplicating)
+    if (activeEventTimers[eventKey]) {
+        clearInterval(activeEventTimers[eventKey].interval);
+        
+        const existingBox = document.getElementById('event-box-' + eventKey);
+        if (existingBox) {
+            const timerEl = existingBox.querySelector('.event-timer');
+            activeEventTimers[eventKey].timeLeft = durationSeconds;
+            timerEl.innerText = durationSeconds + "s";
+            timerEl.style.color = 'white';
+            existingBox.style.borderColor = '#facc15';
+            
+            // Restart the countdown
+            activeEventTimers[eventKey].interval = setInterval(() => {
+                if (isPaused) return;
+                activeEventTimers[eventKey].timeLeft--;
+                let t = activeEventTimers[eventKey].timeLeft;
+                timerEl.innerText = t + "s";
+                
+                if (t <= 3) { timerEl.style.color = '#ff4444'; existingBox.style.borderColor = '#ff4444'; }
+                if (t <= 0) {
+                    clearInterval(activeEventTimers[eventKey].interval);
+                    delete activeEventTimers[eventKey];
+                    existingBox.style.animation = 'slideOutEventLeft 0.3s ease-in forwards';
+                    setTimeout(() => existingBox.remove(), 300);
+                }
+            }, 1000);
+        }
+        return; // Stop here!
+    }
+
+    // 2. IF IT'S A NEW EVENT, CREATE A NEW BOX
+    let container = document.getElementById('active-events-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'active-events-container';
+        document.getElementById('gameArea').appendChild(container);
+    }
+
+    const box = document.createElement('div');
+    box.className = 'active-event-box';
+    box.id = 'event-box-' + eventKey; // Give it a specific ID
+    
+    const typeColor = eventData.type === 'bad' ? '#ff4444' : '#00ff88';
+    const typeText = eventData.type === 'bad' ? 'PERICOL' : 'BONUS';
+
+    box.innerHTML = `
+        <img src="${eventData.image}" style="width: 24px; height: 24px; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">
+        <span class="event-timer" style="font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 16px;">${durationSeconds}s</span>
+        
+        <div class="event-tooltip">
+            <div style="font-family: 'Orbitron'; color: #facc15; font-size: 15px; margin-bottom: 6px;">${eventData.name}</div>
+            <div style="color: ${typeColor
   </script>
 </body>
 </html>
