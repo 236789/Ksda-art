@@ -4191,7 +4191,7 @@ let eventTimeout = null;
 function spawnSpecialEvent() {
     if (isPaused) return;
 
-    // ALEGEM UN EVENIMENT RANDOM
+    // --- LOGICA PENTRU PRIMUL EMOJI ---
     const eventKeys = Object.keys(specialRegistry);
     const chosenKey = eventKeys[Math.floor(Math.random() * eventKeys.length)];
     const eventData = specialRegistry[chosenKey];
@@ -4211,28 +4211,56 @@ function spawnSpecialEvent() {
     
     area.appendChild(item);
 
-    // CLICK PE EMOJI
     item.onclick = (e) => {
         e.stopPropagation();
         if (!e.isTrusted) return;
         item.remove();
-
-        // Pornim evenimentul imediat
         eventData.action(e);
         if (eventData.duration) {
             showEventIndicator(chosenKey, eventData.duration);
         }
     };
 
-    // FIECARE EMOJI DISPARE DUPĂ 4 SECUNDE DACĂ NU E APĂSAT
     setTimeout(() => { 
         if (item && item.parentElement) item.remove(); 
     }, 4000);
 
-    // REPROGRAMĂM URMĂTORUL SPAWN (Între 15 și 25 secunde)
-    // Putem avea mai multe spawn-uri active deodată dacă micșorăm timpul
+    // --- LOGICA PENTRU UN AL DOILEA EMOJI (ȘANSĂ DE 30%) ---
+    // Această parte permite să ai 2 emoji-uri pe ecran deodată
+    if (Math.random() < 0.3) { 
+        const chosenKey2 = eventKeys[Math.floor(Math.random() * eventKeys.length)];
+        const eventData2 = specialRegistry[chosenKey2];
+
+        const item2 = document.createElement('div');
+        item2.className = 'special-event-item';
+        item2.style.backgroundImage = `url('${eventData2.image}')`;
+        item2.style.width = itemSize + 'px';
+        item2.style.height = itemSize + 'px';
+        
+        // Poziție diferită pentru al doilea
+        item2.style.left = Math.random() * (area.clientWidth - itemSize) + "px";
+        item2.style.top = Math.random() * (area.clientHeight - itemSize) + "px";
+        
+        area.appendChild(item2);
+
+        item2.onclick = (e) => {
+            e.stopPropagation();
+            if (!e.isTrusted) return;
+            item2.remove();
+            eventData2.action(e);
+            if (eventData2.duration) {
+                showEventIndicator(chosenKey2, eventData2.duration);
+            }
+        };
+
+        setTimeout(() => { 
+            if (item2 && item2.parentElement) item2.remove(); 
+        }, 4000);
+    }
+
+    // REPROGRAMĂM URMĂTORUL SPAWN (Timp redus la 8-15 secunde pentru intensitate)
     clearTimeout(eventTimeout);
-    eventTimeout = setTimeout(spawnSpecialEvent, Math.random() * 10000 + 15000); 
+    eventTimeout = setTimeout(spawnSpecialEvent, Math.random() * 7000 + 8000); 
 }
 
 // --- MOBILE EVENT MODAL ---
