@@ -2275,50 +2275,23 @@ input:checked + .s-slider:before {
     margin-bottom: 0;
 }
 
-/* Add a "Click for info" hint for mobile on the indicator */
-@media (max-width: 600px) {
-    .active-event-box::after {
-        content: "ℹ️";
-        font-size: 10px;
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        background: #facc15;
-        border-radius: 50%;
-        width: 15px;
-        height: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: black;
-        border: 1px solid black;
-    }
-}
-
-/* Overlay for Slow Motion - FIXED Z-INDEX & EFFECT */
+/* THE SLOW MOTION OVERLAY */
 #slowMoOverlay {
     position: fixed;
     top: 0; left: 0;
     width: 100vw; height: 100vh;
-    /* A desaturated blue/gray tint */
-    background: rgba(44, 62, 80, 0.3); 
-    backdrop-filter: grayscale(80%) contrast(1.1) blur(1px);
+    background: rgba(0, 0, 0, 0.2); 
+    backdrop-filter: grayscale(100%) blur(2px); /* Makes the world gray and blurry */
     pointer-events: none;
-    z-index: 800; /* Above gameArea (500) but below Kevin (999) */
+    z-index: 5000; 
     display: none;
-    animation: slowMoPulse 3s infinite alternate;
 }
 
-@keyframes slowMoPulse {
-    from { opacity: 0.6; }
-    to { opacity: 1; }
-}
-
-/* Character in Slow Motion - FIXED TRANSITION */
-.kevin-slowed {
-    /* Very slow, linear movement for a "floating" effect */
-    transition: left 3s linear !important, top 3s linear !important;
-    filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.5)) saturate(0.5) !important;
+/* THE SLOW MOTION MOVEMENT */
+.kevin-slow-motion {
+    /* This is the magic: it forces the 'left' and 'top' changes to take 2.5s */
+    transition: left 2.5s linear !important, top 2.5s linear !important;
+    filter: drop-shadow(0 0 20px white) brightness(1.2);
 }
   </style>
 </head>
@@ -3064,14 +3037,16 @@ function updateScoreUI(isLoss = false) {
     }, 200);
   }
 }
-// Change the movement function to clear the interval properly
 function startKevinMovement() {
     if (moveKevinInterval) clearInterval(moveKevinInterval);
+    
+    // If slow motion is active, wait 4 seconds between jumps. Otherwise, 1.8s.
+    let speed = isSlowMoActive ? 4000 : 1800; 
+
     moveKevinInterval = setInterval(() => {
         moveKevinAway();
-    }, 1800); // Slightly slower movement for better playability
+    }, speed);
 }
-
 
 
     function moveKevinAway() {
@@ -4084,44 +4059,27 @@ function startSlowMoEvent() {
     const overlay = document.getElementById('slowMoOverlay');
     const kevin = document.getElementById('kevin');
 
-    if (window.isSlowMoActive) return; // Prevent double trigger
-    window.isSlowMoActive = true;
+    isSlowMoActive = true;
 
-    // 1. Show the visual effect
+    // 1. Visuals
     overlay.style.display = 'block';
+    kevin.classList.add('kevin-slow-motion');
 
-    // 2. Slow down Music (Playback speed)
-    if (bgMusic) {
-        bgMusic.playbackRate = 0.5; // Half speed
-    }
+    // 2. Slow Music
+    if (bgMusic) { bgMusic.playbackRate = 0.5; }
 
-    // 3. Apply CSS class for slow transition
-    kevin.classList.add('kevin-slowed');
-    
-    // 4. Force immediate movement to start the slow transition
-    clearInterval(moveKevinInterval);
+    // 3. Trigger the slow movement immediately
+    startKevinMovement(); 
     moveKevinAway(); 
 
-    // 5. Change the move interval to be very slow (move every 4 seconds)
-    moveKevinInterval = setInterval(() => {
-        if (!isPaused && !isKevinTired) {
-            moveKevinAway();
-        }
-    }, 4000);
-
-    // 6. Return to normal after 10 seconds
+    // 4. Return to normal after 10 seconds
     setTimeout(() => {
-        window.isSlowMoActive = false;
+        isSlowMoActive = false;
         overlay.style.display = 'none';
+        kevin.classList.remove('kevin-slow-motion');
 
-        // Music back to normal
-        if (bgMusic) {
-            bgMusic.playbackRate = 1.0;
-        }
+        if (bgMusic) { bgMusic.playbackRate = 1.0; }
 
-        // Character back to normal
-        kevin.classList.remove('kevin-slowed');
-        
         // Restart normal fast movement
         if (!isPaused) {
             startKevinMovement(); 
