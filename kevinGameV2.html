@@ -2188,6 +2188,71 @@ input:checked + .s-slider:before {
     pointer-events: none; /* Nu poți da click pe el după ce a pornit evenimentul */
     animation: spinningAxe 0.5s infinite linear;
 }
+
+
+/* ==========================================
+   ACTIVE EVENT INDICATOR UI
+   ========================================== */
+#active-events-container {
+    position: absolute;
+    top: 80px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+    pointer-events: none; /* Allows clicking through the empty space */
+}
+
+.active-event-box {
+    background: linear-gradient(135deg, #2c2a55 0%, #1b1a37 100%);
+    border: 2px solid #facc15;
+    border-radius: 12px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    pointer-events: auto; /* Makes the box itself hoverable */
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    animation: slideInEvent 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    cursor: help;
+}
+
+.event-tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    right: 110%; /* Pops out to the left of the indicator */
+    top: 50%;
+    transform: translateY(-50%) scale(0.9);
+    background: rgba(10, 8, 30, 0.95);
+    border: 2px solid #5a6288;
+    padding: 12px;
+    border-radius: 8px;
+    width: 220px;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+    text-align: left;
+}
+
+.active-event-box:hover .event-tooltip {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
+
+@keyframes slideInEvent {
+    from { transform: translateX(100px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutEvent {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100px); opacity: 0; }
+}
   </style>
 </head>
 <body>
@@ -3863,16 +3928,16 @@ function playMissSFX() {
 
 
 
-// 📦 CONFIGURARE OBIECTE SPECIALE
 const specialRegistry = {
     "axe": {
         name: "Toporul Nebun",
         image: "https://iili.io/Ck27fPs.png",
         type: "bad",
-        description: "Un topor care ricoșează și îți fură scorul dacă îl lovește pe Kevin!",
+        duration: 10, // <--- Duration in seconds added here
+        description: "Un topor care ricoșează și îți fură scorul dacă te lovește!",
         action: (e) => startAxeEvent()
     }
-    // Aici vom adăuga "bonus_coin", "shield", etc. mai târziu
+    // You can easily add good events here later with type: "good" and their own duration!
 };
 
 
@@ -3882,7 +3947,6 @@ function startAxeEvent() {
     const axe = document.createElement('div');
     axe.className = 'axe-active';
     
-    // 🔥 RESPONSIVE AXE SIZE
     const isMobile = window.innerWidth <= 600;
     const axeSize = isMobile ? 45 : 70;
     axe.style.width = axeSize + 'px';
@@ -3890,18 +3954,13 @@ function startAxeEvent() {
 
     gameArea.appendChild(axe);
 
-    // Start Position
     let posX = Math.random() * (window.innerWidth - axeSize);
     let posY = Math.random() * (window.innerHeight - axeSize);
     
-    // Speed adapted for mobile vs PC
     let dx = (Math.random() > 0.5 ? 1 : -1) * (isMobile ? 7 : 12);
     let dy = (Math.random() > 0.5 ? 1 : -1) * (isMobile ? 7 : 12);
     let recentlyHit = false; 
 
-    // =========================================
-    // EFFECT 1: SCREEN SHAKE
-    // =========================================
     const shakeScreen = () => {
         gameArea.style.transition = 'transform 0.05s ease'; 
         gameArea.style.transform = `translate(${(Math.random() - 0.5) * 15}px, ${(Math.random() - 0.5) * 15}px)`;
@@ -3910,9 +3969,6 @@ function startAxeEvent() {
         }, 50);
     };
 
-    // =========================================
-    // EFFECT 2: RED FLASH (Fixed to work EVERY time)
-    // =========================================
     const flashDamage = () => {
         const flash = document.createElement('div');
         flash.style.position = 'fixed';
@@ -3924,32 +3980,32 @@ function startAxeEvent() {
         flash.style.zIndex = '90000';
         flash.style.opacity = '1';
         document.body.appendChild(flash);
-
-        // 🔥 This forces the browser to draw the red screen BEFORE fading it out!
         void flash.offsetWidth; 
-
         flash.style.transition = 'opacity 0.3s ease-out';
         flash.style.opacity = '0';
-
         setTimeout(() => { flash.remove(); }, 300);
     };
 
-    // =========================================
-    // AXE MOVEMENT LOOP
-    // =========================================
+    // 🔥 Calculate exact ticks for 10 seconds based on the 30ms interval
+    let ticks = 0;
+    const maxTicks = Math.floor(10000 / 30); // ~333 ticks
+
     const moveInterval = setInterval(() => {
         if (isPaused) return; // Freezes if the game is paused
+
+        // Add to our lifespan tick counter
+        ticks++;
+        if (ticks >= maxTicks) {
+            clearInterval(moveInterval);
+            axe.remove();
+            return;
+        }
 
         posX += dx;
         posY += dy;
 
-        // Bounce off walls + Shake screen
-        if (posX <= 0 || posX >= window.innerWidth - axeSize) { 
-            dx *= -1; shakeScreen(); 
-        }
-        if (posY <= 0 || posY >= window.innerHeight - axeSize) { 
-            dy *= -1; shakeScreen(); 
-        }
+        if (posX <= 0 || posX >= window.innerWidth - axeSize) { dx *= -1; shakeScreen(); }
+        if (posY <= 0 || posY >= window.innerHeight - axeSize) { dy *= -1; shakeScreen(); }
 
         axe.style.left = posX + 'px';
         axe.style.top = posY + 'px';
@@ -3957,44 +4013,87 @@ function startAxeEvent() {
         const axeRect = axe.getBoundingClientRect();
         const kevinRect = document.getElementById('kevin').getBoundingClientRect();
 
-        // COLLISION WITH CHARACTER
         if (axeRect.left < kevinRect.right && axeRect.right > kevinRect.left &&
             axeRect.top < kevinRect.bottom && axeRect.bottom > kevinRect.top) {
             
             if (!recentlyHit) {
                 score = Math.max(0, score - 10);
-                updateScoreUI(true); // Red flash on score
-                
+                updateScoreUI(true); 
                 flashDamage();
-                shakeScreen(); // Extra shake on impact
+                shakeScreen(); 
                 
-                // Character turns red briefly
                 document.getElementById('kevin').style.filter = "brightness(2) sepia(1) hue-rotate(-50deg)";
                 setTimeout(() => { document.getElementById('kevin').style.filter = ""; }, 200);
                 
-                // 0.5-second cooldown before they can take damage again
                 recentlyHit = true;
                 setTimeout(() => { recentlyHit = false; }, 500);
             }
         }
     }, 30);
-
-    // =========================================
-    // EXACTLY 10 SECONDS LIFESPAN
-    // =========================================
-    setTimeout(() => {
-        clearInterval(moveInterval);
-        if (axe) axe.remove();
-    }, 10000); // 10000 ms = 10 seconds
 }
 
+// --- EVENT UI GENERATOR ---
+function showEventIndicator(eventKey, durationSeconds) {
+    const eventData = specialRegistry[eventKey];
+    if (!eventData) return;
 
+    // Create the container if it doesn't exist
+    let container = document.getElementById('active-events-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'active-events-container';
+        document.getElementById('gameArea').appendChild(container);
+    }
+
+    const box = document.createElement('div');
+    box.className = 'active-event-box';
+    
+    // Dynamic styling based on good/bad event
+    const typeColor = eventData.type === 'bad' ? '#ff4444' : '#00ff88';
+    const typeText = eventData.type === 'bad' ? 'PERICOL' : 'BONUS';
+
+    box.innerHTML = `
+        <img src="${eventData.image}" style="width: 24px; height: 24px; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">
+        <span class="event-timer" style="font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 16px;">${durationSeconds}s</span>
+        
+        <div class="event-tooltip">
+            <div style="font-family: 'Orbitron'; color: #facc15; font-size: 15px; margin-bottom: 6px;">${eventData.name}</div>
+            <div style="color: ${typeColor}; font-size: 10px; font-weight: bold; margin-bottom: 8px; border: 1px solid ${typeColor}; display: inline-block; padding: 2px 6px; border-radius: 4px; letter-spacing: 1px;">${typeText}</div>
+            <div style="font-family: 'Oswald'; font-size: 13px; color: #d1d5db; line-height: 1.3;">${eventData.description}</div>
+        </div>
+    `;
+
+    container.appendChild(box);
+
+    let timeLeft = durationSeconds;
+    const timerEl = box.querySelector('.event-timer');
+
+    // Countdown logic
+    const interval = setInterval(() => {
+        if (isPaused) return; // Freezes the timer if the game is paused!
+
+        timeLeft--;
+        timerEl.innerText = timeLeft + "s";
+        
+        if (timeLeft <= 3) {
+            timerEl.style.color = '#ff4444'; // Turns red when almost done
+            box.style.borderColor = '#ff4444';
+        }
+        
+        if (timeLeft <= 0) {
+            clearInterval(interval);
+            box.style.animation = 'slideOutEvent 0.3s ease-in forwards';
+            setTimeout(() => box.remove(), 300);
+        }
+    }, 1000);
+}
+
+// --- SPAWN SYSTEM ---
 let eventTimeout = null;
 
 function spawnSpecialEvent() {
     if (isPaused) return;
 
-    // Curățăm evenimentul vechi
     const existing = document.querySelector('.special-event-item');
     if (existing) existing.remove();
 
@@ -4006,32 +4105,34 @@ function spawnSpecialEvent() {
     item.className = 'special-event-item';
     item.style.backgroundImage = `url('${eventData.image}')`;
     
-    // 🔥 RESPONSIVE SIZE (40px mobile, 65px PC)
     const isMobile = window.innerWidth <= 600;
     const itemSize = isMobile ? 40 : 65;
     item.style.width = itemSize + 'px';
     item.style.height = itemSize + 'px';
     
-    // Poziție random
     const area = document.getElementById('gameArea');
     item.style.left = Math.random() * (area.clientWidth - itemSize) + "px";
     item.style.top = Math.random() * (area.clientHeight - itemSize) + "px";
     
     area.appendChild(item);
 
-    // Logică de click
+    // Click Logic
     item.onclick = (e) => {
         e.stopPropagation();
         if (!e.isTrusted) return;
 
         eventData.action(e);
+        
+        // 🔥 Trigger the UI Indicator here!
+        if (eventData.duration) {
+            showEventIndicator(chosenKey, eventData.duration);
+        }
+        
         item.remove();
     };
 
-    // Dispare după 4 secunde dacă nu e apăsat
     setTimeout(() => { if (item) item.remove(); }, 4000);
 
-    // 🔥 LOOP AUTOMAT: Planificăm următorul spawn (între 8 și 15 secunde)
     clearTimeout(eventTimeout);
     eventTimeout = setTimeout(spawnSpecialEvent, 30000);
 }
