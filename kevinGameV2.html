@@ -2294,9 +2294,35 @@ input:checked + .s-slider:before {
         border: 1px solid black;
     }
 }
+
+
+/* Overlay pentru Slow Motion */
+#slowMoOverlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 100, 255, 0.1); /* O tentă ușoară de albastru */
+    backdrop-filter: blur(2px);
+    pointer-events: none;
+    z-index: 450;
+    display: none;
+    animation: pulseSlowMo 2s infinite alternate;
+}
+
+@keyframes pulseSlowMo {
+    from { background: rgba(0, 100, 255, 0.05); }
+    to { background: rgba(0, 100, 255, 0.15); }
+}
+
+/* Clasa aplicată personajului în slow-motion */
+.kevin-slowed {
+    transition: left 1.5s linear !important, top 1.5s linear !important;
+}
   </style>
 </head>
 <body>
+
+<div id="slowMoOverlay"></div>
 
   <!-- ==========================================
        MODALS (OVERLAYS)
@@ -3985,7 +4011,16 @@ const specialRegistry = {
         duration: 15,
         description: "Un mouse glicat care urmărește personajul și dă click-uri automate!",
         action: (e) => startAutoClickEvent()
-    }
+    },
+
+"stopwatch": {
+    name: "Cronometru",
+    image: "https://iili.io/Ck1l1x1.png",
+    type: "good",
+    duration: 10,
+    description: "Timpul încetinește! Muzica și personajul se mișcă în slow-motion.",
+    action: (e) => startSlowMoEvent()
+},
 };
 
 function startAutoClickEvent() {
@@ -4038,6 +4073,47 @@ function startAutoClickEvent() {
         autoCursor.style.opacity = '0';
         setTimeout(() => autoCursor.remove(), 500);
     }, 15000);
+}
+
+
+function startSlowMoEvent() {
+    const overlay = document.getElementById('slowMoOverlay');
+    const kevin = document.getElementById('kevin');
+
+    // 1. Activăm efectul vizual
+    overlay.style.display = 'block';
+
+    // 2. Încetinim muzica (0.6 din viteza normală)
+    if (bgMusic) {
+        bgMusic.playbackRate = 0.6;
+    }
+
+    // 3. Încetinim personajul
+    kevin.classList.add('kevin-slowed');
+    
+    // Oprim mișcarea normală și pornim una foarte rară (la 4 secunde)
+    clearInterval(moveKevinInterval);
+    moveKevinInterval = setInterval(() => {
+        if (!isKevinTired) moveKevinAway();
+    }, 4000);
+
+    // 4. Revenire la normal după 10 secunde
+    setTimeout(() => {
+        overlay.style.display = 'none';
+
+        // Resetăm muzica
+        if (bgMusic) {
+            bgMusic.playbackRate = 1.0;
+        }
+
+        // Resetăm personajul
+        kevin.classList.remove('kevin-slowed');
+        
+        // Repornim mișcarea normală
+        if (!isPaused) {
+            startKevinMovement(); 
+        }
+    }, 10000);
 }
 
 function startAxeEvent() {
