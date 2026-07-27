@@ -2275,23 +2275,50 @@ input:checked + .s-slider:before {
     margin-bottom: 0;
 }
 
-/* THE SLOW MOTION OVERLAY */
+/* Add a "Click for info" hint for mobile on the indicator */
+@media (max-width: 600px) {
+    .active-event-box::after {
+        content: "ℹ️";
+        font-size: 10px;
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #facc15;
+        border-radius: 50%;
+        width: 15px;
+        height: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: black;
+        border: 1px solid black;
+    }
+}
+
+/* Overlay for Slow Motion - FIXED Z-INDEX & EFFECT */
 #slowMoOverlay {
     position: fixed;
     top: 0; left: 0;
     width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.2); 
-    backdrop-filter: grayscale(100%) blur(2px); /* Makes the world gray and blurry */
+    /* A desaturated blue/gray tint */
+    background: rgba(44, 62, 80, 0.3); 
+    backdrop-filter: grayscale(80%) contrast(1.1) blur(1px);
     pointer-events: none;
-    z-index: 5000; 
+    z-index: 800; /* Above gameArea (500) but below Kevin (999) */
     display: none;
+    animation: slowMoPulse 3s infinite alternate;
 }
 
-/* THE SLOW MOTION MOVEMENT */
-.kevin-slow-motion {
-    /* This is the magic: it forces the 'left' and 'top' changes to take 2.5s */
-    transition: left 2.5s linear !important, top 2.5s linear !important;
-    filter: drop-shadow(0 0 20px white) brightness(1.2);
+@keyframes slowMoPulse {
+    from { opacity: 0.6; }
+    to { opacity: 1; }
+}
+
+/* Character in Slow Motion - FIXED TRANSITION */
+.kevin-slowed {
+    /* Very slow, linear movement for a "floating" effect */
+    transition: left 3s linear !important, top 3s linear !important;
+    filter: drop-shadow(0 0 15px rgba(0, 255, 255, 0.5)) saturate(0.5) !important;
 }
   </style>
 </head>
