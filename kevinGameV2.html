@@ -2,6 +2,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -2818,7 +2819,6 @@ function startGameUI() {
   isPaused = false; 
   const kevin = document.getElementById('kevin');
   kevin.style.pointerEvents = 'auto'; 
-  // ---------------------
 
   comboCount = 0;
   updateScoreUI();
@@ -2838,6 +2838,11 @@ function startGameUI() {
   if (saveScoreInterval) clearInterval(saveScoreInterval);
   saveScoreInterval = setInterval(syncScoreToFirestore, 5000);
 
+  // 🔥 START THE SPECIAL EVENT LOOP HERE 🔥
+  clearTimeout(eventTimeout);
+  // Spawns the first event between 8 to 15 seconds after starting
+  eventTimeout = setTimeout(spawnSpecialEvent, Math.random() * 7000 + 8000);
+
   // --- UPDATED MISS PENALTY (With Sound) ---
   document.getElementById('gameArea').onclick = (e) => {
     if (isPaused) return;
@@ -2846,17 +2851,13 @@ function startGameUI() {
         return; 
     }
 
-    // Efect sonor de MISS
     playMissSFX(); 
-
     comboCount = 0; 
     if (score > 0) score--; 
     updateScoreUI(true); 
-
-
     showComboText(e.clientX, e.clientY, 0, true); 
-
-spawnSpecialEvent();
+    
+    // (We removed spawnSpecialEvent from here!)
   };
 }
 
@@ -3879,47 +3880,62 @@ const specialRegistry = {
 function startAxeEvent() {
     const axe = document.createElement('div');
     axe.className = 'axe-active';
+    
+    // 🔥 RESPONSIVE AXE SIZE (45px pe mobile, 70px pe PC)
+    const isMobile = window.innerWidth <= 600;
+    const axeSize = isMobile ? 45 : 70;
+    axe.style.width = axeSize + 'px';
+    axe.style.height = axeSize + 'px';
+
     document.getElementById('gameArea').appendChild(axe);
 
-    // Poziție de start (unde s-a dat click sau random)
-    let posX = Math.random() * (window.innerWidth - 100);
-    let posY = Math.random() * (window.innerHeight - 100);
+    // Poziție de start
+    let posX = Math.random() * (window.innerWidth - axeSize);
+    let posY = Math.random() * (window.innerHeight - axeSize);
     
-    // Direcție și viteză
-    let dx = (Math.random() > 0.5 ? 1 : -1) * 12;
-    let dy = (Math.random() > 0.5 ? 1 : -1) * 12;
+    // Viteza adaptată (puțin mai lent pe mobile ca să ai timp să-l eviți)
+    let dx = (Math.random() > 0.5 ? 1 : -1) * (isMobile ? 7 : 12);
+    let dy = (Math.random() > 0.5 ? 1 : -1) * (isMobile ? 7 : 12);
     let bounces = 0;
+    
+    // 🔥 COOLDOWN PREVENTER (Să nu îți ia 100 de puncte într-o secundă)
+    let recentlyHit = false; 
 
     const moveInterval = setInterval(() => {
-        if (isPaused) return; // Toporul îngheață dacă jocul e pus pe pauză
+        if (isPaused) return; // Toporul îngheață pe pauză
 
         posX += dx;
         posY += dy;
 
-        // Ricoșeu din pereți
-        if (posX <= 0 || posX >= window.innerWidth - 70) { dx *= -1; bounces++; }
-        if (posY <= 0 || posY >= window.innerHeight - 70) { dy *= -1; bounces++; }
+        // Ricoșeu din pereți calculat cu mărimea nouă
+        if (posX <= 0 || posX >= window.innerWidth - axeSize) { dx *= -1; bounces++; }
+        if (posY <= 0 || posY >= window.innerHeight - axeSize) { dy *= -1; bounces++; }
 
         axe.style.left = posX + 'px';
         axe.style.top = posY + 'px';
 
-        // Verificăm dacă lovește caracterul (Kevin)
         const axeRect = axe.getBoundingClientRect();
         const kevinRect = document.getElementById('kevin').getBoundingClientRect();
 
         if (axeRect.left < kevinRect.right && axeRect.right > kevinRect.left &&
             axeRect.top < kevinRect.bottom && axeRect.bottom > kevinRect.top) {
             
-            // L-A LOVIT!
-            score = Math.max(0, score - 10);
-            updateScoreUI(true); // Flash roșu
-            
-            // Efect vizual de lovitură pe Kevin
-            document.getElementById('kevin').style.filter = "brightness(2) sepia(1) hue-rotate(-50deg)";
-            setTimeout(() => { document.getElementById('kevin').style.filter = ""; }, 200);
+            // 🔥 SCADE SCORUL DOAR DACĂ NU A FOST LOVIT RECENT
+            if (!recentlyHit) {
+                score = Math.max(0, score - 10);
+                updateScoreUI(true); // Flash roșu
+                
+                // Efect vizual
+                document.getElementById('kevin').style.filter = "brightness(2) sepia(1) hue-rotate(-50deg)";
+                setTimeout(() => { document.getElementById('kevin').style.filter = ""; }, 200);
+                
+                // Activăm cooldown-ul de jumătate de secundă
+                recentlyHit = true;
+                setTimeout(() => { recentlyHit = false; }, 500);
+            }
         }
 
-        // Toporul dispare după 10 ricoșeuri
+        // Dispariție după 10 ricoșeuri
         if (bounces >= 10) {
             clearInterval(moveInterval);
             axe.remove();
@@ -3928,17 +3944,15 @@ function startAxeEvent() {
 }
 
 
-
 let eventTimeout = null;
 
 function spawnSpecialEvent() {
     if (isPaused) return;
 
-    // Curățăm evenimentul vechi de pe ecran (dacă nu a fost apăsat)
+    // Curățăm evenimentul vechi
     const existing = document.querySelector('.special-event-item');
     if (existing) existing.remove();
 
-    // Alegem un eveniment din listă (momentan avem doar toporul)
     const eventKeys = Object.keys(specialRegistry);
     const chosenKey = eventKeys[Math.floor(Math.random() * eventKeys.length)];
     const eventData = specialRegistry[chosenKey];
@@ -3947,10 +3961,16 @@ function spawnSpecialEvent() {
     item.className = 'special-event-item';
     item.style.backgroundImage = `url('${eventData.image}')`;
     
+    // 🔥 RESPONSIVE SIZE (40px mobile, 65px PC)
+    const isMobile = window.innerWidth <= 600;
+    const itemSize = isMobile ? 40 : 65;
+    item.style.width = itemSize + 'px';
+    item.style.height = itemSize + 'px';
+    
     // Poziție random
     const area = document.getElementById('gameArea');
-    item.style.left = Math.random() * (area.clientWidth - 70) + "px";
-    item.style.top = Math.random() * (area.clientHeight - 70) + "px";
+    item.style.left = Math.random() * (area.clientWidth - itemSize) + "px";
+    item.style.top = Math.random() * (area.clientHeight - itemSize) + "px";
     
     area.appendChild(item);
 
@@ -3959,7 +3979,6 @@ function spawnSpecialEvent() {
         e.stopPropagation();
         if (!e.isTrusted) return;
 
-        // Executăm acțiunea evenimentului (ex: pornește toporul care sare)
         eventData.action(e);
         item.remove();
     };
@@ -3967,7 +3986,8 @@ function spawnSpecialEvent() {
     // Dispare după 4 secunde dacă nu e apăsat
     setTimeout(() => { if (item) item.remove(); }, 4000);
 
-    // Planificăm următorul spawn
+    // 🔥 LOOP AUTOMAT: Planificăm următorul spawn (între 8 și 15 secunde)
+    clearTimeout(eventTimeout);
     eventTimeout = setTimeout(spawnSpecialEvent, Math.random() * 7000 + 8000);
 }
   </script>
