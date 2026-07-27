@@ -2841,7 +2841,7 @@ function startGameUI() {
   // 🔥 START THE SPECIAL EVENT LOOP HERE 🔥
   clearTimeout(eventTimeout);
   // Spawns the first event between 8 to 15 seconds after starting
-  eventTimeout = setTimeout(spawnSpecialEvent, Math.random() * 7000 + 8000);
+  eventTimeout = setTimeout(spawnSpecialEvent, 30000);
 
   // --- UPDATED MISS PENALTY (With Sound) ---
   document.getElementById('gameArea').onclick = (e) => {
@@ -3878,38 +3878,76 @@ const specialRegistry = {
 
 
 function startAxeEvent() {
+    const gameArea = document.getElementById('gameArea');
     const axe = document.createElement('div');
     axe.className = 'axe-active';
     
-    // 🔥 RESPONSIVE AXE SIZE (45px pe mobile, 70px pe PC)
+    // 🔥 RESPONSIVE AXE SIZE
     const isMobile = window.innerWidth <= 600;
     const axeSize = isMobile ? 45 : 70;
     axe.style.width = axeSize + 'px';
     axe.style.height = axeSize + 'px';
 
-    document.getElementById('gameArea').appendChild(axe);
+    gameArea.appendChild(axe);
 
     // Poziție de start
     let posX = Math.random() * (window.innerWidth - axeSize);
     let posY = Math.random() * (window.innerHeight - axeSize);
     
-    // Viteza adaptată (puțin mai lent pe mobile ca să ai timp să-l eviți)
+    // Viteza adaptată
     let dx = (Math.random() > 0.5 ? 1 : -1) * (isMobile ? 7 : 12);
     let dy = (Math.random() > 0.5 ? 1 : -1) * (isMobile ? 7 : 12);
     let bounces = 0;
-    
-    // 🔥 COOLDOWN PREVENTER (Să nu îți ia 100 de puncte într-o secundă)
     let recentlyHit = false; 
 
+    // =========================================
+    // EFECT 1: SCREEN SHAKE (Cutremur pe ecran)
+    // =========================================
+    const shakeScreen = () => {
+        gameArea.style.transition = 'transform 0.05s ease'; 
+        // Zguduie ecranul într-o direcție random
+        gameArea.style.transform = `translate(${(Math.random() - 0.5) * 15}px, ${(Math.random() - 0.5) * 15}px)`;
+        setTimeout(() => {
+            gameArea.style.transform = 'translate(0px, 0px)'; // Revine la normal
+        }, 50);
+    };
+
+    // =========================================
+    // EFECT 2: RED FLASH (Sânge / Damage Overlay)
+    // =========================================
+    const flashDamage = () => {
+        const flash = document.createElement('div');
+        flash.style.position = 'fixed';
+        flash.style.top = '0'; flash.style.left = '0';
+        flash.style.width = '100vw'; flash.style.height = '100vh';
+        flash.style.backgroundColor = 'rgba(255, 0, 0, 0.4)'; // Roșu transparent
+        flash.style.boxShadow = 'inset 0 0 100px rgba(255, 0, 0, 0.8)'; // Margini roșii
+        flash.style.pointerEvents = 'none'; // Să nu blocheze click-urile
+        flash.style.zIndex = '90000';
+        flash.style.transition = 'opacity 0.3s ease-out';
+        document.body.appendChild(flash);
+
+        // Fade out
+        setTimeout(() => { flash.style.opacity = '0'; }, 10);
+        setTimeout(() => { flash.remove(); }, 300);
+    };
+
+    // =========================================
+    // LOOP-UL DE MIȘCARE AL TOPORULUI
+    // =========================================
     const moveInterval = setInterval(() => {
         if (isPaused) return; // Toporul îngheață pe pauză
 
         posX += dx;
         posY += dy;
 
-        // Ricoșeu din pereți calculat cu mărimea nouă
-        if (posX <= 0 || posX >= window.innerWidth - axeSize) { dx *= -1; bounces++; }
-        if (posY <= 0 || posY >= window.innerHeight - axeSize) { dy *= -1; bounces++; }
+        // Ricoșeu din pereți + CUTREMUR 💥
+        if (posX <= 0 || posX >= window.innerWidth - axeSize) { 
+            dx *= -1; bounces++; shakeScreen(); 
+        }
+        if (posY <= 0 || posY >= window.innerHeight - axeSize) { 
+            dy *= -1; bounces++; shakeScreen(); 
+        }
 
         axe.style.left = posX + 'px';
         axe.style.top = posY + 'px';
@@ -3917,19 +3955,22 @@ function startAxeEvent() {
         const axeRect = axe.getBoundingClientRect();
         const kevinRect = document.getElementById('kevin').getBoundingClientRect();
 
+        // COLIZIUNE CU KEVIN
         if (axeRect.left < kevinRect.right && axeRect.right > kevinRect.left &&
             axeRect.top < kevinRect.bottom && axeRect.bottom > kevinRect.top) {
             
-            // 🔥 SCADE SCORUL DOAR DACĂ NU A FOST LOVIT RECENT
             if (!recentlyHit) {
                 score = Math.max(0, score - 10);
-                updateScoreUI(true); // Flash roșu
+                updateScoreUI(true);
                 
-                // Efect vizual
+                // DECLANȘĂM EFECTELE VIZUALE 🩸
+                flashDamage();
+                shakeScreen(); // Extra zguduitură la impact
+                
+                // Kevin devine roșu
                 document.getElementById('kevin').style.filter = "brightness(2) sepia(1) hue-rotate(-50deg)";
                 setTimeout(() => { document.getElementById('kevin').style.filter = ""; }, 200);
                 
-                // Activăm cooldown-ul de jumătate de secundă
                 recentlyHit = true;
                 setTimeout(() => { recentlyHit = false; }, 500);
             }
@@ -3988,7 +4029,7 @@ function spawnSpecialEvent() {
 
     // 🔥 LOOP AUTOMAT: Planificăm următorul spawn (între 8 și 15 secunde)
     clearTimeout(eventTimeout);
-    eventTimeout = setTimeout(spawnSpecialEvent, Math.random() * 7000 + 8000);
+    eventTimeout = setTimeout(spawnSpecialEvent, 30000);
 }
   </script>
 </body>
