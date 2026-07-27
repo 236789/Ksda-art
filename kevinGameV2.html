@@ -3974,14 +3974,73 @@ const specialRegistry = {
         name: "Toporul Nebun",
         image: "https://iili.io/Ck27fPs.png",
         type: "bad",
-        duration: 10, // <--- Duration in seconds added here
+        duration: 10,
         description: "Un topor care ricoșează și îți fură scorul dacă te lovește!",
         action: (e) => startAxeEvent()
+    },
+    "glitchMouse": {
+        name: "Mouse Glicat",
+        image: "https://iili.io/Ck0qyMX.png", // Imaginea cu mouse-ul colorat
+        type: "good",
+        duration: 15,
+        description: "Un mouse glicat care apasă singur și îți crește scorul!",
+        action: (e) => startAutoClickEvent()
     }
-    // You can easily add good events here later with type: "good" and their own duration!
 };
 
 
+function startAutoClickEvent() {
+    const gameArea = document.getElementById('gameArea');
+    const kevin = document.getElementById('kevin');
+    
+    // Creăm cursorul vizual care va urmări personajul
+    const autoCursor = document.createElement('img');
+    autoCursor.src = "https://iili.io/Ck07Z1R.png"; // Imaginea cursorului alb
+    autoCursor.style.position = 'absolute';
+    autoCursor.style.width = '50px';
+    autoCursor.style.zIndex = '1005';
+    autoCursor.style.pointerEvents = 'none'; // Să nu blocheze click-urile tale
+    autoCursor.style.transition = 'left 0.1s linear, top 0.1s linear';
+    autoCursor.style.filter = "drop-shadow(0 0 10px rgba(255,255,255,0.8))";
+    gameArea.appendChild(autoCursor);
+
+    // 1. Logica de urmărire (Cursorul stă pe personaj)
+    const followInterval = setInterval(() => {
+        if (isPaused) return;
+        const rect = kevin.getBoundingClientRect();
+        // Poziționăm cursorul în centrul personajului
+        autoCursor.style.left = (rect.left + rect.width / 2) + 'px';
+        autoCursor.style.top = (rect.top + rect.height / 2) + 'px';
+    }, 50);
+
+    // 2. Logica de Auto-Click (Apasă la fiecare 400ms)
+    const clickInterval = setInterval(() => {
+        if (isPaused) return;
+
+        // Creștem scorul și combo-ul
+        score++;
+        comboCount++;
+        updateScoreUI();
+        playRandomPop(); // Sunet de hit
+
+        // Afișăm textul de combo chiar deasupra personajului
+        const rect = kevin.getBoundingClientRect();
+        showComboText(rect.left + rect.width / 2, rect.top, comboCount);
+
+        // Efect vizual de "pulse" pe cursor la fiecare click
+        autoCursor.style.transform = "scale(0.8)";
+        setTimeout(() => { autoCursor.style.transform = "scale(1)"; }, 100);
+
+    }, 400); // Viteza de click (aprox 2.5 click-uri pe secundă)
+
+    // 3. Oprirea evenimentului după 15 secunde
+    setTimeout(() => {
+        clearInterval(followInterval);
+        clearInterval(clickInterval);
+        autoCursor.style.opacity = '0';
+        setTimeout(() => autoCursor.remove(), 500);
+    }, 15000);
+}
 
 function startAxeEvent() {
     const gameArea = document.getElementById('gameArea');
