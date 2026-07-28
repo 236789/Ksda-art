@@ -4595,6 +4595,15 @@ const specialRegistry = {
         description: "Ai înghițit o jucărie de câine! Acum scoți sunete ciudate când te miști.",
         action: (e) => startSqueakEvent()
     },
+
+"hotSauce": {
+    name: "Sos Iute",
+    image: "https://iili.io/CvIlhhu.png",
+    type: "bad",
+    duration: 15,
+    description: "Eroul tău a mâncat sos iute! E în flăcări, fuge haotic și pierde puncte!",
+    action: (e) => startHotSauceEvent()
+}
 };
 
 function startAutoClickEvent() {
@@ -5164,6 +5173,82 @@ function playRandomSqueak() {
         soundClone.volume = sfxVolume;
         soundClone.play().catch(e => {});
     }
+}
+
+const hotSauceAssets = {
+    kevin: {
+        play: "https://iili.io/CvuYXLb.png",
+        tired: "https://iili.io/CvuYjBj.png",
+        lines: ["MĂ ARDEEE!", "APA, VREAU APA!", "STINGEȚI FOCUL!", "FRIGE!", "SOSUL ĂLA A FOST O GREȘEALĂ!"]
+    },
+    emmanuel: {
+        play: "https://iili.io/CvuYGp9.png",
+        tired: "https://iili.io/CvuYEk7.png",
+        lines: ["Băgămi-aș p***, ardeeeee!", "Cine a pus sosul ăsta?!", "Vreau apă acum!", "Mă topesc pe picioare!", "F***-i gura mă-sii, e prea iute!"]
+    }, 
+    antonio: {
+        play: "https://iili.io/CvuYcrl.png",
+        tired: "https://iili.io/CvuY17S.png",
+        lines: ["IT'S TOO HOT!", "MY MOUTH IS ON FIRE!", "WATER! I NEED WATER!", "SPICY! HELP!", "WHO PUT GHOST PEPPERS IN THIS?!"]
+    }
+};
+
+
+
+let isHotSauceActive = false;
+let hotSauceScoreInterval = null;
+let originalDialogues = null;
+
+function startHotSauceEvent() {
+    if (isHotSauceActive) return; // Prevenim suprapunerea
+    isHotSauceActive = true;
+
+    const charId = window.currentPlayingCharId || "kevin";
+    const assets = hotSauceAssets[charId];
+    const kevin = document.getElementById('kevin');
+
+    // STEP 1: Schimbăm Imaginile (Salvăm originalele mai întâi)
+    const oldPlay = currentPlayImg;
+    const oldTired = currentTiredImg;
+    currentPlayImg = `url('${assets.play}')`;
+    currentTiredImg = `url('${assets.tired}')`;
+    kevin.style.backgroundImage = currentPlayImg;
+
+    // STEP 2: Schimbăm Replicile (Salvăm originalele)
+    originalDialogues = characterDialogues[charId];
+    characterDialogues[charId] = assets.lines;
+
+    // STEP 3: Viteză Insană
+    // Oprim mișcarea normală și pornim una foarte rapidă (0.4s)
+    clearInterval(moveKevinInterval);
+    moveKevinInterval = setInterval(() => {
+        if (!isPaused) moveKevinAway();
+    }, 400);
+
+    // STEP 4: Scădere Scor (-1 la fiecare 0.5s)
+    hotSauceScoreInterval = setInterval(() => {
+        if (!isPaused && score > 0) {
+            score--;
+            updateScoreUI(true); // Efect roșu pe scor
+        }
+    }, 500);
+
+    // CLEANUP după 15 secunde
+    setTimeout(() => {
+        isHotSauceActive = false;
+        clearInterval(hotSauceScoreInterval);
+        
+        // Revenire la imagini originale
+        currentPlayImg = oldPlay;
+        currentTiredImg = oldTired;
+        kevin.style.backgroundImage = isKevinTired ? currentTiredImg : currentPlayImg;
+
+        // Revenire la replici originale
+        characterDialogues[charId] = originalDialogues;
+
+        // Revenire la viteză normală
+        startKevinMovement(); 
+    }, 15000);
 }
   </script>
 </body>
