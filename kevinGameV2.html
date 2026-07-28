@@ -2417,6 +2417,95 @@ input:checked + .s-slider:before {
     .loading-box-v2 { width: 90vw; padding: 25px 15px !important; }
     .loading-box-v2 h2 { font-size: 20px; }
 }
+
+
+/* ==========================================
+   SISTEM DE TEME (THEME VARIABLES)
+   ========================================== */
+:root {
+    --th-bg: radial-gradient(circle at top, #2a2d4c 0%, #101123 100%);
+    --th-border: #facc15;
+    --th-accent: #facc15;
+    --th-glow: rgba(250, 204, 21, 0.4);
+    --th-btn-bg: linear-gradient(180deg, #ffdc43 0%, #ffaa00 50%, #e67300 100%);
+    --th-btn-shadow: #4d2600;
+    --th-btn-text: #1a1c33;
+}
+
+/* 1. Suprascriem Modalele In-Game */
+.pause-modal-box, .shop-box, .settings-v3, #active-events-container .active-event-box {
+    background: var(--th-bg) !important;
+    border-color: var(--th-border) !important;
+    box-shadow: 0 0 30px var(--th-glow), inset 0 0 20px rgba(0,0,0,0.8) !important;
+}
+
+/* 2. Suprascriem Butoanele In-Game (Excludem butoanele roșii/verzi) */
+.pause-modal-box .menu-btn.play:not(.red-exit),
+.shop-box .menu-btn.play,
+.settings-v3 .menu-btn.play:not(.s-red):not(.s-green) {
+    background: var(--th-btn-bg) !important;
+    box-shadow: 0 6px 0 var(--th-btn-shadow), 0 8px 15px rgba(0,0,0,0.4) !important;
+    color: var(--th-btn-text) !important;
+    border-color: #fff !important;
+}
+
+/* Efectul de click pe butoanele cu temă */
+.pause-modal-box .menu-btn.play:not(.red-exit):active,
+.shop-box .menu-btn.play:active,
+.settings-v3 .menu-btn.play:not(.s-red):not(.s-green):active {
+    box-shadow: 0 2px 0 var(--th-btn-shadow) !important;
+    transform: translateY(4px) !important;
+}
+
+/* 3. Suprascriem Textele, Iconițele și Glow-ul */
+.selection-header h2, .shop-icon, .s-title, #scoreText, .shop-header h2, .event-tooltip div:first-child {
+    color: var(--th-accent) !important;
+    text-shadow: 0 0 10px var(--th-glow) !important;
+}
+
+/* 4. Suprascriem HUD-ul (Scoreboard și Butoane Mici) */
+#scoreBoard, .control-btn {
+    border-color: var(--th-border) !important;
+}
+
+#scoreBoard {
+    box-shadow: 0 0 15px var(--th-glow), inset 0 0 10px rgba(0,0,0,0.5) !important;
+}
+
+.control-btn:hover {
+    border-color: var(--th-accent) !important;
+    color: var(--th-accent) !important;
+    box-shadow: 0 0 20px var(--th-glow) !important;
+}
+
+/* Design-ul pentru selectorul de teme din Setări */
+.theme-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.theme-swatch {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    border: 3px solid rgba(255,255,255,0.2);
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.theme-swatch:hover {
+    transform: scale(1.1);
+    border-color: #fff;
+}
+
+.theme-swatch.active-theme {
+    border-color: #fff;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px var(--th-glow);
+}
   </style>
 </head>
 <body>
@@ -2708,18 +2797,36 @@ input:checked + .s-slider:before {
      TAB 2: VIZUAL (REWORKED)
      ========================= -->
 <div id="tab-vizual" class="tab-content">
+  
   <div class="s-row-premium">
     <div class="s-text-side">
         <span class="s-title">DIALOGURI EROI</span>
-        <span class="s-desc">Dezactivează bulele de text dacă vrei liniște totală în timpul jocului.</span>
+        <span class="s-desc">Dezactivează bulele de text dacă vrei liniște.</span>
     </div>
-    
-    <!-- TOGGLE SWITCH -->
     <label class="s-switch">
       <input type="checkbox" id="bubblesToggle" checked onchange="updateBubblesSetting(this.checked)">
       <span class="s-slider"></span>
     </label>
   </div>
+
+  <!-- THEME PICKER NOU -->
+  <div class="settings-group" style="padding: 15px;">
+    <div class="s-title" style="text-align: center; margin-bottom: 5px;">TEMĂ INTERFAȚĂ</div>
+    <div class="s-desc" style="text-align: center; margin-bottom: 15px;">Schimbă culorile meniurilor din joc.</div>
+    
+    <div class="theme-grid">
+      <!-- Cele 8 teme -->
+      <button class="theme-swatch active-theme" id="ts-0" style="background: linear-gradient(135deg, #facc15, #2a2d4c);" onclick="changeTheme(0)"></button>
+      <button class="theme-swatch" id="ts-1" style="background: linear-gradient(135deg, #ff007f, #040d12);" onclick="changeTheme(1)"></button>
+      <button class="theme-swatch" id="ts-2" style="background: linear-gradient(135deg, #39ff14, #0a1a10);" onclick="changeTheme(2)"></button>
+      <button class="theme-swatch" id="ts-3" style="background: linear-gradient(135deg, #ff2a2a, #1a0505);" onclick="changeTheme(3)"></button>
+      <button class="theme-swatch" id="ts-4" style="background: linear-gradient(135deg, #00f0ff, #0a192f);" onclick="changeTheme(4)"></button>
+      <button class="theme-swatch" id="ts-5" style="background: linear-gradient(135deg, #b533ff, #1c0a2a);" onclick="changeTheme(5)"></button>
+      <button class="theme-swatch" id="ts-6" style="background: linear-gradient(135deg, #ffffff, #000000);" onclick="changeTheme(6)"></button>
+      <button class="theme-swatch" id="ts-7" style="background: linear-gradient(135deg, #ff8c00, #1f0b2e);" onclick="changeTheme(7)"></button>
+    </div>
+  </div>
+
 </div>
 
 <!-- =========================
@@ -2936,13 +3043,17 @@ async function checkUserInFirestore(uid) {
                 console.warn("Could not fetch direct player settings:", err);
             }
 
-            // Aplicăm Setările
+// Aplicăm Setările
             if (data.settings) {
                 musicVolume = data.settings.musicVolume ?? 0.08;
                 sfxVolume = data.settings.sfxVolume ?? 0.5;
                 isMuted = data.settings.isMuted ?? false;
                 lastTrackIndex = data.settings.lastTrackIndex ?? 0;
                 showBubbles = data.settings.showBubbles ?? true;
+                
+                // 🎨 ÎNCĂRCĂM TEMA SALVATĂ
+                let savedTheme = data.settings.themeIndex ?? 0;
+                changeTheme(savedTheme);
 
                 bgMusic.volume = isMuted ? 0 : musicVolume;
                 
@@ -3847,6 +3958,7 @@ async function syncSettingsToCloud() {
         isMuted: isMuted,
         lastTrackIndex: lastTrackIndex, // FIX: Am adăugat virgula aici
         showBubbles: showBubbles        // Acum se salvează dacă bulele sunt On sau Off
+        themeIndex: currentThemeIndex // <-- ADD THIS LINE!
     };
 
     console.log("📤 Writing to Firestore for UID:", currentUID, settingsPayload);
@@ -4595,6 +4707,81 @@ function preloadImage(url) {
 // Funcție ajutătoare de așteptare pentru animații mai fine
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
+
+
+// --- GLOBAL THEME VARIABLE ---
+let currentThemeIndex = 0;
+
+// THE 8 PREMIUM THEMES
+const appThemes = [
+    { // 0: Clasic (Galben / Mov) - DEFAULT
+        bg: "radial-gradient(circle at top, #2a2d4c 0%, #101123 100%)",
+        border: "#facc15", accent: "#facc15", glow: "rgba(250, 204, 21, 0.4)",
+        btnBg: "linear-gradient(180deg, #ffdc43 0%, #ffaa00 50%, #e67300 100%)",
+        btnShadow: "#4d2600", btnText: "#1a1c33"
+    },
+    { // 1: Cyberpunk (Roz / Negru-Cyan)
+        bg: "radial-gradient(circle at top, #0b222c 0%, #040d12 100%)",
+        border: "#ff007f", accent: "#00f0ff", glow: "rgba(255, 0, 127, 0.5)",
+        btnBg: "linear-gradient(180deg, #ff4dc4 0%, #ff007f 50%, #99004c 100%)",
+        btnShadow: "#4c0026", btnText: "#ffffff"
+    },
+    { // 2: Toxic (Verde Neon / Verde Închis)
+        bg: "radial-gradient(circle at top, #0f2b1c 0%, #05120a 100%)",
+        border: "#39ff14", accent: "#39ff14", glow: "rgba(57, 255, 20, 0.4)",
+        btnBg: "linear-gradient(180deg, #8aff66 0%, #39ff14 50%, #1a9900 100%)",
+        btnShadow: "#0d4d00", btnText: "#000000"
+    },
+    { // 3: Sângeros (Roșu / Negru)
+        bg: "radial-gradient(circle at top, #2b0a0a 0%, #0f0202 100%)",
+        border: "#ff2a2a", accent: "#ff2a2a", glow: "rgba(255, 42, 42, 0.4)",
+        btnBg: "linear-gradient(180deg, #ff6666 0%, #e60000 50%, #800000 100%)",
+        btnShadow: "#400000", btnText: "#ffffff"
+    },
+    { // 4: Oceanic (Turcoaz / Albastru Închis)
+        bg: "radial-gradient(circle at top, #0d2847 0%, #050f1c 100%)",
+        border: "#00f0ff", accent: "#00f0ff", glow: "rgba(0, 240, 255, 0.4)",
+        btnBg: "linear-gradient(180deg, #66f5ff 0%, #00d4ff 50%, #007799 100%)",
+        btnShadow: "#003b4d", btnText: "#001a22"
+    },
+    { // 5: Regal (Mov / Auriu)
+        bg: "radial-gradient(circle at top, #2b163d 0%, #11061a 100%)",
+        border: "#b533ff", accent: "#facc15", glow: "rgba(181, 51, 255, 0.5)",
+        btnBg: "linear-gradient(180deg, #cc80ff 0%, #a600ff 50%, #59008c 100%)",
+        btnShadow: "#2d0047", btnText: "#ffffff"
+    },
+    { // 6: Monocrom (Alb / Negru)
+        bg: "radial-gradient(circle at top, #1a1a1a 0%, #000000 100%)",
+        border: "#ffffff", accent: "#ffffff", glow: "rgba(255, 255, 255, 0.3)",
+        btnBg: "linear-gradient(180deg, #ffffff 0%, #cccccc 50%, #666666 100%)",
+        btnShadow: "#333333", btnText: "#000000"
+    },
+    { // 7: Synthwave (Portocaliu / Mov Închis)
+        bg: "radial-gradient(circle at top, #2d1033 0%, #0f0514 100%)",
+        border: "#ff8c00", accent: "#ff007f", glow: "rgba(255, 140, 0, 0.5)",
+        btnBg: "linear-gradient(180deg, #ffaf4d 0%, #ff8c00 50%, #b35900 100%)",
+        btnShadow: "#663300", btnText: "#ffffff"
+    }
+];
+
+function changeTheme(index) {
+    currentThemeIndex = index;
+    const theme = appThemes[index];
+    
+    // Aplicăm CSS Variables pe tot documentul
+    const root = document.documentElement;
+    root.style.setProperty('--th-bg', theme.bg);
+    root.style.setProperty('--th-border', theme.border);
+    root.style.setProperty('--th-accent', theme.accent);
+    root.style.setProperty('--th-glow', theme.glow);
+    root.style.setProperty('--th-btn-bg', theme.btnBg);
+    root.style.setProperty('--th-btn-shadow', theme.btnShadow);
+    root.style.setProperty('--th-btn-text', theme.btnText);
+
+    // Update active class on the swatch buttons
+    document.querySelectorAll('.theme-swatch').forEach(btn => btn.classList.remove('active-theme'));
+    document.getElementById(`ts-${index}`).classList.add('active-theme');
+}
   </script>
 </body>
 </html>
