@@ -5223,35 +5223,39 @@ function forcePreload() {
 }
 forcePreload(); // Apelăm imediat
 
-function startHotSauceEvent() {
-    if (isHotSauceActive) return;
-    isHotSauceActive = true;
 
+function startHotSauceEvent() {
     const charId = window.currentPlayingCharId || "kevin";
     const assets = hotSauceAssets[charId];
     const kevin = document.getElementById('kevin');
-    const duration = specialRegistry.hotSauce.duration; // Luăm durata de 15s din registru
+    const duration = specialRegistry.hotSauce.duration;
 
-    // STEP 1: Schimbăm Imaginile (Fără delay acum că sunt în cache)
-    const oldPlay = currentPlayImg;
-    const oldTired = currentTiredImg;
-    
+    // --- LOGICA DE REFRESH (FIX BUG) ---
+    // Dacă eventul e deja activ, oprim cronometrele vechi ca să le luăm de la capăt
+    if (hotSauceCleanupTimeout) clearTimeout(hotSauceCleanupTimeout);
+    if (hotSauceScoreInterval) clearInterval(hotSauceScoreInterval);
+    if (moveKevinInterval) clearInterval(moveKevinInterval);
+
+    // Salvăm replicile originale DOAR dacă nu sunt deja salvate 
+    // (prevenim salvarea replicilor de sos peste cele normale la refresh)
+    if (!isHotSauceActive) {
+        savedOriginalDialogues = [...characterDialogues[charId]];
+    }
+
+    isHotSauceActive = true;
+
+    // STEP 1: Schimbăm Imaginile & Replicile (Instant din cache)
     currentPlayImg = `url('${assets.play}')`;
     currentTiredImg = `url('${assets.tired}')`;
     kevin.style.backgroundImage = currentPlayImg;
-
-    // STEP 2: Schimbăm Replicile
-    originalDialogues = characterDialogues[charId];
     characterDialogues[charId] = assets.lines;
 
-    // STEP 3: Viteză Insană (0.35s pentru un haos real)
-    clearInterval(moveKevinInterval);
+    // STEP 2: Viteză Insană (0.35s)
     moveKevinInterval = setInterval(() => {
         if (!isPaused) moveKevinAway();
     }, 350);
 
-    // STEP 4: Scădere Scor
-    if(hotSauceScoreInterval) clearInterval(hotSauceScoreInterval);
+    // STEP 3: Scădere Scor (-1 la fiecare 0.5s)
     hotSauceScoreInterval = setInterval(() => {
         if (!isPaused && score > 0) {
             score--;
@@ -5259,19 +5263,24 @@ function startHotSauceEvent() {
         }
     }, 500);
 
-    // CLEANUP - Sincronizat perfect cu durata indicatorului
-    setTimeout(() => {
+    // STEP 4: Cleanup perfect sincronizat cu durata de 15s a indicatorului
+    hotSauceCleanupTimeout = setTimeout(() => {
         isHotSauceActive = false;
         clearInterval(hotSauceScoreInterval);
         
-        currentPlayImg = oldPlay;
-        currentTiredImg = oldTired;
+        // Revenire la setările de bază (le luăm din characterList pentru siguranță)
+        const baseChar = characterList.find(c => c.id === charId) || characterList[0];
+        currentPlayImg = `url('${baseChar.playImg}')`;
+        currentTiredImg = `url('${baseChar.tiredImg}')`;
         kevin.style.backgroundImage = isKevinTired ? currentTiredImg : currentPlayImg;
-        characterDialogues[charId] = originalDialogues;
 
-        // Repornim mișcarea normală
+        // Revenire la replicile originale salvate la început
+        characterDialogues[charId] = savedOriginalDialogues;
+        savedOriginalDialogues = null;
+
+        // Revenire la viteză normală
         startKevinMovement(); 
-    }, duration * 1000); // 15000ms
+    }, duration * 1000); 
 }
   </script>
 </body>
