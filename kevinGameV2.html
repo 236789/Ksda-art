@@ -2506,19 +2506,126 @@ input:checked + .s-slider:before {
     transform: scale(1.1);
     box-shadow: 0 0 15px var(--th-glow);
 }
-    /* 5. Suprascriem Butonul Principal de Meniu (Hamburger) */
-.main-toggle {
-    background: var(--th-btn-bg) !important;
-    color: var(--th-btn-text) !important;
-    border-color: #ffffff !important;
+
+
+/* ==========================================
+   BUTONUL SUSȚINE (Suprascriere Culori)
+   ========================================== */
+.menu-btn.play.support-btn {
+  background: linear-gradient(180deg, #1d8cf8 0%, #11579c 100%) !important; /* Fundal Albastru */
+  border-color: #1dd28b !important; /* Margine Verde */
+  color: #ffffff !important; /* Text alb */
+  box-shadow: 0 10px 0 #097047, 0 15px 25px rgba(0, 0, 0, 0.4) !important; /* Umbră laterală Verde Închis */
 }
 
-/* Păstrăm butonul roșu atunci când meniul este deschis (ca să arate a "Închide") */
-.menu-container.active .main-toggle {
-    background: #ff4444 !important;
-    color: white !important;
-    border-color: white !important;
+/* Efectul de Hover (Păstrăm umbra verde) */
+.menu-btn.play.support-btn:hover {
+  box-shadow: 0 13px 0 #097047, 0 20px 30px rgba(0, 0, 0, 0.5) !important;
 }
+
+/* Efectul de Click (Păstrăm umbra verde) */
+.menu-btn.play.support-btn:active {
+  box-shadow: 0 2px 0 #097047 !important;
+}
+
+
+
+/* ==========================================
+   BUTOANE PENTRU DONAȚII (PĂTRATE)
+   ========================================== */
+.payment-squares-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+/* Structura Pătratului */
+.pay-square {
+    width: 120px;
+    height: 120px;
+    border-radius: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+.pay-square:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 25px rgba(0,0,0,0.7);
+}
+
+.pay-square:active {
+    transform: translateY(2px) scale(0.95);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+}
+
+/* Design Revolut */
+.pay-square.revolut {
+    background: #ffffff;
+    color: #1a1a1a;
+}
+.pay-square.revolut .icon-r {
+    font-family: 'Oswald', sans-serif;
+    font-size: 55px;
+    font-weight: 900;
+    font-style: italic;
+    line-height: 1;
+    margin-bottom: 2px;
+    letter-spacing: -2px;
+}
+.pay-square.revolut .pay-name {
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+/* Design PayPal */
+.pay-square.paypal {
+    background: linear-gradient(135deg, #003087 0%, #009cde 100%);
+    color: #ffffff;
+}
+.pay-square.paypal i {
+    font-size: 70px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+/* Texte / Tag-uri sub butoane */
+.payment-tags {
+    font-family: 'Courier New', Courier, monospace; /* Font tip terminal/consolă */
+    font-size: 15px;
+    color: #ffffff;
+    margin-bottom: 25px;
+    text-align: center;
+    line-height: 1.6;
+}
+
+.payment-tags .pay-label {
+    font-weight: bold;
+}
+
+.payment-tags a {
+    color: #d1d5db;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.payment-tags a:hover {
+    color: #facc15;
+}
+
+/* Fix pentru mobil */
+@media (max-width: 600px) {
+    .pay-square { width: 100px; height: 100px; border-radius: 18px; }
+    .pay-square.revolut .icon-r { font-size: 45px; }
+    .pay-square.paypal i { font-size: 55px; }
+    .payment-tags { font-size: 13px; }
+}
+
   </style>
 </head>
 <body>
@@ -2539,6 +2646,67 @@ input:checked + .s-slider:before {
   <span>LOG IN CU GOOGLE</span>
 </button>
       <button class="cancel-btn" onclick="closeLoginModal()">Anulează</button>
+    </div>
+  </div>
+
+<!-- MODAL: SUSȚINE CREATORUL -->
+  <div id="supportModal" class="modal-overlay">
+    <div class="modal-box" style="padding: 30px 20px;">
+      <h2 style="color: #facc15; font-size: 26px; margin-bottom: 20px;">
+        <i class="fa-solid fa-heart" style="color: #ff4d4d;"></i> SUSȚINE CREATORUL
+      </h2>
+      
+      <!-- Aici am modificat text-align: center; -->
+      <p style="font-family: 'Oswald', sans-serif; font-size: 15px; text-align: center; line-height: 1.5; color: #d1d5db; margin-bottom: 25px; padding: 0 10px;">
+        Sunt un dezvoltator pasionat de 18 ani care pune multă muncă, timp și suflet în proiectele pe care le creez... <br><br>
+        Dacă apreciezi ce fac, mă poți susține cu o donație. Orice ajutor contează – pentru motivație, upgrade-uri și continuarea proiectelor.<br><br>
+        <span style="color: #facc15; font-weight: bold;">Mulțumesc sincer! <i class="fa-solid fa-heart" style="color: #ff4d4d;"></i></span>
+      </p>
+      
+      <!-- BUTOANELE PĂTRATE (Revolut & PayPal) -->
+      <div class="payment-squares-container">
+        <!-- Revolut Square -->
+        <a href="https://revolut.me/florinnica83" target="_blank" class="pay-square revolut">
+          <span class="icon-r">R</span>
+          <span class="pay-name">Revolut</span>
+        </a>
+        
+        <!-- PayPal Square -->
+        <a href="https://paypal.me/florinnica83?country.x=RO&locale.x=ro_RO" target="_blank" class="pay-square paypal">
+          <i class="fa-brands fa-paypal"></i>
+        </a>
+      </div>
+
+      <!-- TEXTUL CU LINK-URI SUB BUTOANE -->
+      <div class="payment-tags">
+        <div><span class="pay-label">Revolut:</span> <a href="https://revolut.me/florinnica83" target="_blank">@florinnica83</a></div>
+        <div><span class="pay-label">PayPal:</span> <a href="https://paypal.me/florinnica83?country.x=RO&locale.x=ro_RO" target="_blank">@florinnica83</a></div>
+      </div>
+
+      <button class="menu-btn play" style="width: 100%; height: 50px; font-size: 20px; padding: 0;" onclick="closeSupportModal()">ÎNCHIDE</button>
+    </div>
+  </div>
+
+  <!-- MODAL: DESPRE -->
+  <div id="aboutModal" class="modal-overlay">
+    <div class="modal-box" style="padding: 30px 20px;">
+      <h2 style="color: #facc15; font-size: 26px; margin-bottom: 25px;">
+        <i class="fa-solid fa-gamepad"></i> DESPRE JOC
+      </h2>
+
+      <div style="text-align: center; margin-bottom: 20px;">
+        <h3 style="font-family: 'Orbitron', sans-serif; color: white; font-size: 22px; margin: 0; letter-spacing: 1px;">PRINDEL PE KEVINUȚĂ</h3>
+        <span style="color: #facc15; font-family: 'Oswald', sans-serif; font-size: 14px;">Versiunea 2.0.0</span>
+      </div>
+
+      <!-- Aici am modificat text-align: center; -->
+      <div style="font-family: 'Oswald', sans-serif; font-size: 15px; color: #d1d5db; text-align: center; line-height: 1.6; margin-bottom: 30px; padding: 0 10px;">
+        <b style="color: white;">Dezvoltator:</b> Nica Emmanuel (18 ani)<br><br>
+        <b style="color: white;">Descriere:</b> Un joc de reflexe și viteză extremă. Sistemul de eventuri, cosmeticele și combo-urile sunt gândite pentru a te ține mereu în priză.<br><br>
+        Dacă găsești erori, folosește sistemul de Feedback din meniul de setări!
+      </div>
+
+      <button class="menu-btn play" style="width: 100%; height: 50px; font-size: 20px; padding: 0;" onclick="closeAboutModal()">ÎNCHIDE</button>
     </div>
   </div>
 
@@ -2584,19 +2752,29 @@ input:checked + .s-slider:before {
 </div>    
     <div id="welcomeText">Salut, Jucătorule!</div>
 
-    <div class="button-container">
+<div class="button-container">
       <button class="menu-btn play" onclick="handlePlayClick()">
         <i class="fa-solid fa-play"></i>
         <span>PLAY</span>
-      </button> <!-- Added missing </button> -->
+      </button>
+
+      <!-- Același buton ca Play, dar cu clasa 'support-btn' pentru a-i schimba culorile -->
+      <button class="menu-btn play support-btn" onclick="openSupportModal()">
+        <i class="fa-solid fa-heart"></i>
+        <span>SUSȚINE</span>
+      </button>
+      
+      <!-- Copie 1/1 după Play -->
+      <button class="menu-btn play" onclick="openAboutModal()">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>DESPRE</span>
+      </button>
 
       <button id="logoutBtn" onclick="logoutGoogle()">
         <i class="fa-solid fa-right-from-bracket"></i>
         <span>LOG OUT</span>
       </button>
-    </div> <!-- Added missing </div> for button-container -->
-  </div> <!-- Added missing </div> for mainMenu -->
-  
+    </div>
 
 
 <!-- OVERLAY: CHARACTER SELECTION V2 (Cinematic) -->
@@ -4793,6 +4971,28 @@ function changeTheme(index) {
     document.querySelectorAll('.theme-swatch').forEach(btn => btn.classList.remove('active-theme'));
     document.getElementById(`ts-${index}`).classList.add('active-theme');
 }
+
+
+// --- FUNCȚII PENTRU NOILE MODALE ---
+function openSupportModal() {
+    document.getElementById('supportModal').style.display = 'flex';
+}
+function closeSupportModal() {
+    document.getElementById('supportModal').style.display = 'none';
+}
+
+function openAboutModal() {
+    document.getElementById('aboutModal').style.display = 'flex';
+}
+function closeAboutModal() {
+    document.getElementById('aboutModal').style.display = 'none';
+}
+
+// Opțional: Închide modalele dacă apeși în afara lor (pe fundalul încețoșat)
+window.addEventListener('click', function(e) {
+    if (e.target === document.getElementById('supportModal')) closeSupportModal();
+    if (e.target === document.getElementById('aboutModal')) closeAboutModal();
+});
   </script>
 </body>
 </html>
