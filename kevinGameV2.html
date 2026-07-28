@@ -3951,16 +3951,14 @@ async function syncSettingsToCloud() {
 
     console.group("🔥 FIRESTORE SYNC: SETTINGS");
     
-    // Obiectul cu toate setările tale
-    const settingsPayload = {
+const settingsPayload = {
         musicVolume: musicVolume,
         sfxVolume: sfxVolume,
         isMuted: isMuted,
-        lastTrackIndex: lastTrackIndex, // FIX: Am adăugat virgula aici
-        showBubbles: showBubbles        // Acum se salvează dacă bulele sunt On sau Off
-        themeIndex: currentThemeIndex // <-- ADD THIS LINE!
+        lastTrackIndex: lastTrackIndex, 
+        showBubbles: showBubbles,       // <--- VIRGULA LIPSEA AICI!
+        themeIndex: currentThemeIndex,
     };
-
     console.log("📤 Writing to Firestore for UID:", currentUID, settingsPayload);
 
     try {
