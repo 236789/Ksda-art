@@ -5199,56 +5199,79 @@ let isHotSauceActive = false;
 let hotSauceScoreInterval = null;
 let originalDialogues = null;
 
+// --- PRELOADER ÎMBUNĂTĂȚIT (Forțează descărcarea imediată) ---
+const hotImages = [
+    "https://iili.io/CvuYXLb.png", "https://iili.io/CvuYjBj.png",
+    "https://iili.io/CvuYGp9.png", "https://iili.io/CvuYEk7.png",
+    "https://iili.io/CvuYcrl.png", "https://iili.io/CvuY17S.png"
+];
+
+// Această funcție trebuie să ruleze la început
+function forcePreload() {
+    [...popSounds, missSoundUrl, ...squeakSounds, ...hotImages].forEach(url => {
+        if (url.includes(".mp3")) {
+            const a = new Audio();
+            a.src = url;
+            a.preload = "auto";
+            sfxCache[url] = a;
+        } else {
+            const img = new Image();
+            img.src = url; // Forțează browserul să o pună în cache
+            sfxCache[url] = img;
+        }
+    });
+}
+forcePreload(); // Apelăm imediat
+
 function startHotSauceEvent() {
-    if (isHotSauceActive) return; // Prevenim suprapunerea
+    if (isHotSauceActive) return;
     isHotSauceActive = true;
 
     const charId = window.currentPlayingCharId || "kevin";
     const assets = hotSauceAssets[charId];
     const kevin = document.getElementById('kevin');
+    const duration = specialRegistry.hotSauce.duration; // Luăm durata de 15s din registru
 
-    // STEP 1: Schimbăm Imaginile (Salvăm originalele mai întâi)
+    // STEP 1: Schimbăm Imaginile (Fără delay acum că sunt în cache)
     const oldPlay = currentPlayImg;
     const oldTired = currentTiredImg;
+    
     currentPlayImg = `url('${assets.play}')`;
     currentTiredImg = `url('${assets.tired}')`;
     kevin.style.backgroundImage = currentPlayImg;
 
-    // STEP 2: Schimbăm Replicile (Salvăm originalele)
+    // STEP 2: Schimbăm Replicile
     originalDialogues = characterDialogues[charId];
     characterDialogues[charId] = assets.lines;
 
-    // STEP 3: Viteză Insană
-    // Oprim mișcarea normală și pornim una foarte rapidă (0.4s)
+    // STEP 3: Viteză Insană (0.35s pentru un haos real)
     clearInterval(moveKevinInterval);
     moveKevinInterval = setInterval(() => {
         if (!isPaused) moveKevinAway();
-    }, 400);
+    }, 350);
 
-    // STEP 4: Scădere Scor (-1 la fiecare 0.5s)
+    // STEP 4: Scădere Scor
+    if(hotSauceScoreInterval) clearInterval(hotSauceScoreInterval);
     hotSauceScoreInterval = setInterval(() => {
         if (!isPaused && score > 0) {
             score--;
-            updateScoreUI(true); // Efect roșu pe scor
+            updateScoreUI(true);
         }
     }, 500);
 
-    // CLEANUP după 15 secunde
+    // CLEANUP - Sincronizat perfect cu durata indicatorului
     setTimeout(() => {
         isHotSauceActive = false;
         clearInterval(hotSauceScoreInterval);
         
-        // Revenire la imagini originale
         currentPlayImg = oldPlay;
         currentTiredImg = oldTired;
         kevin.style.backgroundImage = isKevinTired ? currentTiredImg : currentPlayImg;
-
-        // Revenire la replici originale
         characterDialogues[charId] = originalDialogues;
 
-        // Revenire la viteză normală
+        // Repornim mișcarea normală
         startKevinMovement(); 
-    }, 15000);
+    }, duration * 1000); // 15000ms
 }
   </script>
 </body>
