@@ -2746,6 +2746,90 @@ input:checked + .s-slider:before {
     color: var(--th-accent) !important;
     border-color: var(--th-border) !important;
 }
+
+
+/* THE ATTACHED MIDDLE SCOREBOARD */
+#scoreBoard {
+  position: absolute;
+  top: -2px; /* Pull it slightly up to hide the top border */
+  left: 50%;
+  transform: translateX(-50%); /* Centers it perfectly */
+  z-index: 1000;
+  
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  
+  /* Shape: Square at top, rounded at bottom */
+  padding: 10px 35px 12px 15px;
+  border-radius: 0 0 30px 30px; 
+  
+  /* Theme-integrated styles */
+  background: var(--th-bg);
+  backdrop-filter: blur(10px);
+  border: 3px solid var(--th-border);
+  border-top: none; /* Removes the top border so it looks merged with the screen */
+  
+  /* Shadow focused on the bottom */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.3);
+  
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Updated Score Text */
+#scoreText {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 32px; /* Bigger for centered display */
+  font-weight: 900;
+  color: var(--th-accent);
+  text-shadow: 0 0 15px var(--th-glow);
+}
+
+/* Adjust the icon medallion for the new layout */
+.score-icon-wrapper {
+  width: 50px;
+  height: 50px;
+}
+
+/* Updated Animations to keep the centering */
+@keyframes boardGlow {
+  from { box-shadow: 0 5px 15px var(--th-glow); }
+  to { box-shadow: 0 15px 30px var(--th-glow); border-color: #ffffff; }
+}
+
+/* FIX: The "Pump" effect must include the translateX centering! */
+.score-bump {
+  transform: translateX(-50%) scale(1.1) !important;
+}
+
+.score-loss #scoreText {
+  color: #ff4444 !important;
+  text-shadow: 0 0 20px #ff4444;
+  transform: scale(0.9);
+}
+
+
+@media (max-width: 600px) {
+  #scoreBoard {
+    padding: 6px 20px 10px 10px;
+    gap: 8px;
+    border-width: 2px;
+  }
+  
+  #scoreText {
+    font-size: 22px;
+  }
+
+  .score-icon-wrapper {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .score-icon-img {
+    width: 22px;
+    height: 22px;
+  }
+}
   </style>
 </head>
 <body>
