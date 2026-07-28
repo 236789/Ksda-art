@@ -3622,23 +3622,35 @@ function startKevinMovement() {
 }
 
 
-    function moveKevinAway() {
-      if (isKevinTired) return;
+function moveKevinAway() {
+    if (isKevinTired) return;
 
-      const kevin = document.getElementById('kevin');
-      const gameArea = document.getElementById('gameArea');
+    const kevin = document.getElementById('kevin');
+    const gameArea = document.getElementById('gameArea');
 
-      const maxX = gameArea.clientWidth - kevin.offsetWidth;
-      const maxY = gameArea.clientHeight - kevin.offsetHeight;
-      
-      let newX = Math.random() * maxX;
-      let newY = Math.random() * maxY;
-
-      if(newY < 80 && newX < 200) newY += 80;
-
-      kevin.style.left = `${newX}px`;
-      kevin.style.top = `${newY}px`;
+    // 🔥 CHIȚĂIT: Play sound if the event is active
+    if (window.isSqueakyActive) {
+        playRandomSqueak();
     }
+
+    const maxX = gameArea.clientWidth - kevin.offsetWidth;
+    const maxY = gameArea.clientHeight - kevin.offsetHeight;
+    
+    let newX = Math.random() * maxX;
+    let newY = Math.random() * maxY;
+
+    // --- SAFE ZONE: SCOREBOARD (Top Middle) ---
+    // If Kevin tries to go behind the new centered scoreboard, push him down
+    const sbWidth = 300; // Estimated width of your centered scoreboard
+    const centerX = gameArea.clientWidth / 2;
+    
+    if (newY < 120 && newX > (centerX - sbWidth/2) && newX < (centerX + sbWidth/2)) {
+        newY += 120; // Push him down below the scoreboard
+    }
+
+    kevin.style.left = `${newX}px`;
+    kevin.style.top = `${newY}px`;
+}
 
 function startTiredCycle() {
     clearTimeout(tiredTimeout);
@@ -4500,36 +4512,40 @@ function startFeedbackCountdown(targetTime) {
 
 // --- SISTEM EFECTE SONORE (SFX) ---
 const popSounds = [
-    "https://www.dropbox.com/scl/fi/hpzn6q59thrxvcwkac567/POP-1.mp3?rlkey=grpkrvd5oy7iv7t1yyfm94fbi&st=6jfgnuac&dl=1",
-    "https://www.dropbox.com/scl/fi/mq14jxxk1z6k8l2xk0xkf/POP-2.mp3?rlkey=erw4neneykkcimlujpws45gt5&st=jaluboe6&dl=1",
-    "https://www.dropbox.com/scl/fi/94phfhsrq3mjfchm69xr4/POP-3.mp3?rlkey=pvnbp8kama3iage3f6ldww5a9&st=prkzycj5&dl=1",
-    "https://www.dropbox.com/scl/fi/daddzwo7ypfestr9g4sni/POP-4.mp3?rlkey=l7p5f26lt8o6k5jaw23vvlorb&st=hnfw8jqo&dl=1",
-    "https://www.dropbox.com/scl/fi/drmje2gavv65b3qwyowa5/POP-5.mp3?rlkey=8x8hqqivqpbnp12qpz6mqtm8t&st=839zj2xg&dl=1"
+    "https://dl.dropboxusercontent.com/scl/fi/hpzn6q59thrxvcwkac567/POP-1.mp3?rlkey=grpkrvd5oy7iv7t1yyfm94fbi",
+    "https://dl.dropboxusercontent.com/scl/fi/mq14jxxk1z6k8l2xk0xkf/POP-2.mp3?rlkey=erw4neneykkcimlujpws45gt5",
+    "https://dl.dropboxusercontent.com/scl/fi/94phfhsrq3mjfchm69xr4/POP-3.mp3?rlkey=pvnbp8kama3iage3f6ldww5a9",
+    "https://dl.dropboxusercontent.com/scl/fi/daddzwo7ypfestr9g4sni/POP-4.mp3?rlkey=l7p5f26lt8o6k5jaw23vvlorb",
+    "https://dl.dropboxusercontent.com/scl/fi/drmje2gavv65b3qwyowa5/POP-5.mp3?rlkey=8x8hqqivqpbnp12qpz6mqtm8t"
 ];
 
-const missSoundUrl = "https://www.dropbox.com/scl/fi/ggz3cmweur2hgdrm0dc3j/Miss.mp3?rlkey=dv0lgzrt4f294pxfegrhirmna&st=vfn6uotb&dl=1";
+const missSoundUrl = "https://dl.dropboxusercontent.com/scl/fi/ggz3cmweur2hgdrm0dc3j/Miss.mp3?rlkey=dv0lgzrt4f294pxfegrhirmna";
 
-// --- LOGICA DE PRE-LOAD (REZOLVĂ DELAY-UL) ---
+// NOILE SUNETE PENTRU EVENT-UL CU JUCĂRIA
+const squeakSounds = [
+    "https://dl.dropboxusercontent.com/scl/fi/wejsfp0jzuuu6hhe2k3bo/DT1.mp3?rlkey=pkqnhy03bvof05irdv2rzzo48",
+    "https://dl.dropboxusercontent.com/scl/fi/ppgl5q8rjclwxotd4zbx8/dt2.mp3?rlkey=lgpb5797yf19thmcjng36x163",
+    "https://dl.dropboxusercontent.com/scl/fi/n9xgj8khhqbzmfz4jsaqz/DT3.mp3?rlkey=y7ecusj1he6rr02r7ud1jnu7n"
+];
+
+// --- LOGICA DE PRE-LOAD ---
 const sfxCache = {};
 
-// Încărcăm toate sunetele în memorie imediat ce se deschide pagina
-[...popSounds, missSoundUrl].forEach(url => {
+// Încărcăm totul în memorie (Pop + Miss + Squeak)
+[...popSounds, missSoundUrl, ...squeakSounds].forEach(url => {
     const audio = new Audio(url);
     audio.preload = "auto";
     sfxCache[url] = audio;
 });
 
-// Funcția ta playSFX, acum mult mai rapidă
+// Funcție universală de redare (folosește clonarea pentru a permite sunete simultane)
 function playSFX(url) {
     if (isMuted) return; 
-    
-    // În loc să creăm "new Audio", luăm sunetul deja descărcat
     const masterAudio = sfxCache[url];
     if (masterAudio) {
-        // Facem o copie rapidă ca să putem da spam la click-uri
         const soundClone = masterAudio.cloneNode();
         soundClone.volume = sfxVolume;
-        soundClone.play().catch(e => {});
+        soundClone.play().catch(e => console.warn("SFX Play Blocked", e));
     }
 }
 
@@ -4570,6 +4586,15 @@ const specialRegistry = {
     description: "Timpul încetinește! Muzica și personajul se mișcă în slow-motion.",
     action: (e) => startSlowMoEvent()
 },
+
+"squeakyToy": {
+        name: "Jucărie Chițăitoare",
+        image: "https://iili.io/CvBJiDN.png",
+        type: "bad",
+        duration: 20, // Set to 20 seconds
+        description: "Ai înghițit o jucărie de câine! Acum scoți sunete ciudate când te miști.",
+        action: (e) => startSqueakEvent()
+    },
 };
 
 function startAutoClickEvent() {
@@ -5116,6 +5141,30 @@ window.addEventListener('click', function(e) {
     if (e.target === document.getElementById('supportModal')) closeSupportModal();
     if (e.target === document.getElementById('aboutModal')) closeAboutModal();
 });
+
+
+window.isSqueakyActive = false;
+
+function startSqueakEvent() {
+    window.isSqueakyActive = true;
+    // Event cleanup after duration
+    setTimeout(() => {
+        window.isSqueakyActive = false;
+    }, 20000); 
+}
+
+function playRandomSqueak() {
+    if (isMuted) return;
+    const randomIndex = Math.floor(Math.random() * squeakSounds.length);
+    const soundUrl = squeakSounds[randomIndex];
+    
+    const masterAudio = sfxCache[soundUrl];
+    if (masterAudio) {
+        const soundClone = masterAudio.cloneNode();
+        soundClone.volume = sfxVolume;
+        soundClone.play().catch(e => {});
+    }
+}
   </script>
 </body>
 </html>
