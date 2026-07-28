@@ -2626,6 +2626,87 @@ input:checked + .s-slider:before {
     .payment-tags { font-size: 13px; }
 }
 
+
+/* Update this section in your CSS */
+.button-container {
+  display: flex;
+  flex-direction: column; /* Default for Mobile: Stacked */
+  gap: 15px;
+  width: 100%;
+  align-items: center;
+  z-index: 10;
+}
+
+@media (min-width: 850px) {
+  .button-container {
+    display: grid !important;          /* Switch to Grid */
+    grid-template-columns: repeat(3, 220px); /* 3 columns of equal width */
+    grid-template-rows: auto auto;     /* 2 rows */
+    gap: 12px;                         /* Space between buttons */
+    justify-content: center;
+    align-items: start;
+    width: auto;
+    margin: 0 auto;
+  }
+
+  /* Assign grid positions to each button */
+  .button-container > .menu-btn.play:nth-child(1) { 
+    grid-column: 1; grid-row: 1; 
+  } /* PLAY */
+  
+  .button-container > .menu-btn.play.support-btn { 
+    grid-column: 2; grid-row: 1; 
+  } /* SUSȚINE */
+  
+  .button-container > .menu-btn.play:nth-child(3) { 
+    grid-column: 3; grid-row: 1; 
+  } /* DESPRE */
+
+  #logoutBtn {
+    grid-column: 2; /* Directly under Susține */
+    grid-row: 2;
+    display: flex;  /* Note: JS changes this to block/flex, Grid handles the position */
+    justify-self: center; /* Centers the logout button within that middle column */
+    width: 180px;   /* Slightly narrower logout button looks better */
+    margin-top: 5px;
+    padding: 8px 15px;
+    font-size: 14px;
+  }
+
+  .menu-btn.play {
+    width: 100%;    /* Buttons will fill the 220px grid column */
+    height: 70px;
+    font-size: 26px;
+  }
+}
+
+/* Ensure this is inside your CSS to keep PC interactions smooth */
+@media (min-width: 850px) {
+  .menu-btn.play:active {
+    transform: translateY(8px); /* Pushes only the clicked button down */
+    box-shadow: 0 2px 0 #4d2600; /* Reduces the shadow for 3D look */
+  }
+}
+
+
+/* CENTERS TEXT IN SUPPORT AND ABOUT MODALS */
+#supportModal p, 
+#aboutModal div {
+    text-align: center !important; /* Overrides the 'left' alignment in your HTML */
+}
+
+/* Ensures the developer info in 'About' modal is also centered */
+#aboutModal b {
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 2px;
+}
+
+/* Adjusts the payment tags to look better when centered */
+.payment-tags {
+    text-align: center;
+    margin-top: 10px;
+}
   </style>
 </head>
 <body>
