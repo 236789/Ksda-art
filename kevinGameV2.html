@@ -2871,6 +2871,86 @@ input:checked + .s-slider:before {
 }
 
 
+/* --- PREMIUM STATS DASHBOARD V4 --- */
+.stats-dashboard {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    width: 100%;
+    padding: 5px;
+}
+
+.stat-card-premium {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 12px 15px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.stat-card-premium:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateX(5px);
+}
+
+.stat-info-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 8px;
+}
+
+.stat-label-v4 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    color: #9aa0b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-value-v4 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255,255,255,0.2);
+}
+
+/* THE PROGRESS BARS */
+.stat-bar-bg {
+    width: 100%;
+    height: 6px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    position: relative;
+}
+
+.stat-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    width: 0%; /* Dynamic */
+    transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 10px currentColor;
+}
+
+/* Glow Colors */
+.color-score { color: #facc15; background: #facc15; }
+.color-combo { color: #ff4444; background: #ff4444; }
+.color-precision { color: #00f0ff; background: #00f0ff; }
+.color-lost { color: #ff8c00; background: #ff8c00; }
+.color-time { color: #4ade80; background: #4ade80; }
+
+.stat-icon-v4 {
+    position: absolute;
+    right: -10px;
+    bottom: -10px;
+    font-size: 40px;
+    opacity: 0.05;
+    transform: rotate(-15deg);
+}
+
   </style>
 </head>
 <body>
@@ -3297,50 +3377,56 @@ input:checked + .s-slider:before {
   </div>
 </div>
 <div id="tab-statistici" class="tab-content">
-  <div class="mc-stats-container">
+  <div class="stats-dashboard">
     
-    <!-- SKINS UNLOCKED (Hearts Style) -->
-    <div class="mc-stat-row">
-        <div class="mc-label-group">
-            <span>Skins Deblocate</span>
-            <span class="mc-value-text" id="stat-skins-text">1/3</span>
+    <!-- SCORE CARD -->
+    <div class="stat-card-premium">
+        <div class="stat-info-top">
+            <span class="stat-label-v4">Puncte Colectate</span>
+            <span class="stat-value-v4" id="v4-score">0</span>
         </div>
-        <div class="mc-icon-bar" id="bar-skins">
-            <!-- Icons injected by JS -->
-        </div>
+        <div class="stat-bar-bg"><div id="bar-v4-score" class="stat-bar-fill color-score"></div></div>
+        <i class="fa-solid fa-star stat-icon-v4"></i>
     </div>
 
-    <!-- EVENTS SEEN (Food Bar Style) -->
-    <div class="mc-stat-row">
-        <div class="mc-label-group">
-            <span>Evenimente Colectate</span>
-            <span class="mc-value-text" id="stat-events-text">0/5</span>
+    <!-- COMBO CARD -->
+    <div class="stat-card-premium">
+        <div class="stat-info-top">
+            <span class="stat-label-v4">Cel mai mare Combo</span>
+            <span class="stat-value-v4" id="v4-combo">0</span>
         </div>
-        <div class="mc-icon-bar" id="bar-events">
-            <!-- Icons injected by JS -->
-        </div>
+        <div class="stat-bar-bg"><div id="bar-v4-combo" class="stat-bar-fill color-combo"></div></div>
+        <i class="fa-solid fa-fire stat-icon-v4"></i>
     </div>
 
-    <!-- SCORE LOST (Cracked Hearts) -->
-    <div class="mc-stat-row">
-        <div class="mc-label-group">
-            <span>Puncte Pierdute</span>
-            <span class="mc-value-text" id="stat-lost-text">0</span>
+    <!-- ACCURACY/PRECISION CARD -->
+    <div class="stat-card-premium">
+        <div class="stat-info-top">
+            <span class="stat-label-v4">Precizie Click-uri</span>
+            <span class="stat-value-v4" id="v4-precision">0%</span>
         </div>
-        <div class="mc-icon-bar" id="bar-lost">
-            <!-- Icons injected by JS -->
-        </div>
+        <div class="stat-bar-bg"><div id="bar-v4-precision" class="stat-bar-fill color-precision"></div></div>
+        <i class="fa-solid fa-crosshairs stat-icon-v4"></i>
     </div>
 
-    <!-- TOTAL PROGRESS (Experience Bar Style) -->
-    <div class="mc-stat-row">
-        <div class="mc-label-group">
-            <span>Nivel Experiență (Click-uri)</span>
-            <span class="mc-value-text" id="stat-clicks-total">0</span>
+    <!-- SCORE LOST CARD -->
+    <div class="stat-card-premium">
+        <div class="stat-info-top">
+            <span class="stat-label-v4">Puncte Pierdute (Miss/Axe)</span>
+            <span class="stat-value-v4" id="v4-lost">0</span>
         </div>
-        <div class="mc-exp-track">
-            <div class="mc-exp-fill" id="bar-exp-clicks"></div>
+        <div class="stat-bar-bg"><div id="bar-v4-lost" class="stat-bar-fill color-lost"></div></div>
+        <i class="fa-solid fa-heart-crack stat-icon-v4"></i>
+    </div>
+
+    <!-- TIME PLAYED -->
+    <div class="stat-card-premium">
+        <div class="stat-info-top">
+            <span class="stat-label-v4">Sesiune Activă</span>
+            <span class="stat-value-v4" id="v4-time">00:00</span>
         </div>
+        <div class="stat-bar-bg"><div id="bar-v4-time" class="stat-bar-fill color-time"></div></div>
+        <i class="fa-solid fa-clock stat-icon-v4"></i>
     </div>
 
   </div>
@@ -4436,43 +4522,36 @@ function startStatsTimer() {
     statTimerInterval = setInterval(updateStatsUI, 1000);
 }
 
-// --- NEW MINECRAFT STATS LOGIC ---
+// 4. THE UPDATED DASHBOARD LOGIC
 function updateStatsUI() {
-    // 1. SKINS (HEARTS)
-    const skinsCount = 1; // You can change this when players buy skins
-    const totalSkins = characterList.length;
-    document.getElementById('stat-skins-text').innerText = `${skinsCount}/${totalSkins}`;
-    let skinHtml = "";
-    for(let i=0; i<totalSkins; i++) {
-        skinHtml += `<i class="fa-solid fa-heart mc-icon ${i < skinsCount ? 'filled' : 'empty'}" style="color: #ff4d4d;"></i>`;
-    }
-    document.getElementById('bar-skins').innerHTML = skinHtml;
+    // Basic values
+    document.getElementById('v4-score').innerText = score;
+    document.getElementById('v4-combo').innerText = bestComboAllTime;
+    document.getElementById('v4-lost').innerText = totalScoreLost;
 
-    // 2. EVENTS (FOOD)
-    const eventsSeen = 2; // Track this when player interacts with new events
-    document.getElementById('stat-events-text').innerText = `${eventsSeen}/5`;
-    let eventHtml = "";
-    for(let i=0; i<5; i++) {
-        eventHtml += `<i class="fa-solid fa-apple-whole mc-icon ${i < eventsSeen ? 'filled' : 'empty'}" style="color: #ffaa00;"></i>`;
-    }
-    document.getElementById('bar-events').innerHTML = eventHtml;
+    // Accuracy Calculation
+    let totalAttempts = totalClicksAllTime + sessionMisses;
+    let accuracy = totalAttempts > 0 ? Math.round((totalClicksAllTime / totalAttempts) * 100) : 0;
+    document.getElementById('v4-precision').innerText = accuracy + "%";
+    document.getElementById('bar-v4-precision').style.width = accuracy + "%";
 
-    // 3. SCORE LOST (CRACKED HEARTS)
-    // We show one cracked heart for every 10 points lost
-    document.getElementById('stat-lost-text').innerText = totalScoreLost;
-    let lostHtml = "";
-    let heartsToDraw = Math.min(Math.floor(totalScoreLost / 10), 10); 
-    for(let i=0; i<heartsToDraw; i++) {
-        lostHtml += `<i class="fa-solid fa-heart-crack mc-icon" style="color: #555;"></i>`;
-    }
-    document.getElementById('bar-lost').innerHTML = lostHtml || "<span style='font-size:10px; color:#444'>Niciun punct pierdut încă!</span>";
+    // Bars (Visual percentages)
+    // Score bar: Fills every 100 points
+    document.getElementById('bar-v4-score').style.width = (score % 100) + "%";
+    // Combo bar: Fills based on 50 being a "Pro" combo
+    document.getElementById('bar-v4-combo').style.width = Math.min((bestComboAllTime / 50) * 100, 100) + "%";
+    // Lost bar: Grows as you lose points
+    document.getElementById('bar-v4-lost').style.width = Math.min((totalScoreLost / 50) * 100, 100) + "%";
 
-    // 4. EXP BAR (TOTAL CLICKS)
-    document.getElementById('stat-clicks-total').innerText = totalClicksAllTime;
-    let progress = (totalClicksAllTime % 100); // Progress towards the next 100 clicks
-    document.getElementById('bar-exp-clicks').style.width = progress + "%";
+    // Time Logic
+    const now = Date.now();
+    const diff = now - sessionStartTime;
+    const m = Math.floor(diff / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById('v4-time').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    // Time bar: Fills every 1 minute
+    document.getElementById('bar-v4-time').style.width = ((s / 60) * 100) + "%";
 }
-// RADIO LOGIC: Switch tracks from settings
 function changeTrack(dir) {
     lastTrackIndex += dir;
     if (lastTrackIndex < 0) lastTrackIndex = playlist.length - 1;
