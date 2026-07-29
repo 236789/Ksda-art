@@ -4266,6 +4266,23 @@ checkFeedbackCooldown();
 
 }
 
+async function closeSettings() {
+    // 1. Închide modalul de setări
+    document.getElementById('settingsModal').style.display = 'none';
+
+    // 2. Salvează setările în baza de date (apelăm funcția existentă)
+    await syncSettingsToCloud();
+
+    // 3. Oprește cronometrul pentru statistici (pentru a economisi resurse)
+    if (statTimerInterval) clearInterval(statTimerInterval);
+
+    // 4. Verifică unde trebuie să se întoarcă utilizatorul
+    if (document.getElementById('gameArea').style.display === 'block') {
+        // Dacă jucătorul era în timpul meciului, îl trimitem înapoi la meniul de pauză
+        document.getElementById('pauseModal').style.display = 'flex';
+    }
+}
+
 function updateMusicVolume(val) {
     musicVolume = val / 100; // Update Global
     if (!isMuted) bgMusic.volume = musicVolume;
