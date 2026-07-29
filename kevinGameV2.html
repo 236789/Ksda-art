@@ -2748,6 +2748,51 @@ input:checked + .s-slider:before {
     border-color: var(--th-border) !important;
 }
 
+/* --- STATISTICI TAB STYLES --- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+}
+.stat-box {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(250, 204, 21, 0.2);
+    border-radius: 12px;
+    padding: 15px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+    transition: transform 0.2s;
+}
+.stat-box:hover {
+    transform: translateY(-3px);
+    border-color: #facc15;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5), inset 0 2px 10px rgba(0,0,0,0.5);
+}
+.stat-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
+}
+.stat-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 2px;
+    letter-spacing: 1px;
+}
+.stat-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    color: #9aa0b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
 
   </style>
 </head>
@@ -3067,8 +3112,8 @@ input:checked + .s-slider:before {
       <button class="tab-btn" onclick="switchTab('feedback', this)">
         <i class="fa-solid fa-comment-dots"></i> <span>FEEDBACK</span>
       </button>
-      <button class="tab-btn" onclick="switchTab('diverse', this)">
-        <i class="fa-solid fa-box-open"></i> <span>DIVERSE</span>
+<button class="tab-btn" onclick="switchTab('statistici', this)">
+        <i class="fa-solid fa-chart-pie"></i> <span>STATISTICI</span>
       </button>
     </div>
 
@@ -3174,13 +3219,35 @@ input:checked + .s-slider:before {
     </button>
   </div>
 </div>
-    <!-- =========================
-         TAB 4: DIVERSE (Empty Placeholder)
+<!-- =========================
+         TAB 4: STATISTICI
          ========================= -->
-    <div id="tab-diverse" class="tab-content">
-      <div class="placeholder-text">
-        <i class="fa-solid fa-screwdriver-wrench" style="font-size: 30px; margin-bottom: 10px; color:#facc15;"></i>
-        <p>Alte setări în curând...</p>
+    <div id="tab-statistici" class="tab-content">
+      <div class="stats-grid">
+        <!-- Scor Curent -->
+        <div class="stat-box">
+          <i class="fa-solid fa-star stat-icon" style="color: #facc15;"></i>
+          <span class="stat-value" id="stat-score">0</span>
+          <span class="stat-label">SCOR CURENT</span>
+        </div>
+        <!-- Max Combo -->
+        <div class="stat-box">
+          <i class="fa-solid fa-fire stat-icon" style="color: #ff4444;"></i>
+          <span class="stat-value" id="stat-combo">0</span>
+          <span class="stat-label">MAX COMBO (CONT)</span>
+        </div>
+        <!-- Total Click-uri -->
+        <div class="stat-box">
+          <i class="fa-solid fa-hand-pointer stat-icon" style="color: #00f0ff;"></i>
+          <span class="stat-value" id="stat-clicks">0</span>
+          <span class="stat-label">KEVINI PRINȘI (CONT)</span>
+        </div>
+        <!-- Timp Jucat -->
+        <div class="stat-box">
+          <i class="fa-solid fa-clock stat-icon" style="color: #4ade80;"></i>
+          <span class="stat-value" id="stat-time">00:00</span>
+          <span class="stat-label">TIMP JUCAT (SESIUNE)</span>
+        </div>
       </div>
     </div>
 
@@ -3257,6 +3324,12 @@ for (let i = 0; i < particleCount; i++) {
     let isKevinTired = false;
     let canClickKevin = true; 
     let showBubbles = true; // Add this at the top with your other variables
+
+// --- STATISTICI GLOBALS ---
+let bestComboAllTime = 0;
+let totalClicksAllTime = 0;
+let sessionStartTime = Date.now();
+let statTimerInterval = null;
 
 // --- SETTINGS GLOBALS --- 
 let musicVolume = 0.08; // Default 8%
@@ -3358,13 +3431,17 @@ async function checkUserInFirestore(uid) {
                 console.warn("Could not fetch direct player settings:", err);
             }
 
-// Aplicăm Setările
+            // Aplicăm Setările
             if (data.settings) {
                 musicVolume = data.settings.musicVolume ?? 0.08;
                 sfxVolume = data.settings.sfxVolume ?? 0.5;
                 isMuted = data.settings.isMuted ?? false;
                 lastTrackIndex = data.settings.lastTrackIndex ?? 0;
                 showBubbles = data.settings.showBubbles ?? true;
+                
+                // --- EXTRAGEM STATISTICILE AICI ---
+                bestComboAllTime = data.settings.bestCombo ?? 0;
+                totalClicksAllTime = data.settings.totalClicks ?? 0;
                 
                 // 🎨 ÎNCĂRCĂM TEMA SALVATĂ
                 let savedTheme = data.settings.themeIndex ?? 0;
@@ -3671,23 +3748,28 @@ function startTiredCycle() {
 document.getElementById('kevin').addEventListener('click', (e) => {
       e.stopPropagation(); 
 
-      // --- THE ANTI-AIMBOT SHIELD ---
       if (!e.isTrusted) {
           console.warn("🚨 Synthetic click detected and blocked!");
           return; 
       }
-      // ------------------------------
 
       if (!canClickKevin) return;
       canClickKevin = false;
 
-      // Efect sonor de HIT (Un POP random din cele 5)
       playRandomPop(); 
 
       score++;
+      
+      // --- SALVĂM STATISTICILE ---
+      totalClicksAllTime++;
+
       updateScoreUI();
 
       comboCount++;
+      if (comboCount > bestComboAllTime) {
+          bestComboAllTime = comboCount;
+      }
+      
       showComboText(e.clientX, e.clientY, comboCount);
 
       clearTimeout(comboTimer);
@@ -4180,6 +4262,8 @@ function openSettings() {
     // Update Radio text to current song index
     updateRadioText();
 checkFeedbackCooldown();
+    startStatsTimer(); // PORNIM CRONOMETRUL
+
 }
 
 function updateMusicVolume(val) {
@@ -4228,16 +4312,30 @@ function changeTrack(dir) {
     updateRadioText();
 }
 
-// UPDATE THE CLOSE FUNCTION TO SAVE
-function closeSettings() {
-    document.getElementById('settingsModal').style.display = 'none';
+function startStatsTimer() {
+    // Prima actualizare instantanee
+    updateStatsUI();
     
-    // SAVE TO FIREBASE RIGHT NOW
-    syncSettingsToCloud();
+    // Oprim orice alt interval vechi
+    if(statTimerInterval) clearInterval(statTimerInterval);
+    
+    // Actualizăm la fiecare secundă
+    statTimerInterval = setInterval(updateStatsUI, 1000);
+}
 
-    if (document.getElementById('gameArea').style.display === 'block') {
-        document.getElementById('pauseModal').style.display = 'flex';
-    }
+function updateStatsUI() {
+    document.getElementById('stat-score').innerText = score;
+    document.getElementById('stat-combo').innerText = bestComboAllTime;
+    document.getElementById('stat-clicks').innerText = totalClicksAllTime;
+
+    // Calculăm timpul scurs în sesiune
+    const now = Date.now();
+    const diff = now - sessionStartTime;
+    const m = Math.floor(diff / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    
+    document.getElementById('stat-time').innerText = 
+        `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
 // RADIO LOGIC: Switch tracks from settings
@@ -4261,8 +4359,8 @@ function updateRadioText() {
         "Pizzicato", 
         "Quiet Reflection", 
         "Whisker Pursuit", 
-        "Window Views",
-        "Prindel pe kevinută", // 🎵 NUMELE NOII MELODII (Îl poți schimba cum vrei tu)
+        "Window Views"
+        "Prindel pe kevinută" // 🎵 NUMELE NOII MELODII (Îl poți schimba cum vrei tu)
 
     ];
     // This displays the name from the list, or "Track 1" if something is wrong
@@ -4286,8 +4384,10 @@ const settingsPayload = {
         sfxVolume: sfxVolume,
         isMuted: isMuted,
         lastTrackIndex: lastTrackIndex, 
-        showBubbles: showBubbles,       // <--- VIRGULA LIPSEA AICI!
+        showBubbles: showBubbles,       
         themeIndex: currentThemeIndex,
+        bestCombo: bestComboAllTime,    // <-- ADAUGAT
+        totalClicks: totalClicksAllTime, // <-- ADAUGAT
     };
     console.log("📤 Writing to Firestore for UID:", currentUID, settingsPayload);
 
