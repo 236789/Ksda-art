@@ -4343,35 +4343,41 @@ function startStatsTimer() {
     statTimerInterval = setInterval(updateStatsUI, 1000);
 }
 
-// 4. THE UPDATED DASHBOARD LOGIC
-function updateStatsUI() {
-    // Basic values
-    document.getElementById('v4-score').innerText = score;
-    document.getElementById('v4-combo').innerText = bestComboAllTime;
-    document.getElementById('v4-lost').innerText = totalScoreLost;
+// FIX: Close Settings Button
+async function closeSettings() {
+    document.getElementById('settingsModal').style.display = 'none';
+    await syncSettingsToCloud(); // Existing function in your code
+    if(statTimerInterval) clearInterval(statTimerInterval);
+    if (document.getElementById('gameArea').style.display === 'block') {
+        document.getElementById('pauseModal').style.display = 'flex';
+    }
+}
 
-    // Accuracy Calculation
+// HUD UPDATER
+function updateStatsUI() {
+    // 1. Accuracy Logic
     let totalAttempts = totalClicksAllTime + sessionMisses;
     let accuracy = totalAttempts > 0 ? Math.round((totalClicksAllTime / totalAttempts) * 100) : 0;
-    document.getElementById('v4-precision').innerText = accuracy + "%";
-    document.getElementById('bar-v4-precision').style.width = accuracy + "%";
+    
+    // Update Radial Gauge
+    const ring = document.getElementById('v6-precision-ring');
+    if(ring) {
+        ring.style.background = `conic-gradient(var(--th-accent) ${accuracy}%, transparent ${accuracy}%)`;
+    }
+    document.getElementById('v6-precision-val').innerText = accuracy + "%";
 
-    // Bars (Visual percentages)
-    // Score bar: Fills every 100 points
-    document.getElementById('bar-v4-score').style.width = (score % 100) + "%";
-    // Combo bar: Fills based on 50 being a "Pro" combo
-    document.getElementById('bar-v4-combo').style.width = Math.min((bestComboAllTime / 50) * 100, 100) + "%";
-    // Lost bar: Grows as you lose points
-    document.getElementById('bar-v4-lost').style.width = Math.min((totalScoreLost / 50) * 100, 100) + "%";
+    // 2. Standard Values
+    document.getElementById('v6-score').innerText = score;
+    document.getElementById('v6-combo').innerText = bestComboAllTime;
+    document.getElementById('v6-clicks').innerText = totalClicksAllTime;
 
-    // Time Logic
+    // 3. Time Logic
     const now = Date.now();
     const diff = now - sessionStartTime;
     const m = Math.floor(diff / 60000);
     const s = Math.floor((diff % 60000) / 1000);
-    document.getElementById('v4-time').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-    // Time bar: Fills every 1 minute
-    document.getElementById('bar-v4-time').style.width = ((s / 60) * 100) + "%";
+    document.getElementById('v6-time').innerText = 
+        `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 function changeTrack(dir) {
     lastTrackIndex += dir;
