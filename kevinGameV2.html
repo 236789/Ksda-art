@@ -4353,32 +4353,35 @@ async function closeSettings() {
     }
 }
 
-// HUD UPDATER
+// MODUL CORECT DE ACTUALIZARE PENTRU DESIGN-UL DE PĂTRATE (V6)
 function updateStatsUI() {
-    // 1. Accuracy Logic
+    // 1. Calculăm Precizia
     let totalAttempts = totalClicksAllTime + sessionMisses;
     let accuracy = totalAttempts > 0 ? Math.round((totalClicksAllTime / totalAttempts) * 100) : 0;
-    
-    // Update Radial Gauge
-    const ring = document.getElementById('v6-precision-ring');
-    if(ring) {
-        ring.style.background = `conic-gradient(var(--th-accent) ${accuracy}%, transparent ${accuracy}%)`;
-    }
-    document.getElementById('v6-precision-val').innerText = accuracy + "%";
 
-    // 2. Standard Values
-    document.getElementById('v6-score').innerText = score;
-    document.getElementById('v6-combo').innerText = bestComboAllTime;
-    document.getElementById('v6-clicks').innerText = totalClicksAllTime;
-
-    // 3. Time Logic
+    // 2. Calculăm Timpul
     const now = Date.now();
     const diff = now - sessionStartTime;
     const m = Math.floor(diff / 60000);
     const s = Math.floor((diff % 60000) / 1000);
-    document.getElementById('v6-time').innerText = 
-        `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-}
+    const timeString = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
+    // 3. Actualizăm elementele din HTML folosind ID-urile corecte
+    // Verificăm dacă elementele există înainte de a le scrie (pentru a evita erorile)
+    const elScore = document.getElementById('v6-score');
+    const elCombo = document.getElementById('v6-combo');
+    const elPrecision = document.getElementById('v6-precision');
+    const elClicks = document.getElementById('v6-clicks');
+    const elTime = document.getElementById('v6-time');
+
+    if (elScore) elScore.innerText = score;
+    if (elCombo) elCombo.innerText = bestComboAllTime;
+    if (elPrecision) elPrecision.innerText = accuracy + "%";
+    if (elClicks) elClicks.innerText = totalClicksAllTime;
+    if (elTime) elTime.innerText = timeString;
+} 
+
+
 function changeTrack(dir) {
     lastTrackIndex += dir;
     if (lastTrackIndex < 0) lastTrackIndex = playlist.length - 1;
