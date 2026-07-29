@@ -2793,6 +2793,83 @@ input:checked + .s-slider:before {
     letter-spacing: 0.5px;
 }
 
+/* --- MINECRAFT STYLE HUD STATS --- */
+.mc-stats-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 15px;
+    border: 2px solid var(--th-border);
+}
+
+.mc-stat-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.mc-label-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    color: #9aa0b8;
+    text-transform: uppercase;
+}
+
+.mc-value-text {
+    color: var(--th-accent);
+    font-weight: bold;
+}
+
+/* The Row of Icons (Like Hearts/Food) */
+.mc-icon-bar {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+}
+
+.mc-icon {
+    font-size: 16px;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+}
+
+.mc-icon.empty {
+    opacity: 0.2;
+    filter: grayscale(1) blur(1px);
+}
+
+.mc-icon.filled {
+    animation: heartBeat 0.5s ease-in-out;
+}
+
+/* Exp Bar Style */
+.mc-exp-track {
+    width: 100%;
+    height: 8px;
+    background: #111;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.mc-exp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #39ff14, #bcff00);
+    box-shadow: 0 0 10px #39ff14;
+    width: 0%;
+    transition: width 1s ease-in-out;
+}
+
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
 
   </style>
 </head>
@@ -3219,37 +3296,55 @@ input:checked + .s-slider:before {
     </button>
   </div>
 </div>
-<!-- =========================
-         TAB 4: STATISTICI
-         ========================= -->
-    <div id="tab-statistici" class="tab-content">
-      <div class="stats-grid">
-        <!-- Scor Curent -->
-        <div class="stat-box">
-          <i class="fa-solid fa-star stat-icon" style="color: #facc15;"></i>
-          <span class="stat-value" id="stat-score">0</span>
-          <span class="stat-label">SCOR CURENT</span>
+<div id="tab-statistici" class="tab-content">
+  <div class="mc-stats-container">
+    
+    <!-- SKINS UNLOCKED (Hearts Style) -->
+    <div class="mc-stat-row">
+        <div class="mc-label-group">
+            <span>Skins Deblocate</span>
+            <span class="mc-value-text" id="stat-skins-text">1/3</span>
         </div>
-        <!-- Max Combo -->
-        <div class="stat-box">
-          <i class="fa-solid fa-fire stat-icon" style="color: #ff4444;"></i>
-          <span class="stat-value" id="stat-combo">0</span>
-          <span class="stat-label">MAX COMBO (CONT)</span>
+        <div class="mc-icon-bar" id="bar-skins">
+            <!-- Icons injected by JS -->
         </div>
-        <!-- Total Click-uri -->
-        <div class="stat-box">
-          <i class="fa-solid fa-hand-pointer stat-icon" style="color: #00f0ff;"></i>
-          <span class="stat-value" id="stat-clicks">0</span>
-          <span class="stat-label">KEVINI PRINȘI (CONT)</span>
-        </div>
-        <!-- Timp Jucat -->
-        <div class="stat-box">
-          <i class="fa-solid fa-clock stat-icon" style="color: #4ade80;"></i>
-          <span class="stat-value" id="stat-time">00:00</span>
-          <span class="stat-label">TIMP JUCAT (SESIUNE)</span>
-        </div>
-      </div>
     </div>
+
+    <!-- EVENTS SEEN (Food Bar Style) -->
+    <div class="mc-stat-row">
+        <div class="mc-label-group">
+            <span>Evenimente Colectate</span>
+            <span class="mc-value-text" id="stat-events-text">0/5</span>
+        </div>
+        <div class="mc-icon-bar" id="bar-events">
+            <!-- Icons injected by JS -->
+        </div>
+    </div>
+
+    <!-- SCORE LOST (Cracked Hearts) -->
+    <div class="mc-stat-row">
+        <div class="mc-label-group">
+            <span>Puncte Pierdute</span>
+            <span class="mc-value-text" id="stat-lost-text">0</span>
+        </div>
+        <div class="mc-icon-bar" id="bar-lost">
+            <!-- Icons injected by JS -->
+        </div>
+    </div>
+
+    <!-- TOTAL PROGRESS (Experience Bar Style) -->
+    <div class="mc-stat-row">
+        <div class="mc-label-group">
+            <span>Nivel Experiență (Click-uri)</span>
+            <span class="mc-value-text" id="stat-clicks-total">0</span>
+        </div>
+        <div class="mc-exp-track">
+            <div class="mc-exp-fill" id="bar-exp-clicks"></div>
+        </div>
+    </div>
+
+  </div>
+</div>
 
     <!-- =========================
          FOOTER (ALWAYS VISIBLE)
@@ -3330,6 +3425,7 @@ let bestComboAllTime = 0;
 let totalClicksAllTime = 0;
 let sessionStartTime = Date.now();
 let statTimerInterval = null;
+let totalScoreLost = 0; // Tracks how many points were lost to misses or axes
 
 // --- SETTINGS GLOBALS --- 
 let musicVolume = 0.08; // Default 8%
@@ -4340,21 +4436,42 @@ function startStatsTimer() {
     statTimerInterval = setInterval(updateStatsUI, 1000);
 }
 
+// --- NEW MINECRAFT STATS LOGIC ---
 function updateStatsUI() {
-    document.getElementById('stat-score').innerText = score;
-    document.getElementById('stat-combo').innerText = bestComboAllTime;
-    document.getElementById('stat-clicks').innerText = totalClicksAllTime;
+    // 1. SKINS (HEARTS)
+    const skinsCount = 1; // You can change this when players buy skins
+    const totalSkins = characterList.length;
+    document.getElementById('stat-skins-text').innerText = `${skinsCount}/${totalSkins}`;
+    let skinHtml = "";
+    for(let i=0; i<totalSkins; i++) {
+        skinHtml += `<i class="fa-solid fa-heart mc-icon ${i < skinsCount ? 'filled' : 'empty'}" style="color: #ff4d4d;"></i>`;
+    }
+    document.getElementById('bar-skins').innerHTML = skinHtml;
 
-    // Calculăm timpul scurs în sesiune
-    const now = Date.now();
-    const diff = now - sessionStartTime;
-    const m = Math.floor(diff / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    
-    document.getElementById('stat-time').innerText = 
-        `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    // 2. EVENTS (FOOD)
+    const eventsSeen = 2; // Track this when player interacts with new events
+    document.getElementById('stat-events-text').innerText = `${eventsSeen}/5`;
+    let eventHtml = "";
+    for(let i=0; i<5; i++) {
+        eventHtml += `<i class="fa-solid fa-apple-whole mc-icon ${i < eventsSeen ? 'filled' : 'empty'}" style="color: #ffaa00;"></i>`;
+    }
+    document.getElementById('bar-events').innerHTML = eventHtml;
+
+    // 3. SCORE LOST (CRACKED HEARTS)
+    // We show one cracked heart for every 10 points lost
+    document.getElementById('stat-lost-text').innerText = totalScoreLost;
+    let lostHtml = "";
+    let heartsToDraw = Math.min(Math.floor(totalScoreLost / 10), 10); 
+    for(let i=0; i<heartsToDraw; i++) {
+        lostHtml += `<i class="fa-solid fa-heart-crack mc-icon" style="color: #555;"></i>`;
+    }
+    document.getElementById('bar-lost').innerHTML = lostHtml || "<span style='font-size:10px; color:#444'>Niciun punct pierdut încă!</span>";
+
+    // 4. EXP BAR (TOTAL CLICKS)
+    document.getElementById('stat-clicks-total').innerText = totalClicksAllTime;
+    let progress = (totalClicksAllTime % 100); // Progress towards the next 100 clicks
+    document.getElementById('bar-exp-clicks').style.width = progress + "%";
 }
-
 // RADIO LOGIC: Switch tracks from settings
 function changeTrack(dir) {
     lastTrackIndex += dir;
