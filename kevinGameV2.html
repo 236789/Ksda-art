@@ -3006,6 +3006,24 @@ input:checked + .s-slider:before {
     box-shadow: 0 0 50px #facc15 !important;
     border-color: #facc15 !important;
 }
+
+
+.flying-points {
+    position: fixed;
+    z-index: 999999;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    color: #facc15;
+    pointer-events: none;
+    text-shadow: 0 0 15px rgba(250, 204, 21, 0.8), 0 0 5px #000;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.8s;
+}
+
+.flying-points.loss {
+    color: #ef4444;
+    text-shadow: 0 0 15px rgba(239, 68, 68, 0.8), 0 0 5px #000;
+}
   </style>
 </head>
 <body>
@@ -5750,216 +5768,161 @@ function startHotSauceEvent() {
     }, duration * 1000); 
 }
 
-
-// CONFIGURATION
 const slotAssets = {
     seven:   { url: 'https://iili.io/C8v0szx.png', mult: 3.0,  weight: 5 },
     diamond: { url: 'https://iili.io/C8v1oes.png', mult: 2.0,  weight: 10 },
     cherry:  { url: 'https://iili.io/C8v1XEB.png', mult: 1.5,  weight: 15 },
     grape:   { url: 'https://iili.io/C8vXtje.png', mult: 0.5,  weight: 25 },
-    tp:      { url: 'https://iili.io/C8vWtqv.png', mult: -0.5, weight: 25 }, // Special handling
-    poop:    { url: 'https://iili.io/C8vjjeI.png', mult: -1.0, weight: 20 }  // Special handling
+    tp:      { url: 'https://iili.io/C8vWtqv.png', mult: -0.5, weight: 25 },
+    poop:    { url: 'https://iili.io/C8vjjeI.png', mult: -1.0, weight: 20 }
 };
 
 let currentBetAmount = 5;
+let pendingWinAmount = 0;
 
 function openSlotMachine() {
     isPaused = true;
     clearInterval(moveKevinInterval);
-    
-    // 1. FREE POINTS CHECK
     if (score < 5) {
         score = 5;
         updateScoreUI();
-        showKevinutaBubble("Ține 5 puncte de la mine, săracule!");
+        showKevinutaBubble("Ține 5 puncte de la mine!");
     }
-
     document.getElementById('slotMachineModal').style.display = 'flex';
-    setBet(5, document.querySelector('.bet-btn')); // Default to 5
-    
-    // Reset reels to a blank or default state
+    setBet(5, document.querySelector('#slotMachineModal .bet-btn'));
     document.querySelectorAll('.reel').forEach(r => r.style.backgroundImage = `url('${slotAssets.cherry.url}')`);
 }
+
+function openSlotPaytable() { document.getElementById('slotInfoModal').style.display = 'flex'; }
 
 function setBet(val, btn) {
     if (val === 'half') currentBetAmount = Math.floor(score / 2);
     else if (val === 'max') currentBetAmount = 500;
     else currentBetAmount = val;
 
-    // Constraints
     if (currentBetAmount > score) currentBetAmount = score;
     if (currentBetAmount > 500) currentBetAmount = 500;
     if (currentBetAmount < 1) currentBetAmount = 1;
 
     document.getElementById('currentBetValue').innerText = currentBetAmount;
-    document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active-bet'));
+    document.querySelectorAll('#slotMachineModal .bet-btn').forEach(b => b.classList.remove('active-bet'));
     btn.classList.add('active-bet');
 }
 
 function spinSlots() {
     const spinBtn = document.getElementById('spinBtn');
+    if (score < currentBetAmount) return;
     spinBtn.disabled = true;
 
-    // Deduct bet
-    score -= currentBetAmount;
+    score -= currentBetAmount; // Deduct bet instantly
     updateScoreUI(true);
 
-    // 2. PROBABILITY LOGIC (Calculated before animation)
     const outcome = calculateOutcome();
-    
-    const r1 = document.getElementById('reel1');
-    const r2 = document.getElementById('reel2');
-    const r3 = document.getElementById('reel3');
+    const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
 
-    // Add spin classes
-    r1.classList.add('reel-spinning');
-    r2.classList.add('reel-spinning');
-    r3.classList.add('reel-spinning');
+    reels.forEach(r => r.classList.add('reel-spinning'));
 
-    // Sequence the stop
-    setTimeout(() => { r1.classList.remove('reel-spinning'); r1.style.backgroundImage = `url('${outcome.url}')`; }, 1000);
-    setTimeout(() => { r2.classList.remove('reel-spinning'); r2.style.backgroundImage = `url('${outcome.url}')`; }, 1400);
-    setTimeout(() => { 
-        r3.classList.remove('reel-spinning'); 
-        r3.style.backgroundImage = `url('${outcome.url}')`;
-        
-        // Finalize Result
-        setTimeout(() => processSlotResult(outcome), 500);
+    setTimeout(() => stopReel(reels[0], outcome.url), 1000);
+    setTimeout(() => stopReel(reels[1], outcome.url), 1400);
+    setTimeout(() => {
+        stopReel(reels[2], outcome.url);
+        setTimeout(() => finalizeSpin(outcome), 500);
     }, 1800);
 }
 
 function calculateOutcome() {
     const pool = [];
     for (let key in slotAssets) {
-        for (let i = 0; i < slotAssets[key].weight; i++) {
-            pool.push(slotAssets[key]);
-        }
+        for (let i = 0; i < slotAssets[key].weight; i++) pool.push(slotAssets[key]);
     }
     return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function processSlotResult(outcome) {
-    let winMessage = "";
-    
+function stopReel(el, url) { el.classList.remove('reel-spinning'); el.style.backgroundImage = `url('${url}')`; }
+
+function finalizeSpin(outcome) {
+    let title = "GHINION!";
+    let text = "Ai pierdut tot pariul.";
+    let isJackpot = false;
+
     if (outcome.mult === 3.0) {
-        let win = currentBetAmount * 4; // Returns bet + 3x profit
-        score += win;
-        winMessage = `JACKPOT! +${win} Puncte! 💰`;
+        pendingWinAmount = currentBetAmount * 4;
+        title = "JACKPOT!"; text = `FELICITĂRI! Ai câștigat ${pendingWinAmount} puncte!`; isJackpot = true;
     } else if (outcome.mult > 0) {
-        let win = Math.floor(currentBetAmount * (1 + outcome.mult));
-        score += win;
-        winMessage = `CÂȘTIG! +${win} Puncte!`;
+        pendingWinAmount = Math.floor(currentBetAmount * (1 + outcome.mult));
+        title = "CÂȘTIGĂTOR!"; text = `Ai primit ${pendingWinAmount} puncte!`;
     } else if (outcome.mult === -0.5) {
-        let refund = Math.floor(currentBetAmount * 0.5);
-        score += refund;
-        winMessage = "MĂCAR AI RĂMAS CU JUMĂTATE... 🧻";
+        pendingWinAmount = Math.floor(currentBetAmount * 0.5);
+        title = "STRÂMTORAT"; text = `Ai recuperat ${pendingWinAmount} puncte.`;
     } else {
-        winMessage = "AI PIERDUT TOT! 💩";
+        pendingWinAmount = 0;
     }
 
-    updateScoreUI();
-    syncScoreToFirestore();
-    alert(winMessage);
-    
-    // 3. AUTO-CLOSE AFTER SINGLE PLAY
-    setTimeout(() => {
-        document.getElementById('slotMachineModal').style.display = 'none';
-        isPaused = false;
-        startKevinMovement();
-    }, 500);
+    showSlotResult(title, text, isJackpot);
 }
 
-// Function Fixes & Romanian Logic
-function openSlotPaytable() {
-    document.getElementById('slotInfoModal').style.display = 'flex';
-}
-
-function openSlotMachine() {
-    isPaused = true;
-    clearInterval(moveKevinInterval);
-    
-    if (score < 5) {
-        score = 5;
-        updateScoreUI();
-        showKevinutaBubble("Ține 5 puncte de la mine!");
-    }
-
-    document.getElementById('slotMachineModal').style.display = 'flex';
-    setBet(5, document.querySelector('#slotMachineModal .bet-btn'));
-    
-    // Set default icons
-    document.querySelectorAll('.reel').forEach(r => r.style.backgroundImage = `url('${slotAssets.cherry.url}')`);
-}
-
-// Custom Modal for Results (Replaces Alerts)
-function showSlotResult(title, message, isJackpot = false) {
+function showSlotResult(title, message, isJackpot) {
     const modal = document.getElementById('slotResultModal');
     const box = document.getElementById('resultBox');
-    const titleEl = document.getElementById('resultTitle');
-    const textEl = document.getElementById('resultText');
-
-    titleEl.innerText = title;
-    textEl.innerText = message;
-
-    // Visual theme for Jackpot
-    if (isJackpot) {
-        box.classList.add('jackpot-glow');
-        titleEl.style.color = "#facc15";
-    } else {
-        box.classList.remove('jackpot-glow');
-        titleEl.style.color = "#818cf8";
-    }
+    document.getElementById('resultTitle').innerText = title;
+    document.getElementById('resultText').innerText = message;
+    
+    if (isJackpot) box.classList.add('jackpot-glow');
+    else box.classList.remove('jackpot-glow');
 
     modal.style.display = 'flex';
 }
 
 function closeResultAndSlot() {
     document.getElementById('slotResultModal').style.display = 'none';
-    document.getElementById('slotMachineModal').style.display = 'none';
-    
-    // CLEANUP INDICATOR
-    const slotIndicator = document.getElementById('event-box-slotMachine');
-    if (slotIndicator) {
-        slotIndicator.remove();
-        if (activeEventTimers['slotMachine']) {
-            clearInterval(activeEventTimers['slotMachine'].interval);
-            delete activeEventTimers['slotMachine'];
-        }
-    }
-
-    isPaused = false;
-    startKevinMovement();
+    if (pendingWinAmount > 0) animateScoreFlying();
+    else finishSlotCleanup();
 }
 
-function processSlotResult(outcome) {
-    let winTitle = "";
-    let winText = "";
-    let isJackpot = false;
-    
-    if (outcome.mult === 3.0) {
-        let win = currentBetAmount * 4;
-        score += win;
-        winTitle = "JACKPOT!";
-        winText = `INCREDIBIL! Ai câștigat ${win} puncte!`;
-        isJackpot = true;
-    } else if (outcome.mult > 0) {
-        let win = Math.floor(currentBetAmount * (1 + outcome.mult));
-        score += win;
-        winTitle = "CÂȘTIGĂTOR!";
-        winText = `Felicitări! Ai primit ${win} puncte!`;
-    } else if (outcome.mult === -0.5) {
-        let refund = Math.floor(currentBetAmount * 0.5);
-        score += refund;
-        winTitle = "STRÂMTORAT...";
-        winText = "Ai pierdut jumătate din pariu.";
-    } else {
-        winTitle = "GHINION!";
-        winText = "Ai pierdut tot pariul. Mai încearcă!";
-    }
+function animateScoreFlying() {
+    const flyer = document.createElement('div');
+    flyer.className = 'flying-points';
+    flyer.innerText = `+${pendingWinAmount}`;
+    flyer.style.left = '50vw'; flyer.style.top = '50vh';
+    flyer.style.transform = 'translate(-50%, -50%)';
+    document.body.appendChild(flyer);
 
-    updateScoreUI();
+    const rect = document.getElementById('scoreBoard').getBoundingClientRect();
+    setTimeout(() => {
+        flyer.style.left = `${rect.left + rect.width/2}px`;
+        flyer.style.top = `${rect.top + rect.height/2}px`;
+        flyer.style.transform = 'translate(-50%, -50%) scale(0.2)';
+        flyer.style.opacity = '0';
+    }, 50);
+
+    setTimeout(() => { flyer.remove(); countUpTicker(pendingWinAmount); }, 850);
+}
+
+function countUpTicker(amount) {
+    const start = score;
+    const end = score + amount;
+    const duration = 1000;
+    const startTime = performance.now();
+
+    function step(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const current = Math.floor(start + (amount * progress));
+        document.getElementById('scoreText').innerText = current;
+        if (progress < 1) requestAnimationFrame(step);
+        else { score = end; updateScoreUI(); finishSlotCleanup(); }
+    }
+    requestAnimationFrame(step);
+}
+
+function finishSlotCleanup() {
+    document.getElementById('slotMachineModal').style.display = 'none';
+    const indicator = document.getElementById('event-box-slotMachine');
+    if (indicator) indicator.remove();
+    if (activeEventTimers['slotMachine']) { clearInterval(activeEventTimers['slotMachine'].interval); delete activeEventTimers['slotMachine']; }
+    isPaused = false;
+    startKevinMovement();
     syncScoreToFirestore();
-    showSlotResult(winTitle, winText, isJackpot);
+    document.getElementById('spinBtn').disabled = false;
 }
   </script>
 </body>
