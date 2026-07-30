@@ -5873,11 +5873,7 @@ function showSlotResult(title, message, isJackpot) {
     modal.style.display = 'flex';
 }
 
-function closeResultAndSlot() {
-    document.getElementById('slotResultModal').style.display = 'none';
-    if (pendingWinAmount > 0) animateScoreFlying();
-    else finishSlotCleanup();
-}
+
 
 function animateScoreFlying() {
     const flyer = document.createElement('div');
@@ -5914,15 +5910,49 @@ function countUpTicker(amount) {
     requestAnimationFrame(step);
 }
 
-function finishSlotCleanup() {
+function closeResultAndSlot() {
+    // 1. IMMEDIATELY HIDE BOTH MODALS
+    // This reveals the game area so the player can see the flying points
+    document.getElementById('slotResultModal').style.display = 'none';
     document.getElementById('slotMachineModal').style.display = 'none';
+    
+    // 2. TRIGGER ANIMATION ON THE NOW-VISIBLE GAME AREA
+    if (pendingWinAmount > 0) {
+        animateScoreFlying();
+    } else {
+        // If it was a loss (pendingWinAmount is 0), just finish up
+        finishSlotCleanup();
+    }
+}
+
+function finishSlotCleanup() {
+    // Ensure the slot modal is hidden (failsafe)
+    document.getElementById('slotMachineModal').style.display = 'none';
+
+    // 1. CLEANUP THE BOTTOM-LEFT INDICATOR
     const indicator = document.getElementById('event-box-slotMachine');
-    if (indicator) indicator.remove();
-    if (activeEventTimers['slotMachine']) { clearInterval(activeEventTimers['slotMachine'].interval); delete activeEventTimers['slotMachine']; }
+    if (indicator) {
+        indicator.style.animation = 'slideOutEventLeft 0.3s ease-in forwards';
+        setTimeout(() => indicator.remove(), 300);
+    }
+
+    // 2. STOP THE TIMER IN THE REGISTRY
+    if (activeEventTimers['slotMachine']) { 
+        clearInterval(activeEventTimers['slotMachine'].interval); 
+        delete activeEventTimers['slotMachine']; 
+    }
+
+    // 3. RESUME THE GAME
     isPaused = false;
     startKevinMovement();
+    
+    // 4. RESET WIN TRACKERS & BUTTONS
+    pendingWinAmount = 0;
+    const spinBtn = document.getElementById('spinBtn');
+    if (spinBtn) spinBtn.disabled = false;
+
+    // 5. FINAL SYNC TO BACKEND
     syncScoreToFirestore();
-    document.getElementById('spinBtn').disabled = false;
 }
   </script>
 </body>
