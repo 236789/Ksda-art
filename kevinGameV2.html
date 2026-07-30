@@ -2981,6 +2981,31 @@ input:checked + .s-slider:before {
     filter: grayscale(1);
     cursor: not-allowed;
 }
+
+
+/* --- MOBILE & LAYOUT FIXES --- */
+@media (max-width: 600px) {
+    .slot-modal-box { padding: 15px !important; width: 95vw !important; }
+    .reel { width: 70px !important; height: 70px !important; }
+    .bet-grid { gap: 5px !important; }
+    .bet-btn { font-size: 12px !important; height: 40px !important; }
+}
+
+/* RESULT MODAL STYLING */
+.result-modal-box {
+    max-width: 320px !important;
+    border-width: 4px !important;
+    animation: resultPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes resultPop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.jackpot-glow {
+    box-shadow: 0 0 50px #facc15 !important;
+    border-color: #facc15 !important;
+}
   </style>
 </head>
 <body>
@@ -3201,13 +3226,12 @@ input:checked + .s-slider:before {
   <!-- OLD BACK BUTTON REMOVED -->
 </div>
 
-
-<!-- SLOT MODAL V3 -->
+<!-- SLOT MODAL V4 -->
 <div id="slotMachineModal" class="modal-overlay">
   <div class="modal-box slot-modal-box">
     <button class="info-icon-btn" onclick="openSlotPaytable()"><i class="fa-solid fa-circle-question"></i></button>
-    <h2 style="color: #818cf8; letter-spacing: 2px;">NEON SLOTS</h2>
-    <div class="selection-line" style="background: #6366f1; width: 80px;"></div>
+    <h2 style="color: #818cf8;">NEON SLOTS</h2>
+    <div class="selection-line" style="background: #6366f1; width: 60px;"></div>
 
     <div class="slot-machine-container">
       <div id="reel1" class="reel"></div>
@@ -3215,18 +3239,43 @@ input:checked + .s-slider:before {
       <div id="reel3" class="reel"></div>
     </div>
 
-    <div class="bet-display">BET: <span id="currentBetValue" style="color:#fff;">5</span></div>
+    <div class="bet-display">PARIU: <span id="currentBetValue" style="color:#fff;">5</span></div>
     
     <div class="bet-grid">
       <button class="menu-btn play bet-btn active-bet" onclick="setBet(5, this)">5</button>
-      <button class="menu-btn play bet-btn" onclick="setBet('half', this)">HALF</button>
+      <button class="menu-btn play bet-btn" onclick="setBet('half', this)">JUMĂTATE</button>
       <button class="menu-btn play bet-btn" onclick="setBet('max', this)">500</button>
     </div>
 
-    <button id="spinBtn" class="menu-btn play" style="width: 100%; height: 60px; background: linear-gradient(180deg, #6366f1, #4338ca); color:white;" onclick="spinSlots()">
-      SPIN & WIN
+    <button id="spinBtn" class="menu-btn play" style="width: 100%; height: 55px; background: linear-gradient(180deg, #6366f1, #4338ca); color:white;" onclick="spinSlots()">
+      SPIN
     </button>
   </div>
+</div>
+
+<!-- PAYTABLE V4 -->
+<div id="slotInfoModal" class="modal-overlay" style="z-index: 100001;">
+  <div class="modal-box" style="max-width: 320px; border-color: #6366f1; background: #020617;">
+    <h3 style="color:#818cf8; font-family:'Orbitron';">TABEL CÂȘTIGURI</h3>
+    <div class="paytable-list">
+        <div class="pay-row"><span><img src="https://iili.io/C8v0szx.png" width="20"> x3</span> <span>PROFIT x3.0</span></div>
+        <div class="pay-row"><span><img src="https://iili.io/C8v1oes.png" width="20"> x3</span> <span>PROFIT x2.0</span></div>
+        <div class="pay-row"><span><img src="https://iili.io/C8v1XEB.png" width="20"> x3</span> <span>PROFIT x1.5</span></div>
+        <div class="pay-row"><span><img src="https://iili.io/C8vXtje.png" width="20"> x3</span> <span>PROFIT x0.5</span></div>
+        <div class="pay-row"><span><img src="https://iili.io/C8vWtqv.png" width="20"> x3</span> <span>PIERZI 50%</span></div>
+        <div class="pay-row"><span><img src="https://iili.io/C8vjjeI.png" width="20"> x3</span> <span>PIERZI TOT</span></div>
+    </div>
+    <button class="menu-btn play" style="width: 100%; margin-top: 20px;" onclick="document.getElementById('slotInfoModal').style.display='none'">ÎNCHIDE</button>
+  </div>
+</div>
+
+<!-- RESULT MODAL (Custom Alert Replacement) -->
+<div id="slotResultModal" class="modal-overlay" style="z-index: 100005;">
+    <div id="resultBox" class="modal-box result-modal-box">
+        <h2 id="resultTitle">TITLU</h2>
+        <p id="resultText">Mesaj...</p>
+        <button class="menu-btn play" style="width: 100%;" onclick="closeResultAndSlot()">OK</button>
+    </div>
 </div>
 
 <!-- PAYTABLE V3 -->
@@ -5818,6 +5867,99 @@ function processSlotResult(outcome) {
         isPaused = false;
         startKevinMovement();
     }, 500);
+}
+
+// Function Fixes & Romanian Logic
+function openSlotPaytable() {
+    document.getElementById('slotInfoModal').style.display = 'flex';
+}
+
+function openSlotMachine() {
+    isPaused = true;
+    clearInterval(moveKevinInterval);
+    
+    if (score < 5) {
+        score = 5;
+        updateScoreUI();
+        showKevinutaBubble("Ține 5 puncte de la mine!");
+    }
+
+    document.getElementById('slotMachineModal').style.display = 'flex';
+    setBet(5, document.querySelector('#slotMachineModal .bet-btn'));
+    
+    // Set default icons
+    document.querySelectorAll('.reel').forEach(r => r.style.backgroundImage = `url('${slotAssets.cherry.url}')`);
+}
+
+// Custom Modal for Results (Replaces Alerts)
+function showSlotResult(title, message, isJackpot = false) {
+    const modal = document.getElementById('slotResultModal');
+    const box = document.getElementById('resultBox');
+    const titleEl = document.getElementById('resultTitle');
+    const textEl = document.getElementById('resultText');
+
+    titleEl.innerText = title;
+    textEl.innerText = message;
+
+    // Visual theme for Jackpot
+    if (isJackpot) {
+        box.classList.add('jackpot-glow');
+        titleEl.style.color = "#facc15";
+    } else {
+        box.classList.remove('jackpot-glow');
+        titleEl.style.color = "#818cf8";
+    }
+
+    modal.style.display = 'flex';
+}
+
+function closeResultAndSlot() {
+    document.getElementById('slotResultModal').style.display = 'none';
+    document.getElementById('slotMachineModal').style.display = 'none';
+    
+    // CLEANUP INDICATOR
+    const slotIndicator = document.getElementById('event-box-slotMachine');
+    if (slotIndicator) {
+        slotIndicator.remove();
+        if (activeEventTimers['slotMachine']) {
+            clearInterval(activeEventTimers['slotMachine'].interval);
+            delete activeEventTimers['slotMachine'];
+        }
+    }
+
+    isPaused = false;
+    startKevinMovement();
+}
+
+function processSlotResult(outcome) {
+    let winTitle = "";
+    let winText = "";
+    let isJackpot = false;
+    
+    if (outcome.mult === 3.0) {
+        let win = currentBetAmount * 4;
+        score += win;
+        winTitle = "JACKPOT!";
+        winText = `INCREDIBIL! Ai câștigat ${win} puncte!`;
+        isJackpot = true;
+    } else if (outcome.mult > 0) {
+        let win = Math.floor(currentBetAmount * (1 + outcome.mult));
+        score += win;
+        winTitle = "CÂȘTIGĂTOR!";
+        winText = `Felicitări! Ai primit ${win} puncte!`;
+    } else if (outcome.mult === -0.5) {
+        let refund = Math.floor(currentBetAmount * 0.5);
+        score += refund;
+        winTitle = "STRÂMTORAT...";
+        winText = "Ai pierdut jumătate din pariu.";
+    } else {
+        winTitle = "GHINION!";
+        winText = "Ai pierdut tot pariul. Mai încearcă!";
+    }
+
+    updateScoreUI();
+    syncScoreToFirestore();
+    showSlotResult(winTitle, winText, isJackpot);
 }
   </script>
 </body>
