@@ -5811,11 +5811,13 @@ function setBet(val, btn) {
 
 function spinSlots() {
     const spinBtn = document.getElementById('spinBtn');
-    if (score < currentBetAmount) return;
+    if (score < currentBetAmount) {
+        showKevinutaBubble("N-ai bani de pariul ăsta!");
+        return;
+    }
     spinBtn.disabled = true;
 
-    score -= currentBetAmount; // Deduct bet instantly
-    updateScoreUI(true);
+    // NOTE: We no longer do "score -= currentBetAmount" here!
 
     const outcome = calculateOutcome();
     const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
@@ -5841,21 +5843,28 @@ function calculateOutcome() {
 function stopReel(el, url) { el.classList.remove('reel-spinning'); el.style.backgroundImage = `url('${url}')`; }
 
 function finalizeSpin(outcome) {
-    let title = "GHINION!";
-    let text = "Ai pierdut tot pariul.";
+    let title = "";
+    let text = "";
     let isJackpot = false;
 
+    // We calculate the NET PROFIT or LOSS
     if (outcome.mult === 3.0) {
-        pendingWinAmount = currentBetAmount * 4;
-        title = "JACKPOT!"; text = `FELICITĂRI! Ai câștigat ${pendingWinAmount} puncte!`; isJackpot = true;
+        pendingWinAmount = currentBetAmount * 3; // Profit of 3x
+        title = "JACKPOT!";
+        text = `BINGO! Ai câștigat +${pendingWinAmount} puncte!`;
+        isJackpot = true;
     } else if (outcome.mult > 0) {
-        pendingWinAmount = Math.floor(currentBetAmount * (1 + outcome.mult));
-        title = "CÂȘTIGĂTOR!"; text = `Ai primit ${pendingWinAmount} puncte!`;
+        pendingWinAmount = Math.floor(currentBetAmount * outcome.mult);
+        title = "CÂȘTIGĂTOR!";
+        text = `Felicitări! +${pendingWinAmount} puncte!`;
     } else if (outcome.mult === -0.5) {
-        pendingWinAmount = Math.floor(currentBetAmount * 0.5);
-        title = "STRÂMTORAT"; text = `Ai recuperat ${pendingWinAmount} puncte.`;
-    } else {
-        pendingWinAmount = 0;
+        pendingWinAmount = -Math.floor(currentBetAmount * 0.5); // Negative value
+        title = "STRÂMTORAT...";
+        text = `Ai pierdut jumătate din pariu: ${pendingWinAmount} puncte.`;
+    } else if (outcome.mult === -1.0) {
+        pendingWinAmount = -currentBetAmount; // Negative full loss
+        title = "GHINION!";
+        text = `Ai pierdut tot pariul: ${pendingWinAmount} puncte.`;
     }
 
     showSlotResult(title, text, isJackpot);
@@ -5874,27 +5883,42 @@ function showSlotResult(title, message, isJackpot) {
 }
 
 
-
 function animateScoreFlying() {
     const flyer = document.createElement('div');
-    flyer.className = 'flying-points';
-    flyer.innerText = `+${pendingWinAmount}`;
+    
+    // If pendingWinAmount is negative, it's a loss (Red color)
+    const isLoss = pendingWinAmount < 0;
+    flyer.className = `flying-points ${isLoss ? 'loss' : ''}`;
+    
+    // Display as "+50" or "-50"
+    flyer.innerText = (pendingWinAmount > 0 ? "+" : "") + pendingWinAmount;
+    
     flyer.style.left = '50vw'; flyer.style.top = '50vh';
     flyer.style.transform = 'translate(-50%, -50%)';
     document.body.appendChild(flyer);
 
     const rect = document.getElementById('scoreBoard').getBoundingClientRect();
+    
     setTimeout(() => {
         flyer.style.left = `${rect.left + rect.width/2}px`;
         flyer.style.top = `${rect.top + rect.height/2}px`;
         flyer.style.transform = 'translate(-50%, -50%) scale(0.2)';
         flyer.style.opacity = '0';
+        
+        // If loss, shake the scoreboard on hit
+        if (isLoss) {
+            document.getElementById('scoreBoard').classList.add('score-loss');
+            setTimeout(() => document.getElementById('scoreBoard').classList.remove('score-loss'), 500);
+        }
     }, 50);
 
-    setTimeout(() => { flyer.remove(); countUpTicker(pendingWinAmount); }, 850);
+    setTimeout(() => { 
+        flyer.remove(); 
+        runScoreTicker(pendingWinAmount); 
+    }, 850);
 }
 
-function countUpTicker(amount) {
+function runScoreTicker(amount) {
     const start = score;
     const end = score + amount;
     const duration = 1000;
@@ -5902,10 +5926,19 @@ function countUpTicker(amount) {
 
     function step(now) {
         const progress = Math.min((now - startTime) / duration, 1);
+        
+        // This handles both adding and subtracting automatically
         const current = Math.floor(start + (amount * progress));
+        
         document.getElementById('scoreText').innerText = current;
-        if (progress < 1) requestAnimationFrame(step);
-        else { score = end; updateScoreUI(); finishSlotCleanup(); }
+        
+        if (progress < 1) {
+            requestAnimationFrame(step);
+        } else {
+            score = end;
+            updateScoreUI(); // Safety sync to clean UI
+            finishSlotCleanup();
+        }
     }
     requestAnimationFrame(step);
 }
