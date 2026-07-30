@@ -2898,6 +2898,89 @@ input:checked + .s-slider:before {
 }
 .pay-row { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(168, 85, 247, 0.2); padding-bottom: 4px; }
 .pay-row span:last-child { color: #a855f7; font-weight: bold; }
+
+
+/* --- SLOT MODAL V3: DARK CASINO --- */
+.slot-modal-box {
+    max-width: 450px !important;
+    background: radial-gradient(circle at top, #1e1b4b 0%, #020617 100%) !important;
+    border: 3px solid #6366f1 !important; /* Indigo border */
+    box-shadow: 0 0 50px rgba(99, 102, 241, 0.3) !important;
+}
+
+.slot-machine-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: #000;
+    padding: 25px 15px;
+    border-radius: 20px;
+    border: 2px solid #312e81;
+    margin: 20px 0;
+    box-shadow: inset 0 0 30px rgba(99, 102, 241, 0.2);
+}
+
+.reel {
+    width: 90px;
+    height: 90px;
+    background: #111;
+    border: 2px solid #4338ca;
+    border-radius: 12px;
+    background-size: 70%;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    box-shadow: 0 0 15px rgba(0,0,0,0.8);
+}
+
+/* Blur effect during spin */
+.reel-spinning {
+    filter: blur(8px) brightness(1.5);
+    animation: slotVibrate 0.1s infinite;
+}
+
+@keyframes slotVibrate {
+    0% { transform: translateY(-2px); }
+    100% { transform: translateY(2px); }
+}
+
+.bet-display {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    color: #818cf8;
+    background: rgba(0,0,0,0.4);
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    margin-bottom: 15px;
+}
+
+.bet-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.bet-btn {
+    height: 50px !important;
+    border-radius: 12px !important;
+    font-size: 16px !important;
+    border-color: #4338ca !important;
+    background: linear-gradient(180deg, #312e81, #1e1b4b) !important;
+}
+
+.bet-btn.active-bet {
+    border-color: #fff !important;
+    background: linear-gradient(180deg, #6366f1, #4338ca) !important;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.6);
+}
+
+#spinBtn:disabled {
+    opacity: 0.5;
+    filter: grayscale(1);
+    cursor: not-allowed;
+}
   </style>
 </head>
 <body>
@@ -3119,31 +3202,46 @@ input:checked + .s-slider:before {
 </div>
 
 
-<!-- MODAL: SLOT MACHINE -->
+<!-- SLOT MODAL V3 -->
 <div id="slotMachineModal" class="modal-overlay">
   <div class="modal-box slot-modal-box">
     <button class="info-icon-btn" onclick="openSlotPaytable()"><i class="fa-solid fa-circle-question"></i></button>
-    <h2 style="color: #a855f7;"><i class="fa-solid fa-clover"></i> SLOT LUCK</h2>
-    <div class="selection-line" style="background: #a855f7;"></div>
+    <h2 style="color: #818cf8; letter-spacing: 2px;">NEON SLOTS</h2>
+    <div class="selection-line" style="background: #6366f1; width: 80px;"></div>
 
     <div class="slot-machine-container">
-      <div class="reel"><span id="reel1" class="reel-icon">❓</span></div>
-      <div class="reel"><span id="reel2" class="reel-icon">❓</span></div>
-      <div class="reel"><span id="reel3" class="reel-icon">❓</span></div>
+      <div id="reel1" class="reel"></div>
+      <div id="reel2" class="reel"></div>
+      <div id="reel3" class="reel"></div>
     </div>
 
-    <div class="bet-info">PARIEZI: <span id="currentBetValue">5</span> PUNCTE</div>
+    <div class="bet-display">BET: <span id="currentBetValue" style="color:#fff;">5</span></div>
     
     <div class="bet-grid">
-      <button class="menu-btn play bet-btn active-bet" id="bet5" onclick="setBet(5, this)">5</button>
-      <button class="menu-btn play bet-btn" id="betAll" onclick="setBet('all', this)">ALL IN</button>
-      <button class="menu-btn play bet-btn" id="betHalf" onclick="setBet('half', this)">HALF</button>
+      <button class="menu-btn play bet-btn active-bet" onclick="setBet(5, this)">5</button>
+      <button class="menu-btn play bet-btn" onclick="setBet('half', this)">HALF</button>
+      <button class="menu-btn play bet-btn" onclick="setBet('max', this)">500</button>
     </div>
 
-    <button id="spinBtn" class="menu-btn play" style="width: 100%; height: 60px; background: linear-gradient(180deg, #a855f7, #6b21a8);" onclick="spinSlots()">
-      <i class="fa-solid fa-rotate"></i> SPIN
+    <button id="spinBtn" class="menu-btn play" style="width: 100%; height: 60px; background: linear-gradient(180deg, #6366f1, #4338ca); color:white;" onclick="spinSlots()">
+      SPIN & WIN
     </button>
-    <button id="closeSlotBtn" class="cancel-btn" onclick="closeSlotMachine()">ÎNCHIDE</button>
+  </div>
+</div>
+
+<!-- PAYTABLE V3 -->
+<div id="slotInfoModal" class="modal-overlay" style="z-index: 100001;">
+  <div class="modal-box" style="max-width: 320px; border-color: #6366f1; background: #020617;">
+    <h3 style="color:#818cf8; font-family:'Orbitron';">PAYTABLE</h3>
+    <div class="paytable-list">
+        <div class="pay-row"><span><img src="https://iili.io/C8v0szx.png" width="20"> x3</span> <span>x3.0 PROFIT</span></div>
+        <div class="pay-row"><span><img src="https://iili.io/C8v1oes.png" width="20"> x3</span> <span>x2.0 PROFIT</span></div>
+        <div class="pay-row"><span><img src="https://iili.io/C8v1XEB.png" width="20"> x3</span> <span>x1.5 PROFIT</span></div>
+        <div class="pay-row"><span><img src="https://iili.io/C8vXtje.png" width="20"> x3</span> <span>x0.5 WIN</span></div>
+        <div class="pay-row"><span><img src="https://iili.io/C8vWtqv.png" width="20"> x3</span> <span>-50% LOSS</span></div>
+        <div class="pay-row"><span><img src="https://iili.io/C8vjjeI.png" width="20"> x3</span> <span>GAME OVER</span></div>
+    </div>
+    <button class="menu-btn play" style="width: 100%; margin-top: 20px;" onclick="document.getElementById('slotInfoModal').style.display='none'">CLOSE</button>
   </div>
 </div>
 
@@ -5604,110 +5702,122 @@ function startHotSauceEvent() {
 }
 
 
+// CONFIGURATION
+const slotAssets = {
+    seven:   { url: 'https://iili.io/C8v0szx.png', mult: 3.0,  weight: 5 },
+    diamond: { url: 'https://iili.io/C8v1oes.png', mult: 2.0,  weight: 10 },
+    cherry:  { url: 'https://iili.io/C8v1XEB.png', mult: 1.5,  weight: 15 },
+    grape:   { url: 'https://iili.io/C8vXtje.png', mult: 0.5,  weight: 25 },
+    tp:      { url: 'https://iili.io/C8vWtqv.png', mult: -0.5, weight: 25 }, // Special handling
+    poop:    { url: 'https://iili.io/C8vjjeI.png', mult: -1.0, weight: 20 }  // Special handling
+};
+
 let currentBetAmount = 5;
-const slotIcons = ['7️⃣', '💎', '🔔', '🍋', '🍒', '🍇'];
 
 function openSlotMachine() {
     isPaused = true;
     clearInterval(moveKevinInterval);
+    
+    // 1. FREE POINTS CHECK
+    if (score < 5) {
+        score = 5;
+        updateScoreUI();
+        showKevinutaBubble("Ține 5 puncte de la mine, săracule!");
+    }
+
     document.getElementById('slotMachineModal').style.display = 'flex';
-    document.getElementById('currentBetValue').innerText = currentBetAmount;
-}
-
-function closeSlotMachine() {
-    document.getElementById('slotMachineModal').style.display = 'none';
-    isPaused = false;
-    startKevinMovement();
-}
-
-function openSlotPaytable() {
-    document.getElementById('slotInfoModal').style.display = 'flex';
-}
-
-function setBet(type, btn) {
-    if(type === 5) currentBetAmount = 5;
-    else if(type === 'half') currentBetAmount = Math.floor(score / 2);
-    else if(type === 'all') currentBetAmount = score;
+    setBet(5, document.querySelector('.bet-btn')); // Default to 5
     
-    if(currentBetAmount < 1 && score > 0) currentBetAmount = 1;
-    if(score <= 0) currentBetAmount = 0;
+    // Reset reels to a blank or default state
+    document.querySelectorAll('.reel').forEach(r => r.style.backgroundImage = `url('${slotAssets.cherry.url}')`);
+}
+
+function setBet(val, btn) {
+    if (val === 'half') currentBetAmount = Math.floor(score / 2);
+    else if (val === 'max') currentBetAmount = 500;
+    else currentBetAmount = val;
+
+    // Constraints
+    if (currentBetAmount > score) currentBetAmount = score;
+    if (currentBetAmount > 500) currentBetAmount = 500;
+    if (currentBetAmount < 1) currentBetAmount = 1;
 
     document.getElementById('currentBetValue').innerText = currentBetAmount;
-    
-    // UI selection
     document.querySelectorAll('.bet-btn').forEach(b => b.classList.remove('active-bet'));
     btn.classList.add('active-bet');
 }
 
 function spinSlots() {
-    if (score < currentBetAmount || currentBetAmount <= 0) {
-        alert("Nu ai destule puncte pentru acest pariu!");
-        return;
-    }
-
     const spinBtn = document.getElementById('spinBtn');
-    const closeBtn = document.getElementById('closeSlotBtn');
     spinBtn.disabled = true;
-    closeBtn.style.display = 'none';
 
-    // Deduct bet immediately
+    // Deduct bet
     score -= currentBetAmount;
     updateScoreUI(true);
 
+    // 2. PROBABILITY LOGIC (Calculated before animation)
+    const outcome = calculateOutcome();
+    
     const r1 = document.getElementById('reel1');
     const r2 = document.getElementById('reel2');
     const r3 = document.getElementById('reel3');
 
-    // Start Animation
+    // Add spin classes
     r1.classList.add('reel-spinning');
     r2.classList.add('reel-spinning');
     r3.classList.add('reel-spinning');
 
-    setTimeout(() => stopReel(r1, 0), 1000);
-    setTimeout(() => stopReel(r2, 400), 1400);
-    setTimeout(() => {
-        const finalResults = stopReel(r3, 800);
-        setTimeout(() => checkSlotWin(finalResults), 1200);
+    // Sequence the stop
+    setTimeout(() => { r1.classList.remove('reel-spinning'); r1.style.backgroundImage = `url('${outcome.url}')`; }, 1000);
+    setTimeout(() => { r2.classList.remove('reel-spinning'); r2.style.backgroundImage = `url('${outcome.url}')`; }, 1400);
+    setTimeout(() => { 
+        r3.classList.remove('reel-spinning'); 
+        r3.style.backgroundImage = `url('${outcome.url}')`;
+        
+        // Finalize Result
+        setTimeout(() => processSlotResult(outcome), 500);
     }, 1800);
 }
 
-function stopReel(reelEl, delay) {
-    const res = slotIcons[Math.floor(Math.random() * slotIcons.length)];
-    setTimeout(() => {
-        reelEl.classList.remove('reel-spinning');
-        reelEl.innerText = res;
-    }, delay);
-    return res; // This is a bit simplified, logic below handles the final state
+function calculateOutcome() {
+    const pool = [];
+    for (let key in slotAssets) {
+        for (let i = 0; i < slotAssets[key].weight; i++) {
+            pool.push(slotAssets[key]);
+        }
+    }
+    return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function checkSlotWin() {
-    const res1 = document.getElementById('reel1').innerText;
-    const res2 = document.getElementById('reel2').innerText;
-    const res3 = document.getElementById('reel3').innerText;
+function processSlotResult(outcome) {
+    let winMessage = "";
     
-    let multiplier = 0;
-
-    if (res1 === '7️⃣' && res2 === '7️⃣' && res3 === '7️⃣') multiplier = 15;
-    else if (res1 === '💎' && res2 === '💎' && res3 === '💎') multiplier = 8;
-    else if (res1 === '🔔' && res2 === '🔔' && res3 === '🔔') multiplier = 5;
-    else if (res1 === '🍋' && res2 === '🍋' && res3 === '🍋') multiplier = 3;
-    else if (res1 === res2 && res2 === res3) multiplier = 2; // Any other triple
-
-    const spinBtn = document.getElementById('spinBtn');
-    const closeBtn = document.getElementById('closeSlotBtn');
-
-    if (multiplier > 0) {
-        let winAmount = currentBetAmount * multiplier;
-        score += winAmount;
-        updateScoreUI();
-        alert(`CÂȘTIG! 🎉 Ai câștigat ${winAmount} puncte!`);
+    if (outcome.mult === 3.0) {
+        let win = currentBetAmount * 4; // Returns bet + 3x profit
+        score += win;
+        winMessage = `JACKPOT! +${win} Puncte! 💰`;
+    } else if (outcome.mult > 0) {
+        let win = Math.floor(currentBetAmount * (1 + outcome.mult));
+        score += win;
+        winMessage = `CÂȘTIG! +${win} Puncte!`;
+    } else if (outcome.mult === -0.5) {
+        let refund = Math.floor(currentBetAmount * 0.5);
+        score += refund;
+        winMessage = "MĂCAR AI RĂMAS CU JUMĂTATE... 🧻";
     } else {
-        alert("AI PIERDUT! 💀 Mai încearcă data viitoare.");
+        winMessage = "AI PIERDUT TOT! 💩";
     }
 
-    spinBtn.disabled = false;
-    closeBtn.style.display = 'block';
-    syncScoreToFirestore(); // Sync the gamble result immediately
+    updateScoreUI();
+    syncScoreToFirestore();
+    alert(winMessage);
+    
+    // 3. AUTO-CLOSE AFTER SINGLE PLAY
+    setTimeout(() => {
+        document.getElementById('slotMachineModal').style.display = 'none';
+        isPaused = false;
+        startKevinMovement();
+    }, 500);
 }
   </script>
 </body>
