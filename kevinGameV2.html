@@ -5961,17 +5961,43 @@ function runScoreTicker(amount) {
 
 function closeResultAndSlot() {
     // 1. IMMEDIATELY HIDE BOTH MODALS
-    // This reveals the game area so the player can see the flying points
     document.getElementById('slotResultModal').style.display = 'none';
     document.getElementById('slotMachineModal').style.display = 'none';
     
     // 2. TRIGGER ANIMATION ON THE NOW-VISIBLE GAME AREA
-    if (pendingWinAmount > 0) {
+    // FIX: Check if it's NOT zero. This way it runs for BOTH wins (>0) and losses (<0)
+    if (pendingWinAmount !== 0) {
         animateScoreFlying();
     } else {
-        // If it was a loss (pendingWinAmount is 0), just finish up
         finishSlotCleanup();
     }
+}
+
+function runScoreTicker(amount) {
+    const start = score;
+    // FIX: Math.max ensures the score never drops below 0
+    const end = Math.max(0, score + amount); 
+    const duration = 1000;
+    const startTime = performance.now();
+
+    function step(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        
+        // This handles both adding and subtracting automatically
+        const current = Math.floor(start + (amount * progress));
+        
+        // Don't show negative numbers during the animation
+        document.getElementById('scoreText').innerText = Math.max(0, current);
+        
+        if (progress < 1) {
+            requestAnimationFrame(step);
+        } else {
+            score = end;
+            updateScoreUI(); // Safety sync to clean UI
+            finishSlotCleanup();
+        }
+    }
+    requestAnimationFrame(step);
 }
 
 function finishSlotCleanup() {
