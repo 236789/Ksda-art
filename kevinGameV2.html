@@ -3119,6 +3119,78 @@ input:checked + .s-slider:before {
 
 .trivia-btn.correct-anim { background: #22c55e !important; border-color: #fff !important; transform: scale(1.05); }
 .trivia-btn.wrong-anim { background: #ef4444 !important; border-color: #fff !important; }
+
+
+/* KAHOOT-STYLE TRIVIA MODAL */
+.trivia-box {
+    max-width: 500px !important;
+    background: #46178f !important; /* Kahoot Purple */
+    border: none !important;
+    padding: 20px !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+}
+
+#triviaQuestionText {
+    font-family: 'Oswald', sans-serif;
+    font-size: 24px;
+    background: white;
+    color: #333;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 0 #ccc;
+    text-align: center;
+}
+
+.trivia-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.trivia-btn {
+    height: 80px !important;
+    font-size: 18px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    color: white !important;
+    font-weight: 700 !important;
+    text-transform: none !important;
+    transition: transform 0.1s, brightness 0.2s !important;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.2) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* Kahoot Block Colors */
+.btn-0 { background: #e21b3c !important; } /* Red */
+.btn-1 { background: #1368ce !important; } /* Blue */
+.btn-2 { background: #ffa602 !important; } /* Yellow */
+.btn-3 { background: #26890c !important; } /* Green */
+
+.trivia-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.2) !important; }
+
+/* Status Classes */
+.correct-anim { background: #26890c !important; border: 4px solid white !important; z-index: 10; }
+.wrong-anim { background: #e21b3c !important; opacity: 0.5; }
+
+.trivia-timer-container {
+    width: 100%;
+    height: 12px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 20px;
+    margin-bottom: 15px;
+    overflow: hidden;
+}
+
+.trivia-timer-fill {
+    height: 100%;
+    width: 100%;
+    background: #fff;
+    transition: width 1s linear;
+}
   </style>
 </head>
 <body>
@@ -6193,45 +6265,31 @@ function finishSlotCleanup() {
 }
 
 
-
+// TRIVIA SETTINGS
 const triviaQuestions = [
-    // --- TRICKY / LOGIC ---
-    { q: "Câte luni din an au 28 de zile?", a: ["Una (Februarie)", "Niciuna", "Toate 12", "Șase"], c: 2 }, // Logic trap: All months have at least 28 days
-    { q: "Dacă un avion se prăbușește pe graniță, unde sunt îngropați supraviețuitorii?", a: ["În România", "În Ungaria", "Nicăieri", "În ambele"], c: 2 }, // survivors aren't buried
-    { q: "Ce merge în sus, dar nu vine niciodată în jos?", a: ["Vârsta", "Baloanele", "Fumul", "Prețurile"], c: 0 },
-    { q: "Tatăl Mariei are 5 fete: Nana, Nene, Nini, Nono. Cum o cheamă pe a cincea?", a: ["Nunu", "Maria", "Nuna", "Nina"], c: 1 },
-    { q: "Dacă participi la o cursă și îl depășești pe cel de pe locul 2, pe ce loc ești?", a: ["Locul 1", "Locul 2", "Locul 3", "Ultimul"], c: 1 },
-
-    // --- GAME & DEV ---
-    { q: "Câți ani are Emmanuel, dezvoltatorul jocului?", a: ["17", "18", "19", "21"], c: 1 },
-    { q: "Care este scorul maxim pe care îl poți câștiga la Marea Trivia?", a: ["100", "125", "150", "200"], c: 1 },
-    { q: "Ce se întâmplă dacă răspunzi greșit la o întrebare?", a: ["Pierzi 10p", "Treci la următoarea", "Pierzi tot bonusul", "Nu se întâmplă nimic"], c: 2 },
-
-    // --- GENERAL KNOWLEDGE ---
-    { q: "Care este cel mai înalt vârf muntos din România?", a: ["Negoiu", "Moldoveanu", "Omu", "Peleaga"], c: 1 },
-    { q: "Ce planetă este cea mai apropiată de Soare?", a: ["Venus", "Pământ", "Marte", "Mercur"], c: 3 },
-    { q: "Câți litri de sânge are, în medie, un adult?", a: ["2-3 litri", "4-6 litri", "8-10 litri", "12 litri"], c: 1 },
-    { q: "Cine a inventat becul?", a: ["Tesla", "Edison", "Newton", "Einstein"], c: 1 },
-    { q: "Care este cel mai populat oraș din lume?", a: ["New York", "Londra", "Tokyo", "Shanghai"], c: 2 },
-    { q: "În ce an a căzut zidul Berlinului?", a: ["1987", "1989", "1991", "1995"], c: 1 },
-    { q: "Care este cel mai dur material natural de pe Pământ?", a: ["Oțelul", "Titanul", "Diamantul", "Granitul"], c: 2 },
-    { q: "Câte inimi are o caracatiță?", a: ["Una", "Două", "Trei", "Patru"], c: 1 },
-    { q: "Care este cea mai lungă apă curgătoare din lume?", a: ["Dunărea", "Nilul", "Amazonul", "Mississippi"], c: 2 },
-    { q: "Din ce este făcută sticla?", a: ["Plastic", "Nisip", "Metal", "Petrol"], c: 1 },
-    { q: "Câte culori are curcubeul?", a: ["5", "6", "7", "8"], c: 2 },
-    { q: "Care este cel mai mare organ al corpului uman?", a: ["Inima", "Creierul", "Pielea", "Ficatul"], c: 2 }
+    { q: "Dacă Emmanuel are 3 mere și tu îi iei 2, câte mere ai tu?", a: ["1 măr", "2 mere", "3 mere", "Niciunul"], c: 1 },
+    { q: "Unii oameni au 31 de zile, alții 30. Câți au cel puțin 28?", a: ["1 (Februarie)", "Niciunul", "6", "Toți 12"], c: 3 },
+    { q: "Câte cadouri poți pune într-o cutie goală?", a: ["Câte vrei", "Niciunul", "Doar unul", "Până se umple"], c: 2 }, // Logic: After the first, it's not empty anymore
+    { q: "Tatăl lui Bill are 3 fii: Snap, Crackle și...?", a: ["Pop", "Bill", "John", "Emmanuel"], c: 1 },
+    { q: "Câți ani are Emmanuel, dezvoltatorul?", a: ["17", "18", "19", "20"], c: 1 },
+    { q: "Ce cuvânt din dicționar este scris mereu 'Incorect'?", a: ["Greșit", "Eroare", "Incorect", "Niciunul"], c: 2 },
+    { q: "Dacă un avion se prăbușește fix pe graniță, unde îngropi supraviețuitorii?", a: ["România", "Ungaria", "În ambele", "Nu-i îngropi"], c: 3 },
+    { q: "Dacă mă ai, vrei să mă împarți. Dacă mă împarți, nu mă mai ai. Ce sunt?", a: ["Banii", "Un secret", "O pizza", "Timpul"], c: 1 },
+    { q: "În ce an suntem acum?", a: ["2024", "2025", "2026", "2027"], c: 2 },
+    { q: "Câte luni au exact 28 de zile?", a: ["Una", "Toate 12", "Niciuna", "Depinde de an"], c: 0 } // Fixed phrasing: Only Feb has *exactly* 28 usually
 ];
 
 let triviaCurrentIndex = 0;
 let triviaActiveQuestions = [];
 let triviaTimer = null;
 let triviaTimeLeft = 10;
+let triviaPoints = 0;
 
 function startTriviaEvent() {
-    // DO NOT set isPaused = true; game keeps running in background
     triviaCurrentIndex = 0;
+    triviaPoints = 0;
+    // Shuffle and pick 5
     triviaActiveQuestions = [...triviaQuestions].sort(() => 0.5 - Math.random()).slice(0, 5);
-    
     document.getElementById('triviaModal').style.display = 'flex';
     loadTriviaQuestion();
 }
@@ -6251,7 +6309,7 @@ function loadTriviaQuestion() {
     
     question.a.forEach((ans, idx) => {
         const btn = document.createElement('button');
-        btn.className = `menu-btn play trivia-btn btn-${idx}`;
+        btn.className = `trivia-btn btn-${idx}`;
         btn.innerText = ans;
         btn.onclick = () => checkTriviaAnswer(idx);
         container.appendChild(btn);
@@ -6266,7 +6324,6 @@ function resetTriviaTimer() {
     const fill = document.getElementById('triviaTimerFill');
     fill.style.transition = 'none';
     fill.style.width = '100%';
-    
     setTimeout(() => {
         fill.style.transition = 'width 10s linear';
         fill.style.width = '0%';
@@ -6276,41 +6333,71 @@ function resetTriviaTimer() {
         triviaTimeLeft--;
         if (triviaTimeLeft <= 0) {
             clearInterval(triviaTimer);
+            playTriviaSound(false);
             finishTrivia(false, "TIMP EXPIRAT!");
         }
     }, 1000);
+}
+
+function playTriviaSound(isCorrect) {
+    const url = isCorrect 
+        ? "https://www.dropbox.com/scl/fi/7m8h00cdbws1w0tvm5egr/correct.mp3?rlkey=bxou2rderf8qizms9enwmkcoa&st=6w2g83hy&dl=1"
+        : "https://www.dropbox.com/scl/fi/2mojemj2ijj29purajplo/wrong.mp3?rlkey=k5suct253scmpp7a98ri2ixki&st=k70f3fqd&dl=1";
+    const snd = new Audio(url);
+    snd.volume = sfxVolume;
+    snd.play();
 }
 
 function checkTriviaAnswer(idx) {
     clearInterval(triviaTimer);
     const question = triviaActiveQuestions[triviaCurrentIndex];
     const buttons = document.querySelectorAll('.trivia-btn');
-    
-    // Disable all buttons
     buttons.forEach(b => b.disabled = true);
 
     if (idx === question.c) {
-        // CORRECT
-        playSFX("https://www.dropbox.com/scl/fi/7m8h00cdbws1w0tvm5egr/correct.mp3?rlkey=bxou2rderf8qizms9enwmkcoa&st=6w2g83hy&dl=1");
+        playTriviaSound(true);
         buttons[idx].classList.add('correct-anim');
-        
         setTimeout(() => {
             triviaCurrentIndex++;
             loadTriviaQuestion();
-        }, 1000);
+        }, 1200);
     } else {
-        // WRONG
-        playSFX("https://www.dropbox.com/scl/fi/2mojemj2ijj29purajplo/wrong.mp3?rlkey=k5suct253scmpp7a98ri2ixki&st=k70f3fqd&dl=1");
+        playTriviaSound(false);
         buttons[idx].classList.add('wrong-anim');
-        // Briefly show the correct one as requested
-        buttons[question.c].classList.add('correct-anim');
-        
+        buttons[question.c].classList.add('correct-anim'); // Show the right one briefly
         setTimeout(() => {
-            finishTrivia(false, "RĂSPUNS GREȘIT!");
+            finishTrivia(false, "GREȘIT!");
         }, 1500);
     }
 }
 
+function finishTrivia(win, reason = "") {
+    clearInterval(triviaTimer);
+    document.getElementById('triviaModal').style.display = 'none';
+    
+    if (win) {
+        pendingWinAmount = 125;
+        // Show result in the "Jackpot" modal style we already have
+        const resultModal = document.getElementById('slotResultModal');
+        document.getElementById('resultTitle').innerText = "GENIULE!";
+        document.getElementById('resultText').innerText = "Ai răspuns corect la 5/5! Ai câștigat 125 puncte.";
+        
+        const resultBox = document.getElementById('resultBox');
+        resultBox.className = "modal-box mega-jackpot-box"; // Make it gold
+        resultModal.style.display = 'flex';
+
+        // Override the close logic for this win
+        window.closeResultAndSlot = function() {
+            document.getElementById('slotResultModal').style.display = 'none';
+            animateScoreFlying();
+            resultBox.className = "modal-box result-modal-box"; // Reset class
+        };
+    } else {
+        // Reset class to default red for failure
+        document.getElementById('resultBox').className = "modal-box result-modal-box";
+        showSlotResult("AI PIERDUT!", reason + " Ai ratat bonusul de 125 puncte.", false);
+    }
+}
 function finishTrivia(win, reason = "") {
     clearInterval(triviaTimer);
     document.getElementById('triviaModal').style.display = 'none';
