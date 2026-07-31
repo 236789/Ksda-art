@@ -5325,12 +5325,20 @@ function showEventIndicator(eventKey, durationSeconds) {
 let eventTimeout = null;
 
 function spawnSpecialEvent() {
-    if (isPaused) return;
+    // 1. FIX: Dacă e pe pauză, nu oprim loop-ul definitiv! Îl amânăm cu 3 secunde.
+    if (isPaused) {
+        console.log("⏸️ Jocul e pe pauză. Amânăm spawn-ul eventului cu 3 secunde...");
+        clearTimeout(eventTimeout);
+        eventTimeout = setTimeout(spawnSpecialEvent, 3000);
+        return;
+    }
 
     // ALEGEM UN EVENIMENT RANDOM
     const eventKeys = Object.keys(specialRegistry);
     const chosenKey = eventKeys[Math.floor(Math.random() * eventKeys.length)];
     const eventData = specialRegistry[chosenKey];
+
+    console.log(`🎁 SPAWN EVENT: A apărut jucăria/emoji-ul [${eventData.name}] pe ecran!`);
 
     const item = document.createElement('div');
     item.className = 'special-event-item';
@@ -5351,7 +5359,9 @@ function spawnSpecialEvent() {
     item.onclick = (e) => {
         e.stopPropagation();
         if (!e.isTrusted) return;
+        
         item.remove();
+        console.log(`🖱️ EVENT PRINS: Jucătorul a dat click pe [${eventData.name}]!`);
 
         // Pornim evenimentul imediat
         eventData.action(e);
@@ -5360,15 +5370,21 @@ function spawnSpecialEvent() {
         }
     };
 
-    // EMOJI DISPARE DUPĂ 6 SECUNDE (Am mărit puțin timpul ca să poată exista suprapunere)
+    // EMOJI DISPARE DUPĂ 10 SECUNDE (Dacă nu e prins)
     setTimeout(() => { 
-        if (item && item.parentElement) item.remove(); 
+        if (item && item.parentElement) {
+            item.remove(); 
+            console.log(`💨 EVENT RATAT: [${eventData.name}] a dispărut pentru că nu s-a dat click pe el în 10 secunde.`);
+        }
     }, 10000);
 
     // REPROGRAMĂM URMĂTORUL SPAWN (Între 5 și 15 secunde)
-    // Deoarece spawn-ul minim e 5s și durata e 6s, uneori se vor vedea ambele pe ecran 1 secundă.
     clearTimeout(eventTimeout);
-    eventTimeout = setTimeout(spawnSpecialEvent, Math.random() * 10000 + 5000); 
+    let delayToNextSpawn = Math.random() * 10000 + 5000;
+    
+    console.log(`⏳ URMĂTORUL EVENT: Programat să apară în ${(delayToNextSpawn / 1000).toFixed(1)} secunde.`);
+    
+    eventTimeout = setTimeout(spawnSpecialEvent, delayToNextSpawn); 
 }
 
 // --- MOBILE EVENT MODAL ---
