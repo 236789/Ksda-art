@@ -3150,6 +3150,53 @@ input:checked + .s-slider:before {
     opacity: 0.3;
     filter: grayscale(1);
 }
+
+
+/* ==========================================
+   TRIVIA THEMED BUTTONS
+   ========================================== */
+.trivia-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.trivia-btn {
+    /* Folosim variabilele globale de temă */
+    background: var(--th-btn-bg) !important;
+    border: 3px solid var(--th-border) !important;
+    color: var(--th-btn-text) !important;
+    box-shadow: 0 6px 0 var(--th-btn-shadow), 0 8px 15px rgba(0,0,0,0.4) !important;
+    
+    height: 75px !important;
+    font-size: 16px !important;
+    padding: 5px 10px !important;
+    text-transform: uppercase !important;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 800;
+    transition: all 0.1s ease;
+}
+
+.trivia-btn:active {
+    transform: translateY(4px) !important;
+    box-shadow: 0 2px 0 var(--th-btn-shadow) !important;
+}
+
+/* Stil pentru răspuns corect (Verde strălucitor) */
+.trivia-btn.correct-anim {
+    background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%) !important;
+    border-color: #ffffff !important;
+    color: white !important;
+    box-shadow: 0 0 20px #4ade80 !important;
+}
+
+/* Stil pentru răspuns greșit (Se stinge) */
+.trivia-btn.wrong-anim {
+    opacity: 0.2;
+    filter: grayscale(1);
+    transform: scale(0.95);
+    box-shadow: none !important;
+}
   </style>
 </head>
 <body>
@@ -6224,18 +6271,17 @@ function finishSlotCleanup() {
 }
 
 
-// --- NOILE ÎNTREBĂRI TRIVIA (FĂRĂ CELE DUMB) ---
 const triviaQuestions = [
-    { q: "Cât face 2 + 2 x 2?", a: ["8", "4", "6", "10"], c: 2 },
-    { q: "Ce are chei dar nu poate deschide nicio ușă?", a: ["Un seif", "Un pian", "O hartă", "Un lacăt"], c: 1 },
-    { q: "Câți ani are Emmanuel, developerul?", a: ["17", "18", "19", "20"], c: 1 },
-    { q: "Tatăl lui Bill are 3 fii: Snap, Crackle și...?", a: ["Pop", "Bill", "John", "Kevin"], c: 1 },
-    { q: "Care e cel mai rapid caracter din joc?", a: ["Kevin", "Emmanuel", "Antonio", "Toți sunt egali"], c: 0 },
-    { q: "Dacă un avion se prăbușește pe graniță, unde îngropi supraviețuitorii?", a: ["România", "Ungaria", "Graniță", "Nu îi îngropi"], c: 3 },
-    { q: "Care planetă este cunoscută ca Planeta Roșie?", a: ["Venus", "Marte", "Jupiter", "Saturn"], c: 1 },
-    { q: "Ce merge în sus dar nu coboară niciodată?", a: ["Liftul", "Vârsta", "Baloanele", "Scorul"], c: 1 },
-    { q: "Dacă Emmanuel are 3 mere și tu îi iei 2, câte mere ai?", a: ["1 măr", "2 mere", "3 mere", "Niciunul"], c: 1 },
-    { q: "Ce cuvânt din dicționar este scris mereu 'Incorect'?", a: ["Eroare", "Greșit", "Incorect", "Niciunul"], c: 2 }
+    { q: "Cât face 10 + 10 x 0?", a: ["0", "10", "20", "Eroare"], c: 1 },
+    { q: "Cine este personajul principal al acestui joc?", a: ["Emmanuel", "Antonio", "Kevinuță", "Un hamster"], c: 2 },
+    { q: "Ce are clape, dar nu poate deschide nicio ușă?", a: ["Un seif", "Un pian", "O mașină", "O hartă"], c: 1 },
+    { q: "Câți fii are tatăl lui Bill, dacă Snap și Crackle sunt primii doi?", a: ["Unul", "Doi", "Trei", "Patru"], c: 2 }, // Bill e al treilea
+    { q: "Câți ani are Emmanuel, dezvoltatorul jocului?", a: ["17", "18", "19", "20"], c: 1 },
+    { q: "Ce merge în sus, dar nu coboară niciodată?", a: ["Liftul", "Vârsta", "Baloanele", "Scorul tău"], c: 1 },
+    { q: "Dacă un avion se prăbușește pe graniță, unde îngropi supraviețuitorii?", a: ["În România", "În Ungaria", "Nu îi îngropi", "Pe graniță"], c: 2 },
+    { q: "Care planetă este cunoscută drept Planeta Roșie?", a: ["Venus", "Marte", "Jupiter", "Saturn"], c: 1 },
+    { q: "Dacă mă ai, vrei să mă împarți. Dacă mă împarți, nu mă mai ai. Ce sunt?", a: ["Banii", "O pizza", "Un secret", "Timpul"], c: 2 },
+    { q: "Ce cuvânt din dicționar este scris mereu 'Incorect'?", a: ["Greșit", "Eroare", "Incorect", "Niciunul"], c: 2 }
 ];
 
 let triviaCurrentIndex = 0;
@@ -6266,7 +6312,7 @@ function loadTriviaQuestion() {
     
     question.a.forEach((ans, idx) => {
         const btn = document.createElement('button');
-        // Stilul 3D tematic al jocului
+        // Adăugăm clasele care preiau stilul temei
         btn.className = `menu-btn play trivia-btn`; 
         btn.innerText = ans;
         btn.onclick = () => checkTriviaAnswer(idx);
@@ -6275,7 +6321,6 @@ function loadTriviaQuestion() {
 
     resetTriviaTimer();
 }
-
 function resetTriviaTimer() {
     clearInterval(triviaTimer);
     triviaTimeLeft = 10;
