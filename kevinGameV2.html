@@ -5943,7 +5943,7 @@ function startHotSauceEvent() {
 
 const slotAssets = {
     // WINNING OUTCOMES (Total 37% chance to win something)
-    seven:   { url: 'https://iili.io/C8v0szx.png', mult: 3.0,  weight: 2 },  // 2% chance (was 5%) - Very rare Jackpot!
+    seven:   { url: 'https://iili.io/C8v0szx.png', mult: 3.0,  weight: 3 },  // 2% chance (was 5%) - Very rare Jackpot!
     diamond: { url: 'https://iili.io/C8v1oes.png', mult: 2.0,  weight: 5 },  // 5% chance (was 10%)
     cherry:  { url: 'https://iili.io/C8v1XEB.png', mult: 1.5,  weight: 10 }, // 10% chance (was 15%)
     grape:   { url: 'https://iili.io/C8vXtje.png', mult: 0.5,  weight: 20 }, // 20% chance to win a small amount
@@ -6266,7 +6266,7 @@ function loadTriviaQuestion() {
     
     question.a.forEach((ans, idx) => {
         const btn = document.createElement('button');
-        // AICI E CHEIA: Adăugăm clasele de bază ale jocului
+        // Stilul 3D tematic al jocului
         btn.className = `menu-btn play trivia-btn`; 
         btn.innerText = ans;
         btn.onclick = () => checkTriviaAnswer(idx);
@@ -6288,20 +6288,22 @@ function resetTriviaTimer() {
     }, 50);
 
     triviaTimer = setInterval(() => {
+        if (isPaused) return; // Oprim timer-ul dacă jocul e pe pauză
         triviaTimeLeft--;
         if (triviaTimeLeft <= 0) {
             clearInterval(triviaTimer);
-            playTriviaSound(false);
+            playTriviaSound(false); // FIXED NAME
             finishTrivia(false, "TIMP EXPIRAT!");
         }
     }, 1000);
 }
 
-// --- TRIVIA SOUND LINKS ---
+// --- TRIVIA SOUNDS ---
 const triviaSndCorrect = "https://www.dropbox.com/scl/fi/7m8h00cdbws1w0tvm5egr/correct.mp3?rlkey=bxou2rderf8qizms9enwmkcoa&st=mriztexm&dl=1";
 const triviaSndWrong = "https://www.dropbox.com/scl/fi/2mojemj2ijj29purajplo/wrong.mp3?rlkey=k5suct253scmpp7a98ri2ixki&st=k807ox0r&dl=1";
 
-function playTriviaSFX(isCorrect) {
+// FUNCȚIA REDENUMITĂ CORECT
+function playTriviaSound(isCorrect) {
     if (isMuted) return;
     const url = isCorrect ? triviaSndCorrect : triviaSndWrong;
     const audio = new Audio(url);
@@ -6316,16 +6318,16 @@ function checkTriviaAnswer(idx) {
     buttons.forEach(b => b.disabled = true);
 
     if (idx === question.c) {
-        playTriviaSound(true);
+        playTriviaSound(true); // ACUM FUNCȚIONEAZĂ
         buttons[idx].classList.add('correct-anim');
         setTimeout(() => {
             triviaCurrentIndex++;
             loadTriviaQuestion();
         }, 1200);
     } else {
-        playTriviaSound(false);
+        playTriviaSound(false); // ACUM FUNCȚIONEAZĂ
         buttons[idx].classList.add('wrong-anim');
-        buttons[question.c].classList.add('correct-anim'); // Arată răspunsul corect
+        buttons[question.c].classList.add('correct-anim'); 
         setTimeout(() => {
             finishTrivia(false, "GREȘIT!");
         }, 1500);
@@ -6339,20 +6341,24 @@ function finishTrivia(win, reason = "") {
     const resultModal = document.getElementById('slotResultModal');
     const resultBox = document.getElementById('resultBox');
     
+    // Resetăm clasa la cea de bază (pentru a fi afectată de temă)
+    resultBox.className = "modal-box result-modal-box"; 
+
     if (win) {
         pendingWinAmount = 125;
         document.getElementById('resultTitle').innerText = "GENIULE!";
         document.getElementById('resultText').innerText = "5/5 CORECT! Ai câștigat 125 puncte.";
-        resultBox.className = "modal-box mega-jackpot-box"; // Auriu
+        
+        // Adăugăm stilul de aur peste cel de bază
+        resultBox.classList.add('mega-jackpot-box'); 
         resultModal.style.display = 'flex';
 
         window.closeResultAndSlot = function() {
             document.getElementById('slotResultModal').style.display = 'none';
             animateScoreFlying();
-            resultBox.className = "modal-box result-modal-box"; // Reset la normal
+            resultBox.className = "modal-box result-modal-box"; 
         };
     } else {
-        resultBox.className = "modal-box result-modal-box";
         showSlotResult("AI RATAT!", reason + " Ai pierdut bonusul.", false);
     }
 }
