@@ -3024,6 +3024,52 @@ input:checked + .s-slider:before {
     color: #ef4444;
     text-shadow: 0 0 15px rgba(239, 68, 68, 0.8), 0 0 5px #000;
 }
+
+
+/* --- MEGA JACKPOT ANIMATIONS --- */
+@keyframes superJackpotBg {
+    0% { background: radial-gradient(circle at top, #ffdf00 0%, #ff8c00 100%); transform: scale(1); }
+    50% { background: radial-gradient(circle at top, #ffffff 0%, #ffdf00 100%); transform: scale(1.05); }
+    100% { background: radial-gradient(circle at top, #ffdf00 0%, #ff8c00 100%); transform: scale(1); }
+}
+
+.mega-jackpot-box {
+    animation: superJackpotBg 0.4s infinite alternate !important;
+    border: 6px solid #ffffff !important;
+    box-shadow: 0 0 100px #ffdf00, inset 0 0 50px #ff8c00 !important;
+}
+
+.mega-jackpot-box h2 {
+    color: #000000 !important;
+    text-shadow: 0 2px 5px #ffffff !important;
+    font-size: 40px !important;
+    transform: scale(1.2);
+    margin-bottom: 20px;
+}
+
+.mega-jackpot-box p {
+    color: #000000 !important;
+    font-weight: 900 !important;
+    font-size: 20px !important;
+    text-shadow: 0 1px 2px #ffffff !important;
+}
+
+/* Falling Coins for Jackpot */
+.jackpot-coin {
+    position: fixed;
+    width: 40px; height: 40px;
+    background-image: url('https://iili.io/COrCopj.png'); /* Punctul/Bănuțul jocului */
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 100006; /* Deasupra modalului */
+    pointer-events: none;
+    animation: fallCoin linear forwards;
+}
+
+@keyframes fallCoin {
+    0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
   </style>
 </head>
 <body>
@@ -5700,6 +5746,11 @@ let originalDialogues = null;
 let hotSauceCleanupTimeout = null;
 let savedOriginalDialogues = null; // Backup sigur pentru replici
 
+// Sunete Slot Machine
+const slotWooshUrl = "https://dl.dropboxusercontent.com/scl/fi/56hbw5nfqnhvc48cseqzs/freesound-community-light-woosh-7119_K0nG7TOm.mp3?rlkey=nqle7z2yejo7a9hjmd1fqic4y&dl=1";
+const slotWompUrl = "https://dl.dropboxusercontent.com/scl/fi/eg9wza5hzp59cgk8ly6kb/freesound_community-wah-wah-sad-trombone-6347.mp3?rlkey=fr8o8up2b0a4la35gjppjli8r&dl=1";
+const slotJackpotUrl = "https://dl.dropboxusercontent.com/scl/fi/3g7b8hvq1z7iuyohc7dug/floraphonic-playful-casino-slot-machine-bonus-2-183919.mp3?rlkey=yn5j1i8ue9rzfd62aj0gaye39&dl=1";
+
 // --- PRELOADER ÎMBUNĂTĂȚIT (Forțează descărcarea imediată) ---
 const hotImages = [
     "https://iili.io/CvuYXLb.png", "https://iili.io/CvuYjBj.png",
@@ -5709,7 +5760,8 @@ const hotImages = [
 
 // Această funcție trebuie să ruleze la început
 function forcePreload() {
-    [...popSounds, missSoundUrl, ...squeakSounds, ...hotImages].forEach(url => {
+    // Am adăugat slotWooshUrl, slotWompUrl și slotJackpotUrl aici în listă!
+    [...popSounds, missSoundUrl, ...squeakSounds, slotWooshUrl, slotWompUrl, slotJackpotUrl, ...hotImages].forEach(url => {
         if (url.includes(".mp3")) {
             const a = new Audio();
             a.src = url;
@@ -5723,7 +5775,6 @@ function forcePreload() {
     });
 }
 forcePreload(); // Apelăm imediat
-
 
 function startHotSauceEvent() {
     const charId = window.currentPlayingCharId || "kevin";
@@ -5856,31 +5907,41 @@ function calculateOutcome() {
     return pool[Math.floor(Math.random() * pool.length)];
 }
 
-function stopReel(el, url) { el.classList.remove('reel-spinning'); el.style.backgroundImage = `url('${url}')`; }
+// Oprește roata și redă sunetul WOOSH
+function stopReel(el, url) { 
+    el.classList.remove('reel-spinning'); 
+    el.style.backgroundImage = `url('${url}')`; 
+    playSFX(slotWooshUrl); 
+}
 
 function finalizeSpin(outcome) {
     let title = "";
     let text = "";
     let isJackpot = false;
 
-    // We calculate the NET PROFIT or LOSS
     if (outcome.mult === 3.0) {
-        pendingWinAmount = currentBetAmount * 3; // Profit of 3x
-        title = "JACKPOT!";
+        pendingWinAmount = currentBetAmount * 3; 
+        title = "777 JACKPOT! 777";
         text = `BINGO! Ai câștigat +${pendingWinAmount} puncte!`;
         isJackpot = true;
+        
+        playSFX(slotJackpotUrl); // Redă melodia victorioasă!
+        spawnJackpotCoins();     // Pornește ploaia de bănuți!
+        
     } else if (outcome.mult > 0) {
         pendingWinAmount = Math.floor(currentBetAmount * outcome.mult);
         title = "CÂȘTIGĂTOR!";
         text = `Felicitări! +${pendingWinAmount} puncte!`;
     } else if (outcome.mult === -0.5) {
-        pendingWinAmount = -Math.floor(currentBetAmount * 0.5); // Negative value
+        pendingWinAmount = -Math.floor(currentBetAmount * 0.5);
         title = "STRÂMTORAT...";
-        text = `Ai pierdut jumătate din pariu: ${pendingWinAmount} puncte.`;
+        text = `Ai pierdut jumătate: ${pendingWinAmount} puncte.`;
     } else if (outcome.mult === -1.0) {
-        pendingWinAmount = -currentBetAmount; // Negative full loss
-        title = "GHINION!";
+        pendingWinAmount = -currentBetAmount;
+        title = "GHINION TOTAL!";
         text = `Ai pierdut tot pariul: ${pendingWinAmount} puncte.`;
+        
+        playSFX(slotWompUrl); // Redă Womp Womp trist
     }
 
     showSlotResult(title, text, isJackpot);
@@ -5892,10 +5953,33 @@ function showSlotResult(title, message, isJackpot) {
     document.getElementById('resultTitle').innerText = title;
     document.getElementById('resultText').innerText = message;
     
-    if (isJackpot) box.classList.add('jackpot-glow');
-    else box.classList.remove('jackpot-glow');
+    if (isJackpot) {
+        box.classList.remove('result-modal-box'); // Scoatem tema plictisitoare
+        box.classList.add('mega-jackpot-box');    // Punem tema nebună de aur
+    } else {
+        box.classList.remove('mega-jackpot-box');
+        box.classList.add('result-modal-box');
+    }
 
     modal.style.display = 'flex';
+}
+
+// Ploaie de bănuți care curg pe ecran la Jackpot!
+function spawnJackpotCoins() {
+    for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+            const coin = document.createElement('div');
+            coin.className = 'jackpot-coin';
+            coin.style.left = Math.random() * 90 + 'vw';
+            
+            // Random duration for depth perception
+            const duration = Math.random() * 2 + 1.5; 
+            coin.style.animationDuration = duration + 's';
+            
+            document.body.appendChild(coin);
+            setTimeout(() => coin.remove(), duration * 1000);
+        }, i * 40); // Apar secvențial
+    }
 }
 
 
