@@ -5938,7 +5938,18 @@ function spawnSpecialEvent() {
 
     // ALEGEM UN EVENIMENT RANDOM
     const eventKeys = Object.keys(specialRegistry);
-    const chosenKey = eventKeys[Math.floor(Math.random() * eventKeys.length)];
+    let chosenKey = eventKeys[Math.floor(Math.random() * eventKeys.length)];
+
+    // --- LOGICA DE RARITATE 35% PENTRU SLOT MACHINE ---
+    if (chosenKey === "slotMachine") {
+        if (Math.random() > 0.35) { // 65% șansă să dea reroll
+            const otherKeys = eventKeys.filter(key => key !== "slotMachine");
+            chosenKey = otherKeys[Math.floor(Math.random() * otherKeys.length)];
+            console.log("🎲 Slot Machine a fost filtrat pentru raritate. S-a ales altceva.");
+        }
+    }
+    // --------------------------------------------------
+
     const eventData = specialRegistry[chosenKey];
 
     console.log(`🎁 SPAWN EVENT: A apărut jucăria/emoji-ul [${eventData.name}] pe ecran!`);
@@ -5958,7 +5969,7 @@ function spawnSpecialEvent() {
     
     area.appendChild(item);
 
-item.onclick = (e) => {
+    item.onclick = (e) => {
         e.stopPropagation();
         if (!e.isTrusted) return;
         
