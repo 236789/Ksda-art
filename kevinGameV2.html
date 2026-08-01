@@ -3435,6 +3435,29 @@ input:checked + .s-slider:before {
     cursor: default;
     filter: grayscale(1);
 }
+
+
+/* Update these in your <style> section */
+.mem-card.matched .mem-card-face {
+    border-color: #4ade80 !important; /* Bright Green Border */
+    box-shadow: 0 0 20px rgba(74, 222, 128, 0.6); /* Green Glow */
+    filter: brightness(1.1); /* Make it pop */
+}
+
+.mem-card.matched {
+    cursor: default;
+    pointer-events: none; /* Can't click again */
+    transform: rotateY(180deg); /* Stay flipped open */
+}
+
+/* Make the grid look better with only 8 cards (2 rows of 4) */
+#memoryBoard {
+    display: grid; 
+    grid-template-columns: repeat(4, 1fr); 
+    gap: 12px; 
+    perspective: 1000px;
+    margin-top: 10px;
+}
   </style>
 </head>
 <body>
@@ -7044,19 +7067,15 @@ function startMemoryGame() {
     flippedCards = [];
     matchedPairs = 0;
     
-    // THEME SYNC: Use the info-modal-box class for the board's container
-    const modalBox = document.querySelector('#memoryModal .modal-box');
-    modalBox.className = "modal-box info-modal-box"; // Forces theme styles
-
     document.getElementById('memoryModal').style.display = 'flex';
     
     const board = document.getElementById('memoryBoard');
     board.innerHTML = "";
     
-    // 1. Pick 8 random unique icons from the pool of 14
-    let selectedIcons = [...allMemoryIcons].sort(() => 0.5 - Math.random()).slice(0, 8);
+    // 1. Pick 4 random icons (to make 4 pairs = 8 cards total)
+    let selectedIcons = [...allMemoryIcons].sort(() => 0.5 - Math.random()).slice(0, 4);
     
-    // 2. Double them to make pairs and shuffle the final deck
+    // 2. Create the deck
     let deck = [...selectedIcons, ...selectedIcons];
     deck.sort(() => Math.random() - 0.5);
 
@@ -7066,7 +7085,7 @@ function startMemoryGame() {
         card.dataset.val = imgUrl;
         card.innerHTML = `
             <div class="mem-card-face mem-card-front"></div>
-            <div class="mem-card-face mem-card-back"><img src="${imgUrl}"></div>
+            <div class="mem-card-face mem-card-back"><img src="${imgUrl}.png"></div>
         `;
         card.onclick = () => flipCard(card);
         board.appendChild(card);
@@ -7075,36 +7094,29 @@ function startMemoryGame() {
     startMemoryTimer();
 }
 
-function flipCard(card) {
-    if (flippedCards.length < 2 && !card.classList.contains('flipped') && !card.classList.contains('matched')) {
-        card.classList.add('flipped');
-        flippedCards.push(card);
-        playSFX(slotWooshUrl);
-
-        if (flippedCards.length === 2) {
-            checkMatch();
-        }
-    }
-}
-
 function checkMatch() {
     const [c1, c2] = flippedCards;
+    
     if (c1.dataset.val === c2.dataset.val) {
+        // MATCH FOUND
         c1.classList.add('matched');
         c2.classList.add('matched');
         matchedPairs++;
         flippedCards = [];
         
-        // Fixed: Check against 8 (the number of pairs we spawned)
-        if (matchedPairs === 8) {
-            setTimeout(() => finishMemory(true), 500);
+        playTriviaSound(true); // Play the "Correct" sound
+
+        // 8 cards total = 4 pairs to win
+        if (matchedPairs === 4) {
+            setTimeout(() => finishMemory(true), 600);
         }
     } else {
+        // NO MATCH
         setTimeout(() => {
             c1.classList.remove('flipped');
             c2.classList.remove('flipped');
             flippedCards = [];
-        }, 1000);
+        }, 800);
     }
 }
 
@@ -7112,12 +7124,15 @@ function startMemoryTimer() {
     const fill = document.getElementById('memoryTimerFill');
     fill.style.transition = 'none';
     fill.style.width = '100%';
+    
+    // 60 Seconds Timer
     setTimeout(() => {
-        fill.style.transition = 'width 25s linear';
+        fill.style.transition = 'width 60s linear';
         fill.style.width = '0%';
     }, 50);
 
-    memoryTimer = setTimeout(() => finishMemory(false), 25000);
+    if (memoryTimer) clearTimeout(memoryTimer);
+    memoryTimer = setTimeout(() => finishMemory(false), 60000);
 }
 
 function finishMemory(win) {
@@ -7126,15 +7141,16 @@ function finishMemory(win) {
     
     if (win) {
         pendingWinAmount = 50;
-        showSlotResult("MAESTRU!", "Ai potrivit toate cardurile! +50 puncte.", false);
-        // Custom override for OK button to trigger animation
+        showSlotResult("GENIU!", "Ai o memorie incredibilă! +50 puncte.", false);
         window.closeResultAndSlot = () => {
             document.getElementById('slotResultModal').style.display = 'none';
             animateScoreFlying();
             isPaused = false;
+            startKevinMovement();
         };
     } else {
-        showSlotResult("TIMP EXPIRAT!", "Prea lent! Ai pierdut bonusul.", false);
+        playTriviaSound(false); // Play the "Wrong" sound
+        showSlotResult("TIMP EXPIRAT!", "Prea lent de data asta!", false);
     }
 }
   </script>
