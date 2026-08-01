@@ -4195,6 +4195,9 @@ async function checkUserInFirestore(uid) {
                 // --- EXTRAGEM STATISTICILE AICI ---
                 bestComboAllTime = data.settings.bestCombo ?? 0;
                 totalClicksAllTime = data.settings.totalClicks ?? 0;
+// --- LOAD INVENTORY FROM CLOUD ---
+userInventory = data.inventory || {}; 
+console.log("🎒 Inventory loaded from cloud:", userInventory);
                 
                 // 🎨 ÎNCĂRCĂM TEMA SALVATĂ
                 let savedTheme = data.settings.themeIndex ?? 0;
@@ -6571,7 +6574,6 @@ const triviaQuestions = [
     { q: "Dacă mă ai, vrei să mă împarți. Dacă mă împarți, nu mă mai ai. Ce sunt?", a: ["Banii", "O pizza", "Un secret", "Timpul"], c: 2 },
     { q: "Ce cuvânt din dicționar este scris mereu 'Incorect'?", a: ["Greșit", "Eroare", "Incorect", "Niciunul"], c: 2 },
 
-    { q: "Câte luni au 28 de zile?", a: ["1", "2", "12", "Depinde de an"], c: 2 },
     { q: "Ce este mai greu: 1 kg de fier sau 1 kg de pene?", a: ["Fierul", "Penele", "La fel", "Depinde"], c: 2 },
     { q: "Dacă alergi și îl depășești pe al doilea, pe ce loc ești?", a: ["Primul", "Al doilea", "Al treilea", "Ultimul"], c: 1 },
     { q: "Câte animale din fiecare specie a luat Moise pe arcă?", a: ["2", "4", "Nu a luat Moise", "1"], c: 2 },
@@ -6838,7 +6840,6 @@ function switchInvTab(tabId, btn) {
 }
 
 function addToInventory(itemKey) {
-    // 1. Calculate current total
     let totalItems = Object.values(userInventory).reduce((a, b) => a + b, 0);
 
     if (totalItems >= INV_LIMIT) {
@@ -6846,12 +6847,12 @@ function addToInventory(itemKey) {
         return;
     }
 
-    // 2. Add/Stack item
     userInventory[itemKey] = (userInventory[itemKey] || 0) + 1;
     
-    // 3. Visual Feedback (optional toast could go here)
-    console.log(`Inventory: Added ${itemKey}. Total stack: ${userInventory[itemKey]}`);
+    // --- SYNC TO BACKEND ---
+    syncInventoryToCloud(); 
 }
+
 
 function renderInventoryUI() {
     const grid = document.getElementById('inventoryGrid');
@@ -6895,6 +6896,32 @@ function renderInventoryUI() {
 function showItemInfo(key) {
     const data = specialRegistry[key];
     showMobileEventModal(data); 
+}
+
+
+async function syncInventoryToCloud() {
+    if (!currentUID) return;
+
+    try {
+        const idToken = await auth.currentUser.getIdToken(true);
+
+        const response = await fetch('https://kevin-backend-qodc.onrender.com/update-inventory', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                idToken: idToken, 
+                inventory: userInventory 
+            }),
+        });
+
+        if (response.ok) {
+            console.log("✅ Inventory backed up to cloud.");
+        } else {
+            console.warn("⚠️ Inventory sync failed.");
+        }
+    } catch (e) {
+        console.error("Cloud Error:", e);
+    }
 }
   </script>
 </body>
