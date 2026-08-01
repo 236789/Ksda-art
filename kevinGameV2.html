@@ -3200,6 +3200,31 @@ input:checked + .s-slider:before {
     transform: scale(0.95);
     box-shadow: none !important;
 }
+
+/* Overlay for Time Freeze - Blue/Crystalline tint */
+#slowMoOverlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(0, 162, 255, 0.15); 
+    backdrop-filter: saturate(1.5) contrast(1.2) brightness(1.1);
+    pointer-events: none;
+    z-index: 800;
+    display: none;
+}
+
+/* Kevin Frozen Effect */
+.kevin-frozen {
+    transition: none !important; /* Remove all movement transitions */
+    filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.8)) brightness(1.2) !important;
+    animation: shakeFreeze 0.1s infinite;
+}
+
+@keyframes shakeFreeze {
+    0% { transform: translate(1px, 1px); }
+    50% { transform: translate(-1px, -1px); }
+    100% { transform: translate(1px, -1px); }
+}
   </style>
 </head>
 <body>
@@ -4214,7 +4239,7 @@ function startKevinMovement() {
 
 
 function moveKevinAway() {
-    if (isKevinTired) return;
+    if (isKevinTired || isSlowMoActive) return; // Prevent movement if tired OR frozen
 
     const kevin = document.getElementById('kevin');
     const gameArea = document.getElementById('gameArea');
@@ -5236,11 +5261,11 @@ const specialRegistry = {
     },
 
 "stopwatch": {
-    name: "Cronometru",
+    name: "Îngheț Temporal",
     image: "https://iili.io/Ck1l1x1.png",
     type: "good",
-    duration: 10,
-    description: "Timpul încetinește! Muzica și personajul se mișcă în slow-motion.",
+    duration: 8,
+    description: "Timpul s-a oprit! eroul tau este înghețat în loc. Profită și dă click-uri rapide!",
     action: (e) => startSlowMoEvent()
 },
 
@@ -5339,33 +5364,38 @@ window.isSlowMoActive = false;
 function startSlowMoEvent() {
     const overlay = document.getElementById('slowMoOverlay');
     const kevin = document.getElementById('kevin');
+    const duration = specialRegistry.stopwatch.duration;
 
+    // 1. Set State & Stop All Movement
     isSlowMoActive = true;
+    clearInterval(moveKevinInterval); // Kill the movement loop
+    clearTimeout(tiredTimeout);       // Stop the tiredness timer
 
-    // 1. Visuals
+    // 2. Visuals & Audio
     overlay.style.display = 'block';
-    kevin.classList.add('kevin-slow-motion');
+    kevin.classList.add('kevin-frozen');
+    
+    if (bgMusic) { 
+        bgMusic.playbackRate = 0.7; // Slightly slowed music for atmosphere
+    }
 
-    // 2. Slow Music
-    if (bgMusic) { bgMusic.playbackRate = 0.5; }
-
-    // 3. Trigger the slow movement immediately
-    startKevinMovement(); 
-    moveKevinAway(); 
-
-    // 4. Return to normal after 10 seconds
+    // 3. Logic to resume after duration
     setTimeout(() => {
         isSlowMoActive = false;
         overlay.style.display = 'none';
-        kevin.classList.remove('kevin-slow-motion');
+        kevin.classList.remove('kevin-frozen');
 
-        if (bgMusic) { bgMusic.playbackRate = 1.0; }
-
-        // Restart normal fast movement
-        if (!isPaused) {
-            startKevinMovement(); 
+        if (bgMusic) { 
+            bgMusic.playbackRate = 1.0; 
         }
-    }, 10000);
+
+        // 4. Restart normal game loops if the game isn't paused
+        if (!isPaused) {
+            moveKevinAway();       // Move him immediately so he's not a sitting duck
+            startKevinMovement();  // Restart the loop
+            startTiredCycle();     // Restart tiredness cycle
+        }
+    }, duration * 1000);
 }
 
 function startAxeEvent() {
