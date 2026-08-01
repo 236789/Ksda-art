@@ -3269,20 +3269,18 @@ input:checked + .s-slider:before {
     filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
 }
 
-/* V1 STACK BADGE */
 .inv-tile-badge {
     position: absolute;
-    bottom: 8px;
-    right: 8px;
-    background: #ffffff; /* White background like V1 */
-    color: #000000; /* Sharp black text */
+    bottom: 5px;
+    right: 5px;
+    background: #fff;
+    color: #000;
     font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 900;
-    padding: 2px 6px;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.8);
-    border: 1px solid #ddd;
+    padding: 1px 5px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     z-index: 5;
 }
 
@@ -3321,6 +3319,63 @@ input:checked + .s-slider:before {
 .info-modal-box .menu-btn.play:active {
     transform: translateY(4px) !important;
     box-shadow: 0 2px 0 var(--th-btn-shadow) !important;
+}
+
+.inv-tile img {
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
+}
+
+/* TIGHTER V1 INVENTORY GRID */
+.inventory-v1-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 columns instead of 3 */
+    gap: 8px; /* Tighter spacing */
+    padding: 10px;
+    justify-items: center;
+}
+
+.inv-tile {
+    width: 72px; /* Adjusted for 4 columns */
+    height: 72px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid var(--th-border);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.1s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3), inset 0 0 10px rgba(0,0,0,0.5);
+}
+
+.inv-tile:hover {
+    transform: scale(1.05);
+    border-color: #fff;
+    box-shadow: 0 0 15px var(--th-glow);
+}
+
+.inv-tile img {
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
+}
+
+.inv-tile-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: #fff;
+    color: #000;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 1px 5px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    z-index: 5;
 }
   </style>
 </head>
@@ -5795,16 +5850,37 @@ function showMobileEventModal(eventData) {
     modalOverlay.style.display = 'flex';
     modalOverlay.style.zIndex = '100000';
     
-    // We use the theme accent for the type border/text
-    const typeColor = "var(--th-accent)"; 
+    // 1. Determine Badge Color based on Type
+    let badgeColor = "#4ade80"; // Default Green (Good)
+    if (eventData.type === 'bad') badgeColor = "#ef4444"; // Red (Bad)
+    if (eventData.type === 'gamble') badgeColor = "#a855f7"; // Purple (Risc)
 
     modalOverlay.innerHTML = `
         <div class="modal-box info-modal-box" style="padding: 25px 20px; max-width: 320px;">
-            <img src="${eventData.image}" style="width: 60px; height: 60px; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));">
-            <h2 style="font-size: 24px; margin-bottom: 5px;">${eventData.name}</h2>
-            <div style="color: ${typeColor}; font-size: 14px; font-weight: bold; margin-bottom: 15px; border: 2px solid ${typeColor}; display: inline-block; padding: 4px 10px; border-radius: 8px;">INFO</div>
-            <p style="font-size: 15px; line-height: 1.4; margin-bottom: 20px; color: #d1d5db;">${eventData.description}</p>
-            <button class="menu-btn play" id="mobileEventCloseBtn" style="width: 100%; height: 50px; font-size: 20px; padding: 0;">ÎNCHIDE</button>
+            <img src="${eventData.image}" style="width: 70px; height: 70px; margin-bottom: 10px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));">
+            
+            <h2 style="font-size: 26px; margin-bottom: 5px; font-family: 'Oswald';">${eventData.name}</h2>
+            
+            <!-- Dynamic Color Badge -->
+            <div style="
+                color: ${badgeColor}; 
+                border: 2px solid ${badgeColor}; 
+                display: inline-block; 
+                padding: 3px 15px; 
+                border-radius: 10px; 
+                font-family: 'Orbitron'; 
+                font-weight: 900; 
+                font-size: 14px; 
+                letter-spacing: 2px; 
+                margin-bottom: 20px;
+                box-shadow: 0 0 10px ${badgeColor}44;
+            ">INFO</div>
+            
+            <p style="font-size: 16px; line-height: 1.4; margin-bottom: 25px; color: #d1d5db; font-family: 'Oswald';">${eventData.description}</p>
+            
+            <button class="menu-btn play" id="mobileEventCloseBtn" style="width: 100%; height: 55px; font-size: 22px; padding: 0;">
+                <span>ÎNCHIDE</span>
+            </button>
         </div>
     `;
 
@@ -5812,7 +5888,7 @@ function showMobileEventModal(eventData) {
 
     document.getElementById('mobileEventCloseBtn').onclick = () => {
         modalOverlay.remove();
-        // Only resume if the inventory isn't still open
+        // Resume game ONLY if the main inventory modal was already closed
         if (document.getElementById('inventoryModal').style.display !== 'flex') {
             isPaused = false; 
         }
