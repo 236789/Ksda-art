@@ -5607,7 +5607,7 @@ const specialRegistry = {
 
 "memoryCards": {
     name: "Marea de Carduri",
-    image: "https://iili.io/CSVi2Tb", // The yellow card icon
+    image: "https://iili.io/CSVi2Tb.png", // Added .png
     type: "good",
     duration: 0,
     description: "Găsește toate perechile în 25 de secunde pentru un bonus de 50 de puncte!",
@@ -7022,22 +7022,21 @@ let flippedCards = [];
 let matchedPairs = 0;
 let memoryTimer = null;
 
-// ALL 14 THEMED ICONS
 const allMemoryIcons = [
-    "https://iili.io/CSVkkXt", // cherrys
-    "https://iili.io/CSVkeII", // gold coin
-    "https://iili.io/CSVkNmN", // crown
-    "https://iili.io/CSVkwep", // chest
-    "https://iili.io/CSVkU1s", // diamonds
-    "https://iili.io/CSVkSBn", // emerald
-    "https://iili.io/CSVkgrG", // grapes
-    "https://iili.io/CSVk42f", // idk
-    "https://iili.io/CSVk674", // magnet
-    "https://iili.io/CSVkPkl", // orange
-    "https://iili.io/CSVkip2", // ruby
-    "https://iili.io/CSVkLIS", // sapphire
-    "https://iili.io/CSVkQh7", // star
-    "https://iili.io/CSVkZQ9"  // watermelon
+    "https://iili.io/CSVkkXt.png",
+    "https://iili.io/CSVkeII.png",
+    "https://iili.io/CSVkNmN.png",
+    "https://iili.io/CSVkwep.png",
+    "https://iili.io/CSVkU1s.png",
+    "https://iili.io/CSVkSBn.png",
+    "https://iili.io/CSVkgrG.png",
+    "https://iili.io/CSVk42f.png",
+    "https://iili.io/CSVk674.png",
+    "https://iili.io/CSVkPkl.png",
+    "https://iili.io/CSVkip2.png",
+    "https://iili.io/CSVkLIS.png",
+    "https://iili.io/CSVkQh7.png",
+    "https://iili.io/CSVkZQ9.png"
 ];
 
 function startMemoryGame() {
@@ -7095,7 +7094,11 @@ function checkMatch() {
         c2.classList.add('matched');
         matchedPairs++;
         flippedCards = [];
-        if (matchedPairs === memoryAssets.length) finishMemory(true);
+        
+        // Fixed: Check against 8 (the number of pairs we spawned)
+        if (matchedPairs === 8) {
+            setTimeout(() => finishMemory(true), 500);
+        }
     } else {
         setTimeout(() => {
             c1.classList.remove('flipped');
