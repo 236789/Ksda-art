@@ -3378,6 +3378,63 @@ input:checked + .s-slider:before {
     border: 2px solid currentColor;
     text-transform: uppercase;
 }
+
+
+/* MEMORY CARD STYLING */
+.mem-card {
+    width: 100%;
+    aspect-ratio: 1/1;
+    cursor: pointer;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s;
+}
+
+.mem-card.flipped {
+    transform: rotateY(180deg);
+}
+
+.mem-card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    border: 2px solid var(--th-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.mem-card-front {
+    background: linear-gradient(135deg, #1b1a37, #2c2a55);
+}
+
+.mem-card-front::after {
+    content: "?";
+    font-family: 'Orbitron';
+    color: var(--th-accent);
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.mem-card-back {
+    background: #ffffff;
+    transform: rotateY(180deg);
+}
+
+.mem-card-back img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+.mem-card.matched {
+    opacity: 0.5;
+    cursor: default;
+    filter: grayscale(1);
+}
   </style>
 </head>
 <body>
@@ -3840,6 +3897,23 @@ input:checked + .s-slider:before {
       <span>ÎNAPOI</span>
     </button>
   </div>
+</div>
+
+
+<!-- MEMORY GAME MODAL -->
+<div id="memoryModal" class="modal-overlay" style="z-index: 100007;">
+    <div class="modal-box info-modal-box" style="max-width: 450px !important;">
+        <h2 id="memoryTitle">MEMORIE DE ELEFANT</h2>
+        <div class="selection-line"></div>
+        
+        <div class="trivia-timer-container">
+            <div id="memoryTimerFill" class="trivia-timer-fill"></div>
+        </div>
+
+        <div id="memoryBoard" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; perspective: 1000px;">
+            <!-- Cards will be generated here -->
+        </div>
+    </div>
 </div>
 
 <div id="settingsModal" class="modal-overlay">
@@ -5530,6 +5604,17 @@ const specialRegistry = {
     description: "Răspunde corect la 5 întrebări pentru un bonus masiv. Greșești una? Pierzi tot!",
     action: (e) => startTriviaEvent()
 },
+
+"memoryCards": {
+    name: "Marea de Carduri",
+    image: "https://iili.io/CSVi2Tb",
+    type: "good",
+    duration: 0,
+    description: "Găsește toate perechile în 25 de secunde pentru un bonus de 50 de puncte!",
+    action: (e) => startMemoryGame()
+},
+
+
 };
 
 function startAutoClickEvent() {
@@ -6930,6 +7015,105 @@ async function syncInventoryToCloud() {
         }
     } catch (e) {
         console.error("Cloud Error:", e);
+    }
+}
+
+
+
+const memoryAssets = [
+    "https://iili.io/CSVkkXt", "https://iili.io/CSVkeII", "https://iili.io/CSVkNmN",
+    "https://iili.io/CSVkwep", "https://iili.io/CSVkU1s", "https://iili.io/CSVkSBn",
+    "https://iili.io/CSVkgrG", "https://iili.io/CSVk42f" // Picking 8 pairs for a 16-card grid
+];
+
+let flippedCards = [];
+let matchedPairs = 0;
+let memoryTimer = null;
+
+function startMemoryGame() {
+    isPaused = true;
+    flippedCards = [];
+    matchedPairs = 0;
+    document.getElementById('memoryModal').style.display = 'flex';
+    
+    const board = document.getElementById('memoryBoard');
+    board.innerHTML = "";
+    
+    // Create pairs and shuffle
+    let deck = [...memoryAssets, ...memoryAssets];
+    deck.sort(() => Math.random() - 0.5);
+
+    deck.forEach((imgUrl, index) => {
+        const card = document.createElement('div');
+        card.className = "mem-card";
+        card.dataset.val = imgUrl;
+        card.innerHTML = `
+            <div class="mem-card-face mem-card-front"></div>
+            <div class="mem-card-face mem-card-back"><img src="${imgUrl}"></div>
+        `;
+        card.onclick = () => flipCard(card);
+        board.appendChild(card);
+    });
+
+    startMemoryTimer();
+}
+
+function flipCard(card) {
+    if (flippedCards.length < 2 && !card.classList.contains('flipped') && !card.classList.contains('matched')) {
+        card.classList.add('flipped');
+        flippedCards.push(card);
+        playSFX(slotWooshUrl);
+
+        if (flippedCards.length === 2) {
+            checkMatch();
+        }
+    }
+}
+
+function checkMatch() {
+    const [c1, c2] = flippedCards;
+    if (c1.dataset.val === c2.dataset.val) {
+        c1.classList.add('matched');
+        c2.classList.add('matched');
+        matchedPairs++;
+        flippedCards = [];
+        if (matchedPairs === memoryAssets.length) finishMemory(true);
+    } else {
+        setTimeout(() => {
+            c1.classList.remove('flipped');
+            c2.classList.remove('flipped');
+            flippedCards = [];
+        }, 1000);
+    }
+}
+
+function startMemoryTimer() {
+    const fill = document.getElementById('memoryTimerFill');
+    fill.style.transition = 'none';
+    fill.style.width = '100%';
+    setTimeout(() => {
+        fill.style.transition = 'width 25s linear';
+        fill.style.width = '0%';
+    }, 50);
+
+    memoryTimer = setTimeout(() => finishMemory(false), 25000);
+}
+
+function finishMemory(win) {
+    clearTimeout(memoryTimer);
+    document.getElementById('memoryModal').style.display = 'none';
+    
+    if (win) {
+        pendingWinAmount = 50;
+        showSlotResult("MAESTRU!", "Ai potrivit toate cardurile! +50 puncte.", false);
+        // Custom override for OK button to trigger animation
+        window.closeResultAndSlot = () => {
+            document.getElementById('slotResultModal').style.display = 'none';
+            animateScoreFlying();
+            isPaused = false;
+        };
+    } else {
+        showSlotResult("TIMP EXPIRAT!", "Prea lent! Ai pierdut bonusul.", false);
     }
 }
   </script>
