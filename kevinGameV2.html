@@ -4195,12 +4195,14 @@ async function checkUserInFirestore(uid) {
                 // --- EXTRAGEM STATISTICILE AICI ---
                 bestComboAllTime = data.settings.bestCombo ?? 0;
                 totalClicksAllTime = data.settings.totalClicks ?? 0;
+
+
 // --- LOAD INVENTORY FROM CLOUD ---
-userInventory = data.inventory || {}; 
-console.log("🎒 Inventory loaded from cloud:", userInventory);
+_GAME_DATA.inventory = data.inventory || {}; 
+console.log("🎒 Inventory loaded from cloud:", _GAME_DATA.inventory);
                 
                 // 🎨 ÎNCĂRCĂM TEMA SALVATĂ
-                let savedTheme = data.settings.themeIndex ?? 0;
+                let savedTheme = data.settings.themeIndex ?? 0; 
                 changeTheme(savedTheme);
 
                 bgMusic.volume = isMuted ? 0 : musicVolume;
@@ -6789,7 +6791,11 @@ function finishTrivia(win, reason = "") {
 }
 
 
-let userInventory = {}; // Structure: { "axe": 5, "slots": 2 }
+// TO THIS:
+const _GAME_DATA = {
+    inventory: {}
+};
+
 const INV_LIMIT = 500;
 
 
@@ -6840,17 +6846,13 @@ function switchInvTab(tabId, btn) {
 }
 
 function addToInventory(itemKey) {
-    let totalItems = Object.values(userInventory).reduce((a, b) => a + b, 0);
-
-    if (totalItems >= INV_LIMIT) {
-        showKevinutaBubble("Inventar plin! 🎒");
-        return;
-    }
-
-    userInventory[itemKey] = (userInventory[itemKey] || 0) + 1;
+    // Check against the hidden object
+    let totalItems = Object.values(_GAME_DATA.inventory).reduce((a, b) => a + b, 0);
     
-    // --- SYNC TO BACKEND ---
-    syncInventoryToCloud(); 
+    if (totalItems >= INV_LIMIT) return;
+
+    _GAME_DATA.inventory[itemKey] = (_GAME_DATA.inventory[itemKey] || 0) + 1;
+    syncInventoryToCloud();
 }
 
 
