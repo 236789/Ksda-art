@@ -5469,12 +5469,16 @@ function startAxeEvent() {
         const axeRect = axe.getBoundingClientRect();
         const kevinRect = document.getElementById('kevin').getBoundingClientRect();
 
-        if (axeRect.left < kevinRect.right && axeRect.right > kevinRect.left &&
+if (axeRect.left < kevinRect.right && axeRect.right > kevinRect.left &&
             axeRect.top < kevinRect.bottom && axeRect.bottom > kevinRect.top) {
             
             if (!recentlyHit) {
-                score = Math.max(0, score - 10);
-                updateScoreUI(true); 
+                // --- NEW FLYING SCORE LOGIC ---
+                pendingWinAmount = -10; 
+                
+                // Trigger animation flying from the Axe's position
+                animateScoreFlying(axeRect.left + (axeSize/2), axeRect.top + (axeSize/2));
+
                 flashDamage();
                 shakeScreen(); 
                 
@@ -6172,17 +6176,19 @@ function spawnJackpotCoins() {
 }
 
 
-function animateScoreFlying() {
+function animateScoreFlying(startX = null, startY = null) {
     const flyer = document.createElement('div');
     
-    // If pendingWinAmount is negative, it's a loss (Red color)
     const isLoss = pendingWinAmount < 0;
     flyer.className = `flying-points ${isLoss ? 'loss' : ''}`;
-    
-    // Display as "+50" or "-50"
     flyer.innerText = (pendingWinAmount > 0 ? "+" : "") + pendingWinAmount;
     
-    flyer.style.left = '50vw'; flyer.style.top = '50vh';
+    // Position: Use provided coordinates or default to center
+    const x = startX || window.innerWidth / 2;
+    const y = startY || window.innerHeight / 2;
+
+    flyer.style.left = `${x}px`; 
+    flyer.style.top = `${y}px`;
     flyer.style.transform = 'translate(-50%, -50%)';
     document.body.appendChild(flyer);
 
@@ -6194,7 +6200,6 @@ function animateScoreFlying() {
         flyer.style.transform = 'translate(-50%, -50%) scale(0.2)';
         flyer.style.opacity = '0';
         
-        // If loss, shake the scoreboard on hit
         if (isLoss) {
             document.getElementById('scoreBoard').classList.add('score-loss');
             setTimeout(() => document.getElementById('scoreBoard').classList.remove('score-loss'), 500);
