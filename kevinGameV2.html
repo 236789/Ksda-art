@@ -3227,26 +3227,100 @@ input:checked + .s-slider:before {
 }
 
 
-/* Inventory Card Stack Badge */
-.inv-stack-badge {
+/* V1 STYLED INVENTORY GRID */
+.inventory-v1-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns for a clean look */
+    gap: 12px;
+    padding: 10px;
+    justify-items: center;
+}
+
+.inv-tile {
+    width: 85px;
+    height: 85px;
+    background: #1a1a1a; /* Dark matte background */
+    border: 3px solid var(--th-border); /* Thick themed border */
+    border-radius: 18px; /* Smooth rounded corners */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
+    box-shadow: 0 0 15px var(--th-glow), inset 0 0 10px rgba(0,0,0,0.5);
+    padding: 0;
+    overflow: visible;
+}
+
+.inv-tile:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+}
+
+.inv-tile:active {
+    transform: scale(0.95);
+}
+
+.inv-tile img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+}
+
+/* V1 STACK BADGE */
+.inv-tile-badge {
     position: absolute;
-    bottom: -5px;
-    right: -5px;
-    background: var(--th-accent);
-    color: var(--th-btn-text);
-    font-family: 'Orbitron';
+    bottom: 8px;
+    right: 8px;
+    background: #ffffff; /* White background like V1 */
+    color: #000000; /* Sharp black text */
+    font-family: 'Orbitron', sans-serif;
     font-size: 11px;
     font-weight: 900;
     padding: 2px 6px;
     border-radius: 6px;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-    z-index: 2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    border: 1px solid #ddd;
+    z-index: 5;
 }
 
-.shop-card.inv-item {
-    position: relative;
-    padding: 10px;
+/* Mobile Tweak: Make tiles slightly smaller for small screens */
+@media (max-width: 400px) {
+    .inv-tile { width: 75px; height: 75px; }
+    .inv-tile img { width: 40px; height: 40px; }
+}
+
+
+/* UNIVERSAL THEMED MODAL OVERRIDE */
+.result-modal-box, 
+.info-modal-box {
+    background: var(--th-bg) !important;
+    border: 3px solid var(--th-border) !important;
+    box-shadow: 0 0 30px var(--th-glow), inset 0 0 20px rgba(0,0,0,0.8) !important;
+}
+
+/* Modal Title Theming */
+.result-modal-box h2, 
+.info-modal-box h2 {
+    color: var(--th-accent) !important;
+    text-shadow: 0 0 10px var(--th-glow) !important;
+}
+
+/* Ensure buttons inside these modals use themed colors */
+.result-modal-box .menu-btn.play, 
+.info-modal-box .menu-btn.play {
+    background: var(--th-btn-bg) !important;
+    box-shadow: 0 6px 0 var(--th-btn-shadow), 0 8px 15px rgba(0,0,0,0.4) !important;
+    color: var(--th-btn-text) !important;
+    border-color: #fff !important;
+}
+
+.result-modal-box .menu-btn.play:active, 
+.info-modal-box .menu-btn.play:active {
+    transform: translateY(4px) !important;
+    box-shadow: 0 2px 0 var(--th-btn-shadow) !important;
 }
   </style>
 </head>
@@ -5713,24 +5787,23 @@ item.onclick = (e) => {
     eventTimeout = setTimeout(spawnSpecialEvent, delayToNextSpawn); 
 }
 
-// --- MOBILE EVENT MODAL ---
 function showMobileEventModal(eventData) {
-    isPaused = true; // Pause while user reads info
+    isPaused = true; 
     
     const modalOverlay = document.createElement('div');
     modalOverlay.className = 'modal-overlay';
     modalOverlay.style.display = 'flex';
     modalOverlay.style.zIndex = '100000';
     
-    const typeColor = eventData.type === 'bad' ? '#ff4444' : '#00ff88';
-    const typeText = eventData.type === 'bad' ? 'PERICOL' : 'BONUS';
+    // We use the theme accent for the type border/text
+    const typeColor = "var(--th-accent)"; 
 
     modalOverlay.innerHTML = `
-        <div class="modal-box" style="padding: 25px 20px; max-width: 320px;">
+        <div class="modal-box info-modal-box" style="padding: 25px 20px; max-width: 320px;">
             <img src="${eventData.image}" style="width: 60px; height: 60px; margin-bottom: 10px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));">
             <h2 style="font-size: 24px; margin-bottom: 5px;">${eventData.name}</h2>
-            <div style="color: ${typeColor}; font-size: 14px; font-weight: bold; margin-bottom: 15px; border: 2px solid ${typeColor}; display: inline-block; padding: 4px 10px; border-radius: 8px;">${typeText}</div>
-            <p style="font-size: 15px; line-height: 1.4; margin-bottom: 20px;">${eventData.description}</p>
+            <div style="color: ${typeColor}; font-size: 14px; font-weight: bold; margin-bottom: 15px; border: 2px solid ${typeColor}; display: inline-block; padding: 4px 10px; border-radius: 8px;">INFO</div>
+            <p style="font-size: 15px; line-height: 1.4; margin-bottom: 20px; color: #d1d5db;">${eventData.description}</p>
             <button class="menu-btn play" id="mobileEventCloseBtn" style="width: 100%; height: 50px; font-size: 20px; padding: 0;">ÎNCHIDE</button>
         </div>
     `;
@@ -5739,7 +5812,10 @@ function showMobileEventModal(eventData) {
 
     document.getElementById('mobileEventCloseBtn').onclick = () => {
         modalOverlay.remove();
-        isPaused = false; 
+        // Only resume if the inventory isn't still open
+        if (document.getElementById('inventoryModal').style.display !== 'flex') {
+            isPaused = false; 
+        }
     };
 }
 
@@ -6237,11 +6313,11 @@ function showSlotResult(title, message, isJackpot) {
     document.getElementById('resultText').innerText = message;
     
     if (isJackpot) {
-        box.classList.remove('result-modal-box'); // Scoatem tema plictisitoare
-        box.classList.add('mega-jackpot-box');    // Punem tema nebună de aur
+        box.classList.remove('result-modal-box'); 
+        box.classList.add('mega-jackpot-box'); // Special gold theme
     } else {
         box.classList.remove('mega-jackpot-box');
-        box.classList.add('result-modal-box');
+        box.classList.add('result-modal-box'); // Base themed style
     }
 
     modal.style.display = 'flex';
@@ -6696,34 +6772,38 @@ function addToInventory(itemKey) {
 function renderInventoryUI() {
     const grid = document.getElementById('inventoryGrid');
     const counter = document.getElementById('invCounter');
+    
+    // Switch to our new V1 grid class
+    grid.className = "inventory-v1-grid"; 
     grid.innerHTML = "";
     
     let total = 0;
+    const keys = Object.keys(userInventory);
 
-    Object.keys(userInventory).forEach(key => {
+    keys.forEach(key => {
         const count = userInventory[key];
         const data = specialRegistry[key];
-        if (!data) return;
+        if (!data || count <= 0) return;
 
         total += count;
 
-        const card = document.createElement('button');
-        card.className = "shop-card inv-item";
-        card.onclick = () => showItemInfo(key);
+        const tile = document.createElement('div');
+        tile.className = "inv-tile";
+        tile.onclick = () => showItemInfo(key);
 
-        card.innerHTML = `
-            <img src="${data.image}" style="width: 40px; height: 40px; object-fit: contain; margin-bottom: 5px;">
-            <div class="shop-info">
-                <h3 style="font-size: 12px;">${data.name}</h3>
-            </div>
-            ${count > 1 ? `<div class="inv-stack-badge">x${count}</div>` : ''}
+        tile.innerHTML = `
+            <img src="${data.image}">
+            ${count > 1 ? `<div class="inv-tile-badge">x${count}</div>` : ''}
         `;
-        grid.appendChild(card);
+        grid.appendChild(tile);
     });
 
+    // Update the total counter at the top
     counter.innerText = `${total} / ${INV_LIMIT}`;
+
+    // Placeholder if empty
     if (total === 0) {
-        grid.innerHTML = `<div class="placeholder-text" style="grid-column: span 3;">Inventar gol. Prinde obiecte din joc!</div>`;
+        grid.innerHTML = `<div class="placeholder-text" style="grid-column: span 3; margin-top: 50px;">Inventar gol. Prinde obiecte din joc!</div>`;
     }
 }
 
