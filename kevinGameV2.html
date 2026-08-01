@@ -6524,14 +6524,17 @@ function finalizeSpin(outcome) {
     let text = "";
     let isJackpot = false;
 
+    // --- ASCUNDE MAȘINA DE SLOTURI IMEDIAT DUPĂ CE ROLELE S-AU OPRIT ---
+    document.getElementById('slotMachineModal').style.display = 'none';
+
     if (outcome.mult === 3.0) {
         pendingWinAmount = currentBetAmount * 3; 
         title = "777 JACKPOT! 777";
         text = `BINGO! Ai câștigat +${pendingWinAmount} puncte!`;
         isJackpot = true;
         
-        playSFX(slotJackpotUrl); // Redă melodia victorioasă!
-        spawnJackpotCoins();     // Pornește ploaia de bănuți!
+        playSFX(slotJackpotUrl); 
+        spawnJackpotCoins();     
         
     } else if (outcome.mult > 0) {
         pendingWinAmount = Math.floor(currentBetAmount * outcome.mult);
@@ -6545,8 +6548,7 @@ function finalizeSpin(outcome) {
         pendingWinAmount = -currentBetAmount;
         title = "GHINION TOTAL!";
         text = `Ai pierdut tot pariul: ${pendingWinAmount} puncte.`;
-        
-        playSFX(slotWompUrl); // Redă Womp Womp trist
+        playSFX(slotWompUrl); 
     }
 
     showSlotResult(title, text, isJackpot);
@@ -6650,15 +6652,14 @@ function runScoreTicker(amount) {
 }
 
 function closeResultAndSlot() {
-    // 1. IMMEDIATELY HIDE BOTH MODALS
+    // 1. ÎNCHIDE DOAR MODALUL DE REZULTAT (Mașina e deja închisă din finalizeSpin)
     document.getElementById('slotResultModal').style.display = 'none';
-    document.getElementById('slotMachineModal').style.display = 'none';
     
-    // 2. TRIGGER ANIMATION ON THE NOW-VISIBLE GAME AREA
-    // FIX: Check if it's NOT zero. This way it runs for BOTH wins (>0) and losses (<0)
+    // 2. PORNEȘTE ANIMAȚIA DE PUNCTE ZBURĂTOARE
     if (pendingWinAmount !== 0) {
         animateScoreFlying();
     } else {
+        // Dacă a fost egalitate sau zero (deși la sloturi nu prea e cazul), curățăm indicatorul
         finishSlotCleanup();
     }
 }
