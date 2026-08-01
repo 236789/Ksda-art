@@ -4068,6 +4068,11 @@ for (let i = 0; i < particleCount; i++) {
     let currentUsername = "";
     let score = 0;
     let lastSavedScore = 0;
+
+// ADD THIS HERE:
+const _GAME_DATA = {
+    inventory: {}
+};
     
     let comboCount = 0;
     let comboTimer = null;
@@ -6791,13 +6796,11 @@ function finishTrivia(win, reason = "") {
 }
 
 
-// TO THIS:
-const _GAME_DATA = {
-    inventory: {}
-};
 
+// ==========================================
+// SECURE INVENTORY SYSTEM V2 (UNIFIED)
+// ==========================================
 const INV_LIMIT = 500;
-
 
 function openInventory() {
     document.getElementById('inventoryModal').style.display = 'flex';
@@ -6809,7 +6812,7 @@ function openInventory() {
 
     // Force default tab to Items visually
     const itemsBtn = document.querySelector('#inventoryModal .tab-btn:first-child');
-    switchInvTab('items', itemsBtn); 
+    if (itemsBtn) switchInvTab('items', itemsBtn); 
 
     renderInventoryUI();
 }
@@ -6825,20 +6828,12 @@ function closeInventory() {
 function switchInvTab(tabId, btn) {
     const modal = document.getElementById('inventoryModal');
     
-    // 1. Remove 'active' class from all inventory buttons
-    modal.querySelectorAll('.tab-btn').forEach(button => {
-        button.classList.remove('active');
-    });
+    // 1. Remove active states
+    modal.querySelectorAll('.tab-btn').forEach(button => button.classList.remove('active'));
+    modal.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active-content'));
 
-    // 2. Remove 'active-content' class from all inventory tab contents
-    modal.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active-content');
-    });
-
-    // 3. Add active class to the clicked button
+    // 2. Set new active states
     btn.classList.add('active');
-
-    // 4. Show the target content
     const targetContent = document.getElementById(`inv-${tabId}`);
     if (targetContent) {
         targetContent.classList.add('active-content');
@@ -6846,15 +6841,24 @@ function switchInvTab(tabId, btn) {
 }
 
 function addToInventory(itemKey) {
-    // Check against the hidden object
+    // Safety check for the object
+    if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
+
+    // 1. Calculate current total
     let totalItems = Object.values(_GAME_DATA.inventory).reduce((a, b) => a + b, 0);
-    
-    if (totalItems >= INV_LIMIT) return;
 
+    if (totalItems >= INV_LIMIT) {
+        showKevinutaBubble("Inventar plin! 🎒");
+        return;
+    }
+
+    // 2. Add to local object
     _GAME_DATA.inventory[itemKey] = (_GAME_DATA.inventory[itemKey] || 0) + 1;
-    syncInventoryToCloud();
+    console.log(`🎒 Obiect prins: ${itemKey}. Total stack: ${_GAME_DATA.inventory[itemKey]}`);
+    
+    // 3. Sync to Cloud
+    syncInventoryToCloud(); 
 }
-
 
 function renderInventoryUI() {
     const grid = document.getElementById('inventoryGrid');
@@ -6865,10 +6869,11 @@ function renderInventoryUI() {
     grid.innerHTML = "";
     
     let total = 0;
-    const keys = Object.keys(userInventory);
+    // Loop through _GAME_DATA.inventory
+    const keys = Object.keys(_GAME_DATA.inventory);
 
     keys.forEach(key => {
-        const count = userInventory[key];
+        const count = _GAME_DATA.inventory[key];
         const data = specialRegistry[key];
         if (!data || count <= 0) return;
 
@@ -6890,29 +6895,31 @@ function renderInventoryUI() {
 
     // Placeholder if empty
     if (total === 0) {
-        grid.innerHTML = `<div class="placeholder-text" style="grid-column: span 3; margin-top: 50px;">Inventar gol. Prinde obiecte din joc!</div>`;
+        grid.innerHTML = `<div class="placeholder-text" style="grid-column: span 5; margin-top: 50px;">Inventar gol. Prinde obiecte din joc!</div>`;
     }
 }
 
-// Opens the existing mobile/PC event info style modal
 function showItemInfo(key) {
     const data = specialRegistry[key];
     showMobileEventModal(data); 
 }
 
-
 async function syncInventoryToCloud() {
     if (!currentUID) return;
 
     try {
-        const idToken = await auth.currentUser.getIdToken(true);
+        const user = auth.currentUser;
+        if (!user) return;
+
+        // Get the fresh passport (token)
+        const idToken = await user.getIdToken(true);
 
         const response = await fetch('https://kevin-backend-qodc.onrender.com/update-inventory', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 idToken: idToken, 
-                inventory: userInventory 
+                inventory: _GAME_DATA.inventory // Fixed reference
             }),
         });
 
