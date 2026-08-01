@@ -7094,6 +7094,21 @@ function startMemoryGame() {
     startMemoryTimer();
 }
 
+// FUNCȚIA REPARATĂ (Cea care lipsea)
+function flipCard(card) {
+    // Permite întoarcerea doar dacă sunt mai puțin de 2 cărți deschise 
+    // și dacă n-ai dat click pe același card sau pe unul deja potrivit
+    if (flippedCards.length < 2 && !card.classList.contains('flipped') && !card.classList.contains('matched')) {
+        card.classList.add('flipped');
+        flippedCards.push(card);
+        playSFX(slotWooshUrl);
+
+        if (flippedCards.length === 2) {
+            checkMatch();
+        }
+    }
+}
+
 function checkMatch() {
     const [c1, c2] = flippedCards;
     
