@@ -3590,6 +3590,55 @@ input:checked + .s-slider:before {
     .mem-choice-card .diff-title { font-size: 12px; }
     .mem-choice-card .diff-reward { font-size: 14px; }
 }
+
+
+/* --- UPDATED MEMORY TIMER UI --- */
+.mem-timer-wrapper {
+    width: 100%;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+#memTimerCount {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+
+.mem-timer-bar-container {
+    width: 100%;
+    height: 14px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.1);
+    position: relative;
+}
+
+#memoryTimerFill {
+    height: 100%;
+    width: 100%;
+    background: #4ade80; /* Start Green */
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.5);
+    transition: width 1s linear, background-color 0.3s ease;
+}
+
+/* Timer Warning States */
+.timer-warning { background-color: #facc15 !important; box-shadow: 0 0 15px #facc15 !important; }
+.timer-danger { background-color: #ef4444 !important; box-shadow: 0 0 15px #ef4444 !important; }
+
+/* Numeric pulse animation */
+.pulse-text { animation: countPulse 0.3s ease-out; }
+@keyframes countPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); color: #ff4444; }
+    100% { transform: scale(1); }
+}
   </style>
 </head>
 <body>
@@ -4069,7 +4118,7 @@ input:checked + .s-slider:before {
                     <span class="diff-title">EASY</span>
                     <div class="diff-stats">
                         <span>8 CĂRȚI</span>
-                        <span>25 SEC</span>
+                        <span>15 SEC</span>
                     </div>
                     <span class="diff-reward">+50</span>
                 </div>
@@ -4078,7 +4127,7 @@ input:checked + .s-slider:before {
                     <span class="diff-title">MED</span>
                     <div class="diff-stats">
                         <span>12 CĂRȚI</span>
-                        <span>35 SEC</span>
+                        <span>25 SEC</span>
                     </div>
                     <span class="diff-reward">+100</span>
                 </div>
@@ -4087,7 +4136,7 @@ input:checked + .s-slider:before {
                     <span class="diff-title">HARD</span>
                     <div class="diff-stats">
                         <span>16 CĂRȚI</span>
-                        <span>1 MIN</span>
+                        <span>30 SEC</span>
                     </div>
                     <span class="diff-reward">+150</span>
                 </div>
@@ -4095,13 +4144,16 @@ input:checked + .s-slider:before {
             <button class="menu-btn play" style="width: 100%; margin-top: 30px; height: 50px; font-size: 18px;" onclick="document.getElementById('memoryModal').style.display='none'; isPaused=false; startKevinMovement();">ÎNAPOI</button>
         </div>
 
-        <!-- View 2: Game -->
-        <div id="memGameView" style="display: none;">
-            <div class="trivia-timer-container">
-                <div id="memoryTimerFill" class="trivia-timer-fill"></div>
-            </div>
-            <div id="memoryBoard"></div>
+<!-- View 2: Game -->
+<div id="memGameView" style="display: none;">
+    <div class="mem-timer-wrapper">
+        <span id="memTimerCount">0</span>
+        <div class="mem-timer-bar-container">
+            <div id="memoryTimerFill" class="trivia-timer-fill"></div>
         </div>
+    </div>
+    <div id="memoryBoard"></div>
+</div>
     </div>
 </div>
 
@@ -7228,6 +7280,8 @@ let matchedPairs = 0;
 let memoryTimer = null;
 let currentMemConfig = null;
 
+const memAlarmSnd = "https://www.dropbox.com/scl/fi/cp2xztcnmbaartjzbh2v0/ALARM.mp3?rlkey=48toni2ddlb6cvda2n616o7ur&st=6l4gias7&dl=1";
+
 const allMemoryIcons = [
     // --- The 9 New Icons ---
     "https://iili.io/CUfitK7.png", // banana
@@ -7257,9 +7311,9 @@ const allMemoryIcons = [
 ];
 
 const memoryDiffs = {
-    easy:   { cards: 8,  time: 25, win: 50,  loss: 0 },
-    medium: { cards: 12, time: 35, win: 100, loss: -50 },
-    hard:   { cards: 16, time: 60, win: 150, loss: -100 }
+    easy:   { cards: 8,  time: 15, win: 50,  loss: 0 },
+    medium: { cards: 12, time: 25, win: 100, loss: -50 },
+    hard:   { cards: 16, time: 30, win: 150, loss: -100 }
 };
 
 function startMemoryGame() {
@@ -7341,38 +7395,77 @@ function checkMatch() {
     }
 }
 
-function startMemoryTimer(seconds) {
+function startMemoryTimer(totalSeconds) {
     const fill = document.getElementById('memoryTimerFill');
+    const countEl = document.getElementById('memTimerCount');
+    
+    let secondsLeft = totalSeconds;
+    
+    // Reset visuals
     fill.style.transition = 'none';
     fill.style.width = '100%';
-    
-    setTimeout(() => {
-        fill.style.transition = `width ${seconds}s linear`;
-        fill.style.width = '0%';
-    }, 50);
+    fill.className = 'trivia-timer-fill'; // Reset to default green
+    countEl.innerText = secondsLeft;
+    countEl.style.color = "#fff";
 
-    if (memoryTimer) clearTimeout(memoryTimer);
-    memoryTimer = setTimeout(() => finishMemory(false), seconds * 1000);
+    if (memoryTimer) clearInterval(memoryTimer);
+
+    memoryTimer = setInterval(() => {
+        if (isPaused) return;
+
+        secondsLeft--;
+        countEl.innerText = secondsLeft;
+        
+        // Update Bar Width
+        let pct = (secondsLeft / totalSeconds) * 100;
+        fill.style.transition = 'width 1s linear';
+        fill.style.width = pct + '%';
+
+        // Color Logic & Numeric Effects
+        if (pct <= 25) {
+            fill.classList.add('timer-danger');
+            countEl.classList.add('pulse-text');
+            setTimeout(() => countEl.classList.remove('pulse-text'), 300);
+        } else if (pct <= 50) {
+            fill.classList.add('timer-warning');
+        }
+
+        if (secondsLeft <= 0) {
+            clearInterval(memoryTimer);
+            finishMemory(false);
+        }
+    }, 1000);
 }
 
 function finishMemory(win) {
-    clearTimeout(memoryTimer);
+    clearInterval(memoryTimer);
     document.getElementById('memoryModal').style.display = 'none';
     
     if (win) {
         pendingWinAmount = currentMemConfig.win;
-        showSlotResult("GENIU!", `Ai terminat la timp! +${pendingWinAmount} puncte.`, false);
+        showSlotResult("GENIU!", `Ai câștigat +${pendingWinAmount} puncte!`, false);
     } else {
+        // Play Alarm Sound on Loss
+        if (!isMuted) {
+            const alarm = new Audio(memAlarmSnd);
+            alarm.volume = sfxVolume;
+            alarm.play().catch(e => console.warn("Alarm audio blocked"));
+        }
+        
         if (typeof playTriviaSound === 'function') playTriviaSound(false);
+        
         pendingWinAmount = currentMemConfig.loss;
-        
+        let title = "RATAT!";
         let msg = "Timpul a expirat!";
-        if (pendingWinAmount < 0) msg += ` Ai pierdut ${Math.abs(pendingWinAmount)} puncte.`;
         
-        showSlotResult("RATAT!", msg, false);
+        if (pendingWinAmount < 0) {
+            msg = `Prea lent! Ai pierdut ${Math.abs(pendingWinAmount)} puncte.`;
+        }
+        
+        showSlotResult(title, msg, false);
     }
 
-    // Override the generic close function to handle flying points and resume
+    // Standard cleanup
     window.closeResultAndSlot = () => {
         document.getElementById('slotResultModal').style.display = 'none';
         if (pendingWinAmount !== 0) {
