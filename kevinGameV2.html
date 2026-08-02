@@ -4217,11 +4217,10 @@ input:checked + .s-slider:before {
     </div>
 
 <!-- =========================
-     TAB 2: VIZUAL (FIXED LAYOUT)
+     TAB 2: VIZUAL (REWORKED)
      ========================= -->
 <div id="tab-vizual" class="tab-content">
   
-  <!-- ROW 1: DIALOGURI EROI -->
   <div class="s-row-premium">
     <div class="s-text-side">
         <span class="s-title">DIALOGURI EROI</span>
@@ -4233,24 +4232,13 @@ input:checked + .s-slider:before {
     </label>
   </div>
 
-  <!-- ROW 2: CRONOMETRU EVENT-URI -->
-  <div class="s-row-premium">
-    <div class="s-text-side">
-        <span class="s-title">CRONOMETRU EVENT-URI</span>
-        <span class="s-desc">Ascunde ferestrele cu timpul evenimentelor active.</span>
-    </div>
-    <label class="s-switch">
-        <input type="checkbox" id="indicatorsToggle" checked onchange="updateIndicatorsSetting(this.checked)">
-        <span class="s-slider"></span>
-    </label>
-  </div>
-
-  <!-- THEME PICKER -->
+  <!-- THEME PICKER NOU -->
   <div class="settings-group" style="padding: 15px;">
     <div class="s-title" style="text-align: center; margin-bottom: 5px;">TEMĂ INTERFAȚĂ</div>
     <div class="s-desc" style="text-align: center; margin-bottom: 15px;">Schimbă culorile meniurilor din joc.</div>
     
     <div class="theme-grid">
+      <!-- Cele 8 teme -->
       <button class="theme-swatch active-theme" id="ts-0" style="background: linear-gradient(135deg, #facc15, #2a2d4c);" onclick="changeTheme(0)"></button>
       <button class="theme-swatch" id="ts-1" style="background: linear-gradient(135deg, #ff007f, #040d12);" onclick="changeTheme(1)"></button>
       <button class="theme-swatch" id="ts-2" style="background: linear-gradient(135deg, #39ff14, #0a1a10);" onclick="changeTheme(2)"></button>
@@ -4261,6 +4249,7 @@ input:checked + .s-slider:before {
       <button class="theme-swatch" id="ts-7" style="background: linear-gradient(135deg, #ff8c00, #1f0b2e);" onclick="changeTheme(7)"></button>
     </div>
   </div>
+
 </div>
 
 <!-- =========================
@@ -4412,8 +4401,6 @@ const _GAME_DATA = {
     let canClickKevin = true; 
     let showBubbles = true; // Add this at the top with your other variables
 
-let showEventIndicators = true;
-
 // --- STATISTICI GLOBALS ---
 let bestComboAllTime = 0;
 let totalClicksAllTime = 0;
@@ -4527,15 +4514,6 @@ async function checkUserInFirestore(uid) {
                 isMuted = data.settings.isMuted ?? false;
                 lastTrackIndex = data.settings.lastTrackIndex ?? 0;
                 showBubbles = data.settings.showBubbles ?? true;
-    showEventIndicators = data.settings.showEventIndicators ?? true; // Add this
-
-  // Apply to UI toggle
-    const iToggle = document.getElementById('indicatorsToggle');
-    if (iToggle) iToggle.checked = showEventIndicators;
-
-    updateIndicatorsSetting(showEventIndicators); 
-
-
                 
                 // --- EXTRAGEM STATISTICILE AICI ---
                 bestComboAllTime = data.settings.bestCombo ?? 0;
@@ -5226,15 +5204,6 @@ emmanuel: [
   ]
 };
 
-function updateIndicatorsSetting(val) {
-    showEventIndicators = val;
-    const container = document.getElementById('active-events-container');
-    if (container) {
-        container.style.visibility = showEventIndicators ? 'visible' : 'hidden';
-        // We use visibility: hidden so the elements still exist logic-wise but aren't seen
-    }
-}
-
 function updateBubblesSetting(val) {
     showBubbles = val;
     console.log("Dialoguri eroi:", showBubbles ? "PORNITE" : "OPRITE");
@@ -5538,7 +5507,6 @@ const settingsPayload = {
         isMuted: isMuted,
         lastTrackIndex: lastTrackIndex, 
         showBubbles: showBubbles,       
-    showEventIndicators: showEventIndicators, // Add this
         themeIndex: currentThemeIndex,
         bestCombo: bestComboAllTime,    // <-- ADAUGAT
         totalClicks: totalClicksAllTime, // <-- ADAUGAT
@@ -6079,15 +6047,13 @@ if (axeRect.left < kevinRect.right && axeRect.right > kevinRect.left &&
     }, 30);
 }
 
-// --- EVENT UI GENERATOR (UPDATED FOR GAMBLE TYPE) --- 
+// --- EVENT UI GENERATOR (UPDATED FOR GAMBLE TYPE) ---
 function showEventIndicator(eventKey, durationSeconds) {
     const eventData = specialRegistry[eventKey];
     if (!eventData) return;
 
     // Create the container if it doesn't exist
     let container = document.getElementById('active-events-container');
-    if (container) container.style.visibility = showEventIndicators ? 'visible' : 'hidden';
-
     if (!container) {
         container = document.createElement('div');
         container.id = 'active-events-container';
@@ -7435,19 +7401,30 @@ function startMemoryTimer(totalSeconds) {
     
     let secondsLeft = totalSeconds;
     
-    // Reset visuals
+    // Initial State
     fill.style.transition = 'none';
     fill.style.width = '100%';
-    fill.className = 'trivia-timer-fill'; // Reset to default green
+    fill.classList.remove('timer-warning', 'timer-danger');
     countEl.innerText = secondsLeft;
     countEl.style.color = "#fff";
 
     if (memoryTimer) clearInterval(memoryTimer);
 
     memoryTimer = setInterval(() => {
-        if (isPaused) return;
+        // ONLY pause the mini-game clock if the Pause Menu or Settings Modal is visible
+        if (document.getElementById('pauseModal').style.display === 'flex' || 
+            document.getElementById('settingsModal').style.display === 'flex') {
+            return; 
+        }
 
         secondsLeft--;
+        
+        if (secondsLeft < 0) {
+            clearInterval(memoryTimer);
+            finishMemory(false);
+            return;
+        }
+
         countEl.innerText = secondsLeft;
         
         // Update Bar Width
@@ -7455,8 +7432,9 @@ function startMemoryTimer(totalSeconds) {
         fill.style.transition = 'width 1s linear';
         fill.style.width = pct + '%';
 
-        // Color Logic & Numeric Effects
+        // Dynamic Color Logic
         if (pct <= 25) {
+            fill.classList.remove('timer-warning');
             fill.classList.add('timer-danger');
             countEl.classList.add('pulse-text');
             setTimeout(() => countEl.classList.remove('pulse-text'), 300);
@@ -7464,10 +7442,6 @@ function startMemoryTimer(totalSeconds) {
             fill.classList.add('timer-warning');
         }
 
-        if (secondsLeft <= 0) {
-            clearInterval(memoryTimer);
-            finishMemory(false);
-        }
     }, 1000);
 }
 
@@ -7556,7 +7530,6 @@ window.submitFeedback = submitFeedback;
 // Add these to your window exports list!
 window.launchMemoryLevel = launchMemoryLevel;
 window.startMemoryGame = startMemoryGame;
-window.updateIndicatorsSetting = updateIndicatorsSetting;
 
 })(); // <-- CLOSES THE SECURE VAULT
 </script>
