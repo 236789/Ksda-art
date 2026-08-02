@@ -7401,19 +7401,30 @@ function startMemoryTimer(totalSeconds) {
     
     let secondsLeft = totalSeconds;
     
-    // Reset visuals
+    // Initial State
     fill.style.transition = 'none';
     fill.style.width = '100%';
-    fill.className = 'trivia-timer-fill'; // Reset to default green
+    fill.classList.remove('timer-warning', 'timer-danger');
     countEl.innerText = secondsLeft;
     countEl.style.color = "#fff";
 
     if (memoryTimer) clearInterval(memoryTimer);
 
     memoryTimer = setInterval(() => {
-        if (isPaused) return;
+        // ONLY pause the mini-game clock if the Pause Menu or Settings Modal is visible
+        if (document.getElementById('pauseModal').style.display === 'flex' || 
+            document.getElementById('settingsModal').style.display === 'flex') {
+            return; 
+        }
 
         secondsLeft--;
+        
+        if (secondsLeft < 0) {
+            clearInterval(memoryTimer);
+            finishMemory(false);
+            return;
+        }
+
         countEl.innerText = secondsLeft;
         
         // Update Bar Width
@@ -7421,8 +7432,9 @@ function startMemoryTimer(totalSeconds) {
         fill.style.transition = 'width 1s linear';
         fill.style.width = pct + '%';
 
-        // Color Logic & Numeric Effects
+        // Dynamic Color Logic
         if (pct <= 25) {
+            fill.classList.remove('timer-warning');
             fill.classList.add('timer-danger');
             countEl.classList.add('pulse-text');
             setTimeout(() => countEl.classList.remove('pulse-text'), 300);
@@ -7430,10 +7442,6 @@ function startMemoryTimer(totalSeconds) {
             fill.classList.add('timer-warning');
         }
 
-        if (secondsLeft <= 0) {
-            clearInterval(memoryTimer);
-            finishMemory(false);
-        }
     }, 1000);
 }
 
