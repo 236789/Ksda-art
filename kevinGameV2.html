@@ -3494,73 +3494,101 @@ input:checked + .s-slider:before {
 }
 
 
-/* --- MEMORY SELECTION MODAL --- */
+/* --- PREMIUM MEMORY CARDS SELECTION --- */
 .mem-choice-container {
     display: flex;
-    flex-direction: column;
-    gap: 12px;
+    justify-content: center;
+    gap: 15px;
     width: 100%;
-    margin-top: 15px;
+    margin-top: 20px;
+    perspective: 1000px;
 }
 
 .mem-choice-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid var(--th-border);
+    flex: 1;
+    max-width: 130px;
+    height: 190px;
+    background: linear-gradient(135deg, #1b1a37, #0f0c29);
+    border: 3px solid var(--th-border);
     border-radius: 15px;
-    padding: 15px;
     cursor: pointer;
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    transition: all 0.2s ease;
-    text-align: left;
+    justify-content: space-between;
+    padding: 15px 10px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
-    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+}
+
+/* Card Icons/Decorations */
+.mem-choice-card::before {
+    content: "♠";
+    position: absolute;
+    top: 5px; left: 8px;
+    font-size: 14px; opacity: 0.5;
+}
+
+.mem-choice-card::after {
+    content: "♠";
+    position: absolute;
+    bottom: 5px; right: 8px;
+    transform: rotate(180deg);
+    font-size: 14px; opacity: 0.5;
 }
 
 .mem-choice-card:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateX(5px);
-    box-shadow: -5px 0 15px var(--th-glow);
+    transform: translateY(-15px) rotateY(10deg);
+    border-color: #fff;
+    box-shadow: 0 20px 30px var(--th-glow);
 }
 
 .mem-choice-card .diff-title {
     font-family: 'Orbitron', sans-serif;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 900;
+    text-transform: uppercase;
+    text-align: center;
     color: var(--th-accent);
-    display: block;
-    margin-bottom: 4px;
 }
 
 .mem-choice-card .diff-stats {
-    font-family: 'Oswald', sans-serif;
-    font-size: 13px;
-    color: #9aa0b8;
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    color: #9aa0b8;
+    background: rgba(0,0,0,0.3);
+    padding: 8px;
+    border-radius: 8px;
+    width: 100%;
 }
 
 .mem-choice-card .diff-reward {
     font-family: 'Orbitron', sans-serif;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 800;
-    color: #4ade80;
 }
 
+/* Color Coding */
+.mem-choice-card.easy { border-color: #4ade80; }
+.mem-choice-card.easy .diff-reward { color: #4ade80; }
+
+.mem-choice-card.med { border-color: #facc15; }
 .mem-choice-card.med .diff-reward { color: #facc15; }
+
+.mem-choice-card.hard { border-color: #ff4444; }
 .mem-choice-card.hard .diff-reward { color: #ff4444; }
 
-/* Grid adjustments for dynamic card counts */
-#memoryBoard {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    perspective: 1000px;
-    margin-top: 10px;
-    max-height: 60vh;
-    overflow-y: auto;
-    padding: 5px;
+/* Mobile stacking */
+@media (max-width: 500px) {
+    .mem-choice-container { flex-direction: row; gap: 8px; }
+    .mem-choice-card { height: 160px; padding: 10px 5px; }
+    .mem-choice-card .diff-title { font-size: 12px; }
+    .mem-choice-card .diff-reward { font-size: 14px; }
 }
   </style>
 </head>
@@ -4026,43 +4054,48 @@ input:checked + .s-slider:before {
   </div>
 </div>
 
-
 <!-- MEMORY GAME MODAL -->
 <div id="memoryModal" class="modal-overlay" style="z-index: 100007;">
     <div class="modal-box info-modal-box" style="max-width: 480px !important;">
         <h2 id="memoryTitle">MEMORIE</h2>
         <div class="selection-line" style="background: var(--th-accent); margin-bottom: 20px;"></div>
         
-        <!-- View 1: Difficulty Selection -->
+        <!-- View 1: Selection -->
         <div id="memSelectionView">
-            <p>Alege dificultatea. Atenție: la Medium și Hard pierzi puncte dacă expiră timpul!</p>
+            <p style="font-size: 14px; margin-bottom: 10px;">Alege-ți miza. Ești gata?</p>
             <div class="mem-choice-container">
+                <!-- EASY CARD -->
                 <div class="mem-choice-card easy" onclick="launchMemoryLevel('easy')">
-                    <div>
-                        <span class="diff-title">EASY</span>
-                        <div class="diff-stats"><span>8 CĂRȚI</span> <span>60s</span></div>
+                    <span class="diff-title">EASY</span>
+                    <div class="diff-stats">
+                        <span>8 CĂRȚI</span>
+                        <span>60 SEC</span>
                     </div>
                     <span class="diff-reward">+50</span>
                 </div>
+                <!-- MEDIUM CARD -->
                 <div class="mem-choice-card med" onclick="launchMemoryLevel('medium')">
-                    <div>
-                        <span class="diff-title">MEDIUM</span>
-                        <div class="diff-stats"><span>12 CĂRȚI</span> <span>40s</span></div>
+                    <span class="diff-title">MED</span>
+                    <div class="diff-stats">
+                        <span>12 CĂRȚI</span>
+                        <span>40 SEC</span>
                     </div>
-                    <span class="diff-reward">+100 / -50</span>
+                    <span class="diff-reward">+100</span>
                 </div>
+                <!-- HARD CARD -->
                 <div class="mem-choice-card hard" onclick="launchMemoryLevel('hard')">
-                    <div>
-                        <span class="diff-title">HARD</span>
-                        <div class="diff-stats"><span>16 CĂRȚI</span> <span>30s</span></div>
+                    <span class="diff-title">HARD</span>
+                    <div class="diff-stats">
+                        <span>16 CĂRȚI</span>
+                        <span>30 SEC</span>
                     </div>
-                    <span class="diff-reward">+150 / -100</span>
+                    <span class="diff-reward">+150</span>
                 </div>
             </div>
-            <button class="menu-btn play" style="width: 100%; margin-top: 20px; height: 50px;" onclick="document.getElementById('memoryModal').style.display='none'; isPaused=false; startKevinMovement();">ÎNAPOI</button>
+            <button class="menu-btn play" style="width: 100%; margin-top: 30px; height: 50px; font-size: 18px;" onclick="document.getElementById('memoryModal').style.display='none'; isPaused=false; startKevinMovement();">ÎNAPOI</button>
         </div>
 
-        <!-- View 2: Actual Game (Hidden by default) -->
+        <!-- View 2: Game -->
         <div id="memGameView" style="display: none;">
             <div class="trivia-timer-container">
                 <div id="memoryTimerFill" class="trivia-timer-fill"></div>
@@ -7395,6 +7428,9 @@ window.updateBubblesSetting = updateBubblesSetting;
 window.changeTheme = changeTheme;
 window.updateFeedbackCounter = updateFeedbackCounter;
 window.submitFeedback = submitFeedback;
+// Add these to your window exports list!
+window.launchMemoryLevel = launchMemoryLevel;
+window.startMemoryGame = startMemoryGame;
 
 })(); // <-- CLOSES THE SECURE VAULT
 </script>
