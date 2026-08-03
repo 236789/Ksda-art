@@ -7,6 +7,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -3876,8 +3877,8 @@ input:checked + .s-slider:before {
   <i class="fa-solid fa-briefcase"></i>
 </button>
     <button class="control-btn sub-btn" title="Achievements"><i class="fa-solid fa-trophy"></i></button>
-<button class="control-btn sub-btn" style="--i:3" title="Shop" onclick="openShop()">
-  <i class="fa-solid fa-cart-shopping"></i>
+<button class="control-btn sub-btn" style="--i:3" title="Utilități" onclick="openUtilitiesModal()">
+  <i class="fa-solid fa-layer-group"></i>
 </button>
     <button class="control-btn sub-btn" title="Fullscreen" onclick="toggleFullScreen()"><i id="fsIcon" class="fa-solid fa-expand"></i></button>
     <button class="control-btn sub-btn" title="Pause" onclick="togglePause()"><i class="fa-solid fa-pause"></i></button>
@@ -4019,6 +4020,58 @@ input:checked + .s-slider:before {
         <i class="fa-solid fa-house"></i> <span>MENIU</span>
       </button>
     </div>
+  </div>
+</div>
+
+<!-- MODAL: UTILITĂȚI -->
+<div id="utilitiesModal" class="modal-overlay">
+  <div class="modal-box shop-box">
+    <div class="shop-header">
+      <h2><i class="fa-solid fa-layer-group"></i> UTILITĂȚI</h2>
+      <div class="selection-line"></div>
+    </div>
+
+    <div class="shop-grid">
+      <!-- MAGAZIN NORMAL -->
+      <button class="shop-card" onclick="openShopFromUtilities()">
+        <i class="fa-solid fa-cart-shopping shop-icon"></i>
+        <div class="shop-info">
+          <h3>MAGAZIN</h3>
+          <p>Upgrade-uri și cosmetice.</p>
+        </div>
+      </button>
+
+      <!-- PIAȚA NEAGRĂ -->
+      <button class="shop-card" onclick="showComingSoon()">
+        <i class="fa-solid fa-user-ninja shop-icon" style="color: #ff4444; filter: drop-shadow(0 0 8px rgba(255, 68, 68, 0.5));"></i>
+        <div class="shop-info">
+          <h3 style="color: #ff4444;">PIAȚA NEAGRĂ</h3>
+          <p>Obiecte rare și ilegale.</p>
+        </div>
+      </button>
+
+      <!-- INDEX -->
+      <button class="shop-card" onclick="showComingSoon()">
+        <i class="fa-solid fa-book-journal-whills shop-icon" style="color: #00f0ff; filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.5));"></i>
+        <div class="shop-info">
+          <h3 style="color: #00f0ff;">INDEX</h3>
+          <p>Colecția ta de descoperiri.</p>
+        </div>
+      </button>
+
+      <!-- TELEPORTOR -->
+      <button class="shop-card" onclick="showComingSoon()">
+        <i class="fa-solid fa-door-open shop-icon" style="color: #b533ff; filter: drop-shadow(0 0 8px rgba(181, 51, 255, 0.5));"></i>
+        <div class="shop-info">
+          <h3 style="color: #b533ff;">TELEPORTOR</h3>
+          <p>Călătorește în alte zone.</p>
+        </div>
+      </button>
+    </div>
+
+    <button class="menu-btn play close-shop-btn" onclick="closeUtilitiesModal()">
+      <span>ÎNAPOI</span>
+    </button>
   </div>
 </div>
 
@@ -7471,7 +7524,8 @@ function startMemoryTimer(totalSeconds) {
     if (memoryTimer) clearInterval(memoryTimer);
 
     memoryTimer = setInterval(() => {
-        if (isPaused) return;
+        // REMOVED: if (isPaused) return; 
+        // We removed the check because the main game is INTENTIONALLY paused while playing this mini-game!
 
         secondsLeft--;
         countEl.innerText = secondsLeft;
@@ -7539,6 +7593,41 @@ function finishMemory(win) {
 
 
 // ==========================================
+// UTILITIES MODAL SYSTEM
+// ==========================================
+function openUtilitiesModal() {
+    isPaused = true; 
+    clearInterval(moveKevinInterval);
+    document.getElementById('utilitiesModal').style.display = 'flex';
+    document.getElementById('menuWrapper').classList.remove('active');
+}
+
+function closeUtilitiesModal() {
+    document.getElementById('utilitiesModal').style.display = 'none';
+    if (document.getElementById('gameArea').style.display === 'block') {
+        isPaused = false;
+        startKevinMovement();
+    }
+}
+
+function openShopFromUtilities() {
+    // Hide utilities, then open the standard shop
+    document.getElementById('utilitiesModal').style.display = 'none';
+    openShop(); 
+}
+
+function showComingSoon() {
+    // Reusing the beautiful result modal to avoid native alerts
+    showSlotResult("ÎN CURÂND", "Această locație nu este încă deschisă. Revino în viitor!", false);
+}
+
+// Ensure clicks on the utilities modal don't count as "Misses"
+document.getElementById('utilitiesModal').addEventListener('click', (e) => {
+    e.stopPropagation();
+});
+
+
+// ==========================================
 // 🔐 EXPORT UI FUNCTIONS TO WINDOW
 // This allows your HTML buttons to work while 
 // keeping variables like "score" completely hidden!
@@ -7583,6 +7672,10 @@ window.submitFeedback = submitFeedback;
 window.launchMemoryLevel = launchMemoryLevel;
 window.startMemoryGame = startMemoryGame;
 window.updateIndicatorsSetting = updateIndicatorsSetting;
+window.openUtilitiesModal = openUtilitiesModal;
+window.closeUtilitiesModal = closeUtilitiesModal;
+window.openShopFromUtilities = openShopFromUtilities;
+window.showComingSoon = showComingSoon;
 
 })(); // <-- CLOSES THE SECURE VAULT
 </script>
