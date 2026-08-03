@@ -7393,7 +7393,7 @@ let matchedPairs = 0;
 let memoryTimer = null;
 let currentMemConfig = null;
 
-const memAlarmSnd = "https://www.dropbox.com/scl/fi/cp2xztcnmbaartjzbh2v0/ALARM.mp3?rlkey=48toni2ddlb6cvda2n616o7ur&st=6l4gias7&dl=1";
+const memAlarmSnd = "https://www.dropbox.com/scl/fi/cp2xztcnmbaartjzbh2v0/ALARM.mp3?rlkey=48toni2ddlb6cvda2n616o7ur&st=l9r05xlj&dl=1";
 
 const allMemoryIcons = [
     // --- The 9 New Icons ---
@@ -7452,6 +7452,7 @@ function launchMemoryLevel(diffKey) {
 
     const board = document.getElementById('memoryBoard');
     board.innerHTML = "";
+    board.style.pointerEvents = "auto"; // Ensures the board is clickable for a new game
     
     // Calculate pairs needed
     const pairCount = currentMemConfig.cards / 2;
@@ -7553,9 +7554,12 @@ function startMemoryTimer(totalSeconds) {
 
 function finishMemory(win) {
     clearInterval(memoryTimer);
-    document.getElementById('memoryModal').style.display = 'none';
     
+    // Lock the board to prevent clicking during the reveal or success animation
+    document.getElementById('memoryBoard').style.pointerEvents = 'none';
+
     if (win) {
+        document.getElementById('memoryModal').style.display = 'none';
         pendingWinAmount = currentMemConfig.win;
         showSlotResult("GENIU!", `Ai câștigat +${pendingWinAmount} puncte!`, false);
     } else {
@@ -7567,16 +7571,30 @@ function finishMemory(win) {
         }
         
         if (typeof playTriviaSound === 'function') playTriviaSound(false);
+
+        // FLIP ALL UNMATCHED CARDS
+        const unmatchedCards = document.querySelectorAll('.mem-card:not(.matched):not(.flipped)');
+        unmatchedCards.forEach(card => {
+            // Slight stagger effect based on random timeout makes it look even cooler
+            setTimeout(() => {
+                card.classList.add('flipped');
+            }, Math.random() * 300); 
+        });
         
-        pendingWinAmount = currentMemConfig.loss;
-        let title = "RATAT!";
-        let msg = "Timpul a expirat!";
-        
-        if (pendingWinAmount < 0) {
-            msg = `Prea lent! Ai pierdut ${Math.abs(pendingWinAmount)} puncte.`;
-        }
-        
-        showSlotResult(title, msg, false);
+        // WAIT 2 SECONDS FOR PLAYER TO SEE MISSED CARDS, THEN SHOW RESULT
+        setTimeout(() => {
+            document.getElementById('memoryModal').style.display = 'none';
+            
+            pendingWinAmount = currentMemConfig.loss;
+            let title = "RATAT!";
+            let msg = "Timpul a expirat!";
+            
+            if (pendingWinAmount < 0) {
+                msg = `Prea lent! Ai pierdut ${Math.abs(pendingWinAmount)} puncte.`;
+            }
+            
+            showSlotResult(title, msg, false);
+        }, 2000);
     }
 
     // Standard cleanup
