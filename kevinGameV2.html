@@ -3666,229 +3666,6 @@ input:checked + .s-slider:before {
     /* ... existing styles ... */
     pointer-events: auto; /* Buttons remain clickable */
 }
-
-
-/* ==========================================
-   ARCADE PRECISION HUD (MATCHES IMAGE)
-   ========================================== */
-.hud-container {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-}
-
-#scoreBoard {
-    position: relative;
-    width: 340px; /* Fixed width for alignment */
-    height: 95px;
-    background: #0a0b1e; /* Deep dark navy */
-    border-radius: 50px;
-    display: flex;
-    align-items: center;
-    padding: 0 15px 0 10px;
-    box-sizing: border-box;
-    border: 2px solid #1a1c3d; /* Subtle outer rim */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-}
-
-/* THE LED SVG TRACK */
-.led-svg {
-    position: absolute;
-    top: -4px;
-    left: -4px;
-    width: calc(100% + 8px);
-    height: calc(100% + 8px);
-    pointer-events: none;
-    overflow: visible;
-}
-
-.led-bg {
-    fill: none;
-    stroke: #161835; /* Dark "Off" lights */
-    stroke-width: 8;
-    stroke-dasharray: 0.8 0.2; /* Creates the "Box" look */
-    pathLength: 100;
-}
-
-.led-active {
-    fill: none;
-    stroke: #00f0ff; /* Cyan "On" lights */
-    stroke-width: 8;
-    stroke-dasharray: 0.8 0.2;
-    pathLength: 100;
-    stroke-dashoffset: 100; /* Start empty */
-    transition: stroke-dashoffset 0.15s ease-out, stroke 0.3s;
-    filter: drop-shadow(0 0 5px #00f0ff);
-}
-
-/* THE LEFT MEDALLION */
-.score-icon-wrapper {
-    width: 70px;
-    height: 70px;
-    background: radial-gradient(circle at 30% 30%, #ffcc00, #ff8800);
-    border-radius: 50%;
-    border: 3px solid #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 15px rgba(255, 136, 0, 0.4), inset 0 0 10px rgba(0,0,0,0.3);
-    z-index: 2;
-    flex-shrink: 0;
-}
-
-.score-icon-wrapper i {
-    font-size: 32px;
-    color: #1a1c33;
-    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
-}
-
-/* THE DATA BLOCK */
-.score-data {
-    margin-left: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    z-index: 2;
-}
-
-#scoreText {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 42px; /* Large digital numbers */
-    font-weight: 700;
-    line-height: 1;
-    color: #ccff00; /* Lime Yellow from image */
-    text-shadow: 0 0 15px rgba(204, 255, 0, 0.4);
-    margin: 0;
-}
-
-#stageIndicator {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 13px;
-    font-weight: 900;
-    color: #00f0ff; /* Cyan */
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-top: 4px;
-}
-
-/* Bumping effect when gaining points */
-.score-bump { transform: scale(1.02); transition: 0.1s; }
-
-/* Responsive fix for small phones */
-@media (max-width: 400px) {
-    #scoreBoard { width: 280px; height: 80px; }
-    .score-icon-wrapper { width: 55px; height: 55px; }
-    #scoreText { font-size: 32px; }
-    #stageIndicator { font-size: 10px; }
-}
-
-
-/* ==========================================
-   ARCADE HUD REVAMP (SCALED & FIXED)
-   ========================================== */
-.hud-container {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-#scoreBoard {
-    position: relative;
-    width: 290px; /* Reduced width */
-    height: 75px; /* Reduced height */
-    background: #060714; /* Pure dark arcade base */
-    border-radius: 50px;
-    display: flex;
-    align-items: center;
-    padding: 0 8px;
-    box-sizing: border-box;
-    border: 2px solid #1a1c3d;
-    overflow: visible;
-}
-
-/* THE LED RING - 100 INDIVIDUAL SLOTS */
-.led-svg {
-    position: absolute;
-    top: -3px;
-    left: -3px;
-    width: calc(100% + 6px);
-    height: calc(100% + 6px);
-    pointer-events: none;
-    overflow: visible;
-}
-
-.led-bg {
-    fill: none;
-    stroke: #12142b; /* DARK "OFF" SLOTS */
-    stroke-width: 6;
-    stroke-dasharray: 0.6 0.4; /* Creates the "tiny box" effect */
-    pathLength: 100;
-}
-
-.led-active {
-    fill: none;
-    stroke: #00f0ff; /* CYAN "ON" LIGHTS */
-    stroke-width: 6;
-    stroke-dasharray: 0.6 0.4;
-    pathLength: 100;
-    stroke-dashoffset: 100; /* START AT 100 (COMPLETELY OFF) */
-    filter: drop-shadow(0 0 5px #00f0ff);
-    transition: stroke-dashoffset 0.1s linear, stroke 0.3s;
-}
-
-/* THE LEFT ICON MEDALLION */
-.score-icon-wrapper {
-    width: 58px;
-    height: 58px;
-    background: radial-gradient(circle at 30% 30%, #ffcc00, #ff8800);
-    border-radius: 50%;
-    border: 2.5px solid #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 12px rgba(255, 136, 0, 0.4);
-    z-index: 5;
-    flex-shrink: 0;
-}
-
-.score-icon-wrapper i {
-    font-size: 26px;
-    color: #1a1c33;
-}
-
-/* SCORE TEXT DATA - CENTERED */
-.score-data {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* ALIGN TEXT TO CENTER OF PILL */
-    justify-content: center;
-    padding-right: 25px; /* OFFSET THE ICON ON THE LEFT */
-    z-index: 5;
-}
-
-#scoreText {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 32px; /* Smaller, sharper digits */
-    font-weight: 700;
-    color: #ccff00; /* Neon Lime Score */
-    line-height: 1;
-    text-shadow: 0 0 10px rgba(204, 255, 0, 0.3);
-}
-
-#stageIndicator {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 11px;
-    color: #00f0ff;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-top: 2px;
-}
   </style>
 </head>
 <body>
@@ -4077,33 +3854,19 @@ input:checked + .s-slider:before {
   </div>
 </div>
 
+<!-- Inside <div id="gameArea"> -->
 <div id="gameArea">
-<div class="hud-container">
-    <div id="scoreBoard">
-        <!-- LED SVG - 100 SEGMENTS -->
-        <svg class="led-svg" viewBox="0 0 290 75" preserveAspectRatio="none">
-            <!-- Background: Visible Off-state slots -->
-            <rect class="led-bg" x="3" y="3" width="284" height="69" rx="34.5" />
-            <!-- Foreground: The active combo bar -->
-            <rect id="comboLedTrack" class="led-active" x="3" y="3" width="284" height="69" rx="34.5" />
-        </svg>
-
-        <!-- Left Icon -->
-        <div class="score-icon-wrapper">
-            <i class="fa-solid fa-hand-pointer"></i>
-        </div>
-
-        <!-- Centered Data -->
-        <div class="score-data">
-            <span id="scoreText">0</span>
-            <div id="stageIndicator">STAGE 1: <span id="stageName">STRADA</span></div>
-        </div>
+<div id="scoreBoard" class="electric-container">
+    <div class="score-icon-wrapper">
+        <img src="https://iili.io/COrCopj.png" alt="score icon" class="score-icon-img">
     </div>
-
-    <!-- RUBY PANEL (Aligned below) -->
-    <div id="rubyPanel" style="display: none; align-items: center; gap: 8px; background: rgba(10,11,35,0.8); padding: 6px 15px; border-radius: 50px; border: 2px solid #ff4d4d; width: fit-content; margin-left: 15px; backdrop-filter: blur(5px);">
-        <img src="https://iili.io/Cgvi0mu.png" style="height: 18px;">
-        <span id="rubyText" style="font-family: 'Orbitron'; color: #ff4d4d; font-weight: 900; font-size: 18px;">0</span>
+    
+    <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
+        <span id="scoreText">0</span>
+        <!-- NEW: Stage Indicator -->
+        <div id="stageIndicator" style="font-family: 'Orbitron', sans-serif; font-size: 10px; color: var(--th-accent); letter-spacing: 1px; opacity: 0.8; margin-top: -2px;">
+            STAGE 1: <span id="stageName">STRADA</span>
+        </div>
     </div>
 </div>
 
@@ -4425,18 +4188,6 @@ input:checked + .s-slider:before {
   </div>
 </div>
 
-
-<!-- MODAL: RUBY DISCOVERY -->
-<div id="rubyDiscoveryModal" class="modal-overlay" style="z-index: 200000;">
-    <div class="modal-box info-modal-box" style="border-color: #ff4d4d; background: radial-gradient(circle at top, #4a0000 0%, #1a0505 100%);">
-        <div style="font-family: 'Orbitron'; color: #ff4d4d; font-size: 14px; margin-bottom: 10px; letter-spacing: 3px;">OBIECT NOU DETECTAT</div>
-        <img src="https://iili.io/Cgvi0mu.png" style="width: 100px; height: 100px; animation: heroFloat 2s infinite ease-in-out; filter: drop-shadow(0 0 20px #ff0000);">
-        <h2 style="color: #fff !important; text-shadow: 0 0 15px #ff0000;">RUBINUL ROȘU!</h2>
-        <p>Incredibil! Viteza ta a generat o energie atât de mare încât ai creat un Rubin. Această monedă rară este singura acceptată pe Piața Neagră și pentru upgrade-uri supreme!</p>
-        <button class="menu-btn play" style="background: linear-gradient(180deg, #ff4d4d, #8b0000); border-color: #fff;" onclick="closeRubyDiscovery()">COLECTEAZĂ</button>
-    </div>
-</div>
-
 <!-- MEMORY GAME MODAL -->
 <div id="memoryModal" class="modal-overlay" style="z-index: 100007;">
     <div class="modal-box info-modal-box" style="max-width: 480px !important;">
@@ -4732,8 +4483,7 @@ for (let i = 0; i < particleCount; i++) {
     let score = 0;
     let lastSavedScore = 0;
 let isSuperMagnetActive = false;
-let rubies = 0;
-let hasDiscoveredRubies = false; // Set via backend or local discovery
+
 
 // ADD THIS HERE:
 const _GAME_DATA = {
@@ -5109,53 +4859,26 @@ async function syncScoreToFirestore() {
     }
 
 function updateScoreUI(isLoss = false) {
-    const sb = document.getElementById('scoreBoard');
-    const st = document.getElementById('scoreText');
-    
-    st.innerText = score;
+  const sb = document.getElementById('scoreBoard');
+  const st = document.getElementById('scoreText');
+  
+  st.innerText = score;
 
-    if (isLoss) {
-        sb.classList.add('score-loss');
-        setTimeout(() => sb.classList.remove('score-loss'), 500);
-    } else {
-        sb.classList.add('score-bump');
-        setTimeout(() => sb.classList.remove('score-bump'), 100);
-    }
+  if (isLoss) {
+    // Adăugăm clasa de roșu
+    sb.classList.add('score-loss');
+    // O scoatem după 500ms
+    setTimeout(() => {
+      sb.classList.remove('score-loss');
+    }, 500);
+  } else {
+    // Efect de "pump" galben la câștig
+    sb.classList.add('score-bump');
+    setTimeout(() => {
+      sb.classList.remove('score-bump');
+    }, 200);
+  }
 }
-
-function updateComboRing() {
-    const ledTrack = document.getElementById('comboLedTrack');
-    if (!ledTrack) return;
-
-    // We calculate progress from 0 to 100.
-    // At 0 combo, progress is 0. At 100 combo, progress is 100.
-    let progress = Math.min(comboCount, 100);
-    
-    // DASH OFFSET MATH:
-    // 100 offset = 0% visible (All lights OFF)
-    // 0 offset = 100% visible (All lights ON)
-    let offsetValue = 100 - progress;
-    ledTrack.style.strokeDashoffset = offsetValue;
-
-    // COLOR SHIFT: Cyan -> Gold -> Red
-    if (progress >= 95) {
-        ledTrack.style.stroke = "#ff4d4d"; // Red alert
-        ledTrack.style.filter = "drop-shadow(0 0 10px #ff4d4d)";
-    } else if (progress >= 50) {
-        ledTrack.style.stroke = "#facc15"; // Gold mid-combo
-        ledTrack.style.filter = "drop-shadow(0 0 8px #facc15)";
-    } else {
-        ledTrack.style.stroke = "#00f0ff"; // Standard Cyan
-        ledTrack.style.filter = "drop-shadow(0 0 5px #00f0ff)";
-    }
-
-    // Award Ruby every 100 combo
-    if (comboCount > 0 && comboCount % 100 === 0) {
-        if (typeof awardRuby === "function") awardRuby();
-    }
-}
-
-
 function startKevinMovement() {
     if (moveKevinInterval) clearInterval(moveKevinInterval);
     
@@ -5166,7 +4889,7 @@ function startKevinMovement() {
         moveKevinAway();
     }, speed);
 }
- 
+
 
 function moveKevinAway() {
     if (isKevinTired || isSlowMoActive) return; // Prevent movement if tired OR frozen
@@ -5234,7 +4957,6 @@ document.getElementById('kevin').addEventListener('click', (e) => {
       updateScoreUI();
 
       comboCount++;
-    updateComboRing(); // <--- ADD THIS LINE HERE
       if (comboCount > bestComboAllTime) {
           bestComboAllTime = comboCount;
       }
@@ -8075,113 +7797,6 @@ function applyMagnetMovement(item, eventData, chosenKey) {
     }, 20);
 }
 
-function updateComboRing() {
-    const ledPath = document.getElementById('comboLedPath');
-    if (!ledPath) return;
-
-    // We calculate progress up to 100 combo
-    let progress = Math.min(comboCount, 100);
-    
-    // Convert 0-100 to stroke-dashoffset (100 is empty, 0 is full)
-    let offset = 100 - progress;
-    ledPath.style.strokeDashoffset = offset;
-
-    // Change color based on intensity
-    if (comboCount >= 80) {
-        ledPath.style.stroke = "#facc15"; // Yellow for high combo
-        ledPath.style.filter = "drop-shadow(0 0 8px #facc15)";
-    } else {
-        ledPath.style.stroke = "#00f0ff"; // Cyan default
-        ledPath.style.filter = "drop-shadow(0 0 5px #00f0ff)";
-    }
-
-    // Award Ruby logic
-    if (comboCount > 0 && comboCount % 100 === 0) {
-        if (typeof awardRuby === "function") awardRuby();
-    }
-}
-
-function awardRuby() {
-    rubies++;
-    forceCloseMenu();
-    
-    if (!hasDiscoveredRubies) {
-        isPaused = true;
-        clearInterval(moveKevinInterval);
-        document.getElementById('rubyDiscoveryModal').style.display = 'flex';
-    } else {
-        animateRubyFlying();
-    }
-}
-
-function closeRubyDiscovery() {
-    hasDiscoveredRubies = true;
-    document.getElementById('rubyDiscoveryModal').style.display = 'none';
-    
-    const panel = document.getElementById('rubyPanel');
-    panel.style.display = 'flex';
-    setTimeout(() => {
-        panel.style.transform = 'translateY(0)';
-        panel.style.opacity = '1';
-        animateRubyFlying();
-    }, 100);
-
-    isPaused = false;
-    startKevinMovement();
-}
-
-// !!! IMPORTANT: EXPORT TO WINDOW TO FIX CONSOLE ERROR !!!
-
-
-function animateRubyFlying() {
-    const flyer = document.createElement('img');
-    flyer.src = "https://iili.io/Cgvi0mu.png";
-    flyer.style.cssText = `position:fixed; left:50%; top:50%; width:60px; z-index:200001; transform:translate(-50%, -50%); transition: all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045); filter: drop-shadow(0 0 15px #ff0000);`;
-    document.body.appendChild(flyer);
-
-    // Get position of the target text
-    const target = document.getElementById('rubyText').getBoundingClientRect();
-
-    setTimeout(() => {
-        flyer.style.left = target.left + "px";
-        flyer.style.top = target.top + "px";
-        flyer.style.width = "20px";
-        flyer.style.opacity = "0";
-    }, 50);
-
-    setTimeout(() => {
-        flyer.remove();
-        document.getElementById('rubyText').innerText = rubies;
-        const txt = document.getElementById('rubyText');
-        txt.style.transform = "scale(1.3)";
-        setTimeout(() => { txt.style.transform = "scale(1)"; }, 200);
-    }, 850);
-}
-
-function animateRubyFlying() {
-    const flyer = document.createElement('img');
-    flyer.src = "https://iili.io/Cgvi0mu.png";
-    flyer.style.cssText = `position:fixed; left:50%; top:50%; width:60px; z-index:200001; transform:translate(-50%, -50%); transition: all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045); filter: drop-shadow(0 0 15px #ff0000);`;
-    document.body.appendChild(flyer);
-
-    const target = document.getElementById('rubyText').getBoundingClientRect();
-
-    setTimeout(() => {
-        flyer.style.left = target.left + "px";
-        flyer.style.top = target.top + "px";
-        flyer.style.width = "20px";
-        flyer.style.opacity = "0";
-    }, 50);
-
-    setTimeout(() => {
-        flyer.remove();
-        document.getElementById('rubyText').innerText = rubies;
-        // Bump the text
-        document.getElementById('rubyText').style.transform = "scale(1.3)";
-        setTimeout(() => { document.getElementById('rubyText').style.transform = "scale(1)"; }, 200);
-    }, 850);
-}
-
 // ==========================================
 // 🔐 EXPORT UI FUNCTIONS TO WINDOW
 // This allows your HTML buttons to work while 
@@ -8231,8 +7846,6 @@ window.openUtilitiesModal = openUtilitiesModal;
 window.closeUtilitiesModal = closeUtilitiesModal;
 window.openShopFromUtilities = openShopFromUtilities;
 window.showComingSoon = showComingSoon;
-window.closeRubyDiscovery = closeRubyDiscovery;
-
 
 })(); // <-- CLOSES THE SECURE VAULT
 </script>
