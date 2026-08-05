@@ -3666,6 +3666,39 @@ input:checked + .s-slider:before {
     /* ... existing styles ... */
     pointer-events: auto; /* Buttons remain clickable */
 }
+
+
+/* THE PROGRESS RING Bulbs */
+#rubyProgressBar {
+    /* We define the dash: 4px of light, 4px of empty space */
+    /* This creates the 'Individual Lights' look */
+    stroke-dasharray: 4 4; 
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 3px #ff0000) drop-shadow(0 0 8px #ff0000);
+    opacity: 0.8;
+    transition: stroke-dashoffset 0.1s ease-out;
+}
+
+/* Pulsing effect when combo is high */
+@keyframes bulbPulse {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.5) drop-shadow(0 0 12px #ff0000); }
+    100% { filter: brightness(1); }
+}
+
+.ruby-ring-active {
+    animation: bulbPulse 1s infinite alternate;
+}
+
+/* Flying Ruby CSS */
+.flying-ruby {
+    position: fixed;
+    width: 50px;
+    z-index: 100000;
+    pointer-events: none;
+    filter: drop-shadow(0 0 15px #ff0000);
+    transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
   </style>
 </head>
 <body>
@@ -3854,50 +3887,37 @@ input:checked + .s-slider:before {
   </div>
 </div>
 
-<!-- Inside <div id="gameArea"> -->
 <div id="gameArea">
-<!-- SCOREBOARD WRAPPER -->
-<div class="hud-container" style="position: absolute; top: 16px; left: 16px; z-index: 1000; display: flex; flex-direction: column; gap: 8px;">
-    
-    <div id="scoreBoard" class="electric-container" style="position: relative;">
-        <!-- PROGRESS OUTLINE LAYER -->
-        <svg id="rubyProgressSvg" style="position: absolute; top: -3px; left: -3px; width: calc(100% + 6px); height: calc(100% + 6px); pointer-events: none; z-index: 10;">
-            <!-- This rect matches the pill shape of your scoreboard -->
-            <rect id="rubyProgressBar" x="3" y="3" width="calc(100% - 6px)" height="calc(100% - 6px)" rx="999" fill="none" 
-                  stroke="#ff4d4d" stroke-width="4" stroke-dasharray="800" stroke-dashoffset="800" 
-                  style="transition: stroke-dashoffset 0.1s linear; filter: drop-shadow(0 0 5px #ff0000); visibility: hidden;" />
-        </svg>
+  <!-- SCOREBOARD WRAPPER -->
+  <div class="hud-container" style="position: absolute; top: 16px; left: 16px; z-index: 1000; display: flex; flex-direction: column; gap: 12px;">
+      
+      <div id="scoreBoard" class="electric-container" style="position: relative; padding: 8px 25px 8px 10px; border-radius: 999px; background: #1b1a37;">
+          <!-- SVG LED RING LAYER -->
+          <svg style="position: absolute; top: -4px; left: -4px; width: calc(100% + 8px); height: calc(100% + 8px); pointer-events: none; transform: rotate(-90deg); overflow: visible;">
+              <rect id="rubyProgressBar" x="2" y="2" width="calc(100% - 4px)" height="calc(100% - 4px)" rx="999" fill="none" 
+                    stroke="#ff4d4d" stroke-width="5" 
+                    pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" 
+                    style="visibility: hidden;" />
+          </svg>
 
-        <div class="score-icon-wrapper">
-            <img src="https://iili.io/COrCopj.png" alt="score icon" class="score-icon-img">
-        </div>
+          <div class="score-icon-wrapper">
+              <img src="https://iili.io/COrCopj.png" alt="score icon" class="score-icon-img">
+          </div>
 
-        <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
-            <span id="scoreText">0</span>
-            <div id="stageIndicator" style="font-family: 'Orbitron', sans-serif; font-size: 10px; color: var(--th-accent); letter-spacing: 1px; opacity: 0.8; margin-top: -2px;">
-                STAGE 1: <span id="stageName">STRADA</span>
-            </div>
-        </div>
-    </div>
+          <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
+              <span id="scoreText">0</span>
+              <div id="stageIndicator" style="font-family: 'Orbitron', sans-serif; font-size: 10px; color: var(--th-accent); letter-spacing: 1px; opacity: 0.8; margin-top: -2px;">
+                  STAGE 1: <span id="stageName">STRADA</span>
+              </div>
+          </div>
+      </div>
 
-    <!-- HIDDEN RUBY PANEL (Revealed after discovery) -->
-    <div id="rubyBoard" style="display: none; align-items: center; gap: 10px; background: rgba(0,0,0,0.6); padding: 6px 18px; border-radius: 50px; border: 2px solid #ff4d4d; width: fit-content; margin-left: 12px; transform: translateY(-10px); opacity: 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: blur(5px);">
-        <img src="https://iili.io/Cgvi0mu.png" style="height: 22px; filter: drop-shadow(0 0 5px #ff0000);">
-        <span id="rubyText" style="font-family: 'Orbitron'; color: #ff4d4d; font-weight: 900; font-size: 20px;">0</span>
-    </div>
-</div>
-
-
-</div>
-    
-    <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
-        <span id="scoreText">0</span>
-        <!-- NEW: Stage Indicator -->
-        <div id="stageIndicator" style="font-family: 'Orbitron', sans-serif; font-size: 10px; color: var(--th-accent); letter-spacing: 1px; opacity: 0.8; margin-top: -2px;">
-            STAGE 1: <span id="stageName">STRADA</span>
-        </div>
-    </div>
-</div>
+      <!-- HIDDEN RUBY PANEL -->
+      <div id="rubyPanel" style="display: none; align-items: center; gap: 10px; background: rgba(0,0,0,0.7); padding: 6px 18px; border-radius: 50px; border: 2px solid #ff4d4d; width: fit-content; margin-left: 12px; transform: translateY(-20px); opacity: 0; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: blur(8px); box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+          <img src="https://iili.io/Cgvi0mu.png" style="height: 22px; filter: drop-shadow(0 0 5px #ff0000);">
+          <span id="rubyText" style="font-family: 'Orbitron'; color: #ff4d4d; font-weight: 900; font-size: 20px;">0</span>
+      </div>
+  </div>
 
 <div class="menu-container" id="menuWrapper">
   <!-- The sub-buttons (Hidden by default) -->
@@ -7842,17 +7862,21 @@ function applyMagnetMovement(item, eventData, chosenKey) {
 
 
 function updateComboRing() {
-    const bar = document.getElementById('comboProgressBar');
+    // FIX: Changed ID to rubyProgressBar
+    const bar = document.getElementById('rubyProgressBar');
     if (!bar) return;
 
-    // The length of the path for a pill shape (~600 for your size)
-    const totalPathLength = 600; 
+    // Show the outline as soon as combo starts
+    if (comboCount > 0) bar.style.visibility = "visible";
+
+    // Path length logic
+    const totalPathLength = 800; 
     const progress = (comboCount % 100) / 100;
     const offset = totalPathLength - (progress * totalPathLength);
 
     bar.style.strokeDashoffset = offset;
 
-    // Check for Ruby Milestone
+    // Trigger Ruby at 100
     if (comboCount > 0 && comboCount % 100 === 0) {
         awardRuby();
     }
@@ -7861,10 +7885,11 @@ function updateComboRing() {
 function awardRuby() {
     rubies++;
     if (!hasDiscoveredRubies) {
+        forceCloseMenu();
         isPaused = true;
+        clearInterval(moveKevinInterval);
         document.getElementById('rubyDiscoveryModal').style.display = 'flex';
     } else {
-        // Just play flying animation if already discovered
         animateRubyFlying();
     }
 }
@@ -7873,7 +7898,7 @@ function closeRubyDiscovery() {
     hasDiscoveredRubies = true;
     document.getElementById('rubyDiscoveryModal').style.display = 'none';
     
-    // Reveal the panel
+    // FIX: Changed ID to rubyPanel to match HTML
     const panel = document.getElementById('rubyPanel');
     panel.style.display = 'flex';
     setTimeout(() => {
@@ -7884,6 +7909,31 @@ function closeRubyDiscovery() {
 
     isPaused = false;
     startKevinMovement();
+}
+
+function animateRubyFlying() {
+    const flyer = document.createElement('img');
+    flyer.src = "https://iili.io/Cgvi0mu.png";
+    flyer.style.cssText = `position:fixed; left:50%; top:50%; width:60px; z-index:200001; transform:translate(-50%, -50%); transition: all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045); filter: drop-shadow(0 0 15px #ff0000);`;
+    document.body.appendChild(flyer);
+
+    // Get position of the target text
+    const target = document.getElementById('rubyText').getBoundingClientRect();
+
+    setTimeout(() => {
+        flyer.style.left = target.left + "px";
+        flyer.style.top = target.top + "px";
+        flyer.style.width = "20px";
+        flyer.style.opacity = "0";
+    }, 50);
+
+    setTimeout(() => {
+        flyer.remove();
+        document.getElementById('rubyText').innerText = rubies;
+        const txt = document.getElementById('rubyText');
+        txt.style.transform = "scale(1.3)";
+        setTimeout(() => { txt.style.transform = "scale(1)"; }, 200);
+    }, 850);
 }
 
 function animateRubyFlying() {
