@@ -3856,10 +3856,39 @@ input:checked + .s-slider:before {
 
 <!-- Inside <div id="gameArea"> -->
 <div id="gameArea">
-<div id="scoreBoard" class="electric-container">
-    <div class="score-icon-wrapper">
-        <img src="https://iili.io/COrCopj.png" alt="score icon" class="score-icon-img">
+<!-- SCOREBOARD WRAPPER -->
+<div class="hud-container" style="position: absolute; top: 16px; left: 16px; z-index: 1000; display: flex; flex-direction: column; gap: 8px;">
+    
+    <div id="scoreBoard" class="electric-container" style="position: relative;">
+        <!-- PROGRESS OUTLINE LAYER -->
+        <svg id="rubyProgressSvg" style="position: absolute; top: -3px; left: -3px; width: calc(100% + 6px); height: calc(100% + 6px); pointer-events: none; z-index: 10;">
+            <!-- This rect matches the pill shape of your scoreboard -->
+            <rect id="rubyProgressBar" x="3" y="3" width="calc(100% - 6px)" height="calc(100% - 6px)" rx="999" fill="none" 
+                  stroke="#ff4d4d" stroke-width="4" stroke-dasharray="800" stroke-dashoffset="800" 
+                  style="transition: stroke-dashoffset 0.1s linear; filter: drop-shadow(0 0 5px #ff0000); visibility: hidden;" />
+        </svg>
+
+        <div class="score-icon-wrapper">
+            <img src="https://iili.io/COrCopj.png" alt="score icon" class="score-icon-img">
+        </div>
+
+        <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
+            <span id="scoreText">0</span>
+            <div id="stageIndicator" style="font-family: 'Orbitron', sans-serif; font-size: 10px; color: var(--th-accent); letter-spacing: 1px; opacity: 0.8; margin-top: -2px;">
+                STAGE 1: <span id="stageName">STRADA</span>
+            </div>
+        </div>
     </div>
+
+    <!-- HIDDEN RUBY PANEL (Revealed after discovery) -->
+    <div id="rubyBoard" style="display: none; align-items: center; gap: 10px; background: rgba(0,0,0,0.6); padding: 6px 18px; border-radius: 50px; border: 2px solid #ff4d4d; width: fit-content; margin-left: 12px; transform: translateY(-10px); opacity: 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: blur(5px);">
+        <img src="https://iili.io/Cgvi0mu.png" style="height: 22px; filter: drop-shadow(0 0 5px #ff0000);">
+        <span id="rubyText" style="font-family: 'Orbitron'; color: #ff4d4d; font-weight: 900; font-size: 20px;">0</span>
+    </div>
+</div>
+
+
+</div>
     
     <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
         <span id="scoreText">0</span>
@@ -4188,6 +4217,18 @@ input:checked + .s-slider:before {
   </div>
 </div>
 
+
+<!-- MODAL: RUBY DISCOVERY -->
+<div id="rubyDiscoveryModal" class="modal-overlay" style="z-index: 200000;">
+    <div class="modal-box info-modal-box" style="border-color: #ff4d4d; background: radial-gradient(circle at top, #4a0000 0%, #1a0505 100%);">
+        <div style="font-family: 'Orbitron'; color: #ff4d4d; font-size: 14px; margin-bottom: 10px; letter-spacing: 3px;">OBIECT NOU DETECTAT</div>
+        <img src="https://iili.io/Cgvi0mu.png" style="width: 100px; height: 100px; animation: heroFloat 2s infinite ease-in-out; filter: drop-shadow(0 0 20px #ff0000);">
+        <h2 style="color: #fff !important; text-shadow: 0 0 15px #ff0000;">RUBINUL ROȘU!</h2>
+        <p>Incredibil! Viteza ta a generat o energie atât de mare încât ai creat un Rubin. Această monedă rară este singura acceptată pe Piața Neagră și pentru upgrade-uri supreme!</p>
+        <button class="menu-btn play" style="background: linear-gradient(180deg, #ff4d4d, #8b0000); border-color: #fff;" onclick="closeRubyDiscovery()">COLECTEAZĂ</button>
+    </div>
+</div>
+
 <!-- MEMORY GAME MODAL -->
 <div id="memoryModal" class="modal-overlay" style="z-index: 100007;">
     <div class="modal-box info-modal-box" style="max-width: 480px !important;">
@@ -4483,6 +4524,8 @@ for (let i = 0; i < particleCount; i++) {
     let score = 0;
     let lastSavedScore = 0;
 let isSuperMagnetActive = false;
+let rubies = 0;
+let hasDiscoveredRubies = false; // Set via backend or local discovery
 
 // ADD THIS HERE:
 const _GAME_DATA = {
@@ -4956,6 +4999,7 @@ document.getElementById('kevin').addEventListener('click', (e) => {
       updateScoreUI();
 
       comboCount++;
+    updateComboRing(); // <--- ADD THIS LINE HERE
       if (comboCount > bestComboAllTime) {
           bestComboAllTime = comboCount;
       }
@@ -7794,6 +7838,76 @@ function applyMagnetMovement(item, eventData, chosenKey) {
             if (eventData.duration) showEventIndicator(chosenKey, eventData.duration);
         }
     }, 20);
+}
+
+
+function updateComboRing() {
+    const bar = document.getElementById('comboProgressBar');
+    if (!bar) return;
+
+    // The length of the path for a pill shape (~600 for your size)
+    const totalPathLength = 600; 
+    const progress = (comboCount % 100) / 100;
+    const offset = totalPathLength - (progress * totalPathLength);
+
+    bar.style.strokeDashoffset = offset;
+
+    // Check for Ruby Milestone
+    if (comboCount > 0 && comboCount % 100 === 0) {
+        awardRuby();
+    }
+}
+
+function awardRuby() {
+    rubies++;
+    if (!hasDiscoveredRubies) {
+        isPaused = true;
+        document.getElementById('rubyDiscoveryModal').style.display = 'flex';
+    } else {
+        // Just play flying animation if already discovered
+        animateRubyFlying();
+    }
+}
+
+function closeRubyDiscovery() {
+    hasDiscoveredRubies = true;
+    document.getElementById('rubyDiscoveryModal').style.display = 'none';
+    
+    // Reveal the panel
+    const panel = document.getElementById('rubyPanel');
+    panel.style.display = 'flex';
+    setTimeout(() => {
+        panel.style.transform = 'translateY(0)';
+        panel.style.opacity = '1';
+        animateRubyFlying();
+    }, 100);
+
+    isPaused = false;
+    startKevinMovement();
+}
+
+function animateRubyFlying() {
+    const flyer = document.createElement('img');
+    flyer.src = "https://iili.io/Cgvi0mu.png";
+    flyer.style.cssText = `position:fixed; left:50%; top:50%; width:60px; z-index:200001; transform:translate(-50%, -50%); transition: all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045); filter: drop-shadow(0 0 15px #ff0000);`;
+    document.body.appendChild(flyer);
+
+    const target = document.getElementById('rubyText').getBoundingClientRect();
+
+    setTimeout(() => {
+        flyer.style.left = target.left + "px";
+        flyer.style.top = target.top + "px";
+        flyer.style.width = "20px";
+        flyer.style.opacity = "0";
+    }, 50);
+
+    setTimeout(() => {
+        flyer.remove();
+        document.getElementById('rubyText').innerText = rubies;
+        // Bump the text
+        document.getElementById('rubyText').style.transform = "scale(1.3)";
+        setTimeout(() => { document.getElementById('rubyText').style.transform = "scale(1)"; }, 200);
+    }, 850);
 }
 
 // ==========================================
