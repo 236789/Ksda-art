@@ -8,6 +8,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -5423,7 +5424,7 @@ function openShop() {
     document.getElementById('shopModal').style.display = 'flex';
     
     // Close the floating menu automatically when shop opens
-    document.getElementById('menuWrapper').classList.remove('active');
+forceCloseMenu();
 }
 
 function closeShop() {
@@ -5441,6 +5442,8 @@ let isMuted = false;
 let savedVolume = 0.08;
 
 function openSettings() {
+    forceCloseMenu(); // Add this at the top
+
     // If game is active, ensure it stays paused
     if (document.getElementById('gameArea').style.display === 'block') {
         isPaused = true;
@@ -6308,6 +6311,7 @@ function spawnSpecialEvent() {
 }
 
 function showMobileEventModal(eventData) {
+    forceCloseMenu(); // Add this at the top
     isPaused = true; 
     
     const modalOverlay = document.createElement('div');
@@ -6755,6 +6759,7 @@ let currentBetAmount = 5;
 let pendingWinAmount = 0;
 
 function openSlotMachine() {
+    forceCloseMenu(); // Add this at the top
     isPaused = true;
     clearInterval(moveKevinInterval);
     if (score < 5) {
@@ -7258,7 +7263,8 @@ const INV_LIMIT = 500;
 
 function openInventory() {
     document.getElementById('inventoryModal').style.display = 'flex';
-    document.getElementById('menuWrapper').classList.remove('active');
+    forceCloseMenu();
+
     
     // Pause game
     isPaused = true; 
@@ -7617,7 +7623,7 @@ function openUtilitiesModal() {
     isPaused = true; 
     clearInterval(moveKevinInterval);
     document.getElementById('utilitiesModal').style.display = 'flex';
-    document.getElementById('menuWrapper').classList.remove('active');
+    forceCloseMenu();
 }
 
 function closeUtilitiesModal() {
