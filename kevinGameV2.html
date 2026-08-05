@@ -267,18 +267,12 @@
   position: absolute; 
   top: 0; left: 0; 
   width: 100vw; height: 100vh;
-  
-  /* --- BACKGROUND IMAGE SETTINGS --- */
-  /* This adds a 40% dark tint so the character stands out */
-  background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
-              url('https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/e7c37518-746f-42d6-9ea6-e3f7b028ffdb/ChatGPT+Image+Jun+16%2C+2025%2C+10_03_26+PM.png'); 
-  
-  background-size: cover;      /* Makes the image fill the whole screen */
-  background-position: center; /* Centers the image */
+  background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
-  
   overflow: hidden;
   z-index: 500;
+  /* Removed the hardcoded background URL from here */
 }
 
     .score-icon { height: 35px; }
@@ -3862,13 +3856,19 @@ input:checked + .s-slider:before {
 
 <!-- Inside <div id="gameArea"> -->
 <div id="gameArea">
-  <div id="scoreBoard" class="electric-container">
-<div class="score-icon-wrapper">
-  <img src="https://iili.io/COrCopj.png" alt="score icon" class="score-icon-img">
+<div id="scoreBoard" class="electric-container">
+    <div class="score-icon-wrapper">
+        <img src="https://iili.io/COrCopj.png" alt="score icon" class="score-icon-img">
+    </div>
+    
+    <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
+        <span id="scoreText">0</span>
+        <!-- NEW: Stage Indicator -->
+        <div id="stageIndicator" style="font-family: 'Orbitron', sans-serif; font-size: 10px; color: var(--th-accent); letter-spacing: 1px; opacity: 0.8; margin-top: -2px;">
+            STAGE 1: <span id="stageName">STRADA</span>
+        </div>
+    </div>
 </div>
-
-    <span id="scoreText">0</span>
-  </div>
 
 <div class="menu-container" id="menuWrapper">
   <!-- The sub-buttons (Hidden by default) -->
@@ -4758,6 +4758,7 @@ async function saveNewUsername() {
     }
 
 function startGameUI() {
+    applyStage(currentStageId); // Add this line here
   document.getElementById('mainMenu').style.display = 'none';
   document.getElementById('gameArea').style.display = 'block';
 
@@ -7662,6 +7663,41 @@ function forceCloseMenu() {
     if (icon) {
         icon.className = "fa-solid fa-bars";
     }
+}
+
+
+
+// --- STAGE SYSTEM CONFIGURATION ---
+const stageList = {
+    "street": {
+        index: 1,
+        name: "STRADA",
+        bg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/e7c37518-746f-42d6-9ea6-e3f7b028ffdb/ChatGPT+Image+Jun+16%2C+2025%2C+10_03_26+PM.png",
+        accent: "#facc15" // Gold for the street
+    }
+    // Future stages like "beach" or "moon" will go here
+};
+
+let currentStageId = "street";
+
+
+function applyStage(stageId) {
+    const stage = stageList[stageId];
+    if (!stage) return;
+
+    const gameArea = document.getElementById('gameArea');
+    const stageNameEl = document.getElementById('stageName');
+
+    // Update UI Text
+    if (stageNameEl) stageNameEl.innerText = stage.name;
+
+    // Apply Background with the existing dark tint (0.4)
+    if (gameArea) {
+        gameArea.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('${stage.bg}')`;
+    }
+    
+    currentStageId = stageId;
+    console.log(`🌍 Stage Loaded: ${stage.name}`);
 }
 
 // ==========================================
