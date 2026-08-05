@@ -3668,77 +3668,119 @@ input:checked + .s-slider:before {
 }
 
 
-/* --- ARCADE HUD STYLING --- */
+/* ==========================================
+   ARCADE PRECISION HUD (MATCHES IMAGE)
+   ========================================== */
 .hud-container {
     position: absolute;
     top: 20px;
     left: 20px;
     z-index: 1000;
-    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
 }
 
 #scoreBoard {
-    background: #0a0b1e; /* Deep dark blue/black */
-    border: 2px solid #1a1c3d;
-    padding: 10px 30px;
-    border-radius: 100px;
+    position: relative;
+    width: 340px; /* Fixed width for alignment */
+    height: 95px;
+    background: #0a0b1e; /* Deep dark navy */
+    border-radius: 50px;
     display: flex;
     align-items: center;
-    gap: 20px;
-    position: relative;
-    min-width: 320px;
-    height: 90px;
-    box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.1);
+    padding: 0 15px 0 10px;
+    box-sizing: border-box;
+    border: 2px solid #1a1c3d; /* Subtle outer rim */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 
-/* THE LED RING SEGMENTS */
+/* THE LED SVG TRACK */
 .led-svg {
     position: absolute;
-    top: -5px;
-    left: -5px;
-    width: calc(100% + 10px);
-    height: calc(100% + 10px);
+    top: -4px;
+    left: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
     pointer-events: none;
     overflow: visible;
 }
 
-/* Background "Slots" (Unlit boxes) */
 .led-bg {
-    stroke: #161835;
-    stroke-width: 8;
     fill: none;
-    /* This creates the 'tiny boxes' look */
-    stroke-dasharray: 0.75 0.25; 
+    stroke: #161835; /* Dark "Off" lights */
+    stroke-width: 8;
+    stroke-dasharray: 0.8 0.2; /* Creates the "Box" look */
     pathLength: 100;
 }
 
-/* Active "Lights" (Cyan glowing boxes) */
 .led-active {
-    stroke: #00f0ff;
-    stroke-width: 8;
     fill: none;
-    stroke-dasharray: 0.75 0.25;
+    stroke: #00f0ff; /* Cyan "On" lights */
+    stroke-width: 8;
+    stroke-dasharray: 0.8 0.2;
     pathLength: 100;
     stroke-dashoffset: 100; /* Start empty */
+    transition: stroke-dashoffset 0.15s ease-out, stroke 0.3s;
     filter: drop-shadow(0 0 5px #00f0ff);
-    transition: stroke-dashoffset 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* THE LEFT MEDALLION */
+.score-icon-wrapper {
+    width: 70px;
+    height: 70px;
+    background: radial-gradient(circle at 30% 30%, #ffcc00, #ff8800);
+    border-radius: 50%;
+    border: 3px solid #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 15px rgba(255, 136, 0, 0.4), inset 0 0 10px rgba(0,0,0,0.3);
+    z-index: 2;
+    flex-shrink: 0;
+}
+
+.score-icon-wrapper i {
+    font-size: 32px;
+    color: #1a1c33;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));
+}
+
+/* THE DATA BLOCK */
+.score-data {
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    z-index: 2;
 }
 
 #scoreText {
     font-family: 'Orbitron', sans-serif;
-    font-size: 38px;
+    font-size: 42px; /* Large digital numbers */
     font-weight: 700;
-    color: #ccff00; /* Yellow-green from your image */
-    text-shadow: 0 0 10px rgba(204, 255, 0, 0.3);
+    line-height: 1;
+    color: #ccff00; /* Lime Yellow from image */
+    text-shadow: 0 0 15px rgba(204, 255, 0, 0.4);
+    margin: 0;
 }
 
 #stageIndicator {
     font-family: 'Orbitron', sans-serif;
-    font-size: 14px;
-    color: #00f0ff;
-    text-transform: uppercase;
+    font-size: 13px;
+    font-weight: 900;
+    color: #00f0ff; /* Cyan */
     letter-spacing: 2px;
-    margin-top: -5px;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+/* Bumping effect when gaining points */
+.score-bump { transform: scale(1.02); transition: 0.1s; }
+
+/* Responsive fix for small phones */
+@media (max-width: 400px) {
+    #scoreBoard { width: 280px; height: 80px; }
+    .score-icon-wrapper { width: 55px; height: 55px; }
+    #scoreText { font-size: 32px; }
+    #stageIndicator { font-size: 10px; }
 }
   </style>
 </head>
@@ -3929,34 +3971,34 @@ input:checked + .s-slider:before {
 </div>
 
 <div id="gameArea">
-  <div class="hud-container">
+<div class="hud-container">
     <div id="scoreBoard">
-        <!-- THE LED RING (100 BOXES) -->
-        <svg class="led-svg" viewBox="0 0 400 100" preserveAspectRatio="none">
-            <!-- Background slots -->
-            <rect class="led-bg" x="4" y="4" width="392" height="92" rx="46" />
-            <!-- Lit segments -->
-            <rect id="rubyProgressBar" class="led-active" x="4" y="4" width="392" height="92" rx="46" />
+        <!-- LED PROGRESS TRACK -->
+        <svg class="led-svg" viewBox="0 0 350 90" preserveAspectRatio="none">
+            <!-- Background "Slots" -->
+            <rect class="led-bg" x="4" y="4" width="342" height="82" rx="41" />
+            <!-- Active "Lights" -->
+            <rect id="comboLedTrack" class="led-active" x="4" y="4" width="342" height="82" rx="41" />
         </svg>
 
-        <!-- THE ICON (Like the hand in your image) -->
-        <div class="score-icon-wrapper" style="background: linear-gradient(135deg, #ffcc00, #ff8800); width: 60px; height: 60px;">
-            <i class="fa-solid fa-hand-pointer" style="color: #222; font-size: 28px;"></i>
+        <!-- Left Medallion -->
+        <div class="score-icon-wrapper">
+            <i class="fa-solid fa-hand-pointer"></i>
         </div>
 
-        <!-- SCORE & STAGE -->
-        <div style="display: flex; flex-direction: column;">
+        <!-- Score & Stage -->
+        <div class="score-data">
             <span id="scoreText">0</span>
             <div id="stageIndicator">STAGE 1: <span id="stageName">STRADA</span></div>
         </div>
     </div>
 
-    <!-- RUBY COUNTER (Hidden initially) -->
-    <div id="rubyPanel" style="display: none; align-items: center; gap: 10px; background: rgba(10,11,35,0.8); padding: 8px 20px; border-radius: 50px; border: 2px solid #ff4d4d; width: fit-content; margin-top: 15px; margin-left: 20px; transform: translateY(-10px); opacity: 0; transition: all 0.5s ease; backdrop-filter: blur(5px);">
-        <img src="https://iili.io/Cgvi0mu.png" style="height: 24px; filter: drop-shadow(0 0 8px #ff0000);">
-        <span id="rubyText" style="font-family: 'Orbitron'; color: #ff4d4d; font-weight: 900; font-size: 22px;">0</span>
+    <!-- RUBY COUNTER (Aligned under the Pill) -->
+    <div id="rubyPanel" style="display: none; align-items: center; gap: 10px; background: rgba(10,11,35,0.8); padding: 8px 20px; border-radius: 50px; border: 2px solid #ff4d4d; width: fit-content; margin-left: 20px; backdrop-filter: blur(5px);">
+        <img src="https://iili.io/Cgvi0mu.png" style="height: 22px;">
+        <span id="rubyText" style="font-family: 'Orbitron'; color: #ff4d4d; font-weight: 900; font-size: 20px;">0</span>
     </div>
-  </div>
+</div>
 
 <div class="menu-container" id="menuWrapper">
   <!-- The sub-buttons (Hidden by default) -->
@@ -4960,25 +5002,55 @@ async function syncScoreToFirestore() {
     }
 
 function updateScoreUI(isLoss = false) {
-  const sb = document.getElementById('scoreBoard');
-  const st = document.getElementById('scoreText');
-  
-  st.innerText = score;
+    const sb = document.getElementById('scoreBoard');
+    const st = document.getElementById('scoreText');
+    
+    st.innerText = score;
 
-  if (isLoss) {
-    // Adăugăm clasa de roșu
-    sb.classList.add('score-loss');
-    // O scoatem după 500ms
-    setTimeout(() => {
-      sb.classList.remove('score-loss');
-    }, 500);
-  } else {
-    // Efect de "pump" galben la câștig
-    sb.classList.add('score-bump');
-    setTimeout(() => {
-      sb.classList.remove('score-bump');
-    }, 200);
-  }
+    if (isLoss) {
+        sb.classList.add('score-loss');
+        setTimeout(() => sb.classList.remove('score-loss'), 500);
+    } else {
+        sb.classList.add('score-bump');
+        setTimeout(() => sb.classList.remove('score-bump'), 100);
+    }
+}
+
+function updateComboRing() {
+    // We use the ID "comboLedTrack" from the new SVG
+    const ledTrack = document.getElementById('comboLedTrack');
+    if (!ledTrack) return;
+
+    // 1. Calculate progress (max 100 for one full circle)
+    // comboCount comes from your global game variables
+    let progress = Math.min(comboCount, 100);
+    
+    // 2. Dashoffset Logic: 
+    // Because pathLength is set to 100 in the SVG, 
+    // 100 means the line is completely hidden (Off)
+    // 0 means the line is completely visible (On)
+    let offset = 100 - progress;
+    ledTrack.style.strokeDashoffset = offset;
+
+    // 3. Dynamic Colors
+    if (progress >= 90) {
+        ledTrack.style.stroke = "#ff4d4d"; // Red when almost full
+        ledTrack.style.filter = "drop-shadow(0 0 12px #ff4d4d)";
+    } else if (progress >= 50) {
+        ledTrack.style.stroke = "#facc15"; // Yellow at mid-way
+        ledTrack.style.filter = "drop-shadow(0 0 10px #facc15)";
+    } else {
+        ledTrack.style.stroke = "#00f0ff"; // Cyan start
+        ledTrack.style.filter = "drop-shadow(0 0 8px #00f0ff)";
+    }
+
+    // 4. Award Ruby Logic (Every 100 hits)
+    if (comboCount > 0 && comboCount % 100 === 0) {
+        console.log("💎 Combo 100 reached! Awarding Ruby...");
+        if (typeof awardRuby === "function") {
+            awardRuby();
+        }
+    }
 }
 function startKevinMovement() {
     if (moveKevinInterval) clearInterval(moveKevinInterval);
@@ -7899,21 +7971,29 @@ function applyMagnetMovement(item, eventData, chosenKey) {
     }, 20);
 }
 
-// --- RUBY LED RING LOGIC ---
 function updateComboRing() {
-    const bar = document.getElementById('rubyProgressBar');
-    if (!bar) return;
+    const ledPath = document.getElementById('comboLedPath');
+    if (!ledPath) return;
 
-    // Resetting dashoffset: 100 is empty, 0 is full.
-    // We cap the progress at 100.
+    // We calculate progress up to 100 combo
     let progress = Math.min(comboCount, 100);
+    
+    // Convert 0-100 to stroke-dashoffset (100 is empty, 0 is full)
     let offset = 100 - progress;
+    ledPath.style.strokeDashoffset = offset;
 
-    bar.style.strokeDashoffset = offset;
+    // Change color based on intensity
+    if (comboCount >= 80) {
+        ledPath.style.stroke = "#facc15"; // Yellow for high combo
+        ledPath.style.filter = "drop-shadow(0 0 8px #facc15)";
+    } else {
+        ledPath.style.stroke = "#00f0ff"; // Cyan default
+        ledPath.style.filter = "drop-shadow(0 0 5px #00f0ff)";
+    }
 
-    // If 100 combo reached, give Ruby!
+    // Award Ruby logic
     if (comboCount > 0 && comboCount % 100 === 0) {
-        awardRuby();
+        if (typeof awardRuby === "function") awardRuby();
     }
 }
 
