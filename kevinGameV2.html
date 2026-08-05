@@ -4482,6 +4482,7 @@ for (let i = 0; i < particleCount; i++) {
     let currentUsername = "";
     let score = 0;
     let lastSavedScore = 0;
+let isSuperMagnetActive = false;
 
 // ADD THIS HERE:
 const _GAME_DATA = {
@@ -5982,6 +5983,16 @@ const specialRegistry = {
     action: (e) => startMemoryGame()
 },
 
+"superMagnet": {
+        name: "Super Magnet",
+        image: "https://iili.io/CgNnicF.png", // Direct link for the image
+        type: "good",
+        duration: 35,
+        stages: ["street"],
+        description: "Un magnet extrem de puternic care atrage toate emoji-urile spre eroul tău!",
+        action: (e) => startSuperMagnetEvent()
+    },
+
 
 };
 
@@ -6252,8 +6263,11 @@ function spawnSpecialEvent() {
 
     // --- NEW STAGE FILTERING ---
     // Instead of all keys, we only get keys allowed in the current stage
+    // NEW: We also block "superMagnet" from spawning if one is already active
     const availableKeys = Object.keys(specialRegistry).filter(key => {
-        return specialRegistry[key].stages.includes(currentStageId);
+        const isAllowedInStage = specialRegistry[key].stages.includes(currentStageId);
+        const isDuplicateMagnet = (key === "superMagnet" && isSuperMagnetActive);
+        return isAllowedInStage && !isDuplicateMagnet;
     });
 
     // Safety check: if no events are valid for this stage, wait and try again
@@ -6296,6 +6310,12 @@ function spawnSpecialEvent() {
     item.style.top = Math.random() * (area.clientHeight - itemSize) + "px";
     
     area.appendChild(item);
+
+    // --- NEW: MAGNET ATTRACTION ---
+    // If the magnet is running, this specific spawned item will now chase Kevin
+    if (isSuperMagnetActive) {
+        applyMagnetMovement(item, eventData, chosenKey);
+    }
 
     item.onclick = (e) => {
         e.stopPropagation();
@@ -7720,6 +7740,60 @@ function applyStage(stageId) {
     
     currentStageId = stageId;
     console.log(`🌍 Stage Loaded: ${stage.name}`);
+}
+
+
+function startSuperMagnetEvent() {
+    isSuperMagnetActive = true;
+    console.log("🧲 Super Magnet ACTIVATED!");
+
+    setTimeout(() => {
+        isSuperMagnetActive = false;
+        console.log("🧲 Super Magnet EXPIRED.");
+    }, 35000); // 35 seconds
+}
+
+function applyMagnetMovement(item, eventData, chosenKey) {
+    const magnetInterval = setInterval(() => {
+        if (isPaused) return;
+        if (!isSuperMagnetActive || !item.parentElement) {
+            clearInterval(magnetInterval);
+            return;
+        }
+
+        const kevin = document.getElementById('kevin');
+        const kRect = kevin.getBoundingClientRect();
+        const iRect = item.getBoundingClientRect();
+
+        // Calculate direction vector toward Kevin
+        const dx = (kRect.left + kRect.width / 2) - (iRect.left + iRect.width / 2);
+        const dy = (kRect.top + kRect.height / 2) - (iRect.top + iRect.height / 2);
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 5) return;
+
+        // Speed of attraction
+        const speed = 6; 
+        const moveX = (dx / dist) * speed;
+        const moveY = (dy / dist) * speed;
+
+        item.style.left = (parseFloat(item.style.left) + moveX) + "px";
+        item.style.top = (parseFloat(item.style.top) + moveY) + "px";
+
+        // Collision Check: If item touches Kevin, auto-trigger it
+        if (iRect.left < kRect.right && iRect.right > kRect.left &&
+            iRect.top < kRect.bottom && iRect.bottom > kRect.top) {
+            
+            clearInterval(magnetInterval);
+            item.remove();
+            console.log(`🧲 Magnet captured: [${eventData.name}]`);
+            
+            // Auto-trigger the same logic as the click
+            if (Math.random() > 0.5) addToInventory(chosenKey);
+            eventData.action();
+            if (eventData.duration) showEventIndicator(chosenKey, eventData.duration);
+        }
+    }, 20);
 }
 
 // ==========================================
