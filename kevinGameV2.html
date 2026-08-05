@@ -3668,36 +3668,77 @@ input:checked + .s-slider:before {
 }
 
 
-/* THE PROGRESS RING Bulbs */
-#rubyProgressBar {
-    /* We define the dash: 4px of light, 4px of empty space */
-    /* This creates the 'Individual Lights' look */
-    stroke-dasharray: 4 4; 
-    stroke-linecap: round;
-    filter: drop-shadow(0 0 3px #ff0000) drop-shadow(0 0 8px #ff0000);
-    opacity: 0.8;
-    transition: stroke-dashoffset 0.1s ease-out;
+/* --- ARCADE HUD STYLING --- */
+.hud-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
 }
 
-/* Pulsing effect when combo is high */
-@keyframes bulbPulse {
-    0% { filter: brightness(1); }
-    50% { filter: brightness(1.5) drop-shadow(0 0 12px #ff0000); }
-    100% { filter: brightness(1); }
+#scoreBoard {
+    background: #0a0b1e; /* Deep dark blue/black */
+    border: 2px solid #1a1c3d;
+    padding: 10px 30px;
+    border-radius: 100px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+    min-width: 320px;
+    height: 90px;
+    box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.1);
 }
 
-.ruby-ring-active {
-    animation: bulbPulse 1s infinite alternate;
-}
-
-/* Flying Ruby CSS */
-.flying-ruby {
-    position: fixed;
-    width: 50px;
-    z-index: 100000;
+/* THE LED RING SEGMENTS */
+.led-svg {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    width: calc(100% + 10px);
+    height: calc(100% + 10px);
     pointer-events: none;
-    filter: drop-shadow(0 0 15px #ff0000);
-    transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: visible;
+}
+
+/* Background "Slots" (Unlit boxes) */
+.led-bg {
+    stroke: #161835;
+    stroke-width: 8;
+    fill: none;
+    /* This creates the 'tiny boxes' look */
+    stroke-dasharray: 0.75 0.25; 
+    pathLength: 100;
+}
+
+/* Active "Lights" (Cyan glowing boxes) */
+.led-active {
+    stroke: #00f0ff;
+    stroke-width: 8;
+    fill: none;
+    stroke-dasharray: 0.75 0.25;
+    pathLength: 100;
+    stroke-dashoffset: 100; /* Start empty */
+    filter: drop-shadow(0 0 5px #00f0ff);
+    transition: stroke-dashoffset 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#scoreText {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 38px;
+    font-weight: 700;
+    color: #ccff00; /* Yellow-green from your image */
+    text-shadow: 0 0 10px rgba(204, 255, 0, 0.3);
+}
+
+#stageIndicator {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    color: #00f0ff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: -5px;
 }
   </style>
 </head>
@@ -3888,35 +3929,33 @@ input:checked + .s-slider:before {
 </div>
 
 <div id="gameArea">
-  <!-- SCOREBOARD WRAPPER -->
-  <div class="hud-container" style="position: absolute; top: 16px; left: 16px; z-index: 1000; display: flex; flex-direction: column; gap: 12px;">
-      
-      <div id="scoreBoard" class="electric-container" style="position: relative; padding: 8px 25px 8px 10px; border-radius: 999px; background: #1b1a37;">
-          <!-- SVG LED RING LAYER -->
-          <svg style="position: absolute; top: -4px; left: -4px; width: calc(100% + 8px); height: calc(100% + 8px); pointer-events: none; transform: rotate(-90deg); overflow: visible;">
-              <rect id="rubyProgressBar" x="2" y="2" width="calc(100% - 4px)" height="calc(100% - 4px)" rx="999" fill="none" 
-                    stroke="#ff4d4d" stroke-width="5" 
-                    pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" 
-                    style="visibility: hidden;" />
-          </svg>
+  <div class="hud-container">
+    <div id="scoreBoard">
+        <!-- THE LED RING (100 BOXES) -->
+        <svg class="led-svg" viewBox="0 0 400 100" preserveAspectRatio="none">
+            <!-- Background slots -->
+            <rect class="led-bg" x="4" y="4" width="392" height="92" rx="46" />
+            <!-- Lit segments -->
+            <rect id="rubyProgressBar" class="led-active" x="4" y="4" width="392" height="92" rx="46" />
+        </svg>
 
-          <div class="score-icon-wrapper">
-              <img src="https://iili.io/COrCopj.png" alt="score icon" class="score-icon-img">
-          </div>
+        <!-- THE ICON (Like the hand in your image) -->
+        <div class="score-icon-wrapper" style="background: linear-gradient(135deg, #ffcc00, #ff8800); width: 60px; height: 60px;">
+            <i class="fa-solid fa-hand-pointer" style="color: #222; font-size: 28px;"></i>
+        </div>
 
-          <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
-              <span id="scoreText">0</span>
-              <div id="stageIndicator" style="font-family: 'Orbitron', sans-serif; font-size: 10px; color: var(--th-accent); letter-spacing: 1px; opacity: 0.8; margin-top: -2px;">
-                  STAGE 1: <span id="stageName">STRADA</span>
-              </div>
-          </div>
-      </div>
+        <!-- SCORE & STAGE -->
+        <div style="display: flex; flex-direction: column;">
+            <span id="scoreText">0</span>
+            <div id="stageIndicator">STAGE 1: <span id="stageName">STRADA</span></div>
+        </div>
+    </div>
 
-      <!-- HIDDEN RUBY PANEL -->
-      <div id="rubyPanel" style="display: none; align-items: center; gap: 10px; background: rgba(0,0,0,0.7); padding: 6px 18px; border-radius: 50px; border: 2px solid #ff4d4d; width: fit-content; margin-left: 12px; transform: translateY(-20px); opacity: 0; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: blur(8px); box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
-          <img src="https://iili.io/Cgvi0mu.png" style="height: 22px; filter: drop-shadow(0 0 5px #ff0000);">
-          <span id="rubyText" style="font-family: 'Orbitron'; color: #ff4d4d; font-weight: 900; font-size: 20px;">0</span>
-      </div>
+    <!-- RUBY COUNTER (Hidden initially) -->
+    <div id="rubyPanel" style="display: none; align-items: center; gap: 10px; background: rgba(10,11,35,0.8); padding: 8px 20px; border-radius: 50px; border: 2px solid #ff4d4d; width: fit-content; margin-top: 15px; margin-left: 20px; transform: translateY(-10px); opacity: 0; transition: all 0.5s ease; backdrop-filter: blur(5px);">
+        <img src="https://iili.io/Cgvi0mu.png" style="height: 24px; filter: drop-shadow(0 0 8px #ff0000);">
+        <span id="rubyText" style="font-family: 'Orbitron'; color: #ff4d4d; font-weight: 900; font-size: 22px;">0</span>
+    </div>
   </div>
 
 <div class="menu-container" id="menuWrapper">
@@ -7860,23 +7899,19 @@ function applyMagnetMovement(item, eventData, chosenKey) {
     }, 20);
 }
 
-
+// --- RUBY LED RING LOGIC ---
 function updateComboRing() {
-    // FIX: Changed ID to rubyProgressBar
     const bar = document.getElementById('rubyProgressBar');
     if (!bar) return;
 
-    // Show the outline as soon as combo starts
-    if (comboCount > 0) bar.style.visibility = "visible";
-
-    // Path length logic
-    const totalPathLength = 800; 
-    const progress = (comboCount % 100) / 100;
-    const offset = totalPathLength - (progress * totalPathLength);
+    // Resetting dashoffset: 100 is empty, 0 is full.
+    // We cap the progress at 100.
+    let progress = Math.min(comboCount, 100);
+    let offset = 100 - progress;
 
     bar.style.strokeDashoffset = offset;
 
-    // Trigger Ruby at 100
+    // If 100 combo reached, give Ruby!
     if (comboCount > 0 && comboCount % 100 === 0) {
         awardRuby();
     }
@@ -7884,8 +7919,9 @@ function updateComboRing() {
 
 function awardRuby() {
     rubies++;
+    forceCloseMenu();
+    
     if (!hasDiscoveredRubies) {
-        forceCloseMenu();
         isPaused = true;
         clearInterval(moveKevinInterval);
         document.getElementById('rubyDiscoveryModal').style.display = 'flex';
@@ -7898,7 +7934,6 @@ function closeRubyDiscovery() {
     hasDiscoveredRubies = true;
     document.getElementById('rubyDiscoveryModal').style.display = 'none';
     
-    // FIX: Changed ID to rubyPanel to match HTML
     const panel = document.getElementById('rubyPanel');
     panel.style.display = 'flex';
     setTimeout(() => {
@@ -7910,6 +7945,9 @@ function closeRubyDiscovery() {
     isPaused = false;
     startKevinMovement();
 }
+
+// !!! IMPORTANT: EXPORT TO WINDOW TO FIX CONSOLE ERROR !!!
+
 
 function animateRubyFlying() {
     const flyer = document.createElement('img');
@@ -8009,6 +8047,8 @@ window.openUtilitiesModal = openUtilitiesModal;
 window.closeUtilitiesModal = closeUtilitiesModal;
 window.openShopFromUtilities = openShopFromUtilities;
 window.showComingSoon = showComingSoon;
+window.closeRubyDiscovery = closeRubyDiscovery;
+
 
 })(); // <-- CLOSES THE SECURE VAULT
 </script>
