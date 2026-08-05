@@ -5908,6 +5908,7 @@ const specialRegistry = {
         image: "https://iili.io/Ck27fPs.png",
         type: "bad",
         duration: 10,
+        stages: ["street"], // Enabled for Stage 1
         description: "Un topor care ricoșează și îți fură scorul dacă te lovește!",
         action: (e) => startAxeEvent()
     },
@@ -5916,6 +5917,7 @@ const specialRegistry = {
         image: "https://iili.io/Ck0qyMX.png",
         type: "good",
         duration: 15,
+        stages: ["street"], // Enabled for Stage 1
         description: "Un mouse glicat care urmărește personajul și dă click-uri automate!",
         action: (e) => startAutoClickEvent()
     },
@@ -5925,6 +5927,7 @@ const specialRegistry = {
     image: "https://iili.io/Ck1l1x1.png",
     type: "good",
     duration: 8,
+        stages: ["street"], // Enabled for Stage 1
     description: "Timpul s-a oprit! eroul tau este înghețat în loc. Profită și dă click-uri rapide!",
     action: (e) => startSlowMoEvent()
 },
@@ -5934,6 +5937,7 @@ const specialRegistry = {
         image: "https://iili.io/CvBJiDN.png",
         type: "bad",
         duration: 20, // Set to 20 seconds
+        stages: ["street"], // Enabled for Stage 1
         description: "Ai înghițit o jucărie de câine! Acum scoți sunete ciudate când te miști.",
         action: (e) => startSqueakEvent()
     },
@@ -5943,6 +5947,7 @@ const specialRegistry = {
     image: "https://iili.io/CvIlhhu.png",
     type: "bad",
     duration: 15,
+        stages: ["street"], // Enabled for Stage 1
     description: "Eroul tău a mâncat sos iute! E în flăcări, fuge haotic și pierde puncte!",
     action: (e) => startHotSauceEvent()
 },
@@ -5952,6 +5957,7 @@ const specialRegistry = {
     image: "https://iili.io/C8GX6dl.png",
     type: "gamble",
     duration: 8,
+        stages: ["street"], // Enabled for Stage 1
     description: "Încearcă-ți norocul! Pariază din scorul tău pentru un multiplicator uriaș.",
     action: (e) => openSlotMachine()
 },
@@ -5961,6 +5967,7 @@ const specialRegistry = {
     image: "https://iili.io/CSBaA8X.png",
     type: "good",
     duration: 0, 
+        stages: ["street"], // Enabled for Stage 1
     description: "Răspunde corect la 5 întrebări pentru un bonus masiv. Greșești una? Pierzi tot!",
     action: (e) => startTriviaEvent()
 },
@@ -5970,6 +5977,7 @@ const specialRegistry = {
     image: "https://iili.io/CSVi2Tb.png", // Added .png
     type: "good",
     duration: 0,
+        stages: ["street"], // Enabled for Stage 1
     description: "Găsește toate perechile în 25 de secunde pentru un bonus de 50 de puncte!",
     action: (e) => startMemoryGame()
 },
@@ -6242,16 +6250,30 @@ function spawnSpecialEvent() {
         return;
     }
 
-    // ALEGEM UN EVENIMENT RANDOM
-    const eventKeys = Object.keys(specialRegistry);
-    let chosenKey = eventKeys[Math.floor(Math.random() * eventKeys.length)];
+    // --- NEW STAGE FILTERING ---
+    // Instead of all keys, we only get keys allowed in the current stage
+    const availableKeys = Object.keys(specialRegistry).filter(key => {
+        return specialRegistry[key].stages.includes(currentStageId);
+    });
+
+    // Safety check: if no events are valid for this stage, wait and try again
+    if (availableKeys.length === 0) {
+        clearTimeout(eventTimeout);
+        eventTimeout = setTimeout(spawnSpecialEvent, 5000);
+        return;
+    }
+
+    // ALEGEM UN EVENIMENT RANDOM (From the filtered availableKeys)
+    let chosenKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
 
     // --- LOGICA DE RARITATE 35% PENTRU SLOT MACHINE ---
     if (chosenKey === "slotMachine") {
         if (Math.random() > 0.35) { // 65% șansă să dea reroll
-            const otherKeys = eventKeys.filter(key => key !== "slotMachine");
-            chosenKey = otherKeys[Math.floor(Math.random() * otherKeys.length)];
-            console.log("🎲 Slot Machine a fost filtrat pentru raritate. S-a ales altceva.");
+            const otherKeys = availableKeys.filter(key => key !== "slotMachine");
+            if (otherKeys.length > 0) {
+                chosenKey = otherKeys[Math.floor(Math.random() * otherKeys.length)];
+                console.log("🎲 Slot Machine a fost filtrat pentru raritate. S-a ales altceva.");
+            }
         }
     }
     // --------------------------------------------------
