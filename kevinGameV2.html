@@ -3666,6 +3666,168 @@ input:checked + .s-slider:before {
     /* ... existing styles ... */
     pointer-events: auto; /* Buttons remain clickable */
 }
+
+
+/* ==========================================
+   PREMIUM HUD V3 (SCORE, RUBIES, STAGE)
+   ========================================== */
+
+.hud-premium-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    
+    /* THEME INTEGRATION */
+    background: var(--th-bg) !important;
+    border: 3px solid var(--th-border) !important;
+    border-radius: 18px;
+    padding: 8px 20px;
+    
+    box-shadow: 0 10px 20px rgba(0,0,0,0.6), 
+                inset 0 0 15px rgba(0,0,0,0.8), 
+                0 0 20px var(--th-glow) !important;
+                
+    backdrop-filter: blur(10px);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Hover efect pe tot meniul */
+.hud-premium-container:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 25px rgba(0,0,0,0.7), 
+                inset 0 0 15px rgba(0,0,0,0.8), 
+                0 0 30px var(--th-glow) !important;
+}
+
+.hud-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hud-divider {
+    width: 2px;
+    height: 35px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 5px;
+}
+
+/* STAGE STYLING */
+.stage-icon {
+    font-size: 24px;
+    color: var(--th-accent);
+    filter: drop-shadow(0 0 8px var(--th-glow));
+}
+.stage-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.1;
+}
+.stage-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    color: #9aa0b8;
+    letter-spacing: 1px;
+}
+.stage-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--th-accent);
+    text-shadow: 0 0 10px var(--th-glow);
+    text-transform: uppercase;
+}
+
+/* VALUE TEXT (Score & Rubies) */
+.hud-val {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 0 3px 6px rgba(0,0,0,0.8);
+    min-width: 30px; /* Previne mișcarea HUD-ului când numărul crește */
+    transition: transform 0.1s ease, color 0.3s ease;
+    display: inline-block;
+}
+
+/* ICONS (Coins & Rubies) */
+.hud-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    position: relative;
+}
+
+.score-bg {
+    background: radial-gradient(circle at top left, #fff6cf 0%, #f5a623 60%, #c9780f 100%);
+    border: 2px solid #ffe27a;
+}
+
+.ruby-bg {
+    background: radial-gradient(circle at top left, #ffb3c6 0%, #ff0055 60%, #990033 100%);
+    border: 2px solid #ff4d88;
+}
+
+.hud-icon-wrapper img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    filter: drop-shadow(0 3px 3px rgba(0,0,0,0.6));
+    z-index: 2;
+}
+
+/* Mici animații de pierdere/câștig pentru valori */
+.score-bump .hud-val {
+    transform: scale(1.3);
+    color: #facc15;
+}
+.score-loss .hud-val {
+    transform: scale(0.8);
+    color: #ef4444;
+}
+
+/* ==========================================
+   MOBILE RESPONSIVENESS PENTRU HUD
+   ========================================== */
+@media (max-width: 700px) {
+    .hud-premium-container {
+        top: 10px;
+        left: 10px;
+        flex-direction: column; /* Le punem unele sub altele pe telefon */
+        align-items: flex-start;
+        gap: 8px;
+        padding: 10px 15px;
+        border-radius: 15px;
+    }
+    
+    /* Ascundem linia de separare pe mobil */
+    .hud-divider {
+        display: none; 
+    }
+    
+    .hud-section {
+        gap: 8px;
+    }
+    
+    .stage-icon { font-size: 18px; }
+    .stage-label { font-size: 9px; }
+    .stage-name { font-size: 14px; }
+    
+    .hud-icon-wrapper { width: 32px; height: 32px; }
+    .hud-icon-wrapper img { width: 18px; height: 18px; }
+    
+    .hud-val { font-size: 20px; }
+}
   </style>
 </head>
 <body>
@@ -3856,18 +4018,39 @@ input:checked + .s-slider:before {
 
 <!-- Inside <div id="gameArea"> -->
 <div id="gameArea">
-<div id="scoreBoard" class="electric-container">
-    <div class="score-icon-wrapper">
-        <img src="https://iili.io/COrCopj.png" alt="score icon" class="score-icon-img">
-    </div>
+<!-- NOULE SCOREBOARD PREMIUM (V3) -->
+<div id="scoreBoard" class="hud-premium-container">
     
-    <div style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center;">
-        <span id="scoreText">0</span>
-        <!-- NEW: Stage Indicator -->
-        <div id="stageIndicator" style="font-family: 'Orbitron', sans-serif; font-size: 10px; color: var(--th-accent); letter-spacing: 1px; opacity: 0.8; margin-top: -2px;">
-            STAGE 1: <span id="stageName">STRADA</span>
+    <!-- 1. STAGE (ZONA) -->
+    <div class="hud-section">
+        <i class="fa-solid fa-map-location-dot stage-icon"></i>
+        <div class="stage-info">
+            <span class="stage-label">ZONA CURENTĂ</span>
+            <span id="stageName" class="stage-name">STRADA</span>
         </div>
     </div>
+    
+    <div class="hud-divider"></div>
+
+    <!-- 2. SCOR (BĂNUȚI) -->
+    <div class="hud-section" id="scoreSection">
+        <div class="hud-icon-wrapper score-bg">
+            <img src="https://iili.io/COrCopj.png" alt="Scor">
+        </div>
+        <span id="scoreText" class="hud-val">0</span>
+    </div>
+
+    <div class="hud-divider"></div>
+
+    <!-- 3. RUBINE (PREMIUM CURRENCY) -->
+    <div class="hud-section" id="rubySection">
+        <div class="hud-icon-wrapper ruby-bg">
+            <!-- Folosim link-ul direct al imaginii tale -->
+            <img src="https://iili.io/CrnXNdG.png" alt="Rubine">
+        </div>
+        <span id="rubyText" class="hud-val">0</span>
+    </div>
+    
 </div>
 
 <div class="menu-container" id="menuWrapper">
@@ -4481,6 +4664,8 @@ for (let i = 0; i < particleCount; i++) {
     let currentUID = null;
     let currentUsername = "";
     let score = 0;
+let rubies = 0;
+let lastSavedRubies = 0;
     let lastSavedScore = 0;
 let isSuperMagnetActive = false;
 
@@ -4859,24 +5044,30 @@ async function syncScoreToFirestore() {
     }
 
 function updateScoreUI(isLoss = false) {
-  const sb = document.getElementById('scoreBoard');
+  // Aplicăm efectul pe 'scoreSection' ca să sară DOAR scorul, nu tot meniul
+  const sb = document.getElementById('scoreSection'); 
   const st = document.getElementById('scoreText');
+  const rt = document.getElementById('rubyText'); // NOU: Pentru a actualiza și rubinele
   
-  st.innerText = score;
+  if (st) st.innerText = score;
+  if (rt) rt.innerText = rubies; // NOU: Sincronizează rubinele
 
-  if (isLoss) {
-    // Adăugăm clasa de roșu
-    sb.classList.add('score-loss');
-    // O scoatem după 500ms
-    setTimeout(() => {
-      sb.classList.remove('score-loss');
-    }, 500);
-  } else {
-    // Efect de "pump" galben la câștig
-    sb.classList.add('score-bump');
-    setTimeout(() => {
-      sb.classList.remove('score-bump');
-    }, 200);
+  if (sb) {
+    if (isLoss) {
+      // Adăugăm clasa de roșu
+      sb.classList.add('score-loss');
+      // O scoatem după 500ms (Exact cum era în codul tău)
+      setTimeout(() => {
+        sb.classList.remove('score-loss');
+      }, 500);
+    } else {
+      // Efect de "pump" galben la câștig
+      sb.classList.add('score-bump');
+      // O scoatem după 200ms (Exact cum era în codul tău)
+      setTimeout(() => {
+        sb.classList.remove('score-bump');
+      }, 200);
+    }
   }
 }
 function startKevinMovement() {
