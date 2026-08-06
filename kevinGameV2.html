@@ -3668,10 +3668,11 @@ input:checked + .s-slider:before {
 }
 
 /* ==========================================
-   PREMIUM HUD V3 (COMPACT & RESPONSIVE)
+   PREMIUM HUD V3 (COMPACT & RECTANGLE)
    ========================================== */
 
-.hud-premium-container {
+/* Am folosit ID-ul #scoreBoard ca să suprascriem vechiul border-radius rotund */
+#scoreBoard.hud-premium-container {
     position: absolute;
     top: 15px;
     left: 15px;
@@ -3679,13 +3680,14 @@ input:checked + .s-slider:before {
     
     display: flex;
     align-items: center;
-    gap: 12px; /* Spațiu mult mai mic între elemente */
+    gap: 12px; 
     
-    /* THEME INTEGRATION */
     background: var(--th-bg) !important;
-    border: 2px solid var(--th-border) !important; /* Margine mai fină */
-    border-radius: 12px;
-    padding: 6px 12px; /* Mult mai compact */
+    border: 2px solid var(--th-border) !important; 
+    
+    /* FORȚĂM FORMA DREPTUNGHIULARĂ (Colțuri foarte puțin tăiate, stil modern) */
+    border-radius: 8px !important; 
+    padding: 8px 15px !important; 
     
     box-shadow: 0 5px 15px rgba(0,0,0,0.5), 
                 inset 0 0 10px rgba(0,0,0,0.8), 
@@ -3695,7 +3697,7 @@ input:checked + .s-slider:before {
     transition: all 0.2s ease;
 }
 
-.hud-premium-container:hover {
+#scoreBoard.hud-premium-container:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.6), 
                 inset 0 0 10px rgba(0,0,0,0.8), 
@@ -3705,19 +3707,19 @@ input:checked + .s-slider:before {
 .hud-section {
     display: flex;
     align-items: center;
-    gap: 8px; /* Mai strâns */
+    gap: 8px; 
 }
 
 .hud-divider {
     width: 2px;
-    height: 22px; /* Linie despărțitoare mult mai mică */
+    height: 22px; 
     background: rgba(255, 255, 255, 0.2);
     border-radius: 5px;
 }
 
 /* STAGE STYLING */
 .stage-icon {
-    font-size: 18px; /* Micșorat */
+    font-size: 18px; 
     color: var(--th-accent);
     filter: drop-shadow(0 0 5px var(--th-glow));
 }
@@ -3729,23 +3731,23 @@ input:checked + .s-slider:before {
 }
 .stage-label {
     font-family: 'Oswald', sans-serif;
-    font-size: 9px; /* Micșorat */
+    font-size: 9px; 
     color: #9aa0b8;
     letter-spacing: 0.5px;
 }
 .stage-name {
     font-family: 'Orbitron', sans-serif;
-    font-size: 13px; /* Micșorat */
+    font-size: 13px; 
     font-weight: 900;
     color: var(--th-accent);
     text-shadow: 0 0 8px var(--th-glow);
     text-transform: uppercase;
 }
 
-/* VALUE TEXT (Score & Rubies) */
+/* VALUE TEXT */
 .hud-val {
     font-family: 'Orbitron', sans-serif;
-    font-size: 18px; /* Micșorat (înainte era 26) */
+    font-size: 18px; 
     font-weight: 900;
     color: #ffffff;
     text-shadow: 0 2px 4px rgba(0,0,0,0.8);
@@ -3754,9 +3756,9 @@ input:checked + .s-slider:before {
     display: inline-block;
 }
 
-/* ICONS (Coins & Rubies) */
+/* ICONS */
 .hud-icon-wrapper {
-    width: 26px; /* Micșorat masiv (înainte 40) */
+    width: 26px; 
     height: 26px;
     border-radius: 50%;
     display: flex;
@@ -3776,13 +3778,13 @@ input:checked + .s-slider:before {
 }
 
 .hud-icon-wrapper img {
-    width: 14px; /* Iconița interioară mai finuță */
+    width: 14px; 
     height: 14px;
     object-fit: contain;
     filter: drop-shadow(0 2px 2px rgba(0,0,0,0.6));
 }
 
-/* EFECTE CÂȘTIG/PIERDERE (Aplicat pe containerul de scor) */
+/* ANIMATII SCOR */
 .score-bump .hud-val {
     transform: scale(1.3);
     color: #facc15;
@@ -3793,28 +3795,24 @@ input:checked + .s-slider:before {
 }
 
 /* ==========================================
-   MOBILE STACKED LAYOUT (Super Compact)
+   MOBILE STACKED LAYOUT (Dreptunghiular)
    ========================================== */
 @media (max-width: 700px) {
-    .hud-premium-container {
-        top: 10px;
-        left: 10px;
-        flex-direction: column; /* Le așează perfect unele sub altele */
-        align-items: flex-start;
-        gap: 6px; /* Spațiere foarte mică pe verticală */
-        padding: 8px 12px;
-        border-radius: 12px;
+    #scoreBoard.hud-premium-container {
+        top: 10px !important;
+        left: 10px !important;
+        flex-direction: column !important; 
+        align-items: flex-start !important;
+        gap: 6px !important; 
+        padding: 8px 12px !important;
+        
+        /* FORȚĂM FORMA PE MOBIL */
+        border-radius: 8px !important; 
     }
     
-    .hud-divider {
-        display: none; /* Ascundem linia pe mobil */
-    }
+    .hud-divider { display: none; }
+    .hud-section { gap: 8px; }
     
-    .hud-section {
-        gap: 8px;
-    }
-    
-    /* Facem fonturile un pic mai mici pe telefon să nu ocupe ecranul */
     .stage-icon { font-size: 14px; }
     .stage-label { font-size: 8px; }
     .stage-name { font-size: 11px; }
