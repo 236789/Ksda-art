@@ -3667,61 +3667,59 @@ input:checked + .s-slider:before {
     pointer-events: auto; /* Buttons remain clickable */
 }
 
-
 /* ==========================================
-   PREMIUM HUD V3 (SCORE, RUBIES, STAGE)
+   PREMIUM HUD V3 (COMPACT & RESPONSIVE)
    ========================================== */
 
 .hud-premium-container {
     position: absolute;
-    top: 20px;
-    left: 20px;
+    top: 15px;
+    left: 15px;
     z-index: 1000;
     
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px; /* Spațiu mult mai mic între elemente */
     
     /* THEME INTEGRATION */
     background: var(--th-bg) !important;
-    border: 3px solid var(--th-border) !important;
-    border-radius: 18px;
-    padding: 8px 20px;
+    border: 2px solid var(--th-border) !important; /* Margine mai fină */
+    border-radius: 12px;
+    padding: 6px 12px; /* Mult mai compact */
     
-    box-shadow: 0 10px 20px rgba(0,0,0,0.6), 
-                inset 0 0 15px rgba(0,0,0,0.8), 
-                0 0 20px var(--th-glow) !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5), 
+                inset 0 0 10px rgba(0,0,0,0.8), 
+                0 0 15px var(--th-glow) !important;
                 
-    backdrop-filter: blur(10px);
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
 }
 
-/* Hover efect pe tot meniul */
 .hud-premium-container:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 15px 25px rgba(0,0,0,0.7), 
-                inset 0 0 15px rgba(0,0,0,0.8), 
-                0 0 30px var(--th-glow) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6), 
+                inset 0 0 10px rgba(0,0,0,0.8), 
+                0 0 25px var(--th-glow) !important;
 }
 
 .hud-section {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px; /* Mai strâns */
 }
 
 .hud-divider {
     width: 2px;
-    height: 35px;
-    background: rgba(255, 255, 255, 0.15);
+    height: 22px; /* Linie despărțitoare mult mai mică */
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 5px;
 }
 
 /* STAGE STYLING */
 .stage-icon {
-    font-size: 24px;
+    font-size: 18px; /* Micșorat */
     color: var(--th-accent);
-    filter: drop-shadow(0 0 8px var(--th-glow));
+    filter: drop-shadow(0 0 5px var(--th-glow));
 }
 .stage-info {
     display: flex;
@@ -3731,62 +3729,60 @@ input:checked + .s-slider:before {
 }
 .stage-label {
     font-family: 'Oswald', sans-serif;
-    font-size: 11px;
+    font-size: 9px; /* Micșorat */
     color: #9aa0b8;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 .stage-name {
     font-family: 'Orbitron', sans-serif;
-    font-size: 16px;
+    font-size: 13px; /* Micșorat */
     font-weight: 900;
     color: var(--th-accent);
-    text-shadow: 0 0 10px var(--th-glow);
+    text-shadow: 0 0 8px var(--th-glow);
     text-transform: uppercase;
 }
 
 /* VALUE TEXT (Score & Rubies) */
 .hud-val {
     font-family: 'Orbitron', sans-serif;
-    font-size: 26px;
+    font-size: 18px; /* Micșorat (înainte era 26) */
     font-weight: 900;
     color: #ffffff;
-    text-shadow: 0 3px 6px rgba(0,0,0,0.8);
-    min-width: 30px; /* Previne mișcarea HUD-ului când numărul crește */
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    min-width: 20px; 
     transition: transform 0.1s ease, color 0.3s ease;
     display: inline-block;
 }
 
 /* ICONS (Coins & Rubies) */
 .hud-icon-wrapper {
-    width: 40px;
-    height: 40px;
+    width: 26px; /* Micșorat masiv (înainte 40) */
+    height: 26px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-    position: relative;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.6);
 }
 
 .score-bg {
     background: radial-gradient(circle at top left, #fff6cf 0%, #f5a623 60%, #c9780f 100%);
-    border: 2px solid #ffe27a;
+    border: 1px solid #ffe27a;
 }
 
 .ruby-bg {
     background: radial-gradient(circle at top left, #ffb3c6 0%, #ff0055 60%, #990033 100%);
-    border: 2px solid #ff4d88;
+    border: 1px solid #ff4d88;
 }
 
 .hud-icon-wrapper img {
-    width: 24px;
-    height: 24px;
+    width: 14px; /* Iconița interioară mai finuță */
+    height: 14px;
     object-fit: contain;
-    filter: drop-shadow(0 3px 3px rgba(0,0,0,0.6));
-    z-index: 2;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.6));
 }
 
-/* Mici animații de pierdere/câștig pentru valori */
+/* EFECTE CÂȘTIG/PIERDERE (Aplicat pe containerul de scor) */
 .score-bump .hud-val {
     transform: scale(1.3);
     color: #facc15;
@@ -3797,36 +3793,36 @@ input:checked + .s-slider:before {
 }
 
 /* ==========================================
-   MOBILE RESPONSIVENESS PENTRU HUD
+   MOBILE STACKED LAYOUT (Super Compact)
    ========================================== */
 @media (max-width: 700px) {
     .hud-premium-container {
         top: 10px;
         left: 10px;
-        flex-direction: column; /* Le punem unele sub altele pe telefon */
+        flex-direction: column; /* Le așează perfect unele sub altele */
         align-items: flex-start;
-        gap: 8px;
-        padding: 10px 15px;
-        border-radius: 15px;
+        gap: 6px; /* Spațiere foarte mică pe verticală */
+        padding: 8px 12px;
+        border-radius: 12px;
     }
     
-    /* Ascundem linia de separare pe mobil */
     .hud-divider {
-        display: none; 
+        display: none; /* Ascundem linia pe mobil */
     }
     
     .hud-section {
         gap: 8px;
     }
     
-    .stage-icon { font-size: 18px; }
-    .stage-label { font-size: 9px; }
-    .stage-name { font-size: 14px; }
+    /* Facem fonturile un pic mai mici pe telefon să nu ocupe ecranul */
+    .stage-icon { font-size: 14px; }
+    .stage-label { font-size: 8px; }
+    .stage-name { font-size: 11px; }
     
-    .hud-icon-wrapper { width: 32px; height: 32px; }
-    .hud-icon-wrapper img { width: 18px; height: 18px; }
+    .hud-icon-wrapper { width: 22px; height: 22px; }
+    .hud-icon-wrapper img { width: 12px; height: 12px; }
     
-    .hud-val { font-size: 20px; }
+    .hud-val { font-size: 16px; }
 }
   </style>
 </head>
@@ -4019,6 +4015,7 @@ input:checked + .s-slider:before {
 <!-- Inside <div id="gameArea"> -->
 <div id="gameArea">
 <!-- NOULE SCOREBOARD PREMIUM (V3) -->
+<!-- NOULE SCOREBOARD PREMIUM (COMPACT) -->
 <div id="scoreBoard" class="hud-premium-container">
     
     <!-- 1. STAGE (ZONA) -->
@@ -4045,7 +4042,6 @@ input:checked + .s-slider:before {
     <!-- 3. RUBINE (PREMIUM CURRENCY) -->
     <div class="hud-section" id="rubySection">
         <div class="hud-icon-wrapper ruby-bg">
-            <!-- Folosim link-ul direct al imaginii tale -->
             <img src="https://iili.io/CrnXNdG.png" alt="Rubine">
         </div>
         <span id="rubyText" class="hud-val">0</span>
