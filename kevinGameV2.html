@@ -3961,6 +3961,83 @@ input:checked + .s-slider:before {
         justify-content: space-between;
     }
 }
+
+
+/* --- HUD CENTERING & MOBILE HORIZONTAL REVAMP (APPEND AT BOTTOM) --- */
+
+/* 1. Center the HUD at the very top middle for ALL screens */
+#scoreBoard.hud-premium-container {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    top: 15px !important;
+    width: max-content !important; 
+}
+
+/* Fix the hover animation so it stays centered when bouncing */
+#scoreBoard.hud-premium-container:hover {
+    transform: translateX(-50%) translateY(-2px) !important;
+}
+
+/* 2. Force Mobile to act like PC (Horizontal + Combo Bar visible) */
+@media (max-width: 700px) {
+    #scoreBoard.hud-premium-container {
+        width: 95vw !important; /* Uses 95% of the phone screen */
+        padding: 6px 10px !important;
+        gap: 6px !important;
+        top: 10px !important;
+    }
+
+    /* Keep Top Row Horizontal */
+    .hud-top-row {
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        gap: 2px !important;
+    }
+
+    /* Keep sections horizontal and remove stacked borders */
+    .hud-section {
+        padding: 0 !important;
+        border-bottom: none !important; 
+        order: unset !important;
+        width: auto !important;
+        gap: 4px !important;
+    }
+
+    /* Bring back the vertical dividers, just smaller */
+    .pc-divider {
+        display: block !important;
+        height: 16px !important;
+        margin: 0 2px !important;
+    }
+
+    /* Shrink text and icons so they fit horizontally on small screens */
+    .hud-val, #scoreText, #rubyText { font-size: 13px !important; }
+    .stage-name { font-size: 11px !important; margin-top: 0 !important; }
+    .icon-aligner { width: 16px !important; }
+    .stage-icon { font-size: 12px !important; }
+    .hud-icon-wrapper { width: 16px !important; height: 16px !important; }
+    .hud-icon-wrapper img { width: 9px !important; height: 9px !important; }
+
+    /* BRING BACK THE COMBO BAR ON MOBILE */
+    .hud-combo-row {
+        order: unset !important;
+        padding: 0 !important;
+        gap: 8px !important;
+    }
+    .combo-title-wrap {
+        width: auto !important;
+        gap: 4px !important;
+    }
+    .combo-label-text { font-size: 10px !important; }
+    #comboCounterText { font-size: 13px !important; }
+    
+    /* Show the LED lights on mobile! */
+    .combo-track { 
+        display: block !important; 
+        height: 8px !important; /* Slightly thinner for mobile */
+    }
+}
   </style>
 </head>
 <body>
