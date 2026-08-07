@@ -3962,72 +3962,98 @@ input:checked + .s-slider:before {
     }
 }
 
-
-/* --- FORCE MOBILE HUD TO LOOK EXACTLY LIKE PC (HORIZONTAL + COMBO BAR) --- */
+/* --- FIX: MOBILE HUD HORIZONTAL LIKE PC --- */
 @media (max-width: 700px) {
     #scoreBoard.hud-premium-container {
-        /* Keep it in the top left, but make it fit the screen nicely */
         top: 10px !important;
         left: 10px !important;
-        transform: none !important;
-        width: calc(100vw - 20px) !important; /* Spans the screen width with margins */
-        max-width: 380px !important;
-        padding: 8px 12px !important;
-        gap: 6px !important;
-        border-width: 2px !important;
+        /* Resetăm la layout-ul de PC (Coloană care conține două rânduri orizontale) */
+        flex-direction: column !important; 
+        align-items: flex-start !important;
+        width: auto !important; /* Nu mai ocupă tot ecranul */
+        max-width: 95vw !important;
+        padding: 6px 12px !important;
+        gap: 4px !important;
+        border-radius: 10px !important;
     }
 
-    /* Force the stats to stay HORIZONTAL like PC */
+    /* Forțăm primul rând (Zone, Scor, Rubine) să rămână orizontal */
     .hud-top-row {
-        flex-direction: row !important;
-        justify-content: space-between !important;
+        display: flex !important;
+        flex-direction: row !important; 
         align-items: center !important;
+        gap: 8px !important;
+        width: 100% !important;
+        border-bottom: none !important;
+    }
+
+    /* Resetăm secțiunile (scoatem border-ul de jos de pe mobil) */
+    .hud-section {
+        width: auto !important;
+        padding: 0 !important;
+        border-bottom: none !important;
         gap: 5px !important;
     }
 
-    /* Undo the stacking and borders we previously added to mobile */
-    .hud-section {
-        padding: 0 !important;
-        border-bottom: none !important; 
-        order: unset !important;
-        width: auto !important;
-        gap: 6px !important;
-    }
-
-    /* BRING BACK THE DIVIDERS */
+    /* REACTIVĂM DIVIZOARELE (Liniile verticale dintre scoruri) */
     .pc-divider {
         display: block !important;
-        height: 18px !important;
-        margin: 0 !important;
+        height: 15px !important;
+        width: 1px !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+        margin: 0 2px !important;
     }
 
-    /* Shrink the text/icons just enough so they fit horizontally */
-    .hud-val, #scoreText, #rubyText { font-size: 14px !important; }
-    .stage-label { display: none !important; } /* Hide "ZONA CURENTA" text to save space */
-    .stage-name { font-size: 12px !important; margin-top: 0 !important; }
-    
-    .icon-aligner { width: 20px !important; }
-    .stage-icon { font-size: 14px !important; }
-    .hud-icon-wrapper { width: 20px !important; height: 20px !important; }
-    .hud-icon-wrapper img { width: 10px !important; height: 10px !important; }
+    /* Micșorăm textele și iconițele pentru a încăpea pe un singur rând */
+    .hud-val, #scoreText, #rubyText { 
+        font-size: 14px !important; 
+        min-width: auto !important;
+    }
 
-    /* BRING BACK THE LED COMBO BAR ON MOBILE */
+    .stage-name { 
+        font-size: 11px !important; 
+    }
+
+    .hud-icon-wrapper { 
+        width: 18px !important; 
+        height: 18px !important; 
+    }
+    
+    .hud-icon-wrapper img { 
+        width: 10px !important; 
+        height: 10px !important; 
+    }
+
+    .stage-icon { 
+        font-size: 14px !important; 
+    }
+
+    .icon-aligner { 
+        width: 20px !important; 
+    }
+
+    /* Ascundem eticheta "ZONA CURENTĂ" pe mobil pentru a câștiga spațiu */
+    .stage-label { 
+        display: none !important; 
+    }
+
+    /* Rândul de Combo (Bara de jos) */
     .hud-combo-row {
-        order: unset !important;
-        padding: 0 !important;
-        gap: 8px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        width: 100% !important;
+        gap: 6px !important;
+        margin-top: 2px !important;
     }
-    .combo-title-wrap {
-        width: auto !important;
-        gap: 4px !important;
+
+    .combo-track {
+        display: block !important; /* Ne asigurăm că bara rămâne vizibilă */
+        height: 6px !important;
     }
-    .combo-label-text { font-size: 10px !important; }
-    #comboCounterText { font-size: 14px !important; }
-    
-    /* Make the LED track visible on phones! */
-    .combo-track { 
-        display: block !important; 
-        height: 8px !important; 
+
+    #comboCounterText {
+        font-size: 13px !important;
     }
 }
   </style>
