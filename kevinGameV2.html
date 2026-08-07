@@ -3963,39 +3963,35 @@ input:checked + .s-slider:before {
 }
 
 /* ==========================================
-   ULTIMATE MOBILE HUD REPAIR - IMAGE 2 STYLE
+   FINAL UNIFIED MOBILE HUD (MATCHES PC LAYOUT)
    ========================================== */
 @media (max-width: 700px) {
-    /* 1. The Main Container - Center it and fix the width */
     #scoreBoard.hud-premium-container {
         top: 10px !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
-        width: 96vw !important;
+        width: 94vw !important;
         max-width: 480px !important;
         display: flex !important;
-        flex-direction: column !important; /* Stack Top Row and Combo Row */
+        flex-direction: column !important;
         align-items: stretch !important;
-        padding: 6px 12px !important;
+        padding: 8px 14px !important;
         gap: 6px !important;
         border-radius: 10px !important;
         border-width: 2px !important;
         box-sizing: border-box !important;
     }
 
-    /* 2. The Top Row - Force it to stay HORIZONTAL like Image 2 */
     .hud-top-row {
         display: flex !important;
         flex-direction: row !important;
-        flex-wrap: nowrap !important; /* Stops elements from jumping to new lines */
+        flex-wrap: nowrap !important;
         justify-content: space-between !important;
         align-items: center !important;
         width: 100% !important;
-        height: 35px !important;
         gap: 0 !important;
     }
 
-    /* 3. Sections - Ensure they share space equally */
     #stageSection, #scoreSection, #rubySection {
         display: flex !important;
         flex-direction: row !important;
@@ -4005,37 +4001,42 @@ input:checked + .s-slider:before {
         gap: 6px !important;
         margin: 0 !important;
         padding: 0 !important;
-        order: unset !important; /* Reset any previous reordering bugs */
+        order: unset !important;
     }
 
-    /* 4. The Dividers - Force them to be visible (Image 2 style) */
-    .pc-divider {
+    .hud-divider.pc-divider {
         display: block !important;
         visibility: visible !important;
         opacity: 0.25 !important;
         width: 1px !important;
         height: 20px !important;
         background: #fff !important;
-        margin: 0 4px !important;
+        margin: 0 6px !important;
     }
 
-    /* 5. Icons and Text - Scale them down so they fit the narrow screen */
-    .hud-icon-wrapper {
+    .icon-aligner {
         width: 20px !important;
-        height: 20px !important;
-        flex-shrink: 0 !important;
     }
-    
+
+    .hud-icon-wrapper {
+        width: 22px !important;
+        height: 22px !important;
+        flex-shrink: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
     .hud-icon-wrapper img {
-        width: 12px !important;
-        height: 12px !important;
+        width: 13px !important;
+        height: 13px !important;
+        display: block !important;
     }
 
     .stage-icon {
-        font-size: 14px !important;
+        font-size: 15px !important;
     }
 
-    /* Hide the "ZONA CURENTA" text just like the screenshot to save space */
     .stage-label {
         display: none !important;
     }
@@ -4043,6 +4044,7 @@ input:checked + .s-slider:before {
     .stage-name {
         font-size: 12px !important;
         margin: 0 !important;
+        white-space: nowrap !important;
     }
 
     .hud-val, #scoreText, #rubyText {
@@ -4050,7 +4052,7 @@ input:checked + .s-slider:before {
         line-height: 1 !important;
     }
 
-    /* 6. COMBO BAR - FIX THE LEDS */
+    /* COMBO ROW */
     .hud-combo-row {
         display: flex !important;
         flex-direction: row !important;
@@ -4065,6 +4067,7 @@ input:checked + .s-slider:before {
         display: flex !important;
         align-items: center !important;
         gap: 5px !important;
+        flex-shrink: 0 !important;
     }
 
     .combo-label-text {
@@ -4089,7 +4092,6 @@ input:checked + .s-slider:before {
     .combo-fill-segmented {
         display: block !important;
         height: 100% !important;
-        /* Re-creating the LED Segmented look */
         background: repeating-linear-gradient(
             to right,
             var(--th-accent),
