@@ -3668,10 +3668,9 @@ input:checked + .s-slider:before {
 }
 
 /* ==========================================
-   PREMIUM HUD V3 (COMPACT & RECTANGLE)
+   PREMIUM HUD V3 (PERFECT ALIGN & SEPARATORS)
    ========================================== */
 
-/* Am folosit ID-ul #scoreBoard ca să suprascriem vechiul border-radius rotund */
 #scoreBoard.hud-premium-container {
     position: absolute;
     top: 15px;
@@ -3684,8 +3683,6 @@ input:checked + .s-slider:before {
     
     background: var(--th-bg) !important;
     border: 2px solid var(--th-border) !important; 
-    
-    /* FORȚĂM FORMA DREPTUNGHIULARĂ (Colțuri foarte puțin tăiate, stil modern) */
     border-radius: 8px !important; 
     padding: 8px 15px !important; 
     
@@ -3707,7 +3704,15 @@ input:checked + .s-slider:before {
 .hud-section {
     display: flex;
     align-items: center;
-    gap: 8px; 
+    gap: 10px; 
+}
+
+/* FIX ALIGNMENT: Toate iconițele ocupă fix același spațiu */
+.icon-aligner {
+    width: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .hud-divider {
@@ -3719,7 +3724,7 @@ input:checked + .s-slider:before {
 
 /* STAGE STYLING */
 .stage-icon {
-    font-size: 18px; 
+    font-size: 20px; 
     color: var(--th-accent);
     filter: drop-shadow(0 0 5px var(--th-glow));
 }
@@ -3744,16 +3749,25 @@ input:checked + .s-slider:before {
     text-transform: uppercase;
 }
 
-/* VALUE TEXT */
+/* VALUE TEXT BASE */
 .hud-val {
     font-family: 'Orbitron', sans-serif;
-    font-size: 18px; 
+    font-size: 20px; 
     font-weight: 900;
-    color: #ffffff;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
     min-width: 20px; 
     transition: transform 0.1s ease, color 0.3s ease;
     display: inline-block;
+}
+
+/* CULORI TEXT SEPARATE */
+.text-white {
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.text-ruby {
+    color: #ff3366; /* Roșu Premium */
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 8px rgba(255, 51, 102, 0.4);
 }
 
 /* ICONS */
@@ -3785,42 +3799,57 @@ input:checked + .s-slider:before {
 }
 
 /* ANIMATII SCOR */
-.score-bump .hud-val {
-    transform: scale(1.3);
-    color: #facc15;
-}
-.score-loss .hud-val {
-    transform: scale(0.8);
-    color: #ef4444;
-}
+.score-bump .hud-val { transform: scale(1.3); filter: brightness(1.5); }
+.score-loss .hud-val { transform: scale(0.8); color: #ef4444 !important; }
 
 /* ==========================================
-   MOBILE STACKED LAYOUT (Dreptunghiular)
+   MOBILE STACKED LAYOUT (Cu Separatoare & Reordonare)
    ========================================== */
 @media (max-width: 700px) {
     #scoreBoard.hud-premium-container {
         top: 10px !important;
         left: 10px !important;
         flex-direction: column !important; 
-        align-items: flex-start !important;
-        gap: 6px !important; 
-        padding: 8px 12px !important;
-        
-        /* FORȚĂM FORMA PE MOBIL */
+        align-items: stretch !important; /* Lățește conținutul pentru linii */
+        gap: 0 !important; /* Scoatem gap-ul ca să folosim padding */
+        padding: 6px 15px !important;
         border-radius: 8px !important; 
     }
     
-    .hud-divider { display: none; }
-    .hud-section { gap: 8px; }
+    .pc-divider { display: none; } /* Ascundem barele verticale */
     
-    .stage-icon { font-size: 14px; }
-    .stage-label { font-size: 8px; }
-    .stage-name { font-size: 11px; }
+    .hud-section { 
+        width: 100%;
+        padding: 6px 0; /* Padding pentru a face loc liniilor */
+        gap: 12px; 
+    }
     
-    .hud-icon-wrapper { width: 22px; height: 22px; }
+    /* REORDONARE & LINII ORIZONTALE */
+    #scoreSection {
+        order: 1; /* Scor primul */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15); /* Separator */
+    }
+    
+    #rubySection {
+        order: 2; /* Rubine la mijloc */
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15); /* Separator */
+    }
+    
+    #stageSection {
+        order: 3; /* Zona ultima */
+    }
+    
+    /* Sincronizare perfectă a lățimii pe mobil */
+    .icon-aligner { width: 24px; }
+    
+    .stage-icon { font-size: 16px; }
+    .stage-label { font-size: 8px; line-height: 1; margin-bottom: 2px;}
+    .stage-name { font-size: 12px; line-height: 1;}
+    
+    .hud-icon-wrapper { width: 24px; height: 24px; }
     .hud-icon-wrapper img { width: 12px; height: 12px; }
     
-    .hud-val { font-size: 16px; }
+    .hud-val { font-size: 18px; }
 }
   </style>
 </head>
@@ -4012,37 +4041,42 @@ input:checked + .s-slider:before {
 
 <!-- Inside <div id="gameArea"> -->
 <div id="gameArea">
-<!-- NOULE SCOREBOARD PREMIUM (V3) -->
-<!-- NOULE SCOREBOARD PREMIUM (COMPACT) -->
+<!-- NOULE SCOREBOARD PREMIUM (ALINIAT PERFECT & REORDONAT) -->
 <div id="scoreBoard" class="hud-premium-container">
     
     <!-- 1. STAGE (ZONA) -->
-    <div class="hud-section">
-        <i class="fa-solid fa-map-location-dot stage-icon"></i>
+    <div class="hud-section" id="stageSection">
+        <div class="icon-aligner">
+            <i class="fa-solid fa-map-location-dot stage-icon"></i>
+        </div>
         <div class="stage-info">
             <span class="stage-label">ZONA CURENTĂ</span>
             <span id="stageName" class="stage-name">STRADA</span>
         </div>
     </div>
     
-    <div class="hud-divider"></div>
+    <div class="hud-divider pc-divider"></div>
 
     <!-- 2. SCOR (BĂNUȚI) -->
     <div class="hud-section" id="scoreSection">
-        <div class="hud-icon-wrapper score-bg">
-            <img src="https://iili.io/COrCopj.png" alt="Scor">
+        <div class="icon-aligner">
+            <div class="hud-icon-wrapper score-bg">
+                <img src="https://iili.io/COrCopj.png" alt="Scor">
+            </div>
         </div>
-        <span id="scoreText" class="hud-val">0</span>
+        <span id="scoreText" class="hud-val text-white">0</span>
     </div>
 
-    <div class="hud-divider"></div>
+    <div class="hud-divider pc-divider"></div>
 
     <!-- 3. RUBINE (PREMIUM CURRENCY) -->
     <div class="hud-section" id="rubySection">
-        <div class="hud-icon-wrapper ruby-bg">
-            <img src="https://iili.io/CrnXNdG.png" alt="Rubine">
+        <div class="icon-aligner">
+            <div class="hud-icon-wrapper ruby-bg">
+                <img src="https://iili.io/CrnXNdG.png" alt="Rubine">
+            </div>
         </div>
-        <span id="rubyText" class="hud-val">0</span>
+        <span id="rubyText" class="hud-val text-ruby">0</span>
     </div>
     
 </div>
