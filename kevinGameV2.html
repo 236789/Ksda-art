@@ -3963,63 +3963,55 @@ input:checked + .s-slider:before {
 }
 
 
-/* --- HUD CENTERING & MOBILE HORIZONTAL REVAMP (APPEND AT BOTTOM) --- */
-
-/* 1. Center the HUD at the very top middle for ALL screens */
-#scoreBoard.hud-premium-container {
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    top: 15px !important;
-    width: max-content !important; 
-}
-
-/* Fix the hover animation so it stays centered when bouncing */
-#scoreBoard.hud-premium-container:hover {
-    transform: translateX(-50%) translateY(-2px) !important;
-}
-
-/* 2. Force Mobile to act like PC (Horizontal + Combo Bar visible) */
+/* --- FORCE MOBILE HUD TO LOOK EXACTLY LIKE PC (HORIZONTAL + COMBO BAR) --- */
 @media (max-width: 700px) {
     #scoreBoard.hud-premium-container {
-        width: 95vw !important; /* Uses 95% of the phone screen */
-        padding: 6px 10px !important;
-        gap: 6px !important;
+        /* Keep it in the top left, but make it fit the screen nicely */
         top: 10px !important;
+        left: 10px !important;
+        transform: none !important;
+        width: calc(100vw - 20px) !important; /* Spans the screen width with margins */
+        max-width: 380px !important;
+        padding: 8px 12px !important;
+        gap: 6px !important;
+        border-width: 2px !important;
     }
 
-    /* Keep Top Row Horizontal */
+    /* Force the stats to stay HORIZONTAL like PC */
     .hud-top-row {
         flex-direction: row !important;
         justify-content: space-between !important;
-        width: 100% !important;
-        gap: 2px !important;
+        align-items: center !important;
+        gap: 5px !important;
     }
 
-    /* Keep sections horizontal and remove stacked borders */
+    /* Undo the stacking and borders we previously added to mobile */
     .hud-section {
         padding: 0 !important;
         border-bottom: none !important; 
         order: unset !important;
         width: auto !important;
-        gap: 4px !important;
+        gap: 6px !important;
     }
 
-    /* Bring back the vertical dividers, just smaller */
+    /* BRING BACK THE DIVIDERS */
     .pc-divider {
         display: block !important;
-        height: 16px !important;
-        margin: 0 2px !important;
+        height: 18px !important;
+        margin: 0 !important;
     }
 
-    /* Shrink text and icons so they fit horizontally on small screens */
-    .hud-val, #scoreText, #rubyText { font-size: 13px !important; }
-    .stage-name { font-size: 11px !important; margin-top: 0 !important; }
-    .icon-aligner { width: 16px !important; }
-    .stage-icon { font-size: 12px !important; }
-    .hud-icon-wrapper { width: 16px !important; height: 16px !important; }
-    .hud-icon-wrapper img { width: 9px !important; height: 9px !important; }
+    /* Shrink the text/icons just enough so they fit horizontally */
+    .hud-val, #scoreText, #rubyText { font-size: 14px !important; }
+    .stage-label { display: none !important; } /* Hide "ZONA CURENTA" text to save space */
+    .stage-name { font-size: 12px !important; margin-top: 0 !important; }
+    
+    .icon-aligner { width: 20px !important; }
+    .stage-icon { font-size: 14px !important; }
+    .hud-icon-wrapper { width: 20px !important; height: 20px !important; }
+    .hud-icon-wrapper img { width: 10px !important; height: 10px !important; }
 
-    /* BRING BACK THE COMBO BAR ON MOBILE */
+    /* BRING BACK THE LED COMBO BAR ON MOBILE */
     .hud-combo-row {
         order: unset !important;
         padding: 0 !important;
@@ -4030,12 +4022,12 @@ input:checked + .s-slider:before {
         gap: 4px !important;
     }
     .combo-label-text { font-size: 10px !important; }
-    #comboCounterText { font-size: 13px !important; }
+    #comboCounterText { font-size: 14px !important; }
     
-    /* Show the LED lights on mobile! */
+    /* Make the LED track visible on phones! */
     .combo-track { 
         display: block !important; 
-        height: 8px !important; /* Slightly thinner for mobile */
+        height: 8px !important; 
     }
 }
   </style>
