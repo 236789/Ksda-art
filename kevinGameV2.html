@@ -3900,6 +3900,67 @@ input:checked + .s-slider:before {
     
     .hud-val, #scoreText, #rubyText { font-size: 14px !important; } /* Forces Score & Rubies to match perfectly on Mobile */
 }
+
+
+/* --- NEW: COMBO BAR CSS (APPENDED) --- */
+#scoreBoard.hud-premium-container {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+}
+
+.hud-top-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hud-combo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.combo-title-wrap { display: flex; align-items: baseline; gap: 5px; }
+.combo-label-text { font-family: 'Oswald', sans-serif; font-size: 11px; color: #9aa0b8; letter-spacing: 1px; font-weight: bold; }
+#comboCounterText { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #fff; transition: color 0.3s; }
+
+.combo-track {
+    flex-grow: 1;
+    height: 12px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+}
+
+.combo-fill-segmented {
+    height: 100%;
+    width: 0%;
+    background: #4ade80; 
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+    transition: width 0.1s linear, background 0.3s ease, box-shadow 0.3s ease;
+    -webkit-mask-image: repeating-linear-gradient(to right, black 0px, black 4px, transparent 4px, transparent 6px);
+    mask-image: repeating-linear-gradient(to right, black 0px, black 4px, transparent 4px, transparent 6px);
+}
+
+@media (max-width: 700px) {
+    .hud-top-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0 !important;
+    }
+    .hud-combo-row {
+        order: 4;
+        padding: 4px 0;
+    }
+    .combo-track { display: none; } /* Ascunde luminițele pe mobil */
+    .combo-title-wrap {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
   </style>
 </head>
 <body>
@@ -4093,39 +4154,54 @@ input:checked + .s-slider:before {
 <!-- NOULE SCOREBOARD PREMIUM (ALINIAT PERFECT & REORDONAT) -->
 <div id="scoreBoard" class="hud-premium-container">
     
-    <!-- 1. STAGE (ZONA) -->
-    <div class="hud-section" id="stageSection">
-        <div class="icon-aligner">
-            <i class="fa-solid fa-map-location-dot stage-icon"></i>
-        </div>
-        <div class="stage-info">
-            <span class="stage-label">ZONA CURENTĂ</span>
-            <span id="stageName" class="stage-name">STRADA</span>
-        </div>
-    </div>
-    
-    <div class="hud-divider pc-divider"></div>
-
-    <!-- 2. SCOR (BĂNUȚI) -->
-    <div class="hud-section" id="scoreSection">
-        <div class="icon-aligner">
-            <div class="hud-icon-wrapper score-bg">
-                <img src="https://iili.io/COrCopj.png" alt="Scor">
+    <!-- RÂNDUL DE SUS: ZONE, SCOR, RUBINE -->
+    <div class="hud-top-row">
+        <!-- 1. STAGE (ZONA) -->
+        <div class="hud-section" id="stageSection">
+            <div class="icon-aligner">
+                <i class="fa-solid fa-map-location-dot stage-icon"></i>
+            </div>
+            <div class="stage-info">
+                <span class="stage-label">ZONA CURENTĂ</span>
+                <span id="stageName" class="stage-name">STRADA</span>
             </div>
         </div>
-        <span id="scoreText" class="hud-val text-white">0</span>
+        
+        <div class="hud-divider pc-divider"></div>
+
+        <!-- 2. SCOR (BĂNUȚI) -->
+        <div class="hud-section" id="scoreSection">
+            <div class="icon-aligner">
+                <div class="hud-icon-wrapper score-bg">
+                    <img src="https://iili.io/COrCopj.png" alt="Scor">
+                </div>
+            </div>
+            <span id="scoreText" class="hud-val text-white">0</span>
+        </div>
+
+        <div class="hud-divider pc-divider"></div>
+
+        <!-- 3. RUBINE (PREMIUM CURRENCY) -->
+        <div class="hud-section" id="rubySection">
+            <div class="icon-aligner">
+                <div class="hud-icon-wrapper ruby-bg">
+                    <img src="https://iili.io/CrnXNdG.png" alt="Rubine">
+                </div>
+            </div>
+            <span id="rubyText" class="hud-val text-ruby">0</span>
+        </div>
     </div>
 
-    <div class="hud-divider pc-divider"></div>
-
-    <!-- 3. RUBINE (PREMIUM CURRENCY) -->
-    <div class="hud-section" id="rubySection">
-        <div class="icon-aligner">
-            <div class="hud-icon-wrapper ruby-bg">
-                <img src="https://iili.io/CrnXNdG.png" alt="Rubine">
-            </div>
+    <!-- RÂNDUL DE JOS: BARA DE COMBO -->
+    <div class="hud-combo-row" id="comboSection">
+        <div class="combo-title-wrap">
+            <span class="combo-label-text">COMBO</span>
+            <span id="comboCounterText">0</span>
         </div>
-        <span id="rubyText" class="hud-val text-ruby">0</span>
+        <div class="combo-track">
+            <!-- Aici este bara care se umple cu efect de '100 de lumini' -->
+            <div id="comboFill" class="combo-fill-segmented"></div>
+        </div>
     </div>
     
 </div>
@@ -5042,6 +5118,7 @@ function startGameUI() {
 
   comboCount = 0;
   updateScoreUI();
+  updateComboBarUI(0); // <--- ADAUGĂ ASTA AICI
   
   if (!kevin.style.backgroundImage) {
       kevin.style.backgroundImage = currentPlayImg;
@@ -5078,6 +5155,7 @@ document.getElementById('gameArea').onclick = (e) => {
     if (score > 0) score--; 
     updateScoreUI(true); 
     showComboText(e.clientX, e.clientY, 0, true); 
+    updateComboBarUI(0); // <--- ADAUGĂ ASTA AICI
 };
 }
 
@@ -5244,9 +5322,14 @@ document.getElementById('kevin').addEventListener('click', (e) => {
       }
       
       showComboText(e.clientX, e.clientY, comboCount);
+      updateComboBarUI(comboCount); // <--- ADAUGĂ ASTA AICI
 
-      clearTimeout(comboTimer);
-      comboTimer = setTimeout(() => { comboCount = 0; }, 2000);
+
+clearTimeout(comboTimer);
+        comboTimer = setTimeout(() => { 
+            comboCount = 0; 
+            updateComboBarUI(0); 
+        }, 2000);
 
       if (!isKevinTired) {
         moveKevinAway();
@@ -8165,6 +8248,36 @@ function applyMagnetMovement(item, eventData, chosenKey) {
     }, 20);
 }
 
+
+
+// --- NEW: DYNAMIC COMBO BAR SYSTEM ---
+function updateComboBarUI(count) {
+    const fill = document.getElementById('comboFill');
+    const text = document.getElementById('comboCounterText');
+    if(!fill || !text) return;
+    
+    text.innerText = count;
+    
+    // Scale the width: Caps visually at 100% so it doesn't break out of the box
+    let pct = Math.min(count, 100);
+    fill.style.width = pct + "%";
+    
+    // Determine LED Color and Text styling based on Milestone Tiers
+    let color = "#4ade80"; // Default Green
+    let glow = "rgba(74, 222, 128, 0.5)";
+    let textColor = "#ffffff";
+
+    if (count >= 250) { color = "linear-gradient(90deg, #ff4500, #facc15)"; glow = "rgba(255, 69, 0, 0.8)"; textColor = "#ff4500"; }
+    else if (count >= 175) { color = "#ef4444"; glow = "rgba(239, 68, 68, 0.8)"; textColor = "#ef4444"; } 
+    else if (count >= 125) { color = "#fb923c"; glow = "rgba(251, 146, 60, 0.8)"; textColor = "#fb923c"; } 
+    else if (count >= 80)  { color = "#facc15"; glow = "rgba(250, 204, 21, 0.8)"; textColor = "#facc15"; } 
+    else if (count >= 40)  { color = "#22d3ee"; glow = "rgba(34, 211, 238, 0.8)"; } 
+    else if (count >= 15)  { color = "#3b82f6"; glow = "rgba(59, 130, 246, 0.8)"; } 
+
+    fill.style.background = color;
+    fill.style.boxShadow = `0 0 12px ${glow}`;
+    text.style.color = textColor;
+}
 // ==========================================
 // 🔐 EXPORT UI FUNCTIONS TO WINDOW
 // This allows your HTML buttons to work while 
