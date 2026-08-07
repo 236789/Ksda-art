@@ -3963,98 +3963,142 @@ input:checked + .s-slider:before {
 }
 
 /* ==========================================
-   FINAL FIXED MOBILE HUD (PORTRAIT & VERTICAL)
+   ULTIMATE MOBILE HUD REPAIR - IMAGE 2 STYLE
    ========================================== */
 @media (max-width: 700px) {
+    /* 1. The Main Container - Center it and fix the width */
     #scoreBoard.hud-premium-container {
         top: 10px !important;
-        left: 10px !important;
-        width: calc(100vw - 20px) !important;
-        flex-direction: column !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 96vw !important;
+        max-width: 480px !important;
+        display: flex !important;
+        flex-direction: column !important; /* Stack Top Row and Combo Row */
         align-items: stretch !important;
-        padding: 10px !important;
-        gap: 8px !important;
+        padding: 6px 12px !important;
+        gap: 6px !important;
+        border-radius: 10px !important;
+        border-width: 2px !important;
         box-sizing: border-box !important;
-        border-radius: 12px !important;
     }
 
-    /* Row 1: Stage on Left, Rubies on Right */
+    /* 2. The Top Row - Force it to stay HORIZONTAL like Image 2 */
     .hud-top-row {
         display: flex !important;
         flex-direction: row !important;
+        flex-wrap: nowrap !important; /* Stops elements from jumping to new lines */
         justify-content: space-between !important;
         align-items: center !important;
         width: 100% !important;
+        height: 35px !important;
+        gap: 0 !important;
     }
 
-    /* Row 2: Big Score in the Center */
-    #scoreSection {
+    /* 3. Sections - Ensure they share space equally */
+    #stageSection, #scoreSection, #rubySection {
         display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
         justify-content: center !important;
-        padding: 5px 0 !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        flex: 1 !important;
+        gap: 6px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        order: unset !important; /* Reset any previous reordering bugs */
     }
 
-    /* Hide PC Dividers in Vertical Mode to save space */
-    .pc-divider { 
-        display: none !important; 
+    /* 4. The Dividers - Force them to be visible (Image 2 style) */
+    .pc-divider {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 0.25 !important;
+        width: 1px !important;
+        height: 20px !important;
+        background: #fff !important;
+        margin: 0 4px !important;
     }
 
-    /* Adjust font sizes so they fit small screens */
-    .hud-val, #scoreText, #rubyText { 
-        font-size: 18px !important; 
+    /* 5. Icons and Text - Scale them down so they fit the narrow screen */
+    .hud-icon-wrapper {
+        width: 20px !important;
+        height: 20px !important;
+        flex-shrink: 0 !important;
     }
     
-    .stage-name { 
-        font-size: 14px !important; 
+    .hud-icon-wrapper img {
+        width: 12px !important;
+        height: 12px !important;
     }
 
-    .stage-label { 
-        display: none !important; /* Hide "Zona Curenta" text to save vertical space */
+    .stage-icon {
+        font-size: 14px !important;
     }
 
-    .hud-icon-wrapper { 
-        width: 22px !important; 
-        height: 22px !important; 
+    /* Hide the "ZONA CURENTA" text just like the screenshot to save space */
+    .stage-label {
+        display: none !important;
     }
 
-    /* COMBO BAR MOBILE FIX */
+    .stage-name {
+        font-size: 12px !important;
+        margin: 0 !important;
+    }
+
+    .hud-val, #scoreText, #rubyText {
+        font-size: 16px !important;
+        line-height: 1 !important;
+    }
+
+    /* 6. COMBO BAR - FIX THE LEDS */
     .hud-combo-row {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
+        width: 100% !important;
         gap: 10px !important;
-        margin-top: 4px !important;
+        padding-top: 4px !important;
+        border-top: 1px solid rgba(255,255,255,0.1) !important;
+    }
+
+    .combo-title-wrap {
+        display: flex !important;
+        align-items: center !important;
+        gap: 5px !important;
+    }
+
+    .combo-label-text {
+        font-size: 10px !important;
+    }
+
+    #comboCounterText {
+        font-size: 14px !important;
     }
 
     .combo-track {
-        display: block !important; /* Ensure it's visible */
+        display: block !important;
         flex: 1 !important;
-        height: 14px !important;
-        background: rgba(0, 0, 0, 0.5) !important;
-        border-radius: 6px !important;
+        height: 12px !important;
+        background: rgba(0, 0, 0, 0.7) !important;
+        border-radius: 4px !important;
         overflow: hidden !important;
         position: relative !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
     }
 
     .combo-fill-segmented {
         display: block !important;
         height: 100% !important;
-        /* Re-applying the LED stripes for mobile */
+        /* Re-creating the LED Segmented look */
         background: repeating-linear-gradient(
             to right,
             var(--th-accent),
-            var(--th-accent) 6px,
-            transparent 6px,
-            transparent 9px
+            var(--th-accent) 4px,
+            transparent 4px,
+            transparent 6px
         ) !important;
         box-shadow: 0 0 10px var(--th-glow) !important;
-    }
-
-    #comboCounterText {
-        font-size: 18px !important;
-        min-width: 25px;
+        transition: width 0.3s ease !important;
     }
 }
   </style>
