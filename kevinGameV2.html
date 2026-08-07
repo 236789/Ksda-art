@@ -4322,17 +4322,33 @@ input:checked + .s-slider:before {
 </div>
 
 
-<!-- MODAL: DESCOPERIRE RUBIN -->
+<!-- MODAL: DESCOPERIRE RUBIN (FIXED) -->
 <div id="rubyDiscoveryModal" class="modal-overlay" style="z-index: 100010;">
-    <div class="modal-box info-modal-box">
-        <div class="score-icon-wrapper ruby-bg" style="width: 80px; height: 80px; margin: 0 auto 20px auto;">
+    <div class="modal-box info-modal-box" style="border-color: #ff3366 !important; box-shadow: 0 0 30px rgba(255, 51, 102, 0.4) !important;">
+        
+        <div class="score-icon-wrapper ruby-bg" style="width: 80px; height: 80px; margin: 0 auto 20px auto; border-color: #ffb3c6;">
             <img src="https://iili.io/CrnXNdG.png" style="width: 50px; height: 50px;">
         </div>
-        <h2 style="color: #ff3366 !important;">CE ESTE ASTA?</h2>
-        <div class="selection-line" style="background: #ff3366; width: 60px;"></div>
-        <p>Tocmai ai obținut un <b>Rubin</b>! <br><br>
-        Rubinele sunt o monedă rară. Le primești la fiecare <b>100 Combo</b>. Folosește-le în Curând în Magazin pentru a cumpăra Upgrade-uri permanente, Eroi legendari și Skin-uri rare!</p>
-        <button class="menu-btn play" style="width: 100%; background: linear-gradient(180deg, #ff3366, #990033) !important;" onclick="closeRubyDiscovery()">AM ÎNȚELES!</button>
+
+        <h2 style="color: #ff3366 !important; font-size: 28px;">CE ESTE ASTA?</h2>
+        <div class="selection-line" style="background: #ff3366; width: 60px; margin: 10px auto 20px auto;"></div>
+
+        <p style="font-size: 16px; line-height: 1.4;">Tocmai ai obținut un <b>Rubin</b>! <br><br>
+        Rubinele sunt o monedă rară. Le primești la fiecare <b>100 Combo</b>. Folosește-le în Curând în Magazin pentru Upgrade-uri, Eroi și Skin-uri!</p>
+
+        <!-- THE FIXED BUTTON -->
+        <button class="menu-btn play" 
+                style="width: 100%; 
+                       height: 55px; 
+                       font-size: 20px !important; 
+                       background: linear-gradient(180deg, #ff3366, #cc0000) !important; 
+                       box-shadow: 0 6px 0 #5c0000, 0 10px 20px rgba(0,0,0,0.4) !important;
+                       padding: 0 !important;
+                       line-height: 55px !important;
+                       display: block !important;" 
+                onclick="closeRubyDiscovery()">
+            AM ÎNȚELES!
+        </button>
     </div>
 </div>
 
@@ -6556,23 +6572,39 @@ function startAutoClickEvent() {
         autoCursor.style.top = (rect.top + rect.height / 3) + 'px';
     }, 50);
 
-    // 2. LOGICA DE AUTO-CLICK
+// 2. LOGICA DE AUTO-CLICK (FIXED FOR COMBOS & RUBIES)
     const clickInterval = setInterval(() => {
         if (isPaused) return;
 
         score++;
+        totalClicksAllTime++; // Update stats
         comboCount++;
+
+        // 🔥 RUBY FARMING SYSTEM (100 COMBO = 1 RUBY)
+        if (comboCount >= 100) {
+            rubies++;
+            comboCount = 0; // Reset
+            playSFX(slotJackpotUrl); // Play the win sound
+            if (!hasSeenRubyTutorial) openRubyDiscovery();
+        }
+
+        // Update the HUD and the Bar
         updateScoreUI();
+        updateComboBarUI(comboCount); 
+
         playRandomPop(); 
 
-        // Resetăm timer-ul de combo pentru a preveni resetarea combo-ului manual
+        // Reset combo timer to keep the streak alive
         clearTimeout(comboTimer);
-        comboTimer = setTimeout(() => { comboCount = 0; }, 2000);
+        comboTimer = setTimeout(() => { 
+            comboCount = 0; 
+            updateComboBarUI(0); 
+        }, 2000);
 
         const rect = kevin.getBoundingClientRect();
         showComboText(rect.left + rect.width / 2, rect.top, comboCount);
 
-        // Efect vizual de click
+        // Visual click effect
         autoCursor.style.transform = "scale(0.8)";
         setTimeout(() => { autoCursor.style.transform = "scale(1)"; }, 100);
     }, 450); 
