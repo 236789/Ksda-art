@@ -3940,10 +3940,10 @@ input:checked + .s-slider:before {
 
 
 /* ==========================================
-   CLEAN HORIZONTAL HUD - NO RANDOM LINES + LED FIX
+   FINAL MOBILE HUD REPAIR - ZONA | SCORE | RUBIES
    ========================================== */
 @media screen and (max-width: 768px) {
-    /* Container: Wide & Thin */
+    /* Main Container: No more buggy gaps */
     body #gameArea #scoreBoard.hud-premium-container {
         display: flex !important;
         flex-direction: column !important;
@@ -3956,10 +3956,9 @@ input:checked + .s-slider:before {
         border-radius: 12px !important;
         transform: none !important;
         box-sizing: border-box !important;
-        background: var(--th-bg) !important;
     }
 
-    /* TOP ROW: Force Horizontal */
+    /* TOP ROW: Force Sequence ZONA | SCORE | RUBIES */
     #scoreBoard .hud-top-row {
         display: flex !important;
         flex-direction: row !important;
@@ -3967,47 +3966,51 @@ input:checked + .s-slider:before {
         justify-content: space-between !important;
         align-items: center !important;
         width: 100% !important;
+        border: none !important;
         background: none !important;
-        border: none !important; /* REMOVES RANDOM HORIZONTAL LINES */
     }
 
-    /* SECTIONS: Kill all internal borders and padding lines */
+    /* Fix Section Order & Alignment */
+    #scoreBoard #stageSection { order: 1 !important; flex: 1.2 !important; justify-content: flex-start !important; }
+    #scoreBoard .pc-divider:nth-of-type(1) { order: 2 !important; } /* Divider 1 */
+    
+    #scoreBoard #scoreSection { order: 3 !important; flex: 1 !important; justify-content: center !important; }
+    #scoreBoard .pc-divider:nth-of-type(2) { order: 4 !important; } /* Divider 2 */
+    
+    #scoreBoard #rubySection { order: 5 !important; flex: 1 !important; justify-content: flex-end !important; }
+
+    /* RESET SECTIONS: Remove random boxes/lines */
     #scoreBoard .hud-section {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
-        justify-content: center !important;
-        flex: 1 !important;
-        gap: 5px !important;
-        border: none !important; /* REMOVES THE BOX LINES */
-        padding: 0 !important;   /* REMOVES THE STACKED EFFECT */
+        border: none !important;
+        padding: 0 !important;
         background: none !important;
+        gap: 6px !important;
     }
 
-    #scoreBoard #stageSection { justify-content: flex-start !important; }
-    #scoreBoard #rubySection { justify-content: flex-end !important; }
-
-    /* VERTICAL DIVIDERS: The only lines allowed (Image 2 Style) */
+    /* DIVIDERS: The vertical separators | */
     #scoreBoard .pc-divider {
         display: block !important;
         visibility: visible !important;
-        opacity: 0.2 !important;
+        opacity: 0.25 !important;
         width: 1px !important;
-        height: 22px !important;
+        height: 20px !important;
         background: #ffffff !important;
-        margin: 0 6px !important;
-        border: none !important;
+        margin: 0 !important;
+        flex-shrink: 0 !important;
     }
 
-    /* TEXT & ICON SCALING */
-    #scoreBoard .hud-icon-wrapper { width: 22px !important; height: 22px !important; }
+    /* SCALING: Make it all fit perfectly */
+    #scoreBoard .hud-icon-wrapper { width: 20px !important; height: 20px !important; }
     #scoreBoard .hud-icon-wrapper img { width: 12px !important; height: 12px !important; }
-    #scoreBoard .stage-icon { font-size: 16px !important; }
-    #scoreBoard .stage-label { display: none !important; } 
-    #scoreBoard .stage-name { font-size: 13px !important; }
-    #scoreBoard .hud-val, #scoreText, #rubyText { font-size: 16px !important; }
+    #scoreBoard .stage-icon { font-size: 15px !important; }
+    #scoreBoard .stage-label { display: none !important; } /* Hide Zona Curenta text */
+    #scoreBoard .stage-name { font-size: 12px !important; }
+    #scoreBoard .hud-val, #scoreText, #rubyText { font-size: 15px !important; }
 
-    /* COMBO ROW: Working LED System */
+    /* COMBO BAR: Working LED System */
     #scoreBoard .hud-combo-row {
         display: flex !important;
         flex-direction: row !important;
@@ -4015,7 +4018,7 @@ input:checked + .s-slider:before {
         width: 100% !important;
         gap: 10px !important;
         padding-top: 6px !important;
-        border-top: 1px solid rgba(255,255,255,0.1) !important; /* Single separator line */
+        border-top: 1px solid rgba(255,255,255,0.1) !important;
     }
 
     #scoreBoard .combo-track {
@@ -4026,28 +4029,27 @@ input:checked + .s-slider:before {
         border-radius: 4px !important;
         overflow: hidden !important;
         position: relative !important;
-        border: 1px solid rgba(255,255,255,0.05) !important;
     }
 
     #scoreBoard #comboFill.combo-fill-segmented {
         display: block !important;
         height: 100% !important;
-        /* FIXED LED SYSTEM: Background + Mask */
+        /* THE LED EFFECT: Bright color + Dark segmented gaps */
         background-color: var(--th-accent) !important;
         background-image: repeating-linear-gradient(
             90deg,
             transparent,
             transparent 4px,
-            rgba(0,0,0,0.5) 4px,
-            rgba(0,0,0,0.5) 6px
+            rgba(0,0,0,0.6) 4px,
+            rgba(0,0,0,0.6) 7px
         ) !important;
         box-shadow: 0 0 15px var(--th-glow) !important;
         transition: width 0.3s ease !important;
     }
 
     #scoreBoard .combo-title-wrap { display: flex !important; align-items: baseline !important; gap: 5px !important; }
-    #scoreBoard .combo-label-text { font-size: 10px !important; font-weight: bold; }
-    #scoreBoard #comboCounterText { font-size: 15px !important; }
+    #scoreBoard .combo-label-text { font-size: 9px !important; font-weight: bold; }
+    #scoreBoard #comboCounterText { font-size: 14px !important; }
 }
   </style>
 </head>
