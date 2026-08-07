@@ -4748,6 +4748,28 @@ const _GAME_DATA = {
 
 let showEventIndicators = true;
 
+// --- NEW: SCOREBOARD COLLISION HELPER ---
+function isOverlappingScoreboard(x, y, width, height) {
+    const sb = document.getElementById('scoreBoard');
+    if (!sb) return false;
+    
+    const sbRect = sb.getBoundingClientRect();
+    const buffer = 15; // Extra padding so things don't clip the exact pixel edge
+
+    const objLeft = x;
+    const objRight = x + width;
+    const objTop = y;
+    const objBottom = y + height;
+
+    const sbLeft = sbRect.left - buffer;
+    const sbRight = sbRect.right + buffer;
+    const sbTop = sbRect.top - buffer;
+    const sbBottom = sbRect.bottom + buffer;
+
+    // Returns true if the rectangles overlap
+    return !(objRight < sbLeft || objLeft > sbRight || objBottom < sbTop || objTop > sbBottom);
+}
+
 // --- STATISTICI GLOBALS --- 
 let bestComboAllTime = 0;
 let totalClicksAllTime = 0;
@@ -5158,16 +5180,21 @@ function moveKevinAway() {
     const maxX = gameArea.clientWidth - kevin.offsetWidth;
     const maxY = gameArea.clientHeight - kevin.offsetHeight;
     
-    let newX = Math.random() * maxX;
+let newX = Math.random() * maxX;
     let newY = Math.random() * maxY;
 
-    // --- SAFE ZONE: SCOREBOARD (Top Middle) ---
-    // If Kevin tries to go behind the new centered scoreboard, push him down
-    const sbWidth = 300; // Estimated width of your centered scoreboard
-    const centerX = gameArea.clientWidth / 2;
+    // --- SOLID SCOREBOARD WALL CHECK ---
+    let attempts = 0;
+    while (isOverlappingScoreboard(newX, newY, kevin.offsetWidth, kevin.offsetHeight) && attempts < 10) {
+        newX = Math.random() * maxX;
+        newY = Math.random() * maxY;
+        attempts++;
+    }
     
-    if (newY < 120 && newX > (centerX - sbWidth/2) && newX < (centerX + sbWidth/2)) {
-        newY += 120; // Push him down below the scoreboard
+    // Failsafe: if still overlapping after 10 random tries, push him forcefully below it
+    if (isOverlappingScoreboard(newX, newY, kevin.offsetWidth, kevin.offsetHeight)) {
+        const sbRect = document.getElementById('scoreBoard').getBoundingClientRect();
+        newY = sbRect.bottom + 20;
     }
 
     kevin.style.left = `${newX}px`;
@@ -6401,11 +6428,51 @@ function startAxeEvent() {
             return;
         }
 
-        posX += dx;
+posX += dx;
         posY += dy;
 
+        // Bounce off screen edges
         if (posX <= 0 || posX >= window.innerWidth - axeSize) { dx *= -1; shakeScreen(); }
         if (posY <= 0 || posY >= window.innerHeight - axeSize) { dy *= -1; shakeScreen(); }
+
+        // --- SOLID SCOREBOARD BOUNCE CHECK ---
+        const sb = document.getElementById('scoreBoard');
+        if (sb) {
+            const sbRect = sb.getBoundingClientRect();
+            // Tighter buffer so it actually looks like it hits the border
+            if (
+                posX + axeSize > sbRect.left - 5 && 
+                posX < sbRect.right + 5 && 
+                posY + axeSize > sbRect.top - 5 && 
+                posY < sbRect.bottom + 5
+            ) {
+                // Calculate previous position to determine which side was hit
+                const prevX = posX - dx;
+                const prevY = posY - dy;
+                let bounced = false;
+
+                // Hit Left or Right edge
+                if (prevX + axeSize <= sbRect.left - 5 || prevX >= sbRect.right + 5) {
+                    dx *= -1;
+                    posX += dx * 2; // Push it out of the collision box
+                    bounced = true;
+                }
+                // Hit Top or Bottom edge
+                if (prevY + axeSize <= sbRect.top - 5 || prevY >= sbRect.bottom + 5) {
+                    dy *= -1;
+                    posY += dy * 2; 
+                    bounced = true;
+                }
+
+                // Failsafe for corners
+                if (!bounced) {
+                    dx *= -1; dy *= -1;
+                    posX += dx; posY += dy;
+                }
+                
+                shakeScreen(); // Adds visual impact to HUD hits!
+            }
+        }
 
         axe.style.left = posX + 'px';
         axe.style.top = posY + 'px';
@@ -6559,9 +6626,25 @@ function spawnSpecialEvent() {
     item.style.width = itemSize + 'px';
     item.style.height = itemSize + 'px';
     
-    const area = document.getElementById('gameArea');
-    item.style.left = Math.random() * (area.clientWidth - itemSize) + "px";
-    item.style.top = Math.random() * (area.clientHeight - itemSize) + "px";
+const area = document.getElementById('gameArea');
+    
+    let spawnX = Math.random() * (area.clientWidth - itemSize);
+    let spawnY = Math.random() * (area.clientHeight - itemSize);
+
+    // --- SOLID SCOREBOARD WALL CHECK FOR EMOJIS ---
+    let spawnAttempts = 0;
+    while (isOverlappingScoreboard(spawnX, spawnY, itemSize, itemSize) && spawnAttempts < 10) {
+        spawnX = Math.random() * (area.clientWidth - itemSize);
+        spawnY = Math.random() * (area.clientHeight - itemSize);
+        spawnAttempts++;
+    }
+    if (isOverlappingScoreboard(spawnX, spawnY, itemSize, itemSize)) {
+        const sbRect = document.getElementById('scoreBoard').getBoundingClientRect();
+        spawnY = sbRect.bottom + 20;
+    }
+
+    item.style.left = spawnX + "px";
+    item.style.top = spawnY + "px";
     
     area.appendChild(item);
 
