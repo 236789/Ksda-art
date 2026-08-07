@@ -4053,90 +4053,111 @@ input:checked + .s-slider:before {
 }
 
 
+/* ============================================================
+   UNIFIED PREMIUM HUD - PC & MOBILE (STAYS HORIZONTAL)
+   ============================================================ */
 
-/* ==========================================
-   BASE HUD - PC & MOBILE HORIZONTAL DESIGN
-   ========================================== */
+/* 1. MAIN CONTAINER */
 #scoreBoard.hud-premium-container {
     position: absolute;
     top: 20px;
     left: 20px;
     z-index: 1000;
-    
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    
+    gap: 8px;
     background: var(--th-bg);
     border: 2px solid var(--th-border);
     border-radius: 12px;
-    padding: 10px 20px;
+    padding: 10px 18px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.5);
-    
-    /* Responsive Width: Fits PC and Mobile without clipping */
     width: auto;
-    max-width: calc(100vw - 40px); 
+    min-width: 440px; /* PC Width */
     box-sizing: border-box;
 }
 
-/* TOP ROW - ALWAYS HORIZONTAL (Zona | Score | Rubies) */
+/* 2. TOP ROW (ALWAYS HORIZONTAL) */
 .hud-top-row {
     display: flex !important;
     flex-direction: row !important;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    gap: 5px;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 0 !important;
 }
 
+/* 3. SECTIONS & ORDER (Zona | Score | Rubies) */
 .hud-section {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
     gap: 10px;
-    white-space: nowrap; /* Prevents text from wrapping to 2 lines */
+    white-space: nowrap;
 }
 
-/* FORCE THE ORDER: Zona | Score | Rubies */
-#stageSection { order: 1; flex-shrink: 0; }
-.pc-divider:nth-of-type(1) { order: 2; display: block; }
-#scoreSection { order: 3; flex-grow: 1; justify-content: center; }
-.pc-divider:nth-of-type(2) { order: 4; display: block; }
-#rubySection { order: 5; flex-shrink: 0; }
+#stageSection { order: 1 !important; flex: 1; justify-content: flex-start; }
+.pc-divider:nth-of-type(1) { order: 2 !important; }
+#scoreSection { order: 3 !important; flex: 1; justify-content: center; }
+.pc-divider:nth-of-type(2) { order: 4 !important; }
+#rubySection { order: 5 !important; flex: 1; justify-content: flex-end; }
 
+/* 4. THE DIVIDERS | */
 .pc-divider {
+    display: block !important;
+    visibility: visible !important;
     width: 1px;
-    height: 24px;
+    height: 22px;
     background: rgba(255, 255, 255, 0.2);
-    margin: 0 5px;
-    flex-shrink: 0;
+    margin: 0 12px;
 }
 
-/* LED COMBO BAR */
-.hud-combo-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-}
-.combo-track {
-    flex-grow: 1;
-    height: 12px;
-    background: rgba(0, 0, 0, 0.6);
-    border-radius: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    overflow: hidden;
-}
-.combo-fill-segmented {
+/* 5. TEXT & ICONS (PC) */
+.hud-val, #scoreText, #rubyText { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; }
+.stage-name { font-family: 'Orbitron'; font-size: 14px; font-weight: 900; color: var(--th-accent); }
+.stage-label { font-size: 9px; color: #9aa0b8; display: block; }
+.hud-icon-wrapper { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.hud-icon-wrapper img { width: 14px; height: 14px; }
+
+/* 6. COMBO BAR (WORKING LED SYSTEM) */
+.hud-combo-row { display: flex; align-items: center; gap: 12px; width: 100%; padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.1); }
+.combo-track { flex-grow: 1; height: 12px; background: rgba(0,0,0,0.6); border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
+
+#comboFill.combo-fill-segmented {
     height: 100%;
-    background-color: var(--th-accent);
-    background-image: repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(0,0,0,0.6) 4px, rgba(0,0,0,0.6) 7px);
+    background-color: var(--th-accent) !important;
+    background-image: repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(0,0,0,0.6) 4px, rgba(0,0,0,0.6) 7px) !important;
     box-shadow: 0 0 15px var(--th-glow);
     transition: width 0.3s ease;
 }
 
+/* ============================================================
+   MOBILE SCALING (ONLY SHRINKING - NO LAYOUT CHANGES)
+   ============================================================ */
+@media screen and (max-width: 768px) {
+    #scoreBoard.hud-premium-container {
+        top: 10px !important;
+        left: 10px !important;
+        min-width: calc(100vw - 20px) !important; /* Fits width exactly */
+        padding: 8px 10px !important;
+        gap: 6px !important;
+    }
 
+    /* Shrink fonts so they fit in the row */
+    .hud-val, #scoreText, #rubyText { font-size: 15px !important; }
+    .stage-name { font-size: 11px !important; }
+    .stage-label { display: none !important; } /* MUST HIDE TO FIT MOBILE */
+    
+    .hud-icon-wrapper { width: 18px !important; height: 18px !important; }
+    .hud-icon-wrapper img { width: 10px !important; }
+    .stage-icon { font-size: 14px !important; }
 
+    .pc-divider { margin: 0 6px !important; height: 18px !important; }
+    .hud-section { gap: 4px !important; }
+    
+    .combo-track { height: 10px !important; }
+    .combo-label-text { font-size: 9px !important; }
+}
   </style>
 </head>
 <body>
@@ -5517,48 +5538,27 @@ document.getElementById('kevin').addEventListener('click', (e) => {
       playRandomPop(); 
 
       score++;
+      
+      // --- SALVĂM STATISTICILE ---
       totalClicksAllTime++;
 
-      // --- COMBO LOGIC ---
+      updateScoreUI();
+
       comboCount++;
-
-      // 🔥 RUBY FARMING SYSTEM (100 COMBO = 1 RUBY)
-      if (comboCount >= 100) {
-          rubies++; // Add Ruby
-          comboCount = 0; // Reset Combo
-          
-          // Visuals & Sound for the win
-          playSFX(slotJackpotUrl); 
-          
-          // First time reward tutorial
-          if (!hasSeenRubyTutorial) {
-              openRubyDiscovery();
-          }
-          
-          // Special "100" text before resetting visual bar
-          showComboText(e.clientX, e.clientY, 100);
-      } else {
-          // Normal combo text
-          showComboText(e.clientX, e.clientY, comboCount);
-      }
-
-      // Update Highscores
       if (comboCount > bestComboAllTime) {
           bestComboAllTime = comboCount;
       }
       
-      // Update the entire HUD (Score & Rubies)
-      updateScoreUI();
-      updateComboBarUI(comboCount);
+      showComboText(e.clientX, e.clientY, comboCount);
+      updateComboBarUI(comboCount); // <--- ADAUGĂ ASTA AICI
 
-      // --- COMBO EXPIRATION TIMER ---
-      clearTimeout(comboTimer);
-      comboTimer = setTimeout(() => { 
-          comboCount = 0; 
-          updateComboBarUI(0); 
-      }, 2000);
 
-      // --- MOVEMENT ---
+clearTimeout(comboTimer);
+        comboTimer = setTimeout(() => { 
+            comboCount = 0; 
+            updateComboBarUI(0); 
+        }, 2000);
+
       if (!isKevinTired) {
         moveKevinAway();
         startKevinMovement(); 
