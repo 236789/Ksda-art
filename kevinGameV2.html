@@ -3969,131 +3969,126 @@ input:checked + .s-slider:before {
 }
 
 /* ==========================================
-   COMPACT MOBILE HUD - STACKED STYLE
+   FULLY FIXED HORIZONTAL MOBILE HUD (IMAGE 2)
    ========================================== */
-@media (max-width: 700px) {
-    #scoreBoard.hud-premium-container {
-        top: 15px !important;
-        left: 15px !important;
-        width: auto !important; /* Makes it compact like the image */
-        min-width: 140px !important;
-        display: inline-flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        padding: 12px !important;
-        gap: 10px !important;
-        border-radius: 15px !important;
-        transform: none !important;
-    }
-
-    /* 1. Force everything to stack vertically */
-    .hud-top-row {
+@media screen and (max-width: 768px) {
+    /* 1. Main Container - Wide and Thin */
+    body #gameArea #scoreBoard.hud-premium-container {
         display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 8px !important;
-        width: 100% !important;
+        flex-direction: column !important; /* Stack Top Row & Combo Row */
+        width: calc(100vw - 20px) !important;
+        max-width: 450px !important;
+        top: 10px !important;
+        left: 10px !important;
+        padding: 6px 12px !important;
+        gap: 4px !important;
+        border-radius: 10px !important;
+        transform: none !important;
+        box-sizing: border-box !important;
     }
 
-    /* 2. Alignment for each row (Icon + Text) */
-    .hud-section {
+    /* 2. Top Row - THE HORIZONTAL FIX */
+    #scoreBoard .hud-top-row {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important; /* Forces one line */
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+        gap: 0 !important;
+    }
+
+    /* 3. Sections - Distributed evenly */
+    #scoreBoard .hud-section {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
-        justify-content: flex-start !important;
-        gap: 10px !important;
-        width: 100% !important;
-    }
-
-    /* 3. Stage Text Layout (Stacked "ZONA CURENTA" over "STRADA") */
-    #stageSection {
-        align-items: flex-start !important;
-    }
-    
-    .stage-info {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        line-height: 1.1 !important;
-    }
-
-    .stage-label {
-        display: block !important; /* Show it for the compact look */
-        font-size: 8px !important;
-        margin-bottom: 2px !important;
-    }
-
-    .stage-name {
-        font-size: 14px !important;
-    }
-
-    /* 4. Icon Scaling */
-    .icon-aligner {
-        width: 24px !important;
-        display: flex !important;
         justify-content: center !important;
+        flex: 1 !important;
+        gap: 4px !important;
+        white-space: nowrap !important;
+        order: unset !important; /* Removes reordering bugs */
     }
 
-    .hud-icon-wrapper {
-        width: 24px !important;
-        height: 24px !important;
-    }
+    /* Stage specific - align icon and text */
+    #scoreBoard #stageSection { justify-content: flex-start !important; }
+    #scoreBoard #rubySection { justify-content: flex-end !important; }
 
-    /* 5. Hide PC vertical dividers (They don't fit in a stack) */
-    .pc-divider {
-        display: none !important;
-    }
-
-    /* 6. Score & Ruby Text */
-    .hud-val, #scoreText, #rubyText {
-        font-size: 18px !important;
-        margin-left: 2px !important;
-    }
-
-    /* ==========================================
-       PREMIUM LED COMBO BAR (BOTTOM OF STACK)
-       ========================================== */
-    .hud-combo-row {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        width: 100% !important;
-        padding-top: 8px !important;
-        border-top: 1px solid rgba(255,255,255,0.1) !important;
-        gap: 5px !important;
-    }
-
-    .combo-track {
+    /* 4. Dividers - RESTORED IMAGE 2 STYLE */
+    #scoreBoard .pc-divider {
         display: block !important;
+        visibility: visible !important;
+        opacity: 0.2 !important;
+        width: 1px !important;
+        height: 18px !important;
+        background: #fff !important;
+        margin: 0 4px !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* 5. Compact Scaling (So it fits on phones) */
+    #scoreBoard .hud-icon-wrapper {
+        width: 18px !important;
+        height: 18px !important;
+        flex-shrink: 0 !important;
+    }
+    #scoreBoard .hud-icon-wrapper img { width: 10px !important; height: 10px !important; }
+    
+    #scoreBoard .stage-icon { font-size: 14px !important; }
+    #scoreBoard .stage-label { display: none !important; } /* Hidden for space */
+    #scoreBoard .stage-name { font-size: 11px !important; margin: 0 !important; }
+
+    #scoreBoard .hud-val, 
+    #scoreBoard #scoreText, 
+    #scoreBoard #rubyText {
+        font-size: 15px !important;
+        min-width: auto !important;
+    }
+
+    /* 6. COMBO BAR - THE LED DESIGN */
+    #scoreBoard .hud-combo-row {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
         width: 100% !important;
-        height: 12px !important;
-        background: #000 !important;
-        border-radius: 4px !important;
+        gap: 8px !important;
+        margin-top: 2px !important;
+        padding-top: 4px !important;
+        border-top: 1px solid rgba(255,255,255,0.08) !important;
+    }
+
+    #scoreBoard .combo-title-wrap {
+        display: flex !important;
+        align-items: baseline !important;
+        gap: 4px !important;
+    }
+
+    #scoreBoard .combo-label-text { font-size: 9px !important; }
+    #scoreBoard #comboCounterText { font-size: 12px !important; }
+
+    #scoreBoard .combo-track {
+        display: block !important;
+        flex: 1 !important;
+        height: 10px !important;
+        background: rgba(0, 0, 0, 0.6) !important;
+        border-radius: 3px !important;
         border: 1px solid rgba(255,255,255,0.1) !important;
         overflow: hidden !important;
     }
 
-    .combo-fill-segmented {
+    #scoreBoard .combo-fill-segmented {
         display: block !important;
         height: 100% !important;
-        /* THE LED EFFECT: Segmented stripes */
+        /* LED Segment Pattern */
         background: repeating-linear-gradient(
             to right,
             var(--th-accent),
-            var(--th-accent) 4px,
-            transparent 4px,
-            transparent 6px
+            var(--th-accent) 3px,
+            transparent 3px,
+            transparent 5px
         ) !important;
-        box-shadow: 0 0 12px var(--th-glow) !important;
-        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    }
-
-    .combo-label-text {
-        font-size: 9px !important;
-    }
-
-    #comboCounterText {
-        font-size: 14px !important;
+        box-shadow: 0 0 8px var(--th-glow) !important;
+        transition: width 0.2s ease !important;
     }
 }
   </style>
