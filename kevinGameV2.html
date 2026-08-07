@@ -3854,20 +3854,7 @@ input:checked + .s-slider:before {
 .score-bump .hud-val { transform: scale(1.3); filter: brightness(1.5); }
 .score-loss .hud-val { transform: scale(0.8); color: #ef4444 !important; }
 
-/* ==========================================
-   MOBILE STACKED LAYOUT (ULTRA COMPACT)
-   ========================================== */
-@media (max-width: 700px) {
-    #scoreBoard.hud-premium-container {
-        top: 8px !important;
-        left: 8px !important;
-        flex-direction: column !important; 
-        align-items: stretch !important; 
-        gap: 0 !important; 
-        padding: 4px 10px !important;
-        border-radius: 6px !important; 
-        border-width: 1px !important; /* Margine mai subțire pe mobil */
-    }
+
     
     .pc-divider { display: none; } 
     
@@ -3951,145 +3938,116 @@ input:checked + .s-slider:before {
     mask-image: repeating-linear-gradient(to right, black 0px, black 4px, transparent 4px, transparent 6px);
 }
 
-@media (max-width: 700px) {
-    .hud-top-row {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 0 !important;
-    }
-    .hud-combo-row {
-        order: 4;
-        padding: 4px 0;
-    }
-    .combo-track { display: none; } /* Ascunde luminițele pe mobil */
-    .combo-title-wrap {
-        width: 100%;
-        justify-content: space-between;
-    }
-}
 
 /* ==========================================
-   FULLY FIXED HORIZONTAL MOBILE HUD (IMAGE 2)
+   CLEAN HORIZONTAL HUD - NO RANDOM LINES + LED FIX
    ========================================== */
 @media screen and (max-width: 768px) {
-    /* 1. Main Container - Wide and Thin */
+    /* Container: Wide & Thin */
     body #gameArea #scoreBoard.hud-premium-container {
         display: flex !important;
-        flex-direction: column !important; /* Stack Top Row & Combo Row */
+        flex-direction: column !important;
         width: calc(100vw - 20px) !important;
-        max-width: 450px !important;
+        max-width: 460px !important;
         top: 10px !important;
         left: 10px !important;
-        padding: 6px 12px !important;
-        gap: 4px !important;
-        border-radius: 10px !important;
+        padding: 8px 12px !important;
+        gap: 6px !important;
+        border-radius: 12px !important;
         transform: none !important;
         box-sizing: border-box !important;
+        background: var(--th-bg) !important;
     }
 
-    /* 2. Top Row - THE HORIZONTAL FIX */
+    /* TOP ROW: Force Horizontal */
     #scoreBoard .hud-top-row {
         display: flex !important;
         flex-direction: row !important;
-        flex-wrap: nowrap !important; /* Forces one line */
+        flex-wrap: nowrap !important;
         justify-content: space-between !important;
         align-items: center !important;
         width: 100% !important;
-        gap: 0 !important;
+        background: none !important;
+        border: none !important; /* REMOVES RANDOM HORIZONTAL LINES */
     }
 
-    /* 3. Sections - Distributed evenly */
+    /* SECTIONS: Kill all internal borders and padding lines */
     #scoreBoard .hud-section {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
         justify-content: center !important;
         flex: 1 !important;
-        gap: 4px !important;
-        white-space: nowrap !important;
-        order: unset !important; /* Removes reordering bugs */
+        gap: 5px !important;
+        border: none !important; /* REMOVES THE BOX LINES */
+        padding: 0 !important;   /* REMOVES THE STACKED EFFECT */
+        background: none !important;
     }
 
-    /* Stage specific - align icon and text */
     #scoreBoard #stageSection { justify-content: flex-start !important; }
     #scoreBoard #rubySection { justify-content: flex-end !important; }
 
-    /* 4. Dividers - RESTORED IMAGE 2 STYLE */
+    /* VERTICAL DIVIDERS: The only lines allowed (Image 2 Style) */
     #scoreBoard .pc-divider {
         display: block !important;
         visibility: visible !important;
         opacity: 0.2 !important;
         width: 1px !important;
-        height: 18px !important;
-        background: #fff !important;
-        margin: 0 4px !important;
-        flex-shrink: 0 !important;
+        height: 22px !important;
+        background: #ffffff !important;
+        margin: 0 6px !important;
+        border: none !important;
     }
 
-    /* 5. Compact Scaling (So it fits on phones) */
-    #scoreBoard .hud-icon-wrapper {
-        width: 18px !important;
-        height: 18px !important;
-        flex-shrink: 0 !important;
-    }
-    #scoreBoard .hud-icon-wrapper img { width: 10px !important; height: 10px !important; }
-    
-    #scoreBoard .stage-icon { font-size: 14px !important; }
-    #scoreBoard .stage-label { display: none !important; } /* Hidden for space */
-    #scoreBoard .stage-name { font-size: 11px !important; margin: 0 !important; }
+    /* TEXT & ICON SCALING */
+    #scoreBoard .hud-icon-wrapper { width: 22px !important; height: 22px !important; }
+    #scoreBoard .hud-icon-wrapper img { width: 12px !important; height: 12px !important; }
+    #scoreBoard .stage-icon { font-size: 16px !important; }
+    #scoreBoard .stage-label { display: none !important; } 
+    #scoreBoard .stage-name { font-size: 13px !important; }
+    #scoreBoard .hud-val, #scoreText, #rubyText { font-size: 16px !important; }
 
-    #scoreBoard .hud-val, 
-    #scoreBoard #scoreText, 
-    #scoreBoard #rubyText {
-        font-size: 15px !important;
-        min-width: auto !important;
-    }
-
-    /* 6. COMBO BAR - THE LED DESIGN */
+    /* COMBO ROW: Working LED System */
     #scoreBoard .hud-combo-row {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
         width: 100% !important;
-        gap: 8px !important;
-        margin-top: 2px !important;
-        padding-top: 4px !important;
-        border-top: 1px solid rgba(255,255,255,0.08) !important;
+        gap: 10px !important;
+        padding-top: 6px !important;
+        border-top: 1px solid rgba(255,255,255,0.1) !important; /* Single separator line */
     }
-
-    #scoreBoard .combo-title-wrap {
-        display: flex !important;
-        align-items: baseline !important;
-        gap: 4px !important;
-    }
-
-    #scoreBoard .combo-label-text { font-size: 9px !important; }
-    #scoreBoard #comboCounterText { font-size: 12px !important; }
 
     #scoreBoard .combo-track {
         display: block !important;
         flex: 1 !important;
-        height: 10px !important;
+        height: 12px !important;
         background: rgba(0, 0, 0, 0.6) !important;
-        border-radius: 3px !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 4px !important;
         overflow: hidden !important;
+        position: relative !important;
+        border: 1px solid rgba(255,255,255,0.05) !important;
     }
 
-    #scoreBoard .combo-fill-segmented {
+    #scoreBoard #comboFill.combo-fill-segmented {
         display: block !important;
         height: 100% !important;
-        /* LED Segment Pattern */
-        background: repeating-linear-gradient(
-            to right,
-            var(--th-accent),
-            var(--th-accent) 3px,
-            transparent 3px,
-            transparent 5px
+        /* FIXED LED SYSTEM: Background + Mask */
+        background-color: var(--th-accent) !important;
+        background-image: repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 4px,
+            rgba(0,0,0,0.5) 4px,
+            rgba(0,0,0,0.5) 6px
         ) !important;
-        box-shadow: 0 0 8px var(--th-glow) !important;
-        transition: width 0.2s ease !important;
+        box-shadow: 0 0 15px var(--th-glow) !important;
+        transition: width 0.3s ease !important;
     }
+
+    #scoreBoard .combo-title-wrap { display: flex !important; align-items: baseline !important; gap: 5px !important; }
+    #scoreBoard .combo-label-text { font-size: 10px !important; font-weight: bold; }
+    #scoreBoard #comboCounterText { font-size: 15px !important; }
 }
   </style>
 </head>
