@@ -3962,98 +3962,121 @@ input:checked + .s-slider:before {
     }
 }
 
-/* --- FIX: MOBILE HUD HORIZONTAL LIKE PC --- */
+/* --- FIXED HORIZONTAL MOBILE HUD: STAGE -> SCORE -> RUBIES + WORKING LEDS --- */
 @media (max-width: 700px) {
     #scoreBoard.hud-premium-container {
         top: 10px !important;
         left: 10px !important;
-        /* Resetăm la layout-ul de PC (Coloană care conține două rânduri orizontale) */
+        /* Resetăm containerul la o formă dreptunghiulară orizontală */
         flex-direction: column !important; 
-        align-items: flex-start !important;
-        width: auto !important; /* Nu mai ocupă tot ecranul */
-        max-width: 95vw !important;
-        padding: 6px 12px !important;
-        gap: 4px !important;
-        border-radius: 10px !important;
+        align-items: stretch !important;
+        width: calc(100vw - 20px) !important;
+        max-width: 400px !important;
+        padding: 8px 12px !important;
+        gap: 8px !important;
+        border-radius: 12px !important;
+        border: 2px solid var(--th-border) !important;
     }
 
-    /* Forțăm primul rând (Zone, Scor, Rubine) să rămână orizontal */
+    /* Rândul de sus: Stage, Scor, Rubine */
     .hud-top-row {
         display: flex !important;
-        flex-direction: row !important; 
+        flex-direction: row !important;
         align-items: center !important;
-        gap: 8px !important;
+        justify-content: space-between !important; /* Distribuie uniform */
         width: 100% !important;
-        border-bottom: none !important;
+        gap: 4px !important;
     }
 
-    /* Resetăm secțiunile (scoatem border-ul de jos de pe mobil) */
-    .hud-section {
+    /* Forțăm ordinea secțiunilor și scoatem stilurile de "listă" */
+    #stageSection, #scoreSection, #rubySection {
+        order: unset !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 6px !important;
         width: auto !important;
+        border: none !important;
         padding: 0 !important;
-        border-bottom: none !important;
-        gap: 5px !important;
     }
 
-    /* REACTIVĂM DIVIZOARELE (Liniile verticale dintre scoruri) */
+    /* REPARARE SEPARATOARE (Liniile verticale) */
     .pc-divider {
         display: block !important;
-        height: 15px !important;
+        visibility: visible !important;
         width: 1px !important;
+        height: 16px !important;
         background: rgba(255, 255, 255, 0.2) !important;
         margin: 0 2px !important;
     }
 
-    /* Micșorăm textele și iconițele pentru a încăpea pe un singur rând */
+    /* Micșorăm elementele să nu se suprapună */
     .hud-val, #scoreText, #rubyText { 
-        font-size: 14px !important; 
-        min-width: auto !important;
+        font-size: 15px !important; 
     }
 
     .stage-name { 
         font-size: 11px !important; 
+        max-width: 60px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
+
+    .stage-label { display: none !important; } /* Ascundem label-ul lung */
 
     .hud-icon-wrapper { 
-        width: 18px !important; 
-        height: 18px !important; 
+        width: 20px !important; 
+        height: 20px !important; 
     }
     
-    .hud-icon-wrapper img { 
-        width: 10px !important; 
-        height: 10px !important; 
-    }
+    .hud-icon-wrapper img { width: 12px !important; height: 12px !important; }
 
-    .stage-icon { 
-        font-size: 14px !important; 
-    }
-
-    .icon-aligner { 
-        width: 20px !important; 
-    }
-
-    /* Ascundem eticheta "ZONA CURENTĂ" pe mobil pentru a câștiga spațiu */
-    .stage-label { 
-        display: none !important; 
-    }
-
-    /* Rândul de Combo (Bara de jos) */
+    /* REPARARE BARA DE COMBO & LED-uri */
     .hud-combo-row {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
+        gap: 8px !important;
         width: 100% !important;
-        gap: 6px !important;
-        margin-top: 2px !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
     .combo-track {
-        display: block !important; /* Ne asigurăm că bara rămâne vizibilă */
-        height: 6px !important;
+        display: block !important;
+        height: 10px !important; /* Mai înaltă să se vadă LED-urile */
+        flex-grow: 1 !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+        border-radius: 4px !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+
+    .combo-fill-segmented {
+        display: block !important;
+        height: 100% !important;
+        /* Folosim un gradient repetat ca fallback pentru mask-image pe mobile */
+        background: repeating-linear-gradient(
+            to right,
+            #4ade80,
+            #4ade80 4px,
+            transparent 4px,
+            transparent 6px
+        ) !important;
+        /* Păstrăm și masca originală pentru browsere care o suportă bine */
+        -webkit-mask-image: repeating-linear-gradient(to right, black 0px, black 4px, transparent 4px, transparent 6px) !important;
+        mask-image: repeating-linear-gradient(to right, black 0px, black 4px, transparent 4px, transparent 6px) !important;
+        transition: width 0.2s ease !important;
+    }
+
+    .combo-title-wrap {
+        display: flex !important;
+        align-items: baseline !important;
+        gap: 4px !important;
     }
 
     #comboCounterText {
-        font-size: 13px !important;
+        font-size: 14px !important;
     }
 }
   </style>
