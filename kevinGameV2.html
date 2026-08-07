@@ -4054,10 +4054,9 @@ input:checked + .s-slider:before {
 
 
 /* ============================================================
-   CLEAN PREMIUM HUD - PC & MOBILE (NO EXTRA LINES)
+   PREMIUM HUD V4 - PERFECT BALANCE & ALIGNMENT
    ============================================================ */
 
-/* 1. MAIN CONTAINER */
 #scoreBoard.hud-premium-container {
     position: absolute;
     top: 20px;
@@ -4065,107 +4064,101 @@ input:checked + .s-slider:before {
     z-index: 1000;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
     background: var(--th-bg);
     border: 2px solid var(--th-border);
     border-radius: 12px;
-    padding: 12px 18px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.5);
+    padding: 12px 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 0 12px rgba(0,0,0,0.5);
     width: auto;
-    min-width: 450px;
+    min-width: 480px; /* Standard wide look */
     box-sizing: border-box;
 }
 
-/* 2. TOP ROW - Strictly Horizontal with NO internal borders */
+/* THE TOP ROW - Three Equal Columns */
 .hud-top-row {
     display: flex !important;
     flex-direction: row !important;
-    justify-content: space-between !important;
     align-items: center !important;
+    justify-content: space-between !important;
     width: 100% !important;
-    border: none !important; /* Removes horizontal section lines */
-    background: none !important;
 }
 
-/* 3. SECTIONS - Clean alignment, no boxes */
+/* THE SECTIONS - Each takes exactly 1/3 of the space */
 .hud-section {
+    flex: 1 !important; 
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 12px;
-    border: none !important; /* Kills the extra lines */
-    padding: 0 !important;
+    border: none !important;
     background: none !important;
+    padding: 0 !important;
+    white-space: nowrap;
 }
 
-#stageSection { order: 1 !important; }
-.pc-divider:nth-of-type(1) { order: 2 !important; }
-#scoreSection { order: 3 !important; }
-.pc-divider:nth-of-type(2) { order: 4 !important; }
-#rubySection { order: 5 !important; }
+/* ALIGNMENT: Left / Center / Right */
+#stageSection { order: 1 !important; justify-content: flex-start !important; gap: 10px; }
+#scoreSection { order: 3 !important; justify-content: center !important; gap: 10px; }
+#rubySection  { order: 5 !important; justify-content: flex-end !important; gap: 10px; }
 
-/* 4. VERTICAL DIVIDERS | (The only lines allowed) */
+/* THE DIVIDERS - Placed perfectly between sections */
 .pc-divider {
     display: block !important;
-    visibility: visible !important;
-    width: 1px;
-    height: 22px;
-    background: rgba(255, 255, 255, 0.2);
-    margin: 0 10px;
+    width: 1px !important;
+    height: 24px !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    margin: 0 !important;
+    flex-shrink: 0;
 }
+.pc-divider:nth-of-type(1) { order: 2 !important; }
+.pc-divider:nth-of-type(2) { order: 4 !important; }
 
-/* 5. ICON WRAPPERS - Fixed "weird" alignment */
+/* ICON STYLING - Clean and Sharp */
 .hud-icon-wrapper {
-    width: 30px; /* Slightly larger for better look */
-    height: 30px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
+.hud-icon-wrapper img { width: 16px; height: 16px; object-fit: contain; }
+.stage-icon { font-size: 18px; color: var(--th-accent); filter: drop-shadow(0 0 5px var(--th-glow)); }
 
-.hud-icon-wrapper img {
-    width: 18px; 
-    height: 18px;
-    object-fit: contain;
-}
+/* TEXT STYLING */
+.hud-val, #scoreText, #rubyText { font-family: 'Orbitron'; font-size: 19px; font-weight: 900; color: #fff; }
+.stage-name { font-family: 'Orbitron'; font-size: 14px; font-weight: 900; color: var(--th-accent); text-transform: uppercase; }
+.stage-label { display: none; } /* Hidden for ultra-clean look */
 
-/* 6. TEXT STYLING */
-.hud-val, #scoreText, #rubyText { font-family: 'Orbitron'; font-size: 20px; font-weight: 900; line-height: 1; }
-.stage-name { font-family: 'Orbitron'; font-size: 15px; font-weight: 900; color: var(--th-accent); }
-.stage-label { font-size: 8px; color: #9aa0b8; text-transform: uppercase; margin-bottom: 2px; }
-
-/* 7. COMBO ROW - Separated by one clean line */
+/* COMBO BAR - Working LED System */
 .hud-combo-row {
     display: flex;
     align-items: center;
     gap: 12px;
     width: 100%;
-    padding-top: 6px;
-    border-top: 1px solid rgba(255,255,255,0.1); /* The only horizontal line */
+    padding-top: 8px;
+    border-top: 1px solid rgba(255,255,255,0.08);
 }
-
 .combo-track {
     flex-grow: 1;
     height: 12px;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0, 0, 0, 0.6);
     border-radius: 4px;
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
 }
-
 #comboFill.combo-fill-segmented {
     height: 100%;
     background-color: var(--th-accent) !important;
-    background-image: repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(0,0,0,0.5) 4px, rgba(0,0,0,0.5) 6px) !important;
-    box-shadow: 0 0 12px var(--th-glow);
+    background-image: repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(0,0,0,0.6) 4px, rgba(0,0,0,0.6) 7px) !important;
+    box-shadow: 0 0 15px var(--th-glow);
     transition: width 0.3s ease;
 }
 
 /* ============================================================
-   MOBILE SCALING - NO LAYOUT CHANGES, JUST SHRINKING
+   MOBILE SCALING - MAINTAINS BALANCE
    ============================================================ */
 @media screen and (max-width: 768px) {
     #scoreBoard.hud-premium-container {
@@ -4174,18 +4167,14 @@ input:checked + .s-slider:before {
         min-width: calc(100vw - 20px) !important;
         padding: 8px 10px !important;
     }
-
-    .hud-section { gap: 6px !important; }
-    .stage-label { display: none !important; } /* Hide small text to fit */
     
-    .hud-icon-wrapper { width: 22px !important; height: 22px !important; }
-    .hud-icon-wrapper img { width: 14px !important; height: 14px !important; }
+    #stageSection, #scoreSection, #rubySection { gap: 5px !important; }
     
     .hud-val, #scoreText, #rubyText { font-size: 15px !important; }
     .stage-name { font-size: 11px !important; }
-    .pc-divider { margin: 0 5px !important; height: 18px !important; }
-    
-    .combo-track { height: 10px !important; }
+    .hud-icon-wrapper { width: 22px !important; height: 22px !important; }
+    .hud-icon-wrapper img { width: 12px !important; }
+    .pc-divider { height: 18px !important; }
 }
   </style>
 </head>
