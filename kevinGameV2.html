@@ -4322,6 +4322,21 @@ input:checked + .s-slider:before {
 </div>
 
 
+<!-- MODAL: DESCOPERIRE RUBIN -->
+<div id="rubyDiscoveryModal" class="modal-overlay" style="z-index: 100010;">
+    <div class="modal-box info-modal-box">
+        <div class="score-icon-wrapper ruby-bg" style="width: 80px; height: 80px; margin: 0 auto 20px auto;">
+            <img src="https://iili.io/CrnXNdG.png" style="width: 50px; height: 50px;">
+        </div>
+        <h2 style="color: #ff3366 !important;">CE ESTE ASTA?</h2>
+        <div class="selection-line" style="background: #ff3366; width: 60px;"></div>
+        <p>Tocmai ai obținut un <b>Rubin</b>! <br><br>
+        Rubinele sunt o monedă rară. Le primești la fiecare <b>100 Combo</b>. Folosește-le în Curând în Magazin pentru a cumpăra Upgrade-uri permanente, Eroi legendari și Skin-uri rare!</p>
+        <button class="menu-btn play" style="width: 100%; background: linear-gradient(180deg, #ff3366, #990033) !important;" onclick="closeRubyDiscovery()">AM ÎNȚELES!</button>
+    </div>
+</div>
+
+
 <!-- TRIVIA MODAL -->
 <div id="triviaModal" class="modal-overlay" style="z-index: 100006;">
     <div class="modal-box trivia-box">
@@ -4896,6 +4911,7 @@ for (let i = 0; i < particleCount; i++) {
     let score = 0;
 let rubies = 0;
 let lastSavedRubies = 0;
+let hasSeenRubyTutorial = false; // Flag to track the pop-up
     let lastSavedScore = 0;
 let isSuperMagnetActive = false;
 
@@ -5028,9 +5044,13 @@ async function checkUserInFirestore(uid) {
 
         if (response.status === 200) {
             const data = await response.json();
-            currentUsername = data.username;
-            score = data.score || 0;
-            lastSavedScore = score;
+// Inside the checkUserInFirestore response handling:
+currentUsername = data.username;
+score = data.score || 0;
+rubies = data.rubies || 0; // LOAD RUBIES FROM DB
+lastSavedScore = score;
+lastSavedRubies = rubies;
+hasSeenRubyTutorial = data.hasSeenRubyTutorial || false; // LOAD TUTORIAL STATE
             
             updateLoader(75, 'Sincronizare setări...');
             
@@ -5250,40 +5270,51 @@ document.getElementById('gameArea').onclick = (e) => {
 }
 
 async function syncScoreToFirestore() {
-  if (currentUID && score !== lastSavedScore) {
+  // Sync if score OR rubies changed
+  if (currentUID && (score !== lastSavedScore || rubies !== lastSavedRubies)) {
     const scoreToTry = score;
+    const rubiesToTry = rubies;
 
     try {
-      // 1. Get the Identity Token (The Passport)
-      // This proves the user is actually logged in through your app
       const idToken = await firebase.auth().currentUser.getIdToken(true);
 
       const response = await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          idToken: idToken, // We send the token, not the UID
-          score: scoreToTry 
+          idToken: idToken, 
+          score: scoreToTry,
+          rubies: rubiesToTry, // SEND RUBIES
+          hasSeenRubyTutorial: hasSeenRubyTutorial // SAVE TUTORIAL STATE
         }),
       });
 
       if (response.ok) {
         lastSavedScore = scoreToTry;
-        console.log("✅ Verified & Saved.");
-      } else if (response.status === 403) {
-        // 🚨 BACKEND CAUGHT A CHEATER
-        console.warn("🚨 Cheat detected! Rolling back...");
-        score = lastSavedScore; 
-    updateScoreUI(true); // <--- 'true' pentru roșu
-        alert("⚠️ Modificare neautorizată! Scorul a fost resetat.");
-      } else if (response.status === 401) {
-        console.error("🚨 Sesiune expirată. Te rugăm să te re-loghezi.");
+        lastSavedRubies = rubiesToTry;
+        console.log("✅ Stats Synced: Score & Rubies");
       }
     } catch (e) {
-      console.error("Connection error:", e);
+      console.error("Connection error during sync:", e);
     }
   }
 }
+
+// Logic for opening/closing the tutorial
+function openRubyDiscovery() {
+    isPaused = true;
+    document.getElementById('rubyDiscoveryModal').style.display = 'flex';
+}
+
+async function closeRubyDiscovery() {
+    document.getElementById('rubyDiscoveryModal').style.display = 'none';
+    hasSeenRubyTutorial = true;
+    isPaused = false;
+    startKevinMovement();
+    await syncScoreToFirestore(); // Save the fact they've seen it
+}
+
+// Add these to your window exports at the bottom of the script
 
     async function returnToMenu() {
       clearInterval(moveKevinInterval);
@@ -5400,27 +5431,48 @@ document.getElementById('kevin').addEventListener('click', (e) => {
       playRandomPop(); 
 
       score++;
-      
-      // --- SALVĂM STATISTICILE ---
       totalClicksAllTime++;
 
-      updateScoreUI();
-
+      // --- COMBO LOGIC ---
       comboCount++;
+
+      // 🔥 RUBY FARMING SYSTEM (100 COMBO = 1 RUBY)
+      if (comboCount >= 100) {
+          rubies++; // Add Ruby
+          comboCount = 0; // Reset Combo
+          
+          // Visuals & Sound for the win
+          playSFX(slotJackpotUrl); 
+          
+          // First time reward tutorial
+          if (!hasSeenRubyTutorial) {
+              openRubyDiscovery();
+          }
+          
+          // Special "100" text before resetting visual bar
+          showComboText(e.clientX, e.clientY, 100);
+      } else {
+          // Normal combo text
+          showComboText(e.clientX, e.clientY, comboCount);
+      }
+
+      // Update Highscores
       if (comboCount > bestComboAllTime) {
           bestComboAllTime = comboCount;
       }
       
-      showComboText(e.clientX, e.clientY, comboCount);
-      updateComboBarUI(comboCount); // <--- ADAUGĂ ASTA AICI
+      // Update the entire HUD (Score & Rubies)
+      updateScoreUI();
+      updateComboBarUI(comboCount);
 
+      // --- COMBO EXPIRATION TIMER ---
+      clearTimeout(comboTimer);
+      comboTimer = setTimeout(() => { 
+          comboCount = 0; 
+          updateComboBarUI(0); 
+      }, 2000);
 
-clearTimeout(comboTimer);
-        comboTimer = setTimeout(() => { 
-            comboCount = 0; 
-            updateComboBarUI(0); 
-        }, 2000);
-
+      // --- MOVEMENT ---
       if (!isKevinTired) {
         moveKevinAway();
         startKevinMovement(); 
@@ -8417,6 +8469,7 @@ window.openUtilitiesModal = openUtilitiesModal;
 window.closeUtilitiesModal = closeUtilitiesModal;
 window.openShopFromUtilities = openShopFromUtilities;
 window.showComingSoon = showComingSoon;
+window.closeRubyDiscovery = closeRubyDiscovery;
 
 })(); // <-- CLOSES THE SECURE VAULT
 </script>
