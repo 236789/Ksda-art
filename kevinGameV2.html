@@ -3962,74 +3962,78 @@ input:checked + .s-slider:before {
     }
 }
 
-/* --- FIX FINAL HUD VERTICAL (PORTRAIT) --- */
+/* ==========================================
+   FINAL FIXED MOBILE HUD (PORTRAIT & VERTICAL)
+   ========================================== */
 @media (max-width: 700px) {
     #scoreBoard.hud-premium-container {
         top: 10px !important;
         left: 10px !important;
+        width: calc(100vw - 20px) !important;
         flex-direction: column !important;
         align-items: stretch !important;
-        width: calc(100vw - 20px) !important;
         padding: 10px !important;
-        gap: 10px !important;
+        gap: 8px !important;
         box-sizing: border-box !important;
+        border-radius: 12px !important;
     }
 
-    /* Rândul 1: Resetăm totul pentru a fi perfect orizontal */
+    /* Row 1: Stage on Left, Rubies on Right */
     .hud-top-row {
         display: flex !important;
         flex-direction: row !important;
-        justify-content: space-between !important; /* Stage stânga, Rubine dreapta */
+        justify-content: space-between !important;
         align-items: center !important;
         width: 100% !important;
     }
 
-    /* FORȚĂM ORDINEA: Stage (1), Divider (2), Score (3), Divider (4), Rubies (5) */
-    #stageSection { order: 1 !important; display: flex !important; flex: 1; }
-    .pc-divider:nth-of-type(1) { order: 2 !important; display: block !important; margin: 0 5px !important; }
-    #scoreSection { order: 3 !important; display: flex !important; flex: 1; justify-content: center; }
-    .pc-divider:nth-of-type(2) { order: 4 !important; display: block !important; margin: 0 5px !important; }
-    #rubySection { order: 5 !important; display: flex !important; flex: 1; justify-content: flex-end; }
-
-    /* Fix Separatoare Verticale */
-    .pc-divider {
-        width: 2px !important;
-        height: 20px !important;
-        background: rgba(255, 255, 255, 0.2) !important;
-        visibility: visible !important;
-        opacity: 1 !important;
+    /* Row 2: Big Score in the Center */
+    #scoreSection {
+        display: flex !important;
+        justify-content: center !important;
+        padding: 5px 0 !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    /* Ajustări fonturi pentru a încăpea pe lățime mică */
+    /* Hide PC Dividers in Vertical Mode to save space */
+    .pc-divider { 
+        display: none !important; 
+    }
+
+    /* Adjust font sizes so they fit small screens */
     .hud-val, #scoreText, #rubyText { 
-        font-size: 16px !important; 
+        font-size: 18px !important; 
     }
     
     .stage-name { 
-        font-size: 12px !important; 
+        font-size: 14px !important; 
     }
 
-    .stage-label { display: none !important; } /* Ascundem label-ul pentru spațiu */
+    .stage-label { 
+        display: none !important; /* Hide "Zona Curenta" text to save vertical space */
+    }
 
-    .hud-icon-wrapper { width: 22px !important; height: 22px !important; }
+    .hud-icon-wrapper { 
+        width: 22px !important; 
+        height: 22px !important; 
+    }
 
-    /* REPARARE BARA COMBO & LED-uri */
+    /* COMBO BAR MOBILE FIX */
     .hud-combo-row {
-        order: 10 !important; /* Întotdeauna jos */
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
-        width: 100% !important;
         gap: 10px !important;
+        margin-top: 4px !important;
     }
 
     .combo-track {
-        display: block !important;
-        height: 12px !important; /* Mai înaltă pentru vizibilitate */
+        display: block !important; /* Ensure it's visible */
         flex: 1 !important;
-        background: rgba(0, 0, 0, 0.6) !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
-        border-radius: 4px !important;
+        height: 14px !important;
+        background: rgba(0, 0, 0, 0.5) !important;
+        border-radius: 6px !important;
         overflow: hidden !important;
         position: relative !important;
     }
@@ -4037,28 +4041,20 @@ input:checked + .s-slider:before {
     .combo-fill-segmented {
         display: block !important;
         height: 100% !important;
-        /* Efectul de LED-uri (Dungi) */
+        /* Re-applying the LED stripes for mobile */
         background: repeating-linear-gradient(
             to right,
             var(--th-accent),
-            var(--th-accent) 4px,
-            transparent 4px,
-            transparent 6px
+            var(--th-accent) 6px,
+            transparent 6px,
+            transparent 9px
         ) !important;
-        /* Glow pentru LED-uri */
         box-shadow: 0 0 10px var(--th-glow) !important;
-        transition: width 0.3s ease !important;
-    }
-
-    .combo-title-wrap {
-        display: flex !important;
-        align-items: center !important;
-        gap: 5px !important;
     }
 
     #comboCounterText {
-        font-size: 16px !important;
-        min-width: 20px;
+        font-size: 18px !important;
+        min-width: 25px;
     }
 }
   </style>
@@ -4251,59 +4247,44 @@ input:checked + .s-slider:before {
 
 <!-- Inside <div id="gameArea"> -->
 <div id="gameArea">
-<!-- NOULE SCOREBOARD PREMIUM (ALINIAT PERFECT & REORDONAT) -->
 <div id="scoreBoard" class="hud-premium-container">
     
-    <!-- RÂNDUL DE SUS: ZONE, SCOR, RUBINE -->
+    <!-- TOP ROW: Stage and Rubies -->
     <div class="hud-top-row">
-        <!-- 1. STAGE (ZONA) -->
         <div class="hud-section" id="stageSection">
-            <div class="icon-aligner">
-                <i class="fa-solid fa-map-location-dot stage-icon"></i>
-            </div>
+            <div class="icon-aligner"><i class="fa-solid fa-map-location-dot stage-icon"></i></div>
             <div class="stage-info">
                 <span class="stage-label">ZONA CURENTĂ</span>
                 <span id="stageName" class="stage-name">STRADA</span>
             </div>
         </div>
-        
-        <div class="hud-divider pc-divider"></div>
 
-        <!-- 2. SCOR (BĂNUȚI) -->
-        <div class="hud-section" id="scoreSection">
-            <div class="icon-aligner">
-                <div class="hud-icon-wrapper score-bg">
-                    <img src="https://iili.io/COrCopj.png" alt="Scor">
-                </div>
-            </div>
-            <span id="scoreText" class="hud-val text-white">0</span>
-        </div>
-
-        <div class="hud-divider pc-divider"></div>
-
-        <!-- 3. RUBINE (PREMIUM CURRENCY) -->
         <div class="hud-section" id="rubySection">
             <div class="icon-aligner">
-                <div class="hud-icon-wrapper ruby-bg">
-                    <img src="https://iili.io/CrnXNdG.png" alt="Rubine">
-                </div>
+                <div class="hud-icon-wrapper ruby-bg"><img src="https://iili.io/CrnXNdG.png"></div>
             </div>
             <span id="rubyText" class="hud-val text-ruby">0</span>
         </div>
     </div>
 
-    <!-- RÂNDUL DE JOS: BARA DE COMBO -->
+    <!-- MIDDLE ROW: Big Score (Centered on Mobile via CSS) -->
+    <div class="hud-section" id="scoreSection">
+        <div class="icon-aligner">
+            <div class="hud-icon-wrapper score-bg"><img src="https://iili.io/COrCopj.png"></div>
+        </div>
+        <span id="scoreText" class="hud-val text-white">0</span>
+    </div>
+
+    <!-- BOTTOM ROW: Combo Bar -->
     <div class="hud-combo-row" id="comboSection">
         <div class="combo-title-wrap">
             <span class="combo-label-text">COMBO</span>
             <span id="comboCounterText">0</span>
         </div>
         <div class="combo-track">
-            <!-- Aici este bara care se umple cu efect de '100 de lumini' -->
             <div id="comboFill" class="combo-fill-segmented"></div>
         </div>
     </div>
-    
 </div>
 
 <div class="menu-container" id="menuWrapper">
