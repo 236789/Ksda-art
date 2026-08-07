@@ -5464,9 +5464,39 @@ function changeChar(dir) {
     document.getElementById('charHeroDesc').innerText = char.desc;
 }
 
+
+// --- NEW: MOBILE AUTO-FULLSCREEN & UI SYNC ---
+function autoFullscreenForMobile() {
+    // Check if the user is on a mobile device
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile && !document.fullscreenElement) {
+        const docEl = document.documentElement;
+        // Support for all major browsers (Android Chrome, Safari iPad, Firefox, etc.)
+        const requestFS = docEl.requestFullscreen || docEl.webkitRequestFullscreen || docEl.mozRequestFullScreen || docEl.msRequestFullscreen;
+        
+        if (requestFS) {
+            requestFS.call(docEl).catch(err => {
+                console.warn("Fullscreen API is not supported or was blocked by iOS Safari:", err);
+            });
+        }
+    }
+}
+
+// Automatically update the fullscreen icon if the screen state changes
+document.addEventListener('fullscreenchange', () => {
+    const icon = document.getElementById('fsIcon');
+    if (icon) {
+        icon.className = document.fullscreenElement ? "fa-solid fa-compress" : "fa-solid fa-expand";
+    }
+});
+
 async function confirmCharacter() {
+    // --- AUTO FULLSCREEN FOR MOBILE ---
+    autoFullscreenForMobile();
+
     // --- START MUZICĂ ---
-  if (!musicStarted) {
+    if (!musicStarted) {
         musicStarted = true;
         playRandomTrack();
     }
