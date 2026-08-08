@@ -6796,6 +6796,15 @@ const specialRegistry = {
         description: "Un magnet extrem de puternic care atrage toate emoji-urile spre eroul tău!",
         action: (e) => startSuperMagnetEvent()
     },
+"rubyDrop": {
+        name: "Rubin Ascuns",
+        image: "https://iili.io/CrnXNdG.png",
+        type: "good",
+        duration: 0, // Nu are o durată activă pe ecran, doar îl iei
+        stages: ["street"],
+        description: "Un rubin extrem de rar a picat pe stradă! Noroc chior!",
+        action: (e) => pickupRubyEmoji(e)
+    },
 
 
 };
@@ -7127,12 +7136,16 @@ function spawnSpecialEvent() {
         return;
     }
 
-    // --- NEW STAGE FILTERING ---
+// --- NEW STAGE FILTERING ---
     // Instead of all keys, we only get keys allowed in the current stage
     // NEW: We also block "superMagnet" from spawning if one is already active
     const availableKeys = Object.keys(specialRegistry).filter(key => {
         const isAllowedInStage = specialRegistry[key].stages.includes(currentStageId);
         const isDuplicateMagnet = (key === "superMagnet" && isSuperMagnetActive);
+        
+        // NOU: Excludem Rubinul de la extragerea normală, îl calculăm separat!
+        if (key === "rubyDrop") return false;
+        
         return isAllowedInStage && !isDuplicateMagnet;
     });
 
@@ -7145,6 +7158,15 @@ function spawnSpecialEvent() {
 
     // ALEGEM UN EVENIMENT RANDOM (From the filtered availableKeys)
     let chosenKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
+
+    // --- NOU: 1% ȘANSĂ PENTRU RUBIN (Doar dacă sunt deblocate) ---
+    if (hasSeenRubyTutorial || rubies > 0) {
+        // Dacă numărul generat (0-100) e mai mic sau egal cu 1, schimbăm eventul în Rubin!
+        if (Math.random() > 0.35) { // 65% șansă să dea reroll
+            chosenKey = "rubyDrop";
+            console.log("💎 SANSĂ EXTREMĂ! A apărut Rubinul de 1%!");
+        }
+    }
 
     // --- LOGICA DE RARITATE 35% PENTRU SLOT MACHINE ---
     if (chosenKey === "slotMachine") {
@@ -8686,6 +8708,50 @@ function applyStage(stageId) {
     console.log(`🌍 Stage Loaded: ${stage.name}`);
 }
 
+
+function pickupRubyEmoji(e) {
+    // Obținem coordonatele unde ai dat click
+    const startX = e.clientX;
+    const startY = e.clientY;
+    
+    // Sunet wow pentru rubin (refolosim cel de jackpot)
+    playSFX(slotJackpotUrl); 
+
+    // Creăm imaginea zburătoare
+    const flyer = document.createElement('img');
+    flyer.src = 'https://iili.io/CrnXNdG.png';
+    flyer.className = 'flying-points'; 
+    flyer.style.width = '45px';
+    flyer.style.height = '45px';
+    flyer.style.objectFit = 'contain';
+    flyer.style.filter = 'drop-shadow(0 0 15px rgba(255, 51, 102, 0.8))';
+    
+    flyer.style.left = `${startX}px`; 
+    flyer.style.top = `${startY}px`;
+    flyer.style.transform = 'translate(-50%, -50%)';
+    document.body.appendChild(flyer);
+
+    // Zboară direct spre secțiunea RUBINELOR din HUD
+    const targetRect = document.getElementById('rubySection').getBoundingClientRect();
+    
+    setTimeout(() => {
+        flyer.style.left = `${targetRect.left + targetRect.width/2}px`;
+        flyer.style.top = `${targetRect.top + targetRect.height/2}px`;
+        flyer.style.transform = 'translate(-50%, -50%) scale(0.2)';
+        flyer.style.opacity = '0';
+        
+        // Efect de "Pump" pe HUD
+        document.getElementById('rubySection').classList.add('score-bump');
+        setTimeout(() => document.getElementById('rubySection').classList.remove('score-bump'), 500);
+    }, 50);
+
+    setTimeout(() => { 
+        flyer.remove(); 
+        rubies += 1; // Adăugăm 1 rubin
+        updateScoreUI(); // Sincronizăm HUD-ul
+        syncScoreToFirestore(); // Salvăm progresul în Cloud instantaneu
+    }, 850);
+}
 
 function startSuperMagnetEvent() {
     isSuperMagnetActive = true;
