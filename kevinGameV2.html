@@ -6978,15 +6978,15 @@ function startSlowMoEvent() {
 
     // 1. Set State & Stop All Movement
     isSlowMoActive = true;
-    clearInterval(moveKevinInterval); // Kill the movement loop
-    clearTimeout(tiredTimeout);       // Stop the tiredness timer
+    clearInterval(moveKevinInterval); 
+    clearTimeout(tiredTimeout);       
 
     // 2. Visuals & Audio
     overlay.style.display = 'block';
     kevin.classList.add('kevin-frozen');
     
     if (bgMusic) { 
-        bgMusic.playbackRate = 0.7; // Slightly slowed music for atmosphere
+        bgMusic.playbackRate = 0.7; 
     }
 
     // 3. Logic to resume after duration
@@ -6999,11 +6999,21 @@ function startSlowMoEvent() {
             bgMusic.playbackRate = 1.0; 
         }
 
-        // 4. Restart normal game loops if the game isn't paused
+        // --- THE 3 SECONDS INVINCIBILITY START ---
+        isGracePeriodActive = true; 
+        kevin.style.filter = "drop-shadow(0 0 10px white)"; // Visual shield hint
+        
+        setTimeout(() => { 
+            isGracePeriodActive = false; 
+            kevin.style.filter = ""; // Remove hint
+        }, 3000); 
+        // ------------------------------------------
+
+        // 4. Restart normal game loops
         if (!isPaused) {
-            moveKevinAway();       // Move him immediately so he's not a sitting duck
-            startKevinMovement();  // Restart the loop
-            startTiredCycle();     // Restart tiredness cycle
+            moveKevinAway();       
+            startKevinMovement();  
+            startTiredCycle();     
         }
     }, duration * 1000);
 }
