@@ -9266,6 +9266,17 @@ function openSellDetail(idx) {
     document.getElementById('sellDetailModal').style.display = 'flex';
 }
 
+function closeBlackMarket() {
+    document.getElementById('blackMarketModal').style.display = 'none';
+    
+    // Stop the timer to save resources
+    if (bmTimerInterval) clearInterval(bmTimerInterval);
+
+    // Resume the game
+    isPaused = false;
+    startKevinMovement();
+}
+
 function setSellQty(qty) {
     const want = blackMarketWants[currentSellIdx];
     const stock = _GAME_DATA.inventory[want.key] || 0;
