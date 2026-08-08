@@ -4457,7 +4457,7 @@ input:checked + .s-slider:before {
         <div class="selection-line" style="background: #ff3366; width: 60px;"></div>
         <p>Tocmai ai obținut un <b>Rubin</b>! <br><br>
         Rubinele sunt o monedă rară. Le primești la fiecare <b>100 Combo</b>. Folosește-le în Curând în Magazin pentru a cumpăra Upgrade-uri permanente, Eroi legendari și Skin-uri rare!</p>
-        <button class="menu-btn play" style="width: 100%; background: linear-gradient(180deg, #ff3366, #990033) !important;" onclick="closeRubyDiscovery()">AM ÎNȚELES!</button>
+        <button class="menu-btn play" style="width: 100%; background: linear-gradient(180deg, #ff3366, #990033) !important; color: white !important; box-shadow: 0 8px 0 #660022, 0 10px 20px rgba(0,0,0,0.4) !important; white-space: nowrap;" onclick="closeRubyDiscovery()">AM ÎNȚELES!</button>
     </div>
 </div>
 
@@ -6677,17 +6677,39 @@ function startAutoClickEvent() {
     const clickInterval = setInterval(() => {
         if (isPaused) return;
 
-        score++;
+score++;
         comboCount++;
+        
+        // Salvăm best combo-ul și aici
+        if (comboCount > bestComboAllTime) {
+            bestComboAllTime = comboCount;
+        }
+
+        // Câștigi Rubine și din Auto-Clicker!
+        if (comboCount > 0 && comboCount % 100 === 0) {
+            rubies++;
+            if (!hasSeenRubyTutorial) {
+                openRubyDiscovery();
+            } else {
+                showKevinutaBubble("💎 +1 Rubin pentru Combo!");
+            }
+        }
+
         updateScoreUI();
         playRandomPop(); 
 
         // Resetăm timer-ul de combo pentru a preveni resetarea combo-ului manual
         clearTimeout(comboTimer);
-        comboTimer = setTimeout(() => { comboCount = 0; }, 2000);
+        comboTimer = setTimeout(() => { 
+            comboCount = 0; 
+            updateComboBarUI(0); // Curăță bara când expiră timpul!
+        }, 2000);
 
         const rect = kevin.getBoundingClientRect();
         showComboText(rect.left + rect.width / 2, rect.top, comboCount);
+        
+        // 🔥 ACEASTA ESTE LINIA CARE ACTUALIZEAZĂ BARA DE JOS 🔥
+        updateComboBarUI(comboCount);
 
         // Efect vizual de click
         autoCursor.style.transform = "scale(0.8)";
