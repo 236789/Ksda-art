@@ -4413,6 +4413,124 @@ input:checked + .s-slider:before {
     padding: 1px 5px;
     border-radius: 4px;
 }
+
+
+/* BLACK MARKET GRID - 3 per row */
+#blackMarketGrid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px !important;
+}
+
+/* VISUAL STATES */
+.bm-sold-out {
+    filter: grayscale(1) brightness(0.5);
+    cursor: not-allowed !important;
+    border-color: #555 !important;
+}
+.bm-sold-out::after {
+    content: "VÂNDUT";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    background: #ff2a2a;
+    color: white;
+    font-size: 8px;
+    font-weight: 900;
+    padding: 2px 5px;
+    border-radius: 4px;
+}
+
+.bm-no-stock {
+    border-color: rgba(255, 68, 68, 0.4) !important;
+    background: rgba(255, 0, 0, 0.1) !important;
+}
+
+/* REWORKED SELL MODAL */
+.bm-modal-premium {
+    max-width: 380px !important;
+    padding: 30px !important;
+    background: radial-gradient(circle at top, #2b0a0a 0%, #050000 100%) !important;
+    border: 3px solid #ff2a2a !important;
+}
+
+.sell-stats-row {
+    display: flex;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.5);
+    padding: 15px;
+    border-radius: 12px;
+    margin: 15px 0;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.stat-item { display: flex; flex-direction: column; align-items: center; }
+.stat-label { font-size: 10px; color: #9aa0b8; text-transform: uppercase; margin-bottom: 5px; }
+.stat-val { font-family: 'Orbitron'; font-size: 18px; color: #fff; }
+
+.bm-timer-text {
+    font-family: 'Orbitron';
+    font-size: 12px;
+    color: #ff4444;
+    text-align: center;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+
+/* BLACK MARKET GRID - 3 columns, 2 rows */
+#blackMarketGrid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px !important;
+    padding: 10px 5px;
+}
+
+/* VISUAL STATES */
+.bm-sold-out {
+    filter: grayscale(1) brightness(0.4);
+    cursor: not-allowed !important;
+    pointer-events: none;
+}
+.bm-sold-out::after {
+    content: "VÂNDUT";
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    background: #ff2a2a; /* Keep red for 'Sold' as it's a universal warning */
+    color: white;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 2px 5px;
+    border-radius: 4px;
+    z-index: 10;
+}
+
+.bm-no-stock {
+    opacity: 0.6;
+    border-style: dashed !important;
+    border-color: rgba(255,255,255,0.2) !important;
+}
+
+/* THEMED STATS ROW */
+.sell-stats-row {
+    display: flex;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.4);
+    padding: 12px;
+    border-radius: 12px;
+    margin: 15px 0;
+    border: 1px solid var(--th-border);
+}
+.stat-item { display: flex; flex-direction: column; align-items: center; flex: 1; }
+.stat-label { font-size: 9px; color: #9aa0b8; text-transform: uppercase; margin-bottom: 4px; }
+.stat-val { font-family: 'Orbitron'; font-size: 16px; color: #fff; }
+
+.bm-timer-text {
+    font-family: 'Orbitron';
+    font-size: 11px;
+    color: var(--th-accent);
+    text-align: center;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+}
   </style>
 </head>
 <body>
@@ -4802,13 +4920,15 @@ input:checked + .s-slider:before {
 </div>
 
 
-<!-- MODAL: BLACK MARKET -->
 <div id="blackMarketModal" class="modal-overlay">
   <div class="modal-box shop-box bm-box">
     <div class="shop-header">
       <h2 style="color: #ff2a2a !important;"><i class="fa-solid fa-user-ninja"></i> PIAȚA NEAGRĂ</h2>
       <div class="selection-line" style="background: #ff2a2a;"></div>
     </div>
+
+    <!-- TIMER DISPLAY -->
+    <div id="bmTimerDisplay" class="bm-timer-text">REFRESH ÎN: 00:00</div>
 
     <div class="bm-nav">
       <button class="bm-tab" onclick="showComingSoon()">CUMPĂRĂ</button>
@@ -4817,40 +4937,46 @@ input:checked + .s-slider:before {
     </div>
 
     <div id="bm-sell-view">
-        <p style="font-size: 11px; color: #9aa0b8; margin-bottom: 10px;">Cumpărătorul vrea aceste obiecte acum:</p>
         <div id="blackMarketGrid" class="inventory-v1-grid"></div>
     </div>
 
-    <button class="menu-btn play close-shop-btn" style="margin-top: 15px; border-color: #ff2a2a;" onclick="closeBlackMarket()">
-      <span>ÎNAPOI</span>
-    </button>
+    <button class="menu-btn play close-shop-btn" style="margin-top: 20px; border-color: #ff2a2a;" onclick="closeBlackMarket()">ÎNAPOI</button>
   </div>
 </div>
 
-<!-- MODAL: SELL DETAIL -->
+<!-- REWORKED SELL MODAL (Fully Themed) -->
 <div id="sellDetailModal" class="modal-overlay" style="z-index: 100010;">
-    <div class="modal-box info-modal-box bm-box">
-        <img id="sellItemImg" src="" style="width: 70px;">
-        <h2 id="sellItemName" style="color: #ff2a2a !important;">NUME</h2>
-        <p id="sellItemDesc">Mesaj...</p>
+    <div class="modal-box info-modal-box bm-box" style="border-color: var(--th-border) !important;">
+        <img id="sellItemImg" src="" style="width: 80px; margin-bottom: 10px;">
+        <h2 id="sellItemName" style="color: var(--th-accent) !important; margin-bottom: 5px;">NUME</h2>
         
-        <div style="background: rgba(0,0,0,0.4); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
-            <div style="display:flex; justify-content:space-between; font-size: 14px; margin-bottom: 10px;">
-                <span>PREȚ: <b id="sellPriceVal" style="color:#ffcc00;">0</b></span>
-                <span>AI ÎN STOC: <b id="sellStockVal" style="color:#fff;">0</b></span>
+        <div class="sell-stats-row">
+            <div class="stat-item">
+                <span class="stat-label">Preț</span>
+                <span id="sellPriceVal" class="stat-val" style="color: var(--th-accent);">$0</span>
             </div>
-            <div class="bet-grid">
-                <button class="menu-btn play bet-btn" onclick="setSellQty(1)">1</button>
-                <button class="menu-btn play bet-btn" onclick="setSellQty(5)">5</button>
-                <button class="menu-btn play bet-btn" onclick="setSellQty('all')">TOT</button>
+            <div class="stat-item" style="border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1);">
+                <span class="stat-label">Stoc</span>
+                <span id="sellStockVal" class="stat-val">0</span>
             </div>
-            <div style="margin-top: 15px; font-family:'Orbitron'; font-size:18px;">
-                TOTAL: <span id="sellTotalVal" style="color:#4ade80;">0</span> SCOR
+            <div class="stat-item">
+                <span class="stat-label">Necesar</span>
+                <span id="sellNeededVal" class="stat-val">0</span>
             </div>
         </div>
 
-        <button class="menu-btn play" id="sellFinalBtn" style="width: 100%; background: #ff2a2a !important;" onclick="processSell()">VINDE</button>
-        <button class="cancel-btn" onclick="document.getElementById('sellDetailModal').style.display='none'">ANULEAZĂ</button>
+        <div class="bet-grid">
+            <button class="menu-btn play bet-btn" onclick="setSellQty(1)">1</button>
+            <button class="menu-btn play bet-btn" onclick="setSellQty(5)">5</button>
+            <button class="menu-btn play bet-btn" onclick="setSellQty('all')">TOT</button>
+        </div>
+
+        <div style="margin: 20px 0; font-family:'Orbitron'; font-size:18px; color: #fff;">
+            TOTAL: <span id="sellTotalVal" style="color:#4ade80;">0</span> SCOR
+        </div>
+
+        <button class="menu-btn play" id="sellFinalBtn" style="width: 100%; height: 55px;" onclick="processSell()">VINDE</button>
+        <button class="cancel-btn" style="margin-top: 15px;" onclick="document.getElementById('sellDetailModal').style.display='none'">ANULEAZĂ</button>
     </div>
 </div>
 
@@ -9037,9 +9163,11 @@ function updateComboBarUI(count) {
     text.style.color = textColor;
 }
 
+let currentSellIdx = null;
+let currentSellQty = 0;
 
+let bmTimerInterval = null;
 
-// 1. Generate random wants every hour
 function refreshBlackMarketWants() {
     const now = Date.now();
     const oneHour = 60 * 60 * 1000;
@@ -9049,20 +9177,37 @@ function refreshBlackMarketWants() {
     lastMarketRefresh = now;
     blackMarketWants = [];
 
-    // Filter items from registry that can actually be in inventory (ignore rubyDrop, etc.)
     const pool = Object.keys(specialRegistry).filter(k => k !== "rubyDrop" && k !== "trivia");
-    
-    // Pick 6 random ones
     const shuffled = pool.sort(() => 0.5 - Math.random()).slice(0, 6);
 
     shuffled.forEach(key => {
         blackMarketWants.push({
             key: key,
-            price: Math.floor(Math.random() * 5) + 1, // 1 to 5 score
-            limit: Math.floor(Math.random() * 20) + 5, // 5 to 25 items wanted
+            price: Math.floor(Math.random() * 5) + 1,
+            limit: Math.floor(Math.random() * 20) + 5,
             sold: 0
         });
     });
+}
+
+function startBMTimer() {
+    if (bmTimerInterval) clearInterval(bmTimerInterval);
+    bmTimerInterval = setInterval(() => {
+        const now = Date.now();
+        const oneHour = 60 * 60 * 1000;
+        const timeLeft = Math.max(0, oneHour - (now - lastMarketRefresh));
+
+        const mins = Math.floor(timeLeft / 60000);
+        const secs = Math.floor((timeLeft % 60000) / 1000);
+        
+        const display = document.getElementById('bmTimerDisplay');
+        if (display) display.innerText = `REFRESH ÎN: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 0) {
+            refreshBlackMarketWants();
+            renderBlackMarketGrid();
+        }
+    }, 1000);
 }
 
 function openBlackMarket() {
@@ -9072,12 +9217,7 @@ function openBlackMarket() {
     document.getElementById('blackMarketModal').style.display = 'flex';
     document.getElementById('utilitiesModal').style.display = 'none';
     renderBlackMarketGrid();
-}
-
-function closeBlackMarket() {
-    document.getElementById('blackMarketModal').style.display = 'none';
-    isPaused = false;
-    startKevinMovement();
+    startBMTimer();
 }
 
 function renderBlackMarketGrid() {
@@ -9086,23 +9226,29 @@ function renderBlackMarketGrid() {
 
     blackMarketWants.forEach((want, index) => {
         const data = specialRegistry[want.key];
+        const stock = _GAME_DATA.inventory[want.key] || 0;
+        const remaining = want.limit - want.sold;
+
         const tile = document.createElement('div');
         tile.className = "inv-tile";
-        tile.onclick = () => openSellDetail(index);
+        
+        // VISUAL STATES
+        if (remaining <= 0) tile.classList.add('bm-sold-out');
+        else if (stock <= 0) tile.classList.add('bm-no-stock');
 
-        const remaining = want.limit - want.sold;
+        tile.onclick = () => {
+            if (remaining > 0) openSellDetail(index);
+            else showKevinutaBubble("Sunt plin de astea!");
+        };
 
         tile.innerHTML = `
             <div class="bm-price-tag">$${want.price}</div>
             <img src="${data.image}">
-            <div class="bm-limit-tag">VREA: ${remaining}</div>
+            <div class="bm-limit-tag">${remaining > 0 ? 'VREA: '+remaining : 'GATA'}</div>
         `;
         grid.appendChild(tile);
     });
 }
-
-let currentSellIdx = null;
-let currentSellQty = 0;
 
 function openSellDetail(idx) {
     currentSellIdx = idx;
@@ -9112,9 +9258,9 @@ function openSellDetail(idx) {
 
     document.getElementById('sellItemImg').src = data.image;
     document.getElementById('sellItemName').innerText = data.name;
-    document.getElementById('sellItemDesc').innerText = `Acest personaj dubios caută ${data.name}. Îi vinzi?`;
-    document.getElementById('sellPriceVal').innerText = want.price;
+    document.getElementById('sellPriceVal').innerText = `$${want.price}`;
     document.getElementById('sellStockVal').innerText = stock;
+    document.getElementById('sellNeededVal').innerText = want.limit - want.sold;
     
     setSellQty(1);
     document.getElementById('sellDetailModal').style.display = 'flex';
@@ -9132,8 +9278,6 @@ function setSellQty(qty) {
     }
 
     document.getElementById('sellTotalVal').innerText = currentSellQty * want.price;
-    
-    // Disable sell button if qty is 0
     document.getElementById('sellFinalBtn').disabled = (currentSellQty <= 0);
 }
 
@@ -9141,21 +9285,19 @@ function processSell() {
     const want = blackMarketWants[currentSellIdx];
     const totalPay = currentSellQty * want.price;
 
-    // 1. Double check stock
     if ((_GAME_DATA.inventory[want.key] || 0) < currentSellQty) return;
 
-    // 2. Process
     _GAME_DATA.inventory[want.key] -= currentSellQty;
     want.sold += currentSellQty;
+    
+    // Set pending amount for the flying animation
     pendingWinAmount = totalPay;
 
     document.getElementById('sellDetailModal').style.display = 'none';
     
-    // 3. Animation and Update
     const targetRect = document.getElementById('sellItemImg').getBoundingClientRect();
-    animateScoreFlying(targetRect.left + 35, targetRect.top + 35);
+    animateScoreFlying(targetRect.left + 40, targetRect.top + 40);
     
-    // 4. UI Refresh
     renderBlackMarketGrid();
     syncInventoryToCloud();
 }
