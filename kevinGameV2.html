@@ -4652,11 +4652,13 @@ input:checked + .s-slider:before {
   </div>
 </div>
 
-<!-- PAYTABLE V4 -->
+<!-- TABEL CÂȘTIGURI SLOTURI -->
 <div id="slotInfoModal" class="modal-overlay" style="z-index: 100001;">
   <div class="modal-box" style="max-width: 320px; border-color: #6366f1; background: #020617;">
     <h3 style="color:#818cf8; font-family:'Orbitron';">TABEL CÂȘTIGURI</h3>
     <div class="paytable-list">
+        <!-- NOU: Rândul pentru Rubin -->
+        <div class="pay-row"><span><img src="https://iili.io/CrnXNdG.png" width="20"> x3</span> <span style="color: #ff3366; font-weight: 900; text-shadow: 0 0 5px #ff3366;">+1 RUBIN</span></div>
         <div class="pay-row"><span><img src="https://iili.io/C8v0szx.png" width="20"> x3</span> <span>PROFIT x3.0</span></div>
         <div class="pay-row"><span><img src="https://iili.io/C8v1oes.png" width="20"> x3</span> <span>PROFIT x2.0</span></div>
         <div class="pay-row"><span><img src="https://iili.io/C8v1XEB.png" width="20"> x3</span> <span>PROFIT x1.5</span></div>
@@ -7667,6 +7669,8 @@ function startHotSauceEvent() {
 }
 
 const slotAssets = {
+    ruby:    { url: 'https://iili.io/CrnXNdG.png', mult: 'ruby', weight: 4 },  // Șansă de ~4% (apropiat de Jackpot)
+
     // WINNING OUTCOMES (Total 37% chance to win something)
     seven:   { url: 'https://iili.io/C8v0szx.png', mult: 3.0,  weight: 3 },  // 2% chance (was 5%) - Very rare Jackpot!
     diamond: { url: 'https://iili.io/C8v1oes.png', mult: 2.0,  weight: 5 },  // 5% chance (was 10%)
@@ -7680,6 +7684,7 @@ const slotAssets = {
 
 let currentBetAmount = 5;
 let pendingWinAmount = 0;
+let pendingRubyWin = 0; // NOU: Urmărește dacă am câștigat un rubin
 
 function openSlotMachine() {
     forceCloseMenu(); // Add this at the top
@@ -7737,6 +7742,10 @@ function spinSlots() {
 function calculateOutcome() {
     const pool = [];
     for (let key in slotAssets) {
+        // Dacă jucătorul NU are rubine și NU a văzut tutorialul, SĂRIM peste rubin (nu va pica la extragere)
+        if (key === 'ruby' && rubies === 0 && !hasSeenRubyTutorial) {
+            continue; 
+        }
         for (let i = 0; i < slotAssets[key].weight; i++) pool.push(slotAssets[key]);
     }
     return pool[Math.floor(Math.random() * pool.length)];
@@ -7757,7 +7766,19 @@ function finalizeSpin(outcome) {
     // --- ASCUNDE MAȘINA DE SLOTURI IMEDIAT DUPĂ CE ROLELE S-AU OPRIT ---
     document.getElementById('slotMachineModal').style.display = 'none';
 
-    if (outcome.mult === 3.0) {
+    // Ne asigurăm că variabila pentru rubin este 0 înainte de a procesa rezultatul
+    pendingRubyWin = 0;
+
+    if (outcome.mult === 'ruby') {
+        pendingRubyWin = 1;
+        title = "RUBIN RAR!";
+        text = "Incredibil! Ai obținut 3 Rubine la rând! (+1 Rubin)";
+        isJackpot = true;
+        
+        playSFX(slotJackpotUrl);
+        spawnJackpotCoins(); 
+
+    } else if (outcome.mult === 3.0) {
         pendingWinAmount = currentBetAmount * 3; 
         title = "777 JACKPOT! 777";
         text = `BINGO! Ai câștigat +${pendingWinAmount} puncte!`;
@@ -7836,23 +7857,67 @@ function animateScoreFlying(startX = null, startY = null) {
     flyer.style.transform = 'translate(-50%, -50%)';
     document.body.appendChild(flyer);
 
-    const rect = document.getElementById('scoreBoard').getBoundingClientRect();
+    // FIX: Acum punctele zboară fix spre SCOR, nu spre centrul HUD-ului
+    const targetRect = document.getElementById('scoreSection').getBoundingClientRect();
     
     setTimeout(() => {
-        flyer.style.left = `${rect.left + rect.width/2}px`;
-        flyer.style.top = `${rect.top + rect.height/2}px`;
+        flyer.style.left = `${targetRect.left + targetRect.width/2}px`;
+        flyer.style.top = `${targetRect.top + targetRect.height/2}px`;
         flyer.style.transform = 'translate(-50%, -50%) scale(0.2)';
         flyer.style.opacity = '0';
         
         if (isLoss) {
-            document.getElementById('scoreBoard').classList.add('score-loss');
-            setTimeout(() => document.getElementById('scoreBoard').classList.remove('score-loss'), 500);
+            // FIX: Aplicăm efectul de roșu/pierdere DOAR pe secțiunea de scor, nu pe tot meniul cu rubine!
+            document.getElementById('scoreSection').classList.add('score-loss');
+            setTimeout(() => document.getElementById('scoreSection').classList.remove('score-loss'), 500);
         }
     }, 50);
 
     setTimeout(() => { 
         flyer.remove(); 
         runScoreTicker(pendingWinAmount); 
+    }, 850);
+}
+
+function animateRubyFlying(startX = null, startY = null) {
+    const flyer = document.createElement('img');
+    flyer.src = 'https://iili.io/CrnXNdG.png'; // Imaginea Rubinului
+    flyer.className = 'flying-points'; // Ne folosim de CSS-ul existent
+    flyer.style.width = '45px';
+    flyer.style.height = '45px';
+    flyer.style.objectFit = 'contain';
+    flyer.style.filter = 'drop-shadow(0 0 15px rgba(255, 51, 102, 0.8))';
+    
+    const x = startX || window.innerWidth / 2;
+    const y = startY || window.innerHeight / 2;
+
+    flyer.style.left = `${x}px`; 
+    flyer.style.top = `${y}px`;
+    flyer.style.transform = 'translate(-50%, -50%)';
+    document.body.appendChild(flyer);
+
+    // Zboară direct spre secțiunea RUBINELOR
+    const targetRect = document.getElementById('rubySection').getBoundingClientRect();
+    
+    setTimeout(() => {
+        flyer.style.left = `${targetRect.left + targetRect.width/2}px`;
+        flyer.style.top = `${targetRect.top + targetRect.height/2}px`;
+        flyer.style.transform = 'translate(-50%, -50%) scale(0.2)';
+        flyer.style.opacity = '0';
+        
+        // Efect de săritură pe iconița cu rubine
+        document.getElementById('rubySection').classList.add('score-bump');
+        setTimeout(() => document.getElementById('rubySection').classList.remove('score-bump'), 500);
+    }, 50);
+
+    setTimeout(() => { 
+        flyer.remove(); 
+        
+        rubies += pendingRubyWin; // Adăugăm rubinul
+        pendingRubyWin = 0;
+        
+        updateScoreUI(); // Sincronizăm textul de sus
+        finishSlotCleanup(); // Curățăm event-ul și salvăm la Cloud
     }, 850);
 }
 
@@ -7882,14 +7947,13 @@ function runScoreTicker(amount) {
 }
 
 function closeResultAndSlot() {
-    // 1. ÎNCHIDE DOAR MODALUL DE REZULTAT (Mașina e deja închisă din finalizeSpin)
     document.getElementById('slotResultModal').style.display = 'none';
     
-    // 2. PORNEȘTE ANIMAȚIA DE PUNCTE ZBURĂTOARE
-    if (pendingWinAmount !== 0) {
-        animateScoreFlying();
+    if (pendingRubyWin > 0) {
+        animateRubyFlying(); // Zboară rubinul spre dreapta!
+    } else if (pendingWinAmount !== 0) {
+        animateScoreFlying(); // Zboară scorul spre centru
     } else {
-        // Dacă a fost egalitate sau zero (deși la sloturi nu prea e cazul), curățăm indicatorul
         finishSlotCleanup();
     }
 }
