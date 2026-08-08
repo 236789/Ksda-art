@@ -5639,27 +5639,24 @@ async function closeRubyDiscovery() {
       document.getElementById('mainMenu').style.display = 'flex';
     }
 
+// 2. UPDATED updateScoreUI function
 function updateScoreUI(isLoss = false) {
-  // Aplicăm efectul pe 'scoreSection' ca să sară DOAR scorul, nu tot meniul
   const sb = document.getElementById('scoreSection'); 
   const st = document.getElementById('scoreText');
-  const rt = document.getElementById('rubyText'); // NOU: Pentru a actualiza și rubinele
+  const rt = document.getElementById('rubyText');
   
-  if (st) st.innerText = score;
-  if (rt) rt.innerText = rubies; // NOU: Sincronizează rubinele
+  // Use nFormatter here for both Score and Rubies
+  if (st) st.innerText = nFormatter(score);
+  if (rt) rt.innerText = nFormatter(rubies); 
 
   if (sb) {
     if (isLoss) {
-      // Adăugăm clasa de roșu
       sb.classList.add('score-loss');
-      // O scoatem după 500ms (Exact cum era în codul tău)
       setTimeout(() => {
         sb.classList.remove('score-loss');
       }, 500);
     } else {
-      // Efect de "pump" galben la câștig
       sb.classList.add('score-bump');
-      // O scoatem după 200ms (Exact cum era în codul tău)
       setTimeout(() => {
         sb.classList.remove('score-bump');
       }, 200);
@@ -5675,6 +5672,24 @@ function startKevinMovement() {
     moveKevinInterval = setInterval(() => {
         moveKevinAway();
     }, speed);
+}
+
+
+// Function to format big numbers (e.g., 10500 -> 10.5K)
+function formatNumber(num) {
+    if (num < 10000) return num; // Keep raw for 4 digits or less
+    
+    const suffixes = ["", "K", "M", "B", "T"];
+    const suffixNum = Math.floor(("" + num).length / 3);
+    
+    let shortValue = parseFloat((suffixNum != 0 ? (num / Math.pow(1000, suffixNum)) : num).toPrecision(3));
+    
+    // If it has a decimal like 10.0, remove the .0
+    if (shortValue % 1 != 0) {
+        shortValue = shortValue.toFixed(1);
+    }
+    
+    return shortValue + suffixes[suffixNum];
 }
 
 
@@ -7982,23 +7997,22 @@ function animateRubyFlying(startX = null, startY = null) {
 
 function runScoreTicker(amount) {
     const start = score;
-    const end = score + amount;
+    const end = Math.max(0, score + amount); 
     const duration = 1000;
     const startTime = performance.now();
 
     function step(now) {
         const progress = Math.min((now - startTime) / duration, 1);
-        
-        // This handles both adding and subtracting automatically
         const current = Math.floor(start + (amount * progress));
         
-        document.getElementById('scoreText').innerText = current;
+        // Update the text using the formatter while it's counting
+        document.getElementById('scoreText').innerText = formatNumber(Math.max(0, current));
         
         if (progress < 1) {
             requestAnimationFrame(step);
         } else {
             score = end;
-            updateScoreUI(); // Safety sync to clean UI
+            updateScoreUI(); 
             finishSlotCleanup();
         }
     }
