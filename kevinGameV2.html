@@ -5225,6 +5225,7 @@ let lastSavedRubies = 0;
 let hasSeenRubyTutorial = false; // Flag to track the pop-up
     let lastSavedScore = 0;
 let isSuperMagnetActive = false;
+let isGracePeriodActive = false;
 
 
 // ADD THIS HERE:
@@ -5561,24 +5562,24 @@ function startGameUI() {
   // Spawns the first event between 8 to 15 seconds after starting
   eventTimeout = setTimeout(spawnSpecialEvent, 30000);
 
-  // --- UPDATED MISS PENALTY (With Sound) ---
 document.getElementById('gameArea').onclick = (e) => {
-    if (isPaused) return;
+    // 1. If paused OR the 3-second shield is active, do nothing
+    if (isPaused || isGracePeriodActive) return;
 
-    // REFINED: Only ignore the click if the user EXACTLY hit a button or an active event box
+    // 2. Ignore clicks on buttons/event boxes
     if (e.target.closest('.control-btn') || e.target.closest('.active-event-box')) {
         return; 
     }
 
+    // 3. Normal miss logic
     playMissSFX(); 
     comboCount = 0; 
     sessionMisses++; 
     if (score > 0) score--; 
     updateScoreUI(true); 
     showComboText(e.clientX, e.clientY, 0, true); 
-    updateComboBarUI(0); // <--- ADAUGĂ ASTA AICI
+    updateComboBarUI(0);
 };
-}
 
 async function syncScoreToFirestore() {
   // Sync if score OR rubies changed
@@ -5753,15 +5754,26 @@ function startTiredCycle() {
     tiredTimeout = setTimeout(() => {
         const kevin = document.getElementById('kevin');
         isKevinTired = true;
-        kevin.style.backgroundImage = currentTiredImg; // POZA DE OBOSEALĂ DINAMICĂ
+        kevin.style.backgroundImage = currentTiredImg; 
         
         setTimeout(() => {
             isKevinTired = false;
-            kevin.style.backgroundImage = currentPlayImg; // POZA NORMALĂ DINAMICĂ
+            
+            // --- THE 3 SECONDS INVINCIBILITY START ---
+            isGracePeriodActive = true; 
+            kevin.style.filter = "drop-shadow(0 0 10px white)"; // Visual hint for the shield
+            
+            setTimeout(() => { 
+                isGracePeriodActive = false; 
+                kevin.style.filter = ""; // Remove visual hint
+            }, 3000); 
+            // ------------------------------------------
+
+            kevin.style.backgroundImage = currentPlayImg; 
             moveKevinAway(); 
             startTiredCycle();
-        }, 5000);
-    }, 60000);
+        }, 5000); // Stationary for 5 seconds
+    }, 60000); // Happens every 60 seconds
 }
 document.getElementById('kevin').addEventListener('click', (e) => {
       e.stopPropagation(); 
@@ -7234,7 +7246,7 @@ function spawnSpecialEvent() {
     // --- NOU: 1% ȘANSĂ PENTRU RUBIN (Doar dacă sunt deblocate) ---
     if (hasSeenRubyTutorial || rubies > 0) {
         // Dacă numărul generat (0-100) e mai mic sau egal cu 1, schimbăm eventul în Rubin!
-        if (Math.random() > 0.35) { // 65% șansă să dea reroll
+if (Math.random() < 0.02) { // 2% șansă să apară
             chosenKey = "rubyDrop";
             console.log("💎 SANSĂ EXTREMĂ! A apărut Rubinul de 1%!");
         }
