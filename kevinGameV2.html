@@ -9210,14 +9210,50 @@ function startBMTimer() {
     }, 1000);
 }
 
-function openBlackMarket() {
+async function openBlackMarket() {
     isPaused = true;
     clearInterval(moveKevinInterval);
-    refreshBlackMarketWants();
-    document.getElementById('blackMarketModal').style.display = 'flex';
-    document.getElementById('utilitiesModal').style.display = 'none';
-    renderBlackMarketGrid();
-    startBMTimer();
+    
+    document.getElementById('loadingModal').style.display = 'flex';
+    document.getElementById('loadingStatus').innerText = "Întâlnire cu contrabandistul...";
+
+    // 1. Get all currently available emoji IDs from your registry
+    const myAvailableKeys = Object.keys(specialRegistry).filter(k => k !== "rubyDrop" && k !== "trivia");
+
+    try {
+        const idToken = await firebase.auth().currentUser.getIdToken(true);
+        
+        // 2. Ask backend to either give us the current shop or generate a new one
+        const response = await fetch('https://kevin-backend-qodc.onrender.com/sync-black-market', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                idToken: idToken,
+                availableKeys: myAvailableKeys 
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            
+            lastMarketRefresh = data.lastRefresh;
+            
+            // 3. Map the data to our UI format
+            blackMarketWants = data.offers.map(off => ({
+                ...off,
+                sold: data.playerSales[off.key] || 0
+            }));
+
+            document.getElementById('loadingModal').style.display = 'none';
+            document.getElementById('blackMarketModal').style.display = 'flex';
+            renderBlackMarketGrid();
+            startBMTimer();
+        }
+    } catch (e) {
+        document.getElementById('loadingModal').style.display = 'none';
+        showKevinutaBubble("Piața e închisă momentan...");
+        resumeGame();
+    }
 }
 
 function renderBlackMarketGrid() {
@@ -9292,25 +9328,57 @@ function setSellQty(qty) {
     document.getElementById('sellFinalBtn').disabled = (currentSellQty <= 0);
 }
 
-function processSell() {
+async function processSell() {
     const want = blackMarketWants[currentSellIdx];
     const totalPay = currentSellQty * want.price;
 
+    // 1. Logic Check
     if ((_GAME_DATA.inventory[want.key] || 0) < currentSellQty) return;
 
+    // 2. Local Update
     _GAME_DATA.inventory[want.key] -= currentSellQty;
     want.sold += currentSellQty;
-    
-    // Set pending amount for the flying animation
-    pendingWinAmount = totalPay;
+    pendingWinAmount = totalPay; // For the flying animation
 
+    // 3. Close the modal
     document.getElementById('sellDetailModal').style.display = 'none';
     
+    // 4. Flying Animation
     const targetRect = document.getElementById('sellItemImg').getBoundingClientRect();
     animateScoreFlying(targetRect.left + 40, targetRect.top + 40);
-    
+
+    // ==========================================
+    // 5. YOUR CODE SNIPPET GOES HERE (SYNC TO CLOUD)
+    // ==========================================
+    try {
+        const idToken = await firebase.auth().currentUser.getIdToken(true);
+
+        const salesUpdate = {};
+        blackMarketWants.forEach(w => {
+            if (w.sold > 0) salesUpdate[w.key] = w.sold;
+        });
+
+        await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                idToken: idToken, 
+                score: score + totalPay, // Sync new score
+                rubies: rubies,           // Keep rubies in sync too
+                inventory: _GAME_DATA.inventory,
+                bmSales: salesUpdate 
+            }),
+        });
+
+        // Update the local score variable so the UI stays correct
+        score += totalPay;
+        console.log("✅ Black Market transaction synced to Cloud.");
+    } catch (e) {
+        console.error("❌ Cloud sync failed:", e);
+    }
+
+    // 6. Refresh the grid to show new "VREA" limits
     renderBlackMarketGrid();
-    syncInventoryToCloud();
 }
 
 // Ensure the ninja icon in Utilities opens the Market
