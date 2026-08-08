@@ -5562,9 +5562,22 @@ document.getElementById('kevin').addEventListener('click', (e) => {
 
       updateScoreUI();
 
-      comboCount++;
+comboCount++;
       if (comboCount > bestComboAllTime) {
           bestComboAllTime = comboCount;
+      }
+      
+      // 💎 SISTEMUL NOU PENTRU RUBINE (1 Rubin la fiecare 100 Combo)
+      if (comboCount > 0 && comboCount % 100 === 0) {
+          rubies++;
+          updateScoreUI(); // Sincronizează HUD-ul (arată +1 rubin)
+          
+          // Arată tutorialul prima dată, altfel Kevin doar se laudă
+          if (!hasSeenRubyTutorial) {
+              openRubyDiscovery();
+          } else {
+              showKevinutaBubble("💎 +1 Rubin pentru Combo!");
+          }
       }
       
       showComboText(e.clientX, e.clientY, comboCount);
