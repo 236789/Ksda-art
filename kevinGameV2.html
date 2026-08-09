@@ -4743,6 +4743,40 @@ input:checked + .s-slider:before {
     padding: 0 !important;
     margin-top: 10px;
 }
+
+/* THEMED PREMIUM REWARD MODAL */
+.premium-reward-box {
+    background: var(--th-bg) !important;
+    border: 4px solid var(--th-border) !important;
+    box-shadow: 0 0 40px var(--th-glow), inset 0 0 20px rgba(0,0,0,0.8) !important;
+}
+
+.premium-reward-btn {
+    background: var(--th-btn-bg) !important;
+    color: var(--th-btn-text) !important;
+    box-shadow: 0 8px 0 var(--th-btn-shadow), 0 10px 20px rgba(0,0,0,0.4) !important;
+    border: 3px solid #ffffff !important;
+    width: 100% !important;
+    height: 65px !important;
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase;
+}
+
+.premium-reward-btn:active {
+    transform: translateY(6px);
+    box-shadow: 0 2px 0 var(--th-btn-shadow) !important;
+}
+
+.reward-claimed-tag {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid var(--th-border);
+    color: var(--th-accent);
+    padding: 15px;
+    border-radius: 12px;
+    font-family: 'Orbitron';
+    font-weight: 900;
+}
   </style>
 </head>
 <body>
@@ -9807,33 +9841,45 @@ function claimIndexReward(key) {
     const item = specialRegistry[key];
     if (!item || !item.indexReward || _GAME_DATA.claimedRewards.includes(key)) return;
 
-    // 1. Logic
+    // 1. Logic: Save to local data
     _GAME_DATA.claimedRewards.push(key);
     const isRuby = item.indexReward.type === 'ruby';
     const amount = item.indexReward.value;
 
-    // 2. SAFE REMOVAL: Find the modal overlay and kill it
-    const activeModals = document.querySelectorAll('.modal-overlay');
-    activeModals.forEach(m => {
-        if (m.innerHTML.includes('claimIndexReward')) m.remove();
-    });
+    // 2. NUKE ALL MENUS: Close everything so the screen is empty
+    const rewardModal = document.getElementById('activeRewardModal');
+    if (rewardModal) rewardModal.remove();
+    
+    document.getElementById('indexModal').style.display = 'none';
+    document.getElementById('utilitiesModal').style.display = 'none';
 
-    // 3. UI Update: Refresh Grid
+    // 3. UI Update: Refresh grid in background (even though it's hidden)
     const stageId = currentStageId; 
     const itemsInStage = Object.keys(specialRegistry).filter(k => specialRegistry[k].stages && specialRegistry[k].stages.includes(stageId));
     showStageIndex(stageId, itemsInStage);
 
-    // 4. Trigger Result
+    // 4. Trigger Result Flow
     const originalClose = window.closeResultAndSlot;
     window.closeResultAndSlot = () => {
         document.getElementById('slotResultModal').style.display = 'none';
-        if (isRuby) { pendingRubyWin = amount; animateRubyFlying(); } 
-        else { pendingWinAmount = amount; animateScoreFlying(); }
+        
+        if (isRuby) { 
+            pendingRubyWin = amount; 
+            animateRubyFlying(); 
+        } else { 
+            pendingWinAmount = amount; 
+            animateScoreFlying(); 
+        }
+        
+        // Restore movement and original close function
         window.closeResultAndSlot = originalClose;
+        isPaused = false;
+        startKevinMovement();
         syncScoreToFirestore(); 
     };
 
-    showSlotResult("RECOMPENSĂ!", `Ai primit +${amount} ${isRuby ? 'Rubin' : 'Scor'}!`, false);
+    // Show the result on a clear screen
+    showSlotResult("BRAVO!", `Ai colectat +${amount} ${isRuby ? 'Rubin' : 'Scor'}!`, false);
 }
 // Update showStageIndex to show the green "Reward Ready" dot
 function showStageIndex(stageId, itemKeys) {
@@ -9873,7 +9919,7 @@ function showStageIndex(stageId, itemKeys) {
 
 function showIndexRewardModal(key) {
     const data = specialRegistry[key];
-    const isClaimed = _GAME_DATA.claimedRewards.includes(key);
+    const isClaimed = _GAME_DATA.claimedRewards && _GAME_DATA.claimedRewards.includes(key);
     
     const modalOverlay = document.createElement('div');
     modalOverlay.id = "activeRewardModal";
@@ -9887,19 +9933,19 @@ function showIndexRewardModal(key) {
     }
 
     modalOverlay.innerHTML = `
-        <div class="modal-box info-modal-box reward-modal-box">
+        <div class="modal-box info-modal-box premium-reward-box">
             <img src="${data.image}" style="width: 85px; height: 85px; margin-bottom: 15px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));">
-            <h2 style="font-size: 32px; color: #facc15; margin-bottom: 5px;">${data.name}</h2>
-            <div class="selection-line" style="background: #facc15; width: 50px; margin-bottom: 15px;"></div>
+            <h2 style="font-size: 32px; color: var(--th-accent); margin-bottom: 5px;">${data.name}</h2>
+            <div class="selection-line" style="background: var(--th-border); width: 50px; margin-bottom: 15px;"></div>
             <p style="color: #d1d5db; font-size: 16px; margin-bottom: 25px;">${data.description}</p>
             
             ${!isClaimed && data.indexReward ? `
-                <button class="menu-btn play reward-collect-btn" onclick="claimIndexReward('${key}')" style="width: 100%; height: 60px; font-size: 20px;">
+                <button class="menu-btn play premium-reward-btn" onclick="claimIndexReward('${key}')">
                     COLECTEAZĂ: ${rewardText}
                 </button>
-            ` : `<div style="background: rgba(74, 222, 128, 0.1); border: 2px solid #4ade80; padding: 15px; border-radius: 12px; color: #4ade80; font-family: 'Orbitron'; font-weight: 900;">COLECTATĂ ✓</div>`}
+            ` : `<div class="reward-claimed-tag">COLECTATĂ ✓</div>`}
             
-            <button class="cancel-btn" style="margin-top: 20px; font-size: 14px;" onclick="this.closest('.modal-overlay').remove()">ÎNCHIDE</button>
+            <button class="cancel-btn" style="margin-top: 20px; font-size: 14px; color: #9aa0b8;" onclick="this.closest('.modal-overlay').remove()">ÎNCHIDE</button>
         </div>
     `;
     document.body.appendChild(modalOverlay);
