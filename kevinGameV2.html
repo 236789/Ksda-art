@@ -6417,7 +6417,7 @@ comboCount++;
           if (!hasSeenRubyTutorial) {
               openRubyDiscovery();
           } else {
-              showKevinutaBubble("💎 +1 Rubin pentru Combo!");
+          showNotification("COMBO REÎNNOIT!", "Ai atins 100 Combo: +1 Rubin primit!", "https://iili.io/CrnXNdG.png");
           }
       }
       
@@ -7551,7 +7551,7 @@ score++;
             if (!hasSeenRubyTutorial) {
                 openRubyDiscovery();
             } else {
-                showKevinutaBubble("💎 +1 Rubin pentru Combo!");
+                showNotification("COMBO MILESTONE!", "Ai atins 100 combo! +1 Rubin primit.", "https://iili.io/CrnXNdG.png");
             }
         }
 
@@ -7874,7 +7874,7 @@ function spawnSpecialEvent() {
     // --- NOU: 1% ȘANSĂ PENTRU RUBIN (Doar dacă sunt deblocate) ---
     if (hasSeenRubyTutorial || rubies > 0) {
         // Dacă numărul generat (0-100) e mai mic sau egal cu 1, schimbăm eventul în Rubin!
-        if (Math.random() > 0.35) { // 65% șansă să dea reroll
+if (Math.random() < 0.05) { // 2% șansă să apară
             chosenKey = "rubyDrop";
             console.log("💎 SANSĂ EXTREMĂ! A apărut Rubinul de 1%!");
         }
@@ -10080,10 +10080,8 @@ function claimStageReward(stageId) {
 }
 
 
-function showNotification(title, message, iconClass = 'fa-circle-info') {
+function showNotification(title, message, iconOrUrl = 'fa-circle-info') {
     let container = document.getElementById('toastContainer');
-    
-    // Create container if it doesn't exist
     if (!container) {
         container = document.createElement('div');
         container.id = 'toastContainer';
@@ -10093,9 +10091,15 @@ function showNotification(title, message, iconClass = 'fa-circle-info') {
     const toast = document.createElement('div');
     toast.className = 'toast-item';
     
+    // Check if the icon is a URL (starts with http) or a class
+    const isUrl = iconOrUrl.startsWith('http');
+    const iconHtml = isUrl 
+        ? `<img src="${iconOrUrl}" style="width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">`
+        : `<i class="fa-solid ${iconOrUrl}"></i>`;
+
     toast.innerHTML = `
-        <div class="toast-icon"><i class="fa-solid ${iconClass}"></i></div>
-        <div class="toast-content">
+        <div class="toast-icon">${iconHtml}</div>
+        <div class="toast-text">
             <span class="toast-title">${title}</span>
             <span class="toast-msg">${message}</span>
         </div>
@@ -10103,11 +10107,10 @@ function showNotification(title, message, iconClass = 'fa-circle-info') {
 
     container.appendChild(toast);
 
-    // Auto-remove sequence
     setTimeout(() => {
         toast.classList.add('leaving');
         setTimeout(() => toast.remove(), 500);
-    }, 4000); // Stays for 4 seconds
+    }, 4000);
 }
 
 
