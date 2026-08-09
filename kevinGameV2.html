@@ -4777,6 +4777,85 @@ input:checked + .s-slider:before {
     font-family: 'Orbitron';
     font-weight: 900;
 }
+
+
+/* TOAST NOTIFICATION SYSTEM */
+#toastContainer {
+    position: fixed;
+    top: 80px; /* Below the HUD */
+    right: 20px;
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none; /* Clicks pass through to Kevin */
+}
+
+.toast-item {
+    min-width: 250px;
+    max-width: 320px;
+    background: var(--th-bg);
+    border: 2px solid var(--th-border);
+    border-radius: 12px;
+    padding: 12px 18px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5), inset 0 0 10px rgba(0,0,0,0.5);
+    backdrop-filter: blur(8px);
+    
+    /* Animation Logic */
+    animation: toastSlideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    transition: all 0.4s ease;
+}
+
+.toast-item.leaving {
+    animation: toastSlideOut 0.5s ease-in forwards;
+}
+
+@keyframes toastSlideIn {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes toastSlideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(120%); opacity: 0; }
+}
+
+.toast-icon {
+    font-size: 24px;
+    color: var(--th-accent);
+    filter: drop-shadow(0 0 5px var(--th-glow));
+}
+
+.toast-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.toast-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: var(--th-accent);
+    text-transform: uppercase;
+}
+
+.toast-msg {
+    font-family: 'Oswald', sans-serif;
+    font-size: 15px;
+    color: #d1d5db;
+    line-height: 1.2;
+}
+
+/* Mobile Fix for Toasts */
+@media (max-width: 600px) {
+    #toastContainer { right: 10px; top: 120px; width: calc(100% - 20px); align-items: flex-end; }
+    .toast-item { min-width: 200px; padding: 10px 15px; }
+}
   </style>
 </head>
 <body>
@@ -7795,7 +7874,7 @@ function spawnSpecialEvent() {
     // --- NOU: 1% ȘANSĂ PENTRU RUBIN (Doar dacă sunt deblocate) ---
     if (hasSeenRubyTutorial || rubies > 0) {
         // Dacă numărul generat (0-100) e mai mic sau egal cu 1, schimbăm eventul în Rubin!
-if (Math.random() < 0.02) { // 2% șansă să apară
+        if (Math.random() > 0.35) { // 65% șansă să dea reroll
             chosenKey = "rubyDrop";
             console.log("💎 SANSĂ EXTREMĂ! A apărut Rubinul de 1%!");
         }
@@ -7862,6 +7941,7 @@ item.onclick = (e) => {
         // Checks if this emoji key is already in the discovered list
         if (!_GAME_DATA.index.includes(chosenKey)) {
             _GAME_DATA.index.push(chosenKey);
+            showNotification("DESCOPERIRE!", `Ai deblocat elementul: ${eventData.name}`, "fa-book-open");
             console.log(`📖 NOUĂ DESCOPERIRE: [${eventData.name}] adăugat în Index!`);
             syncInventoryToCloud(); // Immediate sync to save the discovery
         }
@@ -9794,20 +9874,35 @@ function showStageIndex(stageId, itemKeys) {
         grid.appendChild(tile);
     });
 
-    // Stage Completion Button logic remains the same...
+    // Stage Completion Logic
     const isStageComplete = itemKeys.length > 0 && itemKeys.every(k => _GAME_DATA.index.includes(k));
     const isStageClaimed = _GAME_DATA.claimedStageRewards.includes(stageId);
+
+    // Trigger Notification for Completion
+    if (isStageComplete && !isStageClaimed && !window[`notified_${stageId}`]) {
+        showNotification("ETAPĂ COMPLETĂ!", `Ai descoperit tot în ${stageList[stageId].name}!`, "fa-medal");
+        window[`notified_${stageId}`] = true; // Prevents spamming every time menu opens
+    }
+
     const oldBtn = document.getElementById('stageRewardBtn');
     if (oldBtn) oldBtn.remove();
+
     if (isStageComplete) {
         const rewardBtn = document.createElement('button');
         rewardBtn.id = 'stageRewardBtn';
         rewardBtn.className = "menu-btn play";
-        rewardBtn.style = "width: 100%; margin-top: 15px; height: 55px; background: linear-gradient(180deg, #facc15, #d97706)!important; color: #000!important; border-color: #fff!important;";
-        rewardBtn.innerHTML = isStageClaimed ? "ETAPĂ COMPLETĂ ✓" : "COLECTEAZĂ PREMIU ETAPĂ (+500)";
-        if (!isStageClaimed) rewardBtn.onclick = () => claimStageReward(stageId);
-        else { rewardBtn.disabled = true; rewardBtn.style.opacity = "0.5"; }
-        detail.appendChild(rewardBtn);
+        rewardBtn.style = "width: 100%; margin-top: 15px; height: 55px; background: linear-gradient(180deg, #facc15, #d97706)!important; color: #000!important; border-color: #fff!important; box-shadow: 0 6px 0 #4d2600!important;";
+        
+        if (isStageClaimed) {
+            rewardBtn.innerHTML = "ETAPĂ COMPLETĂ ✓ (COLECTAT)";
+            rewardBtn.disabled = true;
+            rewardBtn.style.opacity = "0.5";
+            rewardBtn.style.boxShadow = "none";
+        } else {
+            rewardBtn.innerHTML = `COLECTEAZĂ PREMIU ETAPĂ (+500)`;
+            rewardBtn.onclick = () => claimStageReward(stageId);
+        }
+        document.getElementById('indexDetailView').appendChild(rewardBtn);
     }
 }
 
@@ -9985,6 +10080,36 @@ function claimStageReward(stageId) {
 }
 
 
+function showNotification(title, message, iconClass = 'fa-circle-info') {
+    let container = document.getElementById('toastContainer');
+    
+    // Create container if it doesn't exist
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-item';
+    
+    toast.innerHTML = `
+        <div class="toast-icon"><i class="fa-solid ${iconClass}"></i></div>
+        <div class="toast-content">
+            <span class="toast-title">${title}</span>
+            <span class="toast-msg">${message}</span>
+        </div>
+    `;
+
+    container.appendChild(toast);
+
+    // Auto-remove sequence
+    setTimeout(() => {
+        toast.classList.add('leaving');
+        setTimeout(() => toast.remove(), 500);
+    }, 4000); // Stays for 4 seconds
+}
+
 
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
@@ -10052,6 +10177,8 @@ window.closeIndex = closeIndex;
 window.claimIndexReward = claimIndexReward;
 window.claimStageReward = claimStageReward;
 window.showIndexRewardModal = showIndexRewardModal;
+window.showNotification = showNotification;
+
 })(); // <-- CLOSES THE SECURE VAULT
 
 </script>
