@@ -4644,6 +4644,47 @@ input:checked + .s-slider:before {
     color: #ff3366;
     font-weight: 900;
 }
+
+/* Smaller Index Grid */
+.index-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* Increased to 5 per row */
+    gap: 8px; /* Tighter gap */
+    padding: 10px 0;
+}
+
+.index-tile {
+    aspect-ratio: 1/1;
+    background: rgba(0,0,0,0.6);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 10px; /* Slightly tighter corners */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: transform 0.1s;
+}
+
+/* Notification dot for unclaimed rewards */
+.reward-dot {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 12px;
+    height: 12px;
+    background: #4ade80; /* Green dot */
+    border-radius: 50%;
+    border: 2px solid #000;
+    box-shadow: 0 0 5px #4ade80;
+    z-index: 5;
+    animation: pulseGlow 1.5s infinite;
+}
+
+@keyframes pulseGlow {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
   </style>
 </head>
 <body>
@@ -5607,10 +5648,12 @@ let isGracePeriodActive = false;
 
 let blackMarketWants = [];
 let lastMarketRefresh = 0; // Timestamp of last refresh
-// ADD THIS HERE:
+
 const _GAME_DATA = {
     inventory: {},
-    index: [] // Array of item keys discovered at least once
+    index: [],
+    claimedRewards: [],      // Tracks keys of emojis whose reward was taken
+    claimedStageRewards: []  // Tracks stage IDs whose completion reward was taken
 };
     let comboCount = 0;
     let comboTimer = null;
@@ -5733,15 +5776,24 @@ async function checkUserInFirestore(uid) {
         clearTimeout(wakeUpTimer);
         updateLoader(60, 'Descărcare profil...');
 
-        if (response.status === 200) {
+if (response.status === 200) {
             const data = await response.json();
-// Inside the checkUserInFirestore response handling:
-currentUsername = data.username;
-score = data.score || 0;
-rubies = data.rubies || 0; // LOAD RUBIES FROM DB
-lastSavedScore = score;
-lastSavedRubies = rubies;
-hasSeenRubyTutorial = data.hasSeenRubyTutorial || false; // LOAD TUTORIAL STATE
+            
+            // Existing profile data
+            currentUsername = data.username;
+            score = data.score || 0;
+            rubies = data.rubies || 0;
+            lastSavedScore = score;
+            lastSavedRubies = rubies;
+            hasSeenRubyTutorial = data.hasSeenRubyTutorial || false;
+
+            // --- NEW: LOAD INDEX & REWARD PROGRESS ---
+            _GAME_DATA.inventory = data.inventory || {};
+            _GAME_DATA.index = data.index || [];
+            _GAME_DATA.claimedRewards = data.claimedRewards || [];
+            _GAME_DATA.claimedStageRewards = data.claimedStageRewards || [];
+            
+            console.log("📖 Progress loaded:", _GAME_DATA.index.length, "emojis discovered.");
             
             updateLoader(75, 'Sincronizare setări...');
             
@@ -5974,13 +6026,17 @@ async function syncScoreToFirestore() {
       const response = await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          idToken: idToken, 
-          score: scoreToTry,
-          rubies: rubiesToTry, // SEND RUBIES
-          hasSeenRubyTutorial: hasSeenRubyTutorial // SAVE TUTORIAL STATE
-        }),
-      });
+// Locate this inside syncScoreToFirestore()
+body: JSON.stringify({ 
+    idToken: idToken, 
+    score: scoreToTry,
+    rubies: rubiesToTry,
+    hasSeenRubyTutorial: hasSeenRubyTutorial,
+    // NEW: Send claimed status to authorize the reward jump
+    claimedRewards: _GAME_DATA.claimedRewards,
+    claimedStageRewards: _GAME_DATA.claimedStageRewards
+}),
+      }); 
 
       if (response.ok) {
         lastSavedScore = scoreToTry;
@@ -7179,6 +7235,7 @@ const specialRegistry = {
         type: "bad",
         duration: 10,
         stages: ["street"], // Enabled for Stage 1
+    indexReward: { type: 'score', value: 50 },
         description: "Un topor care ricoșează și îți fură scorul dacă te lovește!",
         action: (e) => startAxeEvent()
     },
@@ -7188,6 +7245,7 @@ const specialRegistry = {
         type: "good",
         duration: 15,
         stages: ["street"], // Enabled for Stage 1
+    indexReward: { type: 'score', value: 50 },
         description: "Un mouse glicat care urmărește personajul și dă click-uri automate!",
         action: (e) => startAutoClickEvent()
     },
@@ -7198,6 +7256,7 @@ const specialRegistry = {
     type: "good",
     duration: 8,
         stages: ["street"], // Enabled for Stage 1
+    indexReward: { type: 'score', value: 50 },
     description: "Timpul s-a oprit! eroul tau este înghețat în loc. Profită și dă click-uri rapide!",
     action: (e) => startSlowMoEvent()
 },
@@ -7208,6 +7267,7 @@ const specialRegistry = {
         type: "bad",
         duration: 20, // Set to 20 seconds
         stages: ["street"], // Enabled for Stage 1
+    indexReward: { type: 'score', value: 50 },
         description: "Ai înghițit o jucărie de câine! Acum scoți sunete ciudate când te miști.",
         action: (e) => startSqueakEvent()
     },
@@ -7218,6 +7278,7 @@ const specialRegistry = {
     type: "bad",
     duration: 15,
         stages: ["street"], // Enabled for Stage 1
+    indexReward: { type: 'score', value: 50 },
     description: "Eroul tău a mâncat sos iute! E în flăcări, fuge haotic și pierde puncte!",
     action: (e) => startHotSauceEvent()
 },
@@ -7228,6 +7289,7 @@ const specialRegistry = {
     type: "gamble",
     duration: 8,
         stages: ["street"], // Enabled for Stage 1
+    indexReward: { type: 'score', value: 150 },
     description: "Încearcă-ți norocul! Pariază din scorul tău pentru un multiplicator uriaș.",
     action: (e) => openSlotMachine()
 },
@@ -7238,6 +7300,7 @@ const specialRegistry = {
     type: "good",
     duration: 0, 
         stages: ["street"], // Enabled for Stage 1
+    indexReward: { type: 'score', value: 50 },
     description: "Răspunde corect la 5 întrebări pentru un bonus masiv. Greșești una? Pierzi tot!",
     action: (e) => startTriviaEvent()
 },
@@ -7248,6 +7311,7 @@ const specialRegistry = {
     type: "good",
     duration: 0,
         stages: ["street"], // Enabled for Stage 1
+    indexReward: { type: 'score', value: 50 },
     description: "Găsește toate perechile în 25 de secunde pentru un bonus de 50 de puncte!",
     action: (e) => startMemoryGame()
 },
@@ -7258,6 +7322,7 @@ const specialRegistry = {
         type: "good",
         duration: 35,
         stages: ["street"],
+    indexReward: { type: 'score', value: 50 },
         description: "Un magnet extrem de puternic care atrage toate emoji-urile spre eroul tău!",
         action: (e) => startSuperMagnetEvent()
     },
@@ -7267,6 +7332,7 @@ const specialRegistry = {
         type: "good",
         duration: 0, // Nu are o durată activă pe ecran, doar îl iei
         stages: ["street"],
+    indexReward: { type: 'ruby', value: 1 },
         description: "Un rubin extrem de rar a picat pe stradă! Noroc chior!",
         action: (e) => pickupRubyEmoji(e)
     },
@@ -9161,7 +9227,9 @@ const stageList = {
         index: 1,
         name: "STRADA",
         bg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/e7c37518-746f-42d6-9ea6-e3f7b028ffdb/ChatGPT+Image+Jun+16%2C+2025%2C+10_03_26+PM.png",
-        accent: "#facc15" // Gold for the street
+        accent: "#facc15", // Gold for the street
+    completionReward: { type: 'score', value: 500 },
+
     }
     // Future stages like "beach" or "moon" will go here
 };
@@ -9653,6 +9721,104 @@ async function syncInventoryToCloud() {
             }),
         });
     } catch (e) { console.error("Cloud Error:", e); }
+}
+
+
+function claimIndexReward(key) {
+    const item = specialRegistry[key];
+    if (!item || !item.indexReward) return;
+
+    if (_GAME_DATA.claimedRewards.includes(key)) return;
+
+    // 1. Give the reward
+    if (item.indexReward.type === 'score') {
+        pendingWinAmount = item.indexReward.value;
+        animateScoreFlying(); // Uses your existing score animation
+    } else if (item.indexReward.type === 'ruby') {
+        pendingRubyWin = item.indexReward.value;
+        animateRubyFlying(); // Uses your existing ruby animation
+    }
+
+    // 2. Save state
+    _GAME_DATA.claimedRewards.push(key);
+    syncInventoryToCloud(); // Backup to backend
+
+    // 3. Close the info modal and refresh the grid
+    document.querySelector('.modal-overlay:last-child').remove(); // Closes the "Mobile Event Modal"
+    
+    // Refresh the grid to remove the green dot
+    const stageId = currentStageId; // Or track which stage is open
+    const itemsInStage = Object.keys(specialRegistry).filter(k => specialRegistry[k].stages && specialRegistry[k].stages.includes(stageId));
+    showStageIndex(stageId, itemsInStage);
+}
+
+// Update showStageIndex to show the green "Reward Ready" dot
+function showStageIndex(stageId, itemKeys) {
+    document.getElementById('indexStageList').style.display = 'none';
+    const detail = document.getElementById('indexDetailView');
+    detail.style.display = 'block';
+    
+    document.getElementById('indexDetailTitle').innerText = stageList[stageId].name;
+    const grid = document.getElementById('indexEmojiGrid');
+    grid.innerHTML = "";
+
+    itemKeys.forEach(key => {
+        const data = specialRegistry[key];
+        const isUnlocked = _GAME_DATA.index && _GAME_DATA.index.includes(key);
+        const isClaimed = _GAME_DATA.claimedRewards.includes(key);
+        
+        const tile = document.createElement('div');
+        tile.className = `index-tile ${isUnlocked ? 'unlocked' : 'locked'}`;
+        
+        // Show green dot if unlocked but not claimed
+        let rewardHtml = (isUnlocked && !isClaimed && data.indexReward) ? `<div class="reward-dot"></div>` : "";
+
+        tile.innerHTML = `
+            ${rewardHtml}
+            <img src="${data.image}">
+            ${!isUnlocked ? '<span class="q-mark">???</span>' : ''}
+        `;
+
+        if (isUnlocked) {
+            tile.style.cursor = "pointer";
+            tile.onclick = () => showIndexRewardModal(key);
+        }
+
+        grid.appendChild(tile);
+    });
+}
+
+function showIndexRewardModal(key) {
+    const data = specialRegistry[key];
+    const isClaimed = _GAME_DATA.claimedRewards.includes(key);
+    
+    // We create a temporary modal specifically for the Index claim
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay';
+    modalOverlay.style.display = 'flex';
+    modalOverlay.style.zIndex = '100010';
+    
+    let rewardText = "";
+    if (data.indexReward) {
+        rewardText = data.indexReward.type === 'ruby' ? `+${data.indexReward.value} Rubin` : `+${data.indexReward.value} Scor`;
+    }
+
+    modalOverlay.innerHTML = `
+        <div class="modal-box info-modal-box" style="padding: 25px 20px; max-width: 300px;">
+            <img src="${data.image}" style="width: 70px; margin-bottom: 10px;">
+            <h2 style="font-size: 24px; color: var(--th-accent);">${data.name}</h2>
+            <p style="font-size: 14px; margin-bottom: 20px;">${data.description}</p>
+            
+            ${!isClaimed && data.indexReward ? `
+                <button class="menu-btn play" onclick="claimIndexReward('${key}')" style="width: 100%; height: 50px; background: linear-gradient(180deg, #4ade80, #16a34a)!important; border-color: #fff!important;">
+                    RECOMPENSĂ: ${rewardText}
+                </button>
+            ` : `<p style="color: #4ade80; font-weight: bold;">RECOMPENSĂ COLECTATĂ ✓</p>`}
+            
+            <button class="cancel-btn" style="margin-top: 15px;" onclick="this.closest('.modal-overlay').remove()">ÎNCHIDE</button>
+        </div>
+    `;
+    document.body.appendChild(modalOverlay);
 }
 
 
