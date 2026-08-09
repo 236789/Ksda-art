@@ -4685,6 +4685,38 @@ input:checked + .s-slider:before {
     50% { transform: scale(1.3); opacity: 0.7; }
     100% { transform: scale(1); opacity: 1; }
 }
+
+
+/* Remove .reward-dot and replace with this */
+.index-tile.reward-ready {
+    border-color: #facc15 !important;
+    box-shadow: 0 0 15px #facc15, inset 0 0 10px rgba(250, 204, 21, 0.4);
+    animation: goldTilePulse 1.5s infinite alternate;
+    cursor: pointer;
+}
+
+@keyframes goldTilePulse {
+    from { box-shadow: 0 0 5px #facc15, inset 0 0 5px rgba(250, 204, 21, 0.2); transform: scale(1); }
+    to { box-shadow: 0 0 20px #facc15, inset 0 0 15px rgba(250, 204, 21, 0.5); transform: scale(1.05); }
+}
+
+/* Premium Reward Modal Tweaks */
+.reward-modal-box {
+    background: radial-gradient(circle at top, #2c2a55 0%, #0a0b16 100%) !important;
+    border: 4px solid #facc15 !important;
+    box-shadow: 0 0 40px rgba(250, 204, 21, 0.3) !important;
+}
+
+.reward-collect-btn {
+    background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%) !important;
+    box-shadow: 0 8px 0 #064e3b, 0 10px 20px rgba(0,0,0,0.4) !important;
+    border-color: #fff !important;
+    color: white !important;
+}
+
+.reward-collect-btn:active {
+    box-shadow: 0 2px 0 #064e3b !important;
+}
   </style>
 </head>
 <body>
@@ -9679,24 +9711,51 @@ function showStageIndex(stageId, itemKeys) {
     itemKeys.forEach(key => {
         const data = specialRegistry[key];
         const isUnlocked = _GAME_DATA.index && _GAME_DATA.index.includes(key);
+        const isClaimed = _GAME_DATA.claimedRewards.includes(key);
+        const hasReward = !!data.indexReward;
         
         const tile = document.createElement('div');
-        tile.className = `index-tile ${isUnlocked ? 'unlocked' : 'locked'}`;
+        // --- GOLD PULSING LOGIC ---
+        const rewardClass = (isUnlocked && !isClaimed && hasReward) ? 'reward-ready' : '';
+        tile.className = `index-tile ${isUnlocked ? 'unlocked' : 'locked'} ${rewardClass}`;
         
         tile.innerHTML = `
             <img src="${data.image}">
             ${!isUnlocked ? '<span class="q-mark">???</span>' : ''}
         `;
 
-        // If unlocked, show info on click
         if (isUnlocked) {
-            tile.style.cursor = "pointer";
-            tile.onclick = () => showItemInfo(key);
+            tile.onclick = () => showIndexRewardModal(key);
         }
-
         grid.appendChild(tile);
     });
+
+    // --- STAGE COMPLETION REWARD BUTTON ---
+    const isStageComplete = itemKeys.length > 0 && itemKeys.every(k => _GAME_DATA.index.includes(k));
+    const isStageClaimed = _GAME_DATA.claimedStageRewards.includes(stageId);
+    
+    const oldBtn = document.getElementById('stageRewardBtn');
+    if (oldBtn) oldBtn.remove();
+
+    if (isStageComplete) {
+        const rewardBtn = document.createElement('button');
+        rewardBtn.id = 'stageRewardBtn';
+        rewardBtn.className = "menu-btn play";
+        rewardBtn.style = "width: 100%; margin-top: 15px; height: 55px; background: linear-gradient(180deg, #facc15, #d97706)!important; color: #000!important; border-color: #fff!important; box-shadow: 0 8px 0 #4d2600!important;";
+        
+        if (isStageClaimed) {
+            rewardBtn.innerHTML = "ETAPĂ 100% ✓ (COLECTAT)";
+            rewardBtn.disabled = true;
+            rewardBtn.style.opacity = "0.6";
+            rewardBtn.style.boxShadow = "none";
+        } else {
+            rewardBtn.innerHTML = `COLECTEAZĂ PREMIU ETAPĂ (+500)`;
+            rewardBtn.onclick = () => claimStageReward(stageId);
+        }
+        detail.appendChild(rewardBtn);
+    }
 }
+
 
 function backToIndexMain() {
     renderIndexMain();
@@ -9723,7 +9782,51 @@ async function syncInventoryToCloud() {
     } catch (e) { console.error("Cloud Error:", e); }
 }
 
+function claimIndexReward(key) {
+    const item = specialRegistry[key];
+    if (!item || !item.indexReward || _GAME_DATA.claimedRewards.includes(key)) return;
 
+    // 1. Add to local data immediately
+    _GAME_DATA.claimedRewards.push(key);
+
+    // 2. Prepare the win logic
+    const isRuby = item.indexReward.type === 'ruby';
+    const amount = item.indexReward.value;
+
+    // 3. Close the current reward modal
+    const rewardModal = document.getElementById('activeRewardModal');
+    if (rewardModal) rewardModal.remove();
+
+    // 4. Update the Registry progress locally and refresh the main Index Grid
+    const stageId = currentStageId; 
+    const itemsInStage = Object.keys(specialRegistry).filter(k => specialRegistry[k].stages && specialRegistry[k].stages.includes(stageId));
+    showStageIndex(stageId, itemsInStage);
+
+    // 5. Show the Result Modal (The custom alert)
+    const title = "FELICITĂRI!";
+    const msg = `Ai colectat recompensa pentru ${item.name}: +${amount} ${isRuby ? 'Rubin' : 'Scor'}!`;
+    
+    // We override window.closeResultAndSlot temporarily to trigger the animation
+    const originalClose = window.closeResultAndSlot;
+    
+    window.closeResultAndSlot = () => {
+        document.getElementById('slotResultModal').style.display = 'none';
+        
+        if (isRuby) {
+            pendingRubyWin = amount;
+            animateRubyFlying();
+        } else {
+            pendingWinAmount = amount;
+            animateScoreFlying();
+        }
+        
+        // Restore the original function and sync
+        window.closeResultAndSlot = originalClose;
+        syncScoreToFirestore(); 
+    };
+
+    showSlotResult(title, msg, false);
+}
 function claimIndexReward(key) {
     const item = specialRegistry[key];
     if (!item || !item.indexReward) return;
@@ -9792,34 +9895,69 @@ function showIndexRewardModal(key) {
     const data = specialRegistry[key];
     const isClaimed = _GAME_DATA.claimedRewards.includes(key);
     
-    // We create a temporary modal specifically for the Index claim
     const modalOverlay = document.createElement('div');
+    modalOverlay.id = "activeRewardModal";
     modalOverlay.className = 'modal-overlay';
     modalOverlay.style.display = 'flex';
     modalOverlay.style.zIndex = '100010';
     
     let rewardText = "";
     if (data.indexReward) {
-        rewardText = data.indexReward.type === 'ruby' ? `+${data.indexReward.value} Rubin` : `+${data.indexReward.value} Scor`;
+        rewardText = data.indexReward.type === 'ruby' ? `${data.indexReward.value} RUBIN` : `${data.indexReward.value} SCOR`;
     }
 
     modalOverlay.innerHTML = `
-        <div class="modal-box info-modal-box" style="padding: 25px 20px; max-width: 300px;">
-            <img src="${data.image}" style="width: 70px; margin-bottom: 10px;">
-            <h2 style="font-size: 24px; color: var(--th-accent);">${data.name}</h2>
-            <p style="font-size: 14px; margin-bottom: 20px;">${data.description}</p>
+        <div class="modal-box info-modal-box reward-modal-box">
+            <img src="${data.image}" style="width: 85px; height: 85px; margin-bottom: 15px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));">
+            <h2 style="font-size: 32px; color: #facc15; margin-bottom: 5px;">${data.name}</h2>
+            <div class="selection-line" style="background: #facc15; width: 50px; margin-bottom: 15px;"></div>
+            <p style="color: #d1d5db; font-size: 16px; margin-bottom: 25px;">${data.description}</p>
             
             ${!isClaimed && data.indexReward ? `
-                <button class="menu-btn play" onclick="claimIndexReward('${key}')" style="width: 100%; height: 50px; background: linear-gradient(180deg, #4ade80, #16a34a)!important; border-color: #fff!important;">
-                    RECOMPENSĂ: ${rewardText}
+                <button class="menu-btn play reward-collect-btn" onclick="claimIndexReward('${key}')" style="width: 100%; height: 60px; font-size: 20px;">
+                    COLECTEAZĂ: ${rewardText}
                 </button>
-            ` : `<p style="color: #4ade80; font-weight: bold;">RECOMPENSĂ COLECTATĂ ✓</p>`}
+            ` : `<div style="background: rgba(74, 222, 128, 0.1); border: 2px solid #4ade80; padding: 15px; border-radius: 12px; color: #4ade80; font-family: 'Orbitron'; font-weight: 900;">COLECTATĂ ✓</div>`}
             
-            <button class="cancel-btn" style="margin-top: 15px;" onclick="this.closest('.modal-overlay').remove()">ÎNCHIDE</button>
+            <button class="cancel-btn" style="margin-top: 20px; font-size: 14px;" onclick="this.closest('.modal-overlay').remove()">ÎNCHIDE</button>
         </div>
     `;
     document.body.appendChild(modalOverlay);
 }
+
+function claimStageReward(stageId) {
+    if (_GAME_DATA.claimedStageRewards.includes(stageId)) return;
+
+    // 1. Prepare the reward data
+    pendingWinAmount = 500; 
+    const title = "ETAPĂ COMPLETĂ! ⭐";
+    const msg = `Felicitări! Ai descoperit toate elementele din zona ${stageList[stageId].name}. Primești +500 Scor!`;
+
+    // 2. Save progress locally
+    _GAME_DATA.claimedStageRewards.push(stageId);
+
+    // 3. Setup the custom flow: Result Modal -> OK -> Flying Animation
+    const originalClose = window.closeResultAndSlot;
+    
+    window.closeResultAndSlot = () => {
+        // Hide the result modal
+        document.getElementById('slotResultModal').style.display = 'none';
+        
+        // Trigger the points flying from the center of the screen
+        animateScoreFlying();
+        
+        // Refresh the Index to show "COLECTAT"
+        renderIndexMain();
+
+        // Restore original function and sync to cloud
+        window.closeResultAndSlot = originalClose;
+        syncScoreToFirestore(); 
+    };
+
+    // 4. Show the Result Modal with the "Gold Jackpot" style (true)
+    showSlotResult(title, msg, true); 
+}
+
 
 
 // Ensure the ninja icon in Utilities opens the Market
@@ -9883,6 +10021,11 @@ window.processSell = processSell;
 window.openIndex = openIndex;
 window.backToIndexMain = backToIndexMain;
 window.closeIndex = closeIndex;
+
+// Add these to your window exports list!
+window.claimIndexReward = claimIndexReward;
+window.claimStageReward = claimStageReward;
+window.showIndexRewardModal = showIndexRewardModal;
 })(); // <-- CLOSES THE SECURE VAULT
 
 </script>
