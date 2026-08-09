@@ -9817,6 +9817,7 @@ function openIndex() {
     document.getElementById('indexModal').style.display = 'flex';
     document.getElementById('utilitiesModal').style.display = 'none';
     isPaused = true;
+    clearInterval(moveKevinInterval);
     renderIndexMain();
 }
 
@@ -9835,7 +9836,6 @@ function renderIndexMain() {
     detail.style.display = 'none';
     subtitle.innerText = "ALEGE O ETAPĂ";
     
-    // Reset main button to Close
     mainBtn.className = "menu-btn play close-shop-btn";
     mainBtn.querySelector('span').innerText = "ÎNCHIDE";
     mainBtn.onclick = () => closeIndex();
@@ -9861,7 +9861,7 @@ function renderIndexMain() {
     ["Minigame Paradise", "Seven Seas"].forEach(name => {
         const locked = document.createElement('div');
         locked.className = "index-stage-card locked";
-        locked.innerHTML = `<div class="index-stage-overlay"><i class="fa-solid fa-lock"></i><span class="index-stage-title">${name}</span></div>`;
+        locked.innerHTML = `<div class="index-stage-overlay"><i class="fa-solid fa-lock" style="font-size:24px; color:#facc15; margin-bottom:5px;"></i><span class="index-stage-title">${name}</span></div>`;
         list.appendChild(locked);
     });
 }
@@ -9891,7 +9891,6 @@ function showStageIndex(stageId, itemKeys) {
         grid.appendChild(tile);
     });
 
-    // --- BOTTOM BUTTON LOGIC ---
     const isStageComplete = itemKeys.length > 0 && itemKeys.every(k => _GAME_DATA.index.includes(k));
     const isStageClaimed = _GAME_DATA.claimedStageRewards.includes(stageId);
     const mainBtn = document.getElementById('indexMainActionBtn');
@@ -9911,12 +9910,63 @@ function backToIndexMain() {
     renderIndexMain();
 }
 
+function showIndexRewardModal(key) {
+    const data = specialRegistry[key];
+    const isClaimed = _GAME_DATA.claimedRewards.includes(key);
+    const modalOverlay = document.createElement('div');
+    modalOverlay.id = "activeRewardModal";
+    modalOverlay.className = 'modal-overlay';
+    modalOverlay.style.display = 'flex';
+    modalOverlay.style.zIndex = '100010';
+    
+    let rewardText = "";
+    if (data.indexReward) rewardText = data.indexReward.type === 'ruby' ? `${data.indexReward.value} RUBIN` : `${data.indexReward.value} SCOR`;
+
+    modalOverlay.innerHTML = `
+        <div class="modal-box info-modal-box premium-reward-box">
+            <img src="${data.image}" style="width:85px; filter:drop-shadow(0 5px 15px rgba(0,0,0,0.5)); margin-bottom:15px;">
+            <h2 style="font-size:32px; color:var(--th-accent);">${data.name}</h2>
+            <div class="selection-line" style="background:var(--th-border); width:50px; margin-bottom:15px;"></div>
+            <p style="color:#d1d5db; font-size:16px;">${data.description}</p>
+            ${!isClaimed && data.indexReward ? `
+                <button class="menu-btn play premium-reward-btn" onclick="claimIndexReward('${key}')">COLECTEAZĂ: ${rewardText}</button>
+            ` : `<div class="reward-claimed-tag" style="background:rgba(255,255,255,0.05); border:2px solid var(--th-border); color:var(--th-accent); padding:15px; border-radius:12px; font-family:'Orbitron'; font-weight:900;">COLECTATĂ ✓</div>`}
+            <button class="cancel-btn" style="margin-top:20px;" onclick="this.closest('.modal-overlay').remove()">ÎNCHIDE</button>
+        </div>`;
+    document.body.appendChild(modalOverlay);
+}
+
+function claimIndexReward(key) {
+    const item = specialRegistry[key];
+    if (!item || !item.indexReward || _GAME_DATA.claimedRewards.includes(key)) return;
+
+    _GAME_DATA.claimedRewards.push(key);
+    const isRuby = item.indexReward.type === 'ruby';
+    const amount = item.indexReward.value;
+
+    const rewardModal = document.getElementById('activeRewardModal');
+    if (rewardModal) rewardModal.remove();
+    
+    document.getElementById('indexModal').style.display = 'none';
+    document.getElementById('utilitiesModal').style.display = 'none';
+
+    const originalClose = window.closeResultAndSlot;
+    window.closeResultAndSlot = () => {
+        document.getElementById('slotResultModal').style.display = 'none';
+        if (isRuby) { pendingRubyWin = amount; animateRubyFlying(); } else { pendingWinAmount = amount; animateScoreFlying(); }
+        window.closeResultAndSlot = originalClose;
+        isPaused = false;
+        startKevinMovement();
+        syncScoreToFirestore(); 
+    };
+    showSlotResult("BRAVO!", `Ai colectat +${amount} ${isRuby ? 'Rubin' : 'Scor'}!`, false);
+}
+
 function claimStageReward(stageId) {
     if (_GAME_DATA.claimedStageRewards.includes(stageId)) return;
     _GAME_DATA.claimedStageRewards.push(stageId);
     pendingWinAmount = 500;
 
-    // NUKE ALL MENUS FOR ANIMATION
     document.getElementById('indexModal').style.display = 'none';
     document.getElementById('utilitiesModal').style.display = 'none';
 
@@ -9929,10 +9979,43 @@ function claimStageReward(stageId) {
         startKevinMovement();
         syncScoreToFirestore(); 
     };
-
     showSlotResult("ETAPĂ COMPLETĂ!", `Ai primit +500 Scor pentru zona ${stageList[stageId].name}!`, true);
 }
 
+
+function showNotification(title, message, iconOrUrl = 'fa-circle-info') {
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = 'toast-item';
+    
+    // Logic to handle FontAwesome icons or Image URLs (like the Ruby)
+    const isUrl = iconOrUrl.startsWith('http');
+    const iconHtml = isUrl 
+        ? `<img src="${iconOrUrl}" style="width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">`
+        : `<i class="fa-solid ${iconOrUrl}"></i>`;
+
+    toast.innerHTML = `
+        <div class="toast-icon">${iconHtml}</div>
+        <div class="toast-text" style="display:flex; flex-direction:column;">
+            <span class="toast-title">${title}</span>
+            <span class="toast-msg">${message}</span>
+        </div>
+    `;
+
+    container.appendChild(toast);
+
+    // Auto-remove sequence
+    setTimeout(() => {
+        toast.classList.add('leaving');
+        setTimeout(() => toast.remove(), 500);
+    }, 4000);
+}
 
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
