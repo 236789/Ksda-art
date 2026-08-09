@@ -4717,6 +4717,32 @@ input:checked + .s-slider:before {
 .reward-collect-btn:active {
     box-shadow: 0 2px 0 #064e3b !important;
 }
+
+
+/* 1. THE GOLD PULSE (REPLACES THE DOT) */
+.index-tile.reward-ready {
+    border: 3px solid #facc15 !important;
+    box-shadow: 0 0 20px #facc15, inset 0 0 10px rgba(250, 204, 21, 0.5) !important;
+    animation: goldPulse 1s infinite alternate !important;
+    cursor: pointer;
+}
+
+@keyframes goldPulse {
+    from { transform: scale(1); filter: brightness(1); }
+    to { transform: scale(1.08); filter: brightness(1.3); box-shadow: 0 0 30px #facc15; }
+}
+
+/* 2. THE REWARD BUTTON FIX */
+.reward-collect-btn {
+    width: 100% !important;
+    height: 65px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+    margin-top: 10px;
+}
   </style>
 </head>
 <body>
@@ -5242,7 +5268,7 @@ input:checked + .s-slider:before {
       </button>
     </div>
 
-<button class="menu-btn play close-shop-btn" style="margin-top: 15px;" onclick="backToIndexMain()">
+<button class="menu-btn play close-shop-btn" style="margin-top: 15px;" onclick="closeUtilitiesModal()">
   <span>ÎNCHIDE</span>
 </button>
   </div>
@@ -9711,18 +9737,22 @@ function showStageIndex(stageId, itemKeys) {
     itemKeys.forEach(key => {
         const data = specialRegistry[key];
         const isUnlocked = _GAME_DATA.index && _GAME_DATA.index.includes(key);
-        const isClaimed = _GAME_DATA.claimedRewards.includes(key);
-        const hasReward = !!data.indexReward;
+        const isClaimed = _GAME_DATA.claimedRewards && _GAME_DATA.claimedRewards.includes(key);
         
         const tile = document.createElement('div');
-        // --- GOLD PULSING LOGIC ---
-        const rewardClass = (isUnlocked && !isClaimed && hasReward) ? 'reward-ready' : '';
-        tile.className = `index-tile ${isUnlocked ? 'unlocked' : 'locked'} ${rewardClass}`;
         
-        tile.innerHTML = `
-            <img src="${data.image}">
-            ${!isUnlocked ? '<span class="q-mark">???</span>' : ''}
-        `;
+        // --- CLEAN CLASS LOGIC ---
+        let className = "index-tile";
+        if (isUnlocked) className += " unlocked";
+        else className += " locked";
+        
+        // Add pulse ONLY if unlocked AND not claimed AND has a reward
+        if (isUnlocked && !isClaimed && data.indexReward) {
+            className += " reward-ready";
+        }
+        
+        tile.className = className;
+        tile.innerHTML = `<img src="${data.image}">${!isUnlocked ? '<span class="q-mark">???</span>' : ''}`;
 
         if (isUnlocked) {
             tile.onclick = () => showIndexRewardModal(key);
@@ -9730,28 +9760,19 @@ function showStageIndex(stageId, itemKeys) {
         grid.appendChild(tile);
     });
 
-    // --- STAGE COMPLETION REWARD BUTTON ---
+    // Stage Completion Button logic remains the same...
     const isStageComplete = itemKeys.length > 0 && itemKeys.every(k => _GAME_DATA.index.includes(k));
     const isStageClaimed = _GAME_DATA.claimedStageRewards.includes(stageId);
-    
     const oldBtn = document.getElementById('stageRewardBtn');
     if (oldBtn) oldBtn.remove();
-
     if (isStageComplete) {
         const rewardBtn = document.createElement('button');
         rewardBtn.id = 'stageRewardBtn';
         rewardBtn.className = "menu-btn play";
-        rewardBtn.style = "width: 100%; margin-top: 15px; height: 55px; background: linear-gradient(180deg, #facc15, #d97706)!important; color: #000!important; border-color: #fff!important; box-shadow: 0 8px 0 #4d2600!important;";
-        
-        if (isStageClaimed) {
-            rewardBtn.innerHTML = "ETAPĂ 100% ✓ (COLECTAT)";
-            rewardBtn.disabled = true;
-            rewardBtn.style.opacity = "0.6";
-            rewardBtn.style.boxShadow = "none";
-        } else {
-            rewardBtn.innerHTML = `COLECTEAZĂ PREMIU ETAPĂ (+500)`;
-            rewardBtn.onclick = () => claimStageReward(stageId);
-        }
+        rewardBtn.style = "width: 100%; margin-top: 15px; height: 55px; background: linear-gradient(180deg, #facc15, #d97706)!important; color: #000!important; border-color: #fff!important;";
+        rewardBtn.innerHTML = isStageClaimed ? "ETAPĂ COMPLETĂ ✓" : "COLECTEAZĂ PREMIU ETAPĂ (+500)";
+        if (!isStageClaimed) rewardBtn.onclick = () => claimStageReward(stageId);
+        else { rewardBtn.disabled = true; rewardBtn.style.opacity = "0.5"; }
         detail.appendChild(rewardBtn);
     }
 }
@@ -9786,75 +9807,34 @@ function claimIndexReward(key) {
     const item = specialRegistry[key];
     if (!item || !item.indexReward || _GAME_DATA.claimedRewards.includes(key)) return;
 
-    // 1. Add to local data immediately
+    // 1. Logic
     _GAME_DATA.claimedRewards.push(key);
-
-    // 2. Prepare the win logic
     const isRuby = item.indexReward.type === 'ruby';
     const amount = item.indexReward.value;
 
-    // 3. Close the current reward modal
-    const rewardModal = document.getElementById('activeRewardModal');
-    if (rewardModal) rewardModal.remove();
+    // 2. SAFE REMOVAL: Find the modal overlay and kill it
+    const activeModals = document.querySelectorAll('.modal-overlay');
+    activeModals.forEach(m => {
+        if (m.innerHTML.includes('claimIndexReward')) m.remove();
+    });
 
-    // 4. Update the Registry progress locally and refresh the main Index Grid
+    // 3. UI Update: Refresh Grid
     const stageId = currentStageId; 
     const itemsInStage = Object.keys(specialRegistry).filter(k => specialRegistry[k].stages && specialRegistry[k].stages.includes(stageId));
     showStageIndex(stageId, itemsInStage);
 
-    // 5. Show the Result Modal (The custom alert)
-    const title = "FELICITĂRI!";
-    const msg = `Ai colectat recompensa pentru ${item.name}: +${amount} ${isRuby ? 'Rubin' : 'Scor'}!`;
-    
-    // We override window.closeResultAndSlot temporarily to trigger the animation
+    // 4. Trigger Result
     const originalClose = window.closeResultAndSlot;
-    
     window.closeResultAndSlot = () => {
         document.getElementById('slotResultModal').style.display = 'none';
-        
-        if (isRuby) {
-            pendingRubyWin = amount;
-            animateRubyFlying();
-        } else {
-            pendingWinAmount = amount;
-            animateScoreFlying();
-        }
-        
-        // Restore the original function and sync
+        if (isRuby) { pendingRubyWin = amount; animateRubyFlying(); } 
+        else { pendingWinAmount = amount; animateScoreFlying(); }
         window.closeResultAndSlot = originalClose;
         syncScoreToFirestore(); 
     };
 
-    showSlotResult(title, msg, false);
+    showSlotResult("RECOMPENSĂ!", `Ai primit +${amount} ${isRuby ? 'Rubin' : 'Scor'}!`, false);
 }
-function claimIndexReward(key) {
-    const item = specialRegistry[key];
-    if (!item || !item.indexReward) return;
-
-    if (_GAME_DATA.claimedRewards.includes(key)) return;
-
-    // 1. Give the reward
-    if (item.indexReward.type === 'score') {
-        pendingWinAmount = item.indexReward.value;
-        animateScoreFlying(); // Uses your existing score animation
-    } else if (item.indexReward.type === 'ruby') {
-        pendingRubyWin = item.indexReward.value;
-        animateRubyFlying(); // Uses your existing ruby animation
-    }
-
-    // 2. Save state
-    _GAME_DATA.claimedRewards.push(key);
-    syncInventoryToCloud(); // Backup to backend
-
-    // 3. Close the info modal and refresh the grid
-    document.querySelector('.modal-overlay:last-child').remove(); // Closes the "Mobile Event Modal"
-    
-    // Refresh the grid to remove the green dot
-    const stageId = currentStageId; // Or track which stage is open
-    const itemsInStage = Object.keys(specialRegistry).filter(k => specialRegistry[k].stages && specialRegistry[k].stages.includes(stageId));
-    showStageIndex(stageId, itemsInStage);
-}
-
 // Update showStageIndex to show the green "Reward Ready" dot
 function showStageIndex(stageId, itemKeys) {
     document.getElementById('indexStageList').style.display = 'none';
