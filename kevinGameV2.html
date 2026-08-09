@@ -4546,6 +4546,104 @@ input:checked + .s-slider:before {
 #slotResultModal {
     z-index: 100050 !important; 
 }
+
+
+/* INDEX MODAL SPECIFICS */
+.index-stage-card {
+    position: relative;
+    width: 100%;
+    height: 100px;
+    border-radius: 15px;
+    margin-bottom: 12px;
+    background-size: cover;
+    background-position: center;
+    border: 3px solid var(--th-border);
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.index-stage-card:hover {
+    transform: scale(1.02);
+    border-color: #fff;
+}
+
+.index-stage-card.locked {
+    filter: grayscale(1) brightness(0.5);
+    cursor: not-allowed;
+}
+
+.index-stage-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.index-stage-title {
+    font-family: 'Orbitron', sans-serif;
+    color: white;
+    font-size: 18px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    text-transform: uppercase;
+}
+
+.index-stage-stats {
+    font-family: 'Oswald', sans-serif;
+    color: var(--th-accent);
+    font-size: 14px;
+}
+
+/* EMOJI TILES */
+.index-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.index-tile {
+    aspect-ratio: 1/1;
+    background: rgba(0,0,0,0.6);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.index-tile.unlocked {
+    border-color: var(--th-border);
+    background: radial-gradient(circle, rgba(250,204,21,0.1) 0%, rgba(0,0,0,0.6) 100%);
+}
+
+.index-tile img {
+    width: 70%;
+    height: 70%;
+    object-fit: contain;
+}
+
+.index-tile.locked img {
+    filter: brightness(0) contrast(1);
+    opacity: 0.8;
+}
+
+.index-tile .q-mark {
+    position: absolute;
+    bottom: 5px;
+    right: 8px;
+    font-family: 'Orbitron';
+    font-size: 10px;
+    color: #ff3366;
+    font-weight: 900;
+}
   </style>
 </head>
 <body>
@@ -5022,6 +5120,9 @@ input:checked + .s-slider:before {
   </div>
 </div>
 
+
+
+
 <!-- MODAL: UTILITĂȚI -->
 <div id="utilitiesModal" class="modal-overlay">
   <div class="modal-box shop-box">
@@ -5074,6 +5175,37 @@ input:checked + .s-slider:before {
   </div>
 </div>
 
+
+<!-- MODAL: INDEX -->
+<div id="indexModal" class="modal-overlay">
+  <div class="modal-box shop-box">
+    <div class="shop-header">
+      <h2><i class="fa-solid fa-book-journal-whills"></i> INDEX</h2>
+      <div class="selection-line"></div>
+    </div>
+
+    <!-- Tier 1: Stage Selection -->
+    <div id="indexStageList" style="max-height: 50vh; overflow-y: auto; scrollbar-width: none;">
+        <!-- Stages will be injected here -->
+    </div>
+
+    <!-- Tier 2: Stage Detail (Hidden by default) -->
+    <div id="indexDetailView" style="display: none;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+            <button class="nav-arrow" style="width: 30px; height: 30px;" onclick="backToIndexMain()"><i class="fa-solid fa-chevron-left"></i></button>
+            <h3 id="indexDetailTitle" style="margin: 0; font-family: 'Orbitron'; color: #fff; font-size: 16px;">STAGE NAME</h3>
+        </div>
+        <div id="indexEmojiGrid" class="index-grid">
+            <!-- Emojis will be injected here -->
+        </div>
+    </div>
+
+    <button class="menu-btn play close-shop-btn" style="margin-top: 15px;" onclick="closeIndex()">
+      <span>ÎNAPOI</span>
+    </button>
+  </div>
+</div>
+
 <!-- MODAL: MAGAZIN -->
 <div id="shopModal" class="modal-overlay">
   <div class="modal-box shop-box">
@@ -5084,7 +5216,7 @@ input:checked + .s-slider:before {
 
     <div class="shop-grid">
       <!-- EROI -->
-      <button class="shop-card">
+<button class="shop-card" onclick="openIndex()">
         <i class="fa-solid fa-mask shop-icon"></i>
         <div class="shop-info">
           <h3>EROI</h3>
@@ -5477,9 +5609,9 @@ let blackMarketWants = [];
 let lastMarketRefresh = 0; // Timestamp of last refresh
 // ADD THIS HERE:
 const _GAME_DATA = {
-    inventory: {}
+    inventory: {},
+    index: [] // Array of item keys discovered at least once
 };
-    
     let comboCount = 0;
     let comboTimer = null;
     let moveKevinInterval = null;
@@ -7563,10 +7695,18 @@ const area = document.getElementById('gameArea');
         applyMagnetMovement(item, eventData, chosenKey);
     }
 
-    item.onclick = (e) => {
+item.onclick = (e) => {
         e.stopPropagation();
         if (!e.isTrusted) return;
         
+        // --- INDEX DISCOVERY LOGIC ---
+        // Checks if this emoji key is already in the discovered list
+        if (!_GAME_DATA.index.includes(chosenKey)) {
+            _GAME_DATA.index.push(chosenKey);
+            console.log(`📖 NOUĂ DESCOPERIRE: [${eventData.name}] adăugat în Index!`);
+            syncInventoryToCloud(); // Immediate sync to save the discovery
+        }
+
         item.remove();
         console.log(`🖱️ EVENT PRINS: [${eventData.name}]`);
 
@@ -9398,6 +9538,125 @@ async function processSell() {
     renderBlackMarketGrid();
 }
 
+
+
+function openIndex() {
+    document.getElementById('indexModal').style.display = 'flex';
+    document.getElementById('utilitiesModal').style.display = 'none';
+    isPaused = true;
+    renderIndexMain();
+}
+
+function closeIndex() {
+    document.getElementById('indexModal').style.display = 'none';
+    document.getElementById('utilitiesModal').style.display = 'flex'; // Go back to utils
+}
+
+function renderIndexMain() {
+    const list = document.getElementById('indexStageList');
+    const detail = document.getElementById('indexDetailView');
+    list.style.display = 'block';
+    detail.style.display = 'none';
+    list.innerHTML = "";
+
+    // Loop through defined stages
+    Object.keys(stageList).forEach(stageId => {
+        const stage = stageList[stageId];
+        
+        // Calculate Discovery Progress
+        const itemsInStage = Object.keys(specialRegistry).filter(key => 
+            specialRegistry[key].stages && specialRegistry[key].stages.includes(stageId)
+        );
+        const discoveredInStage = itemsInStage.filter(key => 
+            _GAME_DATA.index && _GAME_DATA.index.includes(key)
+        );
+
+        const card = document.createElement('div');
+        card.className = "index-stage-card";
+        card.style.backgroundImage = `url('${stage.bg}')`;
+        card.onclick = () => showStageIndex(stageId, itemsInStage);
+
+        card.innerHTML = `
+            <div class="index-stage-overlay">
+                <span class="index-stage-title">${stage.name}</span>
+                <span class="index-stage-stats">${discoveredInStage.length} / ${itemsInStage.length} EMOJIS</span>
+            </div>
+        `;
+        list.appendChild(card);
+    });
+
+    // Add "Locked" placeholders for future stages like in your image
+    const futureStages = ["Minigame Paradise", "Seven Seas"];
+    futureStages.forEach(name => {
+        const locked = document.createElement('div');
+        locked.className = "index-stage-card locked";
+        locked.innerHTML = `
+            <div class="index-stage-overlay">
+                <i class="fa-solid fa-lock" style="font-size: 24px; color: #facc15; margin-bottom: 5px;"></i>
+                <span class="index-stage-title">${name}</span>
+            </div>
+        `;
+        list.appendChild(locked);
+    });
+}
+
+function showStageIndex(stageId, itemKeys) {
+    document.getElementById('indexStageList').style.display = 'none';
+    const detail = document.getElementById('indexDetailView');
+    detail.style.display = 'block';
+    
+    document.getElementById('indexDetailTitle').innerText = stageList[stageId].name;
+    const grid = document.getElementById('indexEmojiGrid');
+    grid.innerHTML = "";
+
+    itemKeys.forEach(key => {
+        const data = specialRegistry[key];
+        const isUnlocked = _GAME_DATA.index && _GAME_DATA.index.includes(key);
+        
+        const tile = document.createElement('div');
+        tile.className = `index-tile ${isUnlocked ? 'unlocked' : 'locked'}`;
+        
+        tile.innerHTML = `
+            <img src="${data.image}">
+            ${!isUnlocked ? '<span class="q-mark">???</span>' : ''}
+        `;
+
+        // If unlocked, show info on click
+        if (isUnlocked) {
+            tile.style.cursor = "pointer";
+            tile.onclick = () => showItemInfo(key);
+        }
+
+        grid.appendChild(tile);
+    });
+}
+
+function backToIndexMain() {
+    renderIndexMain();
+}
+
+// Ensure the index data is included in cloud sync
+// Locate your existing syncInventoryToCloud() and ensure it sends _GAME_DATA.index
+async function syncInventoryToCloud() {
+    if (!currentUID) return;
+    try {
+        const user = auth.currentUser;
+        if (!user) return;
+        const idToken = await user.getIdToken(true);
+
+        await fetch('https://kevin-backend-qodc.onrender.com/update-inventory', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                idToken: idToken, 
+                inventory: _GAME_DATA.inventory,
+                index: _GAME_DATA.index // NEW: Added this line
+            }),
+        });
+    } catch (e) { console.error("Cloud Error:", e); }
+}
+
+
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
 // ==========================================
@@ -9454,7 +9713,13 @@ window.openBlackMarket = openBlackMarket;
 window.closeBlackMarket = closeBlackMarket;
 window.setSellQty = setSellQty;
 window.processSell = processSell;
+
+// Final Window Exports
+window.openIndex = openIndex;
+window.backToIndexMain = backToIndexMain;
+
 })(); // <-- CLOSES THE SECURE VAULT
+
 </script>
 </body>
 </html>
