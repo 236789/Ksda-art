@@ -4856,6 +4856,42 @@ input:checked + .s-slider:before {
     #toastContainer { right: 10px; top: 120px; width: calc(100% - 20px); align-items: flex-end; }
     .toast-item { min-width: 200px; padding: 10px 15px; }
 }
+
+
+/* 1. GOLD PULSING OUTLINE (REPLACES DOT) */
+.index-tile.reward-ready {
+    border: 3px solid #facc15 !important;
+    box-shadow: 0 0 20px #facc15, inset 0 0 10px rgba(250, 204, 21, 0.5) !important;
+    animation: goldPulse 1s infinite alternate !important;
+    cursor: pointer;
+}
+
+@keyframes goldPulse {
+    from { transform: scale(1); filter: brightness(1); }
+    to { transform: scale(1.05); filter: brightness(1.2); box-shadow: 0 0 25px #facc15; }
+}
+
+/* 2. SUBTITLE STYLING */
+#indexSubtitle {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    color: var(--th-accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: -10px;
+    margin-bottom: 15px;
+    opacity: 0.8;
+}
+
+/* 3. BIG CLAIM BUTTON STYLING */
+.stage-claim-btn {
+    background: linear-gradient(180deg, #facc15 0%, #d97706 100%) !important;
+    color: #000 !important;
+    border: 3px solid #fff !important;
+    box-shadow: 0 8px 0 #4d2600, 0 10px 20px rgba(0,0,0,0.4) !important;
+    font-size: 22px !important;
+    animation: goldPulse 1s infinite alternate !important;
+}
   </style>
 </head>
 <body>
@@ -5388,32 +5424,30 @@ input:checked + .s-slider:before {
 </div>
 
 
-<!-- MODAL: INDEX -->
+<!-- REPLACED INDEX MODAL PART -->
 <div id="indexModal" class="modal-overlay">
   <div class="modal-box shop-box">
     <div class="shop-header">
       <h2><i class="fa-solid fa-book-journal-whills"></i> INDEX</h2>
+      <div id="indexSubtitle">ALEGE O ETAPĂ</div> <!-- NEW SUBTITLE -->
       <div class="selection-line"></div>
     </div>
 
-    <!-- Tier 1: Stage Selection -->
-    <div id="indexStageList" style="max-height: 50vh; overflow-y: auto; scrollbar-width: none;">
-        <!-- Stages will be injected here -->
-    </div>
+    <div id="indexStageList" style="max-height: 50vh; overflow-y: auto; scrollbar-width: none;"></div>
 
-    <!-- Tier 2: Stage Detail (Hidden by default) -->
     <div id="indexDetailView" style="display: none;">
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
-            <button class="nav-arrow" style="width: 30px; height: 30px;" onclick="backToIndexMain()"><i class="fa-solid fa-chevron-left"></i></button>
-            <h3 id="indexDetailTitle" style="margin: 0; font-family: 'Orbitron'; color: #fff; font-size: 16px;">STAGE NAME</h3>
+        <!-- Small navigation back button -->
+        <div style="display: flex; align-items: center; margin-bottom: 15px;">
+            <button class="nav-arrow" style="width: auto; height: 35px; border-radius: 10px; padding: 0 15px; display: flex; gap: 10px; font-size: 14px;" onclick="backToIndexMain()">
+                <i class="fa-solid fa-chevron-left"></i> <span>ÎNAPOI</span>
+            </button>
         </div>
-        <div id="indexEmojiGrid" class="index-grid">
-            <!-- Emojis will be injected here -->
-        </div>
+        <div id="indexEmojiGrid" class="index-grid"></div>
     </div>
 
-    <button class="menu-btn play close-shop-btn" style="margin-top: 15px;" onclick="closeIndex()">
-      <span>ÎNAPOI</span>
+    <!-- This button will be controlled by JS (ÎNAPOI vs CLAIM) -->
+    <button id="indexMainActionBtn" class="menu-btn play close-shop-btn" style="margin-top: 15px;" onclick="closeIndex()">
+      <span>ÎNCHIDE</span>
     </button>
   </div>
 </div>
@@ -9788,53 +9822,46 @@ function openIndex() {
 
 function closeIndex() {
     document.getElementById('indexModal').style.display = 'none';
-    document.getElementById('utilitiesModal').style.display = 'flex'; // Go back to utils
+    document.getElementById('utilitiesModal').style.display = 'flex'; 
 }
 
 function renderIndexMain() {
     const list = document.getElementById('indexStageList');
     const detail = document.getElementById('indexDetailView');
+    const subtitle = document.getElementById('indexSubtitle');
+    const mainBtn = document.getElementById('indexMainActionBtn');
+
     list.style.display = 'block';
     detail.style.display = 'none';
-    list.innerHTML = "";
+    subtitle.innerText = "ALEGE O ETAPĂ";
+    
+    // Reset main button to Close
+    mainBtn.className = "menu-btn play close-shop-btn";
+    mainBtn.querySelector('span').innerText = "ÎNCHIDE";
+    mainBtn.onclick = () => closeIndex();
 
-    // Loop through defined stages
+    list.innerHTML = "";
     Object.keys(stageList).forEach(stageId => {
         const stage = stageList[stageId];
-        
-        // Calculate Discovery Progress
-        const itemsInStage = Object.keys(specialRegistry).filter(key => 
-            specialRegistry[key].stages && specialRegistry[key].stages.includes(stageId)
-        );
-        const discoveredInStage = itemsInStage.filter(key => 
-            _GAME_DATA.index && _GAME_DATA.index.includes(key)
-        );
+        const itemsInStage = Object.keys(specialRegistry).filter(key => specialRegistry[key].stages && specialRegistry[key].stages.includes(stageId));
+        const discovered = itemsInStage.filter(key => _GAME_DATA.index.includes(key));
 
         const card = document.createElement('div');
         card.className = "index-stage-card";
         card.style.backgroundImage = `url('${stage.bg}')`;
         card.onclick = () => showStageIndex(stageId, itemsInStage);
-
         card.innerHTML = `
             <div class="index-stage-overlay">
                 <span class="index-stage-title">${stage.name}</span>
-                <span class="index-stage-stats">${discoveredInStage.length} / ${itemsInStage.length} EMOJIS</span>
-            </div>
-        `;
+                <span class="index-stage-stats">${discovered.length} / ${itemsInStage.length} EMOJIS</span>
+            </div>`;
         list.appendChild(card);
     });
 
-    // Add "Locked" placeholders for future stages like in your image
-    const futureStages = ["Minigame Paradise", "Seven Seas"];
-    futureStages.forEach(name => {
+    ["Minigame Paradise", "Seven Seas"].forEach(name => {
         const locked = document.createElement('div');
         locked.className = "index-stage-card locked";
-        locked.innerHTML = `
-            <div class="index-stage-overlay">
-                <i class="fa-solid fa-lock" style="font-size: 24px; color: #facc15; margin-bottom: 5px;"></i>
-                <span class="index-stage-title">${name}</span>
-            </div>
-        `;
+        locked.innerHTML = `<div class="index-stage-overlay"><i class="fa-solid fa-lock"></i><span class="index-stage-title">${name}</span></div>`;
         list.appendChild(locked);
     });
 }
@@ -9843,274 +9870,67 @@ function showStageIndex(stageId, itemKeys) {
     document.getElementById('indexStageList').style.display = 'none';
     const detail = document.getElementById('indexDetailView');
     detail.style.display = 'block';
+    document.getElementById('indexSubtitle').innerText = stageList[stageId].name;
     
-    document.getElementById('indexDetailTitle').innerText = stageList[stageId].name;
     const grid = document.getElementById('indexEmojiGrid');
     grid.innerHTML = "";
 
     itemKeys.forEach(key => {
         const data = specialRegistry[key];
-        const isUnlocked = _GAME_DATA.index && _GAME_DATA.index.includes(key);
-        const isClaimed = _GAME_DATA.claimedRewards && _GAME_DATA.claimedRewards.includes(key);
+        const isUnlocked = _GAME_DATA.index.includes(key);
+        const isClaimed = _GAME_DATA.claimedRewards.includes(key);
         
         const tile = document.createElement('div');
-        
-        // --- CLEAN CLASS LOGIC ---
         let className = "index-tile";
-        if (isUnlocked) className += " unlocked";
-        else className += " locked";
-        
-        // Add pulse ONLY if unlocked AND not claimed AND has a reward
-        if (isUnlocked && !isClaimed && data.indexReward) {
-            className += " reward-ready";
-        }
+        if (isUnlocked) className += " unlocked"; else className += " locked";
+        if (isUnlocked && !isClaimed && data.indexReward) className += " reward-ready";
         
         tile.className = className;
         tile.innerHTML = `<img src="${data.image}">${!isUnlocked ? '<span class="q-mark">???</span>' : ''}`;
-
-        if (isUnlocked) {
-            tile.onclick = () => showIndexRewardModal(key);
-        }
+        if (isUnlocked) tile.onclick = () => showIndexRewardModal(key);
         grid.appendChild(tile);
     });
 
-    // Stage Completion Logic
+    // --- BOTTOM BUTTON LOGIC ---
     const isStageComplete = itemKeys.length > 0 && itemKeys.every(k => _GAME_DATA.index.includes(k));
     const isStageClaimed = _GAME_DATA.claimedStageRewards.includes(stageId);
+    const mainBtn = document.getElementById('indexMainActionBtn');
 
-    // Trigger Notification for Completion
-    if (isStageComplete && !isStageClaimed && !window[`notified_${stageId}`]) {
-        showNotification("ETAPĂ COMPLETĂ!", `Ai descoperit tot în ${stageList[stageId].name}!`, "fa-medal");
-        window[`notified_${stageId}`] = true; // Prevents spamming every time menu opens
-    }
-
-    const oldBtn = document.getElementById('stageRewardBtn');
-    if (oldBtn) oldBtn.remove();
-
-    if (isStageComplete) {
-        const rewardBtn = document.createElement('button');
-        rewardBtn.id = 'stageRewardBtn';
-        rewardBtn.className = "menu-btn play";
-        rewardBtn.style = "width: 100%; margin-top: 15px; height: 55px; background: linear-gradient(180deg, #facc15, #d97706)!important; color: #000!important; border-color: #fff!important; box-shadow: 0 6px 0 #4d2600!important;";
-        
-        if (isStageClaimed) {
-            rewardBtn.innerHTML = "ETAPĂ COMPLETĂ ✓ (COLECTAT)";
-            rewardBtn.disabled = true;
-            rewardBtn.style.opacity = "0.5";
-            rewardBtn.style.boxShadow = "none";
-        } else {
-            rewardBtn.innerHTML = `COLECTEAZĂ PREMIU ETAPĂ (+500)`;
-            rewardBtn.onclick = () => claimStageReward(stageId);
-        }
-        document.getElementById('indexDetailView').appendChild(rewardBtn);
+    if (isStageComplete && !isStageClaimed) {
+        mainBtn.className = "menu-btn play stage-claim-btn";
+        mainBtn.querySelector('span').innerText = "COLECTEAZĂ PREMIU ETAPĂ (+500)";
+        mainBtn.onclick = () => claimStageReward(stageId);
+    } else {
+        mainBtn.className = "menu-btn play close-shop-btn";
+        mainBtn.querySelector('span').innerText = isStageClaimed ? "ETAPĂ COMPLETĂ ✓" : "ÎNAPOI";
+        mainBtn.onclick = () => backToIndexMain();
     }
 }
-
 
 function backToIndexMain() {
     renderIndexMain();
 }
 
-// Ensure the index data is included in cloud sync
-// Locate your existing syncInventoryToCloud() and ensure it sends _GAME_DATA.index
-async function syncInventoryToCloud() {
-    if (!currentUID) return;
-    try {
-        const user = auth.currentUser;
-        if (!user) return;
-        const idToken = await user.getIdToken(true);
+function claimStageReward(stageId) {
+    if (_GAME_DATA.claimedStageRewards.includes(stageId)) return;
+    _GAME_DATA.claimedStageRewards.push(stageId);
+    pendingWinAmount = 500;
 
-        await fetch('https://kevin-backend-qodc.onrender.com/update-inventory', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                idToken: idToken, 
-                inventory: _GAME_DATA.inventory,
-                index: _GAME_DATA.index // NEW: Added this line
-            }),
-        });
-    } catch (e) { console.error("Cloud Error:", e); }
-}
-
-function claimIndexReward(key) {
-    const item = specialRegistry[key];
-    if (!item || !item.indexReward || _GAME_DATA.claimedRewards.includes(key)) return;
-
-    // 1. Logic: Save to local data
-    _GAME_DATA.claimedRewards.push(key);
-    const isRuby = item.indexReward.type === 'ruby';
-    const amount = item.indexReward.value;
-
-    // 2. NUKE ALL MENUS: Close everything so the screen is empty
-    const rewardModal = document.getElementById('activeRewardModal');
-    if (rewardModal) rewardModal.remove();
-    
+    // NUKE ALL MENUS FOR ANIMATION
     document.getElementById('indexModal').style.display = 'none';
     document.getElementById('utilitiesModal').style.display = 'none';
 
-    // 3. UI Update: Refresh grid in background (even though it's hidden)
-    const stageId = currentStageId; 
-    const itemsInStage = Object.keys(specialRegistry).filter(k => specialRegistry[k].stages && specialRegistry[k].stages.includes(stageId));
-    showStageIndex(stageId, itemsInStage);
-
-    // 4. Trigger Result Flow
     const originalClose = window.closeResultAndSlot;
     window.closeResultAndSlot = () => {
         document.getElementById('slotResultModal').style.display = 'none';
-        
-        if (isRuby) { 
-            pendingRubyWin = amount; 
-            animateRubyFlying(); 
-        } else { 
-            pendingWinAmount = amount; 
-            animateScoreFlying(); 
-        }
-        
-        // Restore movement and original close function
+        animateScoreFlying();
         window.closeResultAndSlot = originalClose;
         isPaused = false;
         startKevinMovement();
         syncScoreToFirestore(); 
     };
 
-    // Show the result on a clear screen
-    showSlotResult("BRAVO!", `Ai colectat +${amount} ${isRuby ? 'Rubin' : 'Scor'}!`, false);
-}
-// Update showStageIndex to show the green "Reward Ready" dot
-function showStageIndex(stageId, itemKeys) {
-    document.getElementById('indexStageList').style.display = 'none';
-    const detail = document.getElementById('indexDetailView');
-    detail.style.display = 'block';
-    
-    document.getElementById('indexDetailTitle').innerText = stageList[stageId].name;
-    const grid = document.getElementById('indexEmojiGrid');
-    grid.innerHTML = "";
-
-    itemKeys.forEach(key => {
-        const data = specialRegistry[key];
-        const isUnlocked = _GAME_DATA.index && _GAME_DATA.index.includes(key);
-        const isClaimed = _GAME_DATA.claimedRewards.includes(key);
-        
-        const tile = document.createElement('div');
-        tile.className = `index-tile ${isUnlocked ? 'unlocked' : 'locked'}`;
-        
-        // Show green dot if unlocked but not claimed
-        let rewardHtml = (isUnlocked && !isClaimed && data.indexReward) ? `<div class="reward-dot"></div>` : "";
-
-        tile.innerHTML = `
-            ${rewardHtml}
-            <img src="${data.image}">
-            ${!isUnlocked ? '<span class="q-mark">???</span>' : ''}
-        `;
-
-        if (isUnlocked) {
-            tile.style.cursor = "pointer";
-            tile.onclick = () => showIndexRewardModal(key);
-        }
-
-        grid.appendChild(tile);
-    });
-}
-
-function showIndexRewardModal(key) {
-    const data = specialRegistry[key];
-    const isClaimed = _GAME_DATA.claimedRewards && _GAME_DATA.claimedRewards.includes(key);
-    
-    const modalOverlay = document.createElement('div');
-    modalOverlay.id = "activeRewardModal";
-    modalOverlay.className = 'modal-overlay';
-    modalOverlay.style.display = 'flex';
-    modalOverlay.style.zIndex = '100010';
-    
-    let rewardText = "";
-    if (data.indexReward) {
-        rewardText = data.indexReward.type === 'ruby' ? `${data.indexReward.value} RUBIN` : `${data.indexReward.value} SCOR`;
-    }
-
-    modalOverlay.innerHTML = `
-        <div class="modal-box info-modal-box premium-reward-box">
-            <img src="${data.image}" style="width: 85px; height: 85px; margin-bottom: 15px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));">
-            <h2 style="font-size: 32px; color: var(--th-accent); margin-bottom: 5px;">${data.name}</h2>
-            <div class="selection-line" style="background: var(--th-border); width: 50px; margin-bottom: 15px;"></div>
-            <p style="color: #d1d5db; font-size: 16px; margin-bottom: 25px;">${data.description}</p>
-            
-            ${!isClaimed && data.indexReward ? `
-                <button class="menu-btn play premium-reward-btn" onclick="claimIndexReward('${key}')">
-                    COLECTEAZĂ: ${rewardText}
-                </button>
-            ` : `<div class="reward-claimed-tag">COLECTATĂ ✓</div>`}
-            
-            <button class="cancel-btn" style="margin-top: 20px; font-size: 14px; color: #9aa0b8;" onclick="this.closest('.modal-overlay').remove()">ÎNCHIDE</button>
-        </div>
-    `;
-    document.body.appendChild(modalOverlay);
-}
-
-function claimStageReward(stageId) {
-    if (_GAME_DATA.claimedStageRewards.includes(stageId)) return;
-
-    // 1. Prepare the reward data
-    pendingWinAmount = 500; 
-    const title = "ETAPĂ COMPLETĂ! ⭐";
-    const msg = `Felicitări! Ai descoperit toate elementele din zona ${stageList[stageId].name}. Primești +500 Scor!`;
-
-    // 2. Save progress locally
-    _GAME_DATA.claimedStageRewards.push(stageId);
-
-    // 3. Setup the custom flow: Result Modal -> OK -> Flying Animation
-    const originalClose = window.closeResultAndSlot;
-    
-    window.closeResultAndSlot = () => {
-        // Hide the result modal
-        document.getElementById('slotResultModal').style.display = 'none';
-        
-        // Trigger the points flying from the center of the screen
-        animateScoreFlying();
-        
-        // Refresh the Index to show "COLECTAT"
-        renderIndexMain();
-
-        // Restore original function and sync to cloud
-        window.closeResultAndSlot = originalClose;
-        syncScoreToFirestore(); 
-    };
-
-    // 4. Show the Result Modal with the "Gold Jackpot" style (true)
-    showSlotResult(title, msg, true); 
-}
-
-
-function showNotification(title, message, iconOrUrl = 'fa-circle-info') {
-    let container = document.getElementById('toastContainer');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'toastContainer';
-        document.body.appendChild(container);
-    }
-
-    const toast = document.createElement('div');
-    toast.className = 'toast-item';
-    
-    // Check if the icon is a URL (starts with http) or a class
-    const isUrl = iconOrUrl.startsWith('http');
-    const iconHtml = isUrl 
-        ? `<img src="${iconOrUrl}" style="width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">`
-        : `<i class="fa-solid ${iconOrUrl}"></i>`;
-
-    toast.innerHTML = `
-        <div class="toast-icon">${iconHtml}</div>
-        <div class="toast-text">
-            <span class="toast-title">${title}</span>
-            <span class="toast-msg">${message}</span>
-        </div>
-    `;
-
-    container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.classList.add('leaving');
-        setTimeout(() => toast.remove(), 500);
-    }, 4000);
+    showSlotResult("ETAPĂ COMPLETĂ!", `Ai primit +500 Scor pentru zona ${stageList[stageId].name}!`, true);
 }
 
 
