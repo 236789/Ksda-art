@@ -6390,22 +6390,6 @@ input:checked + .s-slider:before {
 
 
 
-let selectedDetailLvl = 1;
-    _GAME_DATA.claimedLvlRewards = []; // Track claimed levels [2, 5, 10...]
-
-    const levelData = {};
-    for (let i = 1; i <= 30; i++) {
-        levelData[i] = {
-            xpReq: i * 250,
-            rewards: [{ type: 'score', val: i * 100 }, { type: 'ruby', val: Math.floor(i/5) }],
-            unlocks: i % 5 === 0 ? ["Zonă Nouă", "Item Slot"] : ["Statistici +"]
-        };
-    }
-    // Custom Unlocks for specific levels
-    levelData[5].unlocks = ["Piața Neagră"];
-    levelData[10].unlocks = ["Teleportor"];
-    levelData[30].unlocks = ["Rang Legendă", "Toate Zonele"];
-
 
 
 const particlesContainer = document.getElementById('particles');
@@ -6490,9 +6474,24 @@ let activeScoreMultiplier = 1;
 const _GAME_DATA = {
     inventory: {},
     index: [],
-    claimedRewards: [],      // Tracks keys of emojis whose reward was taken
-    claimedStageRewards: []  // Tracks stage IDs whose completion reward was taken
+    claimedRewards: [],      // Recompense din Index (per emoji)
+    claimedStageRewards: [], // Recompense pentru finalizare zonă
+    claimedLvlRewards: []    // NOU: Urmărește nivelele pentru care s-a luat premiul [1, 2, 3...]
 };
+
+    // --- NEW: LEVEL DATABASE ---
+    const levelData = {};
+    for (let i = 1; i <= 30; i++) {
+        levelData[i] = {
+            xpReq: i * 250,
+            rewards: [{ type: 'score', val: i * 100 }, { type: 'ruby', val: Math.floor(i/5) }],
+            unlocks: i % 5 === 0 ? ["Zonă Nouă", "Item Slot"] : ["Statistici +"]
+        };
+    }
+    levelData[5].unlocks = ["Piața Neagră"];
+    levelData[10].unlocks = ["Teleportor"];
+
+
     let comboCount = 0;
     let comboTimer = null;
     let moveKevinInterval = null;
