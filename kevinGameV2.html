@@ -4892,6 +4892,71 @@ input:checked + .s-slider:before {
     font-size: 22px !important;
     animation: goldPulse 1s infinite alternate !important;
 }
+
+
+/* ==========================================
+   EPIC STAGE REWARD MODAL & BUTTONS
+   ========================================== */
+
+/* State for when the reward is already claimed */
+.stage-claimed-btn {
+    background: rgba(74, 222, 128, 0.1) !important;
+    color: #4ade80 !important;
+    border: 3px solid #4ade80 !important;
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.2), inset 0 0 10px rgba(74, 222, 128, 0.1) !important;
+    font-size: 22px !important;
+}
+
+.stage-claimed-btn:hover {
+    transform: none !important;
+    cursor: default;
+}
+
+/* Epic Modal Box */
+.epic-stage-reward-box {
+    background: radial-gradient(circle at center, #2c2a55 0%, #0a0b16 100%) !important;
+    border: 4px solid #facc15 !important;
+    box-shadow: 0 0 50px rgba(250, 204, 21, 0.5), inset 0 0 30px rgba(0,0,0,0.8) !important;
+    text-align: center;
+    border-radius: 25px !important;
+    padding: 40px 25px !important;
+    animation: epicModalPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    max-width: 400px !important;
+}
+
+@keyframes epicModalPop {
+    0% { transform: scale(0.5) translateY(50px); opacity: 0; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Floating Trophy Icon */
+.epic-trophy-icon {
+    font-size: 70px;
+    color: #facc15;
+    filter: drop-shadow(0 0 20px rgba(250, 204, 21, 0.8));
+    margin-bottom: 20px;
+    animation: floatTrophy 3s ease-in-out infinite;
+}
+
+@keyframes floatTrophy {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-10px) scale(1.05); }
+}
+
+/* The Big Score Display */
+.epic-reward-amount {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 36px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 15px #facc15;
+    margin: 15px auto 25px auto;
+    background: rgba(0,0,0,0.4);
+    border: 2px solid rgba(250, 204, 21, 0.3);
+    border-radius: 15px;
+    padding: 10px 20px;
+    display: inline-block;
+}
   </style>
 </head>
 <body>
@@ -9895,13 +9960,22 @@ function showStageIndex(stageId, itemKeys) {
     const isStageClaimed = _GAME_DATA.claimedStageRewards.includes(stageId);
     const mainBtn = document.getElementById('indexMainActionBtn');
 
+    // --- NEW BUTTON LOGIC ---
     if (isStageComplete && !isStageClaimed) {
+        // Unclaimed Reward
         mainBtn.className = "menu-btn play stage-claim-btn";
-        mainBtn.querySelector('span').innerText = "COLECTEAZĂ PREMIU ETAPĂ (+500)";
-        mainBtn.onclick = () => claimStageReward(stageId);
+        mainBtn.querySelector('span').innerText = "REVENDICĂ PREMIUL (+500)";
+        mainBtn.onclick = () => showEpicStageRewardModal(stageId);
+    } else if (isStageClaimed) {
+        // Already Claimed
+        mainBtn.className = "menu-btn play stage-claimed-btn";
+        mainBtn.querySelector('span').innerText = "REVENDICAT ✓";
+        // Let it act as a back button so the user isn't stuck
+        mainBtn.onclick = () => backToIndexMain();
     } else {
+        // Not yet complete
         mainBtn.className = "menu-btn play close-shop-btn";
-        mainBtn.querySelector('span').innerText = isStageClaimed ? "ETAPĂ COMPLETĂ ✓" : "ÎNAPOI";
+        mainBtn.querySelector('span').innerText = "ÎNAPOI";
         mainBtn.onclick = () => backToIndexMain();
     }
 }
@@ -9962,24 +10036,65 @@ function claimIndexReward(key) {
     showSlotResult("BRAVO!", `Ai colectat +${amount} ${isRuby ? 'Rubin' : 'Scor'}!`, false);
 }
 
+// --- THE NEW EPIC REWARD MODAL FUNCTION ---
+function showEpicStageRewardModal(stageId) {
+    const stage = stageList[stageId];
+    
+    const modalOverlay = document.createElement('div');
+    modalOverlay.id = "epicStageRewardModal";
+    modalOverlay.className = 'modal-overlay';
+    modalOverlay.style.display = 'flex';
+    modalOverlay.style.zIndex = '100020'; // Above everything
+    
+    modalOverlay.innerHTML = `
+        <div class="modal-box epic-stage-reward-box">
+            <i class="fa-solid fa-trophy epic-trophy-icon"></i>
+            <h2 style="font-size: 32px; color: var(--th-accent); text-transform: uppercase; margin-bottom: 5px; text-shadow: 0 0 15px var(--th-glow);">ZONĂ COMPLETATĂ!</h2>
+            <div class="selection-line" style="margin-bottom: 15px; width: 80px;"></div>
+            <p style="font-size: 16px; color: #d1d5db; font-family: 'Oswald'; margin-bottom: 10px;">Ai colecționat absolut toate elementele din zona <b style="color: #fff;">${stage.name}</b>!</p>
+            
+            <div class="epic-reward-amount">
+                +500 SCOR
+            </div>
+            
+            <button class="menu-btn play stage-claim-btn" style="width: 100%; height: 65px; display: flex; align-items: center; justify-content: center; gap: 10px;" onclick="claimStageReward('${stageId}')">
+                <i class="fa-solid fa-star"></i> <span>COLECTEAZĂ</span>
+            </button>
+            
+            <button class="cancel-btn" style="margin-top: 15px;" onclick="document.getElementById('epicStageRewardModal').remove()">AMÂNĂ</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modalOverlay);
+}
+
+// --- REWRITTEN CLAIM FUNCTION ---
 function claimStageReward(stageId) {
     if (_GAME_DATA.claimedStageRewards.includes(stageId)) return;
+    
+    // 1. Mark as claimed
     _GAME_DATA.claimedStageRewards.push(stageId);
+    
+    // 2. Set the global pending win for the flying animation
     pendingWinAmount = 500;
 
+    // 3. Remove the Epic Modal
+    const epicModal = document.getElementById('epicStageRewardModal');
+    if (epicModal) epicModal.remove();
+
+    // 4. Close underlying UI layers
     document.getElementById('indexModal').style.display = 'none';
     document.getElementById('utilitiesModal').style.display = 'none';
 
-    const originalClose = window.closeResultAndSlot;
-    window.closeResultAndSlot = () => {
-        document.getElementById('slotResultModal').style.display = 'none';
-        animateScoreFlying();
-        window.closeResultAndSlot = originalClose;
-        isPaused = false;
-        startKevinMovement();
-        syncScoreToFirestore(); 
-    };
-    showSlotResult("ETAPĂ COMPLETĂ!", `Ai primit +500 Scor pentru zona ${stageList[stageId].name}!`, true);
+    // 5. Trigger epic visual and audio effects
+    if (typeof playSFX === 'function') playSFX(slotJackpotUrl); // Play the jackpot sound
+    if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins(); // Spawn falling coins
+    animateScoreFlying(); // Fly the points into the HUD
+
+    // 6. Resume gameplay & Save to Cloud
+    isPaused = false;
+    startKevinMovement();
+    syncScoreToFirestore(); 
 }
 
 
