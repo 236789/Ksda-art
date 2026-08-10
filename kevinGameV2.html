@@ -8401,24 +8401,24 @@ function activateBoost(key) {
     // 2. Set Multipliers
     let toastMsg = "";
     if (key === 'boost_x2_score') { activeScoreMultiplier = 2; toastMsg = "Punctele sunt dublate!"; }
-    if (key === 'boost_x2_combo') { activeComboMultiplier = 2; toastMsg = "Combo crește 2x!"; }
-    if (key === 'boost_x2_rubies') { activeRubyMultiplier = 2; toastMsg = "Rubinele sunt dublate!"; }
+    else if (key === 'boost_x2_combo') { activeComboMultiplier = 2; toastMsg = "Combo crește 2x!"; }
+    else if (key === 'boost_x2_rubies') { activeRubyMultiplier = 2; toastMsg = "Rubinele sunt dublate!"; }
 
-    // 3. UI Feedback
+    // 3. UI Feedback (Only activation toast remains)
     showNotification("BOOST ACTIVAT", `${toastMsg} (${data.duration}s)`, data.image);
     
-    // 🔥 TRIGGER THE INDICATOR
+    // Trigger the bottom-left indicator
     showEventIndicator(key, data.duration);
 
-    // 4. Cleanup Timer
+    // 4. Reset Multipliers after duration (Notification removed)
     setTimeout(() => {
         if (key === 'boost_x2_score') activeScoreMultiplier = 1;
         if (key === 'boost_x2_combo') activeComboMultiplier = 1;
         if (key === 'boost_x2_rubies') activeRubyMultiplier = 1;
-        showNotification("BOOST EXPIRAT", "Efectul boost-ului a încetat.", "fa-clock");
+        // The expiration notification has been removed from here
     }, data.duration * 1000);
 
-    // Close inventory and resume
+    // Close inventory and resume game
     closeInventory();
 }
 // --- SMART EVENT INDICATOR (PREVENTS DUPLICATES) ---
