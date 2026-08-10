@@ -5294,91 +5294,118 @@ input:checked + .s-slider:before {
 }
 
 
-/* --- COMPACT NEON MILESTONES (FIXED LAYOUT) --- */
+/* --- CINEMATIC ELITE MILESTONES (NO SCROLL) --- */
 .ms-orig-box {
-    width: 90vw !important;
-    max-width: 600px !important; /* Controlled width so it doesn't look giant on PC */
-    max-height: 90vh; /* Prevents spilling off screen */
-    background: #020512 !important;
-    border: 2px solid #00a2ff !important;
-    box-shadow: 0 0 40px rgba(0, 162, 255, 0.4), inset 0 0 50px rgba(138, 43, 226, 0.1) !important;
-    border-radius: 15px !important;
-    padding: 30px 20px !important;
-    overflow-y: auto; /* Scrollable if screen is tiny */
-    scrollbar-width: none; /* Hide scrollbar Firefox */
+    width: 95vw !important;
+    max-width: 850px !important;
+    height: auto;
+    max-height: 95vh;
+    background: rgba(2, 5, 18, 0.9) !important;
+    backdrop-filter: blur(15px) saturate(180%);
+    border: 1px solid rgba(0, 162, 255, 0.5);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 1), 0 0 20px rgba(0, 162, 255, 0.2);
+    border-radius: 20px !important;
+    padding: 2vh 2vw !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden !important; /* FORCED NO SCROLL */
 }
-.ms-orig-box::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome/Safari */
 
-/* Header Adjustments */
+/* Header Text - Cinematic Glow */
 .ms-orig-header h2 {
     font-family: 'Orbitron', sans-serif;
-    font-size: 24px;
-    letter-spacing: 2px;
+    font-size: clamp(18px, 4vh, 32px);
+    text-transform: uppercase;
+    letter-spacing: 5px;
     margin: 0;
     color: #fff;
+    text-shadow: 0 0 10px rgba(0, 162, 255, 0.8), 0 0 20px rgba(0, 162, 255, 0.4);
 }
-.ms-orig-header p { font-size: 11px; margin: 5px 0 20px 0; }
+.ms-orig-header p {
+    font-family: 'Oswald', sans-serif;
+    color: #00f0ff;
+    font-size: clamp(10px, 1.5vh, 14px);
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin: 5px 0 15px 0;
+}
 
-/* FIXED 5-COLUMN GRID */
+/* THE GRID - Smart Scaling */
 .ms-orig-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr); /* FORCED 5 COLUMNS */
-    gap: 10px;
-    justify-items: center;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1vh; /* Gap scales with height */
+    width: 100%;
 }
 
-/* COMPACT CARD */
+/* ELITE NEON CARD */
 .ms-orig-card {
-    width: 100%;
-    aspect-ratio: 1 / 1.2; /* Forces vertical card shape */
-    background: rgba(0, 162, 255, 0.05);
-    border: 1px solid #00a2ff;
-    border-radius: 8px;
+    aspect-ratio: 1 / 1;
+    background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(0,162,255,0.05) 100%);
+    border: 1px solid rgba(0, 162, 255, 0.3);
+    border-radius: 12%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
-    padding: 5px;
-    transition: 0.2s;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: 0; /* For animation */
+    animation: msCardPop 0.5s forwards;
+}
+
+/* Cascading Entrance Animation */
+@keyframes msCardPop {
+    from { transform: scale(0.5) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 .ms-orig-card.unlocked {
-    background: rgba(0, 162, 255, 0.15);
-    box-shadow: 0 0 10px rgba(0, 162, 255, 0.2);
+    border-color: #00f0ff;
+    background: rgba(0, 240, 255, 0.1);
+    box-shadow: inset 0 0 15px rgba(0, 240, 255, 0.2), 0 0 10px rgba(0, 240, 255, 0.1);
 }
 
-/* Tiny Labels */
-.ms-orig-card .ms-label { font-size: 7px; color: #9aa0b8; letter-spacing: 1px; }
-.ms-orig-card .ms-val { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; line-height: 1; margin: 4px 0; }
-.ms-orig-card .ms-star { font-size: 10px; color: #00a2ff; }
+.ms-orig-card:hover {
+    transform: scale(1.05);
+    border-color: #fff;
+    z-index: 10;
+}
 
-/* The Checkmark */
+/* Tiny Labels & Numbers */
+.ms-orig-card .ms-label { font-family: 'Oswald'; font-size: 0.8vh; color: #9aa0b8; margin-bottom: -2px; }
+.ms-orig-card .ms-val { font-family: 'Orbitron'; font-size: 2.2vh; font-weight: 900; color: #fff; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
+.ms-orig-card .ms-star { font-size: 1.2vh; color: #00f0ff; margin-top: 2px; }
+
+/* The Checkmark - Professional look */
 .ms-orig-check {
     position: absolute;
-    top: 4px; right: 4px;
-    font-size: 8px;
-    color: #00a2ff;
+    top: 5%; right: 5%;
+    font-size: 1vh;
+    color: #00f0ff;
     opacity: 0.2;
 }
-.unlocked .ms-orig-check { opacity: 1; color: #fff; }
+.unlocked .ms-orig-check { opacity: 1; text-shadow: 0 0 5px #00f0ff; color: #fff; }
 
-/* SPECIAL LEVEL 25 */
+/* SPECIAL LEVEL 25 - THE CROWN JEWEL */
 .ms-orig-card-25 {
-    border: 1.5px solid #ff00ff !important;
-    background: rgba(255, 0, 255, 0.1) !important;
-    box-shadow: 0 0 15px rgba(255, 0, 255, 0.3) !important;
+    border: 1px solid #ff00ff !important;
+    background: radial-gradient(circle at center, rgba(255, 0, 255, 0.15) 0%, transparent 100%) !important;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.3), inset 0 0 15px rgba(255, 0, 255, 0.2) !important;
 }
-.ms-orig-card-25 .ms-val { color: #ff00ff; font-size: 22px; }
-.ms-orig-card-25 .ms-star { color: #ff00ff; }
-.ms-crown-orig { font-size: 12px; color: #ff00ff; margin-bottom: -5px; }
+.ms-orig-card-25 .ms-val { color: #ff00ff !important; font-size: 3vh !important; text-shadow: 0 0 10px #ff00ff; }
+.ms-orig-card-25 .ms-star { color: #ff00ff !important; }
+.ms-crown-orig { font-size: 1.8vh; color: #ff00ff; position: absolute; top: -15%; animation: msFloat 2s infinite alternate; }
 
-/* Mobile Optimization (3 Columns to keep boxes square and big enough to touch) */
-@media (max-width: 500px) {
-    .ms-orig-grid {
-        grid-template-columns: repeat(3, 1fr); /* Switch to 3 columns on small phones */
-    }
-    .ms-orig-box { padding: 20px 10px; width: 95vw; }
+@keyframes msFloat { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+
+/* Mobile: Force smaller cards to fit 5x5 without scrolling */
+@media (max-width: 600px) {
+    .ms-orig-box { width: 98vw; padding: 10px 5px; }
+    .ms-orig-grid { gap: 5px; }
+    .ms-orig-header h2 { letter-spacing: 2px; }
 }
   </style>
 </head>
@@ -5698,20 +5725,14 @@ input:checked + .s-slider:before {
     </div>
 </div>
 
-
-<!-- MODAL: LEVEL MILESTONES (ORIGINAL VERSION) -->
-<div id="milestonesModal" class="modal-overlay">
+<div id="milestonesModal" class="modal-overlay" style="z-index: 200000;">
     <div class="ms-orig-box">
         
-        <!-- Decoration Header -->
-        <div class="ms-orig-deco">
-            <div class="line"></div>
-            <i class="fa-solid fa-star"></i>
-            <div class="line rev"></div>
-        </div>
+        <!-- Decoration Top Star -->
+        <i class="fa-solid fa-star" style="color:#00f0ff; font-size: 16px; margin-bottom: 5px; filter: drop-shadow(0 0 10px #00f0ff);"></i>
 
-        <button class="ms-orig-close" onclick="closeMilestones()">
-            <i class="fa-solid fa-xmark"></i>
+        <button class="ms-orig-close" style="top:10px; right:10px; background:none; border:none; color:#9aa0b8; cursor:pointer; font-size:20px;" onclick="closeMilestones()">
+            <i class="fa-solid fa-circle-xmark"></i>
         </button>
 
         <div class="ms-orig-header" style="text-align: center;">
@@ -5719,13 +5740,13 @@ input:checked + .s-slider:before {
             <p>Reach these milestones and earn epic rewards!</p>
         </div>
 
-        <!-- Grid 1-25 -->
-        <div id="msOrigGrid" class="ms-orig-grid"></div>
+        <div id="msOrigGrid" class="ms-orig-grid">
+            <!-- Level cards pop in here -->
+        </div>
 
-        <!-- Footer Info -->
-        <div style="display:flex; align-items:center; gap:15px; margin-top:30px; opacity:0.8; justify-content:center;">
-             <img src="https://iili.io/C4bDVOG.png" style="width:40px; filter: hue-rotate(280deg);">
-             <span style="font-family:'Oswald'; font-size:14px; color:#9aa0b8; text-transform:uppercase;">The higher you go, the better the rewards!</span>
+        <!-- Footer Caption -->
+        <div style="margin-top: 15px; font-family:'Oswald'; font-size: 10px; color:#5a6288; text-transform:uppercase; letter-spacing: 2px;">
+            Final Rank: Legendary Human
         </div>
     </div>
 </div>
@@ -11121,6 +11142,9 @@ function renderMilestones() {
         const isUnlocked = i <= playerLevel;
         const card = document.createElement('div');
         
+        // Add cascading animation delay
+        card.style.animationDelay = (i * 0.03) + "s";
+
         if (i === 25) {
             card.className = "ms-orig-card ms-orig-card-25";
             if (isUnlocked) card.classList.add('unlocked');
@@ -11129,7 +11153,7 @@ function renderMilestones() {
                 <span class="ms-label">LEVEL</span>
                 <span class="ms-val">25</span>
                 <i class="fa-solid fa-star ms-star"></i>
-                <div class="ms-orig-check"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="ms-orig-check"><i class="fa-solid fa-check-double"></i></div>
             `;
         } else {
             card.className = "ms-orig-card";
@@ -11138,16 +11162,18 @@ function renderMilestones() {
                 <span class="ms-label">LEVEL</span>
                 <span class="ms-val">${i}</span>
                 <i class="fa-solid fa-star ms-star"></i>
-                <div class="ms-orig-check"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="ms-orig-check"><i class="fa-solid fa-check"></i></div>
             `;
         }
 
-        card.onclick = () => {
+        card.onclick = (e) => {
+            e.stopPropagation();
             if (isUnlocked) {
-                // Here we will add the "Claim" logic in Step 2
-                showNotification("LEVEL UNLOCKED", `You've reached level ${i}!`, "fa-medal");
+                // Future step 2: claim rewards
+                showNotification("RANK: " + i, "Reward system initializing...", "fa-bolt");
             } else {
-                showKevinutaBubble(`Reach Level ${i} to unlock!`);
+                playMissSFX();
+                showKevinutaBubble("You are too weak for Level " + i + "!");
             }
         };
 
