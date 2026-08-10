@@ -5369,6 +5369,96 @@ input:checked + .s-slider:before {
     .level-nodes-grid { grid-template-columns: repeat(5, 1fr); }
     .lvl-node.max-rank { grid-column: span 1; }
 }
+
+/* --- PROGRESSION MODAL REWORK --- */
+.progression-main-box {
+    max-width: 420px !important; /* Slimmer, more professional */
+    padding: 30px 20px !important;
+}
+
+.lvl-nodes-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* 6x5 = 30 Nodes */
+    gap: 6px;
+    margin: 20px 0;
+}
+
+.lvl-node {
+    aspect-ratio: 1/1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: #5a6288;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lvl-node.unlocked { border-color: var(--th-border); color: #fff; background: rgba(255, 204, 0, 0.05); }
+.lvl-node.current { border-color: #fff; background: var(--th-accent); color: #000; box-shadow: 0 0 15px var(--th-glow); }
+.lvl-node.selected { transform: scale(1.15); z-index: 10; border: 2px solid #fff !important; box-shadow: 0 0 20px #fff; color: #fff; }
+
+.lvl-node.max-node {
+    grid-column: span 2;
+    aspect-ratio: auto;
+    background: linear-gradient(135deg, #ffcc00, #ff8c00);
+    color: #000;
+    font-size: 13px;
+}
+
+/* DETAILS CARD */
+.lvl-details-card {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 15px;
+    text-align: left;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.lvl-details-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.lvl-badge-large {
+    width: 44px; height: 44px;
+    background: var(--th-accent);
+    color: #000;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron'; font-weight: 900; font-size: 18px;
+    box-shadow: 0 0 15px var(--th-glow);
+}
+
+.lvl-title-group { display: flex; flex-direction: column; }
+#detLvlName { font-family: 'Orbitron'; font-size: 16px; font-weight: 900; color: #fff; }
+.status-unlocked { color: #4ade80; font-size: 10px; font-weight: bold; letter-spacing: 1px; }
+.status-locked { color: #ff4444; font-size: 10px; font-weight: bold; letter-spacing: 1px; }
+
+.lvl-rewards-grid { display: flex; gap: 15px; margin-bottom: 15px; }
+.reward-slot { flex: 1; }
+.reward-slot label { display: block; font-size: 9px; color: #5a6288; font-weight: bold; margin-bottom: 4px; }
+.reward-slot div { font-family: 'Oswald'; font-size: 13px; color: #d1d5db; line-height: 1.4; }
+
+.claim-node-btn { width: 100% !important; height: 44px !important; font-size: 16px !important; }
+.claim-node-btn:disabled { opacity: 0.2; filter: grayscale(1); cursor: not-allowed !important; }
+
+/* Cinematic effect when switching nodes */
+.lvl-fade-in { animation: lvlFadeIn 0.4s ease-out forwards; }
+@keyframes lvlFadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Mobile Grid Fix */
+@media (max-width: 600px) {
+    .lvl-nodes-container { grid-template-columns: repeat(6, 1fr); gap: 4px; }
+}
   </style>
 </head>
 <body>
@@ -5908,43 +5998,46 @@ input:checked + .s-slider:before {
 </div>
 
 
-<!-- MODAL: MILESTONES NIVEL -->
+<!-- MODAL: MILESTONES NIVEL (CINEMATIC REWORK) -->
 <div id="levelRewardsModal" class="modal-overlay">
-    <div class="modal-box shop-box" style="max-width: 500px !important; padding: 25px !important;">
+    <div class="modal-box shop-box progression-main-box">
         
         <div class="shop-header">
-            <h2 style="color: #ffcc00 !important;"><i class="fa-solid fa-medal"></i> PROGRES RANG</h2>
-            <div class="selection-line" style="background: #ffcc00;"></div>
+            <h2><i class="fa-solid fa-trophy"></i> RANG JUCĂTOR</h2>
+            <div class="selection-line"></div>
         </div>
 
-        <!-- THE 30-NODE GRID -->
-        <div class="level-nodes-grid" id="levelNodesGrid">
-            <!-- Buttons 1-30 will be generated here -->
-        </div>
+        <!-- COMPACT GRID (No Scrollbar) -->
+        <div class="lvl-nodes-container" id="levelNodesGrid"></div>
 
-        <!-- THE DATA SCANNER (Info Panel) -->
-        <div class="level-info-scanner" id="levelInfoScanner">
-            <div class="scanner-header">
-                <span id="scanLvlTitle">SELECTEAZĂ NIVEL</span>
-                <span id="scanLvlStatus" class="scan-status-locked">INDISPONIBIL</span>
+        <!-- INFO PANEL (Cinematic Detail) -->
+        <div id="lvlInfoPanel" class="lvl-details-card">
+            <div class="lvl-details-header">
+                <div class="lvl-badge-large" id="detLvlCircle">1</div>
+                <div class="lvl-title-group">
+                    <span id="detLvlName">NIVEL 1</span>
+                    <span id="detLvlStatus" class="status-unlocked">DEBLOCAT</span>
+                </div>
             </div>
-            <div class="scanner-body">
-                <div class="scan-col">
+            
+            <div class="lvl-rewards-grid">
+                <div class="reward-slot">
                     <label>RECOMPENSE</label>
-                    <div id="scanRewards">---</div>
+                    <div id="detLvlRewards">---</div>
                 </div>
-                <div class="scan-col">
-                    <label>CONȚINUT NOU</label>
-                    <div id="scanUnlocks">---</div>
+                <div class="reward-slot">
+                    <label>DEBLOCĂRI</label>
+                    <div id="detLvlUnlocks">---</div>
                 </div>
             </div>
-            <button id="claimMilestoneBtn" class="menu-btn play claim-node-btn" disabled>
+
+            <button id="detClaimBtn" class="menu-btn play claim-node-btn" onclick="claimLevelReward()">
                 <span>REVENDICĂ</span>
             </button>
         </div>
 
-        <button class="menu-btn play close-shop-btn" style="margin-top: 20px;" onclick="closeLevelRewards()">
-            <span>ÎNCHIDE CONSOLA</span>
+        <button class="menu-btn play close-shop-btn" style="margin-top: 15px; background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.2) !important;" onclick="closeLevelRewards()">
+            <span>ÎNAPOI</span>
         </button>
     </div>
 </div>
@@ -11042,65 +11135,64 @@ function spawnLevelUpParticles() {
     }
 }
 
-function levelUp() {
-    playerLevel++;
-    
-    // Carry over remaining XP
-    playerXP = playerXP - xpToNextLevel; 
-    if (playerXP < 0) playerXP = 0;
-
-    // Update requirements for the new level
-    xpToNextLevel = getXPRequired(playerLevel);
-
-    // 1. SOUNDS
-    if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
-
-    // 2. CREATE OVERLAY STRUCTURE
-    const overlay = document.createElement('div');
-    overlay.className = 'lvl-up-overlay';
-    overlay.innerHTML = `
-        <div class="lvl-rays"></div>
-        <div class="lvl-card">
-            <h1 class="lvl-text-glitch">LEVEL UP</h1>
-            <div class="lvl-rank-plate">
-                <span>NIVELUL ${playerLevel}</span>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(overlay);
-
-    // 3. TRIGGER VISUALS
-    const flash = document.createElement('div');
-    flash.className = 'lvl-flash';
-    document.body.appendChild(flash);
-    
-    spawnLevelUpParticles();
-
-    // 4. SCREEN SHAKE
-    const gameArea = document.getElementById('gameArea');
-    gameArea.classList.add('shake-impact');
-    
-    // 5. CLEANUP
-    setTimeout(() => {
-        overlay.remove();
-        flash.remove();
-        gameArea.classList.remove('shake-impact');
-    }, 1600);
-
-    // 6. SYNC
-    updateXPBarUI();
-    syncScoreToFirestore(); // Ensure the new level is saved
-}
-
 let selectedLvlNode = 1;
+
+    function levelUp() {
+        playerLevel++;
+        
+        // Carry over remaining XP & Update requirements
+        playerXP = Math.max(0, playerXP - xpToNextLevel); 
+        xpToNextLevel = getXPRequired(playerLevel);
+
+        // 1. SOUNDS
+        if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
+
+        // 2. CREATE OVERLAY STRUCTURE
+        const overlay = document.createElement('div');
+        overlay.className = 'lvl-up-overlay';
+        overlay.innerHTML = `
+            <div class="lvl-rays"></div>
+            <div class="lvl-card">
+                <h1 class="lvl-text-glitch">LEVEL UP</h1>
+                <div class="lvl-rank-plate">
+                    <span>RANG NOU: ${playerLevel}</span>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        // 3. TRIGGER VISUALS
+        const flash = document.createElement('div');
+        flash.className = 'lvl-flash';
+        document.body.appendChild(flash);
+        
+        spawnLevelUpParticles(); // Sparkle explosion
+
+        // 4. SCREEN IMPACT
+        const gameArea = document.getElementById('gameArea');
+        if (gameArea) gameArea.classList.add('shake-impact');
+        
+        // 5. CLEANUP
+        setTimeout(() => {
+            overlay.remove();
+            flash.remove();
+            if (gameArea) gameArea.classList.remove('shake-impact');
+        }, 1600);
+
+        // 6. SYNC
+        updateXPBarUI();
+        syncScoreToFirestore(); 
+    }
 
     function openLevelRewards(e) {
         if (e) { e.preventDefault(); e.stopPropagation(); }
         isPaused = true;
         clearInterval(moveKevinInterval);
+        
         document.getElementById('levelRewardsModal').style.display = 'flex';
+        
         generateLevelGrid();
-        inspectLevel(playerLevel); // Focus on current level by default
+        inspectLevel(playerLevel); // default to player's actual level
     }
 
     function closeLevelRewards() {
@@ -11111,19 +11203,20 @@ let selectedLvlNode = 1;
 
     function generateLevelGrid() {
         const grid = document.getElementById('levelNodesGrid');
+        if (!grid) return;
         grid.innerHTML = "";
 
         for (let i = 1; i <= 30; i++) {
-            const btn = document.createElement('button');
+            const btn = document.createElement('div');
             btn.className = 'lvl-node';
             
-            // Special states
-            if (i === 30) btn.classList.add('max-rank');
+            // Apply visual states based on progress
+            if (i === 30) btn.classList.add('max-node');
             if (i < playerLevel) btn.classList.add('unlocked');
             if (i === playerLevel) btn.classList.add('current');
             if (i === selectedLvlNode) btn.classList.add('selected');
 
-            btn.innerText = i === 30 ? "MAX 30" : i;
+            btn.innerText = i === 30 ? "MAX" : i;
             btn.onclick = () => inspectLevel(i);
             grid.appendChild(btn);
         }
@@ -11131,25 +11224,52 @@ let selectedLvlNode = 1;
 
     function inspectLevel(lvl) {
         selectedLvlNode = lvl;
-        generateLevelGrid(); // Refresh grid visuals
+        generateLevelGrid(); // Refresh grid highlighting
 
-        const title = document.getElementById('scanLvlTitle');
-        const status = document.getElementById('scanLvlStatus');
-        const rewards = document.getElementById('scanRewards');
-        const unlocks = document.getElementById('scanUnlocks');
+        // UI Elements from the Cinematic Card
+        const card = document.getElementById('lvlInfoCard');
+        const title = document.getElementById('detLvlName');
+        const circle = document.getElementById('detLvlCircle');
+        const status = document.getElementById('detLvlStatus');
+        const rewards = document.getElementById('detLvlRewards');
+        const unlocks = document.getElementById('detLvlUnlocks');
+        const btn = document.getElementById('detClaimBtn');
 
-        title.innerText = `DATA: NIVEL ${lvl}`;
+        // Trigger the "Details Swap" Cinematic Fade
+        card.classList.remove('fx-details-swap');
+        void card.offsetWidth; 
+        card.classList.add('fx-details-swap');
+
+        // Populate Data
+        title.innerText = `NIVEL ${lvl}`;
+        circle.innerText = lvl;
         
-        // Placeholder data for now
-        rewards.innerHTML = "• ??? Puncte<br>• ??? Rubine";
-        unlocks.innerHTML = lvl % 5 === 0 ? "• FUNCȚIE NOUĂ" : "• BONUS STATS";
+        const data = levelData[lvl] || { rewards: [], unlocks: ["Bonus Stats"] };
+        
+        rewards.innerHTML = data.rewards.length > 0 
+            ? data.rewards.map(r => `• ${r.val} ${r.type.toUpperCase()}`).join('<br>')
+            : "• FĂRĂ RECOMPENSĂ";
+            
+        unlocks.innerHTML = data.unlocks.map(u => `• ${u}`).join('<br>');
 
-        if (lvl <= playerLevel) {
-            status.innerText = "ATINS";
-            status.className = "scan-status-ready";
+        // Check if level rewards were already claimed
+        const alreadyClaimed = _GAME_DATA.claimedLvlRewards && _GAME_DATA.claimedLvlRewards.includes(lvl);
+
+        if (alreadyClaimed) {
+            status.innerText = "COLECTAT";
+            status.style.color = "#9aa0b8"; // Muted
+            btn.disabled = true;
+            btn.querySelector('span').innerText = "COLECTAT";
+        } else if (lvl <= playerLevel) {
+            status.innerText = "DISPONIBIL";
+            status.style.color = "#4ade80"; // Ready
+            btn.disabled = false;
+            btn.querySelector('span').innerText = "REVENDICĂ";
         } else {
-            status.innerText = "BLOCAT";
-            status.className = "scan-status-locked";
+            status.innerText = "BLOCAT (RESTRICȚIE NIVEL)";
+            status.style.color = "#ff4444"; // Locked
+            btn.disabled = true;
+            btn.querySelector('span').innerText = "BLOCAT";
         }
     }
 
