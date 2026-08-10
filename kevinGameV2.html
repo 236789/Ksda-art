@@ -5526,21 +5526,20 @@ input:checked + .s-slider:before {
         </div>
     </div>
 
-    <!-- RÂNDUL DE JOS: BARA DE COMBO -->
-<!<!-- Row 2: COMBO -->
-<div class="hud-combo-row" id="comboSection">
-    <div class="combo-title-wrap">
-        <span class="combo-label-text">COMBO</span>
-        <span id="comboCounterText">0</span>
+<!-- Row 2: COMBO -->
+    <div class="hud-combo-row" id="comboSection">
+        <div class="combo-title-wrap">
+            <span class="combo-label-text">COMBO</span>
+            <span id="comboCounterText">0</span>
+        </div>
+        <div class="combo-track">
+            <div id="comboFill" class="combo-fill-segmented"></div>
+        </div>
+        <!-- FIXED BUTTON -->
+        <button class="hud-mini-btn" id="comboInfoBtn" onclick="openComboInfo(event)">
+            <i class="fa-solid fa-question"></i>
+        </button>
     </div>
-    <div class="combo-track">
-        <div id="comboFill" class="combo-fill-segmented"></div>
-    </div>
-    <!-- NEW: ? BUTTON -->
-    <button class="hud-mini-btn" id="comboInfoBtn">
-        <i class="fa-solid fa-question"></i>
-    </button>
-</div>
 
 <!-- Row 3: XP -->
 <div class="hud-xp-row" id="xpSection">
@@ -8102,7 +8101,7 @@ function startAutoClickEvent() {
     autoCursor.src = "https://iili.io/Ck07Z1R.png"; 
     autoCursor.style.position = 'absolute';
     autoCursor.style.width = '50px';
-    autoCursor.style.zIndex = '1005';
+autoCursor.style.zIndex = '3000'; // Moves it to the very front layer
     autoCursor.style.pointerEvents = 'none'; 
     autoCursor.style.transition = 'left 0.1s linear, top 0.1s linear';
     autoCursor.style.filter = "drop-shadow(0 0 10px rgba(255,255,255,0.8))";
@@ -10989,19 +10988,26 @@ function levelUp() {
 }
 
 
+// --- COMBO INFO LOGIC ---
 function openComboInfo() {
-    isPaused = true;
-    clearInterval(moveKevinInterval);
+    isPaused = true; 
+    clearInterval(moveKevinInterval); // Stop character movement
     document.getElementById('comboInfoModal').style.display = 'flex';
-    forceCloseMenu(); // Ensure the side menu closes too
+    forceCloseMenu(); // Closes the side menu if it's open
 }
 
-function closeComboInfo() {
+// Attach the click directly to the button inside the vault
+document.getElementById('comboInfoBtn').onclick = (e) => {
+    e.stopPropagation(); // CRITICAL: This stops the game from counting this as a "Miss"
+    openComboInfo();
+};
+
+// Function for the "AM INTELES" button inside the modal
+window.closeComboInfo = function() {
     document.getElementById('comboInfoModal').style.display = 'none';
     isPaused = false;
-    startKevinMovement();
-}
-
+    startKevinMovement(); // Character starts jumping again
+};
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
 // ==========================================
