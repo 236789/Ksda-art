@@ -5432,64 +5432,133 @@ input:checked + .s-slider:before {
 
 
 
-/* --- ELITE LEVEL IDENTITY SYSTEM --- */
-.ms-orig-card .ms-badge {
-    width: 65%;
-    height: 65%;
+/* --- ELITE CINEMATIC MILESTONES (THE "SICK" VERSION) --- */
+.ms-orig-box {
+    width: 95vw !important;
+    max-width: 1000px !important;
+    height: 92vh !important;
+    background: radial-gradient(circle at center, #0a0c1f 0%, #020512 100%) !important;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 100px rgba(0,0,0,1);
+    border-radius: 30px !important;
+    padding: 20px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow: hidden !important; /* NO SCROLL */
+    user-select: none;
+}
+
+/* Background Mesh Decor */
+.ms-orig-box::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+    opacity: 0.2; pointer-events: none;
+}
+
+.ms-orig-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 12px;
+    width: 100%;
+    height: 100%; /* Fills the box */
+    padding: 10px;
+}
+
+/* THE UNIVERSAL TILE STYLE */
+.ms-orig-card {
+    position: relative;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    cursor: pointer;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.05);
+    background: rgba(255,255,255,0.02);
+}
+
+.ms-orig-card:hover { transform: translateY(-5px) scale(1.05); z-index: 10; }
+
+/* THE BADGE LOGIC */
+.ms-badge {
+    width: 80%; height: 80%;
     object-fit: contain;
+    filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8));
+    transition: 0.3s ease;
     z-index: 2;
-    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
-    transition: transform 0.3s ease;
 }
 
-.ms-orig-card:hover .ms-badge { transform: scale(1.2) rotate(5deg); }
-
-/* Individual Tier Glows & Borders */
-.tier-1 { border-color: #cd7f32 !important; box-shadow: 0 0 15px rgba(205, 127, 50, 0.3); } /* Bronze */
-.tier-2 { border-color: #c0c0c0 !important; box-shadow: 0 0 15px rgba(192, 192, 192, 0.3); } /* Silver */
-.tier-3 { border-color: #b87333 !important; box-shadow: 0 0 15px rgba(184, 115, 51, 0.3); } /* Copper */
-.tier-4 { border-color: #0073e6 !important; box-shadow: 0 0 20px rgba(0, 115, 230, 0.4); } /* Sapphire */
-.tier-5 { border-color: #50c878 !important; box-shadow: 0 0 20px rgba(80, 200, 120, 0.4); } /* Emerald */
-.tier-6 { border-color: #9966cc !important; box-shadow: 0 0 20px rgba(153, 102, 204, 0.4); } /* Amethyst */
-.tier-7 { border-color: #ffd700 !important; box-shadow: 0 0 25px rgba(255, 215, 0, 0.5); } /* Gold */
-.tier-8 { border-color: #afeeee !important; box-shadow: 0 0 20px rgba(175, 238, 238, 0.4); } /* Ice Crystal */
-.tier-9 { border-color: #ff0000 !important; box-shadow: 0 0 25px rgba(255, 0, 0, 0.5); } /* Ruby */
-.tier-10 { border-color: #ffaa00 !important; background: linear-gradient(135deg, rgba(255,170,0,0.1), rgba(153,0,255,0.1)) !important; } /* Royal Gold */
-.tier-11 { border-color: #00a86b !important; box-shadow: 0 0 20px rgba(0, 168, 107, 0.4); } /* Jade */
-.tier-12 { border-color: #bc13fe !important; animation: msPulsePurple 3s infinite alternate; } /* Astral */
-.tier-13 { border-color: #00ffff !important; box-shadow: 0 0 20px #00ffff; } /* Azure */
-.tier-14 { border-color: #ff4500 !important; background: rgba(0,0,0,0.6) !important; } /* Obsidian */
-.tier-15 { border-color: #df73ff !important; box-shadow: 0 0 25px #df73ff; } /* Amethyst Geode */
-.tier-16 { border-color: #00ccff !important; background: rgba(255,255,255,0.05) !important; } /* Frost */
-.tier-17 { border-color: #ff00ff !important; box-shadow: 0 0 30px #ff00ff; } /* Mythril */
-.tier-18 { border-color: #39ff14 !important; text-shadow: 0 0 10px #39ff14; } /* Toxicium */
-.tier-19 { border-color: #6600ff !important; background: radial-gradient(circle, #220044, #000) !important; } /* Void */
-.tier-20 { border-color: #ffffff !important; box-shadow: 0 0 30px #fff, inset 0 0 15px #ffd700; } /* Celestial Gold */
-.tier-21 { border-color: #0033ff !important; animation: msSpace 5s infinite linear; } /* Cosmic */
-.tier-22 { border-color: #b9f2ff !important; box-shadow: 0 0 40px #b9f2ff; } /* Celestial Diamond */
-.tier-23 { border-color: #ff0000 !important; border-style: double !important; } /* Infernal */
-.tier-24 { border-color: #fff !important; box-shadow: 0 0 50px rgba(255,255,255,0.6); } /* Divine */
-.tier-25 { 
-    border: 3px solid transparent !important;
-    background: linear-gradient(#020512, #020512) padding-box, 
-                linear-gradient(135deg, #ff00ff, #00ffff, #ffd700) border-box !important;
-    box-shadow: 0 0 50px rgba(255, 0, 255, 0.5) !important;
-} /* ETERNAL - Rainbow Border */
-
-@keyframes msPulsePurple { from { box-shadow: 0 0 10px #bc13fe; } to { box-shadow: 0 0 30px #bc13fe; } }
-@keyframes msSpace { 0% { filter: hue-rotate(0deg); } 100% { filter: hue-rotate(360deg); } }
-
-/* Locked State Overlay */
-.ms-orig-card.locked .ms-badge {
-    filter: grayscale(1) brightness(0.3) blur(2px);
+.ms-orig-card.locked .ms-badge { filter: grayscale(1) brightness(0.2); opacity: 0.5; }
+.ms-orig-card.locked::before {
+    content: "\f023"; font-family: "Font Awesome 6 Free"; font-weight: 900;
+    position: absolute; color: rgba(255,255,255,0.1); font-size: 1.5rem; z-index: 3;
 }
-.ms-orig-card.locked::after {
-    content: "\f023";
-    font-family: "Font Awesome 6 Free";
-    font-weight: 900;
-    position: absolute;
-    color: rgba(255,255,255,0.2);
-    font-size: 20px;
+
+/* --- TIER SPECIAL STYLES (THE CSS SICKNESS) --- */
+
+/* 1-3: METALS */
+.tier-1 { background: radial-gradient(circle at top, #6b3e26, #2a1506) !important; box-shadow: inset 0 0 20px #cd7f32; }
+.tier-2 { background: radial-gradient(circle at top, #4d4d4d, #1a1a1a) !important; box-shadow: inset 0 0 20px #c0c0c0; }
+.tier-3 { background: radial-gradient(circle at top, #804000, #331a00) !important; box-shadow: inset 0 0 20px #b87333; }
+
+/* 4-6: CRYSTALS */
+.tier-4 { background: radial-gradient(circle at top, #003366, #000a1a) !important; box-shadow: 0 0 15px #0073e6; }
+.tier-5 { background: radial-gradient(circle at top, #004d1a, #001a09) !important; box-shadow: 0 0 15px #50c878; }
+.tier-6 { background: radial-gradient(circle at top, #330066, #0d001a) !important; box-shadow: 0 0 15px #9966cc; }
+
+/* 7-9: POWER */
+.tier-7 { background: radial-gradient(circle at top, #664d00, #1a1400) !important; box-shadow: 0 0 20px #ffd700; }
+.tier-8 { background: radial-gradient(circle at top, #004d4d, #001a1a) !important; box-shadow: 0 0 20px #afeeee; }
+.tier-9 { background: radial-gradient(circle at top, #4d0000, #1a0000) !important; box-shadow: 0 0 20px #ff0000; animation: pulseRed 2s infinite; }
+
+/* 10-15: ROYAL / ANCIENT */
+.tier-10 { background: linear-gradient(45deg, #2a004d, #664d00) !important; border: 2px solid #ffd700 !important; }
+.tier-11 { background: linear-gradient(135deg, #002200, #00a86b) !important; }
+.tier-12 { background: radial-gradient(circle, #bc13fe, #000) !important; }
+.tier-13 { background: linear-gradient(to bottom, #000, #00ffff) !important; }
+.tier-14 { background: url('https://www.transparenttextures.com/patterns/lava.png'), #000 !important; box-shadow: inset 0 0 30px #ff4500; }
+.tier-15 { background: radial-gradient(circle, #df73ff 0%, #000 100%) !important; }
+
+/* 16-20: COSMIC / CELESTIAL */
+.tier-16 { background: #000; box-shadow: inset 0 0 40px #00ccff; }
+.tier-17 { background: linear-gradient(45deg, #ffd700, #bc13fe) !important; }
+.tier-18 { background: radial-gradient(circle, #39ff14 0%, #000 70%) !important; }
+.tier-19 { background: repeating-conic-gradient(#6600ff 0% 25%, #000 25% 50%) !important; background-size: 200% 200%; animation: voidRotate 10s linear infinite; }
+.tier-20 { background: linear-gradient(to bottom, #fff, #ffd700, #000) !important; box-shadow: 0 0 30px #fff; }
+
+/* 21-25: GODLY */
+.tier-21 { background: url('https://www.transparenttextures.com/patterns/stardust.png'), #000 !important; box-shadow: 0 0 40px #0033ff; }
+.tier-22 { background: #b9f2ff; box-shadow: inset 0 0 50px #fff, 0 0 30px #00f0ff; }
+.tier-23 { background: #000; border: 3px solid #ff0000 !important; box-shadow: inset 0 0 50px #ff0000; }
+.tier-24 { background: linear-gradient(to top, #00a2ff, #fff) !important; box-shadow: 0 0 50px #fff; }
+
+/* 25: ETERNAL - THE PRISMATIC GOD */
+.tier-25 {
+    background: linear-gradient(45deg, #ff00ff, #00ffff, #ffd700) !important;
+    background-size: 300% 300% !important;
+    animation: rainbowFlow 3s linear infinite !important;
+    border: 3px solid #fff !important;
+    box-shadow: 0 0 60px #ff00ff, inset 0 0 20px #fff !important;
+}
+
+/* Animations */
+@keyframes pulseRed { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; box-shadow: 0 0 40px #ff0000; } }
+@keyframes voidRotate { from { background-position: 0 0; } to { background-position: 100% 100%; } }
+@keyframes rainbowFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+/* PC vs Mobile Scaling */
+@media (max-width: 768px) {
+    .ms-orig-grid { gap: 6px; padding: 5px; }
+    .ms-orig-box { height: 95vh !important; border-radius: 15px !important; }
+}
+
+@media (min-width: 1000px) {
+    .ms-orig-grid { grid-template-columns: repeat(5, 1fr); }
 }
   </style>
 </head>
@@ -5809,25 +5878,23 @@ input:checked + .s-slider:before {
     </div>
 </div>
 
-<div id="milestonesModal" class="modal-overlay" style="z-index: 200000; background: rgba(0,0,0,0.92);">
+<div id="milestonesModal" class="modal-overlay" style="z-index: 200000; background: rgba(0,0,0,0.95);">
     <div class="ms-orig-box">
         
-        <button onclick="closeMilestones()" class="ms-orig-close" style="top:15px; right:15px;">
+        <button onclick="closeMilestones()" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.1); border:none; color:#fff; width:35px; height:35px; border-radius:50%; cursor:pointer; z-index:100;">
             <i class="fa-solid fa-xmark"></i>
         </button>
 
-        <div class="ms-orig-header" style="text-align: center; margin-bottom: 2vh;">
-            <h2 style="font-size: 28px;">RANK MILESTONES</h2>
-            <div style="height:2px; width:60px; background:#00f0ff; margin: 5px auto;"></div>
-            <p style="margin:0; font-size:12px;">UNLOCK NEW TIERS TO CLAIM EXCLUSIVE REWARDS</p>
+        <div style="text-align: center; margin-bottom: 10px;">
+            <h2 style="font-family:'Orbitron'; color:#fff; letter-spacing:4px; font-size:22px; margin:0;">LEGENDARY RANKS</h2>
+            <p style="font-family:'Oswald'; color:#00f0ff; font-size:10px; margin:0; opacity:0.7;">CLICK AN UNLOCKED RANK TO CLAIM REWARDS</p>
         </div>
 
         <div id="msOrigGrid" class="ms-orig-grid"></div>
 
-        <div style="margin-top: 15px; display:flex; align-items:center; gap:20px; opacity:0.6;">
-             <span style="font-family:'Orbitron'; font-size:9px; color:#fff; letter-spacing:2px;">TOTAL RANKS: 25</span>
-             <div style="flex-grow:1; height:1px; background:linear-gradient(90deg, transparent, #00f0ff, transparent);"></div>
-             <span style="font-family:'Orbitron'; font-size:9px; color:#fff; letter-spacing:2px;">STATUS: CONNECTED</span>
+        <!-- Progress Tracker Footer -->
+        <div style="width:100%; height:4px; background:rgba(255,255,255,0.05); margin-top:15px; border-radius:10px; overflow:hidden;">
+            <div id="msGlobalProgress" style="height:100%; width:0%; background:linear-gradient(90deg, #00f0ff, #ff00ff); transition: 1s;"></div>
         </div>
     </div>
 </div>
@@ -11219,66 +11286,41 @@ function renderMilestones() {
     if (!grid) return;
     grid.innerHTML = "";
 
-    // The Definitive Rank Data Map
-    const rankData = [
-        { name: "Bronze", img: "https://i.ibb.co/wFth4chq/bronze.png" },
-        { name: "Silver", img: "https://i.ibb.co/r21M97q5/silver.png" },
-        { name: "Copper", img: "https://i.ibb.co/vxHM1ffF/copper.png" },
-        { name: "Sapphire", img: "https://i.ibb.co/RGTWgFS2/sapphire.png" },
-        { name: "Emerald", img: "https://i.ibb.co/23FZKwXX/emerald.png" },
-        { name: "Amethyst", img: "https://i.ibb.co/3ywhPtDX/amethyst.png" },
-        { name: "Gold", img: "https://i.ibb.co/Xf2gynsP/gold.png" },
-        { name: "Ice Crystal", img: "https://i.ibb.co/RGnRdDRs/ice.png" },
-        { name: "Ruby", img: "https://i.ibb.co/8nS1TM3x/ruby.png" },
-        { name: "Royal Gold", img: "https://i.ibb.co/qL5kJs5H/royal.png" },
-        { name: "Jade", img: "https://i.ibb.co/67QVCSfs/jade.png" },
-        { name: "Astral", img: "https://i.ibb.co/WWttKxPB/astral.png" },
-        { name: "Azure Crystal", img: "https://i.ibb.co/pBfztNy2/azure.png" },
-        { name: "Obsidian", img: "https://i.ibb.co/MyC7Q2GK/obsidian.png" },
-        { name: "Amethyst Geode", img: "https://i.ibb.co/KcNG1RqF/geode.png" },
-        { name: "Frost", img: "https://i.ibb.co/4gnrPFt0/frost.png" },
-        { name: "Mythril", img: "https://i.ibb.co/qLTkBP7P/mythril.png" },
-        { name: "Toxicium", img: "https://i.ibb.co/vfRpjjT/toxic.png" },
-        { name: "Void", img: "https://i.ibb.co/WSGsNSP/void.png" },
-        { name: "Celestial Gold", img: "https://i.ibb.co/YBwnKJyj/celestial.png" },
-        { name: "Cosmic", img: "https://i.ibb.co/pBdxJVhc/cosmic.png" },
-        { name: "Celestial Diamond", img: "https://i.ibb.co/6J1CRmtr/diamond.png" },
-        { name: "Infernal", img: "https://i.ibb.co/S2z2pFW/infernal.png" },
-        { name: "Divine", img: "https://i.ibb.co/Z6vM7YBx/divine.png" },
-        { name: "Eternal", img: "https://i.ibb.co/B5QKGyLM/eternal.png" }
+    const badges = [
+        "https://i.postimg.cc/mD363LpX/bronze.png", "https://i.postimg.cc/mry0Vj60/silver.png", "https://i.postimg.cc/mD8S6v8D/copper.png",
+        "https://i.postimg.cc/mD5s6N4S/sapphire.png", "https://i.postimg.cc/mry6N4S/emerald.png", "https://i.postimg.cc/mD363LpX/amethyst.png",
+        "https://i.postimg.cc/mry0Vj60/gold.png", "https://i.postimg.cc/mD8S6v8D/ice.png", "https://i.postimg.cc/mD5s6N4S/ruby.png",
+        "https://i.postimg.cc/mry6N4S/royal.png", "https://i.postimg.cc/mD363LpX/jade.png", "https://i.postimg.cc/mry0Vj60/astral.png",
+        "https://i.postimg.cc/mD8S6v8D/azure.png", "https://i.postimg.cc/mD5s6N4S/obsidian.png", "https://i.postimg.cc/mry6N4S/geode.png",
+        "https://i.postimg.cc/mD363LpX/frost.png", "https://i.postimg.cc/mry0Vj60/mythril.png", "https://i.postimg.cc/mD8S6v8D/toxic.png",
+        "https://i.postimg.cc/mD5s6N4S/void.png", "https://i.postimg.cc/mry6N4S/heavenly.png", "https://i.postimg.cc/mD363LpX/cosmic.png",
+        "https://i.postimg.cc/mry0Vj60/diamond.png", "https://i.postimg.cc/mD8S6v8D/infernal.png", "https://i.postimg.cc/mD5s6N4S/divine.png",
+        "https://i.postimg.cc/mry6N4S/eternal.png"
     ];
 
     for (let i = 1; i <= 25; i++) {
-        const data = rankData[i-1];
         const isUnlocked = i <= playerLevel;
         const card = document.createElement('div');
-        
         card.className = `ms-orig-card tier-${i} ${isUnlocked ? 'unlocked' : 'locked'}`;
-        card.style.animationDelay = (i * 0.04) + "s";
-
-        // Level 25 gets the Crown decoration still
-        const crown = (i === 25) ? `<i class="fa-solid fa-crown ms-crown-orig"></i>` : "";
+        
+        // Staggered cinematic reveal
+        card.style.animation = `msCardPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards ${i * 0.03}s`;
 
         card.innerHTML = `
-            ${crown}
-            <div class="ms-orig-check"><i class="fa-solid ${isUnlocked ? 'fa-circle-check' : 'fa-lock'}"></i></div>
-            <img src="${data.img}" class="ms-badge" onerror="this.src='https://iili.io/COrCopj.png'">
-            <div style="position:absolute; bottom:5px; font-family:'Orbitron'; font-size:10px; font-weight:900; color:#fff; text-shadow:0 2px 4px #000;">
-                LVL ${i}
-            </div>
-            <div style="font-family:'Oswald'; font-size:7px; color:rgba(255,255,255,0.5); text-transform:uppercase; margin-top:2px;">
-                ${data.name}
+            <img src="${badges[i-1]}" class="ms-badge" onerror="this.src='https://iili.io/COrCopj.png'">
+            <div style="position:absolute; bottom:2px; width:100%; text-align:center; font-family:'Orbitron'; font-size:0.6rem; color:#fff; font-weight:900; background:rgba(0,0,0,0.5); backdrop-filter:blur(2px);">
+                L${i}
             </div>
         `;
 
         card.onclick = (e) => {
             e.stopPropagation();
             if (isUnlocked) {
-                // To be expanded with reward logic
-                showNotification(data.name, "Rank verified. Reward incoming!", "fa-medal");
+                if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
+                showNotification("RANK UNLOCKED", "Accessing legendary reward vault...", "fa-gem");
             } else {
                 playMissSFX();
-                showKevinutaBubble(`Locked! You need to reach Level ${i}!`);
+                showKevinutaBubble(`Reach Level ${i} first!`);
             }
         };
 
