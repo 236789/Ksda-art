@@ -5071,6 +5071,57 @@ input:checked + .s-slider:before {
     height: 10px !important;
     filter: drop-shadow(0 0 0 transparent) !important; /* Removes default shadow for clean fit */
 }
+
+/* --- XP BAR ROW --- */
+.hud-xp-row {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 2px;
+}
+
+.xp-status-wrap {
+    display: flex;
+    justify-content: flex-end; /* Matches image: text on the right */
+    padding-right: 5px;
+}
+
+#xpStatusText {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    color: #fff;
+    /* Strong text outline for 1/1 replica look */
+    text-shadow: 
+        -1px -1px 0 #000,  
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000,
+         2px  2px 4px rgba(0,0,0,0.8);
+    letter-spacing: 0.5px;
+    margin-bottom: -2px; /* Pulls text closer to the bar */
+    z-index: 5;
+}
+
+.xp-track {
+    width: 100%;
+    height: 10px; /* Slim bar as seen in image */
+    background: #000; /* Pure black track */
+    border-radius: 20px;
+    border: 1.5px solid rgba(255, 255, 255, 0.1); /* Subtle edge highlight */
+    overflow: hidden;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.9);
+    position: relative;
+}
+
+#xpFill {
+    height: 100%;
+    width: 0%; /* Controlled by JS */
+    /* High-end Gold gradient to match your theme */
+    background: linear-gradient(90deg, #fff200 0%, #ffc400 100%);
+    box-shadow: 0 0 10px rgba(255, 217, 0, 0.4);
+    transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
   </style>
 </head>
 <body>
@@ -5303,18 +5354,28 @@ input:checked + .s-slider:before {
     </div>
 
     <!-- RÂNDUL DE JOS: BARA DE COMBO -->
+<!-- RÂNDUL DE JOS: BARA DE COMBO -->
     <div class="hud-combo-row" id="comboSection">
         <div class="combo-title-wrap">
             <span class="combo-label-text">COMBO</span>
             <span id="comboCounterText">0</span>
         </div>
         <div class="combo-track">
-            <!-- Aici este bara care se umple cu efect de '100 de lumini' -->
             <div id="comboFill" class="combo-fill-segmented"></div>
         </div>
     </div>
+
+    <!-- NOU: RÂNDUL DE EXPERIENȚĂ (XP) - REPLICĂ 1/1 -->
+    <div class="hud-xp-row" id="xpSection">
+        <div class="xp-info-container">
+            <span id="xpStatusText">Lvl 1 (0/250 XP)</span>
+        </div>
+        <div class="xp-track">
+            <div id="xpFill"></div>
+        </div>
+    </div>
     
-</div>
+</div> <!-- Închide hud-premium-container -->
 
 <div class="menu-container" id="menuWrapper">
   <!-- The sub-buttons (Hidden by default) -->
@@ -6075,6 +6136,10 @@ let hasSeenRubyTutorial = false; // Flag to track the pop-up
     let lastSavedScore = 0;
 let isSuperMagnetActive = false;
 let isGracePeriodActive = false;
+
+let playerLevel = 1;
+    let playerXP = 0;
+    let xpToNextLevel = 250; // Starting requirement
 
 let blackMarketWants = [];
 let lastMarketRefresh = 0; // Timestamp of last refresh
@@ -10587,6 +10652,22 @@ function showNotification(title, message, iconOrUrl = 'fa-circle-info') {
         toast.classList.add('leaving');
         setTimeout(() => toast.remove(), 500);
     }, 4000);
+}
+
+
+function updateXPBarUI() {
+    const fill = document.getElementById('xpFill');
+    const text = document.getElementById('xpStatusText');
+    if(!fill || !text) return;
+
+    // Calculate percentage
+    let pct = (playerXP / xpToNextLevel) * 100;
+    
+    // Update Bar
+    fill.style.width = Math.min(pct, 100) + "%";
+    
+    // Update Text (Lvl X (Current / Total XP))
+    text.innerText = `Lvl ${playerLevel} (${playerXP}/${xpToNextLevel} XP)`;
 }
 
 // Ensure the ninja icon in Utilities opens the Market
