@@ -6491,18 +6491,22 @@ let isGracePeriodActive = false;
     let playerLevel = 1;
     let playerXP = 0;
     
-    // Leveling Math: Level 1->2 (100xp), Level 2->3 (250xp), Level 3->4 (500xp), etc.
-    const getXPRequired = (lvl) => {
-        const requirements = {
-            1: 100,
-            2: 250,
-            3: 500,
-            4: 1000,
-            5: 2500
-        };
-        return requirements[lvl] || lvl * 1000; // Fallback for high levels
+// --- UPDATED PROGRESSION MATH (1-25) ---
+const getXPRequired = (lvl) => {
+    // Level 1-5: Hand-tuned for early retention
+    const earlyLevels = {
+        1: 100,
+        2: 250,
+        3: 500,
+        4: 1000,
+        5: 2500
     };
-
+    if (earlyLevels[lvl]) return earlyLevels[lvl];
+    
+    // Levels 6-24: Scaling formula
+    // Incrementally increases difficulty: (Level ^ 2.2) * 50
+    return Math.floor(Math.pow(lvl, 2.2) * 50);
+};
     let xpToNextLevel = getXPRequired(playerLevel);
 
 let blackMarketWants = [];
@@ -7094,7 +7098,7 @@ document.getElementById('kevin').addEventListener('click', (e) => {
 
       // Apply Multiplier to Score
       score += (1 * activeScoreMultiplier);
-      gainXP(50); // <--- ADD THIS LINE HERE
+      gainXP(5000); // <--- ADD THIS LINE HERE
 
       // --- SALVĂM STATISTICILE ---
       totalClicksAllTime += (1 * activeScoreMultiplier);
@@ -11028,20 +11032,23 @@ function updateXPBarUI() {
     const fill = document.getElementById('xpFill');
     const statusText = document.getElementById('xpStatusText');
     const levelText = document.getElementById('playerLevelText');
+    const MAX_LEVEL = 25;
     
     if(!fill || !statusText || !levelText) return;
 
-    // Calculate percentage
-    let pct = (playerXP / xpToNextLevel) * 100;
-    
-    // Update Fill
-    fill.style.width = Math.min(pct, 100) + "%";
-    
-    // Update Centered Counter
-    statusText.innerText = `${playerXP} / ${xpToNextLevel} XP`;
-    
-    // Update Level Number
     levelText.innerText = playerLevel;
+
+    if (playerLevel >= MAX_LEVEL) {
+        fill.style.width = "100%";
+        fill.style.background = "linear-gradient(90deg, #ff0055, #ffcc00)"; // Special MAX color
+        statusText.innerText = "NIVEL MAXIM ATINS";
+        statusText.style.color = "#fff";
+    } else {
+        let pct = (playerXP / xpToNextLevel) * 100;
+        fill.style.width = Math.min(pct, 100) + "%";
+        fill.style.background = "linear-gradient(90deg, #ffcc00, #d97706)"; // Standard color
+        statusText.innerText = `${playerXP} / ${xpToNextLevel} XP`;
+    }
 }
 
 
@@ -11084,53 +11091,54 @@ function spawnLevelUpParticles() {
 
 let selectedLvlNode = 1;
 
-    function levelUp() {
-        playerLevel++;
-        
-        // Carry over remaining XP & Update requirements
-        playerXP = Math.max(0, playerXP - xpToNextLevel); 
+// --- UPDATED LEVEL UP LOGIC ---
+function levelUp() {
+    const MAX_LEVEL = 25;
+    if (playerLevel >= MAX_LEVEL) return; // Stop at 25
+
+    playerLevel++;
+    
+    // Carry over remaining XP
+    playerXP = Math.max(0, playerXP - xpToNextLevel); 
+    
+    // Check if we just hit MAX
+    if (playerLevel === MAX_LEVEL) {
+        xpToNextLevel = 0; // No more XP needed
+        playerXP = 0;
+    } else {
         xpToNextLevel = getXPRequired(playerLevel);
-
-        // 1. SOUNDS
-        if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
-
-        // 2. CREATE OVERLAY STRUCTURE
-        const overlay = document.createElement('div');
-        overlay.className = 'lvl-up-overlay';
-        overlay.innerHTML = `
-            <div class="lvl-rays"></div>
-            <div class="lvl-card">
-                <h1 class="lvl-text-glitch">LEVEL UP</h1>
-                <div class="lvl-rank-plate">
-                    <span>RANG NOU: ${playerLevel}</span>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-
-        // 3. TRIGGER VISUALS
-        const flash = document.createElement('div');
-        flash.className = 'lvl-flash';
-        document.body.appendChild(flash);
-        
-        spawnLevelUpParticles(); // Sparkle explosion
-
-        // 4. SCREEN IMPACT
-        const gameArea = document.getElementById('gameArea');
-        if (gameArea) gameArea.classList.add('shake-impact');
-        
-        // 5. CLEANUP
-        setTimeout(() => {
-            overlay.remove();
-            flash.remove();
-            if (gameArea) gameArea.classList.remove('shake-impact');
-        }, 1600);
-
-        // 6. SYNC
-        updateXPBarUI();
-        syncScoreToFirestore(); 
     }
 
+    // Cinematic Effects
+    if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'lvl-up-overlay';
+    overlay.innerHTML = `
+        <div class="lvl-rays"></div>
+        <div class="lvl-card">
+            <h1 class="lvl-text-glitch">${playerLevel === MAX_LEVEL ? 'MAX LEVEL' : 'LEVEL UP'}</h1>
+            <div class="lvl-rank-plate">
+                <span>RANG: ${playerLevel === MAX_LEVEL ? 'LEGENDĂ' : playerLevel}</span>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const flash = document.createElement('div');
+    flash.className = 'lvl-flash';
+    document.body.appendChild(flash);
+    
+    spawnLevelUpParticles();
+
+    setTimeout(() => {
+        overlay.remove();
+        flash.remove();
+    }, 1600);
+
+    updateXPBarUI();
+    syncScoreToFirestore(); 
+}
 
 
 // Ensure the ninja icon in Utilities opens the Market
