@@ -4957,6 +4957,91 @@ input:checked + .s-slider:before {
     padding: 10px 20px;
     display: inline-block;
 }
+
+
+/* ==========================================
+   EPIC STAGE REWARD & CLAIM BADGES
+   ========================================== */
+
+/* Fix for Button Text Wrapping */
+.stage-claim-btn {
+    white-space: nowrap !important;
+    font-size: 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+}
+
+/* Static, Non-Clickable "Claimed" Badge (1 Row) */
+.claimed-badge {
+    background: rgba(74, 222, 128, 0.1);
+    border: 2px solid #4ade80;
+    color: #4ade80;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 auto 15px auto;
+    width: 100%;
+    cursor: default;
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.2), inset 0 0 10px rgba(74, 222, 128, 0.1);
+    letter-spacing: 2px;
+}
+
+/* Dual Reward Display (Score + Rubies) */
+.epic-reward-amount {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(0,0,0,0.4);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 15px 25px;
+    margin: 15px auto 25px auto;
+    width: fit-content;
+}
+
+.epic-score-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: #facc15;
+    text-shadow: 0 0 15px rgba(250, 204, 21, 0.6);
+    line-height: 1;
+}
+
+.epic-ruby-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: #ff3366;
+    text-shadow: 0 0 15px rgba(255, 51, 102, 0.6);
+    line-height: 1;
+}
+
+/* Falling Rubies Animation */
+.jackpot-ruby {
+    position: fixed;
+    width: 35px; height: 35px;
+    background-image: url('https://iili.io/CrnXNdG.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 100006;
+    pointer-events: none;
+    filter: drop-shadow(0 0 10px rgba(255, 51, 102, 0.8));
+    animation: fallRuby linear forwards;
+}
+
+@keyframes fallRuby {
+    0% { transform: translateY(-10vh) rotate(0deg) scale(0.8); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(-720deg) scale(1.2); opacity: 0; }
+}
   </style>
 </head>
 <body>
@@ -9931,15 +10016,32 @@ function renderIndexMain() {
     });
 }
 
+
+function backToIndexMain() {
+    renderIndexMain();
+}
+
 function showStageIndex(stageId, itemKeys) {
     document.getElementById('indexStageList').style.display = 'none';
     const detail = document.getElementById('indexDetailView');
     detail.style.display = 'block';
     document.getElementById('indexSubtitle').innerText = stageList[stageId].name;
     
+    // --- CREATE/UPDATE TOP BANNER FOR CLAIMING ---
+    let topBanner = document.getElementById('stageClaimBanner');
+    if (!topBanner) {
+        topBanner = document.createElement('div');
+        topBanner.id = 'stageClaimBanner';
+        topBanner.style.marginBottom = '15px';
+        // Insert it right above the emoji grid
+        detail.insertBefore(topBanner, document.getElementById('indexEmojiGrid'));
+    }
+    topBanner.innerHTML = ""; // Reset it
+
     const grid = document.getElementById('indexEmojiGrid');
     grid.innerHTML = "";
 
+    // Populate emojis
     itemKeys.forEach(key => {
         const data = specialRegistry[key];
         const isUnlocked = _GAME_DATA.index.includes(key);
@@ -9958,30 +10060,29 @@ function showStageIndex(stageId, itemKeys) {
 
     const isStageComplete = itemKeys.length > 0 && itemKeys.every(k => _GAME_DATA.index.includes(k));
     const isStageClaimed = _GAME_DATA.claimedStageRewards.includes(stageId);
-    const mainBtn = document.getElementById('indexMainActionBtn');
 
-    // --- NEW BUTTON LOGIC ---
+    // --- RENDER TOP BANNER STATUS ---
     if (isStageComplete && !isStageClaimed) {
-        // Unclaimed Reward
-        mainBtn.className = "menu-btn play stage-claim-btn";
-        mainBtn.querySelector('span').innerText = "REVENDICĂ PREMIUL (+500)";
-        mainBtn.onclick = () => showEpicStageRewardModal(stageId);
+        // Ready to claim
+        topBanner.innerHTML = `
+            <button class="menu-btn play stage-claim-btn" style="width: 100%; height: 55px;" onclick="showEpicStageRewardModal('${stageId}')">
+                <i class="fa-solid fa-star"></i> <span>REVENDICĂ PREMIUL</span>
+            </button>
+        `;
     } else if (isStageClaimed) {
-        // Already Claimed
-        mainBtn.className = "menu-btn play stage-claimed-btn";
-        mainBtn.querySelector('span').innerText = "REVENDICAT ✓";
-        // Let it act as a back button so the user isn't stuck
-        mainBtn.onclick = () => backToIndexMain();
-    } else {
-        // Not yet complete
-        mainBtn.className = "menu-btn play close-shop-btn";
-        mainBtn.querySelector('span').innerText = "ÎNAPOI";
-        mainBtn.onclick = () => backToIndexMain();
+        // Already Claimed (Static Badge)
+        topBanner.innerHTML = `
+            <div class="claimed-badge">
+                <span>REVENDICAT</span> <i class="fa-solid fa-check"></i>
+            </div>
+        `;
     }
-}
 
-function backToIndexMain() {
-    renderIndexMain();
+    // --- THE BOTTOM BUTTON STAYS "ÎNAPOI" ALWAYS ---
+    const mainBtn = document.getElementById('indexMainActionBtn');
+    mainBtn.className = "menu-btn play close-shop-btn";
+    mainBtn.innerHTML = `<span>ÎNAPOI</span>`;
+    mainBtn.onclick = () => backToIndexMain();
 }
 
 function showIndexRewardModal(key) {
@@ -10003,11 +10104,93 @@ function showIndexRewardModal(key) {
             <div class="selection-line" style="background:var(--th-border); width:50px; margin-bottom:15px;"></div>
             <p style="color:#d1d5db; font-size:16px;">${data.description}</p>
             ${!isClaimed && data.indexReward ? `
-                <button class="menu-btn play premium-reward-btn" onclick="claimIndexReward('${key}')">COLECTEAZĂ: ${rewardText}</button>
-            ` : `<div class="reward-claimed-tag" style="background:rgba(255,255,255,0.05); border:2px solid var(--th-border); color:var(--th-accent); padding:15px; border-radius:12px; font-family:'Orbitron'; font-weight:900;">COLECTATĂ ✓</div>`}
+                <button class="menu-btn play premium-reward-btn stage-claim-btn" onclick="claimIndexReward('${key}')">REVENDICĂ: ${rewardText}</button>
+            ` : `<div class="reward-claimed-tag">REVENDICAT ✓</div>`}
             <button class="cancel-btn" style="margin-top:20px;" onclick="this.closest('.modal-overlay').remove()">ÎNCHIDE</button>
         </div>`;
     document.body.appendChild(modalOverlay);
+}
+
+function showEpicStageRewardModal(stageId) {
+    const stage = stageList[stageId];
+    
+    const modalOverlay = document.createElement('div');
+    modalOverlay.id = "epicStageRewardModal";
+    modalOverlay.className = 'modal-overlay';
+    modalOverlay.style.display = 'flex';
+    modalOverlay.style.zIndex = '100020'; 
+    
+    modalOverlay.innerHTML = `
+        <div class="modal-box epic-stage-reward-box">
+            <i class="fa-solid fa-trophy epic-trophy-icon"></i>
+            <h2 style="font-size: 32px; color: var(--th-accent); text-transform: uppercase; margin-bottom: 5px; text-shadow: 0 0 15px var(--th-glow);">ZONĂ COMPLETATĂ!</h2>
+            <div class="selection-line" style="margin-bottom: 15px; width: 80px;"></div>
+            <p style="font-size: 16px; color: #d1d5db; font-family: 'Oswald'; margin-bottom: 10px;">Ai colecționat absolut toate elementele din zona <b style="color: #fff;">${stage.name}</b>!</p>
+            
+            <div class="epic-reward-amount">
+                <span class="epic-score-text">+1000 SCOR</span>
+                <span class="epic-ruby-text">+5 RUBINE</span>
+            </div>
+            
+            <button class="menu-btn play stage-claim-btn" style="width: 100%; height: 65px;" onclick="claimStageReward('${stageId}')">
+                <i class="fa-solid fa-gem"></i> <span>COLECTEAZĂ</span>
+            </button>
+            
+            <button class="cancel-btn" style="margin-top: 15px;" onclick="document.getElementById('epicStageRewardModal').remove()">AMÂNĂ</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modalOverlay);
+}
+
+function claimStageReward(stageId) {
+    if (_GAME_DATA.claimedStageRewards.includes(stageId)) return;
+    
+    // 1. Mark as claimed
+    _GAME_DATA.claimedStageRewards.push(stageId);
+    
+    // 2. Queue Rewards
+    pendingWinAmount = 1000;
+    pendingRubyWin = 5;
+
+    // 3. Remove Epic Modal & Close Shop UIs
+    const epicModal = document.getElementById('epicStageRewardModal');
+    if (epicModal) epicModal.remove();
+    document.getElementById('indexModal').style.display = 'none';
+    document.getElementById('utilitiesModal').style.display = 'none';
+
+    // 4. Trigger Animations & Sounds
+    if (typeof playSFX === 'function') playSFX(slotJackpotUrl); 
+    if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins(); 
+    spawnJackpotRubies(); // The new ruby rain!
+
+    // Fly both resources to the HUD (staggered slightly for visual clarity)
+    animateScoreFlying();
+    setTimeout(() => {
+        if (pendingRubyWin > 0) animateRubyFlying();
+    }, 400); 
+
+    // 5. Resume Game & Save
+    isPaused = false;
+    startKevinMovement();
+    syncScoreToFirestore(); 
+}
+
+// Function for the falling rubies visual effect
+function spawnJackpotRubies() {
+    for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+            const ruby = document.createElement('div');
+            ruby.className = 'jackpot-ruby';
+            ruby.style.left = Math.random() * 90 + 'vw';
+            
+            const duration = Math.random() * 2 + 1.5; 
+            ruby.style.animationDuration = duration + 's';
+            
+            document.body.appendChild(ruby);
+            setTimeout(() => ruby.remove(), duration * 1000);
+        }, i * 50); // Drop one every 50ms
+    }
 }
 
 function claimIndexReward(key) {
@@ -10019,7 +10202,7 @@ function claimIndexReward(key) {
     const amount = item.indexReward.value;
 
     const rewardModal = document.getElementById('activeRewardModal');
-    if (rewardModal) rewardModal.remove();
+    if (rewardModal) rewardModal.remove(); 
     
     document.getElementById('indexModal').style.display = 'none';
     document.getElementById('utilitiesModal').style.display = 'none';
@@ -10035,68 +10218,6 @@ function claimIndexReward(key) {
     };
     showSlotResult("BRAVO!", `Ai colectat +${amount} ${isRuby ? 'Rubin' : 'Scor'}!`, false);
 }
-
-// --- THE NEW EPIC REWARD MODAL FUNCTION ---
-function showEpicStageRewardModal(stageId) {
-    const stage = stageList[stageId];
-    
-    const modalOverlay = document.createElement('div');
-    modalOverlay.id = "epicStageRewardModal";
-    modalOverlay.className = 'modal-overlay';
-    modalOverlay.style.display = 'flex';
-    modalOverlay.style.zIndex = '100020'; // Above everything
-    
-    modalOverlay.innerHTML = `
-        <div class="modal-box epic-stage-reward-box">
-            <i class="fa-solid fa-trophy epic-trophy-icon"></i>
-            <h2 style="font-size: 32px; color: var(--th-accent); text-transform: uppercase; margin-bottom: 5px; text-shadow: 0 0 15px var(--th-glow);">ZONĂ COMPLETATĂ!</h2>
-            <div class="selection-line" style="margin-bottom: 15px; width: 80px;"></div>
-            <p style="font-size: 16px; color: #d1d5db; font-family: 'Oswald'; margin-bottom: 10px;">Ai colecționat absolut toate elementele din zona <b style="color: #fff;">${stage.name}</b>!</p>
-            
-            <div class="epic-reward-amount">
-                +500 SCOR
-            </div>
-            
-            <button class="menu-btn play stage-claim-btn" style="width: 100%; height: 65px; display: flex; align-items: center; justify-content: center; gap: 10px;" onclick="claimStageReward('${stageId}')">
-                <i class="fa-solid fa-star"></i> <span>COLECTEAZĂ</span>
-            </button>
-            
-            <button class="cancel-btn" style="margin-top: 15px;" onclick="document.getElementById('epicStageRewardModal').remove()">AMÂNĂ</button>
-        </div>
-    `;
-    
-    document.body.appendChild(modalOverlay);
-}
-
-// --- REWRITTEN CLAIM FUNCTION ---
-function claimStageReward(stageId) {
-    if (_GAME_DATA.claimedStageRewards.includes(stageId)) return;
-    
-    // 1. Mark as claimed
-    _GAME_DATA.claimedStageRewards.push(stageId);
-    
-    // 2. Set the global pending win for the flying animation
-    pendingWinAmount = 500;
-
-    // 3. Remove the Epic Modal
-    const epicModal = document.getElementById('epicStageRewardModal');
-    if (epicModal) epicModal.remove();
-
-    // 4. Close underlying UI layers
-    document.getElementById('indexModal').style.display = 'none';
-    document.getElementById('utilitiesModal').style.display = 'none';
-
-    // 5. Trigger epic visual and audio effects
-    if (typeof playSFX === 'function') playSFX(slotJackpotUrl); // Play the jackpot sound
-    if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins(); // Spawn falling coins
-    animateScoreFlying(); // Fly the points into the HUD
-
-    // 6. Resume gameplay & Save to Cloud
-    isPaused = false;
-    startKevinMovement();
-    syncScoreToFirestore(); 
-}
-
 
 function showNotification(title, message, iconOrUrl = 'fa-circle-info') {
     let container = document.getElementById('toastContainer');
