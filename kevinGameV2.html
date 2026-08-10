@@ -10027,16 +10027,9 @@ function showStageIndex(stageId, itemKeys) {
     detail.style.display = 'block';
     document.getElementById('indexSubtitle').innerText = stageList[stageId].name;
     
-    // --- CREATE/UPDATE TOP BANNER FOR CLAIMING ---
-    let topBanner = document.getElementById('stageClaimBanner');
-    if (!topBanner) {
-        topBanner = document.createElement('div');
-        topBanner.id = 'stageClaimBanner';
-        topBanner.style.marginBottom = '15px';
-        // Insert it right above the emoji grid
-        detail.insertBefore(topBanner, document.getElementById('indexEmojiGrid'));
-    }
-    topBanner.innerHTML = ""; // Reset it
+    // Cleanup any accidental top banners from the previous code
+    const oldBanner = document.getElementById('stageClaimBanner');
+    if (oldBanner) oldBanner.remove();
 
     const grid = document.getElementById('indexEmojiGrid');
     grid.innerHTML = "";
@@ -10061,28 +10054,25 @@ function showStageIndex(stageId, itemKeys) {
     const isStageComplete = itemKeys.length > 0 && itemKeys.every(k => _GAME_DATA.index.includes(k));
     const isStageClaimed = _GAME_DATA.claimedStageRewards.includes(stageId);
 
-    // --- RENDER TOP BANNER STATUS ---
-    if (isStageComplete && !isStageClaimed) {
-        // Ready to claim
-        topBanner.innerHTML = `
-            <button class="menu-btn play stage-claim-btn" style="width: 100%; height: 55px;" onclick="showEpicStageRewardModal('${stageId}')">
-                <i class="fa-solid fa-star"></i> <span>REVENDICĂ PREMIUL</span>
-            </button>
-        `;
-    } else if (isStageClaimed) {
-        // Already Claimed (Static Badge)
-        topBanner.innerHTML = `
-            <div class="claimed-badge">
-                <span>REVENDICAT</span> <i class="fa-solid fa-check"></i>
-            </div>
-        `;
-    }
-
-    // --- THE BOTTOM BUTTON STAYS "ÎNAPOI" ALWAYS ---
+    // --- APPLY LOGIC TO THE MAIN BOTTOM BUTTON ---
     const mainBtn = document.getElementById('indexMainActionBtn');
-    mainBtn.className = "menu-btn play close-shop-btn";
-    mainBtn.innerHTML = `<span>ÎNAPOI</span>`;
-    mainBtn.onclick = () => backToIndexMain();
+
+    if (isStageComplete && !isStageClaimed) {
+        // 1. Ready to claim (Gold glowing button)
+        mainBtn.className = "menu-btn play stage-claim-btn";
+        mainBtn.innerHTML = `<i class="fa-solid fa-star"></i> <span>REVENDICĂ PREMIUL</span>`;
+        mainBtn.onclick = () => showEpicStageRewardModal(stageId); // Direct JS binding fixes the ReferenceError!
+    } else if (isStageClaimed) {
+        // 2. Already Claimed (Static Badge - Unclickable)
+        mainBtn.className = "claimed-badge"; // Uses the new green badge CSS
+        mainBtn.innerHTML = `<span>REVENDICAT</span> <i class="fa-solid fa-check"></i>`;
+        mainBtn.onclick = null; // Removes click functionality so it acts like a stamp
+    } else {
+        // 3. Not complete yet (Normal Back Button)
+        mainBtn.className = "menu-btn play close-shop-btn";
+        mainBtn.innerHTML = `<span>ÎNAPOI</span>`;
+        mainBtn.onclick = () => backToIndexMain();
+    }
 }
 
 function showIndexRewardModal(key) {
@@ -10097,6 +10087,7 @@ function showIndexRewardModal(key) {
     let rewardText = "";
     if (data.indexReward) rewardText = data.indexReward.type === 'ruby' ? `${data.indexReward.value} RUBIN` : `${data.indexReward.value} SCOR`;
 
+    // Updated Individual Emojis to also use REVENDICĂ / REVENDICAT
     modalOverlay.innerHTML = `
         <div class="modal-box info-modal-box premium-reward-box">
             <img src="${data.image}" style="width:85px; filter:drop-shadow(0 5px 15px rgba(0,0,0,0.5)); margin-bottom:15px;">
@@ -10105,7 +10096,11 @@ function showIndexRewardModal(key) {
             <p style="color:#d1d5db; font-size:16px;">${data.description}</p>
             ${!isClaimed && data.indexReward ? `
                 <button class="menu-btn play premium-reward-btn stage-claim-btn" onclick="claimIndexReward('${key}')">REVENDICĂ: ${rewardText}</button>
-            ` : `<div class="reward-claimed-tag">REVENDICAT ✓</div>`}
+            ` : `
+                <div class="claimed-badge" style="margin-top: 15px; width: auto; display: inline-flex;">
+                    <span>REVENDICAT</span> <i class="fa-solid fa-check"></i>
+                </div>
+            `}
             <button class="cancel-btn" style="margin-top:20px;" onclick="this.closest('.modal-overlay').remove()">ÎNCHIDE</button>
         </div>`;
     document.body.appendChild(modalOverlay);
@@ -10146,31 +10141,31 @@ function showEpicStageRewardModal(stageId) {
 function claimStageReward(stageId) {
     if (_GAME_DATA.claimedStageRewards.includes(stageId)) return;
     
-    // 1. Mark as claimed
+    // Mark as claimed
     _GAME_DATA.claimedStageRewards.push(stageId);
     
-    // 2. Queue Rewards
+    // Queue Rewards (1000 Score, 5 Rubies)
     pendingWinAmount = 1000;
     pendingRubyWin = 5;
 
-    // 3. Remove Epic Modal & Close Shop UIs
+    // Remove Epic Modal & Close Shop UIs
     const epicModal = document.getElementById('epicStageRewardModal');
     if (epicModal) epicModal.remove();
     document.getElementById('indexModal').style.display = 'none';
     document.getElementById('utilitiesModal').style.display = 'none';
 
-    // 4. Trigger Animations & Sounds
+    // Trigger Animations & Sounds
     if (typeof playSFX === 'function') playSFX(slotJackpotUrl); 
     if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins(); 
-    spawnJackpotRubies(); // The new ruby rain!
+    if (typeof spawnJackpotRubies === 'function') spawnJackpotRubies();
 
-    // Fly both resources to the HUD (staggered slightly for visual clarity)
+    // Fly resources to the HUD
     animateScoreFlying();
     setTimeout(() => {
         if (pendingRubyWin > 0) animateRubyFlying();
     }, 400); 
 
-    // 5. Resume Game & Save
+    // Resume Game & Save
     isPaused = false;
     startKevinMovement();
     syncScoreToFirestore(); 
@@ -10320,6 +10315,7 @@ window.claimIndexReward = claimIndexReward;
 window.claimStageReward = claimStageReward;
 window.showIndexRewardModal = showIndexRewardModal;
 window.showNotification = showNotification;
+window.showEpicStageRewardModal = showEpicStageRewardModal;
 
 })(); // <-- CLOSES THE SECURE VAULT
 
