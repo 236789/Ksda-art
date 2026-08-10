@@ -7782,7 +7782,7 @@ const boostRegistry = {
     "boost_x2_combo": {
         name: "X2 COMBO",
         image: "https://iili.io/C4bLzTQ.png",
-        type: "good",
+        type: "good", // Used for the green border/label
         duration: 30,
         description: "Dublează progresul barei de Combo pentru 30 de secunde."
     },
@@ -8061,15 +8061,47 @@ if (axeRect.left < kevinRect.right && axeRect.right > kevinRect.left &&
     }, 30);
 }
 
-// --- EVENT UI GENERATOR (UPDATED FOR GAMBLE TYPE) --- 
 function showEventIndicator(eventKey, durationSeconds) {
-    const eventData = specialRegistry[eventKey];
+    // NEW: Check both registries so Boosts can find their icons/data
+    const eventData = specialRegistry[eventKey] || boostRegistry[eventKey];
     if (!eventData) return;
 
-    // Create the container if it doesn't exist
-    let container = document.getElementById('active-events-container');
-    if (container) container.style.visibility = showEventIndicators ? 'visible' : 'hidden';
+    // 1. CHECK IF EVENT IS ALREADY RUNNING (Refresh it instead of duplicating)
+    if (activeEventTimers[eventKey]) {
+        clearInterval(activeEventTimers[eventKey].interval);
+        
+        const existingBox = document.getElementById('event-box-' + eventKey);
+        if (existingBox) {
+            const timerEl = existingBox.querySelector('.event-timer');
+            activeEventTimers[eventKey].timeLeft = durationSeconds;
+            timerEl.innerText = durationSeconds + "s";
+            timerEl.style.color = 'white';
+            existingBox.style.borderColor = 'var(--th-border)';
+            
+            // Restart the countdown
+            activeEventTimers[eventKey].interval = setInterval(() => {
+                if (isPaused) return;
+                activeEventTimers[eventKey].timeLeft--;
+                let t = activeEventTimers[eventKey].timeLeft;
+                timerEl.innerText = t + "s";
+                
+                if (t <= 3) { 
+                    timerEl.style.color = '#ff4444'; 
+                    existingBox.style.borderColor = '#ff4444'; 
+                }
+                if (t <= 0) {
+                    clearInterval(activeEventTimers[eventKey].interval);
+                    delete activeEventTimers[eventKey];
+                    existingBox.style.animation = 'slideOutEventLeft 0.3s ease-in forwards';
+                    setTimeout(() => existingBox.remove(), 300);
+                }
+            }, 1000);
+        }
+        return; 
+    }
 
+    // 2. IF IT'S A NEW EVENT, CREATE A NEW BOX
+    let container = document.getElementById('active-events-container');
     if (!container) {
         container = document.createElement('div');
         container.id = 'active-events-container';
@@ -8078,23 +8110,25 @@ function showEventIndicator(eventKey, durationSeconds) {
 
     const box = document.createElement('div');
     box.className = 'active-event-box';
+    box.id = 'event-box-' + eventKey; 
+    box.style.pointerEvents = 'auto';
     
     // Logic for Colors and Labels based on Type
-    let typeColor = '#00ff88'; // Default Good (Green)
+    let typeColor = '#00ff88'; 
     let typeText = 'BONUS';
 
     if (eventData.type === 'bad') {
         typeColor = '#ff4444';
         typeText = 'PERICOL';
     } else if (eventData.type === 'gamble') {
-        typeColor = '#a855f7'; // Purple Gamble Color
+        typeColor = '#a855f7';
         typeText = 'RISC';
-        box.classList.add('tier-gamble'); // Specific CSS class for purple glow
+        box.classList.add('tier-gamble');
     }
 
     box.innerHTML = `
         <img src="${eventData.image}" style="width: 24px; height: 24px; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">
-        <span class="event-timer" style="font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 16px;">${durationSeconds}s</span>
+        <span class="event-timer" style="font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 16px; margin-left: 8px;">${durationSeconds}s</span>
         
         <div class="event-tooltip">
             <div style="font-family: 'Orbitron'; color: var(--th-accent); font-size: 15px; margin-bottom: 6px;">${eventData.name}</div>
@@ -8103,30 +8137,39 @@ function showEventIndicator(eventKey, durationSeconds) {
         </div>
     `;
 
+    // MOBILE MODAL TRIGGER: Click the indicator icon to see info
+    box.onclick = (e) => {
+        e.stopPropagation();
+        if (window.innerWidth <= 600) {
+            // Passing false because it's already active, no need for a "Use" button here
+            showMobileEventModal(eventData, false); 
+        }
+    };
+
     container.appendChild(box);
 
-    let timeLeft = durationSeconds;
-    const timerEl = box.querySelector('.event-timer');
+    activeEventTimers[eventKey] = {
+        timeLeft: durationSeconds,
+        interval: setInterval(() => {
+            if (isPaused) return;
+            activeEventTimers[eventKey].timeLeft--;
+            let t = activeEventTimers[eventKey].timeLeft;
+            const timerEl = box.querySelector('.event-timer');
+            if (timerEl) timerEl.innerText = t + "s";
 
-    // Countdown logic
-    const interval = setInterval(() => {
-        if (isPaused) return; 
+            if (t <= 3 && timerEl) {
+                timerEl.style.color = '#ff4444';
+                box.style.borderColor = '#ff4444';
+            }
 
-        timeLeft--;
-        timerEl.innerText = timeLeft + "s";
-        
-        if (timeLeft <= 3) {
-            timerEl.style.color = '#ff4444'; 
-            box.style.borderColor = '#ff4444';
-        }
-        
-        if (timeLeft <= 0) {
-            clearInterval(interval);
-            // Updated animation name to match your CSS from the previous step
-            box.style.animation = 'slideOutEventLeft 0.3s ease-in forwards';
-            setTimeout(() => box.remove(), 300);
-        }
-    }, 1000);
+            if (t <= 0) {
+                clearInterval(activeEventTimers[eventKey].interval);
+                delete activeEventTimers[eventKey];
+                box.style.animation = 'slideOutEventLeft 0.3s ease-in forwards';
+                setTimeout(() => box.remove(), 300);
+            }
+        }, 1000)
+    };
 }
 
 let eventTimeout = null;
@@ -8385,7 +8428,43 @@ function activateBoost(key) {
     isPaused = false;
     startKevinMovement();
 }
+function activateBoost(key) {
+    const data = boostRegistry[key];
+    if (!data || !_GAME_DATA.inventory[key] || _GAME_DATA.inventory[key] <= 0) {
+        showKevinutaBubble("Nu mai ai acest boost!");
+        return;
+    }
 
+    // 1. Consume item
+    _GAME_DATA.inventory[key]--;
+    renderInventoryUI();
+    syncInventoryToCloud();
+
+    // 2. Apply Multiplier logic
+    let toastMsg = "";
+    if (key === 'boost_x2_score') { activeScoreMultiplier = 2; toastMsg = "Scorul este dublat!"; }
+    else if (key === 'boost_x2_combo') { activeComboMultiplier = 2; toastMsg = "Combo crește de 2 ori mai repede!"; }
+    else if (key === 'boost_x2_rubies') { activeRubyMultiplier = 2; toastMsg = "Vei primi rubine duble!"; }
+
+    // 3. UI FEEDBACK (This triggers the box in the bottom-left)
+    showNotification("BOOST ACTIVAT", toastMsg, data.image);
+    
+    // 🔥 THIS LINE ADDS THE DURATION INDICATOR ON SCREEN
+    showEventIndicator(key, data.duration);
+
+    // 4. Timer to reset multipliers
+    setTimeout(() => {
+        if (key === 'boost_x2_score') activeScoreMultiplier = 1;
+        if (key === 'boost_x2_combo') activeComboMultiplier = 1;
+        if (key === 'boost_x2_rubies') activeRubyMultiplier = 1;
+        showNotification("BOOST EXPIRAT", "Efectul de " + data.name + " a încetat.", "fa-clock");
+    }, data.duration * 1000);
+
+    // Resume game
+    document.getElementById('inventoryModal').style.display = 'none';
+    isPaused = false;
+    startKevinMovement();
+}
 // --- SMART EVENT INDICATOR (PREVENTS DUPLICATES) ---
 let activeEventTimers = {}; // Tracks running events
 
