@@ -5295,6 +5295,124 @@ input:checked + .s-slider:before {
     justify-content: space-between;
     gap: 10px; /* Reduced gap slightly to fit the button */
 }
+
+/* --- CINEMATIC COMBO HUD --- */
+.combo-overlay-cinematic {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 25000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    pointer-events: auto;
+    overflow: hidden;
+}
+
+/* Scanning Light Rays */
+.combo-rays {
+    position: absolute;
+    width: 200vmax; height: 200vmax;
+    background: conic-gradient(from 0deg, 
+        transparent 0deg, 
+        rgba(0, 240, 255, 0.1) 20deg, 
+        transparent 40deg);
+    animation: rotateRays 15s linear infinite;
+}
+
+/* Holographic Data Card */
+.combo-hud-card {
+    position: relative;
+    width: 90vw;
+    max-width: 450px;
+    background: linear-gradient(135deg, rgba(20, 20, 40, 0.95), rgba(10, 10, 20, 0.98));
+    border: 2px solid #00f0ff;
+    border-radius: 20px;
+    padding: 35px 25px;
+    box-shadow: 0 0 40px rgba(0, 240, 255, 0.3), inset 0 0 20px rgba(0,0,0,0.5);
+    animation: hudSlam 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes hudSlam {
+    0% { transform: scale(1.5) translateY(100px); opacity: 0; filter: brightness(5); }
+    100% { transform: scale(1) translateY(0); opacity: 1; filter: brightness(1); }
+}
+
+.combo-hud-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    color: #00f0ff;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-bottom: 5px;
+    text-shadow: 0 0 15px #00f0ff;
+}
+
+/* Data Rows Entrance */
+.hud-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 15px 0;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 4px solid #00f0ff;
+    border-radius: 0 12px 12px 0;
+    opacity: 0;
+    transform: translateX(-30px);
+    animation: rowSlideIn 0.5s forwards;
+}
+
+@keyframes rowSlideIn {
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.hud-row:nth-child(1) { animation-delay: 0.3s; }
+.hud-row:nth-child(2) { animation-delay: 0.5s; }
+.hud-row:nth-child(3) { animation-delay: 0.7s; }
+
+.hud-row i { font-size: 18px; color: #00f0ff; width: 25px; }
+.hud-row span { font-family: 'Oswald'; font-size: 16px; color: #d1d5db; }
+.hud-row b { color: #fff; font-family: 'Orbitron'; font-size: 12px; display: block; margin-bottom: 2px; }
+
+/* Cinematic Ruby Card */
+.ruby-epic-card {
+    margin-top: 25px;
+    background: linear-gradient(45deg, #ff3366, #990033);
+    padding: 15px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border: 2px solid #fff;
+    box-shadow: 0 0 30px rgba(255, 51, 102, 0.5);
+    opacity: 0;
+    animation: rowSlideIn 0.5s 1s forwards;
+}
+
+.ruby-epic-card img {
+    width: 50px;
+    animation: rubySpin 4s linear infinite;
+}
+
+@keyframes rubySpin {
+    0% { transform: rotateY(0deg); }
+    100% { transform: rotateY(360deg); }
+}
+
+.close-hud-btn {
+    margin-top: 30px;
+    width: 100%;
+    height: 60px;
+    background: #00f0ff !important;
+    color: #000 !important;
+    border: 2px solid #fff !important;
+    font-family: 'Orbitron' !important;
+    font-weight: 900 !important;
+    box-shadow: 0 8px 0 #008899 !important;
+}
   </style>
 </head>
 <body>
@@ -5536,7 +5654,7 @@ input:checked + .s-slider:before {
             <div id="comboFill" class="combo-fill-segmented"></div>
         </div>
         <!-- FIXED BUTTON -->
-        <button class="hud-mini-btn" id="comboInfoBtn" onclick="openComboInfo(event)">
+    <button class="hud-mini-btn cinematic-btn" id="comboInfoBtn" onclick="openComboCinematic(event)">
             <i class="fa-solid fa-question"></i>
         </button>
     </div>
@@ -5892,26 +6010,53 @@ input:checked + .s-slider:before {
 </div>
 
 
-<!-- MODAL: INFO COMBO -->
-<div id="comboInfoModal" class="modal-overlay">
-    <div class="modal-box info-modal-box">
-        <div class="score-icon-wrapper score-bg" style="width: 70px; height: 70px; margin: 0 auto 15px auto; background: radial-gradient(circle at center, #4ade80 0%, #166534 100%); border-color: #fff;">
-            <i class="fa-solid fa-fire" style="color: #fff; font-size: 30px;"></i>
+<!-- OVERLAY: COMBO CINEMATIC HUD -->
+<div id="comboCinematicModal" class="combo-overlay-cinematic" style="display:none;">
+    <div class="combo-rays"></div>
+    
+    <div class="combo-hud-card">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div class="combo-hud-title">COMBO DATA</div>
+            <div style="width: 100%; height: 2px; background: rgba(0, 240, 255, 0.3);"></div>
         </div>
-        <h2 style="color: var(--th-accent) !important;">SISTEM COMBO</h2>
-        <div class="selection-line" style="background: var(--th-accent); width: 60px;"></div>
-        
-        <div style="text-align: left; font-family: 'Oswald', sans-serif; color: #d1d5db; line-height: 1.6; margin-bottom: 25px;">
-            <p>• <b>CREȘTERE:</b> Combo-ul crește cu +1 la fiecare captură reușită.</p>
-            <p>• <b>RESETARE:</b> Combo-ul revine la <b>0</b> dacă ratezi un click sau timpul expiră.</p>
-            <p>• <b>XP BONUS:</b> Cu cât combo-ul este mai mare, cu atât primești mai mult XP!</p>
-            <div style="background: rgba(255, 51, 102, 0.1); border: 1px dashed #ff3366; padding: 10px; border-radius: 8px; margin-top: 15px;">
-                <span style="color: #ff3366; font-weight: 900; font-family: 'Orbitron'; font-size: 14px;">💎 PREMIU RUBIN</span><br>
-                La fiecare <b>100 COMBO</b> primești garantat <b>1 RUBIN</b>!
+
+        <div class="combo-info-list" style="margin: 0;">
+            <div class="hud-row">
+                <i class="fa-solid fa-bolt"></i>
+                <div>
+                    <b>INTENSITATE</b>
+                    <span>Fiecare captură crește combo-ul și viteza jocului.</span>
+                </div>
+            </div>
+
+            <div class="hud-row">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <div>
+                    <b>SINCRONIZARE</b>
+                    <span>Ai 2 secunde între capturi înainte ca bara să se reseteze.</span>
+                </div>
+            </div>
+
+            <div class="hud-row">
+                <i class="fa-solid fa-skull-crossbones"></i>
+                <div>
+                    <b>CRITICAL FAIL</b>
+                    <span>Dacă ratezi ținta, pierzi 1 punct și întreg combo-ul.</span>
+                </div>
+            </div>
+
+            <div class="ruby-epic-card">
+                <img src="https://iili.io/CrnXNdG.png" alt="Ruby">
+                <div>
+                    <b style="color: #fff; font-size: 16px;">MILESTONE: 100</b>
+                    <span style="color: #ffdce5; font-size: 14px;">Atinge pragul de 100 Combo pentru a extrage 1 RUBIN!</span>
+                </div>
             </div>
         </div>
 
-        <button class="menu-btn play" style="width: 100%; height: 50px; font-size: 20px;" onclick="closeComboInfo()">AM ÎNȚELES!</button>
+        <button class="menu-btn play close-hud-btn" onclick="closeComboCinematic()">
+            <span>SISTEM REPORNIT</span>
+        </button>
     </div>
 </div>
 
@@ -10989,19 +11134,30 @@ function levelUp() {
 
 
 // --- COMBO INFO LOGIC ---
-function openComboInfo() {
-    isPaused = true; 
-    clearInterval(moveKevinInterval); // Stop character movement
-    document.getElementById('comboInfoModal').style.display = 'flex';
-    forceCloseMenu(); // Closes the side menu if it's open
+function openComboCinematic() {
+    isPaused = true;
+    clearInterval(moveKevinInterval);
+    document.getElementById('comboCinematicModal').style.display = 'flex';
+    forceCloseMenu();
+    
+    // Play a technical sound if available
+    if (typeof playSFX === 'function') playSFX(slotWooshUrl);
 }
 
-// Attach the click directly to the button inside the vault
+function closeComboCinematic() {
+    document.getElementById('comboCinematicModal').style.display = 'none';
+    isPaused = false;
+    startKevinMovement();
+}
+
+// Re-bind the button to the new cinematic function
 document.getElementById('comboInfoBtn').onclick = (e) => {
-    e.stopPropagation(); // CRITICAL: This stops the game from counting this as a "Miss"
-    openComboInfo();
+    e.stopPropagation();
+    openComboCinematic();
 };
 
+// Export to window
+window.closeComboCinematic = closeComboCinematic;
 // Function for the "AM INTELES" button inside the modal
 window.closeComboInfo = function() {
     document.getElementById('comboInfoModal').style.display = 'none';
