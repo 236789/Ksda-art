@@ -5893,6 +5893,30 @@ input:checked + .s-slider:before {
 </div>
 
 
+<!-- MODAL: INFO COMBO -->
+<div id="comboInfoModal" class="modal-overlay">
+    <div class="modal-box info-modal-box">
+        <div class="score-icon-wrapper score-bg" style="width: 70px; height: 70px; margin: 0 auto 15px auto; background: radial-gradient(circle at center, #4ade80 0%, #166534 100%); border-color: #fff;">
+            <i class="fa-solid fa-fire" style="color: #fff; font-size: 30px;"></i>
+        </div>
+        <h2 style="color: var(--th-accent) !important;">SISTEM COMBO</h2>
+        <div class="selection-line" style="background: var(--th-accent); width: 60px;"></div>
+        
+        <div style="text-align: left; font-family: 'Oswald', sans-serif; color: #d1d5db; line-height: 1.6; margin-bottom: 25px;">
+            <p>• <b>CREȘTERE:</b> Combo-ul crește cu +1 la fiecare captură reușită.</p>
+            <p>• <b>RESETARE:</b> Combo-ul revine la <b>0</b> dacă ratezi un click sau timpul expiră.</p>
+            <p>• <b>XP BONUS:</b> Cu cât combo-ul este mai mare, cu atât primești mai mult XP!</p>
+            <div style="background: rgba(255, 51, 102, 0.1); border: 1px dashed #ff3366; padding: 10px; border-radius: 8px; margin-top: 15px;">
+                <span style="color: #ff3366; font-weight: 900; font-family: 'Orbitron'; font-size: 14px;">💎 PREMIU RUBIN</span><br>
+                La fiecare <b>100 COMBO</b> primești garantat <b>1 RUBIN</b>!
+            </div>
+        </div>
+
+        <button class="menu-btn play" style="width: 100%; height: 50px; font-size: 20px;" onclick="closeComboInfo()">AM ÎNȚELES!</button>
+    </div>
+</div>
+
+
 <!-- REPLACED INDEX MODAL PART -->
 <div id="indexModal" class="modal-overlay">
   <div class="modal-box shop-box">
@@ -6693,12 +6717,13 @@ document.getElementById('gameArea').onclick = (e) => {
     // 1. If paused OR the 3-second shield is active, do nothing
     if (isPaused || isGracePeriodActive) return;
 
-// Add these to the check that prevents "Misses" on UI clicks
-if (e.target.closest('.control-btn') || 
-    e.target.closest('.active-event-box') || 
-    e.target.closest('.hud-mini-btn')) { // <--- ADD THIS
-    return; 
-}
+    // 2. TREAT THE HUD, BUTTONS, AND EVENT BOXES AS SAFE ZONES
+    if (e.target.closest('.control-btn') || 
+        e.target.closest('.active-event-box') || 
+        e.target.closest('.hud-mini-btn') ||
+        e.target.closest('#scoreBoard')) { // <--- THIS LINE EXCLUDES THE ENTIRE HUD
+        return; 
+    }
 
 
     // 3. Normal miss logic
@@ -10963,6 +10988,20 @@ function levelUp() {
     syncScoreToFirestore(); // Ensure the new level is saved
 }
 
+
+function openComboInfo() {
+    isPaused = true;
+    clearInterval(moveKevinInterval);
+    document.getElementById('comboInfoModal').style.display = 'flex';
+    forceCloseMenu(); // Ensure the side menu closes too
+}
+
+function closeComboInfo() {
+    document.getElementById('comboInfoModal').style.display = 'none';
+    isPaused = false;
+    startKevinMovement();
+}
+
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
 // ==========================================
@@ -11036,6 +11075,8 @@ window.showEpicStageRewardModal = showEpicStageRewardModal;
 window.switchBMTab = switchBMTab;
 window.setBuyQty = setBuyQty;
 window.processBuy = processBuy;
+window.closeComboInfo = closeComboInfo;
+
 })(); // <-- CLOSES THE SECURE VAULT
 
 </script>
