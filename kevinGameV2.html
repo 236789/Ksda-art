@@ -5246,6 +5246,55 @@ input:checked + .s-slider:before {
     animation: flashOut 0.5s ease-out forwards;
 }
 @keyframes flashOut { 0% { opacity: 0.8; } 100% { opacity: 0; } }
+
+/* --- HUD MINI BUTTONS --- */
+.hud-mini-btn {
+    width: 24px;
+    height: 24px;
+    min-width: 24px; /* Prevents shrinking */
+    border-radius: 50%;
+    background: var(--th-bg);
+    border: 1.5px solid var(--th-border);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5), inset 0 0 5px rgba(0,0,0,0.5);
+    padding: 0;
+    z-index: 5;
+}
+
+.hud-mini-btn:hover {
+    transform: scale(1.1);
+    border-color: #fff;
+    box-shadow: 0 0 10px var(--th-glow);
+    color: var(--th-accent);
+}
+
+.hud-mini-btn:active {
+    transform: scale(0.9) translateY(2px);
+}
+
+/* Specific color for the Gift button to make it "pop" */
+#lvlRewardsBtn {
+    border-color: #ffcc00;
+    color: #ffcc00;
+}
+
+#lvlRewardsBtn:hover {
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+    background: #ffcc00;
+    color: #000;
+}
+
+/* Adjusting the rows to handle the 3rd element */
+.hud-combo-row, .hud-xp-row {
+    justify-content: space-between;
+    gap: 10px; /* Reduced gap slightly to fit the button */
+}
   </style>
 </head>
 <body>
@@ -5478,29 +5527,36 @@ input:checked + .s-slider:before {
     </div>
 
     <!-- RÂNDUL DE JOS: BARA DE COMBO -->
-<!-- RÂNDUL DE JOS: BARA DE COMBO -->
-    <div class="hud-combo-row" id="comboSection">
-        <div class="combo-title-wrap">
-            <span class="combo-label-text">COMBO</span>
-            <span id="comboCounterText">0</span>
-        </div>
-        <div class="combo-track">
-            <div id="comboFill" class="combo-fill-segmented"></div>
-        </div>
+<!<!-- Row 2: COMBO -->
+<div class="hud-combo-row" id="comboSection">
+    <div class="combo-title-wrap">
+        <span class="combo-label-text">COMBO</span>
+        <span id="comboCounterText">0</span>
     </div>
+    <div class="combo-track">
+        <div id="comboFill" class="combo-fill-segmented"></div>
+    </div>
+    <!-- NEW: ? BUTTON -->
+    <button class="hud-mini-btn" id="comboInfoBtn">
+        <i class="fa-solid fa-question"></i>
+    </button>
+</div>
 
-<!-- RÂNDUL DE JOS: NIVEL & XP (HORIZONTAL) -->
-    <div class="hud-xp-row" id="xpSection">
-        <div class="xp-title-wrap">
-            <span class="xp-label-text">LEVEL</span>
-            <span id="playerLevelText">1</span>
-        </div>
-        <div class="xp-track">
-            <!-- Bara de progres -->
-            <div id="xpFill"></div>
-            <!-- Textul din interiorul barei -->
-            <span id="xpStatusText">0 / 250 XP</span>
-        </div>
+<!-- Row 3: XP -->
+<div class="hud-xp-row" id="xpSection">
+    <div class="xp-title-wrap">
+        <span class="xp-label-text">LEVEL</span>
+        <span id="playerLevelText">1</span>
+    </div>
+    <div class="xp-track">
+        <div id="xpFill"></div>
+        <span id="xpStatusText">0 / 250 XP</span>
+    </div>
+    <!-- NEW: GIFT BUTTON -->
+    <button class="hud-mini-btn" id="lvlRewardsBtn">
+        <i class="fa-solid fa-gift"></i>
+    </button>
+</div>
     </div>
 </div> <!-- Închide hud-premium-container -->
 
@@ -6637,10 +6693,13 @@ document.getElementById('gameArea').onclick = (e) => {
     // 1. If paused OR the 3-second shield is active, do nothing
     if (isPaused || isGracePeriodActive) return;
 
-    // 2. Ignore clicks on buttons/event boxes
-    if (e.target.closest('.control-btn') || e.target.closest('.active-event-box')) {
-        return; 
-    }
+// Add these to the check that prevents "Misses" on UI clicks
+if (e.target.closest('.control-btn') || 
+    e.target.closest('.active-event-box') || 
+    e.target.closest('.hud-mini-btn')) { // <--- ADD THIS
+    return; 
+}
+
 
     // 3. Normal miss logic
     playMissSFX(); 
