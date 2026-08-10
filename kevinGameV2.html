@@ -5146,6 +5146,40 @@ input:checked + .s-slider:before {
     .xp-track { height: 16px; }
     #xpStatusText { font-size: 9px; }
 }
+
+/* LEVEL UP SLAM ANIMATION */
+.level-up-text {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10000;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 80px;
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    text-shadow: 0 0 20px #ffcc00, 0 0 40px #d97706, 0 0 60px #ffcc00;
+    pointer-events: none;
+    animation: levelUpSlam 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes levelUpSlam {
+    0% { transform: translate(-50%, -50%) scale(5); opacity: 0; filter: blur(20px); }
+    20% { transform: translate(-50%, -50%) scale(1); opacity: 1; filter: blur(0px); }
+    80% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+    100% { transform: translate(-50%, -150%) scale(0.5); opacity: 0; }
+}
+
+/* Scoreboard Shine on Level Up */
+.xp-level-up-glow {
+    animation: xpGlowPulse 0.5s 3 ease-in-out;
+}
+
+@keyframes xpGlowPulse {
+    0%, 100% { box-shadow: 0 8px 20px rgba(0,0,0,0.6); border-color: var(--th-border); }
+    50% { box-shadow: 0 0 40px #ffcc00; border-color: #fff; }
+}
   </style>
 </head>
 <body>
@@ -6164,9 +6198,23 @@ let hasSeenRubyTutorial = false; // Flag to track the pop-up
 let isSuperMagnetActive = false;
 let isGracePeriodActive = false;
 
-let playerLevel = 1;
+// --- PROGRESSION SYSTEM ---
+    let playerLevel = 1;
     let playerXP = 0;
-    let xpToNextLevel = 250; // Starting requirement
+    
+    // Leveling Math: Level 1->2 (100xp), Level 2->3 (250xp), Level 3->4 (500xp), etc.
+    const getXPRequired = (lvl) => {
+        const requirements = {
+            1: 100,
+            2: 250,
+            3: 500,
+            4: 1000,
+            5: 2500
+        };
+        return requirements[lvl] || lvl * 1000; // Fallback for high levels
+    };
+
+    let xpToNextLevel = getXPRequired(playerLevel);
 
 let blackMarketWants = [];
 let lastMarketRefresh = 0; // Timestamp of last refresh
@@ -6752,7 +6800,8 @@ document.getElementById('kevin').addEventListener('click', (e) => {
 
       // Apply Multiplier to Score
       score += (1 * activeScoreMultiplier);
-      
+      gainXP(1); // <--- ADD THIS LINE HERE
+
       // --- SALVĂM STATISTICILE ---
       totalClicksAllTime += (1 * activeScoreMultiplier);
 
@@ -10699,6 +10748,50 @@ function updateXPBarUI() {
     
     // Update Level Number
     levelText.innerText = playerLevel;
+}
+
+
+function gainXP(amount) {
+    playerXP += amount;
+
+    // Check for Level Up
+    if (playerXP >= xpToNextLevel) {
+        levelUp();
+    }
+
+    updateXPBarUI();
+}
+
+function levelUp() {
+    playerLevel++;
+    
+    // Carry over remaining XP
+    playerXP = playerXP - xpToNextLevel; 
+    if (playerXP < 0) playerXP = 0;
+
+    // Update requirements for the new level
+    xpToNextLevel = getXPRequired(playerLevel);
+
+    // 1. Play Sound (Reusing Jackpot Sound for Level Up)
+    if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
+
+    // 2. Visual Animation: Text Slam
+    const lvText = document.createElement('div');
+    lvText.className = 'level-up-text';
+    lvText.innerHTML = `LEVEL UP!<br><span style="font-size: 40px; color: #ffcc00;">NIVEL ${playerLevel}</span>`;
+    document.body.appendChild(lvText);
+    setTimeout(() => lvText.remove(), 1600);
+
+    // 3. Visual Animation: Scoreboard Flash
+    const sb = document.getElementById('scoreBoard');
+    sb.classList.add('xp-level-up-glow');
+    setTimeout(() => sb.classList.remove('xp-level-up-glow'), 1500);
+
+    // 4. Notification
+    showNotification("LEVEL UP!", `Ai atins nivelul ${playerLevel}!`, "fa-up-long");
+
+    // Recalculate UI
+    updateXPBarUI();
 }
 
 // Ensure the ninja icon in Utilities opens the Market
