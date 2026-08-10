@@ -5294,154 +5294,91 @@ input:checked + .s-slider:before {
 }
 
 
-/* --- ORIGINAL NEON MILESTONES (STANDALONE) --- */
+/* --- COMPACT NEON MILESTONES (FIXED LAYOUT) --- */
 .ms-orig-box {
-    width: 95vw !important;
-    max-width: 900px !important; /* Wide layout for PC */
-    background: #020512 !important; /* Deep space black */
+    width: 90vw !important;
+    max-width: 600px !important; /* Controlled width so it doesn't look giant on PC */
+    max-height: 90vh; /* Prevents spilling off screen */
+    background: #020512 !important;
     border: 2px solid #00a2ff !important;
-    box-shadow: 0 0 30px rgba(0, 162, 255, 0.4), inset 0 0 50px rgba(138, 43, 226, 0.2) !important;
-    border-radius: 20px !important;
-    padding: 40px 30px !important;
-    color: white !important;
-    position: relative;
+    box-shadow: 0 0 40px rgba(0, 162, 255, 0.4), inset 0 0 50px rgba(138, 43, 226, 0.1) !important;
+    border-radius: 15px !important;
+    padding: 30px 20px !important;
+    overflow-y: auto; /* Scrollable if screen is tiny */
+    scrollbar-width: none; /* Hide scrollbar Firefox */
 }
+.ms-orig-box::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome/Safari */
 
-/* Wings/Header Decoration */
-.ms-orig-deco {
-    position: absolute;
-    top: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    z-index: 5;
-}
-.ms-orig-deco i { color: #00a2ff; font-size: 24px; filter: drop-shadow(0 0 10px #00a2ff); }
-.ms-orig-deco .line { width: 100px; height: 2px; background: linear-gradient(to left, #00a2ff, transparent); }
-.ms-orig-deco .line.rev { background: linear-gradient(to right, #00a2ff, transparent); }
-
+/* Header Adjustments */
 .ms-orig-header h2 {
     font-family: 'Orbitron', sans-serif;
-    font-size: 32px;
-    text-transform: uppercase;
-    letter-spacing: 4px;
+    font-size: 24px;
+    letter-spacing: 2px;
     margin: 0;
-    background: linear-gradient(to bottom, #fff, #9aa0b8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #fff;
 }
+.ms-orig-header p { font-size: 11px; margin: 5px 0 20px 0; }
 
-.ms-orig-header p {
-    font-family: 'Oswald', sans-serif;
-    color: #9aa0b8;
-    font-size: 14px;
-    letter-spacing: 1px;
-    margin: 10px 0 30px 0;
-}
-
-/* The Grid */
+/* FIXED 5-COLUMN GRID */
 .ms-orig-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr); /* 5 columns like image */
-    gap: 15px;
+    grid-template-columns: repeat(5, 1fr); /* FORCED 5 COLUMNS */
+    gap: 10px;
+    justify-items: center;
 }
 
-/* Standard Card 1-24 */
+/* COMPACT CARD */
 .ms-orig-card {
+    width: 100%;
+    aspect-ratio: 1 / 1.2; /* Forces vertical card shape */
     background: rgba(0, 162, 255, 0.05);
-    border: 1.5px solid #00a2ff;
-    border-radius: 12px;
-    padding: 15px 5px;
+    border: 1px solid #00a2ff;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-    transition: 0.3s;
+    padding: 5px;
+    transition: 0.2s;
 }
 
 .ms-orig-card.unlocked {
     background: rgba(0, 162, 255, 0.15);
-    box-shadow: 0 0 15px rgba(0, 162, 255, 0.3);
+    box-shadow: 0 0 10px rgba(0, 162, 255, 0.2);
 }
 
-.ms-orig-card .ms-label { font-family: 'Oswald'; font-size: 10px; color: #9aa0b8; text-transform: uppercase; }
-.ms-orig-card .ms-val { font-family: 'Orbitron'; font-size: 28px; font-weight: 900; color: #fff; margin: 2px 0; }
-.ms-orig-card .ms-star { color: #00a2ff; font-size: 14px; filter: drop-shadow(0 0 5px #00a2ff); }
+/* Tiny Labels */
+.ms-orig-card .ms-label { font-size: 7px; color: #9aa0b8; letter-spacing: 1px; }
+.ms-orig-card .ms-val { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; line-height: 1; margin: 4px 0; }
+.ms-orig-card .ms-star { font-size: 10px; color: #00a2ff; }
 
-/* Checkmark badge */
+/* The Checkmark */
 .ms-orig-check {
     position: absolute;
-    top: 8px; right: 8px;
-    width: 18px; height: 18px;
-    background: #020512;
-    border: 1.5px solid #00a2ff;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; color: #00a2ff;
-    opacity: 0.3;
+    top: 4px; right: 4px;
+    font-size: 8px;
+    color: #00a2ff;
+    opacity: 0.2;
 }
-.unlocked .ms-orig-check { opacity: 1; background: #00a2ff; color: #fff; box-shadow: 0 0 10px #00a2ff; }
+.unlocked .ms-orig-check { opacity: 1; color: #fff; }
 
-/* THE BIG 25 CARD */
+/* SPECIAL LEVEL 25 */
 .ms-orig-card-25 {
-    grid-column: span 1; /* Keeping it in the grid, but styling it huge */
-    border: 2px solid #ff00ff !important;
-    background: linear-gradient(135deg, rgba(255,0,255,0.1), rgba(138,43,226,0.2)) !important;
-    box-shadow: 0 0 30px rgba(255, 0, 255, 0.4) !important;
+    border: 1.5px solid #ff00ff !important;
+    background: rgba(255, 0, 255, 0.1) !important;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.3) !important;
 }
+.ms-orig-card-25 .ms-val { color: #ff00ff; font-size: 22px; }
+.ms-orig-card-25 .ms-star { color: #ff00ff; }
+.ms-crown-orig { font-size: 12px; color: #ff00ff; margin-bottom: -5px; }
 
-.ms-orig-card-25 .ms-val {
-    font-size: 48px !important;
-    background: linear-gradient(to bottom, #fff, #ff00ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.ms-orig-card-25 .ms-star { color: #ff00ff !important; font-size: 20px !important; filter: drop-shadow(0 0 10px #ff00ff); }
-
-/* Wreath & Crown for 25 */
-.ms-wreath {
-    position: absolute;
-    width: 110%;
-    height: 110%;
-    border: 2px solid rgba(255, 0, 255, 0.2);
-    border-radius: 50%;
-    pointer-events: none;
-}
-.ms-crown-orig {
-    position: absolute;
-    top: -15px;
-    color: #ff00ff;
-    font-size: 22px;
-    filter: drop-shadow(0 0 10px #ff00ff);
-    animation: crownPulse 2s infinite alternate;
-}
-@keyframes crownPulse { from { transform: scale(1); } to { transform: scale(1.2); } }
-
-/* Close Button (Original Purple) */
-.ms-orig-close {
-    position: absolute;
-    top: 20px; right: 20px;
-    background: rgba(138, 43, 226, 0.2);
-    border: 2px solid #8a2be2;
-    color: white;
-    width: 40px; height: 40px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 20px;
-    transition: 0.2s;
-}
-.ms-orig-close:hover { background: #8a2be2; box-shadow: 0 0 15px #8a2be2; }
-
-/* Responsive: Switch to 3 columns on small phones */
-@media (max-width: 600px) {
-    .ms-orig-grid { grid-template-columns: repeat(3, 1fr); }
-    .ms-orig-header h2 { font-size: 22px; }
-    .ms-orig-deco .line { width: 40px; }
+/* Mobile Optimization (3 Columns to keep boxes square and big enough to touch) */
+@media (max-width: 500px) {
+    .ms-orig-grid {
+        grid-template-columns: repeat(3, 1fr); /* Switch to 3 columns on small phones */
+    }
+    .ms-orig-box { padding: 20px 10px; width: 95vw; }
 }
   </style>
 </head>
@@ -11185,7 +11122,6 @@ function renderMilestones() {
         const card = document.createElement('div');
         
         if (i === 25) {
-            // THE BIG 25
             card.className = "ms-orig-card ms-orig-card-25";
             if (isUnlocked) card.classList.add('unlocked');
             card.innerHTML = `
@@ -11193,26 +11129,25 @@ function renderMilestones() {
                 <span class="ms-label">LEVEL</span>
                 <span class="ms-val">25</span>
                 <i class="fa-solid fa-star ms-star"></i>
-                <div class="ms-orig-check"><i class="fa-solid fa-check"></i></div>
+                <div class="ms-orig-check"><i class="fa-solid fa-circle-check"></i></div>
             `;
         } else {
-            // NORMAL 1-24
             card.className = "ms-orig-card";
             if (isUnlocked) card.classList.add('unlocked');
             card.innerHTML = `
                 <span class="ms-label">LEVEL</span>
                 <span class="ms-val">${i}</span>
                 <i class="fa-solid fa-star ms-star"></i>
-                <div class="ms-orig-check"><i class="fa-solid fa-check"></i></div>
+                <div class="ms-orig-check"><i class="fa-solid fa-circle-check"></i></div>
             `;
         }
 
         card.onclick = () => {
             if (isUnlocked) {
-                // We will add Step 2: Reward Logic here later
-                showNotification("LEVEL MILESTONE", `Ai ajuns la nivelul ${i}! Recompensa vine curând.`, "fa-medal");
+                // Here we will add the "Claim" logic in Step 2
+                showNotification("LEVEL UNLOCKED", `You've reached level ${i}!`, "fa-medal");
             } else {
-                showKevinutaBubble(`Nivelul ${i} este blocat!`);
+                showKevinutaBubble(`Reach Level ${i} to unlock!`);
             }
         };
 
