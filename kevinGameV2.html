@@ -5292,6 +5292,91 @@ input:checked + .s-slider:before {
 .combo-track, .xp-track {
     flex-grow: 1 !important;
 }
+
+
+/* --- PROGRESSION CONSOLE STYLES --- */
+.level-grid-container {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr); /* 6 per row on PC */
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 15px;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+/* THE LEVEL BUTTONS */
+.lvl-node {
+    aspect-ratio: 1/1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #5a6288;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.lvl-node.unlocked { color: #fff; border-color: var(--th-border); background: rgba(250, 204, 21, 0.1); }
+.lvl-node.current { border-color: #fff; box-shadow: 0 0 15px var(--th-glow); background: var(--th-accent); color: #000; }
+.lvl-node.active-selection { border-color: #fff !important; transform: scale(1.1); z-index: 5; }
+
+/* THE BIG LEVEL 30 */
+.lvl-node.ultimate {
+    grid-column: span 2;
+    aspect-ratio: auto;
+    background: linear-gradient(135deg, #ffcc00, #ff8c00);
+    color: #000;
+    border-color: #fff;
+}
+
+/* THE DETAIL PANEL */
+.level-detail-panel {
+    background: rgba(0,0,0,0.5);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    text-align: left;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 10px;
+}
+
+#detLvlTitle { font-family: 'Orbitron'; font-size: 18px; font-weight: 900; color: #fff; }
+
+.status-badge-locked { color: #ff4444; font-size: 10px; font-weight: 900; border: 1px solid #ff4444; padding: 2px 8px; border-radius: 4px; }
+.status-badge-ready { color: #4ade80; font-size: 10px; font-weight: 900; border: 1px solid #4ade80; padding: 2px 8px; border-radius: 4px; animation: pulseGlow 1s infinite; }
+.status-badge-claimed { color: #9aa0b8; font-size: 10px; font-weight: 900; border: 1px solid #9aa0b8; padding: 2px 8px; border-radius: 4px; opacity: 0.6; }
+
+.detail-content { display: flex; gap: 20px; margin-bottom: 20px; }
+.detail-column { flex: 1; }
+.det-label { display: block; font-size: 10px; color: #5a6288; font-weight: 900; margin-bottom: 5px; }
+.det-list { font-family: 'Oswald'; font-size: 14px; color: #d1d5db; line-height: 1.4; }
+
+/* CLAIM BUTTON STATES */
+.claim-btn-disabled { filter: grayscale(1); opacity: 0.3; cursor: not-allowed !important; height: 45px !important; font-size: 16px !important; }
+.claim-btn-ready { background: linear-gradient(180deg, #4ade80, #16a34a) !important; color: #fff !important; box-shadow: 0 5px 0 #064e3b !important; height: 45px !important; font-size: 16px !important; }
+
+@media (max-width: 600px) {
+    .level-grid-container { grid-template-columns: repeat(5, 1fr); }
+    .lvl-node.ultimate { grid-column: span 1; }
+}
   </style>
 </head>
 <body>
@@ -5831,6 +5916,51 @@ input:checked + .s-slider:before {
 </div>
 
 
+<!-- MODAL: NIVEL ȘI RECOMPENSE (PROGRESSION CONSOLE) -->
+<div id="levelRewardsModal" class="modal-overlay">
+    <div class="modal-box shop-box" style="max-width: 550px !important; padding: 25px !important;">
+        
+        <div class="shop-header">
+            <h2 style="color: #ffcc00 !important;"><i class="fa-solid fa-medal"></i> RANG JUCĂTOR</h2>
+            <div class="selection-line" style="background: #ffcc00;"></div>
+        </div>
+
+        <!-- THE 30 LEVEL GRID -->
+        <div class="level-grid-container" id="levelGrid">
+            <!-- Buttons 1-30 will be generated here by JS -->
+        </div>
+
+        <!-- THE DETAIL SCANNER (Updates when a button is clicked) -->
+        <div class="level-detail-panel" id="levelDetailPanel">
+            <div class="detail-header">
+                <span id="detLvlTitle">SELECTEAZĂ UN NIVEL</span>
+                <div id="detStatusBadge" class="status-badge-locked">BLOCAT</div>
+            </div>
+            
+            <div class="detail-content">
+                <div class="detail-column">
+                    <span class="det-label">RECOMPENSE</span>
+                    <div id="detRewardsList" class="det-list">---</div>
+                </div>
+                <div class="detail-column">
+                    <span class="det-label">DEBLOCĂRI</span>
+                    <div id="detUnlocksList" class="det-list">---</div>
+                </div>
+            </div>
+
+            <!-- CLAIM BUTTON -->
+            <button id="claimLvlRewardBtn" class="menu-btn play claim-btn-disabled" disabled onclick="claimLevelReward()">
+                <span>REVENDICĂ</span>
+            </button>
+        </div>
+
+        <button class="menu-btn play close-shop-btn" style="margin-top: 20px;" onclick="closeLevelRewards()">
+            <span>ÎNAPOI</span>
+        </button>
+    </div>
+</div>
+
+
 
 
 <!-- MODAL: UTILITĂȚI -->
@@ -6257,6 +6387,26 @@ input:checked + .s-slider:before {
   <script>
 
 (() => { // <-- ADD THIS AT THE VERY TOP
+
+
+
+let selectedDetailLvl = 1;
+    _GAME_DATA.claimedLvlRewards = []; // Track claimed levels [2, 5, 10...]
+
+    const levelData = {};
+    for (let i = 1; i <= 30; i++) {
+        levelData[i] = {
+            xpReq: i * 250,
+            rewards: [{ type: 'score', val: i * 100 }, { type: 'ruby', val: Math.floor(i/5) }],
+            unlocks: i % 5 === 0 ? ["Zonă Nouă", "Item Slot"] : ["Statistici +"]
+        };
+    }
+    // Custom Unlocks for specific levels
+    levelData[5].unlocks = ["Piața Neagră"];
+    levelData[10].unlocks = ["Teleportor"];
+    levelData[30].unlocks = ["Rang Legendă", "Toate Zonele"];
+
+
 
 const particlesContainer = document.getElementById('particles');
 const particleCount = 40;
@@ -10954,6 +11104,95 @@ function levelUp() {
     syncScoreToFirestore(); // Ensure the new level is saved
 }
 
+
+function openLevelRewards(e) {
+        if (e) e.stopPropagation();
+        isPaused = true;
+        clearInterval(moveKevinInterval);
+        document.getElementById('levelRewardsModal').style.display = 'flex';
+        renderLevelGrid();
+        showLevelDetails(playerLevel); // Auto-focus current player level
+    }
+
+    function closeLevelRewards() {
+        document.getElementById('levelRewardsModal').style.display = 'none';
+        isPaused = false;
+        startKevinMovement();
+    }
+
+    function renderLevelGrid() {
+        const grid = document.getElementById('levelGrid');
+        grid.innerHTML = "";
+        for (let i = 1; i <= 30; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'lvl-node';
+            if (i === 30) btn.classList.add('ultimate');
+            if (i < playerLevel) btn.classList.add('unlocked');
+            if (i === playerLevel) btn.classList.add('current');
+            if (i === selectedDetailLvl) btn.classList.add('active-selection');
+            
+            btn.innerText = i;
+            btn.onclick = () => showLevelDetails(i);
+            grid.appendChild(btn);
+        }
+    }
+
+    function showLevelDetails(lvl) {
+        selectedDetailLvl = lvl;
+        renderLevelGrid(); // Refresh active state
+
+        const data = levelData[lvl];
+        const title = document.getElementById('detLvlTitle');
+        const badge = document.getElementById('detStatusBadge');
+        const rewardsEl = document.getElementById('detRewardsList');
+        const unlocksEl = document.getElementById('detUnlocksList');
+        const claimBtn = document.getElementById('claimLvlRewardBtn');
+
+        title.innerText = `NIVEL ${lvl}`;
+        
+        // Update Rewards List
+        rewardsEl.innerHTML = data.rewards.map(r => `• ${r.val} ${r.type.toUpperCase()}`).join('<br>');
+        unlocksEl.innerHTML = data.unlocks.map(u => `• ${u}`).join('<br>');
+
+        // Update Badge & Button State
+        if (_GAME_DATA.claimedLvlRewards.includes(lvl)) {
+            badge.innerText = "REVENDICAT";
+            badge.className = "status-badge-claimed";
+            claimBtn.disabled = true;
+            claimBtn.className = "menu-btn play claim-btn-disabled";
+        } else if (lvl <= playerLevel) {
+            badge.innerText = "DISPONIBIL";
+            badge.className = "status-badge-ready";
+            claimBtn.disabled = false;
+            claimBtn.className = "menu-btn play claim-btn-ready";
+        } else {
+            badge.innerText = "BLOCAT";
+            badge.className = "status-badge-locked";
+            claimBtn.disabled = true;
+            claimBtn.className = "menu-btn play claim-btn-disabled";
+        }
+    }
+
+    function claimLevelReward() {
+        const lvl = selectedDetailLvl;
+        if (lvl > playerLevel || _GAME_DATA.claimedLvlRewards.includes(lvl)) return;
+
+        _GAME_DATA.claimedLvlRewards.push(lvl);
+        const data = levelData[lvl];
+
+        // Apply Rewards
+        data.rewards.forEach(r => {
+            if (r.type === 'score') score += r.val;
+            if (r.type === 'ruby') rubies += r.val;
+        });
+
+        playSFX(slotJackpotUrl);
+        showNotification("RECOMPENSĂ!", `Ai primit premiile pentru Nivelul ${lvl}!`, "fa-gift");
+        updateScoreUI();
+        showLevelDetails(lvl); // Refresh panel
+        syncScoreToFirestore(); // Save progress
+    }
+
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
 // ==========================================
@@ -11027,6 +11266,10 @@ window.showEpicStageRewardModal = showEpicStageRewardModal;
 window.switchBMTab = switchBMTab;
 window.setBuyQty = setBuyQty;
 window.processBuy = processBuy;
+
+window.openLevelRewards = openLevelRewards;
+window.closeLevelRewards = closeLevelRewards;
+window.claimLevelReward = claimLevelReward;
 })(); // <-- CLOSES THE SECURE VAULT
 
 </script>
