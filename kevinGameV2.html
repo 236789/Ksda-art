@@ -6686,11 +6686,12 @@ document.getElementById('gameArea').onclick = (e) => {
     // 1. If paused OR the 3-second shield is active, do nothing
     if (isPaused || isGracePeriodActive) return;
 
-    // 2. Ignore clicks on buttons/event boxes
-    if (e.target.closest('.control-btn') || e.target.closest('.active-event-box')) {
-        return; 
-    }
-
+if (e.target.closest('.control-btn') || 
+    e.target.closest('.active-event-box') || 
+    e.target.closest('.hud-mini-btn') || 
+    e.target.closest('#scoreBoard')) { 
+    return; 
+}
     // 3. Normal miss logic
     playMissSFX(); 
     comboCount = 0; 
