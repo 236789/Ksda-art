@@ -6078,6 +6078,9 @@ let isGracePeriodActive = false;
 
 let blackMarketWants = [];
 let lastMarketRefresh = 0; // Timestamp of last refresh
+let activeScoreMultiplier = 1;
+    let activeComboMultiplier = 1;
+    let activeRubyMultiplier = 1;
 
 const _GAME_DATA = {
     inventory: {},
@@ -6655,40 +6658,42 @@ document.getElementById('kevin').addEventListener('click', (e) => {
 
       playRandomPop(); 
 
-      score++;
+      // Apply Multiplier to Score
+      score += (1 * activeScoreMultiplier);
       
       // --- SALVĂM STATISTICILE ---
-      totalClicksAllTime++;
+      totalClicksAllTime += (1 * activeScoreMultiplier);
 
       updateScoreUI();
 
-comboCount++;
+      // Apply Multiplier to Combo
+      comboCount += (1 * activeComboMultiplier);
+
       if (comboCount > bestComboAllTime) {
           bestComboAllTime = comboCount;
       }
       
-      // 💎 SISTEMUL NOU PENTRU RUBINE (1 Rubin la fiecare 100 Combo)
+      // 💎 SISTEMUL NOU PENTRU RUBINE (Respects Ruby Multiplier)
       if (comboCount > 0 && comboCount % 100 === 0) {
-          rubies++;
-          updateScoreUI(); // Sincronizează HUD-ul (arată +1 rubin)
+          rubies += (1 * activeRubyMultiplier);
+          updateScoreUI(); // Sincronizează HUD-ul (arată +X rubine)
           
           // Arată tutorialul prima dată, altfel Kevin doar se laudă
           if (!hasSeenRubyTutorial) {
               openRubyDiscovery();
           } else {
-          showNotification("COMBO REÎNNOIT!", "Ai atins 100 Combo: +1 Rubin primit!", "https://iili.io/CrnXNdG.png");
+              showNotification("COMBO REÎNNOIT!", `Ai atins 100 Combo: +${1 * activeRubyMultiplier} Rubin primit!`, "https://iili.io/CrnXNdG.png");
           }
       }
       
       showComboText(e.clientX, e.clientY, comboCount);
-      updateComboBarUI(comboCount); // <--- ADAUGĂ ASTA AICI
+      updateComboBarUI(comboCount); 
 
-
-clearTimeout(comboTimer);
-        comboTimer = setTimeout(() => { 
-            comboCount = 0; 
-            updateComboBarUI(0); 
-        }, 2000);
+      clearTimeout(comboTimer);
+      comboTimer = setTimeout(() => { 
+          comboCount = 0; 
+          updateComboBarUI(0); 
+      }, 2000);
 
       if (!isKevinTired) {
         moveKevinAway();
@@ -7777,20 +7782,25 @@ const boostRegistry = {
     "boost_x2_combo": {
         name: "X2 COMBO",
         image: "https://iili.io/C4bLzTQ.png",
-        description: "Dublează progresul barei de Combo pentru o scurtă perioadă."
+        type: "good",
+        duration: 30,
+        description: "Dublează progresul barei de Combo pentru 30 de secunde."
     },
     "boost_x2_score": {
         name: "X2 SCOR",
         image: "https://iili.io/C4bDVOG.png",
-        description: "Orice click îți aduce puncte duble cât timp este activ."
+        type: "good",
+        duration: 30,
+        description: "Orice captură îți aduce puncte duble timp de 30 de secunde."
     },
     "boost_x2_rubies": {
         name: "X2 RUBINE",
         image: "https://iili.io/C4bm2Zx.png",
-        description: "Pragurile de combo îți oferă Rubine duble!"
+        type: "good",
+        duration: 60,
+        description: "Primești rubine duble la pragurile de combo timp de 60 de secunde!"
     }
 };
-
 
 
 function startAutoClickEvent() {
@@ -8260,8 +8270,8 @@ item.onclick = (e) => {
     eventTimeout = setTimeout(spawnSpecialEvent, delayToNextSpawn); 
 }
 
-function showMobileEventModal(eventData) {
-    forceCloseMenu(); // Add this at the top
+function showMobileEventModal(eventData, isUseable = false, itemKey = null) {
+    forceCloseMenu();
     isPaused = true; 
     
     const modalOverlay = document.createElement('div');
@@ -8287,7 +8297,7 @@ function showMobileEventModal(eventData) {
             
             <h2 style="font-size: 28px; margin-bottom: 8px; font-family: 'Oswald'; color: var(--th-accent);">${eventData.name}</h2>
             
-            <!-- Themed Status Badge -->
+            <!-- Themed Status Badge (PRESERVED STYLES) -->
             <div style="
                 color: ${badgeColor}; 
                 border: 2px solid ${badgeColor}; 
@@ -8305,13 +8315,25 @@ function showMobileEventModal(eventData) {
             
             <p style="font-size: 16px; line-height: 1.5; margin-bottom: 25px; color: #d1d5db; font-family: 'Oswald';">${eventData.description}</p>
             
-            <button class="menu-btn play" id="mobileEventCloseBtn" style="width: 100%; height: 55px; font-size: 22px; padding: 0;">
-                <span>ÎNCHIDE</span>
-            </button>
+            <!-- BUTTON CONTAINER -->
+            <div style="display:flex; flex-direction:column; gap:12px; width:100%;">
+                ${isUseable ? `<button class="menu-btn play" id="useItemBtn" style="width: 100%; height: 55px; font-size: 22px; padding: 0;"><span>FOLOSEȘTE</span></button>` : ''}
+                <button class="menu-btn play" id="mobileEventCloseBtn" style="width: 100%; height: 55px; font-size: 22px; padding: 0; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3);">
+                    <span>ÎNCHIDE</span>
+                </button>
+            </div>
         </div>
     `;
 
     document.body.appendChild(modalOverlay);
+
+    // Handle USE logic
+    if (isUseable) {
+        document.getElementById('useItemBtn').onclick = () => {
+            modalOverlay.remove();
+            activateBoost(itemKey);
+        };
+    }
 
     document.getElementById('mobileEventCloseBtn').onclick = () => {
         modalOverlay.remove();
@@ -8319,6 +8341,49 @@ function showMobileEventModal(eventData) {
             isPaused = false; 
         }
     };
+}
+
+function activateBoost(key) {
+    const data = boostRegistry[key];
+    if (!data || !_GAME_DATA.inventory[key] || _GAME_DATA.inventory[key] <= 0) {
+        showKevinutaBubble("Nu mai ai acest boost!");
+        return;
+    }
+
+    // 1. Consume item
+    _GAME_DATA.inventory[key]--;
+    renderInventoryUI();
+    syncInventoryToCloud();
+
+    // 2. Apply Multiplier
+    let toastMsg = "";
+    if (key === 'boost_x2_score') {
+        activeScoreMultiplier = 2;
+        toastMsg = "Scorul este dublat!";
+    } else if (key === 'boost_x2_combo') {
+        activeComboMultiplier = 2;
+        toastMsg = "Combo crește de 2 ori mai repede!";
+    } else if (key === 'boost_x2_rubies') {
+        activeRubyMultiplier = 2;
+        toastMsg = "Vei primi rubine duble!";
+    }
+
+    // 3. UI Feedback
+    showNotification("BOOST ACTIVAT", toastMsg, data.image);
+    showEventIndicator(key, data.duration);
+
+    // 4. Timer to reset
+    setTimeout(() => {
+        if (key === 'boost_x2_score') activeScoreMultiplier = 1;
+        if (key === 'boost_x2_combo') activeComboMultiplier = 1;
+        if (key === 'boost_x2_rubies') activeRubyMultiplier = 1;
+        showNotification("BOOST EXPIRAT", "Efectul de " + data.name + " a încetat.", "fa-clock");
+    }, data.duration * 1000);
+
+    // Resume game if it was paused
+    document.getElementById('inventoryModal').style.display = 'none';
+    isPaused = false;
+    startKevinMovement();
 }
 
 // --- SMART EVENT INDICATOR (PREVENTS DUPLICATES) ---
@@ -9393,8 +9458,17 @@ function renderInventoryUI() {
 }
 
 function showItemInfo(key) {
-    const data = specialRegistry[key];
-    showMobileEventModal(data); 
+    // Check specialRegistry first, then boostRegistry
+    const data = specialRegistry[key] || boostRegistry[key];
+    
+    if (!data) {
+        console.error("Item data not found for key:", key);
+        return;
+    }
+
+    // If it's a boost, we pass 'true' to show the USE button
+    const isBoost = key.startsWith('boost_');
+    showMobileEventModal(data, isBoost, key); 
 }
 
 async function syncInventoryToCloud() {
