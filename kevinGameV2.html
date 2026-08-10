@@ -7769,28 +7769,27 @@ const specialRegistry = {
         action: (e) => pickupRubyEmoji(e)
     },
 
-"boost_x2_combo": {
+};
+
+
+
+const boostRegistry = {
+    "boost_x2_combo": {
         name: "X2 COMBO",
         image: "https://iili.io/C4bLzTQ.png",
-        type: "boost",
-        description: "Dublează progresul barei de Combo pentru o perioadă limitată de timp."
+        description: "Dublează progresul barei de Combo pentru o scurtă perioadă."
     },
     "boost_x2_score": {
         name: "X2 SCOR",
         image: "https://iili.io/C4bDVOG.png",
-        type: "boost",
         description: "Orice click îți aduce puncte duble cât timp este activ."
     },
     "boost_x2_rubies": {
         name: "X2 RUBINE",
         image: "https://iili.io/C4bm2Zx.png",
-        type: "boost",
         description: "Pragurile de combo îți oferă Rubine duble!"
-    },
-
-
+    }
 };
-
 
 
 
@@ -9348,22 +9347,32 @@ function renderInventoryUI() {
 
     keys.forEach(key => {
         const count = _GAME_DATA.inventory[key];
-        const data = specialRegistry[key];
+        
+        // Check which registry the item belongs to
+        let isBoost = false;
+        let data = specialRegistry[key];
+        
+        if (!data) {
+            data = boostRegistry[key];
+            if (data) isBoost = true;
+        }
+
+        // If it doesn't exist in either, or count is 0, skip
         if (!data || count <= 0) return;
 
         total += count;
 
         const tile = document.createElement('div');
         tile.className = "inv-tile";
-        tile.onclick = () => showItemInfo(key);
+        tile.onclick = () => showItemInfo(key); // We will update showItemInfo to handle boosts later when we make them clickable!
 
         tile.innerHTML = `
             <img src="${data.image}">
             ${count > 1 ? `<div class="inv-tile-badge">x${count}</div>` : ''}
         `;
 
-        // Distribute based on item type
-        if (data.type === 'boost') {
+        // Route to correct tab
+        if (isBoost) {
             boostsGrid.appendChild(tile);
             hasBoosts = true;
         } else {
@@ -9864,15 +9873,14 @@ function refreshBlackMarketWants() {
     const now = Date.now();
     const oneHour = 60 * 60 * 1000;
 
-    // Prevent refresh if less than an hour has passed and data exists
     if (now - lastMarketRefresh < oneHour && blackMarketWants.length > 0 && blackMarketOffers.length > 0) return;
 
     lastMarketRefresh = now;
     blackMarketWants = [];
     blackMarketOffers = [];
 
-    // 1. SELL OFFERS (Exclude rubies, trivia, and boosts)
-    const sellPool = Object.keys(specialRegistry).filter(k => k !== "rubyDrop" && k !== "trivia" && specialRegistry[k].type !== "boost");
+    // 1. SELL OFFERS (Pulls normally from specialRegistry)
+    const sellPool = Object.keys(specialRegistry).filter(k => k !== "rubyDrop" && k !== "trivia");
     const shuffledSell = sellPool.sort(() => 0.5 - Math.random()).slice(0, 6);
 
     shuffledSell.forEach(key => {
@@ -9884,8 +9892,8 @@ function refreshBlackMarketWants() {
         });
     });
 
-    // 2. BUY OFFERS (Only Boosts)
-    const buyPool = Object.keys(specialRegistry).filter(k => specialRegistry[k].type === "boost");
+    // 2. BUY OFFERS (Pulls cleanly from the new boostRegistry)
+    const buyPool = Object.keys(boostRegistry);
     for(let i = 0; i < 6; i++) {
         const randomBoost = buyPool[Math.floor(Math.random() * buyPool.length)];
         blackMarketOffers.push({
@@ -9987,15 +9995,12 @@ async function openBlackMarket() {
     }
 }
 
-// =====================================
-// BLACK MARKET: BUY LOGIC
-// =====================================
 function renderBlackMarketBuyGrid() {
     const grid = document.getElementById('blackMarketBuyGrid');
     grid.innerHTML = "";
 
     blackMarketOffers.forEach((offer, index) => {
-        const data = specialRegistry[offer.key];
+        const data = boostRegistry[offer.key]; // <-- CHANGED HERE
         const remaining = offer.limit - offer.bought;
 
         const tile = document.createElement('div');
@@ -10022,7 +10027,7 @@ function renderBlackMarketBuyGrid() {
 function openBuyDetail(idx) {
     currentBuyIdx = idx;
     const offer = blackMarketOffers[idx];
-    const data = specialRegistry[offer.key];
+    const data = boostRegistry[offer.key]; // <-- CHANGED HERE
     const stock = _GAME_DATA.inventory[offer.key] || 0;
 
     document.getElementById('buyItemImg').src = data.image;
