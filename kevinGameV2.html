@@ -5147,38 +5147,80 @@ input:checked + .s-slider:before {
     #xpStatusText { font-size: 9px; }
 }
 
-/* LEVEL UP SLAM ANIMATION */
-.level-up-text {
+/* --- CINEMATIC LEVEL UP --- */
+.level-up-banner {
     position: fixed;
-    top: 50%;
+    top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 10000;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: bannerSlam 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+#lvlMainText {
     font-family: 'Orbitron', sans-serif;
-    font-size: 80px;
+    font-size: clamp(40px, 10vw, 90px);
     font-weight: 900;
     color: #fff;
-    text-transform: uppercase;
-    text-shadow: 0 0 20px #ffcc00, 0 0 40px #d97706, 0 0 60px #ffcc00;
+    white-space: nowrap;
+    text-shadow: 
+        0 0 20px #ffcc00, 
+        0 0 40px #d97706, 
+        4px 4px 0 #000;
+    letter-spacing: 5px;
+}
+
+#lvlSubText {
+    background: #ffcc00;
+    color: #000;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    padding: 5px 25px;
+    border-radius: 50px;
+    font-size: 20px;
+    margin-top: -10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    border: 3px solid #fff;
+}
+
+@keyframes bannerSlam {
+    0% { transform: translate(-50%, -50%) scale(5); opacity: 0; filter: blur(15px); }
+    15% { transform: translate(-50%, -50%) scale(1); opacity: 1; filter: blur(0px); }
+    80% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+    100% { transform: translate(-50%, -180%) scale(0.8); opacity: 0; }
+}
+
+/* --- CONFETTI PARTICLES --- */
+.confetti-p {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    z-index: 9999;
     pointer-events: none;
-    animation: levelUpSlam 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    border-radius: 2px;
 }
 
-@keyframes levelUpSlam {
-    0% { transform: translate(-50%, -50%) scale(5); opacity: 0; filter: blur(20px); }
-    20% { transform: translate(-50%, -50%) scale(1); opacity: 1; filter: blur(0px); }
-    80% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
-    100% { transform: translate(-50%, -150%) scale(0.5); opacity: 0; }
+@keyframes confettiFall {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) rotate(720deg); opacity: 0; }
 }
 
-/* Scoreboard Shine on Level Up */
-.xp-level-up-glow {
-    animation: xpGlowPulse 0.5s 3 ease-in-out;
+/* Screen Shake Effect */
+.shake-impact {
+    animation: screenShake 0.4s strong;
 }
 
-@keyframes xpGlowPulse {
-    0%, 100% { box-shadow: 0 8px 20px rgba(0,0,0,0.6); border-color: var(--th-border); }
-    50% { box-shadow: 0 0 40px #ffcc00; border-color: #fff; }
+@keyframes screenShake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    40% { transform: translate(3px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    80% { transform: translate(3px, 1px) rotate(-1deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
 }
   </style>
 </head>
@@ -6800,7 +6842,7 @@ document.getElementById('kevin').addEventListener('click', (e) => {
 
       // Apply Multiplier to Score
       score += (1 * activeScoreMultiplier);
-      gainXP(1); // <--- ADD THIS LINE HERE
+      gainXP(50); // <--- ADD THIS LINE HERE
 
       // --- SALVĂM STATISTICILE ---
       totalClicksAllTime += (1 * activeScoreMultiplier);
@@ -10772,26 +10814,67 @@ function levelUp() {
     // Update requirements for the new level
     xpToNextLevel = getXPRequired(playerLevel);
 
-    // 1. Play Sound (Reusing Jackpot Sound for Level Up)
+    // 1. Play Exciting Sound (Jackpot)
     if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
 
-    // 2. Visual Animation: Text Slam
-    const lvText = document.createElement('div');
-    lvText.className = 'level-up-text';
-    lvText.innerHTML = `LEVEL UP!<br><span style="font-size: 40px; color: #ffcc00;">NIVEL ${playerLevel}</span>`;
-    document.body.appendChild(lvText);
-    setTimeout(() => lvText.remove(), 1600);
+    // 2. Trigger Confetti
+    spawnConfetti();
 
-    // 3. Visual Animation: Scoreboard Flash
+    // 3. Cinematic Banner
+    const banner = document.createElement('div');
+    banner.className = 'level-up-banner';
+    banner.innerHTML = `
+        <div id="lvlMainText">LEVEL UP!</div>
+        <div id="lvlSubText">NIVELUL ${playerLevel} DEBLOCAT</div>
+    `;
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), 1500);
+
+    // 4. Screen Impact (Shake the game area)
+    const gameArea = document.getElementById('gameArea');
+    gameArea.classList.add('shake-impact');
+    setTimeout(() => gameArea.classList.remove('shake-impact'), 500);
+
+    // 5. Scoreboard Shine
     const sb = document.getElementById('scoreBoard');
     sb.classList.add('xp-level-up-glow');
     setTimeout(() => sb.classList.remove('xp-level-up-glow'), 1500);
 
-    // 4. Notification
-    showNotification("LEVEL UP!", `Ai atins nivelul ${playerLevel}!`, "fa-up-long");
-
-    // Recalculate UI
+    // 6. UI Sync
     updateXPBarUI();
+}
+
+function spawnConfetti() {
+    const colors = ['#ffcc00', '#ff0055', '#39ff14', '#00f0ff', '#ffffff', '#ff8c00'];
+    const count = 60; // Total pieces
+
+    for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'confetti-p';
+        
+        // Random color
+        p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        
+        // Start position (Middle of screen)
+        p.style.left = '50%';
+        p.style.top = '40%';
+        
+        // Set dynamic destination
+        const dx = (Math.random() - 0.5) * 600 + 'px';
+        const dy = (Math.random() - 0.5) * 600 + 'px';
+        p.style.setProperty('--dx', dx);
+        p.style.setProperty('--dy', dy);
+        
+        // Random size
+        const size = Math.random() * 10 + 5 + 'px';
+        p.style.width = size;
+        p.style.height = size;
+        
+        p.style.animation = `confettiFall ${Math.random() * 1 + 1}s cubic-bezier(0, .9, .5, 1) forwards`;
+        
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 2000);
+    }
 }
 
 // Ensure the ninja icon in Utilities opens the Market
