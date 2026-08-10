@@ -8393,117 +8393,67 @@ function activateBoost(key) {
         return;
     }
 
-    // 1. Consume item
+    // 1. Consume the item
     _GAME_DATA.inventory[key]--;
     renderInventoryUI();
     syncInventoryToCloud();
 
-    // 2. Apply Multiplier
+    // 2. Set Multipliers
     let toastMsg = "";
-    if (key === 'boost_x2_score') {
-        activeScoreMultiplier = 2;
-        toastMsg = "Scorul este dublat!";
-    } else if (key === 'boost_x2_combo') {
-        activeComboMultiplier = 2;
-        toastMsg = "Combo crește de 2 ori mai repede!";
-    } else if (key === 'boost_x2_rubies') {
-        activeRubyMultiplier = 2;
-        toastMsg = "Vei primi rubine duble!";
-    }
+    if (key === 'boost_x2_score') { activeScoreMultiplier = 2; toastMsg = "Punctele sunt dublate!"; }
+    if (key === 'boost_x2_combo') { activeComboMultiplier = 2; toastMsg = "Combo crește 2x!"; }
+    if (key === 'boost_x2_rubies') { activeRubyMultiplier = 2; toastMsg = "Rubinele sunt dublate!"; }
 
     // 3. UI Feedback
-    showNotification("BOOST ACTIVAT", toastMsg, data.image);
-    showEventIndicator(key, data.duration);
-
-    // 4. Timer to reset
-    setTimeout(() => {
-        if (key === 'boost_x2_score') activeScoreMultiplier = 1;
-        if (key === 'boost_x2_combo') activeComboMultiplier = 1;
-        if (key === 'boost_x2_rubies') activeRubyMultiplier = 1;
-        showNotification("BOOST EXPIRAT", "Efectul de " + data.name + " a încetat.", "fa-clock");
-    }, data.duration * 1000);
-
-    // Resume game if it was paused
-    document.getElementById('inventoryModal').style.display = 'none';
-    isPaused = false;
-    startKevinMovement();
-}
-function activateBoost(key) {
-    const data = boostRegistry[key];
-    if (!data || !_GAME_DATA.inventory[key] || _GAME_DATA.inventory[key] <= 0) {
-        showKevinutaBubble("Nu mai ai acest boost!");
-        return;
-    }
-
-    // 1. Consume item
-    _GAME_DATA.inventory[key]--;
-    renderInventoryUI();
-    syncInventoryToCloud();
-
-    // 2. Apply Multiplier logic
-    let toastMsg = "";
-    if (key === 'boost_x2_score') { activeScoreMultiplier = 2; toastMsg = "Scorul este dublat!"; }
-    else if (key === 'boost_x2_combo') { activeComboMultiplier = 2; toastMsg = "Combo crește de 2 ori mai repede!"; }
-    else if (key === 'boost_x2_rubies') { activeRubyMultiplier = 2; toastMsg = "Vei primi rubine duble!"; }
-
-    // 3. UI FEEDBACK (This triggers the box in the bottom-left)
-    showNotification("BOOST ACTIVAT", toastMsg, data.image);
+    showNotification("BOOST ACTIVAT", `${toastMsg} (${data.duration}s)`, data.image);
     
-    // 🔥 THIS LINE ADDS THE DURATION INDICATOR ON SCREEN
+    // 🔥 TRIGGER THE INDICATOR
     showEventIndicator(key, data.duration);
 
-    // 4. Timer to reset multipliers
+    // 4. Cleanup Timer
     setTimeout(() => {
         if (key === 'boost_x2_score') activeScoreMultiplier = 1;
         if (key === 'boost_x2_combo') activeComboMultiplier = 1;
         if (key === 'boost_x2_rubies') activeRubyMultiplier = 1;
-        showNotification("BOOST EXPIRAT", "Efectul de " + data.name + " a încetat.", "fa-clock");
+        showNotification("BOOST EXPIRAT", "Efectul boost-ului a încetat.", "fa-clock");
     }, data.duration * 1000);
 
-    // Resume game
-    document.getElementById('inventoryModal').style.display = 'none';
-    isPaused = false;
-    startKevinMovement();
+    // Close inventory and resume
+    closeInventory();
 }
 // --- SMART EVENT INDICATOR (PREVENTS DUPLICATES) ---
 let activeEventTimers = {}; // Tracks running events
 
 function showEventIndicator(eventKey, durationSeconds) {
-    const eventData = specialRegistry[eventKey];
+    // FIX: Look in both registries so Boosts can be found
+    const eventData = specialRegistry[eventKey] || boostRegistry[eventKey];
     if (!eventData) return;
 
-    // 1. CHECK IF EVENT IS ALREADY RUNNING (Refresh it instead of duplicating)
+    // 1. REFRESH LOGIC: If boost is already active, reset the timer instead of making a new box
     if (activeEventTimers[eventKey]) {
         clearInterval(activeEventTimers[eventKey].interval);
-        
         const existingBox = document.getElementById('event-box-' + eventKey);
         if (existingBox) {
             const timerEl = existingBox.querySelector('.event-timer');
             activeEventTimers[eventKey].timeLeft = durationSeconds;
             timerEl.innerText = durationSeconds + "s";
-            timerEl.style.color = 'white';
-            existingBox.style.borderColor = '#facc15';
             
-            // Restart the countdown
             activeEventTimers[eventKey].interval = setInterval(() => {
                 if (isPaused) return;
                 activeEventTimers[eventKey].timeLeft--;
                 let t = activeEventTimers[eventKey].timeLeft;
                 timerEl.innerText = t + "s";
-                
-                if (t <= 3) { timerEl.style.color = '#ff4444'; existingBox.style.borderColor = '#ff4444'; }
                 if (t <= 0) {
                     clearInterval(activeEventTimers[eventKey].interval);
                     delete activeEventTimers[eventKey];
-                    existingBox.style.animation = 'slideOutEventLeft 0.3s ease-in forwards';
-                    setTimeout(() => existingBox.remove(), 300);
+                    existingBox.remove();
                 }
             }, 1000);
         }
         return; 
     }
 
-    // 2. IF IT'S A NEW EVENT, CREATE A NEW BOX
+    // 2. CREATE NEW BOX
     let container = document.getElementById('active-events-container');
     if (!container) {
         container = document.createElement('div');
@@ -8514,29 +8464,20 @@ function showEventIndicator(eventKey, durationSeconds) {
     const box = document.createElement('div');
     box.className = 'active-event-box';
     box.id = 'event-box-' + eventKey; 
-    box.style.pointerEvents = 'auto'; // Make sure the box can be clicked
     
+    // Boosts are always "good" (Green)
     const typeColor = eventData.type === 'bad' ? '#ff4444' : '#00ff88';
     const typeText = eventData.type === 'bad' ? 'PERICOL' : 'BONUS';
 
     box.innerHTML = `
-        <img src="${eventData.image}" style="width: 24px; height: 24px; object-fit: contain; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));">
-        <span class="event-timer" style="font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 16px; margin-left: 8px;">${durationSeconds}s</span>
-        
+        <img src="${eventData.image}" style="width: 24px; height: 24px; object-fit: contain;">
+        <span class="event-timer" style="font-family: 'Orbitron'; font-weight: bold; font-size: 16px; margin-left: 8px;">${durationSeconds}s</span>
         <div class="event-tooltip">
-            <div style="font-family: 'Orbitron'; color: #facc15; font-size: 15px; margin-bottom: 6px;">${eventData.name}</div>
-            <div style="color: ${typeColor}; font-size: 10px; font-weight: bold; margin-bottom: 8px; border: 1px solid ${typeColor}; display: inline-block; padding: 2px 6px; border-radius: 4px; letter-spacing: 1px;">${typeText}</div>
-            <div style="font-family: 'Oswald'; font-size: 13px; color: #d1d5db; line-height: 1.3;">${eventData.description}</div>
+            <div style="font-family: 'Orbitron'; color: var(--th-accent); font-size: 15px;">${eventData.name}</div>
+            <div style="color: ${typeColor}; font-size: 10px; font-weight: bold; margin-bottom: 5px;">${typeText}</div>
+            <div style="font-family: 'Oswald'; font-size: 13px; color: #d1d5db;">${eventData.description}</div>
         </div>
     `;
-
-    // MOBILE MODAL TRIGGER: Click the indicator icon to see info
-    box.onclick = (e) => {
-        e.stopPropagation();
-        if (window.innerWidth <= 600) {
-            showMobileEventModal(eventData); 
-        }
-    };
 
     container.appendChild(box);
 
@@ -8548,17 +8489,10 @@ function showEventIndicator(eventKey, durationSeconds) {
             let t = activeEventTimers[eventKey].timeLeft;
             const timerEl = box.querySelector('.event-timer');
             if (timerEl) timerEl.innerText = t + "s";
-
-            if (t <= 3 && timerEl) {
-                timerEl.style.color = '#ff4444';
-                box.style.borderColor = '#ff4444';
-            }
-
             if (t <= 0) {
                 clearInterval(activeEventTimers[eventKey].interval);
                 delete activeEventTimers[eventKey];
-                box.style.animation = 'slideOutEventLeft 0.3s ease-in forwards';
-                setTimeout(() => box.remove(), 300);
+                box.remove();
             }
         }, 1000)
     };
@@ -9537,16 +9471,12 @@ function renderInventoryUI() {
 }
 
 function showItemInfo(key) {
-    // Check specialRegistry first, then boostRegistry
+    // Look in boosts if not in specials
     const data = specialRegistry[key] || boostRegistry[key];
-    
-    if (!data) {
-        console.error("Item data not found for key:", key);
-        return;
-    }
+    if (!data) return;
 
-    // If it's a boost, we pass 'true' to show the USE button
-    const isBoost = key.startsWith('boost_');
+    // Check if it's a boost key to show the "FOLOSEȘTE" button
+    const isBoost = key.includes('boost_');
     showMobileEventModal(data, isBoost, key); 
 }
 
@@ -10727,7 +10657,7 @@ window.claimStageReward = claimStageReward;
 window.showIndexRewardModal = showIndexRewardModal;
 window.showNotification = showNotification;
 window.showEpicStageRewardModal = showEpicStageRewardModal;
- 
+
 
 window.switchBMTab = switchBMTab;
 window.setBuyQty = setBuyQty;
