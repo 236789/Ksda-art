@@ -5998,49 +5998,7 @@ input:checked + .s-slider:before {
 </div>
 
 
-<!-- MODAL: MILESTONES NIVEL (CINEMATIC REWORK) -->
-<div id="levelRewardsModal" class="modal-overlay">
-    <div class="modal-box shop-box progression-main-box">
-        
-        <div class="shop-header">
-            <h2><i class="fa-solid fa-trophy"></i> RANG JUCĂTOR</h2>
-            <div class="selection-line"></div>
-        </div>
 
-        <!-- COMPACT GRID (No Scrollbar) -->
-        <div class="lvl-nodes-container" id="levelNodesGrid"></div>
-
-        <!-- INFO PANEL (Cinematic Detail) -->
-        <div id="lvlInfoPanel" class="lvl-details-card">
-            <div class="lvl-details-header">
-                <div class="lvl-badge-large" id="detLvlCircle">1</div>
-                <div class="lvl-title-group">
-                    <span id="detLvlName">NIVEL 1</span>
-                    <span id="detLvlStatus" class="status-unlocked">DEBLOCAT</span>
-                </div>
-            </div>
-            
-            <div class="lvl-rewards-grid">
-                <div class="reward-slot">
-                    <label>RECOMPENSE</label>
-                    <div id="detLvlRewards">---</div>
-                </div>
-                <div class="reward-slot">
-                    <label>DEBLOCĂRI</label>
-                    <div id="detLvlUnlocks">---</div>
-                </div>
-            </div>
-
-            <button id="detClaimBtn" class="menu-btn play claim-node-btn" onclick="claimLevelReward()">
-                <span>REVENDICĂ</span>
-            </button>
-        </div>
-
-        <button class="menu-btn play close-shop-btn" style="margin-top: 15px; background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.2) !important;" onclick="closeLevelRewards()">
-            <span>ÎNAPOI</span>
-        </button>
-    </div>
-</div>
 
 
 
@@ -6558,20 +6516,9 @@ const _GAME_DATA = {
     index: [],
     claimedRewards: [],      // Recompense din Index (per emoji)
     claimedStageRewards: [], // Recompense pentru finalizare zonă
-    claimedLvlRewards: []    // NOU: Urmărește nivelele pentru care s-a luat premiul [1, 2, 3...]
 };
 
-    // --- NEW: LEVEL DATABASE ---
-    const levelData = {};
-    for (let i = 1; i <= 30; i++) {
-        levelData[i] = {
-            xpReq: i * 250,
-            rewards: [{ type: 'score', val: i * 100 }, { type: 'ruby', val: Math.floor(i/5) }],
-            unlocks: i % 5 === 0 ? ["Zonă Nouă", "Item Slot"] : ["Statistici +"]
-        };
-    }
-    levelData[5].unlocks = ["Piața Neagră"];
-    levelData[10].unlocks = ["Teleportor"];
+
 
 
     let comboCount = 0;
@@ -11184,118 +11131,7 @@ let selectedLvlNode = 1;
         syncScoreToFirestore(); 
     }
 
-    function openLevelRewards(e) {
-        if (e) { e.preventDefault(); e.stopPropagation(); }
-        isPaused = true;
-        clearInterval(moveKevinInterval);
-        
-        document.getElementById('levelRewardsModal').style.display = 'flex';
-        
-        generateLevelGrid();
-        inspectLevel(playerLevel); // default to player's actual level
-    }
 
-    function closeLevelRewards() {
-        document.getElementById('levelRewardsModal').style.display = 'none';
-        isPaused = false;
-        startKevinMovement();
-    }
-
-    function generateLevelGrid() {
-        const grid = document.getElementById('levelNodesGrid');
-        if (!grid) return;
-        grid.innerHTML = "";
-
-        for (let i = 1; i <= 30; i++) {
-            const btn = document.createElement('div');
-            btn.className = 'lvl-node';
-            
-            // Apply visual states based on progress
-            if (i === 30) btn.classList.add('max-node');
-            if (i < playerLevel) btn.classList.add('unlocked');
-            if (i === playerLevel) btn.classList.add('current');
-            if (i === selectedLvlNode) btn.classList.add('selected');
-
-            btn.innerText = i === 30 ? "MAX" : i;
-            btn.onclick = () => inspectLevel(i);
-            grid.appendChild(btn);
-        }
-    }
-
-    function inspectLevel(lvl) {
-        selectedLvlNode = lvl;
-        generateLevelGrid(); // Refresh grid highlighting
-
-        // UI Elements from the Cinematic Card
-        const card = document.getElementById('lvlInfoCard');
-        const title = document.getElementById('detLvlName');
-        const circle = document.getElementById('detLvlCircle');
-        const status = document.getElementById('detLvlStatus');
-        const rewards = document.getElementById('detLvlRewards');
-        const unlocks = document.getElementById('detLvlUnlocks');
-        const btn = document.getElementById('detClaimBtn');
-
-        // Trigger the "Details Swap" Cinematic Fade
-        card.classList.remove('fx-details-swap');
-        void card.offsetWidth; 
-        card.classList.add('fx-details-swap');
-
-        // Populate Data
-        title.innerText = `NIVEL ${lvl}`;
-        circle.innerText = lvl;
-        
-        const data = levelData[lvl] || { rewards: [], unlocks: ["Bonus Stats"] };
-        
-        rewards.innerHTML = data.rewards.length > 0 
-            ? data.rewards.map(r => `• ${r.val} ${r.type.toUpperCase()}`).join('<br>')
-            : "• FĂRĂ RECOMPENSĂ";
-            
-        unlocks.innerHTML = data.unlocks.map(u => `• ${u}`).join('<br>');
-
-        // Check if level rewards were already claimed
-        const alreadyClaimed = _GAME_DATA.claimedLvlRewards && _GAME_DATA.claimedLvlRewards.includes(lvl);
-
-        if (alreadyClaimed) {
-            status.innerText = "COLECTAT";
-            status.style.color = "#9aa0b8"; // Muted
-            btn.disabled = true;
-            btn.querySelector('span').innerText = "COLECTAT";
-        } else if (lvl <= playerLevel) {
-            status.innerText = "DISPONIBIL";
-            status.style.color = "#4ade80"; // Ready
-            btn.disabled = false;
-            btn.querySelector('span').innerText = "REVENDICĂ";
-        } else {
-            status.innerText = "BLOCAT (RESTRICȚIE NIVEL)";
-            status.style.color = "#ff4444"; // Locked
-            btn.disabled = true;
-            btn.querySelector('span').innerText = "BLOCAT";
-        }
-    }
-
-    // EXPORT TO WINDOW
-    window.openLevelRewards = openLevelRewards;
-    window.closeLevelRewards = closeLevelRewards;
-
-    function claimLevelReward() {
-        const lvl = selectedDetailLvl;
-        if (lvl > playerLevel || _GAME_DATA.claimedLvlRewards.includes(lvl)) return;
-
-        _GAME_DATA.claimedLvlRewards.push(lvl);
-        const data = levelData[lvl];
-
-        // Apply Rewards
-        data.rewards.forEach(r => {
-            if (r.type === 'score') score += r.val;
-            if (r.type === 'ruby') rubies += r.val;
-        });
-
-        playSFX(slotJackpotUrl);
-        showNotification("RECOMPENSĂ!", `Ai primit premiile pentru Nivelul ${lvl}!`, "fa-gift");
-        updateScoreUI();
-        showLevelDetails(lvl); // Refresh panel
-        syncScoreToFirestore(); // Save progress
-    }
 
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
@@ -11371,9 +11207,7 @@ window.switchBMTab = switchBMTab;
 window.setBuyQty = setBuyQty;
 window.processBuy = processBuy;
 
-window.openLevelRewards = openLevelRewards;
-window.closeLevelRewards = closeLevelRewards;
-window.claimLevelReward = claimLevelReward;
+
 })(); // <-- CLOSES THE SECURE VAULT
 
 </script>
