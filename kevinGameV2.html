@@ -5042,6 +5042,35 @@ input:checked + .s-slider:before {
     0% { transform: translateY(-10vh) rotate(0deg) scale(0.8); opacity: 1; }
     100% { transform: translateY(110vh) rotate(-720deg) scale(1.2); opacity: 0; }
 }
+
+
+/* ==========================================
+   BLACK MARKET BUY & RUBY TAGS
+   ========================================== */
+.bm-ruby-tag {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    background: #ff3366;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-family: 'Orbitron';
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    box-shadow: 0 2px 5px rgba(255, 51, 102, 0.5);
+    border: 1px solid #ff99b3;
+}
+
+.bm-ruby-tag img {
+    width: 10px !important;
+    height: 10px !important;
+    filter: drop-shadow(0 0 0 transparent) !important; /* Removes default shadow for clean fit */
+}
   </style>
 </head>
 <body>
@@ -5431,6 +5460,7 @@ input:checked + .s-slider:before {
 </div>
 
 
+<!-- BLACK MARKET MAIN MODAL -->
 <div id="blackMarketModal" class="modal-overlay">
   <div class="modal-box shop-box bm-box">
     <div class="shop-header">
@@ -5442,18 +5472,25 @@ input:checked + .s-slider:before {
     <div id="bmTimerDisplay" class="bm-timer-text">REFRESH ÎN: 00:00</div>
 
     <div class="bm-nav">
-      <button class="bm-tab" onclick="showComingSoon()">CUMPĂRĂ</button>
-      <button class="bm-tab active">VINDE</button>
+      <button class="bm-tab active" id="tabBmBuy" onclick="switchBMTab('buy')">CUMPĂRĂ</button>
+      <button class="bm-tab" id="tabBmSell" onclick="switchBMTab('sell')">VINDE</button>
       <button class="bm-tab" onclick="showComingSoon()">SCHIMB</button>
     </div>
 
-    <div id="bm-sell-view">
-        <div id="blackMarketGrid" class="inventory-v1-grid"></div>
+    <!-- BUY VIEW -->
+    <div id="bm-buy-view">
+        <div id="blackMarketBuyGrid" class="inventory-v1-grid" style="grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 10px 5px;"></div>
+    </div>
+
+    <!-- SELL VIEW -->
+    <div id="bm-sell-view" style="display: none;">
+        <div id="blackMarketGrid" class="inventory-v1-grid" style="grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 10px 5px;"></div>
     </div>
 
     <button class="menu-btn play close-shop-btn" style="margin-top: 20px; border-color: #ff2a2a;" onclick="closeBlackMarket()">ÎNAPOI</button>
   </div>
 </div>
+
 
 <!-- REWORKED SELL MODAL (Fully Themed) -->
 <div id="sellDetailModal" class="modal-overlay" style="z-index: 100010;">
@@ -5488,6 +5525,44 @@ input:checked + .s-slider:before {
 
         <button class="menu-btn play" id="sellFinalBtn" style="width: 100%; height: 55px;" onclick="processSell()">VINDE</button>
         <button class="cancel-btn" style="margin-top: 15px;" onclick="document.getElementById('sellDetailModal').style.display='none'">ANULEAZĂ</button>
+    </div>
+</div>
+
+<!-- BUY DETAIL MODAL -->
+<div id="buyDetailModal" class="modal-overlay" style="z-index: 100010;">
+    <div class="modal-box info-modal-box bm-box" style="border-color: #ff3366 !important;">
+        <img id="buyItemImg" src="" style="width: 80px; margin-bottom: 10px; filter: drop-shadow(0 0 10px rgba(255, 51, 102, 0.5));">
+        <h2 id="buyItemName" style="color: #ff3366 !important; margin-bottom: 5px;">NUME</h2>
+        
+        <div class="sell-stats-row" style="border-color: rgba(255, 51, 102, 0.3);">
+            <div class="stat-item">
+                <span class="stat-label">Preț (Rubine)</span>
+                <span id="buyPriceVal" class="stat-val" style="color: #ff3366; display: flex; align-items: center; gap: 5px;">
+                    0 <img src="https://iili.io/CrnXNdG.png" style="width: 12px; height: 12px; margin: 0;">
+                </span>
+            </div>
+            <div class="stat-item" style="border-left: 1px solid rgba(255,255,255,0.1); border-right: 1px solid rgba(255,255,255,0.1);">
+                <span class="stat-label">În Inventar</span>
+                <span id="buyStockVal" class="stat-val">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Stoc Magazin</span>
+                <span id="buyLimitVal" class="stat-val">0</span>
+            </div>
+        </div>
+
+        <div class="bet-grid">
+            <button class="menu-btn play bet-btn" onclick="setBuyQty(1)">1</button>
+            <button class="menu-btn play bet-btn" onclick="setBuyQty(5)">5</button>
+            <button class="menu-btn play bet-btn" onclick="setBuyQty('all')">MAX</button>
+        </div>
+
+        <div style="margin: 20px 0; font-family:'Orbitron'; font-size:18px; color: #fff; display: flex; justify-content: center; align-items: center; gap: 8px;">
+            TOTAL: <span id="buyTotalVal" style="color:#ff3366; font-weight: 900;">0</span> <img src="https://iili.io/CrnXNdG.png" style="width: 18px; height: 18px; margin: 0;">
+        </div>
+
+        <button class="menu-btn play" id="buyFinalBtn" style="width: 100%; height: 55px; background: linear-gradient(180deg, #ff3366 0%, #990033 100%); color: white; border-color: white;" onclick="processBuy()">CUMPĂRĂ</button>
+        <button class="cancel-btn" style="margin-top: 15px;" onclick="document.getElementById('buyDetailModal').style.display='none'">ANULEAZĂ</button>
     </div>
 </div>
 
@@ -5684,9 +5759,9 @@ input:checked + .s-slider:before {
         <div id="inventoryGrid" class="inventory-v1-grid"></div>
     </div>
 
-    <!-- TAB CONTENT: BOOSTS (Placeholder) -->
-    <div id="inv-boosts" class="tab-content">
-        <div class="placeholder-text">Boost-urile vor fi disponibile în curând!</div>
+<!-- TAB CONTENT: BOOSTS -->
+    <div id="inv-boosts" class="tab-content" style="max-height: 50vh; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;">
+        <div id="inventoryBoostsGrid" class="inventory-v1-grid"></div>
     </div>
 
     <!-- TAB CONTENT: PETS (Placeholder) -->
@@ -7583,6 +7658,8 @@ function playMissSFX() {
 
 
 
+
+
 const specialRegistry = {
     "axe": {
         name: "Toporul Nebun",
@@ -7692,8 +7769,30 @@ const specialRegistry = {
         action: (e) => pickupRubyEmoji(e)
     },
 
+"boost_x2_combo": {
+        name: "X2 COMBO",
+        image: "https://iili.io/C4bLzTQ.png",
+        type: "boost",
+        description: "Dublează progresul barei de Combo pentru o perioadă limitată de timp."
+    },
+    "boost_x2_score": {
+        name: "X2 SCOR",
+        image: "https://iili.io/C4bDVOG.png",
+        type: "boost",
+        description: "Orice click îți aduce puncte duble cât timp este activ."
+    },
+    "boost_x2_rubies": {
+        name: "X2 RUBINE",
+        image: "https://iili.io/C4bm2Zx.png",
+        type: "boost",
+        description: "Pragurile de combo îți oferă Rubine duble!"
+    },
+
 
 };
+
+
+
 
 function startAutoClickEvent() {
     const gameArea = document.getElementById('gameArea');
@@ -9234,16 +9333,18 @@ function addToInventory(itemKey) {
 }
 
 function renderInventoryUI() {
-    const grid = document.getElementById('inventoryGrid');
+    const itemsGrid = document.getElementById('inventoryGrid');
+    const boostsGrid = document.getElementById('inventoryBoostsGrid');
     const counter = document.getElementById('invCounter');
     
-    // Switch to our new V1 grid class
-    grid.className = "inventory-v1-grid"; 
-    grid.innerHTML = "";
+    itemsGrid.innerHTML = "";
+    boostsGrid.innerHTML = "";
     
     let total = 0;
-    // Loop through _GAME_DATA.inventory
     const keys = Object.keys(_GAME_DATA.inventory);
+
+    let hasItems = false;
+    let hasBoosts = false;
 
     keys.forEach(key => {
         const count = _GAME_DATA.inventory[key];
@@ -9260,15 +9361,25 @@ function renderInventoryUI() {
             <img src="${data.image}">
             ${count > 1 ? `<div class="inv-tile-badge">x${count}</div>` : ''}
         `;
-        grid.appendChild(tile);
+
+        // Distribute based on item type
+        if (data.type === 'boost') {
+            boostsGrid.appendChild(tile);
+            hasBoosts = true;
+        } else {
+            itemsGrid.appendChild(tile);
+            hasItems = true;
+        }
     });
 
-    // Update the total counter at the top
     counter.innerText = `${total} / ${INV_LIMIT}`;
 
-    // Placeholder if empty
-    if (total === 0) {
-        grid.innerHTML = `<div class="placeholder-text" style="grid-column: span 5; margin-top: 50px;">Inventar gol. Prinde obiecte din joc!</div>`;
+    // Placeholders if empty
+    if (!hasItems) {
+        itemsGrid.innerHTML = `<div class="placeholder-text" style="grid-column: span 5; margin-top: 50px;">Niciun obiect. Joacă pentru a găsi!</div>`;
+    }
+    if (!hasBoosts) {
+        boostsGrid.innerHTML = `<div class="placeholder-text" style="grid-column: span 5; margin-top: 50px;">Nu ai niciun Boost. Vizitează Piața Neagră!</div>`;
     }
 }
 
@@ -9743,22 +9854,28 @@ function updateComboBarUI(count) {
 
 let currentSellIdx = null;
 let currentSellQty = 0;
+let currentBuyIdx = null;
+let currentBuyQty = 0;
 
 let bmTimerInterval = null;
+let blackMarketOffers = []; // Array for BUY tab
 
 function refreshBlackMarketWants() {
     const now = Date.now();
     const oneHour = 60 * 60 * 1000;
 
-    if (now - lastMarketRefresh < oneHour && blackMarketWants.length > 0) return;
+    // Prevent refresh if less than an hour has passed and data exists
+    if (now - lastMarketRefresh < oneHour && blackMarketWants.length > 0 && blackMarketOffers.length > 0) return;
 
     lastMarketRefresh = now;
     blackMarketWants = [];
+    blackMarketOffers = [];
 
-    const pool = Object.keys(specialRegistry).filter(k => k !== "rubyDrop" && k !== "trivia");
-    const shuffled = pool.sort(() => 0.5 - Math.random()).slice(0, 6);
+    // 1. SELL OFFERS (Exclude rubies, trivia, and boosts)
+    const sellPool = Object.keys(specialRegistry).filter(k => k !== "rubyDrop" && k !== "trivia" && specialRegistry[k].type !== "boost");
+    const shuffledSell = sellPool.sort(() => 0.5 - Math.random()).slice(0, 6);
 
-    shuffled.forEach(key => {
+    shuffledSell.forEach(key => {
         blackMarketWants.push({
             key: key,
             price: Math.floor(Math.random() * 5) + 1,
@@ -9766,6 +9883,18 @@ function refreshBlackMarketWants() {
             sold: 0
         });
     });
+
+    // 2. BUY OFFERS (Only Boosts)
+    const buyPool = Object.keys(specialRegistry).filter(k => specialRegistry[k].type === "boost");
+    for(let i = 0; i < 6; i++) {
+        const randomBoost = buyPool[Math.floor(Math.random() * buyPool.length)];
+        blackMarketOffers.push({
+            key: randomBoost,
+            price: Math.floor(Math.random() * 3) + 1, // Costs 1 to 3 Rubies
+            limit: Math.floor(Math.random() * 3) + 1, // Store has 1 to 3 in stock
+            bought: 0
+        });
+    }
 }
 
 function startBMTimer() {
@@ -9783,30 +9912,50 @@ function startBMTimer() {
 
         if (timeLeft <= 0) {
             refreshBlackMarketWants();
+            renderBlackMarketBuyGrid();
             renderBlackMarketGrid();
         }
     }, 1000);
 }
+
+function switchBMTab(tab) {
+    document.getElementById('tabBmBuy').classList.remove('active');
+    document.getElementById('tabBmSell').classList.remove('active');
+
+    if (tab === 'buy') {
+        document.getElementById('tabBmBuy').classList.add('active');
+        document.getElementById('bm-buy-view').style.display = 'block';
+        document.getElementById('bm-sell-view').style.display = 'none';
+        renderBlackMarketBuyGrid();
+    } else {
+        document.getElementById('tabBmSell').classList.add('active');
+        document.getElementById('bm-buy-view').style.display = 'none';
+        document.getElementById('bm-sell-view').style.display = 'block';
+        renderBlackMarketGrid();
+    }
+}
+
 async function openBlackMarket() {
     isPaused = true;
     clearInterval(moveKevinInterval);
     
-    // 1. Hide Utilities and Open BM Frame immediately (No full-screen loader)
     document.getElementById('utilitiesModal').style.display = 'none';
     document.getElementById('blackMarketModal').style.display = 'flex';
     
-    // 2. Show a temporary message in the grid area while waiting
-    const grid = document.getElementById('blackMarketGrid');
-    grid.innerHTML = `<div style="grid-column: span 3; text-align: center; padding: 40px; color: var(--th-accent); font-family: 'Orbitron'; font-size: 14px; opacity: 0.7;">
-        <i class="fa-solid fa-spinner fa-spin"></i> SE CONECTEAZĂ...
-    </div>`;
+    // Default to Cumpără (Buy)
+    switchBMTab('buy');
 
-    const myAvailableKeys = Object.keys(specialRegistry).filter(k => k !== "rubyDrop" && k !== "trivia");
+    const gridBuy = document.getElementById('blackMarketBuyGrid');
+    const gridSell = document.getElementById('blackMarketGrid');
+    const loadingHtml = `<div style="grid-column: span 3; text-align: center; padding: 40px; color: var(--th-accent); font-family: 'Orbitron'; font-size: 14px; opacity: 0.7;"><i class="fa-solid fa-spinner fa-spin"></i> SE CONECTEAZĂ...</div>`;
+    gridBuy.innerHTML = loadingHtml;
+    gridSell.innerHTML = loadingHtml;
+
+    const myAvailableKeys = Object.keys(specialRegistry).filter(k => k !== "rubyDrop" && k !== "trivia" && specialRegistry[k].type !== "boost");
 
     try {
         const idToken = await firebase.auth().currentUser.getIdToken(true);
         
-        // 3. Fetch from backend in the background
         const response = await fetch('https://kevin-backend-qodc.onrender.com/sync-black-market', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -9825,16 +9974,124 @@ async function openBlackMarket() {
                 sold: data.playerSales[off.key] || 0
             }));
 
-            // 4. Populate the grid once data arrives
+            // Sync Buy State (Generated locally for now)
+            if (blackMarketOffers.length === 0) refreshBlackMarketWants();
+
+            renderBlackMarketBuyGrid();
             renderBlackMarketGrid();
             startBMTimer();
         }
     } catch (e) {
-        grid.innerHTML = `<div style="grid-column: span 3; text-align: center; color: #ff4444;">Eroare de conexiune.</div>`;
+        gridSell.innerHTML = `<div style="grid-column: span 3; text-align: center; color: #ff4444;">Eroare de conexiune.</div>`;
         console.error("BM Sync Error:", e);
     }
 }
 
+// =====================================
+// BLACK MARKET: BUY LOGIC
+// =====================================
+function renderBlackMarketBuyGrid() {
+    const grid = document.getElementById('blackMarketBuyGrid');
+    grid.innerHTML = "";
+
+    blackMarketOffers.forEach((offer, index) => {
+        const data = specialRegistry[offer.key];
+        const remaining = offer.limit - offer.bought;
+
+        const tile = document.createElement('div');
+        tile.className = "inv-tile";
+        
+        if (remaining <= 0) tile.classList.add('bm-sold-out');
+
+        tile.onclick = () => {
+            if (remaining > 0) openBuyDetail(index);
+            else showKevinutaBubble("Stoc epuizat!");
+        };
+
+        tile.innerHTML = `
+            <div class="bm-ruby-tag" style="position:absolute; top:-5px; left:-5px; background:#ff3366; color:#fff; font-size:11px; font-weight:900; padding:2px 6px; border-radius:6px; font-family:'Orbitron'; z-index:6; display:flex; align-items:center; gap:3px; border:1px solid #ff99b3;">
+                ${offer.price} <img src="https://iili.io/CrnXNdG.png" style="width:10px; height:10px;">
+            </div>
+            <img src="${data.image}">
+            <div class="bm-limit-tag" style="background:#ff3366;">${remaining > 0 ? 'STOC: '+remaining : 'GATA'}</div>
+        `;
+        grid.appendChild(tile);
+    });
+}
+
+function openBuyDetail(idx) {
+    currentBuyIdx = idx;
+    const offer = blackMarketOffers[idx];
+    const data = specialRegistry[offer.key];
+    const stock = _GAME_DATA.inventory[offer.key] || 0;
+
+    document.getElementById('buyItemImg').src = data.image;
+    document.getElementById('buyItemName').innerText = data.name;
+    document.getElementById('buyPriceVal').innerHTML = `${offer.price} <img src="https://iili.io/CrnXNdG.png" style="width:14px; height:14px; margin:0;">`;
+    document.getElementById('buyStockVal').innerText = stock;
+    document.getElementById('buyLimitVal').innerText = offer.limit - offer.bought;
+    
+    setBuyQty(1);
+    document.getElementById('buyDetailModal').style.display = 'flex';
+}
+
+function setBuyQty(qty) {
+    const offer = blackMarketOffers[currentBuyIdx];
+    const remainingLimit = offer.limit - offer.bought;
+    const maxCanAfford = Math.floor(rubies / offer.price);
+
+    if (qty === 'all') {
+        currentBuyQty = Math.min(remainingLimit, maxCanAfford);
+    } else {
+        currentBuyQty = Math.min(qty, remainingLimit, maxCanAfford);
+    }
+
+    if (currentBuyQty < 0) currentBuyQty = 0; 
+
+    document.getElementById('buyTotalVal').innerText = currentBuyQty * offer.price;
+    document.getElementById('buyFinalBtn').disabled = (currentBuyQty <= 0);
+}
+
+async function processBuy() {
+    const offer = blackMarketOffers[currentBuyIdx];
+    const totalCost = currentBuyQty * offer.price;
+
+    if (rubies < totalCost || currentBuyQty <= 0) {
+        showKevinutaBubble("Nu ai suficiente rubine!");
+        return;
+    }
+
+    rubies -= totalCost;
+    _GAME_DATA.inventory[offer.key] = (_GAME_DATA.inventory[offer.key] || 0) + currentBuyQty;
+    offer.bought += currentBuyQty;
+
+    updateScoreUI(); 
+
+    document.getElementById('buyDetailModal').style.display = 'none';
+    if (typeof playSFX === 'function') playSFX(popSounds[0]); 
+    
+    try {
+        const idToken = await firebase.auth().currentUser.getIdToken(true);
+        await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                idToken: idToken, 
+                score: score, 
+                rubies: rubies,
+                inventory: _GAME_DATA.inventory
+            }),
+        });
+    } catch (e) {
+        console.error("Cloud sync failed:", e);
+    }
+
+    renderBlackMarketBuyGrid();
+}
+
+// =====================================
+// BLACK MARKET: SELL LOGIC (EXISTING)
+// =====================================
 function renderBlackMarketGrid() {
     const grid = document.getElementById('blackMarketGrid');
     grid.innerHTML = "";
@@ -9847,7 +10104,6 @@ function renderBlackMarketGrid() {
         const tile = document.createElement('div');
         tile.className = "inv-tile";
         
-        // VISUAL STATES
         if (remaining <= 0) tile.classList.add('bm-sold-out');
         else if (stock <= 0) tile.classList.add('bm-no-stock');
 
@@ -9882,15 +10138,9 @@ function openSellDetail(idx) {
 }
 
 function closeBlackMarket() {
-    // 1. Hide the Market
     document.getElementById('blackMarketModal').style.display = 'none';
-    
-    // 2. SHOW UTILITIES AGAIN (So the player goes back to where they were)
     document.getElementById('utilitiesModal').style.display = 'flex';
-
     if (bmTimerInterval) clearInterval(bmTimerInterval);
-
-    // Note: We DO NOT unpause here because the player is still in the Utilities menu!
 }
 
 function setSellQty(qty) {
@@ -9912,27 +10162,19 @@ async function processSell() {
     const want = blackMarketWants[currentSellIdx];
     const totalPay = currentSellQty * want.price;
 
-    // 1. Logic Check
     if ((_GAME_DATA.inventory[want.key] || 0) < currentSellQty) return;
 
-    // 2. Local Update
     _GAME_DATA.inventory[want.key] -= currentSellQty;
     want.sold += currentSellQty;
-    pendingWinAmount = totalPay; // For the flying animation
+    pendingWinAmount = totalPay; 
 
-    // 3. Close the modal
     document.getElementById('sellDetailModal').style.display = 'none';
     
-    // 4. Flying Animation
     const targetRect = document.getElementById('sellItemImg').getBoundingClientRect();
     animateScoreFlying(targetRect.left + 40, targetRect.top + 40);
 
-    // ==========================================
-    // 5. YOUR CODE SNIPPET GOES HERE (SYNC TO CLOUD)
-    // ==========================================
     try {
         const idToken = await firebase.auth().currentUser.getIdToken(true);
-
         const salesUpdate = {};
         blackMarketWants.forEach(w => {
             if (w.sold > 0) salesUpdate[w.key] = w.sold;
@@ -9943,24 +10185,20 @@ async function processSell() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 idToken: idToken, 
-                score: score + totalPay, // Sync new score
-                rubies: rubies,           // Keep rubies in sync too
+                score: score + totalPay, 
+                rubies: rubies,           
                 inventory: _GAME_DATA.inventory,
                 bmSales: salesUpdate 
             }),
         });
 
-        // Update the local score variable so the UI stays correct
         score += totalPay;
-        console.log("✅ Black Market transaction synced to Cloud.");
     } catch (e) {
-        console.error("❌ Cloud sync failed:", e);
+        console.error("Cloud sync failed:", e);
     }
 
-    // 6. Refresh the grid to show new "VREA" limits
     renderBlackMarketGrid();
 }
-
 
 
 function openIndex() {
@@ -10317,6 +10555,10 @@ window.showIndexRewardModal = showIndexRewardModal;
 window.showNotification = showNotification;
 window.showEpicStageRewardModal = showEpicStageRewardModal;
 
+
+window.switchBMTab = switchBMTab;
+window.setBuyQty = setBuyQty;
+window.processBuy = processBuy;
 })(); // <-- CLOSES THE SECURE VAULT
 
 </script>
