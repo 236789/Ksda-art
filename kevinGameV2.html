@@ -5953,6 +5953,29 @@ input:checked + .s-slider:before {
 @keyframes firePulse { 0% { box-shadow: 0 0 5px #ff4500; } 50% { box-shadow: 0 0 30px #ff4500; } 100% { box-shadow: 0 0 5px #ff4500; } }
 @keyframes flicker-light { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
 @keyframes whiteFlash { from { filter: brightness(1); } to { filter: brightness(2); } }
+
+
+
+/* Header Description Styling */
+.map-flavor-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    color: #9aa0b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 5px 0 10px 0;
+    opacity: 0.9;
+    line-height: 1.4;
+}
+
+.map-level-counter {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    color: #fff;
+    margin-top: 5px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 10px;
+}
   </style>
 </head>
 <body>
@@ -6279,23 +6302,26 @@ input:checked + .s-slider:before {
             <button class="epic-close-btn" onclick="closeMilestones()">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-            <h2><i class="fa-solid fa-route"></i> THE LEGENDARY TRAIL</h2>
-            <p>Nivel Curent: <span id="epicMapLevelText" style="color: #00f0ff; font-weight: bold;">1</span> / 25</p>
+            <h2><i class="fa-solid fa-route"></i> DRUMUL LEGENDELOR</h2>
+            
+            <!-- NEW DESCRIPTION -->
+            <p class="map-flavor-text">Joacă, adună XP și deblochează recompense și funcții exclusive!</p>
+
+            <div class="map-level-counter">
+                Nivel Curent: <span id="epicMapLevelText" style="color: #00f0ff; font-weight: bold;">1</span> / 25
+            </div>
         </div>
 
         <!-- Scrollable Map Area -->
         <div class="epic-map-scroll" id="epicMapScroll">
-            <!-- Background Effects -->
             <div class="epic-map-stars"></div>
-            
             <div class="epic-map-content" id="epicMapContent">
-                <!-- JS will draw the SVG lines and Round Nodes here -->
+                <!-- JS draws the SVG and Nodes here -->
             </div>
         </div>
 
     </div>
 </div>
-
 <!-- SLOT MODAL V4 -->
 <div id="slotMachineModal" class="modal-overlay">
   <div class="modal-box slot-modal-box">
@@ -11699,6 +11725,7 @@ function openLevelMilestones() {
     forceCloseMenu();
     
     document.getElementById('milestonesModal').style.display = 'flex';
+    // Sync the current level to the UI
     document.getElementById('epicMapLevelText').innerText = playerLevel;
     
     renderEpicWindingMap();
