@@ -5148,86 +5148,27 @@ input:checked + .s-slider:before {
     #xpStatusText { font-size: 9px; }
 }
 
-/* --- CINEMATIC LEVEL UP 2.0 --- */
+/* --- CINEMATIC LEVEL UP OVERLAY --- */
 .lvl-up-overlay {
-    position: fixed; inset: 0;
-    z-index: 50000;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.9);
-    backdrop-filter: blur(15px);
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
     overflow: hidden;
 }
 
-.lvl-title-anim {
-    font-family: 'Montserrat', sans-serif;
-    font-size: clamp(50px, 15vw, 100px);
-    font-weight: 900;
-    color: #fff;
-    text-transform: uppercase;
-    text-shadow: 0 0 20px rgba(255,255,255,0.5);
-    animation: titleSlam 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-/* THE BADGE STAGE */
-.lvl-badge-stage {
-    position: relative;
-    width: 200px; height: 200px;
-    margin-top: 40px;
-    display: flex; align-items: center; justify-content: center;
-}
-
-.lvl-badge-img {
-    width: 100%; height: 100%;
-    object-fit: contain;
-    filter: drop-shadow(0 0 20px var(--t-color));
-    z-index: 10;
-}
-
-/* Aggressive Glitch for Transition */
-.glitch-active {
-    animation: rankMutation 0.2s infinite;
-    filter: hue-rotate(90deg) brightness(2) contrast(2);
-}
-
-@keyframes rankMutation {
-    0% { transform: translate(0,0) scale(1); clip-path: inset(0 0 0 0); }
-    20% { transform: translate(-10px, 5px) scale(1.1); clip-path: inset(10% 0 40% 0); }
-    40% { transform: translate(10px, -5px) scale(0.9); clip-path: inset(50% 0 10% 0); }
-    60% { transform: translate(-5px, -10px) scale(1.2); clip-path: inset(20% 0 20% 0); }
-    100% { transform: translate(0,0) scale(1); }
-}
-
-@keyframes titleSlam {
-    0% { transform: scale(5) translateY(-200px); opacity: 0; }
-    100% { transform: scale(1) translateY(0); opacity: 1; }
-}
-
-/* The White Mutation Flash */
-.lvl-mutation-flash {
+/* Golden Sunburst Rays */
+.lvl-rays {
     position: absolute;
-    inset: -50px;
-    background: #fff;
-    border-radius: 50%;
-    opacity: 0;
-    z-index: 15;
-    filter: blur(20px);
-}
-
-.flash-trigger { animation: mutationExplosion 0.6s ease-out forwards; }
-
-@keyframes mutationExplosion {
-    0% { transform: scale(0); opacity: 1; }
-    50% { transform: scale(2); opacity: 1; }
-    100% { transform: scale(3); opacity: 0; }
-}
-
-/* Background Rays */
-.lvl-god-rays {
-    position: absolute; width: 200%; height: 200%;
-    background: conic-gradient(from 0deg, transparent, var(--t-color), transparent 30%);
-    animation: rotateAura 5s linear infinite;
-    opacity: 0.3;
+    width: 150vmax; height: 150vmax;
+    background: conic-gradient(from 0deg, 
+        transparent 0deg, 
+        rgba(255, 204, 0, 0.2) 20deg, 
+        transparent 40deg);
+    animation: rotateRays 10s linear infinite;
 }
 
 @keyframes rotateRays { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -6034,145 +5975,6 @@ input:checked + .s-slider:before {
     margin-top: 5px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 10px;
-}
-
-
-/* --- FIXED LEVEL UP STYLING --- */
-.lvl-up-overlay {
-    position: fixed; inset: 0;
-    z-index: 999999;
-    background: rgba(0,0,0,0.95); /* Slightly transparent black */
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    overflow: hidden;
-    padding: 20px; /* Prevents touching edges */
-}
-
-/* Reduced size and added perspective */
-.lvl-evolution-stage {
-    position: relative;
-    width: min(220px, 60vw); /* Responsive size: max 220px or 60% of screen */
-    height: min(220px, 60vw);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 10;
-    margin: 20px 0;
-}
-
-/* Ensures the full image is always visible */
-.lvl-main-img {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain; /* CRITICAL: Shows the whole badge */
-    filter: drop-shadow(0 0 20px var(--t-color));
-    transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    transform: scale(0.8); /* Starts slightly smaller */
-}
-
-/* Updated Title size to not overlap */
-.lvl-title-mega {
-    font-family: 'Montserrat', sans-serif;
-    font-size: clamp(40px, 12vw, 80px); /* Smaller than before to fit mobile */
-    font-weight: 900;
-    color: #fff;
-    text-transform: uppercase;
-    z-index: 10;
-    margin-bottom: 10px;
-    text-shadow: 0 0 15px rgba(255,255,255,0.3);
-}
-
-/* Rank Name Adjustment */
-.lvl-rank-name-huge {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(18px, 5vw, 28px);
-    font-weight: 900;
-    color: #fff;
-    text-transform: uppercase;
-    letter-spacing: 4px; /* Reduced spacing for mobile */
-    padding: 8px 30px;
-    background: rgba(255,255,255,0.05);
-    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
-    border-left: 3px solid var(--t-color);
-    border-right: 3px solid var(--t-color);
-    text-align: center;
-}
-
-
-/* --- GOD-MODE LEVEL UP 7.0: THE SHADER ENGINE --- */
-.lvl-up-overlay {
-    position: fixed; inset: 0;
-    z-index: 999999;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    overflow: hidden;
-    animation: fadeIn 0.5s forwards;
-}
-
-/* THE DYNAMIC BACKGROUND LAYER */
-.lvl-bg-layer {
-    position: absolute; inset: 0;
-    z-index: -1;
-    transition: all 0.8s ease;
-}
-
-/* 1. BRONZE */ .lvl-theme-1 .lvl-bg-layer { background: linear-gradient(135deg, #3d1f05, #cd7f32); }
-/* 2. SILVER */ .lvl-theme-2 .lvl-bg-layer { background: linear-gradient(135deg, #777, #fff, #777); background-size: 200% auto; animation: shineSweep 3s infinite; }
-/* 3. SARAC */ .lvl-theme-3 .lvl-bg-layer { background: linear-gradient(45deg, #8b4513, #cd853f); }
-/* 4. BLUE */  .lvl-theme-4 .lvl-bg-layer { background: linear-gradient(-45deg, #00d2ff, #3a7bd5, #004e92, #000428); background-size: 400% 400%; animation: liquid-flow 6s infinite; }
-/* 5. TOXIC */ .lvl-theme-5 .lvl-bg-layer { background: #050a00; background-image: repeating-linear-gradient(45deg, #000, #000 10px, #1b3a08 10px, #1b3a08 20px); border: 10px solid #39ff14; }
-/* 6. AMETHYST */ .lvl-theme-6 .lvl-bg-layer { background: linear-gradient(135deg, #6a11cb, #2575fc); animation: hue-rotate 5s infinite; }
-/* 7. MIDAS */ .lvl-theme-7 .lvl-bg-layer { background: radial-gradient(circle, #ffd700, #b8860b, #000); }
-/* 8. ICE */   .lvl-theme-8 .lvl-bg-layer { background: #fff; background-image: radial-gradient(circle, #e3fdfd, #00e5ff); animation: flicker-light 2s infinite; }
-/* 9. INFERNO */ .lvl-theme-9 .lvl-bg-layer { background: #500; background-image: radial-gradient(circle, #ff4500, #000); animation: firePulse 1.5s infinite; }
-/* 10. ROYAL */ .lvl-theme-10 .lvl-bg-layer { background: #1a0514; border: 15px double #ffd700; box-shadow: inset 0 0 100px #ffd700; }
-/* 15. GEODE */ .lvl-theme-15 .lvl-bg-layer { background: linear-gradient(135deg, #d32ce6, #1a0225); }
-/* 19. VOID */  .lvl-theme-19 .lvl-bg-layer { background: radial-gradient(circle, #7000ff, #050508); }
-/* 21. COSMIC */ .lvl-theme-21 .lvl-bg-layer { background: #000 url('https://media.giphy.com/media/l3c614V12UA82q1vG/giphy.gif') center/cover; }
-/* 23. HELL */   .lvl-theme-23 .lvl-bg-layer { background: #111; background-image: url('https://www.transparenttextures.com/patterns/asfalt-dark.png'); filter: sepia(1) saturate(5) hue-rotate(-50deg); }
-/* 25. ETERNAL */ .lvl-theme-25 .lvl-bg-layer { background: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/desc%C4%83rcare.gif?alt=media&token=f0045bb9-4176-4e6a-92e2-25be1eea9bae') center/cover; }
-
-/* THE UI ELEMENTS */
-.lvl-title-mega {
-    font-family: 'Montserrat', sans-serif;
-    font-size: clamp(60px, 18vw, 120px);
-    font-weight: 900; color: #fff;
-    text-transform: uppercase; letter-spacing: -5px;
-    text-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    margin-bottom: 20px; z-index: 10;
-}
-
-.lvl-badge-container {
-    position: relative;
-    width: 250px; height: 250px;
-    display: flex; align-items: center; justify-content: center;
-    z-index: 10; margin-bottom: 30px;
-}
-
-.lvl-badge-img {
-    max-width: 100%; max-height: 100%;
-    object-fit: contain; /* FIXED CLIPPING */
-    filter: drop-shadow(0 0 30px rgba(255,255,255,0.5));
-}
-
-.lvl-rank-tag-huge {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 32px; font-weight: 900;
-    color: #fff; background: rgba(0,0,0,0.8);
-    padding: 10px 50px;
-    clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%);
-    border-left: 5px solid var(--t-color);
-    border-right: 5px solid var(--t-color);
-    z-index: 10;
-}
-
-/* THE GLITCH ANIMATION */
-.is-mutating { animation: glitchSkew 0.2s infinite; filter: brightness(2) contrast(2); }
-@keyframes glitchSkew {
-    0% { transform: translate(0); }
-    20% { transform: translate(-10px, 5px) skew(5deg); }
-    40% { transform: translate(10px, -5px) skew(-5deg); }
-    100% { transform: translate(0); }
 }
   </style>
 </head>
@@ -11834,67 +11636,50 @@ function spawnLevelUpParticles() {
 
 let selectedLvlNode = 1;
 
+// --- UPDATED LEVEL UP LOGIC ---
 function levelUp() {
     const MAX_LEVEL = 25;
-    if (playerLevel >= MAX_LEVEL) return;
+    if (playerLevel >= MAX_LEVEL) return; // Stop at 25
 
-    const oldTier = mapTiers[playerLevel - 1];
     playerLevel++;
-    const newTier = mapTiers[playerLevel - 1];
     
+    // Carry over remaining XP
     playerXP = Math.max(0, playerXP - xpToNextLevel); 
-    xpToNextLevel = (playerLevel === MAX_LEVEL) ? 0 : getXPRequired(playerLevel);
-
-    // Build the Cinematic Stage
-    const overlay = document.createElement('div');
-    overlay.className = `lvl-up-overlay lvl-theme-${playerLevel}`;
-    overlay.style.setProperty('--t-color', newTier.color);
     
+    // Check if we just hit MAX
+    if (playerLevel === MAX_LEVEL) {
+        xpToNextLevel = 0; // No more XP needed
+        playerXP = 0;
+    } else {
+        xpToNextLevel = getXPRequired(playerLevel);
+    }
+
+    // Cinematic Effects
+    if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
+
+    const overlay = document.createElement('div');
+    overlay.className = 'lvl-up-overlay';
     overlay.innerHTML = `
-        <div class="lvl-bg-layer"></div>
-        <h1 class="lvl-title-mega">LEVEL UP</h1>
-        
-        <div class="lvl-badge-container">
-            <img src="https://i.ibb.co/${oldTier.id}/image.png" class="lvl-badge-img" id="evolveBadge">
+        <div class="lvl-rays"></div>
+        <div class="lvl-card">
+            <h1 class="lvl-text-glitch">${playerLevel === MAX_LEVEL ? 'MAX LEVEL' : 'LEVEL UP'}</h1>
+            <div class="lvl-rank-plate">
+                <span>RANG: ${playerLevel === MAX_LEVEL ? 'LEGENDĂ' : playerLevel}</span>
+            </div>
         </div>
-        
-        <div class="lvl-rank-tag-huge" id="evolveName">${oldTier.name.toUpperCase()}</div>
     `;
     document.body.appendChild(overlay);
 
-    const badge = document.getElementById('evolveBadge');
-    const nameLabel = document.getElementById('evolveName');
+    const flash = document.createElement('div');
+    flash.className = 'lvl-flash';
+    document.body.appendChild(flash);
+    
+    spawnLevelUpParticles();
 
-    // 1. Start "Unstable" Glitch on old badge
     setTimeout(() => {
-        badge.classList.add('is-mutating');
-        if (typeof playMissSFX === 'function') playMissSFX();
-    }, 1000);
-
-    // 2. The Transformation
-    setTimeout(() => {
-        badge.classList.remove('is-mutating');
-        badge.src = `https://i.ibb.co/${newTier.id}/image.png`;
-        
-        // Massive Flare Reveal
-        badge.animate([
-            { transform: 'scale(0.2) rotate(-180deg)', filter: 'brightness(10)' },
-            { transform: 'scale(1) rotate(0deg)', filter: 'brightness(1)' }
-        ], { duration: 800, easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)' });
-
-        nameLabel.innerText = newTier.name.toUpperCase();
-        nameLabel.style.color = newTier.color;
-        nameLabel.style.textShadow = `0 0 20px ${newTier.color}`;
-
-        if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
-    }, 1800);
-
-    // 3. Cinematic Exit
-    setTimeout(() => {
-        overlay.style.opacity = "0";
-        overlay.style.transition = "opacity 1s ease";
-        setTimeout(() => overlay.remove(), 1000);
-    }, 5000);
+        overlay.remove();
+        flash.remove();
+    }, 1600);
 
     updateXPBarUI();
     syncScoreToFirestore(); 
