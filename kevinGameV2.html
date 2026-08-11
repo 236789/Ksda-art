@@ -6754,7 +6754,7 @@ input:checked + .s-slider:before {
 <div class="v3-scroll-area">
     <div class="v3-header">
         <img src="https://iili.io/C6jbZjj.png" class="v3-top-emblem">
-        <div class="v3-level-label">NIVEL</div>
+        <div class="v3-level-label">RANG</div>
         
         <h2 id="detailRankName" class="v3-rank-title">RANK</h2>
 
@@ -7694,6 +7694,7 @@ updateGiftButtonState(); // 🔥 Add this
             _GAME_DATA.index = data.index || [];
             _GAME_DATA.claimedRewards = data.claimedRewards || [];
             _GAME_DATA.claimedStageRewards = data.claimedStageRewards || [];
+            _GAME_DATA.claimedLevelRewards = data.claimedLevelRewards || []; 
             
             console.log("📖 Progress loaded:", _GAME_DATA.index.length, "emojis discovered.");
             
@@ -7918,8 +7919,9 @@ if (e.target.closest('.control-btn') ||
 }
 
 async function syncScoreToFirestore() {
-  // Add playerLevel and playerXP to the change check
-  if (currentUID && (score !== lastSavedScore || rubies !== lastSavedRubies || playerXP !== lastSavedXP)) {
+  // Verificăm dacă avem UID. 
+  // Am scos verificarea strictă de score/XP pentru a permite salvarea listei de "claimed" chiar dacă numerele nu s-au schimbat încă.
+  if (currentUID) {
     try {
       const idToken = await firebase.auth().currentUser.getIdToken(true);
 
@@ -7930,19 +7932,22 @@ async function syncScoreToFirestore() {
             idToken: idToken, 
             score: score,
             rubies: rubies,
-            level: playerLevel, // NEW
-            xp: playerXP,       // NEW
+            level: playerLevel,
+            xp: playerXP,
             hasSeenRubyTutorial: hasSeenRubyTutorial,
-            claimedRewards: _GAME_DATA.claimedRewards,
-            claimedStageRewards: _GAME_DATA.claimedStageRewards
+            // --- LISTELE DE PROGRES ---
+            claimedLevelRewards: _GAME_DATA.claimedLevelRewards, // Recompensele de Nivel (1-25)
+            claimedRewards: _GAME_DATA.claimedRewards,           // Recompensele de Emojis (Index)
+            claimedStageRewards: _GAME_DATA.claimedStageRewards  // Recompensele de Zonă (Street, etc.)
         }),
       }); 
 
       if (response.ok) {
+        // Actualizăm cache-ul local pentru a nu trimite date identice în buclă
         lastSavedScore = score;
         lastSavedRubies = rubies;
-        lastSavedXP = playerXP; // Track this locally to prevent unnecessary pings
-        console.log("✅ Cloud Sync: Progress Saved (LVL " + playerLevel + ")");
+        lastSavedXP = playerXP;
+        console.log("✅ Cloud Sync Complete: Progres și Recompense salvate.");
       }
     } catch (e) {
       console.error("Connection error during sync:", e);
@@ -12503,47 +12508,38 @@ function openLevelDetail(lvl) {
 function closeLevelDetail() {
     document.getElementById('levelDetailModal').style.display = 'none';
 }
-
+ 
 
 function handleClaimLevelReward(lvl) {
     const data = LEVEL_REWARDS_REGISTRY[lvl];
+    // Verificăm dacă există date sau dacă a fost deja revendicat
     if (!data || _GAME_DATA.claimedLevelRewards.includes(lvl)) return;
 
-    // 1. Salvăm faptul că a fost revendicat
+    // 1. Salvăm local în variabila de joc
     _GAME_DATA.claimedLevelRewards.push(lvl);
 
-    // 2. Închidem modalul de detalii imediat pentru a vedea animațiile
+    // 2. Închidem modalul
     closeLevelDetail();
 
-    // 3. Procesăm Recompensele și pornim animațiile de zbor
-    let hasScore = false;
-    let hasRubies = false;
-
+    // 3. Procesăm Recompensele (Scor și Rubine)
     data.rewards.forEach(r => {
         if (r.type === 'score') {
             pendingWinAmount = r.value;
-            animateScoreFlying(); // Zbor către scor
-            hasScore = true;
+            animateScoreFlying(); 
         }
         if (r.type === 'ruby') {
             pendingRubyWin = r.value;
-            // Delay mic pentru rubine ca să nu se suprapună perfect cu scorul
             setTimeout(() => animateRubyFlying(), 300); 
-            hasRubies = true;
         }
     });
 
-    // 4. Sunet de succes
+    // 4. Feedback vizual și sonor
     if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
-
-    // 5. Update UI principal (oprim tremuratul dacă nu mai sunt premii)
     updateGiftButtonState();
     renderEpicWindingMap(); 
-
-    // 6. Notificare Toast
     showNotification("PREMIU COLECTAT!", `Ai primit cadoul pentru nivelul ${lvl}!`, "fa-gift");
 
-    // 7. Sincronizare Cloud
+    // 5. SINCRONIZARE IMEDIATĂ - Trimitem lista la backend
     syncScoreToFirestore();
 }
 // Ensure the ninja icon in Utilities opens the Market
