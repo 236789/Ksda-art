@@ -7085,6 +7085,7 @@ const _GAME_DATA = {
     index: [],
     claimedRewards: [],      // Recompense din Index (per emoji)
     claimedStageRewards: [], // Recompense pentru finalizare zonă
+    claimedLevelRewards: [], // 🆕 Added: Tracks which level rewards are DONE
 };
 
 
@@ -11668,6 +11669,9 @@ function levelUp() {
     if (playerLevel >= MAX_LEVEL) return; // Stop at 25
 
     playerLevel++;
+
+    checkRewardAvailability(playerLevel);
+
     
     // Carry over remaining XP
     playerXP = Math.max(0, playerXP - xpToNextLevel); 
@@ -11847,6 +11851,9 @@ const xPercent = 50 + Math.sin(i * 1.0) * 28;
     }, 50);
 }
 
+
+
+
 window.clickEpicNode = function(level, name) {
     if (level < playerLevel) {
         if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
@@ -11859,6 +11866,51 @@ window.clickEpicNode = function(level, name) {
         showKevinutaBubble(`Ai nevoie de Nivelul ${level} pentru ${name}!`);
     }
 };
+
+
+
+const LEVEL_REWARDS_REGISTRY = {
+    2:  { name: "Silver",      rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    3:  { name: "Copper",      rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    4:  { name: "Sapphire",    rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    5:  { name: "Emerald",     rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    6:  { name: "Amethyst",    rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    7:  { name: "Gold",        rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    8:  { name: "Ice Crystal", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    9:  { name: "Ruby",        rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    10: { name: "Royal Gold",  rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    11: { name: "Jade",        rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    12: { name: "Astral",      rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    13: { name: "Azure",       rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    14: { name: "Obsidian",    rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    15: { name: "Geode",       rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    16: { name: "Frost",       rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    17: { name: "Mythril",     rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    18: { name: "Toxicium",    rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    19: { name: "Void",        rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    20: { name: "Cel. Gold",   rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    21: { name: "Cosmic",      rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    22: { name: "Diamond",     rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    23: { name: "Infernal",    rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    24: { name: "Divine",      rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    25: { name: "Eternal",     rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] }
+};
+
+
+function checkRewardAvailability(lvl) {
+    const rewardData = LEVEL_REWARDS_REGISTRY[lvl];
+    
+    if (rewardData) {
+        // Just checking if it's already in our 'claimed' list
+        const isAlreadyClaimed = _GAME_DATA.claimedLevelRewards.includes(lvl);
+        
+        if (!isAlreadyClaimed) {
+            console.log(`🎁 STATUS: Level ${lvl} (${rewardData.name}) reward is now UNLOCKED and ready to be claimed later.`);
+        } else {
+            console.log(`✅ STATUS: Level ${lvl} reward was already claimed previously.`);
+        }
+    }
+}
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
 // ==========================================
