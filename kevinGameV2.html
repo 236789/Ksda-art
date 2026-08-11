@@ -5489,16 +5489,15 @@ input:checked + .s-slider:before {
     transition: width 1s ease;
 }
 
-
 /* ==========================================
-   CINEMATIC WINDING MAP (THE ROUTE)
+   CINEMATIC WINDING MAP (V3 - THE ULTIMATE)
    ========================================== */
 .epic-map-box {
     width: 95vw !important;
     max-width: 600px !important;
     height: 90vh !important;
     max-height: 850px;
-    background: #050714; /* Deep dark void */
+    background: #050714;
     border: 3px solid #3b82f6;
     border-radius: 20px;
     display: flex;
@@ -5549,28 +5548,25 @@ input:checked + .s-slider:before {
 }
 .epic-close-btn:hover { background: #ef4444; border-color: #ef4444; transform: scale(1.1); box-shadow: 0 0 15px #ef4444; }
 
-/* THE SCROLL AREA & BACKGROUND EFFECTS */
+/* THE SCROLL AREA & ANIMATED NEBULA BACKGROUND */
 .epic-map-scroll {
     flex: 1;
     overflow-y: auto;
     position: relative;
     scrollbar-width: none;
-    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+    background-color: #050714;
+    /* Panning Stars/Nebula Effect */
+    background-image: 
+        radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 50%),
+        radial-gradient(circle at 85% 30%, rgba(168, 85, 247, 0.1), transparent 50%),
+        url('https://www.transparenttextures.com/patterns/stardust.png');
+    animation: panNebula 60s linear infinite;
 }
 .epic-map-scroll::-webkit-scrollbar { display: none; }
 
-/* Cinematic Grid/Stars inside the map */
-.epic-map-stars {
-    position: absolute;
-    inset: 0;
-    background-image: 
-        radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 40px 70px, #ffffff, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 90px 40px, #ffffff, rgba(0,0,0,0));
-    background-size: 150px 150px;
-    opacity: 0.3;
-    pointer-events: none;
-    z-index: 0;
+@keyframes panNebula {
+    0% { background-position: 0% 0%, 0% 0%, 0 0; }
+    100% { background-position: 0% 0%, 0% 0%, 1000px 1000px; }
 }
 
 .epic-map-content {
@@ -5578,143 +5574,126 @@ input:checked + .s-slider:before {
     width: 100%;
     z-index: 1;
 }
-/* ==========================================
-   EPIC MAP NODES & ANIMATED TIERS
-   ========================================== */
+
+/* THE MAP NODES (SCROLL-JITTER FIXED & PERFECTLY CENTERED) */
 .epic-node {
     position: absolute;
-    transform: translate(-50%, -50%); 
-    width: 75px;
-    height: 75px;
+    /* Removed transform: translate to fix scroll jitter. Calculated in JS instead! */
     border-radius: 50%;
+    
+    /* PERFECT FLEXBOX CENTERING FOR THE BADGE */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
     cursor: pointer;
     z-index: 5;
     border: 3px solid var(--t-color);
-    background-color: #050714;
-    overflow: hidden; /* Keeps the internal gradient animations inside the circle */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.9), 0 0 15px var(--t-color);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background-color: #0b1026;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.9);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.epic-node:hover { transform: translate(-50%, -50%) scale(1.2); z-index: 10; }
+.epic-node:hover { transform: scale(1.15); z-index: 10; }
 
-/* 1. PERFECT CENTERING FOR THE BADGES */
-.epic-node img {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 75%;
-    height: 75%;
-    object-fit: contain;
-    z-index: 3; /* Above the animated backgrounds */
-    filter: drop-shadow(0 5px 8px rgba(0,0,0,0.9));
-}
-
-/* 2. THE BACKGROUND ANIMATION LAYER */
+/* DYNAMIC UNIQUE BACKGROUNDS FOR EVERY NODE */
 .epic-node::before {
     content: "";
     position: absolute;
     inset: 0;
+    border-radius: 50%;
+    /* This guarantees every single node has its unique color glowing from the center */
+    background: radial-gradient(circle at center, var(--t-color) 0%, transparent 75%);
+    opacity: 0.6;
     z-index: 1;
 }
 
-/* TIER 1 (Lvl 1-4): Deep Static Glow */
-.node-tier-1::before {
-    background: radial-gradient(circle at center, var(--t-color) 0%, transparent 80%);
-    opacity: 0.6;
+/* BADGE IMAGES (PERFECTLY CENTERED) */
+.epic-node img {
+    width: 75%;
+    height: 75%;
+    object-fit: contain;
+    position: relative;
+    z-index: 3;
+    display: block;
+    filter: drop-shadow(0 5px 8px rgba(0,0,0,0.8));
 }
 
-/* TIER 2 (Lvl 5-9): Breathing Energy Glow */
-.node-tier-2::before {
-    background: radial-gradient(circle at center, var(--t-color) 0%, transparent 90%);
-    animation: breathGlow 2s infinite alternate ease-in-out;
-}
-@keyframes breathGlow { 
-    0% { opacity: 0.4; transform: scale(0.8); } 
-    100% { opacity: 0.9; transform: scale(1.2); } 
-}
-
-/* TIER 3 (Lvl 10-14): Sweeping Light Beam */
-.node-tier-3::before {
-    background: linear-gradient(135deg, transparent, var(--t-color), transparent);
-    background-size: 200% 200%;
-    opacity: 0.8;
-    animation: panGlow 2.5s linear infinite;
-}
-@keyframes panGlow { 
-    0% { background-position: 0% 50%; } 
-    100% { background-position: 200% 50%; } 
-}
-
-/* TIER 4 (Lvl 15-19): Spinning Conic Vortex */
-.node-tier-4::before {
-    background: conic-gradient(from 0deg, transparent, var(--t-color), transparent 50%);
-    animation: spinGlow 2s linear infinite;
-    opacity: 0.9;
-}
-
-/* TIER 5 (Lvl 20-25): Godly Radiant Core */
-.node-tier-5::before {
-    background: conic-gradient(from 0deg, var(--t-color), #ffffff, var(--t-color), #ffffff, var(--t-color));
-    animation: spinGlow 4s linear infinite;
-    opacity: 1;
-}
-.node-tier-5::after {
-    /* Creates a dark center so the badge stands out against the godly spin */
-    content: ""; position: absolute; inset: 4px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(0,0,0,0.4), #050714); z-index: 2;
-}
-
-@keyframes spinGlow { to { transform: rotate(360deg); } }
-
-
-/* NODE STATES (Locked / Current) */
+/* NODE STATES */
 .node-locked {
-    filter: grayscale(1) brightness(0.3);
+    filter: grayscale(1) brightness(0.4);
     border-color: rgba(255,255,255,0.2) !important;
     box-shadow: none !important;
     pointer-events: none;
 }
-.node-locked::before { display: none; } /* No animation if locked */
+.node-locked::before { display: none; }
+
+.node-completed {
+    box-shadow: 0 0 20px var(--t-color), inset 0 0 15px rgba(0,0,0,0.8);
+}
+.node-completed::before { opacity: 0.8; }
 
 .node-current {
-    border-color: #ffffff !important; /* Stands out as the active goal */
-    box-shadow: 0 0 40px var(--t-color), inset 0 0 20px #ffffff;
-    animation: pulseCurrent 1s infinite alternate;
+    border-color: #ffffff !important;
+    box-shadow: 0 0 35px var(--t-color), inset 0 0 20px rgba(255,255,255,0.3);
+    animation: pulseCurrentNode 1.5s infinite alternate;
 }
-@keyframes pulseCurrent {
-    from { transform: translate(-50%, -50%) scale(1.05); }
-    to { transform: translate(-50%, -50%) scale(1.2); }
+.node-current::before { opacity: 1; }
+
+@keyframes pulseCurrentNode {
+    from { filter: brightness(1); box-shadow: 0 0 20px var(--t-color); }
+    to { filter: brightness(1.3); box-shadow: 0 0 50px var(--t-color), 0 0 10px #fff; }
 }
 
-/* PERFECTLY CENTERED LABELS */
+/* LEVEL 25 MASSIVE BOSS NODE */
+.node-epic-boss {
+    border-width: 4px;
+    border-color: #fff !important;
+    box-shadow: 0 0 60px var(--t-color), inset 0 0 30px var(--t-color) !important;
+}
+.node-epic-boss::before {
+    background: conic-gradient(from 0deg, var(--t-color), #ffffff, var(--t-color), #ffffff, var(--t-color));
+    animation: spinGlow 4s linear infinite;
+    opacity: 0.8;
+}
+@keyframes spinGlow { to { transform: rotate(360deg); } }
+
+/* ANIMATED NODE LABELS */
 .epic-node-label {
     position: absolute;
-    bottom: -26px;
+    top: calc(100% + 8px); /* Locks it exactly below the circle */
     left: 50%;
-    transform: translateX(-50%); /* Mathematical perfect centering */
-    background: #050714;
+    /* Use margin instead of transform to prevent scroll jitter */
+    margin-left: -50%; 
+    width: max-content;
+    
+    background: rgba(5, 7, 20, 0.9);
     color: #fff;
     font-family: 'Orbitron', sans-serif;
     font-size: 11px;
     font-weight: 900;
-    padding: 3px 12px;
+    padding: 4px 12px;
     border-radius: 8px;
     border: 1px solid var(--t-color); 
-    white-space: nowrap;
     text-transform: uppercase;
     box-shadow: 0 4px 10px rgba(0,0,0,0.8);
     z-index: 10;
+    
+    /* The Floating Animation */
+    animation: floatLabel 2s ease-in-out infinite alternate;
+}
+
+@keyframes floatLabel {
+    from { transform: translateY(0px); }
+    to { transform: translateY(4px); }
 }
 
 .node-completed .epic-node-label { color: var(--t-color); text-shadow: 0 0 8px var(--t-color); }
-.node-current .epic-node-label { color: #ffffff; border-color: #ffffff; text-shadow: 0 0 10px #ffffff; }
-.node-locked .epic-node-label { border-color: rgba(255,255,255,0.2); color: #666; }
+.node-current .epic-node-label { color: #ffffff; border-color: #ffffff; text-shadow: 0 0 10px #ffffff; font-size: 12px; }
+.node-locked .epic-node-label { border-color: rgba(255,255,255,0.2); color: #666; animation: none; }
+.node-epic-boss .epic-node-label { font-size: 14px; padding: 6px 16px; top: calc(100% + 12px); }
 
-/* ==========================================
-   ANIMATED SVG FLOWING LINES
-   ========================================== */
+/* SVG PATH LINES & ENERGY FLOW */
 .epic-path-line {
     position: absolute;
     top: 0; left: 0;
@@ -5722,8 +5701,6 @@ input:checked + .s-slider:before {
     z-index: 1;
     pointer-events: none;
 }
-
-/* The energy pulse running along the completed path */
 .energy-flow {
     animation: flowEnergy 1.5s linear infinite;
 }
@@ -11437,8 +11414,9 @@ function levelUp() {
 }
 
 
+
 // ==========================================
-// CINEMATIC WINDING MAP LOGIC (25 UNIQUE STYLES)
+// CINEMATIC WINDING MAP LOGIC (V3)
 // ==========================================
 
 const mapTiers = [
@@ -11455,7 +11433,7 @@ const mapTiers = [
     { name: "Jade", id: "67QVCSfs", color: "#10b981" },
     { name: "Astral", id: "WWttKxPB", color: "#8b5cf6" },
     { name: "Azure", id: "pBfztNy2", color: "#3b82f6" },
-    { name: "Obsidian", id: "MyC7Q2GK", color: "#ea580c" }, // Molten orange glow
+    { name: "Obsidian", id: "MyC7Q2GK", color: "#ea580c" }, 
     { name: "Geode", id: "KcNG1RqF", color: "#d946ef" },
     { name: "Frost", id: "4gnrPFt0", color: "#22d3ee" },
     { name: "Mythril", id: "qLTkBP7P", color: "#e879f9" },
@@ -11466,7 +11444,7 @@ const mapTiers = [
     { name: "Diamond", id: "6J1CRmtr", color: "#93c5fd" },
     { name: "Infernal", id: "S2z2pFW", color: "#dc2626" },
     { name: "Divine", id: "Z6vM7YBx", color: "#f0f9ff" },
-    { name: "Eternal", id: "B5QKGyLM", color: "#f0abfc" }
+    { name: "Eternal", id: "B5QKGyLM", color: "#ff00ff" } // Ultimate Pink/Purple
 ];
 
 function openLevelMilestones() {
@@ -11496,8 +11474,8 @@ function renderEpicWindingMap() {
     container.innerHTML = "";
 
     const totalNodes = 25;
-    const spacingY = 130; 
-    const mapHeight = (totalNodes * spacingY) + 150; 
+    const spacingY = 140; // More space for the animated titles
+    const mapHeight = (totalNodes * spacingY) + 200; 
     
     container.style.height = mapHeight + 'px';
 
@@ -11511,7 +11489,7 @@ function renderEpicWindingMap() {
         const fallbackHTML = `this.src='https://iili.io/COrCopj.png'`; 
 
         const y = mapHeight - (i * spacingY) - 50; 
-        const xPercent = 50 + Math.sin(i * 1.0) * 30; 
+        const xPercent = 50 + Math.sin(i * 1.0) * 35; 
 
         if (i <= playerLevel) {
             completedPath += `${xPercent},${y} `;
@@ -11525,36 +11503,43 @@ function renderEpicWindingMap() {
         if (i < playerLevel) stateClass = "node-completed";
         if (i === playerLevel) stateClass = "node-current";
 
-        // DETERMINE ANIMATION TIER CLASS (1 to 5)
-        let animClass = "node-tier-1";
-        if (i >= 5) animClass = "node-tier-2";
-        if (i >= 10) animClass = "node-tier-3";
-        if (i >= 15) animClass = "node-tier-4";
-        if (i >= 20) animClass = "node-tier-5";
+        // Level 25 Boss logic
+        const isBoss = (i === 25);
+        if (isBoss) stateClass += " node-epic-boss";
+
+        // HARDWARE ACCELERATED POSITIONING (FIXES SCROLL JITTER)
+        const nodeSize = isBoss ? 110 : 75;
+        const halfSize = nodeSize / 2;
 
         nodesHtml += `
-            <div class="epic-node ${stateClass} ${animClass}" style="left: ${xPercent}%; top: ${y}px; --t-color: ${tier.color};" onclick="clickEpicNode(${i}, '${tier.name}')">
+            <div class="epic-node ${stateClass}" 
+                 style="left: calc(${xPercent}% - ${halfSize}px); top: ${y - halfSize}px; width: ${nodeSize}px; height: ${nodeSize}px; --t-color: ${tier.color};" 
+                 onclick="clickEpicNode(${i}, '${tier.name}')">
+                
+                ${isBoss ? '<i class="fa-solid fa-crown" style="position:absolute; top:-25px; color:#fff; font-size:24px; filter:drop-shadow(0 0 10px #ff00ff); z-index:10;"></i>' : ''}
+                
                 <img src="${imgUrl}" onerror="${fallbackHTML}" alt="${tier.name}">
                 <div class="epic-node-label">${i}. ${tier.name}</div>
             </div>
         `;
     }
 
-    // 3-LAYER SVG PATH (Locked, Solid Neon, Flowing Energy Pulse)
+    // 3-LAYER SVG PATH
     container.innerHTML = `
         <svg class="epic-path-line" viewBox="0 0 100 ${mapHeight}" preserveAspectRatio="none">
-            <!-- 1. Locked Path (Faint background dashed line) -->
+            <!-- 1. Locked Path -->
             <polyline points="${lockedPath}" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="4" stroke-dasharray="8,8" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>
             
-            <!-- 2. Completed Solid Neon Line -->
+            <!-- 2. Completed Solid Line -->
             <polyline points="${completedPath}" fill="none" stroke="#00f0ff" stroke-width="6" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 10px #00f0ff);"/>
             
-            <!-- 3. Animated Energy Pulse (Flows up the line) -->
+            <!-- 3. Animated Energy Pulse -->
             <polyline points="${completedPath}" fill="none" stroke="#ffffff" stroke-width="4" stroke-dasharray="15, 85" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" class="energy-flow" style="filter: drop-shadow(0 0 8px #ffffff);"/>
         </svg>
         ${nodesHtml}
     `;
 
+    // AUTO SCROLL
     setTimeout(() => {
         const targetY = mapHeight - (playerLevel * spacingY) - 50;
         scrollArea.scrollTop = targetY - (scrollArea.clientHeight / 2);
@@ -11564,16 +11549,15 @@ function renderEpicWindingMap() {
 window.clickEpicNode = function(level, name) {
     if (level < playerLevel) {
         if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
-        showNotification("ZONĂ FINALIZATĂ", `Ai deblocat deja emblema ${name}.`, "fa-check");
+        showNotification("RANK OBȚINUT", `Ai emblema: ${name}.`, "fa-check");
     } else if (level === playerLevel) {
         if (typeof playSFX === 'function') playSFX(popSounds[0]);
-        showNotification("OBIECTIV CURENT", `Adună XP pentru a debloca ${name}!`, "fa-play");
+        showNotification("OBIECTIV", `Adună XP pentru a debloca ${name}!`, "fa-play");
     } else {
         playMissSFX();
         showKevinutaBubble(`Ai nevoie de Nivelul ${level} pentru ${name}!`);
     }
 };
-
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
 // ==========================================
@@ -11634,7 +11618,7 @@ window.processSell = processSell;
 // Final Window Exports
 window.openIndex = openIndex;
 window.backToIndexMain = backToIndexMain;
-window.closeIndex = closeIndex; 
+window.closeIndex = closeIndex;
 
 // Add these to your window exports list!
 window.claimIndexReward = claimIndexReward;
