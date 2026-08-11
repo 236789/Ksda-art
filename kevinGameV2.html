@@ -6334,6 +6334,67 @@ input:checked + .s-slider:before {
     pointer-events: none;
     opacity: 0.8;
 }
+
+
+/* Container to keep the button centered and padded from the bottom */
+.v3-footer { 
+    padding: 10px 30px 25px 30px; 
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+/* THE NEW 3D BUTTON */
+.v3-main-btn {
+    width: 100%; 
+    height: 55px; 
+    border-radius: 15px;
+    
+    /* Premium Gradient */
+    background: linear-gradient(180deg, #bf00ff 0%, #7000ff 50%, #4b00b0 100%);
+    
+    color: #ffffff;
+    border: 3px solid #ffffff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    text-transform: uppercase;
+    cursor: pointer;
+    
+    /* Centering text */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    
+    /* 3D Chunky Shadow */
+    box-shadow: 0 6px 0 #2d0047, 0 10px 20px rgba(0, 0, 0, 0.5);
+    transition: all 0.1s ease;
+}
+
+.v3-main-btn:active {
+    transform: translateY(4px); /* Satisfying push-down effect */
+    box-shadow: 0 2px 0 #2d0047, 0 5px 10px rgba(0, 0, 0, 0.6);
+}
+
+/* State: Already Claimed */
+.v3-main-btn.claimed {
+    background: #1a1a1a !important;
+    color: #4ade80 !important;
+    border-color: #4ade80 !important;
+    box-shadow: none !important;
+    pointer-events: none;
+}
+
+/* State: Level too high */
+.v3-main-btn.locked {
+    background: #333 !important;
+    color: #777 !important;
+    border-color: #555 !important;
+    box-shadow: 0 4px 0 #111 !important;
+    cursor: not-allowed;
+}
   </style>
 </head>
 <body>
@@ -6743,10 +6804,10 @@ input:checked + .s-slider:before {
             </div>
 
             <!-- Buton Principal -->
-            <div class="v3-footer">
-<button id="replicaMainBtn" class="v3-main-btn" onclick="handleClaimLevelReward()">
-                    SĂ MERGEM!
-                </button>
+<!-- Inside replica-v3-box -->
+<div class="v3-footer">
+    <button id="replicaMainBtn" class="v3-main-btn">REVENDICĂ ACUM!</button>
+</div>
             </div>
         </div>
     </div>
@@ -12419,41 +12480,68 @@ function openLevelDetail(lvl) {
                 <div class="v3-qty">x${r.value}</div>
             </div>`;
     });
-
-    // --- BUTTON LOGIC REPAIR ---
+// --- BUTTON LOGIC REPAIR (PREMIUM 3D VERSION) ---
     const mainBtn = document.getElementById('replicaMainBtn');
     const isClaimed = _GAME_DATA.claimedLevelRewards.includes(lvl);
     const isLocked = lvl > playerLevel;
 
-    // Reset button styles first
+    // 1. Reset & Base Styling (Fixes Centering and Shape)
     mainBtn.style.display = "flex"; 
+    mainBtn.style.alignItems = "center";
+    mainBtn.style.justifyContent = "center";
+    mainBtn.style.textAlign = "center";
     mainBtn.style.opacity = "1";
     mainBtn.style.pointerEvents = "auto";
+    mainBtn.style.width = "100%";
+    mainBtn.style.height = "60px";
+    mainBtn.style.borderRadius = "18px";
+    mainBtn.style.fontFamily = "'Orbitron', sans-serif";
+    mainBtn.style.fontSize = "20px";
+    mainBtn.style.fontWeight = "900";
+    mainBtn.style.textTransform = "uppercase";
+    mainBtn.style.letterSpacing = "1px";
+    mainBtn.style.transition = "all 0.1s ease";
+    mainBtn.style.transform = "translateY(0)";
+    mainBtn.style.cursor = "pointer";
 
     if (isLocked) {
-        mainBtn.innerText = "BLOOCAT (LVL " + lvl + ")";
-        mainBtn.style.background = "linear-gradient(180deg, #444, #222)";
+        // --- LOCKED STATE (Grey 3D) ---
+        mainBtn.innerText = "BLOCAT (LVL " + lvl + ")";
+        mainBtn.style.background = "linear-gradient(180deg, #555, #333)";
         mainBtn.style.color = "#888";
-        mainBtn.style.borderColor = "#555";
-        mainBtn.style.boxShadow = "none";
-        mainBtn.onclick = () => { playMissSFX(); showKevinutaBubble("Nu ai nivel destul!"); };
+        mainBtn.style.border = "3px solid #444";
+        mainBtn.style.boxShadow = "0 6px 0 #1a1a1a";
+        mainBtn.onclick = () => { 
+            playMissSFX(); 
+            showKevinutaBubble("Nivel prea mic! 😂"); 
+        };
     } else if (isClaimed) {
-        mainBtn.innerText = "DEJA REVENDICAT";
-        mainBtn.style.background = "rgba(74, 222, 128, 0.1)";
-        mainBtn.style.color = "#4ade80";
-        mainBtn.style.borderColor = "#4ade80";
+        // --- CLAIMED STATE (Green Stamp) ---
+        mainBtn.innerText = "REVENDICAT ✓";
+        mainBtn.style.background = "rgba(0, 255, 136, 0.1)";
+        mainBtn.style.color = "#00ff88";
+        mainBtn.style.border = "3px solid #00ff88";
         mainBtn.style.boxShadow = "none";
-        mainBtn.style.pointerEvents = "none"; // Disable clicking
+        mainBtn.style.pointerEvents = "none";
         mainBtn.onclick = null;
     } else {
-        // READY TO CLAIM
+        // --- READY STATE (Purple 3D - High End) ---
         mainBtn.innerText = "REVENDICĂ ACUM!";
-        mainBtn.style.background = "linear-gradient(to right, #7000ff, #ff00ff)";
-        mainBtn.style.color = "#fff";
-        mainBtn.style.borderColor = "#fff";
-        mainBtn.style.boxShadow = "0 0 30px rgba(112, 0, 255, 0.6)";
-        // We force the argument into the function here
-        mainBtn.onclick = () => handleClaimLevelReward(lvl);
+        mainBtn.style.background = "linear-gradient(180deg, #bf00ff 0%, #7000ff 50%, #4b00b0 100%)";
+        mainBtn.style.color = "#ffffff";
+        mainBtn.style.border = "3px solid #ffffff";
+        
+        // The chunky 3D side and floor shadow
+        mainBtn.style.boxShadow = "0 8px 0 #2d0047, 0 15px 25px rgba(0, 0, 0, 0.5)";
+
+        mainBtn.onclick = () => {
+            // Visual push-down effect
+            mainBtn.style.transform = "translateY(6px)";
+            mainBtn.style.boxShadow = "0 2px 0 #2d0047, 0 5px 10px rgba(0,0,0,0.5)";
+            
+            // Trigger the reward after a tiny delay for the animation
+            setTimeout(() => handleClaimLevelReward(lvl), 100);
+        };
     }
 
     document.getElementById('levelDetailModal').style.display = 'flex';
