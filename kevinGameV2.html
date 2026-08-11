@@ -6097,6 +6097,108 @@ input:checked + .s-slider:before {
     border-right: 3px solid var(--t-color);
     text-align: center;
 }
+
+
+/* --- GOD-MODE LEVEL UP 4.0: THE ASCENSION --- */
+.lvl-up-overlay {
+    position: fixed; inset: 0;
+    z-index: 999999; background: #000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    overflow: hidden; perspective: 1000px;
+}
+
+/* 1. THE CINEMATIC ENVIRONMENT */
+.lvl-bg-chamber {
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at center, rgba(var(--rgb-color), 0.15) 0%, #000 80%);
+    z-index: 0;
+}
+
+/* 3D Moving Floor */
+.lvl-floor {
+    position: absolute; width: 200%; height: 200%;
+    bottom: -50%; left: -50%;
+    background-image: 
+        linear-gradient(rgba(var(--rgb-color), 0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(var(--rgb-color), 0.2) 1px, transparent 1px);
+    background-size: 50px 50px;
+    transform: rotateX(70deg);
+    animation: floorScroll 5s linear infinite;
+    mask-image: linear-gradient(to top, rgba(0,0,0,1), transparent);
+}
+
+@keyframes floorScroll { from { background-position: 0 0; } to { background-position: 0 50px; } }
+
+/* Holographic Scanline */
+.lvl-scanner {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, transparent, rgba(var(--rgb-color), 0.1) 50%, transparent);
+    background-size: 100% 20px;
+    animation: scanMove 3s linear infinite;
+    pointer-events: none; z-index: 5;
+}
+
+/* 2. THE MEGA TITLE */
+.lvl-title-mega {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(50px, 15vw, 110px);
+    font-weight: 900; color: #fff;
+    text-transform: uppercase; letter-spacing: -5px;
+    margin-bottom: -10px; z-index: 10;
+    text-shadow: 0 0 20px var(--t-color);
+    animation: titleEntrance 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* 3. THE BADGE STAGE (PERFECTLY SIZED) */
+.lvl-evolution-stage {
+    position: relative;
+    width: 240px; height: 240px; /* Locked size to prevent cut-off */
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10; margin: 30px 0;
+}
+
+.lvl-main-img {
+    max-width: 90%; max-height: 90%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 30px var(--t-color));
+    z-index: 11;
+}
+
+/* 4. THE RANK TAG (WEBSITE STYLE) */
+.lvl-rank-tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 26px; font-weight: 900;
+    color: #fff; text-transform: uppercase;
+    padding: 10px 40px; background: rgba(0,0,0,0.8);
+    clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%);
+    border-left: 5px solid var(--t-color);
+    border-right: 5px solid var(--t-color);
+    box-shadow: 0 0 20px var(--t-color);
+    z-index: 10;
+}
+
+/* 5. SICK FX: PARTICLES & GLITCH */
+.lvl-particle {
+    position: absolute; width: 6px; height: 6px;
+    background: var(--t-color); border-radius: 50%;
+    pointer-events: none; z-index: 20;
+}
+
+.is-mutating {
+    animation: sickGlitch 0.15s infinite;
+    filter: brightness(3) contrast(2) hue-rotate(90deg);
+}
+
+@keyframes sickGlitch {
+    0% { transform: translate(0) skew(0); }
+    20% { transform: translate(-15px, 5px) skew(10deg); clip-path: inset(10% 0 30% 0); }
+    40% { transform: translate(15px, -5px) skew(-10deg); clip-path: inset(40% 0 10% 0); }
+    100% { transform: translate(0) skew(0); }
+}
+
+@keyframes titleEntrance { 0% { transform: scale(5); opacity: 0; filter: blur(20px); } 100% { transform: scale(1); opacity: 1; filter: blur(0); } }
+@keyframes scanMove { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
   </style>
 </head>
 <body>
@@ -11761,7 +11863,6 @@ function levelUp() {
     const MAX_LEVEL = 25;
     if (playerLevel >= MAX_LEVEL) return;
 
-    // 1. Get Data
     const oldTier = mapTiers[playerLevel - 1];
     playerLevel++;
     const newTier = mapTiers[playerLevel - 1];
@@ -11769,82 +11870,73 @@ function levelUp() {
     playerXP = Math.max(0, playerXP - xpToNextLevel); 
     xpToNextLevel = (playerLevel === MAX_LEVEL) ? 0 : getXPRequired(playerLevel);
 
-    // Helper to convert hex to RGB for the background glow
     const hexToRgb = (hex) => {
         const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
         return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : "255,255,255";
     };
 
-    // 2. Build the Overlay
     const overlay = document.createElement('div');
     overlay.className = 'lvl-up-overlay';
     overlay.style.setProperty('--t-color', newTier.color);
     overlay.style.setProperty('--rgb-color', hexToRgb(newTier.color));
     
     overlay.innerHTML = `
-        <div class="lvl-bg-visual"></div>
-        <div class="reveal-flare" id="flare"></div>
+        <div class="lvl-bg-chamber"></div>
+        <div class="lvl-floor"></div>
+        <div class="lvl-scanner"></div>
         <h1 class="lvl-title-mega">LEVEL UP</h1>
-        
-        <div class="lvl-evolution-stage">
+        <div class="lvl-evolution-stage" id="badgeStage">
             <img src="https://i.ibb.co/${oldTier.id}/image.png" class="lvl-main-img" id="evolveBadge">
         </div>
-        
-        <div class="lvl-rank-name-huge" id="evolveName">${oldTier.name.toUpperCase()}</div>
+        <div class="lvl-rank-tag" id="evolveName">${oldTier.name}</div>
     `;
     document.body.appendChild(overlay);
 
     const badge = document.getElementById('evolveBadge');
+    const stage = document.getElementById('badgeStage');
     const nameLabel = document.getElementById('evolveName');
-    const flare = document.getElementById('flare');
 
-    // Phase 1: Show current rank clearly
-    setTimeout(() => {
-        nameLabel.style.opacity = "1";
-        nameLabel.style.transform = "translateY(0)";
-        nameLabel.style.transition = "0.5s";
-    }, 100);
+    // EFFECT: Spawn Sparkles on reveal
+    function spawnSparkles() {
+        for(let i=0; i<30; i++) {
+            const p = document.createElement('div');
+            p.className = 'lvl-particle';
+            p.style.left = '50%'; p.style.top = '50%';
+            const angle = Math.random() * Math.PI * 2;
+            const dist = Math.random() * 200 + 100;
+            p.animate([
+                { transform: `translate(-50%, -50%) scale(1)`, opacity: 1 },
+                { transform: `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px)) scale(0)`, opacity: 0 }
+            ], { duration: 1000, easing: 'ease-out' });
+            stage.appendChild(p);
+            setTimeout(() => p.remove(), 1000);
+        }
+    }
 
-// Phase 3: The Flare Reveal & Image Swap
+    // Phase 1: Mutation Start
     setTimeout(() => {
-        flare.classList.add('flare-anim');
-        
-        // Swap to NEW badge
+        badge.classList.add('is-mutating');
+        if (typeof playMissSFX === 'function') playMissSFX();
+    }, 1000);
+
+    // Phase 2: THE EXPLOSION
+    setTimeout(() => {
+        spawnSparkles();
         badge.src = `https://i.ibb.co/${newTier.id}/image.png`;
         badge.classList.remove('is-mutating');
-        
-        // CHANGE THIS LINE: Set scale to 1.1 instead of 1.4 to prevent zoom-cut
-        badge.style.transform = "scale(1.1)"; 
-        
-        // Update Name
+        badge.animate([
+            { transform: 'scale(0.5)', filter: 'brightness(5)' },
+            { transform: 'scale(1)', filter: 'brightness(1)' }
+        ], { duration: 500, easing: 'ease-out' });
+
         nameLabel.innerText = newTier.name.toUpperCase();
         nameLabel.style.color = newTier.color;
-        nameLabel.style.opacity = "1";
-        nameLabel.style.transform = "scale(1.1)";
+        nameLabel.style.boxShadow = `0 0 30px ${newTier.color}`;
 
         if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
-    }, 2000);
+    }, 1800);
 
-    // Phase 3: The Flare Reveal & Image Swap
-    setTimeout(() => {
-        flare.classList.add('flare-anim');
-        
-        // Swap to NEW badge
-        badge.src = `https://i.ibb.co/${newTier.id}/image.png`;
-        badge.classList.remove('is-mutating');
-        badge.style.transform = "scale(1.4)";
-        
-        // Update Name
-        nameLabel.innerText = newTier.name.toUpperCase();
-        nameLabel.style.color = newTier.color;
-        nameLabel.style.borderLeftColor = "#fff";
-        nameLabel.style.borderRightColor = "#fff";
-        nameLabel.style.transform = "scale(1.2)";
-
-        if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
-    }, 2000);
-
-    // Phase 4: Fade Out
+    // Fade Out
     setTimeout(() => {
         overlay.style.transition = "opacity 1s";
         overlay.style.opacity = "0";
