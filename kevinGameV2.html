@@ -6025,95 +6025,119 @@ input:checked + .s-slider:before {
     animation: rewardShake 2s infinite; /* Uses the same animation from Step 4 */
 }
 
-/* --- THE ULTIMATE REPLICA BOX STYLE --- */
+/* THE MASTER BOX - 1:1 REPLICA */
 .replica-v3-box {
     width: 90vw !important;
-    max-width: 440px !important;
-    max-height: 85vh !important; /* Forces the box to stay on screen */
-    background: #050714 !important;
-    border: 3px solid #3b82f6 !important;
+    max-width: 420px !important;
+    max-height: 85vh !important; /* Forces scroll if content is too long */
+    background: radial-gradient(circle at top, #100b3b 0%, #050510 100%) !important;
+    border: 2px solid #3b82f6 !important;
     border-radius: 24px !important;
     display: flex !important;
-    flex-direction: column !important; /* Stack: Scroll Area then Footer */
+    flex-direction: column !important;
     position: relative;
     overflow: hidden !important;
     padding: 0 !important;
     box-shadow: 0 0 60px rgba(0,0,0,0.9), inset 0 0 40px rgba(59, 130, 246, 0.2) !important;
 }
 
-/* THE NEBULA BACKGROUND (Stays fixed while text moves) */
-.v3-nebula {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    background-image: radial-gradient(circle at 50% 20%, rgba(59, 130, 246, 0.2), transparent 50%),
-                      url('https://www.transparenttextures.com/patterns/stardust.png');
-    animation: panNebula 60s linear infinite;
-    opacity: 0.5;
-    pointer-events: none;
-}
-
-/* THE SCROLL AREA (Invisible Scrollbar) */
+/* THE SCROLL AREA - HIDDEN BAR */
 .v3-scroll-area {
-    flex: 1 !important; /* Fills middle space */
+    flex: 1 !important;
     overflow-y: auto !important;
-    padding: 30px 20px 10px 20px !important;
+    padding: 20px 20px 0 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    scrollbar-width: none;
+    z-index: 2;
+}
+.v3-scroll-area::-webkit-scrollbar { display: none; }
+
+/* THE X BUTTON - PINK SQUARE */
+.v3-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #ffffff !important; /* Match the white box in image */
+    color: #000 !important;
+    border: none;
+    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 100;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    position: relative;
-    z-index: 1;
-    scrollbar-width: none; /* Hide for Firefox */
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
-.v3-scroll-area::-webkit-scrollbar { display: none; } /* Hide for Chrome/Safari */
 
-/* CINEMATIC ELEMENTS */
-.v3-header { text-align: center; width: 100%; margin-bottom: 20px; }
-.v3-rank-title { font-family: 'Orbitron'; font-size: 32px; font-weight: 900; color: #fff; text-transform: uppercase; margin: 10px 0; }
-.v3-message { font-family: 'Oswald'; color: #94a3b8; font-size: 14px; line-height: 1.4; max-width: 280px; margin: 0 auto; }
+/* CINEMATIC STAR & PLATFORM */
+.v3-star-platform { position: relative; height: 50px; width: 100%; margin-top: 10px; }
+.v3-platform-base { 
+    width: 80px; height: 30px; background: #1a1a3a; margin: 0 auto; 
+    transform: perspective(100px) rotateX(45deg); 
+    border: 2px solid #3b82f6; box-shadow: 0 0 15px #3b82f6; 
+}
+.v3-star-icon { 
+    position: absolute; top: -5px; left: 50%; transform: translateX(-50%); 
+    font-size: 28px; color: #fff; text-shadow: 0 0 15px #fff; 
+}
 
-.v3-badge-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 15px 0; position: relative; }
-#detailBadgeImg { width: 110px; height: 110px; object-fit: contain; z-index: 2; filter: drop-shadow(0 0 15px rgba(255,255,255,0.2)); }
+/* BADGE & LAURELS */
+.v3-badge-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 5px 0; }
+.v3-laurel { font-size: 24px; opacity: 0.9; filter: drop-shadow(0 0 5px #39ff14); }
+#detailBadgeImg { width: 130px; height: 130px; object-fit: contain; }
 
-/* SECTIONS (Rewards/Unlocks) */
-.v3-section { width: 100%; margin-bottom: 25px; }
-.v3-divider { display: flex; align-items: center; gap: 10px; color: #ff00ff; margin-bottom: 15px; }
-.v3-divider span { font-family: 'Orbitron'; font-weight: 900; font-size: 14px; color: #fff; }
-.v3-line { flex-grow: 1; height: 2px; background: linear-gradient(to right, transparent, #ff00ff, transparent); }
+/* TEXT STYLES */
+.v3-rank-title { 
+    font-family: 'Orbitron'; font-size: 38px; font-weight: 900; color: #fff; 
+    text-transform: uppercase; margin: 0; letter-spacing: 2px;
+    text-shadow: 0 0 15px rgba(255,255,255,0.4);
+}
+.v3-level-tag { font-family: 'Orbitron'; font-size: 14px; color: #fff; font-weight: 900; margin-top: 5px; letter-spacing: 1px; }
+.v3-message { font-family: 'Oswald'; color: #94a3b8; font-size: 15px; font-weight: 700; margin: 8px auto 20px auto; max-width: 300px; text-align: center; }
 
-.v3-rewards-grid { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+/* PINK DIVIDERS */
+.v3-divider { 
+    display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin: 15px 0;
+}
+.v3-divider span { font-family: 'Orbitron'; font-weight: 900; font-size: 14px; color: #fff; letter-spacing: 1px; }
+.v3-line { flex: 1; height: 2px; background: linear-gradient(to right, transparent, #ff00ff, transparent); }
+
+/* REWARD TILES */
+.v3-rewards-grid { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
 .v3-card {
-    width: 70px; height: 70px; border-radius: 12px; background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; position: relative;
+    width: 75px; height: 75px; border-radius: 12px; background: rgba(0,0,0,0.6);
+    border: 2px solid #facc15; display: flex; align-items: center; justify-content: center; position: relative;
 }
-.reward-ruby { border-color: #ff3366; }
-.reward-score { border-color: #facc15; }
-.v3-qty { position: absolute; bottom: -5px; right: -5px; background: #fff; color: #000; font-size: 10px; font-weight: 900; padding: 1px 5px; border-radius: 4px; }
+.v3-card.reward-ruby { border-color: #ff3366; }
+.v3-qty { 
+    position: absolute; bottom: -5px; right: -5px; background: #fff; color: #000; 
+    font-size: 9px; font-weight: 900; padding: 2px 5px; border-radius: 4px; border: 1px solid #000;
+}
 
-/* THE STICKY FOOTER & BUTTON */
+/* THE 3D BUTTON & FOOTER */
 .v3-footer {
-    flex-shrink: 0; /* Ensures footer never shrinks */
-    padding: 15px 30px 25px 30px;
-    background: linear-gradient(to top, #050714 80%, transparent);
-    z-index: 10;
-    width: 100%;
-    box-sizing: border-box;
+    padding: 10px 30px 25px 30px;
+    background: linear-gradient(to top, #050510 80%, transparent);
+    width: 100%; box-sizing: border-box; flex-shrink: 0;
 }
 
 .v3-main-btn {
-    width: 100%; height: 55px; border-radius: 15px;
+    width: 100%; height: 58px; border-radius: 18px;
     background: linear-gradient(180deg, #bf00ff 0%, #7000ff 50%, #4b00b0 100%);
     color: #ffffff; border: 3px solid #ffffff;
-    font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900;
+    font-family: 'Orbitron', sans-serif; font-size: 19px; font-weight: 900;
     text-transform: uppercase; cursor: pointer;
     box-shadow: 0 6px 0 #2d0047, 0 10px 20px rgba(0, 0, 0, 0.5);
     transition: all 0.1s ease;
     display: flex; align-items: center; justify-content: center;
 }
 .v3-main-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #2d0047; }
-
-/* REUSABLE ANIMATION */
-@keyframes panNebula { 0% { background-position: 0 0; } 100% { background-position: 1000px 1000px; } }
   </style>
 </head>
 <body>
@@ -6463,63 +6487,71 @@ input:checked + .s-slider:before {
     </div>
 </div>
 
-<!-- LEVEL DETAIL MODAL (THE FINAL VERSION) -->
+
 <div id="levelDetailModal" class="modal-overlay" style="z-index: 200005;">
     <div class="modal-box replica-v3-box">
         
-        <!-- Fixed Cinematic Background -->
-        <div class="v3-nebula"></div>
+        <!-- FIX: Nebula background stays fixed -->
+        <div class="v3-nebula" style="position:absolute; inset:0; opacity:0.3; pointer-events:none; background-image: url('https://www.transparenttextures.com/patterns/stardust.png');"></div>
 
-        <!-- Scrollable Content Area -->
+        <!-- THE SCROLLABLE CONTENT -->
         <div class="v3-scroll-area">
             
-            <!-- Header section -->
             <div class="v3-header">
-                <button class="v3-close" onclick="closeLevelDetail()"><i class="fa-solid fa-xmark"></i></button>
+                <!-- White Square Close Button -->
+                <button class="v3-close" onclick="closeLevelDetail()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
                 
+                <!-- Tilted Platform -->
                 <div class="v3-star-platform">
                     <div class="v3-platform-base"></div>
                     <i class="fa-solid fa-star v3-star-icon"></i>
                 </div>
 
+                <!-- Badge with Laurels -->
                 <div class="v3-badge-container">
                     <div class="v3-laurel left">🌿</div>
-                    <div class="v3-badge-glow"></div>
                     <img id="detailBadgeImg" src="" alt="Badge">
                     <div class="v3-laurel right">🌿</div>
                 </div>
 
-                <h2 id="detailRankName" class="v3-rank-title">SILVER</h2>
-                <div class="v3-level-tag">NIVELUL <span id="detailLevelNumber">13</span></div>
-                <p id="detailLevelMessage" class="v3-message">Mesaj cinematic...</p>
+                <h2 id="detailRankName" class="v3-rank-title">COPPER</h2>
+                <div class="v3-level-tag">NIVELUL <span id="detailLevelNumber">3</span></div>
+                <p id="detailLevelMessage" class="v3-message">Keep it up! Devii din ce în ce mai rapid.</p>
             </div>
 
-            <!-- Rewards section -->
-            <div class="v3-section">
+            <!-- REWARDS SECTION -->
+            <div class="v3-section" style="width:100%;">
                 <div class="v3-divider">
                     <div class="v3-line"></div>
-                    <i class="fa-solid fa-gift"></i>
+                    <i class="fa-solid fa-gift" style="color:#ff00ff; font-size:18px;"></i>
                     <span>RECOMPENSE</span>
                     <div class="v3-line"></div>
                 </div>
-                <div id="detailRewardsGrid" class="v3-rewards-grid"></div>
+                <div id="detailRewardsGrid" class="v3-rewards-grid">
+                    <!-- Cards will be injected by JS like: 
+                    <div class="v3-card"><img src="score.png"><div class="v3-qty">x1000</div></div> 
+                    -->
+                </div>
             </div>
 
-            <!-- Unlocks section -->
-            <div class="v3-section">
+            <!-- UNLOCKS SECTION -->
+            <div class="v3-section" style="width:100%; margin-bottom: 20px;">
                 <div class="v3-divider">
                     <div class="v3-line"></div>
-                    <i class="fa-solid fa-lock-open"></i>
+                    <i class="fa-solid fa-lock-open" style="color:#ff00ff; font-size:18px;"></i>
                     <span>DEBLOCĂRI</span>
                     <div class="v3-line"></div>
                 </div>
-                <div id="detailUnlocksList" class="v3-unlock-list">
-                    <div class="v3-empty-unlock">Nicio funcție nouă la acest nivel.</div>
+                <div id="detailUnlocksList" style="text-align:center;">
+                    <div class="v3-empty-unlock" style="font-family:'Oswald'; color:#fff; font-size:14px; font-weight:700;">Nicio funcție nouă la acest nivel.</div>
                 </div>
             </div>
+
         </div> <!-- End Scroll Area -->
 
-        <!-- Pinned Footer (Always visible at the bottom) -->
+        <!-- FIXED FOOTER BUTTON -->
         <div class="v3-footer">
             <button id="replicaMainBtn" class="v3-main-btn">REVENDICĂ ACUM!</button>
         </div>
