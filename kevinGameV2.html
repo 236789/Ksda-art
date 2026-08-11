@@ -6308,11 +6308,15 @@ input:checked + .s-slider:before {
 /* DEBLOCĂRI */
 .v3-empty-unlock { font-size: 12px; font-weight: 700; color: #334155; margin-top: 5px; }
 
-/* Butonul de jos fixat */
+/* Footer Button Fixed at the bottom */
 .v3-footer { 
     padding: 15px 30px 25px 30px; 
     background: linear-gradient(to top, #050714 80%, transparent); 
     width: 100%;
+    flex-shrink: 0; /* THIS IS KEY: Prevents the footer from disappearing */
+    display: flex;
+    justify-content: center;
+    z-index: 10;
 }
 .v3-main-btn {
     width: 100%; height: 52px; border-radius: 14px;
@@ -6740,7 +6744,7 @@ input:checked + .s-slider:before {
 
             <!-- Buton Principal -->
             <div class="v3-footer">
-                <button id="replicaMainBtn" class="v3-main-btn" onclick="handleClaimLevelReward()">
+<button id="replicaMainBtn" class="v3-main-btn" onclick="handleClaimLevelReward()">
                     SĂ MERGEM!
                 </button>
             </div>
@@ -12385,62 +12389,70 @@ function openLevelDetail(lvl) {
     const data = LEVEL_REWARDS_REGISTRY[lvl];
     if (!data) return;
 
-    // Luăm datele din mapTiers pentru badge și nume real (folosim lvl-1 pentru index)
+    // Get visuals from mapTiers
     const tierData = mapTiers[lvl - 1]; 
     const badgeImgUrl = `https://i.ibb.co/${tierData.id}/image.png`;
 
-    currentDetailLevel = lvl;
+    currentDetailLevel = lvl; // Set the global tracker
     
-    // Setăm textele și imaginile
+    // Set text and images
     document.getElementById('detailBadgeImg').src = badgeImgUrl;
     document.getElementById('detailRankName').innerText = tierData.name;
     document.getElementById('detailLevelNumber').innerText = lvl;
     document.getElementById('detailLevelMessage').innerText = data.message;
     
-    // Setăm culoarea rangului bazată pe ce avem în hartă
+    // Set rank color
     document.getElementById('detailRankName').style.color = tierData.color;
     document.getElementById('detailRankName').style.textShadow = `0 0 20px ${tierData.color}`;
 
-// Înlocuiește bucata de cod care generează detailRewardsGrid în openLevelDetail:
-const grid = document.getElementById('detailRewardsGrid');
-grid.innerHTML = "";
-data.rewards.forEach(r => {
-    const isRuby = r.type === 'ruby';
-    const icon = isRuby ? "https://iili.io/CrnXNdG.png" : "https://iili.io/COrCopj.png";
-    const cardClass = isRuby ? "reward-ruby" : "reward-score"; // Clasificare culori
-    
-    grid.innerHTML += `
-        <div class="v3-card ${cardClass}">
-            <img src="${icon}" style="width:70%; height:70%; object-fit:contain;">
-            <div class="v3-qty">x${r.value}</div>
-        </div>`;
-});
-    // Logica Butonului (Revendicat / Locked / Ready)
-// Logica Butonului (Revendicat / Locked / Ready)
+    // Populate rewards
+    const grid = document.getElementById('detailRewardsGrid');
+    grid.innerHTML = "";
+    data.rewards.forEach(r => {
+        const isRuby = r.type === 'ruby';
+        const icon = isRuby ? "https://iili.io/CrnXNdG.png" : "https://iili.io/COrCopj.png";
+        const cardClass = isRuby ? "reward-ruby" : "reward-score";
+        
+        grid.innerHTML += `
+            <div class="v3-card ${cardClass}">
+                <img src="${icon}" style="width:70%; height:70%; object-fit:contain;">
+                <div class="v3-qty">x${r.value}</div>
+            </div>`;
+    });
+
+    // --- BUTTON LOGIC REPAIR ---
     const mainBtn = document.getElementById('replicaMainBtn');
     const isClaimed = _GAME_DATA.claimedLevelRewards.includes(lvl);
     const isLocked = lvl > playerLevel;
 
+    // Reset button styles first
+    mainBtn.style.display = "flex"; 
+    mainBtn.style.opacity = "1";
+    mainBtn.style.pointerEvents = "auto";
+
     if (isLocked) {
-        mainBtn.innerText = "JOACĂ MAI MULT!";
-        mainBtn.style.background = "#222";
-        mainBtn.style.color = "#555";
+        mainBtn.innerText = "BLOOCAT (LVL " + lvl + ")";
+        mainBtn.style.background = "linear-gradient(180deg, #444, #222)";
+        mainBtn.style.color = "#888";
+        mainBtn.style.borderColor = "#555";
         mainBtn.style.boxShadow = "none";
-        mainBtn.onclick = null;
+        mainBtn.onclick = () => { playMissSFX(); showKevinutaBubble("Nu ai nivel destul!"); };
     } else if (isClaimed) {
-        mainBtn.innerText = "REVENDICAT ✓";
-        mainBtn.style.background = "rgba(0, 255, 136, 0.1)";
-        mainBtn.style.color = "#00ff88";
-        mainBtn.style.border = "2px solid #00ff88";
+        mainBtn.innerText = "DEJA REVENDICAT";
+        mainBtn.style.background = "rgba(74, 222, 128, 0.1)";
+        mainBtn.style.color = "#4ade80";
+        mainBtn.style.borderColor = "#4ade80";
         mainBtn.style.boxShadow = "none";
+        mainBtn.style.pointerEvents = "none"; // Disable clicking
         mainBtn.onclick = null;
     } else {
-        mainBtn.innerText = "REVENDICĂ ACUM!"; // Text nou mai clar
+        // READY TO CLAIM
+        mainBtn.innerText = "REVENDICĂ ACUM!";
         mainBtn.style.background = "linear-gradient(to right, #7000ff, #ff00ff)";
         mainBtn.style.color = "#fff";
-        mainBtn.style.border = "3px solid #fff";
+        mainBtn.style.borderColor = "#fff";
         mainBtn.style.boxShadow = "0 0 30px rgba(112, 0, 255, 0.6)";
-        // Transmitem corect nivelul curent către funcție
+        // We force the argument into the function here
         mainBtn.onclick = () => handleClaimLevelReward(lvl);
     }
 
