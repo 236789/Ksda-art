@@ -5707,6 +5707,101 @@ input:checked + .s-slider:before {
 @keyframes flowEnergy {
     to { stroke-dashoffset: -100; }
 }
+
+
+/* --- MILESTONE TIER ANIMATIONS --- */
+
+/* TIER 2: Levels 5-9 (Awakened) - Gentle Spin & Pulse */
+.node-tier-2::before {
+    animation: nodeSpin 4s linear infinite;
+    filter: brightness(1.2) saturate(1.2);
+}
+@keyframes nodeSpin { to { transform: rotate(360deg); } }
+
+/* TIER 3: Levels 10-14 (Elite) - Double Glow & Hover Vibration */
+.node-tier-3 {
+    box-shadow: 0 0 20px var(--t-color), 0 0 40px var(--t-color) inset !important;
+}
+.node-tier-3:hover {
+    animation: nodeShake 0.1s infinite;
+}
+@keyframes nodeShake {
+    0% { transform: scale(1.15) translate(1px, 1px); }
+    50% { transform: scale(1.15) translate(-1px, -1px); }
+    100% { transform: scale(1.15) translate(1px, -1px); }
+}
+
+/* TIER 4: Levels 15-19 (Master) - Electric Aura */
+.node-tier-4::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px dashed var(--t-color);
+    animation: nodeSpin 2s linear infinite reverse;
+    opacity: 0.6;
+}
+
+/* TIER 5: Levels 20-24 (Legendary) - Chromatic Aberration & Solar Flare */
+.node-tier-5 {
+    border-width: 4px !important;
+    animation: solarFlare 2s ease-in-out infinite alternate;
+}
+@keyframes solarFlare {
+    from { box-shadow: 0 0 20px var(--t-color); }
+    to { box-shadow: 0 0 60px var(--t-color), 0 0 20px #fff; }
+}
+
+/* TIER 6: Level 25 (GOD TIER) - The Final Boss */
+.node-god-tier {
+    transform: scale(1.2);
+    border: 5px double #fff !important;
+    background: white !important;
+}
+.node-god-tier img {
+    animation: godFloat 2s ease-in-out infinite;
+}
+@keyframes godFloat {
+    0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 20px var(--t-color)); }
+    50% { transform: translateY(-15px) scale(1.1); filter: drop-shadow(0 0 40px var(--t-color)); }
+}
+
+/* --- SICK TEXT ANIMATIONS --- */
+.epic-node-label {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+/* Levels 10+ have a light sweep on the name */
+.node-tier-3 .epic-node-label::before,
+.node-tier-4 .epic-node-label::before,
+.node-tier-5 .epic-node-label::before,
+.node-god-tier .epic-node-label::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: textSweep 3s infinite;
+}
+@keyframes textSweep {
+    0% { left: -100%; }
+    20% { left: 150%; }
+    100% { left: 150%; }
+}
+
+/* God tier text glitches */
+.node-god-tier .epic-node-label {
+    color: #000 !important;
+    background: #fff !important;
+    font-size: 14px !important;
+    box-shadow: 0 0 20px #fff;
+    animation: godPulse 0.5s infinite alternate;
+}
+@keyframes godPulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.1); box-shadow: 0 0 30px var(--t-color); }
+}
   </style>
 </head>
 <body>
@@ -11483,7 +11578,7 @@ function renderEpicWindingMap() {
     let lockedPath = "";
     let nodesHtml = "";
 
-    for (let i = 1; i <= totalNodes; i++) {
+for (let i = 1; i <= totalNodes; i++) {
         const tier = mapTiers[i - 1];
         const imgUrl = `https://i.ibb.co/${tier.id}/image.png`;
         const fallbackHTML = `this.src='https://iili.io/COrCopj.png'`; 
@@ -11498,7 +11593,15 @@ function renderEpicWindingMap() {
             lockedPath += `${xPercent},${y} `;
         }
 
-        // Determine node state
+        // --- NEW: CINEMATIC TIER ASSIGNMENT ---
+        let tierClass = "node-tier-1"; // Standard (1-4)
+        if (i >= 25) tierClass = "node-god-tier";
+        else if (i >= 20) tierClass = "node-tier-5";
+        else if (i >= 15) tierClass = "node-tier-4";
+        else if (i >= 10) tierClass = "node-tier-3";
+        else if (i >= 5)  tierClass = "node-tier-2";
+
+        // Determine node completion state
         let stateClass = "node-locked";
         if (i < playerLevel) stateClass = "node-completed";
         if (i === playerLevel) stateClass = "node-current";
@@ -11507,7 +11610,10 @@ function renderEpicWindingMap() {
         const isBoss = (i === 25);
         if (isBoss) stateClass += " node-epic-boss";
 
-        // HARDWARE ACCELERATED POSITIONING (FIXES SCROLL JITTER)
+        // Combine base state with animation tier
+        stateClass += " " + tierClass;
+
+        // POSITIONING
         const nodeSize = isBoss ? 110 : 75;
         const halfSize = nodeSize / 2;
 
