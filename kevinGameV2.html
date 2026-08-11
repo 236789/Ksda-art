@@ -11932,6 +11932,7 @@ window.clickEpicNode = function(level, name) {
 
 
 const LEVEL_REWARDS_REGISTRY = {
+    1:  { name: "Bronze",      rewards: [{ type: "score", value: 500 }, { type: "ruby", value: 5 }] }, // 🆕 Welcome Reward
     2:  { name: "Silver",      rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
     3:  { name: "Copper",      rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
     4:  { name: "Sapphire",    rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
@@ -11983,7 +11984,7 @@ function updateGiftButtonState() {
     let hasUnclaimed = false;
 
     // Check every level from 2 up to your current level
-    for (let i = 2; i <= playerLevel; i++) {
+    for (let i = 1; i <= playerLevel; i++) {
         // If the level has a defined reward AND it's not in the claimed list
         if (LEVEL_REWARDS_REGISTRY[i] && !_GAME_DATA.claimedLevelRewards.includes(i)) {
             hasUnclaimed = true;
