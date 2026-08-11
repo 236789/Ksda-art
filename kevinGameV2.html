@@ -6035,6 +6035,117 @@ input:checked + .s-slider:before {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 10px;
 }
+
+
+/* --- GOD-MODE LEVEL UP OVERLAY --- */
+.lvl-up-overlay {
+    position: fixed; inset: 0;
+    z-index: 999999;
+    background: #000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    overflow: hidden;
+}
+
+/* Cinematic Background: 3D Perspective Grid */
+.lvl-bg-visual {
+    position: absolute; inset: 0;
+    background: 
+        radial-gradient(circle at center, rgba(var(--rgb-color), 0.2) 0%, #000 70%),
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 100% 100%, 50px 50px, 50px 50px;
+    transform: perspective(500px) rotateX(60deg) scale(2);
+    transform-origin: top;
+    animation: gridTravel 10s linear infinite;
+    z-index: 0;
+}
+
+@keyframes gridTravel { from { background-position: 0 0, 0 0, 0 0; } to { background-position: 0 0, 0 100px, 0 0; } }
+
+/* The Main Title */
+.lvl-title-mega {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(60px, 18vw, 120px);
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -5px;
+    text-transform: uppercase;
+    z-index: 10;
+    margin-bottom: -20px;
+    filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
+    animation: titleEntrance 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* THE TRANSFORMING BADGE */
+.lvl-evolution-stage {
+    position: relative;
+    width: 280px; height: 280px;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+}
+
+.lvl-main-img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 30px var(--t-color));
+    transition: all 0.3s ease;
+}
+
+/* Rank Name: HUGE & CLIPPED */
+.lvl-rank-name-huge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 10px;
+    margin-top: 30px;
+    padding: 10px 40px;
+    background: rgba(255,255,255,0.05);
+    clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%);
+    border-left: 4px solid var(--t-color);
+    border-right: 4px solid var(--t-color);
+    text-shadow: 0 0 15px var(--t-color);
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+/* Glitch State for the Swap */
+.is-mutating {
+    animation: glitchBreak 0.2s infinite;
+    filter: brightness(3) contrast(1.5) hue-rotate(180deg);
+}
+
+@keyframes glitchBreak {
+    0% { transform: translate(0); clip-path: inset(0 0 0 0); }
+    25% { transform: translate(-15px, 10px); clip-path: inset(20% 0 50% 0); }
+    50% { transform: translate(15px, -10px); clip-path: inset(60% 0 10% 0); }
+    75% { transform: translate(-5px, -5px); clip-path: inset(10% 0 80% 0); }
+}
+
+@keyframes titleEntrance {
+    0% { transform: scale(3) rotateX(-90deg); opacity: 0; }
+    100% { transform: scale(1) rotateX(0); opacity: 1; }
+}
+
+/* Final Shine FX */
+.reveal-flare {
+    position: absolute;
+    width: 5px; height: 500px;
+    background: #fff;
+    box-shadow: 0 0 50px 20px #fff;
+    transform: rotate(45deg);
+    opacity: 0;
+    z-index: 20;
+}
+.flare-anim { animation: flareSweep 0.8s ease-in-out forwards; }
+@keyframes flareSweep {
+    0% { left: -100%; opacity: 0; }
+    50% { opacity: 1; }
+    100% { left: 200%; opacity: 0; }
+}
   </style>
 </head>
 <body>
@@ -11699,68 +11810,81 @@ function levelUp() {
     const MAX_LEVEL = 25;
     if (playerLevel >= MAX_LEVEL) return;
 
-    // 1. Data Prep
-    const oldTier = mapTiers[playerLevel - 1]; // Current (about to be old)
+    // 1. Get Data
+    const oldTier = mapTiers[playerLevel - 1];
     playerLevel++;
-    const newTier = mapTiers[playerLevel - 1]; // New Rank
+    const newTier = mapTiers[playerLevel - 1];
     
     playerXP = Math.max(0, playerXP - xpToNextLevel); 
     xpToNextLevel = (playerLevel === MAX_LEVEL) ? 0 : getXPRequired(playerLevel);
 
-    // 2. Create the Cinematic Overlay
+    // Helper to convert hex to RGB for the background glow
+    const hexToRgb = (hex) => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : "255,255,255";
+    };
+
+    // 2. Build the Overlay
     const overlay = document.createElement('div');
     overlay.className = 'lvl-up-overlay';
     overlay.style.setProperty('--t-color', newTier.color);
+    overlay.style.setProperty('--rgb-color', hexToRgb(newTier.color));
+    
     overlay.innerHTML = `
-        <div class="lvl-god-rays"></div>
-        <h1 class="lvl-title-anim">LEVEL UP</h1>
-        <div class="lvl-badge-stage">
-            <div class="lvl-mutation-flash" id="mutFlash"></div>
-            <img src="https://i.ibb.co/${oldTier.id}/image.png" class="lvl-badge-img" id="mutBadge">
+        <div class="lvl-bg-visual"></div>
+        <div class="reveal-flare" id="flare"></div>
+        <h1 class="lvl-title-mega">LEVEL UP</h1>
+        
+        <div class="lvl-evolution-stage">
+            <img src="https://i.ibb.co/${oldTier.id}/image.png" class="lvl-main-img" id="evolveBadge">
         </div>
-        <div id="mutRankName" style="color:#fff; font-family:Orbitron; margin-top:20px; letter-spacing:5px; font-weight:900; opacity:0.6;">
-            ${oldTier.name.toUpperCase()}
-        </div>
+        
+        <div class="lvl-rank-name-huge" id="evolveName">${oldTier.name.toUpperCase()}</div>
     `;
     document.body.appendChild(overlay);
 
-    const badge = document.getElementById('mutBadge');
-    const flash = document.getElementById('mutFlash');
-    const nameText = document.getElementById('mutRankName');
+    const badge = document.getElementById('evolveBadge');
+    const nameLabel = document.getElementById('evolveName');
+    const flare = document.getElementById('flare');
 
-    if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
-
-    // 3. THE TRANSFORMATION SEQUENCE
-    // Phase A: Start Shaking/Glitched (after 1s)
+    // Phase 1: Show current rank clearly
     setTimeout(() => {
-        badge.classList.add('glitch-active');
-        if (typeof playMissSFX === 'function') playMissSFX(); // Glitch sound
-    }, 1000);
+        nameLabel.style.opacity = "1";
+        nameLabel.style.transform = "translateY(0)";
+        nameLabel.style.transition = "0.5s";
+    }, 100);
 
-    // Phase B: The Mutation Flash & Swap (after 2s)
+    // Phase 2: The "Mutation" (Shake & Glitch)
     setTimeout(() => {
-        flash.classList.add('flash-trigger');
+        badge.classList.add('is-mutating');
+        if (typeof playMissSFX === 'function') playMissSFX(); // Glitch noise
+    }, 1200);
+
+    // Phase 3: The Flare Reveal & Image Swap
+    setTimeout(() => {
+        flare.classList.add('flare-anim');
         
-        // Swap to NEW badge exactly during the flash
+        // Swap to NEW badge
         badge.src = `https://i.ibb.co/${newTier.id}/image.png`;
-        badge.classList.remove('glitch-active');
-        badge.style.transform = "scale(1.3)";
-        badge.style.filter = `drop-shadow(0 0 30px ${newTier.color})`;
+        badge.classList.remove('is-mutating');
+        badge.style.transform = "scale(1.4)";
         
-        nameText.innerText = newTier.name.toUpperCase();
-        nameText.style.color = newTier.color;
-        nameText.style.opacity = "1";
-        nameText.style.textShadow = `0 0 10px ${newTier.color}`;
+        // Update Name
+        nameLabel.innerText = newTier.name.toUpperCase();
+        nameLabel.style.color = newTier.color;
+        nameLabel.style.borderLeftColor = "#fff";
+        nameLabel.style.borderRightColor = "#fff";
+        nameLabel.style.transform = "scale(1.2)";
 
         if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
     }, 2000);
 
-    // Phase C: Cleanup
+    // Phase 4: Fade Out
     setTimeout(() => {
         overlay.style.transition = "opacity 1s";
         overlay.style.opacity = "0";
         setTimeout(() => overlay.remove(), 1000);
-    }, 4500);
+    }, 5000);
 
     updateXPBarUI();
     syncScoreToFirestore(); 
