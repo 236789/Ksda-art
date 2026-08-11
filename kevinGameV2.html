@@ -5693,13 +5693,14 @@ input:checked + .s-slider:before {
 .node-locked .epic-node-label { border-color: rgba(255,255,255,0.2); color: #666; animation: none; }
 .node-epic-boss .epic-node-label { font-size: 14px; padding: 6px 16px; top: calc(100% + 12px); }
 
-/* SVG PATH LINES & ENERGY FLOW */
 .epic-path-line {
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 100%;
     z-index: 1;
     pointer-events: none;
+    /* This ensures the lines stay anchored to the map coordinates */
+    vector-effect: non-scaling-stroke; 
 }
 .energy-flow {
     animation: flowEnergy 1.5s linear infinite;
@@ -5802,6 +5803,8 @@ input:checked + .s-slider:before {
     border: none;
     position: relative;
     white-space: nowrap;
+    border: 2px solid rgba(255, 255, 255, 0.5); /* The thick outline */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);   /* Simple shadow for depth */
 }
 
 /* THE OUTER BOX GLOW: Fixed collision issues */
@@ -5920,15 +5923,25 @@ input:checked + .s-slider:before {
 .node-24 { background: #fff !important; --t-color: #ffd700; box-shadow: 0 0 100px #fff !important; }
 .label-24 { background: #fff !important; color: #ffd700 !important; }
 
-/* LVL 25: ULTIMATE SINGULARITY */
+/* LVL 25: THE ETERNAL SINGULARITY */
 .node-25 { 
     background-image: url('https://firebasestorage.googleapis.com/v0/b/ksda-7546f.firebasestorage.app/o/desc%C4%83rcare.gif?alt=media&token=f0045bb9-4176-4e6a-92e2-25be1eea9bae') !important;
-    background-size: cover !important; border-color: #fff !important; box-shadow: 0 0 80px #fff !important;
-}
-.label-25 { 
-    background: #fff !important; color: #000 !important; font-size: 13px !important; box-shadow: 0 0 30px #fff !important;
+    background-size: cover !important;
+    border: 5px solid #fff !important;
+    /* Spinning Aura Effect */
+    box-shadow: 0 0 50px #fff, 0 0 20px var(--t-color);
+    animation: godFlicker 0.2s infinite alternate;
 }
 
+.label-25 { 
+    background: linear-gradient(135deg, #fff 0%, #777 50%, #fff 100%) !important;
+    background-size: 200% auto !important;
+    animation: shineSweep 1s linear infinite !important;
+    color: #000 !important;
+    border: 3px solid #ffd700 !important; /* Thick Gold outline */
+    font-size: 14px !important;
+    letter-spacing: 2px;
+}
 /* Locked nodes master fix */
 .node-locked { opacity: 0.5; filter: grayscale(1) !important; background: #222 !important; border-color: #444 !important; box-shadow: none !important; }
 
@@ -11704,8 +11717,8 @@ function renderEpicWindingMap() {
     container.innerHTML = "";
 
     const totalNodes = 25;
-    const spacingY = 140; // More space for the animated titles
-    const mapHeight = (totalNodes * spacingY) + 200; 
+const spacingY = 240; // <--- CHANGE THIS to 240
+const mapHeight = (totalNodes * spacingY) + 300; // Increase total height too
     
     container.style.height = mapHeight + 'px';
 
