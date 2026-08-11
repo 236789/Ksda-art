@@ -6022,6 +6022,63 @@ input:checked + .s-slider:before {
 .node-vibrate {
     animation: rewardShake 2s infinite; /* Uses the same animation from Step 4 */
 }
+
+
+
+.replica-box {
+    width: 95vw !important;
+    max-width: 420px !important;
+    background: radial-gradient(circle at top, #100b3b 0%, #050510 100%) !important;
+    border: 2px solid #3b82f6 !important;
+    border-radius: 20px !important;
+    padding: 30px 15px 20px 15px !important;
+    display: flex; flex-direction: column; gap: 20px;
+    box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(59, 130, 246, 0.2) !important;
+}
+
+.replica-header { position: relative; text-align: center; margin-top: 20px; }
+.replica-close { position: absolute; top: -45px; right: 0; background: none; border: none; color: #ff00ff; font-size: 24px; cursor: pointer; }
+
+/* The Level Circle & Crown */
+.replica-badge-wrap { position: relative; display: inline-block; margin-top: -60px; }
+.replica-crown { font-size: 28px; position: absolute; top: -20px; left: 50%; transform: translateX(-50%); filter: drop-shadow(0 0 10px gold); }
+.replica-level-circle {
+    width: 90px; height: 90px;
+    background: linear-gradient(135deg, #7000ff, #ff00ff);
+    border: 4px solid #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 25px #ff00ff;
+}
+.replica-level-circle span { font-family: 'Orbitron'; font-size: 42px; font-weight: 900; color: #fff; text-shadow: 0 2px 4px #000; }
+
+.replica-message { font-family: 'Oswald'; color: #94a3b8; font-size: 14px; margin-top: 10px; }
+
+/* Section Styling */
+.replica-section-title { display: flex; align-items: center; gap: 10px; color: #fff; font-family: 'Orbitron'; font-size: 16px; font-weight: 900; }
+.title-line { flex-grow: 1; height: 1px; background: linear-gradient(to right, rgba(255,255,255,0.3), transparent); }
+.replica-subtext { font-family: 'Oswald'; font-size: 12px; color: #64748b; text-align: left; margin: 4px 0 0 28px; }
+
+/* Reward Squares */
+.replica-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px; }
+.replica-item {
+    aspect-ratio: 1/1; border: 1px solid #ff4444; border-radius: 8px;
+    background: rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+}
+.replica-item img { width: 70%; height: 70%; object-fit: contain; }
+.replica-qty { position: absolute; bottom: 0; right: 0; background: #000; color: #fff; font-size: 9px; padding: 1px 3px; font-family: 'Orbitron'; }
+
+/* Footer Button */
+.replica-main-btn {
+    width: 100%; height: 55px; border-radius: 12px;
+    background: linear-gradient(to right, #7000ff, #ff00ff);
+    border: 2px solid #fff; color: #fff;
+    font-family: 'Orbitron'; font-size: 20px; font-weight: 900;
+    cursor: pointer; box-shadow: 0 0 20px rgba(112, 0, 255, 0.5);
+    transition: 0.2s;
+}
+.replica-main-btn:active { transform: scale(0.95); }
+.replica-main-btn.disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -6370,6 +6427,59 @@ input:checked + .s-slider:before {
         </div>
     </div>
 </div>
+
+
+<!-- LEVEL DETAIL MODAL (Replica) -->
+<div id="levelDetailModal" class="modal-overlay" style="z-index: 200005;">
+    <div class="modal-box replica-box">
+        <!-- Top Header: Close & Star -->
+        <div class="replica-header">
+            <button class="replica-close" onclick="closeLevelDetail()"><i class="fa-solid fa-xmark"></i></button>
+            <div class="replica-star-platform">
+                <div class="star-glow"></div>
+                <i class="fa-solid fa-star big-star"></i>
+            </div>
+            
+            <!-- Level Badge Circle -->
+            <div class="replica-badge-wrap">
+                <div class="replica-crown">👑</div>
+                <div class="replica-level-circle">
+                    <span id="detailLevelNumber">25</span>
+                </div>
+            </div>
+            <p id="detailLevelMessage" class="replica-message">Keep going! You're becoming unstoppable!</p>
+        </div>
+
+        <!-- Section 1: REWARDS -->
+        <div class="replica-section">
+            <div class="replica-section-title">
+                <i class="fa-solid fa-gift"></i> <span>RECOMPENSE</span> <div class="title-line"></div>
+            </div>
+            <p class="replica-subtext">Vei primi următoarele premii:</p>
+            <div id="detailRewardsGrid" class="replica-grid">
+                <!-- Squares go here (Score, Rubies, etc) -->
+            </div>
+        </div>
+
+        <!-- Section 2: UNLOCKS -->
+        <div class="replica-section">
+            <div class="replica-section-title">
+                <i class="fa-solid fa-lock-open"></i> <span>DEBLOCĂRI</span> <div class="title-line"></div>
+            </div>
+            <p class="replica-subtext">Funcții noi la acest nivel:</p>
+            <div id="detailUnlocksList" class="replica-unlocks-list">
+                <!-- Unlocks go here (Placeholder for now) -->
+                <div class="placeholder-text" style="font-size: 12px; margin-top: 10px;">Nicio deblocare momentan la acest nivel.</div>
+            </div>
+        </div>
+
+        <!-- Footer: Main Button -->
+        <button id="replicaMainBtn" class="replica-main-btn" onclick="handleClaimLevelReward()">
+            LET'S GO!
+        </button>
+    </div>
+</div>
+
 <!-- SLOT MODAL V4 -->
 <div id="slotMachineModal" class="modal-overlay">
   <div class="modal-box slot-modal-box">
@@ -11870,6 +11980,7 @@ for (let i = 1; i <= totalNodes; i++) {
 
     nodesHtml += `
         <div class="epic-node ${stateClass} ${tierClass}" 
+         onclick="openLevelDetail(${i})" 
              style="left: calc(${xPercent}% - ${halfSize}px); top: ${y - halfSize}px; width: ${nodeSize}px; height: ${nodeSize}px;">
             
             ${rewardDotHtml} <!-- 🔥 The Red Dot appears here -->
@@ -11930,33 +12041,32 @@ window.clickEpicNode = function(level, name) {
 };
 
 
-
 const LEVEL_REWARDS_REGISTRY = {
-    1:  { name: "Bronze",      rewards: [{ type: "score", value: 500 }, { type: "ruby", value: 5 }] }, // 🆕 Welcome Reward
-    2:  { name: "Silver",      rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    3:  { name: "Copper",      rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    4:  { name: "Sapphire",    rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    5:  { name: "Emerald",     rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    6:  { name: "Amethyst",    rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    7:  { name: "Gold",        rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    8:  { name: "Ice Crystal", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    9:  { name: "Ruby",        rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    10: { name: "Royal Gold",  rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    11: { name: "Jade",        rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    12: { name: "Astral",      rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    13: { name: "Azure",       rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    14: { name: "Obsidian",    rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    15: { name: "Geode",       rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    16: { name: "Frost",       rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    17: { name: "Mythril",     rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    18: { name: "Toxicium",    rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    19: { name: "Void",        rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    20: { name: "Cel. Gold",   rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    21: { name: "Cosmic",      rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    22: { name: "Diamond",     rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    23: { name: "Infernal",    rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    24: { name: "Divine",      rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    25: { name: "Eternal",     rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] }
+    1:  { name: "Bronze",      message: "Bun venit în legendă! Acesta este cadoul tău de început.", rewards: [{ type: "score", value: 500 }, { type: "ruby", value: 5 }] },
+    2:  { name: "Silver",      message: "Te miști bine! Ai deblocat primele recompense de argint.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    3:  { name: "Copper",      message: "Keep it up! Devii din ce în ce mai rapid.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    4:  { name: "Sapphire",    message: "Strălucești ca un safir! Click-urile tale sunt precise.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    5:  { name: "Emerald",     message: "Viteză de smarald! Ești deja peste medie.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    6:  { name: "Amethyst",    message: "Magic! Reflexele tale încep să pară ireale.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    7:  { name: "Gold",        message: "Mânu de aur! Ai ajuns în liga jucătorilor serioși.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    8:  { name: "Ice Crystal", message: "Rece și calculat. Nimic nu îți scapă!", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    9:  { name: "Ruby",        message: "Roșu aprins! Kevin începe să se teamă de tine.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    10: { name: "Royal Gold",  message: "REGELE CLICK-URILOR! Ai atins primul prag de elită.", rewards: [{ type: "score", value: 1500 }, { type: "ruby", value: 15 }] },
+    11: { name: "Jade",        message: "Echilibru perfect între viteză și precizie.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    12: { name: "Astral",      message: "Ești de pe altă planetă! Look at those moves!", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    13: { name: "Azure",       message: "Cerul este limita, dar tu tocmai ai trecut de el.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    14: { name: "Obsidian",    message: "Dur ca piatra. Nimic nu îți poate opri combo-ul.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    15: { name: "Geode",       message: "O raritate absolută! Ești în top 10% jucători.", rewards: [{ type: "score", value: 2000 }, { type: "ruby", value: 20 }] },
+    16: { name: "Frost",       message: "Zero grade! Îngheți timpul cu viteza ta.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    17: { name: "Mythril",     message: "Material de legendă. Numele tău va fi reținut!", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    18: { name: "Toxicium",    message: "Ești periculos de bun! Kevin e în panică totală.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    19: { name: "Void",        message: "Ai intrat în neant. Doar cei mai rapizi ajung aici.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    20: { name: "Cel. Gold",   message: "AUR CELEST! Ești oficial un Demizeu al reflexelor.", rewards: [{ type: "score", value: 3000 }, { type: "ruby", value: 30 }] },
+    21: { name: "Cosmic",      message: "Universul tremură la fiecare click al tău.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    22: { name: "Diamond",     message: "Indestructibil. Ești cel mai valoros jucător!", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    23: { name: "Infernal",    message: "Iadul s-a dezlănțuit! Viteza ta e de necuprins.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    24: { name: "Divine",      message: "Aproape de perfecțiune. Zeii te privesc cu respect.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    25: { name: "Eternal",     message: "SINGULARITATEA ETERNĂ! Ai cucerit timpul și spațiul.", rewards: [{ type: "score", value: 5000 }, { type: "ruby", value: 50 }] }
 };
 
 
@@ -11997,6 +12107,83 @@ function updateGiftButtonState() {
     } else {
         btn.classList.remove('gift-vibrate');
     }
+}
+
+
+let currentDetailLevel = 0;
+
+function openLevelDetail(lvl) {
+    const data = LEVEL_REWARDS_REGISTRY[lvl];
+    if (!data) return;
+
+    currentDetailLevel = lvl;
+    document.getElementById('detailLevelNumber').innerText = lvl;
+    document.getElementById('detailLevelMessage').innerText = data.message || "Keep going! You're becoming unstoppable!";
+    
+    // Render Rewards
+    const grid = document.getElementById('detailRewardsGrid');
+    grid.innerHTML = "";
+    data.rewards.forEach(r => {
+        const icon = r.type === 'ruby' ? "https://iili.io/CrnXNdG.png" : "https://iili.io/COrCopj.png";
+        grid.innerHTML += `
+            <div class="replica-item">
+                <img src="${icon}">
+                <div class="replica-qty">x${r.value}</div>
+            </div>`;
+    });
+
+    // Check Button State
+    const mainBtn = document.getElementById('replicaMainBtn');
+    const isClaimed = _GAME_DATA.claimedLevelRewards.includes(lvl);
+    const isLocked = lvl > playerLevel;
+
+    if (isLocked) {
+        mainBtn.innerText = "KEEP GOING!";
+        mainBtn.classList.add('disabled');
+        mainBtn.onclick = null;
+    } else if (isClaimed) {
+        mainBtn.innerText = "REVENDICAT!";
+        mainBtn.classList.add('disabled');
+        mainBtn.onclick = null;
+    } else {
+        mainBtn.innerText = "LET'S GO!";
+        mainBtn.classList.remove('disabled');
+        mainBtn.onclick = () => handleClaimLevelReward(lvl);
+    }
+
+    document.getElementById('levelDetailModal').style.display = 'flex';
+}
+
+function closeLevelDetail() {
+    document.getElementById('levelDetailModal').style.display = 'none';
+}
+
+
+function handleClaimLevelReward(lvl) {
+    const data = LEVEL_REWARDS_REGISTRY[lvl];
+    if (!data || _GAME_DATA.claimedLevelRewards.includes(lvl)) return;
+
+    // 1. Mark as claimed
+    _GAME_DATA.claimedLevelRewards.push(lvl);
+
+    // 2. Process Rewards
+    data.rewards.forEach(r => {
+        if (r.type === 'score') score += r.value;
+        if (r.type === 'ruby') rubies += r.value;
+    });
+
+    // 3. UI Update
+    updateScoreUI();
+    updateGiftButtonState();
+    renderEpicWindingMap(); // Remove the shake/dot from map
+    closeLevelDetail();
+    
+    // 4. Effects
+    if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
+    showNotification("RECOMPENSĂ COLECTATĂ", `Nivelul ${lvl} a fost revendicat!`, "fa-check");
+
+    // 5. Save to cloud
+    syncScoreToFirestore();
 }
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
