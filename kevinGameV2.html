@@ -6153,6 +6153,83 @@ input:checked + .s-slider:before {
 }
 
 @keyframes starFloat { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -10px); } }
+
+
+
+.replica-v3-box {
+    width: 95vw !important; max-width: 460px !important;
+    min-height: 80vh; border-radius: 20px !important;
+    border: 2px solid #3b82f6 !important;
+    position: relative; overflow: hidden; padding: 0 !important;
+    background: #050714 !important;
+    box-shadow: 0 0 60px rgba(0,0,0,0.9), inset 0 0 40px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Reutilizăm animația de nebuloasă pentru fundal */
+.v3-nebula {
+    position: absolute; inset: 0; z-index: 0;
+    background-image: 
+        radial-gradient(circle at 50% 20%, rgba(59, 130, 246, 0.2), transparent 50%),
+        url('https://www.transparenttextures.com/patterns/stardust.png');
+    animation: panNebula 60s linear infinite; opacity: 0.5;
+}
+
+.v3-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+
+/* Header & Star */
+.v3-header { padding: 40px 20px 10px 20px; text-align: center; width: 100%; }
+.v3-close { position: absolute; top: 15px; right: 15px; background: #ff007f; color: #fff; border: none; border-radius: 8px; width: 35px; height: 35px; cursor: pointer; z-index: 10; font-size: 20px; }
+
+.v3-star-platform { position: relative; height: 40px; margin-bottom: 20px; }
+.v3-platform-base { width: 80px; height: 30px; background: #1a1a3a; margin: 0 auto; transform: perspective(100px) rotateX(45deg); border: 2px solid #00d2ff; box-shadow: 0 0 15px #00d2ff; }
+.v3-star-icon { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 40px; color: #00d2ff; text-shadow: 0 0 20px #00d2ff; animation: starFloat 2s ease-in-out infinite; }
+
+/* Badge Image Cinematic */
+.v3-badge-container { position: relative; display: flex; align-items: center; justify-content: center; gap: 15px; margin: 10px 0; }
+.v3-badge-glow { position: absolute; width: 120px; height: 120px; background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%); animation: badgePulse 2s infinite alternate; }
+#detailBadgeImg { width: 130px; height: 130px; object-fit: contain; filter: drop-shadow(0 0 15px rgba(255,255,255,0.3)); z-index: 2; animation: badgeRotate 10s linear infinite; }
+.v3-laurel { font-size: 45px; opacity: 0.4; filter: brightness(2) drop-shadow(0 0 10px #fff); }
+.v3-laurel.right { transform: scaleX(-1); }
+
+/* Typography */
+.v3-rank-title { font-family: 'Orbitron'; font-size: 38px; color: #fff; margin: 5px 0; letter-spacing: 4px; text-shadow: 0 0 20px rgba(255,255,255,0.4); text-transform: uppercase; }
+.v3-level-tag { font-family: 'Orbitron'; font-size: 14px; color: #00d2ff; letter-spacing: 3px; font-weight: 900; }
+.v3-message { font-family: 'Oswald'; color: #94a3b8; font-size: 15px; max-width: 320px; margin: 15px auto; line-height: 1.4; font-style: italic; }
+
+/* Dividers & Sections */
+.v3-section { width: 100%; padding: 10px 30px; }
+.v3-divider { display: flex; align-items: center; gap: 15px; color: #ff00ff; }
+.v3-divider span { font-family: 'Orbitron'; font-weight: 900; font-size: 15px; color: #fff; letter-spacing: 2px; }
+.v3-line { flex-grow: 1; height: 2px; background: linear-gradient(to right, transparent, #ff00ff, transparent); }
+.v3-sub { font-family: 'Oswald'; font-size: 12px; color: #64748b; margin: 5px 0 15px 0; text-align: center; text-transform: uppercase; }
+
+/* Reward Cards Centered */
+.v3-rewards-grid { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-top: 10px; }
+.v3-card {
+    width: 75px; height: 75px; border: 2px solid #ff4444; border-radius: 12px;
+    background: rgba(255, 0, 0, 0.1); display: flex; align-items: center; justify-content: center;
+    position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+.v3-card img { width: 70%; height: 70%; object-fit: contain; }
+.v3-qty { position: absolute; bottom: 3px; right: 5px; color: #fff; font-family: 'Orbitron'; font-size: 11px; font-weight: bold; }
+
+/* Unlock Rows Centered */
+.v3-unlock-list { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 5px; }
+.v3-empty-unlock { font-family: 'Oswald'; color: #444; font-size: 13px; }
+
+/* Footer Button Sick Glow */
+.v3-footer { width: 100%; padding: 30px 40px; }
+.v3-main-btn {
+    width: 100%; height: 60px; border-radius: 15px;
+    background: linear-gradient(to right, #7000ff, #ff00ff);
+    border: 3px solid #fff; color: #fff; font-family: 'Orbitron'; font-size: 22px; font-weight: 900;
+    cursor: pointer; box-shadow: 0 0 30px rgba(112, 0, 255, 0.6); transition: 0.3s;
+}
+.v3-main-btn:hover { transform: scale(1.02); filter: brightness(1.2); }
+
+/* Animații */
+@keyframes badgePulse { from { transform: scale(0.8); opacity: 0.3; } to { transform: scale(1.2); opacity: 0.1; } }
+@keyframes badgeRotate { 0% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } 100% { transform: rotate(-5deg); } }
   </style>
 </head>
 <body>
@@ -6503,72 +6580,70 @@ input:checked + .s-slider:before {
 </div>
 
 
-<!-- LEVEL DETAIL MODAL (ULTIMATE REPLICA) -->
-<div id="levelDetailModal" class="modal-overlay" style="z-index: 200005; background: rgba(0,0,0,0.92);">
-    <div class="modal-box replica-v2-box">
-        
-        <!-- TOP DECORATION: STAR PLATFORM -->
-        <div class="rep2-header">
-            <button class="rep2-close" onclick="closeLevelDetail()">×</button>
-            
-            <div class="rep2-star-area">
-                <div class="rep2-platform"></div>
-                <i class="fa-solid fa-star rep2-big-star"></i>
+<!-- LEVEL DETAIL MODAL (CINEMATIC V3) -->
+<div id="levelDetailModal" class="modal-overlay" style="z-index: 200005;">
+    <div class="modal-box replica-v3-box epic-map-scroll">
+        <!-- Fundalul animat integrat direct -->
+        <div class="v3-nebula"></div>
+
+        <div class="v3-content">
+            <!-- Header Cinematic -->
+            <div class="v3-header">
+                <button class="v3-close" onclick="closeLevelDetail()"><i class="fa-solid fa-xmark"></i></button>
+                
+                <div class="v3-star-platform">
+                    <div class="v3-platform-base"></div>
+                    <i class="fa-solid fa-star v3-star-icon"></i>
+                </div>
+
+                <div class="v3-badge-container">
+                    <div class="v3-laurel left">🌿</div>
+                    <!-- Badge-ul real se încarcă aici prin JS -->
+                    <div class="v3-badge-glow"></div>
+                    <img id="detailBadgeImg" src="" alt="Badge">
+                    <div class="v3-laurel right">🌿</div>
+                </div>
+
+                <h2 id="detailRankName" class="v3-rank-title">SILVER</h2>
+                <div class="v3-level-tag">NIVELUL <span id="detailLevelNumber">13</span></div>
+                
+                <p id="detailLevelMessage" class="v3-message">Mesaj cinematic...</p>
             </div>
 
-            <div class="rep2-level-display">
-                <span class="rep2-level-label">LEVEL</span>
-                <div class="rep2-num-wrap">
-                    <span class="rep2-laurel left">🌿</span>
-                    <h1 id="detailLevelNumber">13</h1>
-                    <span class="rep2-laurel right">🌿</span>
+            <!-- Secțiunea RECOMPENSE -->
+            <div class="v3-section">
+                <div class="v3-divider">
+                    <div class="v3-line"></div>
+                    <i class="fa-solid fa-gift"></i>
+                    <span>RECOMPENSE</span>
+                    <div class="v3-line"></div>
+                </div>
+                <p class="v3-sub">Vei primi următoarele premii:</p>
+                <div id="detailRewardsGrid" class="v3-rewards-grid">
+                    <!-- Carduri generate prin JS -->
                 </div>
             </div>
-            
-            <p id="detailLevelMessage" class="rep2-message">Keep going! You're becoming unstoppable!</p>
-        </div>
 
-        <!-- REWARDS SECTION -->
-        <div class="rep2-section">
-            <div class="rep2-title-row">
-                <i class="fa-solid fa-gift"></i>
-                <span class="rep2-title">REWARDS</span>
-                <div class="rep2-line"></div>
-            </div>
-            <p class="rep2-subtitle">You will receive the following rewards:</p>
-            
-            <div id="detailRewardsGrid" class="rep2-rewards-grid">
-                <!-- Items like Score and Rubies generated by JS -->
-            </div>
-        </div>
-
-        <!-- UNLOCKS SECTION -->
-        <div class="rep2-section">
-            <div class="rep2-title-row">
-                <i class="fa-solid fa-lock-open"></i>
-                <span class="rep2-title">UNLOCKS</span>
-                <div class="rep2-line"></div>
-            </div>
-            <p class="rep2-subtitle">Features you unlock at this level:</p>
-            
-            <div id="detailUnlocksList" class="rep2-unlock-list">
-                <!-- Rows like in the image -->
-                <div class="rep2-unlock-row">
-                    <div class="rep2-unlock-icon"><i class="fa-solid fa-bolt"></i></div>
-                    <div class="rep2-unlock-info">
-                        <div class="rep2-unlock-name">STARE DE TURBO</div>
-                        <div class="rep2-unlock-desc">Click-urile tale sunt mai rapide la nivele mari!</div>
-                    </div>
-                    <div class="rep2-unlocked-badge"><i class="fa-solid fa-circle-check"></i> UNLOCKED</div>
+            <!-- Secțiunea DEBLOCĂRI -->
+            <div class="v3-section">
+                <div class="v3-divider">
+                    <div class="v3-line"></div>
+                    <i class="fa-solid fa-lock-open"></i>
+                    <span>DEBLOCĂRI</span>
+                    <div class="v3-line"></div>
+                </div>
+                <p class="v3-sub">Funcții noi la acest nivel:</p>
+                <div id="detailUnlocksList" class="v3-unlock-list">
+                    <div class="v3-empty-unlock">Nicio funcție nouă la acest nivel.</div>
                 </div>
             </div>
-        </div>
 
-        <!-- FOOTER BUTTON -->
-        <div class="rep2-footer">
-            <button id="replicaMainBtn" class="rep2-main-btn" onclick="handleClaimLevelReward()">
-                LET'S GO!
-            </button>
+            <!-- Buton Principal -->
+            <div class="v3-footer">
+                <button id="replicaMainBtn" class="v3-main-btn" onclick="handleClaimLevelReward()">
+                    SĂ MERGEM!
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -12210,39 +12285,53 @@ function openLevelDetail(lvl) {
     const data = LEVEL_REWARDS_REGISTRY[lvl];
     if (!data) return;
 
+    // Luăm datele din mapTiers pentru badge și nume real (folosim lvl-1 pentru index)
+    const tierData = mapTiers[lvl - 1]; 
+    const badgeImgUrl = `https://i.ibb.co/${tierData.id}/image.png`;
+
     currentDetailLevel = lvl;
+    
+    // Setăm textele și imaginile
+    document.getElementById('detailBadgeImg').src = badgeImgUrl;
+    document.getElementById('detailRankName').innerText = tierData.name;
     document.getElementById('detailLevelNumber').innerText = lvl;
     document.getElementById('detailLevelMessage').innerText = data.message;
     
-    // Render Rewards Grid
+    // Setăm culoarea rangului bazată pe ce avem în hartă
+    document.getElementById('detailRankName').style.color = tierData.color;
+    document.getElementById('detailRankName').style.textShadow = `0 0 20px ${tierData.color}`;
+
+    // Generăm Recompensele
     const grid = document.getElementById('detailRewardsGrid');
     grid.innerHTML = "";
     data.rewards.forEach(r => {
         const icon = r.type === 'ruby' ? "https://iili.io/CrnXNdG.png" : "https://iili.io/COrCopj.png";
         grid.innerHTML += `
-            <div class="rep2-card">
+            <div class="v3-card">
                 <img src="${icon}">
-                <div class="rep2-qty">x${r.value}</div>
+                <div class="v3-qty">x${r.value}</div>
             </div>`;
     });
 
-    // Button Logic
+    // Logica Butonului (Revendicat / Locked / Ready)
     const mainBtn = document.getElementById('replicaMainBtn');
     const isClaimed = _GAME_DATA.claimedLevelRewards.includes(lvl);
     const isLocked = lvl > playerLevel;
 
     if (isLocked) {
-        mainBtn.innerText = "KEEP GOING!";
-        mainBtn.style.filter = "grayscale(1)";
+        mainBtn.innerText = "CONTINUĂ JOCUL!";
+        mainBtn.style.background = "#222";
+        mainBtn.style.boxShadow = "none";
         mainBtn.onclick = null;
     } else if (isClaimed) {
-        mainBtn.innerText = "CLAIMED";
-        mainBtn.style.background = "#333";
+        mainBtn.innerText = "REVENDICAT!";
+        mainBtn.style.background = "linear-gradient(to right, #1a9900, #39ff14)";
+        mainBtn.style.boxShadow = "0 0 20px rgba(57, 255, 20, 0.4)";
         mainBtn.onclick = null;
     } else {
-        mainBtn.innerText = "LET'S GO!";
-        mainBtn.style.filter = "none";
+        mainBtn.innerText = "SĂ MERGEM!";
         mainBtn.style.background = "linear-gradient(to right, #7000ff, #ff00ff)";
+        mainBtn.style.boxShadow = "0 0 30px rgba(112, 0, 255, 0.6)";
         mainBtn.onclick = () => handleClaimLevelReward(lvl);
     }
 
