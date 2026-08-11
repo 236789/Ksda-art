@@ -5976,6 +5976,26 @@ input:checked + .s-slider:before {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 10px;
 }
+
+
+/* Animation for the Gift Button when rewards are waiting */
+@keyframes rewardShake {
+    0% { transform: scale(1); }
+    10% { transform: scale(1.2) rotate(5deg); }
+    20% { transform: scale(1.2) rotate(-5deg); }
+    30% { transform: scale(1.2) rotate(5deg); }
+    40% { transform: scale(1); rotate: 0deg; }
+    100% { transform: scale(1); }
+}
+
+.gift-vibrate {
+    animation: rewardShake 1.5s infinite;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    background: radial-gradient(circle, #ffcc00, #d97706) !important;
+    box-shadow: 0 0 20px #ffcc00, inset 0 0 10px rgba(255,255,255,0.8) !important;
+    z-index: 1002;
+}
   </style>
 </head>
 <body>
@@ -7224,6 +7244,8 @@ if (response.status === 200) {
     xpToNextLevel = getXPRequired(playerLevel); // Update the goal based on the loaded level
 
     updateXPBarUI(); 
+updateGiftButtonState(); // 🔥 Add this
+
 
             lastSavedScore = score;
             lastSavedRubies = rubies;
@@ -11671,6 +11693,7 @@ function levelUp() {
     playerLevel++;
 
     checkRewardAvailability(playerLevel);
+    updateGiftButtonState(); // 🔥 Add this
 
     
     // Carry over remaining XP
@@ -11909,6 +11932,30 @@ function checkRewardAvailability(lvl) {
         } else {
             console.log(`✅ STATUS: Level ${lvl} reward was already claimed previously.`);
         }
+    }
+}
+
+
+
+function updateGiftButtonState() {
+    const btn = document.getElementById('lvlRewardsBtn');
+    if (!btn) return;
+
+    let hasUnclaimed = false;
+
+    // Check every level from 2 up to your current level
+    for (let i = 2; i <= playerLevel; i++) {
+        // If the level has a defined reward AND it's not in the claimed list
+        if (LEVEL_REWARDS_REGISTRY[i] && !_GAME_DATA.claimedLevelRewards.includes(i)) {
+            hasUnclaimed = true;
+            break; 
+        }
+    }
+
+    if (hasUnclaimed) {
+        btn.classList.add('gift-vibrate');
+    } else {
+        btn.classList.remove('gift-vibrate');
     }
 }
 // Ensure the ninja icon in Utilities opens the Market
