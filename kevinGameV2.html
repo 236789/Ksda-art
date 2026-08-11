@@ -6234,90 +6234,91 @@ input:checked + .s-slider:before {
 @keyframes badgeRotate { 0% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } 100% { transform: rotate(-5deg); } }
 
 
-/* Containerul Principal */
-.v4-replica-box {
-    width: 90vw !important; max-width: 400px !important;
-    max-height: 85vh !important;
-    background: #05050f !important;
-    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+/* Containerul Principal Cinematic V3 Adaptat */
+.replica-v3-box {
+    width: 90vw !important; 
+    max-width: 420px !important;
+    max-height: 85vh !important; /* Limitează înălțimea pentru a nu ieși din ecran */
+    background: #050714 !important;
+    border: 2px solid #3b82f6 !important;
     border-radius: 24px !important;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden; /* Fundalul rămâne fix */
     padding: 0 !important;
-    display: flex; flex-direction: column;
-    font-family: 'Montserrat', sans-serif !important;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
+    font-family: 'Montserrat', sans-serif !important; /* Fontul nou bold */
+    box-shadow: 0 0 60px rgba(0,0,0,0.9), inset 0 0 40px rgba(59, 130, 246, 0.2) !important;
 }
 
-/* Scroll modern */
-.v4-scroll-container {
-    flex: 1; overflow-y: auto; overflow-x: hidden;
-    padding: 20px; scrollbar-width: none;
+/* Zona de scroll pentru conținut */
+.v3-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    scrollbar-width: none; /* Ascunde scrollbar pe Firefox */
 }
-.v4-scroll-container::-webkit-scrollbar { display: none; }
+.v3-scroll-area::-webkit-scrollbar { display: none; } /* Ascunde scrollbar pe Chrome/Safari */
 
-.v4-content { display: flex; flex-direction: column; align-items: center; text-align: center; }
-
-/* Buton Închidere */
-.v4-close {
-    position: absolute; top: 15px; right: 15px;
-    width: 30px; height: 30px; border-radius: 50%;
-    background: rgba(255,255,255,0.1); border: none;
-    color: white; font-size: 20px; cursor: pointer; z-index: 100;
-}
-
-/* Badge & Header */
-.v4-badge-area { position: relative; margin: 10px 0; }
-#detailBadgeImg { width: 110px; height: 110px; object-fit: contain; z-index: 2; position: relative; }
-.v4-badge-glow {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 140px; height: 140px; border-radius: 50%;
-    background: radial-gradient(circle, var(--t-color, #fff) 0%, transparent 70%);
-    opacity: 0.3; filter: blur(10px);
+/* Header-ul mai compact */
+.v3-header { padding-top: 30px; text-align: center; width: 100%; }
+.v3-rank-title { 
+    font-size: 32px; /* Puțin mai mic */
+    font-weight: 900; 
+    color: #fff; 
+    margin: 5px 0; 
+    text-transform: uppercase;
+    letter-spacing: -1px;
 }
 
-.v4-rank-title { font-size: 28px; font-weight: 900; margin: 0; letter-spacing: -1px; text-transform: uppercase; }
-.v4-level-tag { font-family: 'Orbitron'; font-size: 11px; color: #00d2ff; opacity: 0.8; margin-top: 5px; }
-.v4-message { font-size: 13px; font-weight: 700; color: #94a3b8; margin: 12px 0; line-height: 1.4; padding: 0 10px; }
+#detailBadgeImg { width: 110px; height: 110px; z-index: 2; margin: 10px 0; }
 
-/* Dividere */
-.v4-divider {
-    width: 100%; display: flex; align-items: center; justify-content: center;
-    margin: 15px 0; position: relative;
-}
-.v4-divider::before {
-    content: ""; position: absolute; left: 0; top: 50%; width: 100%; height: 1px;
-    background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
-}
-.v4-divider span {
-    background: #05050f; padding: 0 15px; position: relative;
-    font-size: 10px; font-weight: 900; color: #64748b; letter-spacing: 2px;
+.v3-message { 
+    font-size: 14px; 
+    font-weight: 700; /* Bold */
+    color: #94a3b8; 
+    margin: 10px auto; 
+    max-width: 280px; 
+    line-height: 1.3;
 }
 
-/* Recompense Stil "Gamer" */
-.v4-rewards-grid { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
-.v4-card {
-    width: 65px; height: 65px; border-radius: 12px;
+/* RECOMPENSE - CULORI NOI */
+.v3-rewards-grid { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 10px 0; }
+.v3-card {
+    width: 68px; height: 68px; border-radius: 12px;
     background: rgba(255, 255, 255, 0.03);
-    border: 2px solid rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.1); /* Default gri discret */
     display: flex; align-items: center; justify-content: center;
-    position: relative; transition: 0.2s;
+    position: relative;
 }
-.v4-card.type-ruby { border-color: rgba(255, 51, 102, 0.4); background: rgba(255, 51, 102, 0.05); }
-.v4-card.type-score { border-color: rgba(250, 204, 21, 0.4); background: rgba(250, 204, 21, 0.05); }
+/* Styling per tip de recompensă */
+.v3-card.reward-ruby { border-color: #ff3366; background: rgba(255, 51, 102, 0.05); }
+.v3-card.reward-score { border-color: #facc15; background: rgba(250, 204, 21, 0.05); }
 
-.v4-card img { width: 60%; height: 60%; object-fit: contain; }
-.v4-card .qty {
-    position: absolute; bottom: -8px; background: #fff; color: #000;
-    font-size: 9px; font-weight: 900; padding: 1px 6px; border-radius: 4px;
+.v3-qty { 
+    position: absolute; bottom: -5px; right: -5px; 
+    background: #fff; color: #000; 
+    font-size: 9px; font-weight: 900; 
+    padding: 1px 5px; border-radius: 4px;
 }
 
-/* Footer & Buton */
-.v4-footer { padding: 15px 20px 20px 20px; background: linear-gradient(to top, #05050f 80%, transparent); }
-.v4-main-btn {
-    width: 100%; height: 50px; border-radius: 14px;
-    background: #fff; border: none; color: #000;
-    font-size: 16px; font-weight: 900; cursor: pointer; transition: 0.2s;
+/* DEBLOCĂRI */
+.v3-empty-unlock { font-size: 12px; font-weight: 700; color: #334155; margin-top: 5px; }
+
+/* Butonul de jos fixat */
+.v3-footer { 
+    padding: 15px 30px 25px 30px; 
+    background: linear-gradient(to top, #050714 80%, transparent); 
+    width: 100%;
 }
-.v4-main-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.1); }
+.v3-main-btn {
+    width: 100%; height: 52px; border-radius: 14px;
+    font-size: 18px; font-weight: 900;
+    font-family: 'Montserrat', sans-serif !important;
+}
   </style>
 </head>
 <body>
@@ -6668,60 +6669,70 @@ input:checked + .s-slider:before {
 </div>
 
 
-<!-- LEVEL DETAIL MODAL (V4 FINAL) -->
+<!-- LEVEL DETAIL MODAL (CINEMATIC V3) -->
 <div id="levelDetailModal" class="modal-overlay" style="z-index: 200005;">
-    <div class="modal-box v4-replica-box">
-        <div class="v3-nebula"></div> <!-- Fundalul animat -->
-        
-        <button class="v4-close" onclick="closeLevelDetail()">×</button>
+    <div class="modal-box replica-v3-box epic-map-scroll">
+        <!-- Fundalul animat integrat direct -->
+        <div class="v3-nebula"></div>
 
-        <!-- Containerul de scroll -->
-        <div class="v4-scroll-container">
-            <div class="v4-content">
+        <div class="v3-content">
+            <!-- Header Cinematic -->
+            <div class="v3-header">
+                <button class="v3-close" onclick="closeLevelDetail()"><i class="fa-solid fa-xmark"></i></button>
                 
-                <!-- Header Secțiune -->
-                <div class="v4-header">
-                    <div class="v3-star-platform">
-                        <div class="v3-platform-base"></div>
-                        <i class="fa-solid fa-star v3-star-icon"></i>
-                    </div>
-
-                    <div class="v4-badge-area">
-                        <img id="detailBadgeImg" src="" alt="Badge">
-                        <div class="v4-badge-glow"></div>
-                    </div>
-
-                    <h2 id="detailRankName" class="v4-rank-title">SILVER</h2>
-                    <div class="v4-level-tag">NIVELUL <span id="detailLevelNumber">0</span></div>
-                    <p id="detailLevelMessage" class="v4-message">Mesaj...</p>
+                <div class="v3-star-platform">
+                    <div class="v3-platform-base"></div>
+                    <i class="fa-solid fa-star v3-star-icon"></i>
                 </div>
 
-                <!-- Recompense -->
-                <div class="v4-section">
-                    <div class="v4-divider">
-                        <span>RECOMPENSE</span>
-                    </div>
-                    <div id="detailRewardsGrid" class="v4-rewards-grid"></div>
+                <div class="v3-badge-container">
+                    <div class="v3-laurel left">🌿</div>
+                    <!-- Badge-ul real se încarcă aici prin JS -->
+                    <div class="v3-badge-glow"></div>
+                    <img id="detailBadgeImg" src="" alt="Badge">
+                    <div class="v3-laurel right">🌿</div>
                 </div>
 
-                <!-- Deblocări -->
-                <div class="v4-section">
-                    <div class="v4-divider">
-                        <span>DEBLOCĂRI</span>
-                    </div>
-                    <div id="detailUnlocksList" class="v4-unlock-list">
-                        <div class="v4-empty-text">Nicio funcție nouă aici.</div>
-                    </div>
-                </div>
-
+                <h2 id="detailRankName" class="v3-rank-title">SILVER</h2>
+                <div class="v3-level-tag">NIVELUL <span id="detailLevelNumber">13</span></div>
+                
+                <p id="detailLevelMessage" class="v3-message">Mesaj cinematic...</p>
             </div>
-        </div>
 
-        <!-- Butonul fix la bază -->
-        <div class="v4-footer">
-            <button id="replicaMainBtn" class="v4-main-btn" onclick="handleClaimLevelReward()">
-                SĂ MERGEM!
-            </button>
+            <!-- Secțiunea RECOMPENSE -->
+            <div class="v3-section">
+                <div class="v3-divider">
+                    <div class="v3-line"></div>
+                    <i class="fa-solid fa-gift"></i>
+                    <span>RECOMPENSE</span>
+                    <div class="v3-line"></div>
+                </div>
+                <p class="v3-sub">Vei primi următoarele premii:</p>
+                <div id="detailRewardsGrid" class="v3-rewards-grid">
+                    <!-- Carduri generate prin JS -->
+                </div>
+            </div>
+
+            <!-- Secțiunea DEBLOCĂRI -->
+            <div class="v3-section">
+                <div class="v3-divider">
+                    <div class="v3-line"></div>
+                    <i class="fa-solid fa-lock-open"></i>
+                    <span>DEBLOCĂRI</span>
+                    <div class="v3-line"></div>
+                </div>
+                <p class="v3-sub">Funcții noi la acest nivel:</p>
+                <div id="detailUnlocksList" class="v3-unlock-list">
+                    <div class="v3-empty-unlock">Nicio funcție nouă la acest nivel.</div>
+                </div>
+            </div>
+
+            <!-- Buton Principal -->
+            <div class="v3-footer">
+                <button id="replicaMainBtn" class="v3-main-btn" onclick="handleClaimLevelReward()">
+                    SĂ MERGEM!
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -12363,57 +12374,55 @@ function openLevelDetail(lvl) {
     const data = LEVEL_REWARDS_REGISTRY[lvl];
     if (!data) return;
 
+    // Luăm datele din mapTiers pentru badge și nume real (folosim lvl-1 pentru index)
     const tierData = mapTiers[lvl - 1]; 
     const badgeImgUrl = `https://i.ibb.co/${tierData.id}/image.png`;
 
     currentDetailLevel = lvl;
     
-    // UI Update
+    // Setăm textele și imaginile
     document.getElementById('detailBadgeImg').src = badgeImgUrl;
     document.getElementById('detailRankName').innerText = tierData.name;
     document.getElementById('detailLevelNumber').innerText = lvl;
     document.getElementById('detailLevelMessage').innerText = data.message;
     
-    // Setăm culoarea tematică a badge-ului pentru glow-ul din spate
-    document.querySelector('.v4-replica-box').style.setProperty('--t-color', tierData.color);
+    // Setăm culoarea rangului bazată pe ce avem în hartă
     document.getElementById('detailRankName').style.color = tierData.color;
+    document.getElementById('detailRankName').style.textShadow = `0 0 20px ${tierData.color}`;
 
-    // Grid Recompense
-    const grid = document.getElementById('detailRewardsGrid');
-    grid.innerHTML = "";
-    data.rewards.forEach(r => {
-        const isRuby = r.type === 'ruby';
-        const icon = isRuby ? "https://iili.io/CrnXNdG.png" : "https://iili.io/COrCopj.png";
-        const cardClass = isRuby ? "type-ruby" : "type-score";
-        
-        grid.innerHTML += `
-            <div class="v4-card ${cardClass}">
-                <img src="${icon}">
-                <div class="qty">x${r.value}</div>
-            </div>`;
-    });
-
-    // Buton Logic
+// Înlocuiește bucata de cod care generează detailRewardsGrid în openLevelDetail:
+const grid = document.getElementById('detailRewardsGrid');
+grid.innerHTML = "";
+data.rewards.forEach(r => {
+    const isRuby = r.type === 'ruby';
+    const icon = isRuby ? "https://iili.io/CrnXNdG.png" : "https://iili.io/COrCopj.png";
+    const cardClass = isRuby ? "reward-ruby" : "reward-score"; // Clasificare culori
+    
+    grid.innerHTML += `
+        <div class="v3-card ${cardClass}">
+            <img src="${icon}" style="width:70%; height:70%; object-fit:contain;">
+            <div class="v3-qty">x${r.value}</div>
+        </div>`;
+});
+    // Logica Butonului (Revendicat / Locked / Ready)
     const mainBtn = document.getElementById('replicaMainBtn');
     const isClaimed = _GAME_DATA.claimedLevelRewards.includes(lvl);
     const isLocked = lvl > playerLevel;
 
     if (isLocked) {
-        mainBtn.innerText = "BLOCHEAZĂ-L!";
-        mainBtn.style.background = "#1a1a1a";
-        mainBtn.style.color = "#444";
+        mainBtn.innerText = "CONTINUĂ JOCUL!";
+        mainBtn.style.background = "#222";
+        mainBtn.style.boxShadow = "none";
         mainBtn.onclick = null;
     } else if (isClaimed) {
-        mainBtn.innerText = "REVENDICAT ✓";
-        mainBtn.style.background = "rgba(0, 255, 136, 0.1)";
-        mainBtn.style.color = "#00ff88";
-        mainBtn.style.border = "1px solid #00ff88";
+        mainBtn.innerText = "REVENDICAT!";
+        mainBtn.style.background = "linear-gradient(to right, #1a9900, #39ff14)";
+        mainBtn.style.boxShadow = "0 0 20px rgba(57, 255, 20, 0.4)";
         mainBtn.onclick = null;
     } else {
         mainBtn.innerText = "SĂ MERGEM!";
-        mainBtn.style.background = "#fff";
-        mainBtn.style.color = "#000";
-        mainBtn.style.border = "none";
+        mainBtn.style.background = "linear-gradient(to right, #7000ff, #ff00ff)";
+        mainBtn.style.boxShadow = "0 0 30px rgba(112, 0, 255, 0.6)";
         mainBtn.onclick = () => handleClaimLevelReward(lvl);
     }
 
