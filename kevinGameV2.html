@@ -11358,9 +11358,60 @@ function closeMilestones() {
 }
 
 function renderMilestones() {
-    const grid = document.getElementById('msOrigGrid');
-    if (!grid) return;
-    grid.innerHTML = "";
+    const track = document.getElementById('lvlPathTrack');
+    const scrollBox = document.getElementById('lvlPathScroll');
+    const svg = document.getElementById('lvlPathSvg');
+    const lineBase = document.getElementById('lvlPathLineBase');
+    const lineGold = document.getElementById('lvlPathLineGold');
+
+    if (!track || !svg || !lineBase || !lineGold) {
+        console.error("❌ Milestones: missing DOM elements", { track, svg, lineBase, lineGold });
+        return;
+    }
+
+    // Guard against undefined globals
+    const lvl = (typeof playerLevel === 'number' && playerLevel > 0) ? playerLevel : 1;
+    const xp = (typeof playerXP === 'number') ? playerXP : 0;
+    const xpNeeded = (typeof xpToNextLevel === 'number' && xpToNextLevel > 0) ? xpToNextLevel : 1;
+
+    if (!_GAME_DATA.claimedLevelRewards) _GAME_DATA.claimedLevelRewards = [];
+
+    track.querySelectorAll('.lvlpath-node').forEach(n => n.remove());
+
+    const vGap = 108, topPad = 60, bottomPad = 60;
+    const LVL_PATH_TOTAL = 25;
+    const trackHeight = topPad + (LVL_PATH_TOTAL - 1) * vGap + bottomPad;
+
+    track.style.height = trackHeight + 'px';
+    track.style.minHeight = trackHeight + 'px';
+    track.style.width = '100%';
+
+    svg.setAttribute('viewBox', `0 0 100 ${trackHeight}`);
+    svg.setAttribute('width', '100%');
+    svg.setAttribute('height', trackHeight);
+
+    const points = [];
+    for (let i = 1; i <= LVL_PATH_TOTAL; i++) {
+        points.push({ level: i, x: 50 + 28 * Math.sin(i * 0.85), y: topPad + (i - 1) * vGap });
+    }
+
+    lineBase.setAttribute('points', points.map(p => `${p.x},${p.y}`).join(' '));
+
+    const progressFraction = Math.min(xp / xpNeeded, 1);
+    const goldPoints = [];
+    for (let i = 0; i < points.length; i++) {
+        if (points[i].level <= lvl) {
+            goldPoints.push(points[i]);
+        } else if (points[i].level === lvl + 1) {
+            const prev = points[i - 1], next = points[i];
+            goldPoints.push({
+                x: prev.x + (next.x - prev.x) * progressFraction,
+                y: prev.y + (next.y - prev.y) * progressFraction
+            });
+            break;
+        } else break;
+    }
+    lineGold.setAttribute('points', goldPoints.map(p => `${p.x},${p.y}`).join(' '));
 
     const badges = [
         "https://i.postimg.cc/mD363LpX/bronze.png", "https://i.postimg.cc/mry0Vj60/silver.png", "https://i.postimg.cc/mD8S6v8D/copper.png",
@@ -11374,36 +11425,59 @@ function renderMilestones() {
         "https://i.postimg.cc/mry6N4S/eternal.png"
     ];
 
-    for (let i = 1; i <= 25; i++) {
-        const isUnlocked = i <= playerLevel;
-        const card = document.createElement('div');
-        card.className = `ms-orig-card tier-${i} ${isUnlocked ? 'unlocked' : 'locked'}`;
-        
-        // Staggered cinematic reveal
-        card.style.animation = `msCardPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards ${i * 0.03}s`;
+    let currentNodeEl = null;
+    let nodesBuilt = 0;
 
-        card.innerHTML = `
-            <img src="${badges[i-1]}" class="ms-badge" onerror="this.src='https://iili.io/COrCopj.png'">
-            <div style="position:absolute; bottom:2px; width:100%; text-align:center; font-family:'Orbitron'; font-size:0.6rem; color:#fff; font-weight:900; background:rgba(0,0,0,0.5); backdrop-filter:blur(2px);">
-                L${i}
+    points.forEach(p => {
+        const nodeLvl = p.level;
+        const isUnlocked = nodeLvl <= lvl;
+        const isCurrent = nodeLvl === lvl;
+        const reward = getLevelReward(nodeLvl);
+        const hasReward = reward.score > 0 || reward.ruby > 0;
+        const isClaimed = _GAME_DATA.claimedLevelRewards.includes(nodeLvl);
+        const isClaimable = isUnlocked && hasReward && !isClaimed;
+
+        const node = document.createElement('div');
+        node.className = 'lvlpath-node ' + (isCurrent ? 'current' : (isUnlocked ? (isClaimed ? 'claimed' : 'unlocked') : 'locked'));
+        if (isClaimable) node.classList.add('claimable');
+        node.style.left = p.x + '%';
+        node.style.top = p.y + 'px';
+        node.dataset.level = nodeLvl;
+
+        node.innerHTML = `
+            <div class="lvlpath-node-ring"></div>
+            <div class="lvlpath-node-circle">
+                <img src="${badges[nodeLvl - 1]}" onerror="this.src='https://iili.io/COrCopj.png'">
+                ${!isUnlocked ? '<i class="fa-solid fa-lock lvlpath-lock-icon"></i>' : ''}
             </div>
+            <div class="lvlpath-node-label">L${nodeLvl}</div>
+            ${isClaimable ? '<div class="lvlpath-node-badge"><i class="fa-solid fa-gift"></i></div>' : ''}
+            ${isClaimed ? '<div class="lvlpath-node-badge"><i class="fa-solid fa-check"></i></div>' : ''}
+            ${isCurrent ? '<div class="lvlpath-here-flag">EȘTI AICI</div>' : ''}
         `;
 
-        card.onclick = (e) => {
-            e.stopPropagation();
-            if (isUnlocked) {
-                if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
-                showNotification("RANK UNLOCKED", "Accessing legendary reward vault...", "fa-gem");
-            } else {
-                playMissSFX();
-                showKevinutaBubble(`Reach Level ${i} first!`);
-            }
-        };
+        node.onclick = () => showLevelRewardModal(nodeLvl);
+        track.appendChild(node);
+        nodesBuilt++;
+        if (isCurrent) currentNodeEl = node;
+    });
 
-        grid.appendChild(card);
-    }
+    console.log(`✅ Milestones rendered: ${nodesBuilt} nodes, playerLevel=${lvl}, trackHeight=${trackHeight}`);
+
+    const subtitle = document.getElementById('lvlPathSubtitle');
+    if (subtitle) subtitle.innerText = `NIVEL ${lvl} / ${LVL_PATH_TOTAL}`;
+    const pct = Math.round((lvl / LVL_PATH_TOTAL) * 100);
+    const fill = document.getElementById('lvlPathProgressFill');
+    const label = document.getElementById('lvlPathProgressLabel');
+    if (fill) fill.style.width = pct + '%';
+    if (label) label.innerText = pct + '%';
+
+    setTimeout(() => {
+        if (currentNodeEl && scrollBox) {
+            scrollBox.scrollTop = Math.max(0, currentNodeEl.offsetTop - (scrollBox.clientHeight / 2));
+        }
+    }, 50);
 }
-
 
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
