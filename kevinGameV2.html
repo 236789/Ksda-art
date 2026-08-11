@@ -6140,175 +6140,88 @@ input:checked + .s-slider:before {
 .v3-main-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #2d0047; }
 
 
+/* FONT BOLD PENTRU ROMÂNĂ */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap');
 
-/* THE MASTER BOX */
 .replica-v3-box {
-    width: 95vw !important;
-    max-width: 460px !important;
-    max-height: 90vh !important;
-    background: #02020a !important;
-    border: 2px solid #1e3a8a !important;
-    border-radius: 20px !important;
+    font-family: 'Montserrat', sans-serif !important;
     display: flex !important;
     flex-direction: column !important;
-    position: relative;
-    overflow: hidden !important;
-    padding: 0 !important;
-    font-family: 'Montserrat', sans-serif !important;
-    box-shadow: 0 0 40px rgba(0, 102, 255, 0.3), inset 0 0 30px rgba(0,0,0,1) !important;
+    max-height: 85vh !important;
+    overflow: hidden !important; /* Esențial pentru scroll interior */
 }
 
-/* THE SCROLL AREA - HIDDEN BAR */
+/* BUTON X MOV (Exact ca în imagine) */
+.v3-close {
+    position: absolute;
+    top: 15px; right: 15px;
+    background: linear-gradient(135deg, #a855f7, #6b21a8) !important;
+    border: 2px solid #c084fc !important;
+    border-radius: 8px;
+    width: 32px; height: 32px;
+    color: white !important;
+    font-size: 18px;
+    z-index: 100;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+
+/* SCROLL INVIZIBIL */
 .v3-scroll-area {
     flex: 1 !important;
     overflow-y: auto !important;
-    padding: 20px !important;
     scrollbar-width: none;
-    z-index: 2;
+    padding: 20px;
 }
 .v3-scroll-area::-webkit-scrollbar { display: none; }
 
-/* THE PURPLE X BUTTON */
-.v3-close {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: linear-gradient(135deg, #a855f7, #6b21a8) !important;
-    color: #fff !important;
-    border: 2px solid #c084fc !important;
-    border-radius: 8px;
-    width: 36px;
-    height: 36px;
-    font-size: 22px;
-    font-weight: 900;
-    cursor: pointer;
-    z-index: 100;
-    display: flex;
-    align-items: center;
+/* HEADER & PLACEMENT ICONIȚE */
+.v3-header { text-align: center; width: 100%; position: relative; padding-top: 20px; }
+.v3-top-emblem { width: 100px; margin-bottom: 5px; }
+.v3-level-label { color: #fff; font-weight: 900; letter-spacing: 4px; font-size: 14px; }
+
+.v3-level-container { 
+    position: relative; 
+    display: inline-flex; 
+    align-items: center; 
     justify-content: center;
-    box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+    margin: 10px 0;
 }
+.v3-level-num { font-size: 90px; font-weight: 900; color: #fff; margin: 0 20px; line-height: 1; }
 
-/* HEADER SECTION */
-.v3-header { width: 100%; text-align: center; position: relative; padding-top: 40px; margin-bottom: 20px; }
+.v3-laurel-img { width: 50px; height: auto; }
+.v3-laurel-img.left { /* Deja orientată corect */ }
+.v3-laurel-img.right { /* Deja orientată corect */ }
 
-.v3-top-emblem { width: 120px; margin: 0 auto 10px auto; display: block; }
-
-.v3-level-container { position: relative; display: inline-block; }
-.v3-level-num { font-size: 90px; font-weight: 900; color: #fff; line-height: 1; margin: 0; text-shadow: 0 0 30px rgba(255,255,255,0.4); }
-.v3-laurel-img { position: absolute; width: 60px; top: 50%; transform: translateY(-50%); }
-.v3-laurel-img.left { right: 105%; }
-.v3-laurel-img.right { left: 105%; }
-
-/* STAR PEDESTAL (Left Side like image) */
-.v3-pedestal-container {
-    position: absolute;
-    left: 20px;
-    top: 60px;
-    width: 100px;
-    height: 100px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.v3-pedestal-img { width: 80px; height: auto; filter: drop-shadow(0 0 15px #00d2ff); }
-
-/* SECTIONS & TITLES */
+/* DIVIDERS ( Diamonds ◆ ) */
 .v3-section-title {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    color: #fff;
-    font-size: 18px;
-    font-weight: 900;
-    text-transform: uppercase;
-    margin: 20px 0 5px 0;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    color: #fff; font-weight: 900; font-size: 18px; margin-top: 20px;
 }
-.v3-section-subtitle { color: #94a3b8; font-size: 12px; text-align: center; margin-bottom: 15px; font-weight: 700; }
+.v3-diamonds { color: #3b82f6; font-size: 12px; }
+.v3-sub-info { color: #94a3b8; font-size: 12px; font-weight: 700; text-align: center; margin-bottom: 15px; }
 
-.v3-divider-diamonds { color: #3b82f6; font-size: 10px; opacity: 0.8; }
-
-/* REWARDS GRID */
-.v3-rewards-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-    width: 100%;
-}
+/* CARDURI RECOMPENSE (Bordură Roșie ca în imagine) */
 .v3-reward-card {
-    aspect-ratio: 1/1;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1.5px solid #ff0000; /* Red border from image */
+    border: 2px solid #ff0000 !important;
+    background: rgba(255, 255, 255, 0.03) !important;
     border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 70px; height: 70px;
     position: relative;
+    display: flex; align-items: center; justify-content: center;
 }
-.v3-reward-card img { width: 70%; height: 70%; object-fit: contain; }
 .v3-reward-qty {
-    position: absolute;
-    bottom: -4px;
-    right: -4px;
-    background: #fff;
-    color: #000;
-    font-size: 10px;
-    font-weight: 900;
-    padding: 2px 6px;
-    border-radius: 4px;
+    position: absolute; bottom: -4px; right: -4px;
+    background: #fff; color: #000; font-weight: 900;
+    padding: 2px 5px; border-radius: 4px; font-size: 10px;
 }
 
-/* UNLOCK ROWS */
-.v3-unlock-row {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 12px;
-    padding: 12px;
-    margin-bottom: 8px;
-}
-.v3-unlock-icon { width: 45px; height: 45px; object-fit: contain; }
-.v3-unlock-info { flex: 1; text-align: left; }
-.v3-unlock-name { color: #fff; font-size: 13px; font-weight: 900; text-transform: uppercase; }
-.v3-unlock-desc { color: #64748b; font-size: 11px; font-weight: 700; line-height: 1.2; }
-.v3-unlocked-badge {
-    background: rgba(0, 255, 136, 0.1);
-    color: #00ff88;
-    border: 1px solid #00ff88;
-    font-size: 9px;
-    font-weight: 900;
-    padding: 4px 8px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-/* FOOTER BUTTON (LET'S GO!) */
+/* FOOTER BUTON FIX JOS */
 .v3-footer {
-    padding: 20px 40px 30px 40px;
-    background: linear-gradient(to top, #02020a 90%, transparent);
-    flex-shrink: 0;
-}
-.v3-main-btn {
+    padding: 15px 30px 25px 30px;
+    background: linear-gradient(to top, #050714 90%, transparent);
     width: 100%;
-    height: 55px;
-    border-radius: 50px;
-    background: linear-gradient(to bottom, #7e22ce, #3b0764) !important;
-    border: 2px solid #c084fc !important;
-    color: #fff !important;
-    font-size: 22px !important;
-    font-weight: 900 !important;
-    text-transform: uppercase;
-    cursor: pointer;
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), inset 0 0 10px rgba(255,255,255,0.2);
-    transition: 0.2s;
 }
-.v3-main-btn:active { transform: scale(0.95); filter: brightness(1.2); }
   </style>
 </head>
 <body>
@@ -6658,63 +6571,66 @@ input:checked + .s-slider:before {
     </div>
 </div>
 
-<!-- LEVEL DETAIL MODAL (REPLICA MASTER ROMÂNĂ) -->
+<!-- LEVEL DETAIL MODAL (THE ULTIMATE 1:1 REPLICA) -->
 <div id="levelDetailModal" class="modal-overlay" style="z-index: 200005;">
     <div class="modal-box replica-v3-box">
         
-        <!-- Fundal Nebula fix -->
-        <div class="v3-nebula" style="position:absolute; inset:0; opacity:0.2; pointer-events:none; background-image: url('https://www.transparenttextures.com/patterns/stardust.png');"></div>
+        <!-- Fundal Nebula Fix -->
+        <div class="v3-nebula"></div>
 
-        <!-- Butonul X stilizat (Square Purple) -->
-        <button class="v3-close" onclick="closeLevelDetail()">X</button>
+        <!-- BUTON X STILIZAT (PĂTRAT MOV CA ÎN IMAGINE) -->
+        <button class="v3-close" onclick="closeLevelDetail()">
+             <i class="fa-solid fa-xmark"></i>
+        </button>
 
-        <!-- ZONA CU SCROLL (Aici se mișcă conținutul) -->
+        <!-- ZONA DE SCROLL (Butonul de jos va rămâne fix) -->
         <div class="v3-scroll-area">
             
             <div class="v3-header">
-                <!-- Emblemă de sus (Steaua cu aripi) -->
-                <img src="https://iili.io/C6jbZjj.png" class="v3-top-emblem" alt="Emblem">
+                <!-- Emblemă Aripi Sus -->
+                <img src="https://iili.io/C6jbZjj.png" class="v3-top-emblem" alt="Wings">
                 
-                <span style="color:#fff; font-weight:900; font-size:14px; letter-spacing:3px; text-transform: uppercase;">NIVEL</span>
+                <div class="v3-level-label">NIVEL</div>
                 
                 <div class="v3-level-container">
+                    <!-- Laurels stânga/dreapta fix ca în imagine -->
                     <img src="https://iili.io/C6jD2l1.png" class="v3-laurel-img left">
                     <h1 class="v3-level-num" id="detailLevelNumber">13</h1>
                     <img src="https://iili.io/C6jDTlt.png" class="v3-laurel-img right">
                 </div>
 
-                <p id="detailLevelMessage" class="v3-message" style="font-weight: 700; font-family: 'Oswald';">Continuă tot așa! Devii de neoprit!</p>
+                <p id="detailLevelMessage" class="v3-message">Continuă tot așa! Devii de neoprit!</p>
             </div>
 
             <!-- SECȚIUNE RECOMPENSE -->
             <div class="v3-section-title">
-                <span class="v3-divider-diamonds">◆</span>
-                <i class="fa-solid fa-gift" style="color:#ff00ff;"></i>
+                <span class="v3-diamonds">◆</span>
+                <i class="fa-solid fa-gift"></i>
                 <span>RECOMPENSE</span>
-                <span class="v3-divider-diamonds">◆</span>
+                <span class="v3-diamonds">◆</span>
             </div>
-            <p class="v3-section-subtitle">Vei primi următoarele premii:</p>
+            <p class="v3-sub-info">Vei primi următoarele recompense:</p>
             
             <div id="detailRewardsGrid" class="v3-rewards-grid">
-                <!-- AICI VOR FI INJECTATE PRIN JS BOXURILE ROȘII CU x1000 -->
+                <!-- Injectate prin JS (Carduri cu bordură roșie) -->
             </div>
 
             <!-- SECȚIUNE DEBLOCĂRI -->
             <div class="v3-section-title">
-                <span class="v3-divider-diamonds">◆</span>
-                <i class="fa-solid fa-lock-open" style="color:#ff00ff;"></i>
+                <span class="v3-diamonds">◆</span>
+                <i class="fa-solid fa-lock-open"></i>
                 <span>DEBLOCĂRI</span>
-                <span class="v3-divider-diamonds">◆</span>
+                <span class="v3-diamonds">◆</span>
             </div>
-            <p class="v3-section-subtitle">Funcții noi la acest nivel:</p>
+            <p class="v3-sub-info">Funcții noi deblocate la acest nivel:</p>
 
             <div id="detailUnlocksList" class="v3-unlock-list">
-                <!-- AICI VOR FI INJECTATE PRIN JS RÂNDURILE CU METEORITES, ETC. -->
+                <!-- Injectate prin JS -->
             </div>
 
         </div> <!-- Sfârșit zonă scroll -->
 
-        <!-- FOOTER FIX (Butonul nu se mișcă niciodată) -->
+        <!-- BUTONUL FIX (REVENDICĂ) -->
         <div class="v3-footer">
             <button id="replicaMainBtn" class="v3-main-btn">REVENDICĂ ACUM!</button>
         </div>
@@ -12359,39 +12275,91 @@ function openLevelDetail(lvl) {
     const data = LEVEL_REWARDS_REGISTRY[lvl];
     if (!data) return;
 
+    const tierData = mapTiers[lvl - 1]; 
+    const badgeImgUrl = `https://i.ibb.co/${tierData.id}/image.png`;
+
+    currentDetailLevel = lvl;
+    
+    // Set Header/Badge info
+    document.getElementById('detailBadgeImg').src = badgeImgUrl;
+    document.getElementById('detailRankName').innerText = tierData.name;
     document.getElementById('detailLevelNumber').innerText = lvl;
     document.getElementById('detailLevelMessage').innerText = data.message;
+    
+    document.getElementById('detailRankName').style.color = tierData.color;
+    document.getElementById('detailRankName').style.textShadow = `0 0 20px ${tierData.color}`;
 
-    // Fill Rewards
+    // Fill rewards grid
     const grid = document.getElementById('detailRewardsGrid');
     grid.innerHTML = "";
     data.rewards.forEach(r => {
-        const icon = (r.type === 'ruby') ? "https://iili.io/CrnXNdG.png" : "https://iili.io/COrCopj.png";
+        const isRuby = r.type === 'ruby';
+        const icon = isRuby ? "https://iili.io/CrnXNdG.png" : "https://iili.io/COrCopj.png";
+        const cardClass = isRuby ? "reward-ruby" : "reward-score";
         grid.innerHTML += `
-            <div class="v3-reward-card">
-                <img src="${icon}">
-                <div class="v3-reward-qty">x${r.value}</div>
+            <div class="v3-card ${cardClass}">
+                <img src="${icon}" style="width:70%; height:70%; object-fit:contain;">
+                <div class="v3-qty">x${r.value}</div>
             </div>`;
     });
 
-    // Fill Unlocks (Optional: Add custom logic if level has unlocks)
-    const unlockList = document.getElementById('detailUnlocksList');
-    if (lvl === 13) {
-        unlockList.innerHTML = `
-            <div class="v3-unlock-row">
-                <img src="https://iili.io/Ck27fPs.png" class="v3-unlock-icon">
-                <div class="v3-unlock-info">
-                    <div class="v3-unlock-name">METEORITES</div>
-                    <div class="v3-unlock-desc">Meteorites will start spawning every 10 seconds!</div>
-                </div>
-                <div class="v3-unlocked-badge">✓ UNLOCKED</div>
-            </div>
-        `;
+    // --- BUTTON LOGIC REPAIR (SCROLLABLE & PREMIUM 3D) ---
+    const mainBtn = document.getElementById('replicaMainBtn');
+    const isClaimed = _GAME_DATA.claimedLevelRewards.includes(lvl);
+    const isLocked = lvl > playerLevel;
+
+    // Reset Base Styles for Centering and Design
+    mainBtn.style.display = "flex"; 
+    mainBtn.style.alignItems = "center";
+    mainBtn.style.justifyContent = "center";
+    mainBtn.style.textAlign = "center";
+    mainBtn.style.opacity = "1";
+    mainBtn.style.pointerEvents = "auto";
+    mainBtn.style.width = "100%";
+    mainBtn.style.height = "60px";
+    mainBtn.style.borderRadius = "18px";
+    mainBtn.style.fontFamily = "'Orbitron', sans-serif";
+    mainBtn.style.fontSize = "18px";
+    mainBtn.style.fontWeight = "900";
+    mainBtn.style.textTransform = "uppercase";
+    mainBtn.style.transition = "all 0.1s ease";
+    mainBtn.style.cursor = "pointer";
+
+    if (isLocked) {
+        mainBtn.innerText = "BLOCAT (LVL " + lvl + ")";
+        mainBtn.style.background = "linear-gradient(180deg, #444, #222)";
+        mainBtn.style.color = "#777";
+        mainBtn.style.border = "3px solid #555";
+        mainBtn.style.boxShadow = "0 6px 0 #111";
+        mainBtn.onclick = () => { playMissSFX(); showKevinutaBubble("Nivel prea mic! 😂"); };
+    } else if (isClaimed) {
+        mainBtn.innerText = "REVENDICAT ✓";
+        mainBtn.style.background = "rgba(0, 255, 136, 0.1)";
+        mainBtn.style.color = "#00ff88";
+        mainBtn.style.border = "3px solid #00ff88";
+        mainBtn.style.boxShadow = "none";
+        mainBtn.style.pointerEvents = "none";
+        mainBtn.onclick = null;
     } else {
-        unlockList.innerHTML = `<div style="color:#64748b; text-align:center; padding:10px; font-weight:700;">No features at this level.</div>`;
+        mainBtn.innerText = "REVENDICĂ ACUM!";
+        mainBtn.style.background = "linear-gradient(180deg, #bf00ff 0%, #7000ff 50%, #4b00b0 100%)";
+        mainBtn.style.color = "#ffffff";
+        mainBtn.style.border = "3px solid #ffffff";
+        mainBtn.style.boxShadow = "0 8px 0 #2d0047, 0 15px 25px rgba(0,0,0,0.5)";
+
+        mainBtn.onclick = () => {
+            mainBtn.style.transform = "translateY(6px)";
+            mainBtn.style.boxShadow = "0 2px 0 #2d0047";
+            setTimeout(() => handleClaimLevelReward(lvl), 100);
+        };
     }
 
+    // Open Modal
     document.getElementById('levelDetailModal').style.display = 'flex';
+    
+    // Auto-scroll to top when opened
+    const scrollArea = document.querySelector('.v3-scroll-area');
+    if (scrollArea) scrollArea.scrollTop = 0;
 }
 
 function closeLevelDetail() {
