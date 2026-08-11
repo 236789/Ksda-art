@@ -5661,7 +5661,8 @@ input:checked + .s-slider:before {
 /* ANIMATED NODE LABELS */
 .epic-node-label {
     position: absolute;
-    top: calc(100% + 8px); /* Locks it exactly below the circle */
+    top: calc(100% + 12px); /* Space below the circle */
+    transform: translateX(-50%); /* This forces it to stay centered on the node */
     left: 50%;
     /* Use margin instead of transform to prevent scroll jitter */
     margin-left: -50%; 
@@ -5805,6 +5806,8 @@ input:checked + .s-slider:before {
     white-space: nowrap;
     border: 2px solid rgba(255, 255, 255, 0.5); /* The thick outline */
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);   /* Simple shadow for depth */
+    white-space: nowrap; /* Prevents the text from breaking into two lines */
+    max-width: 90vw;    /* Ensures it never goes wider than the phone screen */
 }
 
 /* THE OUTER BOX GLOW: Fixed collision issues */
@@ -11732,7 +11735,7 @@ for (let i = 1; i <= totalNodes; i++) {
         const fallbackHTML = `this.src='https://iili.io/COrCopj.png'`; 
 
         const y = mapHeight - (i * spacingY) - 50; 
-        const xPercent = 50 + Math.sin(i * 1.0) * 35; 
+const xPercent = 50 + Math.sin(i * 1.0) * 28;
 
         // 1. Determine Level Logic (node-1, node-2, etc)
         const tierClass = `node-${i}`; 
