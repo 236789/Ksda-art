@@ -5659,6 +5659,90 @@ input:checked + .s-slider:before {
     z-index: 1;
     pointer-events: none;
 }
+
+
+/* THE MAP NODES */
+.epic-node {
+    position: absolute;
+    /* This perfectly centers the circle on the exact X,Y coordinate of the line */
+    transform: translate(-50%, -50%); 
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #1a233a, #050714);
+    
+    /* We use the custom variable passed from JavaScript for the border */
+    border: 3px solid var(--t-color);
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* Base shadow using the custom color */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 0 15px rgba(0,0,0,0.8);
+}
+
+.epic-node:hover { transform: translate(-50%, -50%) scale(1.15); z-index: 10; }
+
+.epic-node img {
+    width: 85%;
+    height: 85%;
+    object-fit: contain;
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.8));
+    transition: 0.3s;
+}
+
+/* NODE STATES */
+.node-locked {
+    filter: grayscale(1) brightness(0.3);
+    border-color: rgba(255,255,255,0.2) !important;
+    box-shadow: none !important;
+    pointer-events: none;
+}
+
+.node-completed {
+    /* Uses the specific tier color for the glow */
+    box-shadow: 0 0 20px var(--t-color), inset 0 0 15px rgba(0,0,0,0.8);
+}
+
+.node-current {
+    box-shadow: 0 0 30px var(--t-color), inset 0 0 15px rgba(0,0,0,0.8);
+    animation: pulseMapNode 1.5s infinite alternate;
+}
+
+@keyframes pulseMapNode {
+    from { transform: translate(-50%, -50%) scale(1.05); filter: brightness(1); }
+    to { transform: translate(-50%, -50%) scale(1.2); filter: brightness(1.3); }
+}
+
+/* NODE LABELS (Perfectly Centered) */
+.epic-node-label {
+    position: absolute;
+    bottom: -24px;
+    left: 50%;
+    transform: translateX(-50%); /* Perfectly centers the text under the node */
+    
+    background: #050714;
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 3px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--t-color); /* Matches the badge color */
+    
+    white-space: nowrap;
+    text-transform: uppercase;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+    transition: 0.3s;
+}
+
+.node-completed .epic-node-label { color: var(--t-color); text-shadow: 0 0 5px var(--t-color); }
+.node-current .epic-node-label { color: var(--t-color); font-size: 11px; text-shadow: 0 0 10px var(--t-color); }
+.node-locked .epic-node-label { border-color: rgba(255,255,255,0.2); color: #666; }
   </style>
 </head>
 <body>
@@ -11367,36 +11451,35 @@ function levelUp() {
 
 
 // ==========================================
-// CINEMATIC WINDING MAP LOGIC (25 LEVELS)
+// CINEMATIC WINDING MAP LOGIC (25 UNIQUE STYLES)
 // ==========================================
 
-// Your exact 25 badges with Names and ibb.co IDs
 const mapTiers = [
-    { name: "Bronze", id: "wFth4chq" },
-    { name: "Silver", id: "r21M97q5" },
-    { name: "Copper", id: "vxHM1ffF" },
-    { name: "Sapphire", id: "RGTWgFS2" },
-    { name: "Emerald", id: "23FZKwXX" },
-    { name: "Amethyst", id: "3ywhPtDX" },
-    { name: "Gold", id: "Xf2gynsP" },
-    { name: "Ice Crystal", id: "RGnRdDRs" },
-    { name: "Ruby", id: "8nS1TM3x" },
-    { name: "Royal Gold", id: "qL5kJs5H" },
-    { name: "Jade", id: "67QVCSfs" },
-    { name: "Astral", id: "WWttKxPB" },
-    { name: "Azure", id: "pBfztNy2" },
-    { name: "Obsidian", id: "MyC7Q2GK" },
-    { name: "Geode", id: "KcNG1RqF" },
-    { name: "Frost", id: "4gnrPFt0" },
-    { name: "Mythril", id: "qLTkBP7P" },
-    { name: "Toxicium", id: "vfRpjjT" },
-    { name: "Void", id: "WSGsNSP" },
-    { name: "Cel. Gold", id: "YBwnKJyj" }, // Shortened slightly for label fit
-    { name: "Cosmic", id: "pBdxJVhc" },
-    { name: "Cel. Diamond", id: "6J1CRmtr" },
-    { name: "Infernal", id: "S2z2pFW" },
-    { name: "Divine", id: "Z6vM7YBx" },
-    { name: "Eternal", id: "B5QKGyLM" }
+    { name: "Bronze", id: "wFth4chq", color: "#cd7f32" },
+    { name: "Silver", id: "r21M97q5", color: "#c0c0c0" },
+    { name: "Copper", id: "vxHM1ffF", color: "#b87333" },
+    { name: "Sapphire", id: "RGTWgFS2", color: "#0088ff" },
+    { name: "Emerald", id: "23FZKwXX", color: "#10b981" },
+    { name: "Amethyst", id: "3ywhPtDX", color: "#a855f7" },
+    { name: "Gold", id: "Xf2gynsP", color: "#facc15" },
+    { name: "Ice Crystal", id: "RGnRdDRs", color: "#67e8f9" },
+    { name: "Ruby", id: "8nS1TM3x", color: "#ef4444" },
+    { name: "Royal Gold", id: "qL5kJs5H", color: "#d4af37" },
+    { name: "Jade", id: "67QVCSfs", color: "#10b981" },
+    { name: "Astral", id: "WWttKxPB", color: "#8b5cf6" },
+    { name: "Azure", id: "pBfztNy2", color: "#3b82f6" },
+    { name: "Obsidian", id: "MyC7Q2GK", color: "#ea580c" }, // Molten orange glow
+    { name: "Geode", id: "KcNG1RqF", color: "#d946ef" },
+    { name: "Frost", id: "4gnrPFt0", color: "#22d3ee" },
+    { name: "Mythril", id: "qLTkBP7P", color: "#e879f9" },
+    { name: "Toxicium", id: "vfRpjjT", color: "#22c55e" },
+    { name: "Void", id: "WSGsNSP", color: "#7c3aed" },
+    { name: "Cel. Gold", id: "YBwnKJyj", color: "#fde047" },
+    { name: "Cosmic", id: "pBdxJVhc", color: "#4f46e5" },
+    { name: "Diamond", id: "6J1CRmtr", color: "#93c5fd" },
+    { name: "Infernal", id: "S2z2pFW", color: "#dc2626" },
+    { name: "Divine", id: "Z6vM7YBx", color: "#f0f9ff" },
+    { name: "Eternal", id: "B5QKGyLM", color: "#f0abfc" }
 ];
 
 function openLevelMilestones() {
@@ -11426,7 +11509,7 @@ function renderEpicWindingMap() {
     container.innerHTML = "";
 
     const totalNodes = 25;
-    const spacingY = 120; // Vertical distance between nodes
+    const spacingY = 130; // Increased spacing slightly so labels don't touch the line
     const mapHeight = (totalNodes * spacingY) + 150; 
     
     container.style.height = mapHeight + 'px';
@@ -11435,62 +11518,51 @@ function renderEpicWindingMap() {
     let lockedPath = "";
     let nodesHtml = "";
 
-    // Generate Path Coordinates (Bottom to Top, winding left/right)
     for (let i = 1; i <= totalNodes; i++) {
         const tier = mapTiers[i - 1];
-        
-        // Convert ibb.co ID to direct image link
         const imgUrl = `https://i.ibb.co/${tier.id}/image.png`;
-        const fallbackHTML = `this.src='https://iili.io/COrCopj.png'`; // Failsafe coin
+        const fallbackHTML = `this.src='https://iili.io/COrCopj.png'`; 
 
-        // Y starts at bottom and goes up
         const y = mapHeight - (i * spacingY) - 50; 
         
-        // Sine wave for X creates the winding road (between 20% and 80% width)
-        const xPercent = 50 + Math.sin(i * 1.3) * 35; 
+        // Smoother sine wave for a balanced winding road
+        const xPercent = 50 + Math.sin(i * 1.0) * 30; 
 
-        // Build the SVG Polyline strings
         if (i <= playerLevel) {
             completedPath += `${xPercent},${y} `;
-            if (i === playerLevel) lockedPath += `${xPercent},${y} `; // Connect the two lines seamlessly
+            if (i === playerLevel) lockedPath += `${xPercent},${y} `; 
         } else {
             lockedPath += `${xPercent},${y} `;
         }
 
-        // Determine node state
         let stateClass = "node-locked";
         if (i < playerLevel) stateClass = "node-completed";
         if (i === playerLevel) stateClass = "node-current";
 
-        // Build HTML for the round node and custom image
+        // PASSING THE UNIQUE COLOR AS AN INLINE CSS VARIABLE (--t-color)
         nodesHtml += `
-            <div class="epic-node ${stateClass}" style="left: ${xPercent}%; top: ${y}px;" onclick="clickEpicNode(${i}, '${tier.name}')">
+            <div class="epic-node ${stateClass}" style="left: ${xPercent}%; top: ${y}px; --t-color: ${tier.color};" onclick="clickEpicNode(${i}, '${tier.name}')">
                 <img src="${imgUrl}" onerror="${fallbackHTML}" alt="${tier.name}">
                 <div class="epic-node-label">${i}. ${tier.name}</div>
             </div>
         `;
     }
 
-    // Inject the Glowing SVG Lines and HTML Nodes
+    // SVG PATHS (Glowing cyan line linking them all, underneath the nodes)
     container.innerHTML = `
         <svg class="epic-path-line" viewBox="0 0 100 ${mapHeight}" preserveAspectRatio="none">
-            <!-- Locked Path (Faint dashed line) -->
-            <polyline points="${lockedPath}" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="4" stroke-dasharray="8,8" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>
-            
-            <!-- Completed Path (Glowing Neon Blue/Cyan line) -->
-            <polyline points="${completedPath}" fill="none" stroke="#00f0ff" stroke-width="6" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 10px #00f0ff);"/>
+            <polyline points="${lockedPath}" fill="none" stroke="rgba(0, 240, 255, 0.15)" stroke-width="4" stroke-dasharray="8,8" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="${completedPath}" fill="none" stroke="#00f0ff" stroke-width="6" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 12px #00f0ff);"/>
         </svg>
         ${nodesHtml}
     `;
 
-    // AUTO SCROLL TO CURRENT LEVEL
     setTimeout(() => {
         const targetY = mapHeight - (playerLevel * spacingY) - 50;
         scrollArea.scrollTop = targetY - (scrollArea.clientHeight / 2);
     }, 50);
 }
 
-// Click interaction for the nodes
 window.clickEpicNode = function(level, name) {
     if (level < playerLevel) {
         if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
@@ -11503,7 +11575,6 @@ window.clickEpicNode = function(level, name) {
         showKevinutaBubble(`Ai nevoie de Nivelul ${level} pentru ${name}!`);
     }
 };
-
 
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
