@@ -5996,6 +5996,32 @@ input:checked + .s-slider:before {
     box-shadow: 0 0 20px #ffcc00, inset 0 0 10px rgba(255,255,255,0.8) !important;
     z-index: 1002;
 }
+
+
+/* Red Notification Dot for Map Nodes */
+.node-reward-dot {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 22px;
+    height: 22px;
+    background: #ff4444;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: 900;
+    z-index: 20;
+    box-shadow: 0 0 10px #ff4444;
+}
+
+/* Reusing your vibration but slightly smaller for the map */
+.node-vibrate {
+    animation: rewardShake 2s infinite; /* Uses the same animation from Step 4 */
+}
   </style>
 </head>
 <body>
@@ -11778,6 +11804,8 @@ function openLevelMilestones() {
     forceCloseMenu();
     
     document.getElementById('milestonesModal').style.display = 'flex';
+    renderEpicWindingMap(); // 🔥 This ensures the dots/shakes are calculated fresh
+
     // Sync the current level to the UI
     document.getElementById('epicMapLevelText').innerText = playerLevel;
     
@@ -11810,47 +11838,58 @@ const mapHeight = (totalNodes * spacingY) + 300; // Increase total height too
     let nodesHtml = "";
 
 for (let i = 1; i <= totalNodes; i++) {
-        const tier = mapTiers[i - 1];
-        const imgUrl = `https://i.ibb.co/${tier.id}/image.png`;
-        const fallbackHTML = `this.src='https://iili.io/COrCopj.png'`; 
+    const tier = mapTiers[i - 1];
+    const imgUrl = `https://i.ibb.co/${tier.id}/image.png`;
+    const fallbackHTML = `this.src='https://iili.io/COrCopj.png'`; 
 
-        const y = mapHeight - (i * spacingY) - 50; 
-const xPercent = 50 + Math.sin(i * 1.0) * 28;
+    const y = mapHeight - (i * spacingY) - 50; 
+    const xPercent = 50 + Math.sin(i * 1.0) * 28;
 
-        // 1. Determine Level Logic (node-1, node-2, etc)
-        const tierClass = `node-${i}`; 
-        const labelClass = `label-${i}`;
+    const tierClass = `node-${i}`; 
+    const labelClass = `label-${i}`;
 
-        // 2. Base Game States
-        let stateClass = "node-locked";
-        if (i < playerLevel) stateClass = "node-completed";
-        if (i === playerLevel) stateClass = "node-current";
+    // 1. Determine Base States
+    let stateClass = "node-locked";
+    if (i < playerLevel) stateClass = "node-completed";
+    if (i === playerLevel) stateClass = "node-current";
 
-        // Size adjustment
-        const nodeSize = (i === 25) ? 130 : 75;
-        const halfSize = nodeSize / 2;
+    // 🔥 NEW: Reward Alert Logic
+    // If player reached this level, it has a reward, and it hasn't been claimed yet
+    const isUnclaimed = (i <= playerLevel) && 
+                        LEVEL_REWARDS_REGISTRY[i] && 
+                        !_GAME_DATA.claimedLevelRewards.includes(i);
 
-        nodesHtml += `
-            <div class="epic-node ${stateClass} ${tierClass}" 
-                 style="left: calc(${xPercent}% - ${halfSize}px); top: ${y - halfSize}px; width: ${nodeSize}px; height: ${nodeSize}px;">
-                
-                <img src="${imgUrl}" onerror="${fallbackHTML}" alt="${tier.name}">
-                
-                <!-- Consistent Box Label Engine -->
-                <div class="epic-node-label">
-                    <div class="node-title-badge ${labelClass}">${tier.name}</div>
-                </div>
-            </div>
-        `;
-
-        // SVG Path logic (remains the same)
-        if (i <= playerLevel) {
-            completedPath += `${xPercent},${y} `;
-            if (i === playerLevel) lockedPath += `${xPercent},${y} `; 
-        } else {
-            lockedPath += `${xPercent},${y} `;
-        }
+    let rewardDotHtml = "";
+    if (isUnclaimed) {
+        stateClass += " node-vibrate"; // Adds the shake animation
+        rewardDotHtml = `<div class="node-reward-dot">!</div>`; // Adds the red dot
     }
+
+    const nodeSize = (i === 25) ? 130 : 75;
+    const halfSize = nodeSize / 2;
+
+    nodesHtml += `
+        <div class="epic-node ${stateClass} ${tierClass}" 
+             style="left: calc(${xPercent}% - ${halfSize}px); top: ${y - halfSize}px; width: ${nodeSize}px; height: ${nodeSize}px;">
+            
+            ${rewardDotHtml} <!-- 🔥 The Red Dot appears here -->
+            
+            <img src="${imgUrl}" onerror="${fallbackHTML}" alt="${tier.name}">
+            
+            <div class="epic-node-label">
+                <div class="node-title-badge ${labelClass}">${tier.name}</div>
+            </div>
+        </div>
+    `;
+
+    // SVG Path logic (remains the same)
+    if (i <= playerLevel) {
+        completedPath += `${xPercent},${y} `;
+        if (i === playerLevel) lockedPath += `${xPercent},${y} `; 
+    } else {
+        lockedPath += `${xPercent},${y} `;
+    }
+}
 
     // 3-LAYER SVG PATH
     container.innerHTML = `
