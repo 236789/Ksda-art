@@ -9,6 +9,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -5294,272 +5295,341 @@ input:checked + .s-slider:before {
 }
 
 
-/* --- AAA CINEMATIC MILESTONES (ULTRA VIBRANT) --- */
-.ms-orig-box {
-    width: 90vw !important;
-    max-width: 900px !important;
-    max-height: 90vh;
-    /* Mesh Gradient Background: Blue, Purple, and Deep Navy */
-    background: radial-gradient(at 0% 0%, rgba(0, 162, 255, 0.15) 0, transparent 50%), 
-                radial-gradient(at 100% 100%, rgba(138, 43, 226, 0.2) 0, transparent 50%),
-                rgba(5, 8, 25, 0.95) !important;
-    backdrop-filter: blur(20px) saturate(200%);
-    border: 2px solid #00f0ff;
-    border-radius: 25px !important;
-    box-shadow: 0 0 40px rgba(0, 240, 255, 0.3), 
-                inset 0 0 30px rgba(138, 43, 226, 0.3) !important;
-    padding: 30px !important;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    overflow: hidden !important;
-}
-
-/* Header: Glowing Chrome Effect */
-.ms-orig-header h2 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(22px, 5vh, 40px);
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 6px;
-    color: #fff;
-    text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff, 0 0 40px rgba(0, 240, 255, 0.5);
-    margin-bottom: 5px;
-}
-
-/* Elite Level Cards */
-.ms-orig-card {
-    width: 100%;
-    aspect-ratio: 1 / 1.1;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(0, 240, 255, 0.2);
-    border-radius: 15px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: 0.4s cubic-bezier(0.2, 1, 0.2, 1);
-    overflow: hidden;
-    animation: msCardPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-/* UNLOCKED STATE: Ultra Bright Cyan */
-.ms-orig-card.unlocked {
-    border: 2px solid #00f0ff;
-    background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 162, 255, 0.2));
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4), inset 0 0 15px rgba(0, 240, 255, 0.2);
-}
-
-/* LIGHT SWEEP EFFECT (The Cinematic Shine) */
-.ms-orig-card::before {
-    content: "";
-    position: absolute;
-    top: 0; left: -100%;
-    width: 50%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transform: skewX(-25deg);
-    transition: 0.5s;
-}
-.ms-orig-card:hover::before { left: 150%; }
-
-.ms-orig-card .ms-val {
-    font-family: 'Orbitron';
-    font-size: 2.8vh;
-    font-weight: 900;
-    color: #fff;
-    text-shadow: 0 0 10px rgba(255,255,255,0.5);
-}
-.ms-orig-card .ms-star { 
-    color: #00f0ff; 
-    font-size: 1.5vh; 
-    filter: drop-shadow(0 0 8px #00f0ff);
-}
-
-/* THE BOSS LEVEL 25 (MAGENTA MADNESS) */
-.ms-orig-card-25 {
-    border: 2px solid #ff00ff !important;
-    background: linear-gradient(135deg, rgba(255, 0, 255, 0.2), rgba(138, 43, 226, 0.3)) !important;
-    box-shadow: 0 0 30px rgba(255, 0, 255, 0.6), inset 0 0 20px rgba(255, 0, 255, 0.4) !important;
-}
-.ms-orig-card-25 .ms-val { 
-    color: #fff !important; 
-    font-size: 4vh !important; 
-    text-shadow: 0 0 15px #ff00ff; 
-}
-.ms-orig-card-25 .ms-star { color: #ff00ff !important; font-size: 2vh !important; filter: drop-shadow(0 0 10px #ff00ff); }
-
-.ms-crown-orig {
-    position: absolute;
-    top: -10px;
-    font-size: 2.5vh;
-    color: #ff00ff;
-    filter: drop-shadow(0 0 10px #ff00ff);
-    animation: msFloat 2s infinite alternate;
-}
-
-/* PC GRID SCALE */
-.ms-orig-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 15px;
-    width: 100%;
-    padding: 10px;
-}
-
-/* Checkmarks */
-.ms-orig-check {
-    position: absolute;
-    top: 10px; right: 10px;
-    background: #fff;
-    color: #00f0ff;
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px;
-    box-shadow: 0 0 10px #00f0ff;
-    transform: scale(0);
-    transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-.unlocked .ms-orig-check { transform: scale(1); }
-
-@media (max-width: 600px) {
-    .ms-orig-box { width: 98vw; padding: 15px 10px; }
-    .ms-orig-grid { gap: 8px; }
-    .ms-orig-header h2 { letter-spacing: 3px; }
-}
-
-
-
-/* --- ELITE CINEMATIC MILESTONES (THE "SICK" VERSION) --- */
-.ms-orig-box {
+/* ==========================================
+   SKILL TREE / MAP REVAMP (CLASH OF CLANS VIBE)
+   ========================================== */
+.map-modal-box {
     width: 95vw !important;
-    max-width: 1000px !important;
-    height: 92vh !important;
-    background: radial-gradient(circle at center, #0a0c1f 0%, #020512 100%) !important;
-    border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 0 100px rgba(0,0,0,1);
-    border-radius: 30px !important;
-    padding: 20px !important;
+    max-width: 500px !important;
+    height: 90vh !important;
+    max-height: 850px;
+    background: #0a0b16; /* Fundal super intunecat */
+    border: 4px solid var(--th-border);
+    border-radius: 20px;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    padding: 0 !important;
+    box-shadow: 0 0 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(250, 204, 21, 0.2);
+}
+
+.map-header {
+    background: linear-gradient(to bottom, #2a2d4c, #131526);
+    border-bottom: 3px solid var(--th-border);
+    padding: 20px 20px 15px 20px;
+    text-align: center;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+}
+
+.map-header h2 {
+    font-family: 'Orbitron', sans-serif;
+    color: var(--th-accent);
+    margin: 0 0 5px 0;
+    font-size: 24px;
+    text-shadow: 0 0 10px var(--th-glow);
+    letter-spacing: 2px;
+}
+
+.map-header p {
+    font-family: 'Oswald', sans-serif;
+    color: #9aa0b8;
+    font-size: 13px;
+    margin: 0;
+}
+
+.close-map-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.3);
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
     align-items: center;
+    justify-content: center;
+}
+
+.close-map-btn:hover {
+    background: #ff4444;
+    border-color: #ff4444;
+    transform: scale(1.1);
+}
+
+/* The actual scrollable map */
+.map-scroll-area {
+    flex: 1;
+    overflow-y: auto;
     position: relative;
-    overflow: hidden !important; /* NO SCROLL */
-    user-select: none;
+    background: 
+        radial-gradient(circle at center, rgba(44, 42, 85, 0.8) 0%, #0a0b16 100%),
+        url('https://www.transparenttextures.com/patterns/cubes.png');
+    scrollbar-width: none; /* Hide scrollbar for clean look */
 }
+.map-scroll-area::-webkit-scrollbar { display: none; }
 
-/* Background Mesh Decor */
-.ms-orig-box::before {
-    content: ""; position: absolute; inset: 0;
-    background-image: url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
-    opacity: 0.2; pointer-events: none;
-}
-
-.ms-orig-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    gap: 12px;
+.map-path-container {
+    position: relative;
     width: 100%;
-    height: 100%; /* Fills the box */
-    padding: 10px;
+    /* Inaltimea va fi setata dinamic in JS pentru a incapea 25 de noduri */
 }
 
-/* THE UNIVERSAL TILE STYLE */
-.ms-orig-card {
-    position: relative;
-    border-radius: 15px;
+/* Individual Map Nodes (Circles) */
+.map-node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
     cursor: pointer;
+    z-index: 5;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.6);
+}
+
+.map-node:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Locked Node */
+.node-locked {
+    background: radial-gradient(circle, #3a3f58, #1a1c33);
+    border: 3px solid #5a6288;
+    color: #5a6288;
+}
+
+/* Completed Node */
+.node-completed {
+    background: linear-gradient(135deg, #facc15, #d97706);
+    border: 3px solid #ffffff;
+    color: #000;
+    box-shadow: 0 0 20px rgba(250, 204, 21, 0.6), inset 0 0 10px rgba(255,255,255,0.5);
+}
+
+/* Current Node (Pulsing) */
+.node-current {
+    background: linear-gradient(135deg, #00f0ff, #007799);
+    border: 4px solid #ffffff;
+    color: #000;
+    animation: pulseCurrentMap 1.5s infinite alternate;
+}
+
+@keyframes pulseCurrentMap {
+    from { box-shadow: 0 0 10px #00f0ff; transform: translate(-50%, -50%) scale(1); }
+    to { box-shadow: 0 0 30px #00f0ff, inset 0 0 15px rgba(255,255,255,0.8); transform: translate(-50%, -50%) scale(1.15); }
+}
+
+/* Epic Boss Nodes (5, 10, 15, 20, 25) */
+.node-boss {
+    width: 80px;
+    height: 80px;
+    border-width: 4px;
+}
+
+.node-boss.node-locked { border-color: #ff3366; background: radial-gradient(circle, #4a1525, #1a050d); color: #ff3366;}
+.node-boss.node-completed { background: linear-gradient(135deg, #ff3366, #990033); box-shadow: 0 0 30px rgba(255, 51, 102, 0.8); }
+
+/* Labels around nodes */
+.node-label {
+    position: absolute;
+    top: -25px;
+    white-space: nowrap;
+    color: #ffffff;
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    text-shadow: 0 2px 4px #000, 0 0 5px rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.6);
+    padding: 2px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.node-stars {
+    position: absolute;
+    bottom: -18px;
+    display: flex;
+    gap: 2px;
+    color: #facc15;
+    font-size: 12px;
+    filter: drop-shadow(0 2px 2px #000);
+}
+
+.node-icon { font-size: 24px; }
+.node-boss .node-icon { font-size: 32px; }
+
+/* Progress Footer */
+.map-footer {
+    background: #131526;
+    padding: 15px 20px;
+    border-top: 2px solid rgba(255,255,255,0.1);
+}
+.map-progress-bar {
+    width: 100%;
+    height: 12px;
+    background: #000;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.2);
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.05);
-    background: rgba(255,255,255,0.02);
+}
+.map-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00f0ff, #b533ff, #facc15);
+    box-shadow: 0 0 10px #facc15;
+    transition: width 1s ease;
 }
 
-.ms-orig-card:hover { transform: translateY(-5px) scale(1.05); z-index: 10; }
 
-/* THE BADGE LOGIC */
-.ms-badge {
-    width: 80%; height: 80%;
-    object-fit: contain;
-    filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8));
-    transition: 0.3s ease;
-    z-index: 2;
+/* ============================================================
+   SKILL TREE / LEGEND PATH — MILESTONES REDESIGN
+   ============================================================ */
+#milestonesModal .lvlpath-box {
+    width: 100%; height: 100%;
+    max-width: 560px; max-height: 100vh;
+    margin: 0 auto;
+    background: radial-gradient(circle at 50% 0%, #1b1440 0%, #06040f 70%);
+    display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
 }
-
-.ms-orig-card.locked .ms-badge { filter: grayscale(1) brightness(0.2); opacity: 0.5; }
-.ms-orig-card.locked::before {
-    content: "\f023"; font-family: "Font Awesome 6 Free"; font-weight: 900;
-    position: absolute; color: rgba(255,255,255,0.1); font-size: 1.5rem; z-index: 3;
+@media (min-width: 620px) {
+    #milestonesModal .lvlpath-box {
+        height: 92vh; margin-top: 4vh; border-radius: 28px;
+        border: 2px solid var(--th-border);
+        box-shadow: 0 0 60px var(--th-glow), 0 20px 60px rgba(0,0,0,0.6);
+    }
 }
-
-/* --- TIER SPECIAL STYLES (THE CSS SICKNESS) --- */
-
-/* 1-3: METALS */
-.tier-1 { background: radial-gradient(circle at top, #6b3e26, #2a1506) !important; box-shadow: inset 0 0 20px #cd7f32; }
-.tier-2 { background: radial-gradient(circle at top, #4d4d4d, #1a1a1a) !important; box-shadow: inset 0 0 20px #c0c0c0; }
-.tier-3 { background: radial-gradient(circle at top, #804000, #331a00) !important; box-shadow: inset 0 0 20px #b87333; }
-
-/* 4-6: CRYSTALS */
-.tier-4 { background: radial-gradient(circle at top, #003366, #000a1a) !important; box-shadow: 0 0 15px #0073e6; }
-.tier-5 { background: radial-gradient(circle at top, #004d1a, #001a09) !important; box-shadow: 0 0 15px #50c878; }
-.tier-6 { background: radial-gradient(circle at top, #330066, #0d001a) !important; box-shadow: 0 0 15px #9966cc; }
-
-/* 7-9: POWER */
-.tier-7 { background: radial-gradient(circle at top, #664d00, #1a1400) !important; box-shadow: 0 0 20px #ffd700; }
-.tier-8 { background: radial-gradient(circle at top, #004d4d, #001a1a) !important; box-shadow: 0 0 20px #afeeee; }
-.tier-9 { background: radial-gradient(circle at top, #4d0000, #1a0000) !important; box-shadow: 0 0 20px #ff0000; animation: pulseRed 2s infinite; }
-
-/* 10-15: ROYAL / ANCIENT */
-.tier-10 { background: linear-gradient(45deg, #2a004d, #664d00) !important; border: 2px solid #ffd700 !important; }
-.tier-11 { background: linear-gradient(135deg, #002200, #00a86b) !important; }
-.tier-12 { background: radial-gradient(circle, #bc13fe, #000) !important; }
-.tier-13 { background: linear-gradient(to bottom, #000, #00ffff) !important; }
-.tier-14 { background: url('https://www.transparenttextures.com/patterns/lava.png'), #000 !important; box-shadow: inset 0 0 30px #ff4500; }
-.tier-15 { background: radial-gradient(circle, #df73ff 0%, #000 100%) !important; }
-
-/* 16-20: COSMIC / CELESTIAL */
-.tier-16 { background: #000; box-shadow: inset 0 0 40px #00ccff; }
-.tier-17 { background: linear-gradient(45deg, #ffd700, #bc13fe) !important; }
-.tier-18 { background: radial-gradient(circle, #39ff14 0%, #000 70%) !important; }
-.tier-19 { background: repeating-conic-gradient(#6600ff 0% 25%, #000 25% 50%) !important; background-size: 200% 200%; animation: voidRotate 10s linear infinite; }
-.tier-20 { background: linear-gradient(to bottom, #fff, #ffd700, #000) !important; box-shadow: 0 0 30px #fff; }
-
-/* 21-25: GODLY */
-.tier-21 { background: url('https://www.transparenttextures.com/patterns/stardust.png'), #000 !important; box-shadow: 0 0 40px #0033ff; }
-.tier-22 { background: #b9f2ff; box-shadow: inset 0 0 50px #fff, 0 0 30px #00f0ff; }
-.tier-23 { background: #000; border: 3px solid #ff0000 !important; box-shadow: inset 0 0 50px #ff0000; }
-.tier-24 { background: linear-gradient(to top, #00a2ff, #fff) !important; box-shadow: 0 0 50px #fff; }
-
-/* 25: ETERNAL - THE PRISMATIC GOD */
-.tier-25 {
-    background: linear-gradient(45deg, #ff00ff, #00ffff, #ffd700) !important;
-    background-size: 300% 300% !important;
-    animation: rainbowFlow 3s linear infinite !important;
-    border: 3px solid #fff !important;
-    box-shadow: 0 0 60px #ff00ff, inset 0 0 20px #fff !important;
+.lvlpath-close-btn {
+    position: absolute; top: 14px; right: 14px;
+    width: 38px; height: 38px; border-radius: 50%;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 20; transition: 0.2s;
 }
-
-/* Animations */
-@keyframes pulseRed { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; box-shadow: 0 0 40px #ff0000; } }
-@keyframes voidRotate { from { background-position: 0 0; } to { background-position: 100% 100%; } }
-@keyframes rainbowFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-/* PC vs Mobile Scaling */
-@media (max-width: 768px) {
-    .ms-orig-grid { gap: 6px; padding: 5px; }
-    .ms-orig-box { height: 95vh !important; border-radius: 15px !important; }
+.lvlpath-close-btn:hover { background: #ff2a2a; transform: rotate(90deg); }
+.lvlpath-header { display: flex; align-items: center; gap: 14px; padding: 22px 55px 10px 22px; z-index: 10; }
+.lvlpath-header-icon {
+    width: 46px; height: 46px; border-radius: 14px;
+    background: var(--th-btn-bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--th-btn-text);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.5); flex-shrink: 0;
 }
-
-@media (min-width: 1000px) {
-    .ms-orig-grid { grid-template-columns: repeat(5, 1fr); }
+.lvlpath-header-text h2 {
+    margin: 0; font-family: 'Orbitron', sans-serif; font-size: 20px;
+    letter-spacing: 2px; color: #fff; text-shadow: 0 0 15px var(--th-glow);
 }
+.lvlpath-header-text span {
+    font-family: 'Oswald', sans-serif; font-size: 12px; color: var(--th-accent);
+    letter-spacing: 1px; text-transform: uppercase;
+}
+.lvlpath-progress-wrap { display: flex; align-items: center; gap: 12px; padding: 0 22px 16px 22px; }
+.lvlpath-progress-track {
+    flex-grow: 1; height: 10px; background: rgba(0,0,0,0.5);
+    border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);
+}
+.lvlpath-progress-fill {
+    height: 100%; width: 0%; background: var(--th-btn-bg);
+    box-shadow: 0 0 12px var(--th-glow); transition: width 0.6s ease;
+}
+#lvlPathProgressLabel {
+    font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900;
+    color: var(--th-accent); min-width: 34px; text-align: right;
+}
+.lvlpath-scroll {
+    flex: 1; overflow-y: auto; overflow-x: hidden;
+    scrollbar-width: thin; scrollbar-color: var(--th-border) transparent;
+    -webkit-overflow-scrolling: touch; position: relative;
+}
+.lvlpath-scroll::-webkit-scrollbar { width: 5px; }
+.lvlpath-scroll::-webkit-scrollbar-thumb { background: var(--th-border); border-radius: 10px; opacity: 0.5; }
+.lvlpath-track { position: relative; width: 100%; }
+.lvlpath-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+.lvlpath-line-base {
+    fill: none; stroke: rgba(255,255,255,0.12); stroke-width: 2.2;
+    stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 3 10;
+    vector-effect: non-scaling-stroke;
+}
+.lvlpath-line-gold {
+    fill: none; stroke: var(--th-accent); stroke-width: 2.6;
+    stroke-linecap: round; stroke-linejoin: round;
+    filter: drop-shadow(0 0 6px var(--th-glow));
+    vector-effect: non-scaling-stroke;
+}
+.lvlpath-node {
+    position: absolute; transform: translate(-50%, -50%);
+    display: flex; flex-direction: column; align-items: center;
+    z-index: 5; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.lvlpath-node-ring {
+    position: absolute; inset: -6px; border-radius: 50%;
+    border: 2px solid var(--th-accent); opacity: 0;
+}
+.lvlpath-node.claimable .lvlpath-node-ring { opacity: 1; animation: lvlpathRingPulse 1.4s infinite ease-out; }
+@keyframes lvlpathRingPulse {
+    0% { transform: scale(0.9); opacity: 0.9; }
+    100% { transform: scale(1.35); opacity: 0; }
+}
+.lvlpath-node-circle {
+    position: relative; width: 62px; height: 62px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(145deg, #2c2a55, #14132b);
+    border: 3px solid rgba(255,255,255,0.15);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.6);
+    transition: transform 0.15s ease; overflow: hidden;
+}
+.lvlpath-node:active .lvlpath-node-circle { transform: scale(0.92); }
+.lvlpath-node-circle img { width: 68%; height: 68%; object-fit: contain; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.6)); }
+.lvlpath-lock-icon { position: absolute; font-size: 18px; color: rgba(255,255,255,0.5); }
+.lvlpath-node.locked .lvlpath-node-circle {
+    background: linear-gradient(145deg, #1a1a2c, #0a0a14);
+    border-color: rgba(255,255,255,0.06); filter: grayscale(1);
+}
+.lvlpath-node.locked .lvlpath-node-circle img { opacity: 0.15; }
+.lvlpath-node.unlocked .lvlpath-node-circle { border-color: var(--th-border); box-shadow: 0 0 16px var(--th-glow), 0 6px 14px rgba(0,0,0,0.6); }
+.lvlpath-node.claimed .lvlpath-node-circle { border-color: #4ade80; box-shadow: 0 0 14px rgba(74, 222, 128, 0.5); }
+.lvlpath-node.current .lvlpath-node-circle {
+    width: 74px; height: 74px; border-color: #fff;
+    box-shadow: 0 0 0 4px var(--th-glow), 0 8px 20px rgba(0,0,0,0.7);
+}
+.lvlpath-node-label {
+    margin-top: 6px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900;
+    color: #cbd0e6; background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 8px; letter-spacing: 1px;
+}
+.lvlpath-node.current .lvlpath-node-label { color: var(--th-accent); }
+.lvlpath-node-badge {
+    position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%;
+    background: #facc15; color: #1a1c33; display: flex; align-items: center; justify-content: center;
+    font-size: 11px; box-shadow: 0 2px 6px rgba(0,0,0,0.5); border: 2px solid #fff; z-index: 6;
+}
+.lvlpath-node.claimed .lvlpath-node-badge { background: #4ade80; }
+.lvlpath-here-flag {
+    position: absolute; top: -34px; white-space: nowrap;
+    font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 900; letter-spacing: 1px;
+    color: #1a1c33; background: var(--th-accent); padding: 4px 10px; border-radius: 8px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.5); animation: lvlpathFlagBob 1.6s ease-in-out infinite;
+}
+.lvlpath-here-flag::after {
+    content: ""; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
+    border-width: 5px 5px 0 5px; border-style: solid; border-color: var(--th-accent) transparent transparent transparent;
+}
+@keyframes lvlpathFlagBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@media (max-width: 420px) {
+    .lvlpath-node-circle { width: 54px; height: 54px; }
+    .lvlpath-node.current .lvlpath-node-circle { width: 64px; height: 64px; }
+    .lvlpath-node-label { font-size: 10px; }
+}
+.lvlpath-reward-box .epic-trophy-icon { font-size: 55px; }
   </style>
 </head>
 <body>
@@ -5877,26 +5947,32 @@ input:checked + .s-slider:before {
         </div>
     </div>
 </div>
+<div id="milestonesModal" class="modal-overlay" style="z-index: 200000; background: rgba(5,6,15,0.97);">
+  <div class="lvlpath-box">
+    <button class="lvlpath-close-btn" onclick="closeMilestones()"><i class="fa-solid fa-xmark"></i></button>
 
-<div id="milestonesModal" class="modal-overlay" style="z-index: 200000; background: rgba(0,0,0,0.95);">
-    <div class="ms-orig-box">
-        
-        <button onclick="closeMilestones()" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.1); border:none; color:#fff; width:35px; height:35px; border-radius:50%; cursor:pointer; z-index:100;">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-
-        <div style="text-align: center; margin-bottom: 10px;">
-            <h2 style="font-family:'Orbitron'; color:#fff; letter-spacing:4px; font-size:22px; margin:0;">LEGENDARY RANKS</h2>
-            <p style="font-family:'Oswald'; color:#00f0ff; font-size:10px; margin:0; opacity:0.7;">CLICK AN UNLOCKED RANK TO CLAIM REWARDS</p>
-        </div>
-
-        <div id="msOrigGrid" class="ms-orig-grid"></div>
-
-        <!-- Progress Tracker Footer -->
-        <div style="width:100%; height:4px; background:rgba(255,255,255,0.05); margin-top:15px; border-radius:10px; overflow:hidden;">
-            <div id="msGlobalProgress" style="height:100%; width:0%; background:linear-gradient(90deg, #00f0ff, #ff00ff); transition: 1s;"></div>
+    <div class="lvlpath-header">
+        <div class="lvlpath-header-icon"><i class="fa-solid fa-route"></i></div>
+        <div class="lvlpath-header-text">
+            <h2>DRUMUL LEGENDEI</h2>
+            <span id="lvlPathSubtitle">NIVEL 1 / 25</span>
         </div>
     </div>
+
+    <div class="lvlpath-progress-wrap">
+        <div class="lvlpath-progress-track"><div id="lvlPathProgressFill" class="lvlpath-progress-fill"></div></div>
+        <span id="lvlPathProgressLabel">0%</span>
+    </div>
+
+    <div class="lvlpath-scroll" id="lvlPathScroll">
+        <div class="lvlpath-track" id="lvlPathTrack">
+            <svg class="lvlpath-svg" id="lvlPathSvg" preserveAspectRatio="none">
+                <polyline id="lvlPathLineBase" class="lvlpath-line-base"></polyline>
+                <polyline id="lvlPathLineGold" class="lvlpath-line-gold"></polyline>
+            </svg>
+        </div>
+    </div>
+  </div>
 </div>
 
 <!-- SLOT MODAL V4 -->
