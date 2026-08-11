@@ -5490,146 +5490,154 @@ input:checked + .s-slider:before {
 }
 
 
-/* ============================================================
-   SKILL TREE / LEGEND PATH — MILESTONES REDESIGN
-   ============================================================ */
-#milestonesModal .lvlpath-box {
+/* ==========================================
+   CLASH OF CLANS STYLE WINDING MAP
+   ========================================== */
+.coc-map-box {
+    width: 95vw !important;
+    max-width: 600px !important;
+    height: 90vh !important;
+    background: #0d1117; /* Dark background for the map */
+    border: 4px solid var(--th-border);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 0 !important;
+    box-shadow: 0 0 50px rgba(0,0,0,0.9);
+}
+
+.coc-map-header {
+    background: linear-gradient(to bottom, #1e293b, #0f172a);
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.coc-map-header h2 {
+    font-family: 'Orbitron', sans-serif;
+    color: #fff;
+    margin: 0 0 5px 0;
+    font-size: 22px;
+    letter-spacing: 2px;
+}
+
+.coc-map-header p {
+    font-family: 'Oswald', sans-serif;
+    color: #94a3b8;
+    margin: 0;
+    font-size: 14px;
+}
+
+.coc-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    width: 35px; height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: 0.2s;
+}
+.coc-close-btn:hover { background: #ef4444; transform: scale(1.1); }
+
+/* SCROLL AREA */
+.coc-map-scroll {
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    /* Optional grid/dirt pattern for the map background */
+    background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+    scrollbar-width: none; /* Hides scrollbar on Firefox */
+}
+.coc-map-scroll::-webkit-scrollbar { display: none; } /* Hides scrollbar on Chrome */
+
+.coc-map-content {
+    position: relative;
+    width: 100%;
+    /* Height is set dynamically by JS based on nodes */
+}
+
+/* THE ROUND NODES */
+.coc-node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: #1e293b;
+    border: 3px solid #334155;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    transition: transform 0.2s;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+}
+
+.coc-node:hover { transform: translate(-50%, -50%) scale(1.1); }
+
+.coc-node img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    border-radius: 50%;
+}
+
+/* NODE STATES */
+.node-locked {
+    filter: grayscale(1) brightness(0.5);
+    pointer-events: none;
+}
+
+.node-completed {
+    border-color: #4ade80; /* Green border for completed */
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.4), inset 0 0 10px rgba(0,0,0,0.8);
+}
+
+.node-current {
+    border-color: #facc15; /* Gold border for current */
+    box-shadow: 0 0 25px rgba(250, 204, 21, 0.8), inset 0 0 10px rgba(0,0,0,0.8);
+    animation: pulseNode 1.5s infinite alternate;
+}
+
+@keyframes pulseNode {
+    from { transform: translate(-50%, -50%) scale(1); }
+    to { transform: translate(-50%, -50%) scale(1.15); box-shadow: 0 0 35px #facc15; }
+}
+
+/* LEVEL NUMBER LABEL */
+.coc-node-label {
+    position: absolute;
+    bottom: -15px;
+    background: #000;
+    color: #fff;â
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* SVG PATH LINES */
+.coc-path-line {
+    position: absolute;
+    top: 0; left: 0;
     width: 100%; height: 100%;
-    max-width: 560px; max-height: 100vh;
-    margin: 0 auto;
-    background: radial-gradient(circle at 50% 0%, #1b1440 0%, #06040f 70%);
-    display: flex; flex-direction: column;
-    position: relative; overflow: hidden;
+    z-index: 1;
+    pointer-events: none;
 }
-@media (min-width: 620px) {
-    #milestonesModal .lvlpath-box {
-        height: 92vh; margin-top: 4vh; border-radius: 28px;
-        border: 2px solid var(--th-border);
-        box-shadow: 0 0 60px var(--th-glow), 0 20px 60px rgba(0,0,0,0.6);
-    }
-}
-.lvlpath-close-btn {
-    position: absolute; top: 14px; right: 14px;
-    width: 38px; height: 38px; border-radius: 50%;
-    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-    color: #fff; font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; z-index: 20; transition: 0.2s;
-}
-.lvlpath-close-btn:hover { background: #ff2a2a; transform: rotate(90deg); }
-.lvlpath-header { display: flex; align-items: center; gap: 14px; padding: 22px 55px 10px 22px; z-index: 10; }
-.lvlpath-header-icon {
-    width: 46px; height: 46px; border-radius: 14px;
-    background: var(--th-btn-bg);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; color: var(--th-btn-text);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.5); flex-shrink: 0;
-}
-.lvlpath-header-text h2 {
-    margin: 0; font-family: 'Orbitron', sans-serif; font-size: 20px;
-    letter-spacing: 2px; color: #fff; text-shadow: 0 0 15px var(--th-glow);
-}
-.lvlpath-header-text span {
-    font-family: 'Oswald', sans-serif; font-size: 12px; color: var(--th-accent);
-    letter-spacing: 1px; text-transform: uppercase;
-}
-.lvlpath-progress-wrap { display: flex; align-items: center; gap: 12px; padding: 0 22px 16px 22px; }
-.lvlpath-progress-track {
-    flex-grow: 1; height: 10px; background: rgba(0,0,0,0.5);
-    border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);
-}
-.lvlpath-progress-fill {
-    height: 100%; width: 0%; background: var(--th-btn-bg);
-    box-shadow: 0 0 12px var(--th-glow); transition: width 0.6s ease;
-}
-#lvlPathProgressLabel {
-    font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900;
-    color: var(--th-accent); min-width: 34px; text-align: right;
-}
-.lvlpath-scroll {
-    flex: 1; overflow-y: auto; overflow-x: hidden;
-    scrollbar-width: thin; scrollbar-color: var(--th-border) transparent;
-    -webkit-overflow-scrolling: touch; position: relative;
-}
-.lvlpath-scroll::-webkit-scrollbar { width: 5px; }
-.lvlpath-scroll::-webkit-scrollbar-thumb { background: var(--th-border); border-radius: 10px; opacity: 0.5; }
-.lvlpath-track { position: relative; width: 100%; }
-.lvlpath-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-.lvlpath-line-base {
-    fill: none; stroke: rgba(255,255,255,0.12); stroke-width: 2.2;
-    stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 3 10;
-    vector-effect: non-scaling-stroke;
-}
-.lvlpath-line-gold {
-    fill: none; stroke: var(--th-accent); stroke-width: 2.6;
-    stroke-linecap: round; stroke-linejoin: round;
-    filter: drop-shadow(0 0 6px var(--th-glow));
-    vector-effect: non-scaling-stroke;
-}
-.lvlpath-node {
-    position: absolute; transform: translate(-50%, -50%);
-    display: flex; flex-direction: column; align-items: center;
-    z-index: 5; cursor: pointer; -webkit-tap-highlight-color: transparent;
-}
-.lvlpath-node-ring {
-    position: absolute; inset: -6px; border-radius: 50%;
-    border: 2px solid var(--th-accent); opacity: 0;
-}
-.lvlpath-node.claimable .lvlpath-node-ring { opacity: 1; animation: lvlpathRingPulse 1.4s infinite ease-out; }
-@keyframes lvlpathRingPulse {
-    0% { transform: scale(0.9); opacity: 0.9; }
-    100% { transform: scale(1.35); opacity: 0; }
-}
-.lvlpath-node-circle {
-    position: relative; width: 62px; height: 62px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(145deg, #2c2a55, #14132b);
-    border: 3px solid rgba(255,255,255,0.15);
-    box-shadow: 0 6px 14px rgba(0,0,0,0.6);
-    transition: transform 0.15s ease; overflow: hidden;
-}
-.lvlpath-node:active .lvlpath-node-circle { transform: scale(0.92); }
-.lvlpath-node-circle img { width: 68%; height: 68%; object-fit: contain; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.6)); }
-.lvlpath-lock-icon { position: absolute; font-size: 18px; color: rgba(255,255,255,0.5); }
-.lvlpath-node.locked .lvlpath-node-circle {
-    background: linear-gradient(145deg, #1a1a2c, #0a0a14);
-    border-color: rgba(255,255,255,0.06); filter: grayscale(1);
-}
-.lvlpath-node.locked .lvlpath-node-circle img { opacity: 0.15; }
-.lvlpath-node.unlocked .lvlpath-node-circle { border-color: var(--th-border); box-shadow: 0 0 16px var(--th-glow), 0 6px 14px rgba(0,0,0,0.6); }
-.lvlpath-node.claimed .lvlpath-node-circle { border-color: #4ade80; box-shadow: 0 0 14px rgba(74, 222, 128, 0.5); }
-.lvlpath-node.current .lvlpath-node-circle {
-    width: 74px; height: 74px; border-color: #fff;
-    box-shadow: 0 0 0 4px var(--th-glow), 0 8px 20px rgba(0,0,0,0.7);
-}
-.lvlpath-node-label {
-    margin-top: 6px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900;
-    color: #cbd0e6; background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 8px; letter-spacing: 1px;
-}
-.lvlpath-node.current .lvlpath-node-label { color: var(--th-accent); }
-.lvlpath-node-badge {
-    position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%;
-    background: #facc15; color: #1a1c33; display: flex; align-items: center; justify-content: center;
-    font-size: 11px; box-shadow: 0 2px 6px rgba(0,0,0,0.5); border: 2px solid #fff; z-index: 6;
-}
-.lvlpath-node.claimed .lvlpath-node-badge { background: #4ade80; }
-.lvlpath-here-flag {
-    position: absolute; top: -34px; white-space: nowrap;
-    font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 900; letter-spacing: 1px;
-    color: #1a1c33; background: var(--th-accent); padding: 4px 10px; border-radius: 8px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.5); animation: lvlpathFlagBob 1.6s ease-in-out infinite;
-}
-.lvlpath-here-flag::after {
-    content: ""; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
-    border-width: 5px 5px 0 5px; border-style: solid; border-color: var(--th-accent) transparent transparent transparent;
-}
-@keyframes lvlpathFlagBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-@media (max-width: 420px) {
-    .lvlpath-node-circle { width: 54px; height: 54px; }
-    .lvlpath-node.current .lvlpath-node-circle { width: 64px; height: 64px; }
-    .lvlpath-node-label { font-size: 10px; }
-}
-.lvlpath-reward-box .epic-trophy-icon { font-size: 55px; }
   </style>
 </head>
 <body>
@@ -5947,32 +5955,27 @@ input:checked + .s-slider:before {
         </div>
     </div>
 </div>
-<div id="milestonesModal" class="modal-overlay" style="z-index: 200000; background: rgba(5,6,15,0.97);">
-  <div class="lvlpath-box">
-    <button class="lvlpath-close-btn" onclick="closeMilestones()"><i class="fa-solid fa-xmark"></i></button>
-
-    <div class="lvlpath-header">
-        <div class="lvlpath-header-icon"><i class="fa-solid fa-route"></i></div>
-        <div class="lvlpath-header-text">
-            <h2>DRUMUL LEGENDEI</h2>
-            <span id="lvlPathSubtitle">NIVEL 1 / 25</span>
+<!-- CLASH OF CLANS STYLE MAP MODAL -->
+<div id="milestonesModal" class="modal-overlay" style="z-index: 200000; background: rgba(0,0,0,0.9);">
+    <div class="coc-map-box">
+        
+        <!-- Header -->
+        <div class="coc-map-header">
+            <button class="coc-close-btn" onclick="closeMilestones()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h2>TRASEUL LEGENDELOR</h2>
+            <p>Nivel Curent: <span id="cocCurrentLevelText" style="color: #facc15;">1</span> / 25</p>
         </div>
-    </div>
 
-    <div class="lvlpath-progress-wrap">
-        <div class="lvlpath-progress-track"><div id="lvlPathProgressFill" class="lvlpath-progress-fill"></div></div>
-        <span id="lvlPathProgressLabel">0%</span>
-    </div>
-
-    <div class="lvlpath-scroll" id="lvlPathScroll">
-        <div class="lvlpath-track" id="lvlPathTrack">
-            <svg class="lvlpath-svg" id="lvlPathSvg" preserveAspectRatio="none">
-                <polyline id="lvlPathLineBase" class="lvlpath-line-base"></polyline>
-                <polyline id="lvlPathLineGold" class="lvlpath-line-gold"></polyline>
-            </svg>
+        <!-- The Scrollable Map Area -->
+        <div class="coc-map-scroll" id="cocMapScroll">
+            <div class="coc-map-content" id="cocMapContent">
+                <!-- JavaScript will draw the SVG lines and Round Nodes here -->
+            </div>
         </div>
+
     </div>
-  </div>
 </div>
 
 <!-- SLOT MODAL V4 -->
@@ -11339,14 +11342,47 @@ function levelUp() {
 }
 
 
-// --- MILESTONES MODAL LOGIC ---
+// ==========================================
+// CLASH OF CLANS STYLE MAP LOGIC
+// ==========================================
+
+const mapBadges = [
+    "https://ibb.co/wFth4chq", // 1 Bronze
+    "https://ibb.co/r21M97q5", // 2 Silver
+    "https://ibb.co/vxHM1ffF", // 3 Copper
+    "https://ibb.co/RGTWgFS2", // 4 Sapphire
+    "https://ibb.co/23FZKwXX", // 5 Emerald
+    "https://ibb.co/3ywhPtDX", // 6 Amethyst
+    "https://ibb.co/Xf2gynsP", // 7 Gold
+    "https://ibb.co/RGnRdDRs", // 8 Ice Crystal
+    "https://ibb.co/8nS1TM3x", // 9 Ruby
+    "https://ibb.co/qL5kJs5H", // 10 Royal Gold
+    "https://ibb.co/67QVCSfs", // 11 Jade
+    "https://ibb.co/WWttKxPB", // 12 Astral
+    "https://ibb.co/pBfztNy2", // 13 Azure
+    "https://ibb.co/MyC7Q2GK", // 14 Obsidian
+    "https://ibb.co/KcNG1RqF", // 15 Geode
+    "https://ibb.co/4gnrPFt0", // 16 Frost
+    "https://ibb.co/qLTkBP7P", // 17 Mythril
+    "https://ibb.co/vfRpjjT",  // 18 Toxicium
+    "https://ibb.co/WSGsNSP",  // 19 Void
+    "https://ibb.co/YBwnKJyj", // 20 Celestial Gold
+    "https://ibb.co/pBdxJVhc", // 21 Cosmic
+    "https://ibb.co/6J1CRmtr", // 22 Celestial Diamond
+    "https://ibb.co/S2z2pFW",  // 23 Infernal
+    "https://ibb.co/Z6vM7YBx", // 24 Divine
+    "https://ibb.co/B5QKGyLM"  // 25 Eternal
+];
 
 function openLevelMilestones() {
     isPaused = true;
     clearInterval(moveKevinInterval);
-    document.getElementById('milestonesModal').style.display = 'flex';
-    renderMilestones();
     forceCloseMenu();
+    
+    document.getElementById('milestonesModal').style.display = 'flex';
+    document.getElementById('cocCurrentLevelText').innerText = playerLevel;
+    
+    renderCocMap();
 }
 
 function closeMilestones() {
@@ -11357,127 +11393,85 @@ function closeMilestones() {
     }
 }
 
-function renderMilestones() {
-    const track = document.getElementById('lvlPathTrack');
-    const scrollBox = document.getElementById('lvlPathScroll');
-    const svg = document.getElementById('lvlPathSvg');
-    const lineBase = document.getElementById('lvlPathLineBase');
-    const lineGold = document.getElementById('lvlPathLineGold');
+function renderCocMap() {
+    const container = document.getElementById('cocMapContent');
+    const scrollArea = document.getElementById('cocMapScroll');
+    if (!container) return;
+    
+    container.innerHTML = "";
 
-    if (!track || !svg || !lineBase || !lineGold) {
-        console.error("❌ Milestones: missing DOM elements", { track, svg, lineBase, lineGold });
-        return;
-    }
+    const totalNodes = 25;
+    const spacingY = 110; // Vertical distance between nodes
+    const mapHeight = (totalNodes * spacingY) + 150; 
+    
+    container.style.height = mapHeight + 'px';
 
-    // Guard against undefined globals
-    const lvl = (typeof playerLevel === 'number' && playerLevel > 0) ? playerLevel : 1;
-    const xp = (typeof playerXP === 'number') ? playerXP : 0;
-    const xpNeeded = (typeof xpToNextLevel === 'number' && xpToNextLevel > 0) ? xpToNextLevel : 1;
+    let completedPath = "";
+    let lockedPath = "";
+    let nodesHtml = "";
 
-    if (!_GAME_DATA.claimedLevelRewards) _GAME_DATA.claimedLevelRewards = [];
+    // Generate Path Coordinates (Bottom to Top, winding left/right)
+    for (let i = 1; i <= totalNodes; i++) {
+        // Y starts at bottom and goes up
+        const y = mapHeight - (i * spacingY) - 50; 
+        
+        // Sine wave for X creates the winding road (between 25% and 75% width)
+        const xPercent = 50 + Math.sin(i * 1.2) * 30; 
 
-    track.querySelectorAll('.lvlpath-node').forEach(n => n.remove());
-
-    const vGap = 108, topPad = 60, bottomPad = 60;
-    const LVL_PATH_TOTAL = 25;
-    const trackHeight = topPad + (LVL_PATH_TOTAL - 1) * vGap + bottomPad;
-
-    track.style.height = trackHeight + 'px';
-    track.style.minHeight = trackHeight + 'px';
-    track.style.width = '100%';
-
-    svg.setAttribute('viewBox', `0 0 100 ${trackHeight}`);
-    svg.setAttribute('width', '100%');
-    svg.setAttribute('height', trackHeight);
-
-    const points = [];
-    for (let i = 1; i <= LVL_PATH_TOTAL; i++) {
-        points.push({ level: i, x: 50 + 28 * Math.sin(i * 0.85), y: topPad + (i - 1) * vGap });
-    }
-
-    lineBase.setAttribute('points', points.map(p => `${p.x},${p.y}`).join(' '));
-
-    const progressFraction = Math.min(xp / xpNeeded, 1);
-    const goldPoints = [];
-    for (let i = 0; i < points.length; i++) {
-        if (points[i].level <= lvl) {
-            goldPoints.push(points[i]);
-        } else if (points[i].level === lvl + 1) {
-            const prev = points[i - 1], next = points[i];
-            goldPoints.push({
-                x: prev.x + (next.x - prev.x) * progressFraction,
-                y: prev.y + (next.y - prev.y) * progressFraction
-            });
-            break;
-        } else break;
-    }
-    lineGold.setAttribute('points', goldPoints.map(p => `${p.x},${p.y}`).join(' '));
-
-    const badges = [
-        "https://i.postimg.cc/mD363LpX/bronze.png", "https://i.postimg.cc/mry0Vj60/silver.png", "https://i.postimg.cc/mD8S6v8D/copper.png",
-        "https://i.postimg.cc/mD5s6N4S/sapphire.png", "https://i.postimg.cc/mry6N4S/emerald.png", "https://i.postimg.cc/mD363LpX/amethyst.png",
-        "https://i.postimg.cc/mry0Vj60/gold.png", "https://i.postimg.cc/mD8S6v8D/ice.png", "https://i.postimg.cc/mD5s6N4S/ruby.png",
-        "https://i.postimg.cc/mry6N4S/royal.png", "https://i.postimg.cc/mD363LpX/jade.png", "https://i.postimg.cc/mry0Vj60/astral.png",
-        "https://i.postimg.cc/mD8S6v8D/azure.png", "https://i.postimg.cc/mD5s6N4S/obsidian.png", "https://i.postimg.cc/mry6N4S/geode.png",
-        "https://i.postimg.cc/mD363LpX/frost.png", "https://i.postimg.cc/mry0Vj60/mythril.png", "https://i.postimg.cc/mD8S6v8D/toxic.png",
-        "https://i.postimg.cc/mD5s6N4S/void.png", "https://i.postimg.cc/mry6N4S/heavenly.png", "https://i.postimg.cc/mD363LpX/cosmic.png",
-        "https://i.postimg.cc/mry0Vj60/diamond.png", "https://i.postimg.cc/mD8S6v8D/infernal.png", "https://i.postimg.cc/mD5s6N4S/divine.png",
-        "https://i.postimg.cc/mry6N4S/eternal.png"
-    ];
-
-    let currentNodeEl = null;
-    let nodesBuilt = 0;
-
-    points.forEach(p => {
-        const nodeLvl = p.level;
-        const isUnlocked = nodeLvl <= lvl;
-        const isCurrent = nodeLvl === lvl;
-        const reward = getLevelReward(nodeLvl);
-        const hasReward = reward.score > 0 || reward.ruby > 0;
-        const isClaimed = _GAME_DATA.claimedLevelRewards.includes(nodeLvl);
-        const isClaimable = isUnlocked && hasReward && !isClaimed;
-
-        const node = document.createElement('div');
-        node.className = 'lvlpath-node ' + (isCurrent ? 'current' : (isUnlocked ? (isClaimed ? 'claimed' : 'unlocked') : 'locked'));
-        if (isClaimable) node.classList.add('claimable');
-        node.style.left = p.x + '%';
-        node.style.top = p.y + 'px';
-        node.dataset.level = nodeLvl;
-
-        node.innerHTML = `
-            <div class="lvlpath-node-ring"></div>
-            <div class="lvlpath-node-circle">
-                <img src="${badges[nodeLvl - 1]}" onerror="this.src='https://iili.io/COrCopj.png'">
-                ${!isUnlocked ? '<i class="fa-solid fa-lock lvlpath-lock-icon"></i>' : ''}
-            </div>
-            <div class="lvlpath-node-label">L${nodeLvl}</div>
-            ${isClaimable ? '<div class="lvlpath-node-badge"><i class="fa-solid fa-gift"></i></div>' : ''}
-            ${isClaimed ? '<div class="lvlpath-node-badge"><i class="fa-solid fa-check"></i></div>' : ''}
-            ${isCurrent ? '<div class="lvlpath-here-flag">EȘTI AICI</div>' : ''}
-        `;
-
-        node.onclick = () => showLevelRewardModal(nodeLvl);
-        track.appendChild(node);
-        nodesBuilt++;
-        if (isCurrent) currentNodeEl = node;
-    });
-
-    console.log(`✅ Milestones rendered: ${nodesBuilt} nodes, playerLevel=${lvl}, trackHeight=${trackHeight}`);
-
-    const subtitle = document.getElementById('lvlPathSubtitle');
-    if (subtitle) subtitle.innerText = `NIVEL ${lvl} / ${LVL_PATH_TOTAL}`;
-    const pct = Math.round((lvl / LVL_PATH_TOTAL) * 100);
-    const fill = document.getElementById('lvlPathProgressFill');
-    const label = document.getElementById('lvlPathProgressLabel');
-    if (fill) fill.style.width = pct + '%';
-    if (label) label.innerText = pct + '%';
-
-    setTimeout(() => {
-        if (currentNodeEl && scrollBox) {
-            scrollBox.scrollTop = Math.max(0, currentNodeEl.offsetTop - (scrollBox.clientHeight / 2));
+        // Build the SVG Polyline strings
+        if (i <= playerLevel) {
+            completedPath += `${xPercent},${y} `;
+            if (i === playerLevel) lockedPath += `${xPercent},${y} `; // Connect the two lines seamlessly
+        } else {
+            lockedPath += `${xPercent},${y} `;
         }
+
+        // Determine node state
+        let stateClass = "node-locked";
+        if (i < playerLevel) stateClass = "node-completed";
+        if (i === playerLevel) stateClass = "node-current";
+
+        // Build HTML for the round node
+        nodesHtml += `
+            <div class="coc-node ${stateClass}" style="left: ${xPercent}%; top: ${y}px;" onclick="clickCocNode(${i})">
+                <img src="${mapBadges[i-1]}" onerror="this.src='https://iili.io/COrCopj.png'">
+                <div class="coc-node-label">${i}</div>
+            </div>
+        `;
+    }
+
+    // Inject the SVG Lines and HTML Nodes
+    container.innerHTML = `
+        <svg class="coc-path-line" viewBox="0 0 100 ${mapHeight}" preserveAspectRatio="none">
+            <!-- Locked Path (Dotted grey) -->
+            <polyline points="${lockedPath}" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="4" stroke-dasharray="10,10" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/>
+            
+            <!-- Completed Path (Solid Gold) -->
+            <polyline points="${completedPath}" fill="none" stroke="#facc15" stroke-width="6" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px #facc15);"/>
+        </svg>
+        ${nodesHtml}
+    `;
+
+    // AUTO SCROLL TO CURRENT LEVEL
+    setTimeout(() => {
+        const targetY = mapHeight - (playerLevel * spacingY) - 50;
+        scrollArea.scrollTop = targetY - (scrollArea.clientHeight / 2);
     }, 50);
 }
+
+// Click interaction for the nodes
+window.clickCocNode = function(level) {
+    if (level < playerLevel) {
+        if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
+        showNotification("ZONĂ FINALIZATĂ", `Ai trecut deja de Nivelul ${level}.`, "fa-check");
+    } else if (level === playerLevel) {
+        if (typeof playSFX === 'function') playSFX(popSounds[0]);
+        showNotification("NIVEL CURENT", `Acesta este obiectivul tău. Joacă pentru a aduna XP!`, "fa-play");
+    } else {
+        playMissSFX();
+        showKevinutaBubble(`Îți trebuie Nivelul ${level} pentru a ajunge aici!`);
+    }
+};
 
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
