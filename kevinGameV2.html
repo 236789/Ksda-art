@@ -6421,6 +6421,51 @@ input:checked + .s-slider:before {
     background: linear-gradient(to top, #050714 80%, transparent);
     z-index: 10;
 }
+
+/* Containerul principal al ferestrei de detalii */
+.replica-v3-box {
+    width: 90vw !important; 
+    max-width: 420px !important;
+    /* Limităm înălțimea la 90% din ecran ca să nu iasă afară */
+    max-height: 90vh !important; 
+    background: #050714 !important;
+    border: 2px solid #3b82f6 !important;
+    border-radius: 24px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative;
+    overflow: hidden !important; 
+    padding: 0 !important;
+    box-shadow: 0 0 60px rgba(0,0,0,0.9), inset 0 0 40px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Zona de conținut care va permite scroll-ul */
+.v3-scroll-area {
+    flex: 1 !important;
+    overflow-y: auto !important; /* Permite scroll pe verticală */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    padding: 20px !important;
+
+    /* ASCUNDE BARA DE SCROLL */
+    scrollbar-width: none; /* Pentru Firefox */
+    -ms-overflow-style: none; /* Pentru Internet Explorer și Edge */
+}
+
+/* ASCUNDE BARA DE SCROLL pentru Chrome, Safari și Opera */
+.v3-scroll-area::-webkit-scrollbar {
+    display: none;
+}
+
+/* Asigură-te că footer-ul (unde e butonul de claim) este parte din flux sau fix */
+.v3-footer {
+    width: 100% !important;
+    padding: 15px 30px 25px 30px !important;
+    flex-shrink: 0 !important; /* Previne turtirea butonului */
+    background: linear-gradient(to top, #050714 80%, transparent);
+    z-index: 10;
+}
   </style>
 </head>
 <body>
@@ -6773,11 +6818,13 @@ input:checked + .s-slider:before {
 
 <!-- LEVEL DETAIL MODAL (CINEMATIC V3) -->
 <div id="levelDetailModal" class="modal-overlay" style="z-index: 200005;">
-    <div class="modal-box replica-v3-box epic-map-scroll">
-        <!-- Fundalul animat integrat direct -->
+    <div class="modal-box replica-v3-box">
+        <!-- Fundalul animat (Nebula) - rămâne fix în spatele conținutului -->
         <div class="v3-nebula"></div>
 
-        <div class="v3-content">
+        <!-- ACEASTA ESTE ZONA CARE PERMITE SCROLL-UL -->
+        <div class="v3-scroll-area">
+            
             <!-- Header Cinematic -->
             <div class="v3-header">
                 <button class="v3-close" onclick="closeLevelDetail()"><i class="fa-solid fa-xmark"></i></button>
@@ -6789,7 +6836,6 @@ input:checked + .s-slider:before {
 
                 <div class="v3-badge-container">
                     <div class="v3-laurel left">🌿</div>
-                    <!-- Badge-ul real se încarcă aici prin JS -->
                     <div class="v3-badge-glow"></div>
                     <img id="detailBadgeImg" src="" alt="Badge">
                     <div class="v3-laurel right">🌿</div>
@@ -6800,8 +6846,6 @@ input:checked + .s-slider:before {
                 
                 <p id="detailLevelMessage" class="v3-message">Mesaj cinematic...</p>
             </div>
-        <div class="v3-scroll-area">
-
 
             <!-- Secțiunea RECOMPENSE -->
             <div class="v3-section">
@@ -6831,14 +6875,13 @@ input:checked + .s-slider:before {
                 </div>
             </div>
 
-            <!-- Buton Principal -->
-<!-- Inside replica-v3-box -->
-<div class="v3-footer">
-    <button id="replicaMainBtn" class="v3-main-btn">REVENDICĂ ACUM!</button>
-</div>
+            <!-- Buton Principal la finalul scroll-ului -->
+            <div class="v3-footer">
+                <button id="replicaMainBtn" class="v3-main-btn">REVENDICĂ ACUM!</button>
             </div>
-        </div>
-    </div>
+
+        </div> <!-- Închidere v3-scroll-area -->
+    </div> <!-- Închidere replica-v3-box -->
 </div>
 
 <!-- SLOT MODAL V4 -->
