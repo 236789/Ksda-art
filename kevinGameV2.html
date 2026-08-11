@@ -6079,6 +6079,80 @@ input:checked + .s-slider:before {
 }
 .replica-main-btn:active { transform: scale(0.95); }
 .replica-main-btn.disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; }
+
+
+
+.replica-v2-box {
+    width: 95vw !important; max-width: 440px !important;
+    background: #050510 !important;
+    border: 1px solid #00d2ff !important;
+    border-radius: 15px !important;
+    padding: 0 !important; overflow: hidden;
+    box-shadow: 0 0 50px rgba(0, 210, 255, 0.2), inset 0 0 30px rgba(0,0,0,1) !important;
+    display: flex; flex-direction: column;
+}
+
+/* Header & Star Platform */
+.rep2-header { padding: 40px 20px 20px 20px; position: relative; text-align: center; }
+.rep2-close { position: absolute; top: 15px; right: 15px; background: #ff007f; color: #fff; border: none; border-radius: 5px; width: 30px; height: 30px; font-weight: bold; cursor: pointer; }
+
+.rep2-star-area { position: relative; height: 60px; margin-bottom: 10px; }
+.rep2-platform { 
+    width: 100px; height: 40px; background: #1a1a3a; margin: 0 auto; 
+    transform: perspective(100px) rotateX(45deg); 
+    border: 2px solid #00d2ff; box-shadow: 0 0 20px #00d2ff;
+}
+.rep2-big-star { 
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+    font-size: 45px; color: #00d2ff; text-shadow: 0 0 20px #00d2ff; 
+    animation: starFloat 2s ease-in-out infinite;
+}
+
+/* Level Typography */
+.rep2-level-label { font-family: 'Orbitron'; font-size: 14px; color: #fff; letter-spacing: 5px; opacity: 0.8; }
+.rep2-num-wrap { display: flex; align-items: center; justify-content: center; gap: 20px; }
+.rep2-num-wrap h1 { font-family: 'Orbitron'; font-size: 80px; margin: 0; color: #fff; text-shadow: 0 0 30px rgba(255,255,255,0.5); line-height: 1; }
+.rep2-laurel { font-size: 40px; filter: grayscale(1) brightness(2) drop-shadow(0 0 10px #7000ff); }
+.rep2-laurel.right { transform: scaleX(-1); }
+
+.rep2-message { font-family: 'Oswald'; color: #94a3b8; font-size: 14px; margin-top: 5px; }
+
+/* Sections */
+.rep2-section { padding: 10px 25px; }
+.rep2-title-row { display: flex; align-items: center; gap: 10px; color: #ff00ff; }
+.rep2-title { font-family: 'Orbitron'; font-weight: 900; font-size: 16px; color: #fff; letter-spacing: 2px; }
+.rep2-line { flex-grow: 1; height: 1px; background: rgba(255,255,255,0.2); }
+.rep2-subtitle { font-family: 'Oswald'; font-size: 12px; color: #4b5563; margin: 5px 0 15px 30px; }
+
+/* Reward Cards */
+.rep2-rewards-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding-bottom: 10px; }
+.rep2-card {
+    aspect-ratio: 1/1; border: 1.5px solid #ff4444; border-radius: 10px;
+    background: rgba(255, 0, 0, 0.05); display: flex; align-items: center; justify-content: center;
+    position: relative;
+}
+.rep2-card img { width: 75%; height: 75%; object-fit: contain; }
+.rep2-qty { position: absolute; bottom: 3px; right: 5px; color: #fff; font-family: 'Orbitron'; font-size: 10px; font-weight: bold; text-shadow: 1px 1px 2px #000; }
+
+/* Unlock List */
+.rep2-unlock-list { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 10px; }
+.rep2-unlock-row { display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px 0; }
+.rep2-unlock-icon { width: 40px; height: 40px; background: #111; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #00d2ff; border: 1px solid #333; }
+.rep2-unlock-info { flex-grow: 1; text-align: left; }
+.rep2-unlock-name { font-family: 'Orbitron'; font-size: 11px; color: #fff; }
+.rep2-unlock-desc { font-family: 'Oswald'; font-size: 10px; color: #666; }
+.rep2-unlocked-badge { font-family: 'Orbitron'; font-size: 9px; color: #00ff88; display: flex; align-items: center; gap: 4px; border: 1px solid #00ff88; padding: 3px 6px; border-radius: 5px; background: rgba(0, 255, 136, 0.05); }
+
+/* Footer Button */
+.rep2-footer { padding: 20px 25px 30px 25px; }
+.rep2-main-btn {
+    width: 100%; height: 55px; border-radius: 12px;
+    background: linear-gradient(to right, #7000ff, #ff00ff);
+    border: 2px solid #fff; color: #fff; font-family: 'Orbitron'; font-size: 20px; font-weight: 900;
+    cursor: pointer; box-shadow: 0 0 30px rgba(112, 0, 255, 0.4); transition: 0.2s;
+}
+
+@keyframes starFloat { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, -10px); } }
   </style>
 </head>
 <body>
@@ -6429,54 +6503,73 @@ input:checked + .s-slider:before {
 </div>
 
 
-<!-- LEVEL DETAIL MODAL (Replica) -->
-<div id="levelDetailModal" class="modal-overlay" style="z-index: 200005;">
-    <div class="modal-box replica-box">
-        <!-- Top Header: Close & Star -->
-        <div class="replica-header">
-            <button class="replica-close" onclick="closeLevelDetail()"><i class="fa-solid fa-xmark"></i></button>
-            <div class="replica-star-platform">
-                <div class="star-glow"></div>
-                <i class="fa-solid fa-star big-star"></i>
-            </div>
+<!-- LEVEL DETAIL MODAL (ULTIMATE REPLICA) -->
+<div id="levelDetailModal" class="modal-overlay" style="z-index: 200005; background: rgba(0,0,0,0.92);">
+    <div class="modal-box replica-v2-box">
+        
+        <!-- TOP DECORATION: STAR PLATFORM -->
+        <div class="rep2-header">
+            <button class="rep2-close" onclick="closeLevelDetail()">×</button>
             
-            <!-- Level Badge Circle -->
-            <div class="replica-badge-wrap">
-                <div class="replica-crown">👑</div>
-                <div class="replica-level-circle">
-                    <span id="detailLevelNumber">25</span>
+            <div class="rep2-star-area">
+                <div class="rep2-platform"></div>
+                <i class="fa-solid fa-star rep2-big-star"></i>
+            </div>
+
+            <div class="rep2-level-display">
+                <span class="rep2-level-label">LEVEL</span>
+                <div class="rep2-num-wrap">
+                    <span class="rep2-laurel left">🌿</span>
+                    <h1 id="detailLevelNumber">13</h1>
+                    <span class="rep2-laurel right">🌿</span>
                 </div>
             </div>
-            <p id="detailLevelMessage" class="replica-message">Keep going! You're becoming unstoppable!</p>
+            
+            <p id="detailLevelMessage" class="rep2-message">Keep going! You're becoming unstoppable!</p>
         </div>
 
-        <!-- Section 1: REWARDS -->
-        <div class="replica-section">
-            <div class="replica-section-title">
-                <i class="fa-solid fa-gift"></i> <span>RECOMPENSE</span> <div class="title-line"></div>
+        <!-- REWARDS SECTION -->
+        <div class="rep2-section">
+            <div class="rep2-title-row">
+                <i class="fa-solid fa-gift"></i>
+                <span class="rep2-title">REWARDS</span>
+                <div class="rep2-line"></div>
             </div>
-            <p class="replica-subtext">Vei primi următoarele premii:</p>
-            <div id="detailRewardsGrid" class="replica-grid">
-                <!-- Squares go here (Score, Rubies, etc) -->
-            </div>
-        </div>
-
-        <!-- Section 2: UNLOCKS -->
-        <div class="replica-section">
-            <div class="replica-section-title">
-                <i class="fa-solid fa-lock-open"></i> <span>DEBLOCĂRI</span> <div class="title-line"></div>
-            </div>
-            <p class="replica-subtext">Funcții noi la acest nivel:</p>
-            <div id="detailUnlocksList" class="replica-unlocks-list">
-                <!-- Unlocks go here (Placeholder for now) -->
-                <div class="placeholder-text" style="font-size: 12px; margin-top: 10px;">Nicio deblocare momentan la acest nivel.</div>
+            <p class="rep2-subtitle">You will receive the following rewards:</p>
+            
+            <div id="detailRewardsGrid" class="rep2-rewards-grid">
+                <!-- Items like Score and Rubies generated by JS -->
             </div>
         </div>
 
-        <!-- Footer: Main Button -->
-        <button id="replicaMainBtn" class="replica-main-btn" onclick="handleClaimLevelReward()">
-            LET'S GO!
-        </button>
+        <!-- UNLOCKS SECTION -->
+        <div class="rep2-section">
+            <div class="rep2-title-row">
+                <i class="fa-solid fa-lock-open"></i>
+                <span class="rep2-title">UNLOCKS</span>
+                <div class="rep2-line"></div>
+            </div>
+            <p class="rep2-subtitle">Features you unlock at this level:</p>
+            
+            <div id="detailUnlocksList" class="rep2-unlock-list">
+                <!-- Rows like in the image -->
+                <div class="rep2-unlock-row">
+                    <div class="rep2-unlock-icon"><i class="fa-solid fa-bolt"></i></div>
+                    <div class="rep2-unlock-info">
+                        <div class="rep2-unlock-name">STARE DE TURBO</div>
+                        <div class="rep2-unlock-desc">Click-urile tale sunt mai rapide la nivele mari!</div>
+                    </div>
+                    <div class="rep2-unlocked-badge"><i class="fa-solid fa-circle-check"></i> UNLOCKED</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER BUTTON -->
+        <div class="rep2-footer">
+            <button id="replicaMainBtn" class="rep2-main-btn" onclick="handleClaimLevelReward()">
+                LET'S GO!
+            </button>
+        </div>
     </div>
 </div>
 
@@ -12119,36 +12212,37 @@ function openLevelDetail(lvl) {
 
     currentDetailLevel = lvl;
     document.getElementById('detailLevelNumber').innerText = lvl;
-    document.getElementById('detailLevelMessage').innerText = data.message || "Keep going! You're becoming unstoppable!";
+    document.getElementById('detailLevelMessage').innerText = data.message;
     
-    // Render Rewards
+    // Render Rewards Grid
     const grid = document.getElementById('detailRewardsGrid');
     grid.innerHTML = "";
     data.rewards.forEach(r => {
         const icon = r.type === 'ruby' ? "https://iili.io/CrnXNdG.png" : "https://iili.io/COrCopj.png";
         grid.innerHTML += `
-            <div class="replica-item">
+            <div class="rep2-card">
                 <img src="${icon}">
-                <div class="replica-qty">x${r.value}</div>
+                <div class="rep2-qty">x${r.value}</div>
             </div>`;
     });
 
-    // Check Button State
+    // Button Logic
     const mainBtn = document.getElementById('replicaMainBtn');
     const isClaimed = _GAME_DATA.claimedLevelRewards.includes(lvl);
     const isLocked = lvl > playerLevel;
 
     if (isLocked) {
         mainBtn.innerText = "KEEP GOING!";
-        mainBtn.classList.add('disabled');
+        mainBtn.style.filter = "grayscale(1)";
         mainBtn.onclick = null;
     } else if (isClaimed) {
-        mainBtn.innerText = "REVENDICAT!";
-        mainBtn.classList.add('disabled');
+        mainBtn.innerText = "CLAIMED";
+        mainBtn.style.background = "#333";
         mainBtn.onclick = null;
     } else {
         mainBtn.innerText = "LET'S GO!";
-        mainBtn.classList.remove('disabled');
+        mainBtn.style.filter = "none";
+        mainBtn.style.background = "linear-gradient(to right, #7000ff, #ff00ff)";
         mainBtn.onclick = () => handleClaimLevelReward(lvl);
     }
 
