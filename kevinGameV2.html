@@ -6099,106 +6099,65 @@ input:checked + .s-slider:before {
 }
 
 
-/* --- GOD-MODE LEVEL UP 4.0: THE ASCENSION --- */
+/* --- CINEMATIC LEVEL UP 5.0: THE THEME ENGINE --- */
 .lvl-up-overlay {
-    position: fixed; inset: 0;
-    z-index: 999999; background: #000;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    overflow: hidden; perspective: 1000px;
+    position: fixed; inset: 0; z-index: 999999; background: #000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    overflow: hidden; perspective: 1200px;
 }
 
-/* 1. THE CINEMATIC ENVIRONMENT */
-.lvl-bg-chamber {
-    position: absolute; inset: 0;
-    background: radial-gradient(circle at center, rgba(var(--rgb-color), 0.15) 0%, #000 80%);
-    z-index: 0;
-}
-
-/* 3D Moving Floor */
-.lvl-floor {
-    position: absolute; width: 200%; height: 200%;
-    bottom: -50%; left: -50%;
-    background-image: 
-        linear-gradient(rgba(var(--rgb-color), 0.2) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(var(--rgb-color), 0.2) 1px, transparent 1px);
-    background-size: 50px 50px;
-    transform: rotateX(70deg);
-    animation: floorScroll 5s linear infinite;
-    mask-image: linear-gradient(to top, rgba(0,0,0,1), transparent);
-}
-
-@keyframes floorScroll { from { background-position: 0 0; } to { background-position: 0 50px; } }
-
-/* Holographic Scanline */
-.lvl-scanner {
-    position: absolute; inset: 0;
-    background: linear-gradient(to bottom, transparent, rgba(var(--rgb-color), 0.1) 50%, transparent);
-    background-size: 100% 20px;
-    animation: scanMove 3s linear infinite;
-    pointer-events: none; z-index: 5;
-}
-
-/* 2. THE MEGA TITLE */
+/* Base Title Style */
 .lvl-title-mega {
-    font-family: 'Montserrat', sans-serif;
-    font-size: clamp(50px, 15vw, 110px);
-    font-weight: 900; color: #fff;
-    text-transform: uppercase; letter-spacing: -5px;
-    margin-bottom: -10px; z-index: 10;
-    text-shadow: 0 0 20px var(--t-color);
-    animation: titleEntrance 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    font-family: 'Montserrat', sans-serif; font-weight: 900;
+    font-size: clamp(50px, 15vw, 110px); text-transform: uppercase;
+    z-index: 10; margin-bottom: -10px; transition: all 0.5s;
 }
 
-/* 3. THE BADGE STAGE (PERFECTLY SIZED) */
-.lvl-evolution-stage {
-    position: relative;
-    width: 240px; height: 240px; /* Locked size to prevent cut-off */
-    display: flex; align-items: center; justify-content: center;
-    z-index: 10; margin: 30px 0;
-}
+/* 1. TOXIC THEME (Lvl 5, 18) */
+.theme-toxic .lvl-floor { background-image: linear-gradient(#1b3a08 1px, transparent 1px), linear-gradient(90deg, #1b3a08 1px, transparent 1px); }
+.theme-toxic .lvl-title-mega { color: #39ff14; text-shadow: 0 0 20px #39ff14, 0 0 40px #1b3a08; font-family: 'Courier New', monospace !important; }
+.theme-toxic .lvl-rank-tag { border-color: #39ff14; color: #39ff14; box-shadow: 0 0 20px #39ff14; }
 
-.lvl-main-img {
-    max-width: 90%; max-height: 90%;
-    object-fit: contain;
-    filter: drop-shadow(0 0 30px var(--t-color));
-    z-index: 11;
-}
+/* 2. ICE THEME (Lvl 8, 13, 16) */
+.theme-ice .lvl-floor { background-image: linear-gradient(#00e5ff 1px, transparent 1px), linear-gradient(90deg, #00e5ff 1px, transparent 1px); }
+.theme-ice .lvl-title-mega { color: #fff; text-shadow: 0 0 30px #00e5ff, 0 0 60px #fff; letter-spacing: 5px; animation: flicker-light 2s infinite; }
+.theme-ice .lvl-rank-tag { background: #fff; color: #006994; border-color: #00e5ff; }
 
-/* 4. THE RANK TAG (WEBSITE STYLE) */
-.lvl-rank-tag {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 26px; font-weight: 900;
-    color: #fff; text-transform: uppercase;
-    padding: 10px 40px; background: rgba(0,0,0,0.8);
-    clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%);
-    border-left: 5px solid var(--t-color);
-    border-right: 5px solid var(--t-color);
-    box-shadow: 0 0 20px var(--t-color);
-    z-index: 10;
-}
+/* 3. ROYAL GOLD THEME (Lvl 7, 10, 17, 24) */
+.theme-gold .lvl-floor { background-image: linear-gradient(#ffd700 1px, transparent 1px), linear-gradient(90deg, #ffd700 1px, transparent 1px); }
+.theme-gold .lvl-title-mega { color: #ffd700; text-shadow: 0 0 30px #ffd700; background: linear-gradient(180deg, #fff, #ffd700); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.theme-gold .lvl-rank-tag { background: #000; color: #ffd700; border-color: #ffd700; animation: shineSweep 2s infinite; }
 
-/* 5. SICK FX: PARTICLES & GLITCH */
-.lvl-particle {
-    position: absolute; width: 6px; height: 6px;
-    background: var(--t-color); border-radius: 50%;
-    pointer-events: none; z-index: 20;
-}
+/* 4. INFERNO/LAVA THEME (Lvl 9, 14, 23) */
+.theme-lava .lvl-floor { background-image: linear-gradient(#ff4500 1px, transparent 1px), linear-gradient(90deg, #ff4500 1px, transparent 1px); }
+.theme-lava .lvl-title-mega { color: #ff4500; text-shadow: 0 0 20px #ff0000; animation: firePulse 1s infinite; }
+.theme-lava .lvl-rank-tag { background: #200; color: #ff4500; border-color: #ff0000; }
 
-.is-mutating {
-    animation: sickGlitch 0.15s infinite;
-    filter: brightness(3) contrast(2) hue-rotate(90deg);
-}
+/* 5. VOID/ASTRAL THEME (Lvl 6, 12, 15, 19) */
+.theme-void .lvl-floor { background-image: linear-gradient(#7000ff 1px, transparent 1px), linear-gradient(90deg, #7000ff 1px, transparent 1px); }
+.theme-void .lvl-title-mega { color: #b533ff; text-shadow: 0 0 30px #7000ff; letter-spacing: -2px; }
+.theme-void .lvl-rank-tag { background: #050508; color: #7000ff; border-color: #7000ff; }
 
-@keyframes sickGlitch {
-    0% { transform: translate(0) skew(0); }
-    20% { transform: translate(-15px, 5px) skew(10deg); clip-path: inset(10% 0 30% 0); }
-    40% { transform: translate(15px, -5px) skew(-10deg); clip-path: inset(40% 0 10% 0); }
-    100% { transform: translate(0) skew(0); }
+/* 6. ULTIMATE SINGULARITY (Lvl 25) */
+.theme-eternal { background: radial-gradient(circle, #222, #000); }
+.theme-eternal .lvl-floor { animation-duration: 1s; background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); }
+.theme-eternal .lvl-title-mega { 
+    background: linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3);
+    background-size: 400% 400%; animation: rainbowAnim 2s linear infinite;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 130px;
 }
+.theme-eternal .lvl-rank-tag { background: #fff; color: #000; border-color: #000; font-size: 32px; box-shadow: 0 0 50px #fff; }
 
-@keyframes titleEntrance { 0% { transform: scale(5); opacity: 0; filter: blur(20px); } 100% { transform: scale(1); opacity: 1; filter: blur(0); } }
-@keyframes scanMove { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
+/* Base elements that stay */
+.lvl-bg-chamber { position: absolute; inset: 0; z-index: 0; }
+.lvl-floor { position: absolute; width: 200%; height: 200%; bottom: -50%; left: -50%; background-size: 60px 60px; transform: rotateX(70deg); animation: floorScroll 5s linear infinite; mask-image: linear-gradient(to top, black, transparent); }
+.lvl-evolution-stage { position: relative; width: 240px; height: 240px; z-index: 10; margin: 30px 0; display: flex; align-items: center; justify-content: center; }
+.lvl-main-img { max-width: 90%; max-height: 90%; object-fit: contain; z-index: 11; }
+.lvl-rank-tag { font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 900; padding: 10px 40px; clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%); border-left: 5px solid #fff; border-right: 5px solid #fff; z-index: 10; transition: all 0.5s; }
+
+@keyframes floorScroll { from { background-position: 0 0; } to { background-position: 0 60px; } }
+@keyframes rainbowAnim { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+@keyframes flicker-light { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
   </style>
 </head>
 <body>
@@ -11870,69 +11829,52 @@ function levelUp() {
     playerXP = Math.max(0, playerXP - xpToNextLevel); 
     xpToNextLevel = (playerLevel === MAX_LEVEL) ? 0 : getXPRequired(playerLevel);
 
-    const hexToRgb = (hex) => {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : "255,255,255";
-    };
+    // DETERMINE THEME BASED ON RANK NAME
+    let theme = "theme-default";
+    const name = newTier.name.toLowerCase();
+    
+    if (playerLevel === 25) theme = "theme-eternal";
+    else if (name.includes("toxic")) theme = "theme-toxic";
+    else if (name.includes("ice") || name.includes("frost") || name.includes("azure")) theme = "theme-ice";
+    else if (name.includes("gold") || name.includes("midas") || name.includes("divine") || name.includes("champion")) theme = "theme-gold";
+    else if (name.includes("lava") || name.includes("inferno") || name.includes("ruby") || name.includes("vulcan")) theme = "theme-lava";
+    else if (name.includes("void") || name.includes("astral") || name.includes("amethyst") || name.includes("nebula") || name.includes("cosmic")) theme = "theme-void";
 
     const overlay = document.createElement('div');
-    overlay.className = 'lvl-up-overlay';
+    overlay.className = `lvl-up-overlay ${theme}`;
     overlay.style.setProperty('--t-color', newTier.color);
-    overlay.style.setProperty('--rgb-color', hexToRgb(newTier.color));
     
     overlay.innerHTML = `
         <div class="lvl-bg-chamber"></div>
         <div class="lvl-floor"></div>
-        <div class="lvl-scanner"></div>
         <h1 class="lvl-title-mega">LEVEL UP</h1>
         <div class="lvl-evolution-stage" id="badgeStage">
-            <img src="https://i.ibb.co/${oldTier.id}/image.png" class="lvl-main-img" id="evolveBadge">
+            <img src="https://i.ibb.co/${oldTier.id}/image.png" class="lvl-main-img" id="evolveBadge" style="filter: drop-shadow(0 0 20px ${oldTier.color})">
         </div>
         <div class="lvl-rank-tag" id="evolveName">${oldTier.name}</div>
     `;
     document.body.appendChild(overlay);
 
     const badge = document.getElementById('evolveBadge');
-    const stage = document.getElementById('badgeStage');
     const nameLabel = document.getElementById('evolveName');
 
-    // EFFECT: Spawn Sparkles on reveal
-    function spawnSparkles() {
-        for(let i=0; i<30; i++) {
-            const p = document.createElement('div');
-            p.className = 'lvl-particle';
-            p.style.left = '50%'; p.style.top = '50%';
-            const angle = Math.random() * Math.PI * 2;
-            const dist = Math.random() * 200 + 100;
-            p.animate([
-                { transform: `translate(-50%, -50%) scale(1)`, opacity: 1 },
-                { transform: `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px)) scale(0)`, opacity: 0 }
-            ], { duration: 1000, easing: 'ease-out' });
-            stage.appendChild(p);
-            setTimeout(() => p.remove(), 1000);
-        }
-    }
-
-    // Phase 1: Mutation Start
+    // Phase 1: Glitch/Mutation
     setTimeout(() => {
         badge.classList.add('is-mutating');
         if (typeof playMissSFX === 'function') playMissSFX();
     }, 1000);
 
-    // Phase 2: THE EXPLOSION
+    // Phase 2: Transformation
     setTimeout(() => {
-        spawnSparkles();
         badge.src = `https://i.ibb.co/${newTier.id}/image.png`;
         badge.classList.remove('is-mutating');
-        badge.animate([
-            { transform: 'scale(0.5)', filter: 'brightness(5)' },
-            { transform: 'scale(1)', filter: 'brightness(1)' }
-        ], { duration: 500, easing: 'ease-out' });
-
+        badge.style.filter = `drop-shadow(0 0 40px ${newTier.color})`;
+        
         nameLabel.innerText = newTier.name.toUpperCase();
-        nameLabel.style.color = newTier.color;
-        nameLabel.style.boxShadow = `0 0 30px ${newTier.color}`;
-
+        nameLabel.style.color = "#fff"; // Tag handled by CSS theme
+        
+        // Final Pop
+        badge.animate([{ transform: 'scale(0.5)' }, { transform: 'scale(1)' }], { duration: 500 });
         if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
     }, 1800);
 
@@ -11941,7 +11883,7 @@ function levelUp() {
         overlay.style.transition = "opacity 1s";
         overlay.style.opacity = "0";
         setTimeout(() => overlay.remove(), 1000);
-    }, 5000);
+    }, 5500);
 
     updateXPBarUI();
     syncScoreToFirestore(); 
