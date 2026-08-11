@@ -7218,9 +7218,17 @@ if (response.status === 200) {
             currentUsername = data.username;
             score = data.score || 0;
             rubies = data.rubies || 0;
+    playerLevel = data.level || 1;
+    playerXP = data.xp || 0;
+    xpToNextLevel = getXPRequired(playerLevel); // Update the goal based on the loaded level
+
+    updateXPBarUI(); 
+
             lastSavedScore = score;
             lastSavedRubies = rubies;
             hasSeenRubyTutorial = data.hasSeenRubyTutorial || false;
+
+
 
             // --- NEW: LOAD INDEX & REWARD PROGRESS ---
             _GAME_DATA.inventory = data.inventory || {};
@@ -7451,33 +7459,31 @@ if (e.target.closest('.control-btn') ||
 }
 
 async function syncScoreToFirestore() {
-  // Sync if score OR rubies changed
-  if (currentUID && (score !== lastSavedScore || rubies !== lastSavedRubies)) {
-    const scoreToTry = score;
-    const rubiesToTry = rubies;
-
+  // Add playerLevel and playerXP to the change check
+  if (currentUID && (score !== lastSavedScore || rubies !== lastSavedRubies || playerXP !== lastSavedXP)) {
     try {
       const idToken = await firebase.auth().currentUser.getIdToken(true);
 
       const response = await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-// Locate this inside syncScoreToFirestore()
-body: JSON.stringify({ 
-    idToken: idToken, 
-    score: scoreToTry,
-    rubies: rubiesToTry,
-    hasSeenRubyTutorial: hasSeenRubyTutorial,
-    // NEW: Send claimed status to authorize the reward jump
-    claimedRewards: _GAME_DATA.claimedRewards,
-    claimedStageRewards: _GAME_DATA.claimedStageRewards
-}),
+        body: JSON.stringify({ 
+            idToken: idToken, 
+            score: score,
+            rubies: rubies,
+            level: playerLevel, // NEW
+            xp: playerXP,       // NEW
+            hasSeenRubyTutorial: hasSeenRubyTutorial,
+            claimedRewards: _GAME_DATA.claimedRewards,
+            claimedStageRewards: _GAME_DATA.claimedStageRewards
+        }),
       }); 
 
       if (response.ok) {
-        lastSavedScore = scoreToTry;
-        lastSavedRubies = rubiesToTry;
-        console.log("✅ Stats Synced: Score & Rubies");
+        lastSavedScore = score;
+        lastSavedRubies = rubies;
+        lastSavedXP = playerXP; // Track this locally to prevent unnecessary pings
+        console.log("✅ Cloud Sync: Progress Saved (LVL " + playerLevel + ")");
       }
     } catch (e) {
       console.error("Connection error during sync:", e);
