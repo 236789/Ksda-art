@@ -12275,91 +12275,39 @@ function openLevelDetail(lvl) {
     const data = LEVEL_REWARDS_REGISTRY[lvl];
     if (!data) return;
 
-    const tierData = mapTiers[lvl - 1]; 
-    const badgeImgUrl = `https://i.ibb.co/${tierData.id}/image.png`;
-
-    currentDetailLevel = lvl;
-    
-    // Set Header/Badge info
-    document.getElementById('detailBadgeImg').src = badgeImgUrl;
-    document.getElementById('detailRankName').innerText = tierData.name;
     document.getElementById('detailLevelNumber').innerText = lvl;
     document.getElementById('detailLevelMessage').innerText = data.message;
-    
-    document.getElementById('detailRankName').style.color = tierData.color;
-    document.getElementById('detailRankName').style.textShadow = `0 0 20px ${tierData.color}`;
 
-    // Fill rewards grid
+    // Fill Rewards
     const grid = document.getElementById('detailRewardsGrid');
     grid.innerHTML = "";
     data.rewards.forEach(r => {
-        const isRuby = r.type === 'ruby';
-        const icon = isRuby ? "https://iili.io/CrnXNdG.png" : "https://iili.io/COrCopj.png";
-        const cardClass = isRuby ? "reward-ruby" : "reward-score";
+        const icon = (r.type === 'ruby') ? "https://iili.io/CrnXNdG.png" : "https://iili.io/COrCopj.png";
         grid.innerHTML += `
-            <div class="v3-card ${cardClass}">
-                <img src="${icon}" style="width:70%; height:70%; object-fit:contain;">
-                <div class="v3-qty">x${r.value}</div>
+            <div class="v3-reward-card">
+                <img src="${icon}">
+                <div class="v3-reward-qty">x${r.value}</div>
             </div>`;
     });
 
-    // --- BUTTON LOGIC REPAIR (SCROLLABLE & PREMIUM 3D) ---
-    const mainBtn = document.getElementById('replicaMainBtn');
-    const isClaimed = _GAME_DATA.claimedLevelRewards.includes(lvl);
-    const isLocked = lvl > playerLevel;
-
-    // Reset Base Styles for Centering and Design
-    mainBtn.style.display = "flex"; 
-    mainBtn.style.alignItems = "center";
-    mainBtn.style.justifyContent = "center";
-    mainBtn.style.textAlign = "center";
-    mainBtn.style.opacity = "1";
-    mainBtn.style.pointerEvents = "auto";
-    mainBtn.style.width = "100%";
-    mainBtn.style.height = "60px";
-    mainBtn.style.borderRadius = "18px";
-    mainBtn.style.fontFamily = "'Orbitron', sans-serif";
-    mainBtn.style.fontSize = "18px";
-    mainBtn.style.fontWeight = "900";
-    mainBtn.style.textTransform = "uppercase";
-    mainBtn.style.transition = "all 0.1s ease";
-    mainBtn.style.cursor = "pointer";
-
-    if (isLocked) {
-        mainBtn.innerText = "BLOCAT (LVL " + lvl + ")";
-        mainBtn.style.background = "linear-gradient(180deg, #444, #222)";
-        mainBtn.style.color = "#777";
-        mainBtn.style.border = "3px solid #555";
-        mainBtn.style.boxShadow = "0 6px 0 #111";
-        mainBtn.onclick = () => { playMissSFX(); showKevinutaBubble("Nivel prea mic! 😂"); };
-    } else if (isClaimed) {
-        mainBtn.innerText = "REVENDICAT ✓";
-        mainBtn.style.background = "rgba(0, 255, 136, 0.1)";
-        mainBtn.style.color = "#00ff88";
-        mainBtn.style.border = "3px solid #00ff88";
-        mainBtn.style.boxShadow = "none";
-        mainBtn.style.pointerEvents = "none";
-        mainBtn.onclick = null;
+    // Fill Unlocks (Optional: Add custom logic if level has unlocks)
+    const unlockList = document.getElementById('detailUnlocksList');
+    if (lvl === 13) {
+        unlockList.innerHTML = `
+            <div class="v3-unlock-row">
+                <img src="https://iili.io/Ck27fPs.png" class="v3-unlock-icon">
+                <div class="v3-unlock-info">
+                    <div class="v3-unlock-name">METEORITES</div>
+                    <div class="v3-unlock-desc">Meteorites will start spawning every 10 seconds!</div>
+                </div>
+                <div class="v3-unlocked-badge">✓ UNLOCKED</div>
+            </div>
+        `;
     } else {
-        mainBtn.innerText = "REVENDICĂ ACUM!";
-        mainBtn.style.background = "linear-gradient(180deg, #bf00ff 0%, #7000ff 50%, #4b00b0 100%)";
-        mainBtn.style.color = "#ffffff";
-        mainBtn.style.border = "3px solid #ffffff";
-        mainBtn.style.boxShadow = "0 8px 0 #2d0047, 0 15px 25px rgba(0,0,0,0.5)";
-
-        mainBtn.onclick = () => {
-            mainBtn.style.transform = "translateY(6px)";
-            mainBtn.style.boxShadow = "0 2px 0 #2d0047";
-            setTimeout(() => handleClaimLevelReward(lvl), 100);
-        };
+        unlockList.innerHTML = `<div style="color:#64748b; text-align:center; padding:10px; font-weight:700;">No features at this level.</div>`;
     }
 
-    // Open Modal
     document.getElementById('levelDetailModal').style.display = 'flex';
-    
-    // Auto-scroll to top when opened
-    const scrollArea = document.querySelector('.v3-scroll-area');
-    if (scrollArea) scrollArea.scrollTop = 0;
 }
 
 function closeLevelDetail() {
