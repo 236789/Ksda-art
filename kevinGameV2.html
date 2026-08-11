@@ -7695,6 +7695,8 @@ updateGiftButtonState(); // 🔥 Add this
             _GAME_DATA.claimedRewards = data.claimedRewards || [];
             _GAME_DATA.claimedStageRewards = data.claimedStageRewards || [];
             _GAME_DATA.claimedLevelRewards = data.claimedLevelRewards || []; 
+
+
             
             console.log("📖 Progress loaded:", _GAME_DATA.index.length, "emojis discovered.");
             
@@ -12398,10 +12400,11 @@ function updateGiftButtonState() {
 
     let hasUnclaimed = false;
 
-    // Check every level from 2 up to your current level
+    // We check from level 1 up to your current playerLevel
     for (let i = 1; i <= playerLevel; i++) {
-        // If the level has a defined reward AND it's not in the claimed list
-        if (LEVEL_REWARDS_REGISTRY[i] && !_GAME_DATA.claimedLevelRewards.includes(i)) {
+        // If a level has a reward defined but is NOT in your claimed list
+        // We use Number(i) to ensure we aren't comparing a string to a number
+        if (LEVEL_REWARDS_REGISTRY[i] && !_GAME_DATA.claimedLevelRewards.map(Number).includes(Number(i))) {
             hasUnclaimed = true;
             break; 
         }
@@ -12410,6 +12413,7 @@ function updateGiftButtonState() {
     if (hasUnclaimed) {
         btn.classList.add('gift-vibrate');
     } else {
+        // This makes the button stop shaking immediately
         btn.classList.remove('gift-vibrate');
     }
 }
@@ -12540,6 +12544,8 @@ function handleClaimLevelReward(lvl) {
     showNotification("PREMIU COLECTAT!", `Ai primit cadoul pentru nivelul ${lvl}!`, "fa-gift");
 
     // 5. SINCRONIZARE IMEDIATĂ - Trimitem lista la backend
+    updateGiftButtonState(); // <--- CALL IT HERE
+
     syncScoreToFirestore();
 }
 // Ensure the ninja icon in Utilities opens the Market
