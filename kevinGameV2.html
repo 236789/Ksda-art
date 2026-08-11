@@ -6395,6 +6395,32 @@ input:checked + .s-slider:before {
     box-shadow: 0 4px 0 #111 !important;
     cursor: not-allowed;
 }
+
+/* Ensure the main container doesn't overflow the screen */
+.replica-v3-box {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 80vh !important; /* Limits height so scrolling is possible */
+    max-height: 650px !important;
+    overflow: hidden !important; /* Prevents the whole box from scrolling */
+}
+
+/* This is the middle part that will scroll */
+.v3-scroll-area {
+    flex: 1 !important; /* Takes up all available space */
+    overflow-y: auto !important; /* Enables vertical scrolling */
+    padding: 20px !important;
+    scrollbar-width: none; /* Hides scrollbar on Firefox */
+}
+.v3-scroll-area::-webkit-scrollbar { display: none; } /* Hides scrollbar on Chrome/Safari */
+
+/* Footer stays pinned to the bottom */
+.v3-footer {
+    flex-shrink: 0 !important; /* Prevents the footer from being squished */
+    padding: 15px 30px 25px 30px !important;
+    background: linear-gradient(to top, #050714 80%, transparent);
+    z-index: 10;
+}
   </style>
 </head>
 <body>
@@ -6774,6 +6800,8 @@ input:checked + .s-slider:before {
                 
                 <p id="detailLevelMessage" class="v3-message">Mesaj cinematic...</p>
             </div>
+        <div class="v3-scroll-area">
+
 
             <!-- Secțiunea RECOMPENSE -->
             <div class="v3-section">
@@ -12450,42 +12478,40 @@ function openLevelDetail(lvl) {
     const data = LEVEL_REWARDS_REGISTRY[lvl];
     if (!data) return;
 
-    // Get visuals from mapTiers
     const tierData = mapTiers[lvl - 1]; 
     const badgeImgUrl = `https://i.ibb.co/${tierData.id}/image.png`;
 
-    currentDetailLevel = lvl; // Set the global tracker
+    currentDetailLevel = lvl;
     
-    // Set text and images
+    // Set Header/Badge info
     document.getElementById('detailBadgeImg').src = badgeImgUrl;
     document.getElementById('detailRankName').innerText = tierData.name;
     document.getElementById('detailLevelNumber').innerText = lvl;
     document.getElementById('detailLevelMessage').innerText = data.message;
     
-    // Set rank color
     document.getElementById('detailRankName').style.color = tierData.color;
     document.getElementById('detailRankName').style.textShadow = `0 0 20px ${tierData.color}`;
 
-    // Populate rewards
+    // Fill rewards grid
     const grid = document.getElementById('detailRewardsGrid');
     grid.innerHTML = "";
     data.rewards.forEach(r => {
         const isRuby = r.type === 'ruby';
         const icon = isRuby ? "https://iili.io/CrnXNdG.png" : "https://iili.io/COrCopj.png";
         const cardClass = isRuby ? "reward-ruby" : "reward-score";
-        
         grid.innerHTML += `
             <div class="v3-card ${cardClass}">
                 <img src="${icon}" style="width:70%; height:70%; object-fit:contain;">
                 <div class="v3-qty">x${r.value}</div>
             </div>`;
     });
-// --- BUTTON LOGIC REPAIR (PREMIUM 3D VERSION) ---
+
+    // --- BUTTON LOGIC REPAIR (SCROLLABLE & PREMIUM 3D) ---
     const mainBtn = document.getElementById('replicaMainBtn');
     const isClaimed = _GAME_DATA.claimedLevelRewards.includes(lvl);
     const isLocked = lvl > playerLevel;
 
-    // 1. Reset & Base Styling (Fixes Centering and Shape)
+    // Reset Base Styles for Centering and Design
     mainBtn.style.display = "flex"; 
     mainBtn.style.alignItems = "center";
     mainBtn.style.justifyContent = "center";
@@ -12496,27 +12522,20 @@ function openLevelDetail(lvl) {
     mainBtn.style.height = "60px";
     mainBtn.style.borderRadius = "18px";
     mainBtn.style.fontFamily = "'Orbitron', sans-serif";
-    mainBtn.style.fontSize = "20px";
+    mainBtn.style.fontSize = "18px";
     mainBtn.style.fontWeight = "900";
     mainBtn.style.textTransform = "uppercase";
-    mainBtn.style.letterSpacing = "1px";
     mainBtn.style.transition = "all 0.1s ease";
-    mainBtn.style.transform = "translateY(0)";
     mainBtn.style.cursor = "pointer";
 
     if (isLocked) {
-        // --- LOCKED STATE (Grey 3D) ---
         mainBtn.innerText = "BLOCAT (LVL " + lvl + ")";
-        mainBtn.style.background = "linear-gradient(180deg, #555, #333)";
-        mainBtn.style.color = "#888";
-        mainBtn.style.border = "3px solid #444";
-        mainBtn.style.boxShadow = "0 6px 0 #1a1a1a";
-        mainBtn.onclick = () => { 
-            playMissSFX(); 
-            showKevinutaBubble("Nivel prea mic! 😂"); 
-        };
+        mainBtn.style.background = "linear-gradient(180deg, #444, #222)";
+        mainBtn.style.color = "#777";
+        mainBtn.style.border = "3px solid #555";
+        mainBtn.style.boxShadow = "0 6px 0 #111";
+        mainBtn.onclick = () => { playMissSFX(); showKevinutaBubble("Nivel prea mic! 😂"); };
     } else if (isClaimed) {
-        // --- CLAIMED STATE (Green Stamp) ---
         mainBtn.innerText = "REVENDICAT ✓";
         mainBtn.style.background = "rgba(0, 255, 136, 0.1)";
         mainBtn.style.color = "#00ff88";
@@ -12525,26 +12544,25 @@ function openLevelDetail(lvl) {
         mainBtn.style.pointerEvents = "none";
         mainBtn.onclick = null;
     } else {
-        // --- READY STATE (Purple 3D - High End) ---
         mainBtn.innerText = "REVENDICĂ ACUM!";
         mainBtn.style.background = "linear-gradient(180deg, #bf00ff 0%, #7000ff 50%, #4b00b0 100%)";
         mainBtn.style.color = "#ffffff";
         mainBtn.style.border = "3px solid #ffffff";
-        
-        // The chunky 3D side and floor shadow
-        mainBtn.style.boxShadow = "0 8px 0 #2d0047, 0 15px 25px rgba(0, 0, 0, 0.5)";
+        mainBtn.style.boxShadow = "0 8px 0 #2d0047, 0 15px 25px rgba(0,0,0,0.5)";
 
         mainBtn.onclick = () => {
-            // Visual push-down effect
             mainBtn.style.transform = "translateY(6px)";
-            mainBtn.style.boxShadow = "0 2px 0 #2d0047, 0 5px 10px rgba(0,0,0,0.5)";
-            
-            // Trigger the reward after a tiny delay for the animation
+            mainBtn.style.boxShadow = "0 2px 0 #2d0047";
             setTimeout(() => handleClaimLevelReward(lvl), 100);
         };
     }
 
+    // Open Modal
     document.getElementById('levelDetailModal').style.display = 'flex';
+    
+    // Auto-scroll to top when opened
+    const scrollArea = document.querySelector('.v3-scroll-area');
+    if (scrollArea) scrollArea.scrollTop = 0;
 }
 
 function closeLevelDetail() {
