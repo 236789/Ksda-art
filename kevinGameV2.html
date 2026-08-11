@@ -12416,11 +12416,10 @@ function openLevelDetail(lvl) {
     const data = LEVEL_REWARDS_REGISTRY[lvl];
     if (!data) return;
 
-    // Get Tier Data (Name + Color + Badge Image)
     const tier = mapTiers[lvl - 1]; 
     const badgeImgUrl = `https://i.ibb.co/${tier.id}/image.png`;
 
-    // 1. Set Header Visuals
+    // 1. Header Info
     const rankTitle = document.getElementById('detailRankName');
     rankTitle.innerText = tier.name;
     rankTitle.style.color = tier.color;
@@ -12430,11 +12429,8 @@ function openLevelDetail(lvl) {
     document.getElementById('detailLevelMessage').innerText = data.message;
     document.getElementById('detailBadgeImg').src = badgeImgUrl;
 
-    // 2. Populate RECOMPENSE Header & Grid
-    const rewardsGrid = document.getElementById('detailRewardsGrid');
-    
-    // We clear the grid and add the Cinematic Header before the rewards
-    rewardsGrid.innerHTML = `
+    // 2. Inject RECOMPENSE Section
+    document.getElementById('detailRewardsSection').innerHTML = `
         <div class="v3-section-title">
             <div class="v3-line"></div>
             <span class="v3-diamonds">◆</span>
@@ -12444,7 +12440,7 @@ function openLevelDetail(lvl) {
             <div class="v3-line"></div>
         </div>
         <p class="v3-sub-info">Vei primi următoarele recompense:</p>
-        <div class="v3-rewards-wrapper" style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap; width:100%;">
+        <div id="detailRewardsGrid" class="v3-rewards-grid">
             ${data.rewards.map(r => {
                 const icon = (r.type === 'ruby') ? "https://iili.io/CrnXNdG.png" : "https://iili.io/COrCopj.png";
                 return `
@@ -12456,10 +12452,9 @@ function openLevelDetail(lvl) {
         </div>
     `;
 
-    // 3. Populate DEBLOCĂRI Header & Content
-    const unlockList = document.getElementById('detailUnlocksList');
-    unlockList.innerHTML = `
-        <div class="v3-section-title" style="margin-top:20px;">
+    // 3. Inject DEBLOCĂRI Section
+    document.getElementById('detailUnlocksSection').innerHTML = `
+        <div class="v3-section-title">
             <div class="v3-line"></div>
             <span class="v3-diamonds">◆</span>
             <i class="fa-solid fa-lock-open"></i>
@@ -12468,7 +12463,7 @@ function openLevelDetail(lvl) {
             <div class="v3-line"></div>
         </div>
         <p class="v3-sub-info">Funcții noi la acest nivel:</p>
-        <div style="color:#64748b; text-align:center; padding:10px; font-weight:700; font-size:12px;">
+        <div class="v3-unlock-list" style="color:#64748b; text-align:center; padding:10px; font-weight:700; font-size:12px;">
             Nicio funcție nouă la acest nivel.
         </div>
     `;
@@ -12480,13 +12475,10 @@ function openLevelDetail(lvl) {
 
     mainBtn.style.opacity = "1";
     mainBtn.style.pointerEvents = "auto";
-    mainBtn.style.transform = "translateY(0)";
 
     if (isLocked) {
         mainBtn.innerText = "BLOCAT (LVL " + lvl + ")";
         mainBtn.style.background = "linear-gradient(180deg, #444, #222)";
-        mainBtn.style.color = "#888";
-        mainBtn.style.border = "3px solid #555";
         mainBtn.style.boxShadow = "none";
         mainBtn.onclick = () => { playMissSFX(); showKevinutaBubble("Nivel prea mic!"); };
     } else if (isClaimed) {
@@ -12499,8 +12491,6 @@ function openLevelDetail(lvl) {
     } else {
         mainBtn.innerText = "REVENDICĂ ACUM!";
         mainBtn.style.color = "#fff";
-        mainBtn.style.fontFamily = "'Montserrat', sans-serif";
-        mainBtn.style.fontWeight = "900";
         mainBtn.style.background = "linear-gradient(180deg, #bf00ff 0%, #7000ff 50%, #4b00b0 100%)";
         mainBtn.style.border = "3px solid #fff";
         mainBtn.style.boxShadow = "0 6px 0 #2d0047, 0 10px 20px rgba(0, 0, 0, 0.5)";
