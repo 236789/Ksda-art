@@ -6319,6 +6319,17 @@ input:checked + .s-slider:before {
     font-size: 18px; font-weight: 900;
     font-family: 'Montserrat', sans-serif !important;
 }
+
+.v3-main-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 10px rgba(112, 0, 255, 0.8);
+}
+
+/* Stil pentru când butonul e Revendicat (în interiorul modalului) */
+.v3-main-btn.claimed {
+    pointer-events: none;
+    opacity: 0.8;
+}
   </style>
 </head>
 <body>
@@ -12405,24 +12416,31 @@ data.rewards.forEach(r => {
         </div>`;
 });
     // Logica Butonului (Revendicat / Locked / Ready)
+// Logica Butonului (Revendicat / Locked / Ready)
     const mainBtn = document.getElementById('replicaMainBtn');
     const isClaimed = _GAME_DATA.claimedLevelRewards.includes(lvl);
     const isLocked = lvl > playerLevel;
 
     if (isLocked) {
-        mainBtn.innerText = "CONTINUĂ JOCUL!";
+        mainBtn.innerText = "JOACĂ MAI MULT!";
         mainBtn.style.background = "#222";
+        mainBtn.style.color = "#555";
         mainBtn.style.boxShadow = "none";
         mainBtn.onclick = null;
     } else if (isClaimed) {
-        mainBtn.innerText = "REVENDICAT!";
-        mainBtn.style.background = "linear-gradient(to right, #1a9900, #39ff14)";
-        mainBtn.style.boxShadow = "0 0 20px rgba(57, 255, 20, 0.4)";
+        mainBtn.innerText = "REVENDICAT ✓";
+        mainBtn.style.background = "rgba(0, 255, 136, 0.1)";
+        mainBtn.style.color = "#00ff88";
+        mainBtn.style.border = "2px solid #00ff88";
+        mainBtn.style.boxShadow = "none";
         mainBtn.onclick = null;
     } else {
-        mainBtn.innerText = "SĂ MERGEM!";
+        mainBtn.innerText = "REVENDICĂ ACUM!"; // Text nou mai clar
         mainBtn.style.background = "linear-gradient(to right, #7000ff, #ff00ff)";
+        mainBtn.style.color = "#fff";
+        mainBtn.style.border = "3px solid #fff";
         mainBtn.style.boxShadow = "0 0 30px rgba(112, 0, 255, 0.6)";
+        // Transmitem corect nivelul curent către funcție
         mainBtn.onclick = () => handleClaimLevelReward(lvl);
     }
 
@@ -12438,26 +12456,41 @@ function handleClaimLevelReward(lvl) {
     const data = LEVEL_REWARDS_REGISTRY[lvl];
     if (!data || _GAME_DATA.claimedLevelRewards.includes(lvl)) return;
 
-    // 1. Mark as claimed
+    // 1. Salvăm faptul că a fost revendicat
     _GAME_DATA.claimedLevelRewards.push(lvl);
 
-    // 2. Process Rewards
+    // 2. Închidem modalul de detalii imediat pentru a vedea animațiile
+    closeLevelDetail();
+
+    // 3. Procesăm Recompensele și pornim animațiile de zbor
+    let hasScore = false;
+    let hasRubies = false;
+
     data.rewards.forEach(r => {
-        if (r.type === 'score') score += r.value;
-        if (r.type === 'ruby') rubies += r.value;
+        if (r.type === 'score') {
+            pendingWinAmount = r.value;
+            animateScoreFlying(); // Zbor către scor
+            hasScore = true;
+        }
+        if (r.type === 'ruby') {
+            pendingRubyWin = r.value;
+            // Delay mic pentru rubine ca să nu se suprapună perfect cu scorul
+            setTimeout(() => animateRubyFlying(), 300); 
+            hasRubies = true;
+        }
     });
 
-    // 3. UI Update
-    updateScoreUI();
-    updateGiftButtonState();
-    renderEpicWindingMap(); // Remove the shake/dot from map
-    closeLevelDetail();
-    
-    // 4. Effects
+    // 4. Sunet de succes
     if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
-    showNotification("RECOMPENSĂ COLECTATĂ", `Nivelul ${lvl} a fost revendicat!`, "fa-check");
 
-    // 5. Save to cloud
+    // 5. Update UI principal (oprim tremuratul dacă nu mai sunt premii)
+    updateGiftButtonState();
+    renderEpicWindingMap(); 
+
+    // 6. Notificare Toast
+    showNotification("PREMIU COLECTAT!", `Ai primit cadoul pentru nivelul ${lvl}!`, "fa-gift");
+
+    // 7. Sincronizare Cloud
     syncScoreToFirestore();
 }
 // Ensure the ninja icon in Utilities opens the Market
