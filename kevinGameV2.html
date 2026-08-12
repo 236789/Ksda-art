@@ -7353,7 +7353,7 @@ input:checked + .s-slider:before {
                         <span>16 CĂRȚI</span>
                         <span>30 SEC</span>
                     </div>
-                    <span class="diff-reward">+150</span>
+    <span class="diff-reward" style="font-size: 14px;">+150 SCOR<br>+100 XP</span>
                 </div>
             </div>
 
@@ -10555,19 +10555,19 @@ function showSlotResult(title, message, isJackpot) {
     const modal = document.getElementById('slotResultModal');
     const box = document.getElementById('resultBox');
     document.getElementById('resultTitle').innerText = title;
-    document.getElementById('resultText').innerText = message;
+    // We use innerHTML so we can style the XP and Points separately if needed
+    document.getElementById('resultText').innerHTML = message; 
     
     if (isJackpot) {
         box.classList.remove('result-modal-box'); 
-        box.classList.add('mega-jackpot-box'); // Special gold theme
+        box.classList.add('mega-jackpot-box');
     } else {
         box.classList.remove('mega-jackpot-box');
-        box.classList.add('result-modal-box'); // Base themed style
+        box.classList.add('result-modal-box');
     }
 
     modal.style.display = 'flex';
 }
-
 // Ploaie de bănuți care curg pe ecran la Jackpot!
 function spawnJackpotCoins() {
     for (let i = 0; i < 50; i++) {
@@ -10964,25 +10964,37 @@ function finishTrivia(win, reason = "") {
     const resultModal = document.getElementById('slotResultModal');
     const resultBox = document.getElementById('resultBox');
     
-    // Resetăm clasa la cea de bază (pentru a fi afectată de temă)
+    // Reset to base theme style
     resultBox.className = "modal-box result-modal-box"; 
 
     if (win) {
         pendingWinAmount = 125;
+        const xpWon = 50; // <--- MASSIVE XP REWARD
+
         document.getElementById('resultTitle').innerText = "GENIULE!";
-        document.getElementById('resultText').innerText = "5/5 CORECT! Ai câștigat 125 puncte.";
+        // 🆕 UPDATED UI TEXT
+        document.getElementById('resultText').innerHTML = `5/5 CORECT!<br><br>Ai câștigat <b style="color:#facc15;">125 Puncte</b> și <b style="color:#ffcc00;">${xpWon} XP</b>!`;
         
-        // Adăugăm stilul de aur peste cel de bază
         resultBox.classList.add('mega-jackpot-box'); 
         resultModal.style.display = 'flex';
 
+        // Update the "OK" button logic for this specific win
         window.closeResultAndSlot = function() {
             document.getElementById('slotResultModal').style.display = 'none';
-            animateScoreFlying();
+            
+            // 1. Points fly to the score
+            animateScoreFlying(); 
+
+            // 2. 🆕 XP GAIN & FLYER
+            gainXP(xpWon);
+            showXPFlyer(window.innerWidth / 2, window.innerHeight / 2, xpWon);
+
             resultBox.className = "modal-box result-modal-box"; 
+            isPaused = false;
+            startKevinMovement();
         };
     } else {
-        showSlotResult("AI RATAT!", reason + " Ai pierdut bonusul.", false);
+        showSlotResult("AI RATAT!", reason + " Bonusul a fost pierdut.", false);
     }
 }
 
@@ -11198,9 +11210,9 @@ const allMemoryIcons = [
 ];
 
 const memoryDiffs = {
-    easy:   { cards: 8,  time: 15, win: 50,  loss: 0 },
-    medium: { cards: 12, time: 25, win: 100, loss: -50 },
-    hard:   { cards: 16, time: 30, win: 150, loss: -100 }
+    easy:   { cards: 8,  time: 15, win: 50,  loss: 0,    xp: 25 },  // 🆕 Added XP
+    medium: { cards: 12, time: 25, win: 100, loss: -50,   xp: 50 },  // 🆕 Added XP
+    hard:   { cards: 16, time: 30, win: 150, loss: -100,  xp: 100 }  // 🆕 Added XP
 };
 
 function startMemoryGame() {
@@ -11329,58 +11341,56 @@ function startMemoryTimer(totalSeconds) {
 function finishMemory(win) {
     clearInterval(memoryTimer);
     
-    // Lock the board to prevent clicking during the reveal or success animation
     document.getElementById('memoryBoard').style.pointerEvents = 'none';
 
     if (win) {
         document.getElementById('memoryModal').style.display = 'none';
+        
         pendingWinAmount = currentMemConfig.win;
-        showSlotResult("GENIU!", `Ai câștigat +${pendingWinAmount} puncte!`, false);
+        const xpWon = currentMemConfig.xp; // Get XP based on difficulty
+
+        // Show the sick result modal with Score + XP
+        const title = "GENIU MEMORIE!";
+        const message = `Ai găsit toate perechile!<br><br>Câștig: <b style="color:#facc15;">+${pendingWinAmount} Scor</b> și <b style="color:#ffcc00;">+${xpWon} XP</b>!`;
+        
+        showSlotResult(title, message, true); // True for Jackpot glow
+
+        // Define what happens when they click "OK"
+        window.closeResultAndSlot = () => {
+            document.getElementById('slotResultModal').style.display = 'none';
+            
+            // 1. Points fly to the top
+            animateScoreFlying(); 
+
+            // 2. 🆕 XP Gain & Visual Flyer
+            gainXP(xpWon);
+            showXPFlyer(window.innerWidth / 2, window.innerHeight / 2, xpWon);
+
+            isPaused = false;
+            startKevinMovement();
+        };
+
     } else {
-        // Play Alarm Sound on Loss
+        // --- LOSS LOGIC (Stays the same) ---
         if (!isMuted) {
             const alarm = new Audio(memAlarmSnd);
             alarm.volume = sfxVolume;
-            alarm.play().catch(e => console.warn("Alarm audio blocked"));
+            alarm.play().catch(e => {});
         }
-        
         if (typeof playTriviaSound === 'function') playTriviaSound(false);
 
-        // FLIP ALL UNMATCHED CARDS
         const unmatchedCards = document.querySelectorAll('.mem-card:not(.matched):not(.flipped)');
         unmatchedCards.forEach(card => {
-            // Slight stagger effect based on random timeout makes it look even cooler
-            setTimeout(() => {
-                card.classList.add('flipped');
-            }, Math.random() * 300); 
+            setTimeout(() => { card.classList.add('flipped'); }, Math.random() * 300); 
         });
         
-        // WAIT 2 SECONDS FOR PLAYER TO SEE MISSED CARDS, THEN SHOW RESULT
         setTimeout(() => {
             document.getElementById('memoryModal').style.display = 'none';
-            
             pendingWinAmount = currentMemConfig.loss;
-            let title = "RATAT!";
-            let msg = "Timpul a expirat!";
-            
-            if (pendingWinAmount < 0) {
-                msg = `Prea lent! Ai pierdut ${Math.abs(pendingWinAmount)} puncte.`;
-            }
-            
-            showSlotResult(title, msg, false);
+            let msg = pendingWinAmount < 0 ? `Prea lent! Ai pierdut ${Math.abs(pendingWinAmount)} puncte.` : "Timpul a expirat!";
+            showSlotResult("RATAT!", msg, false);
         }, 2000);
     }
-
-    // Standard cleanup
-    window.closeResultAndSlot = () => {
-        document.getElementById('slotResultModal').style.display = 'none';
-        if (pendingWinAmount !== 0) {
-            animateScoreFlying();
-        } else {
-            isPaused = false;
-            startKevinMovement();
-        }
-    };
 }
 
 
