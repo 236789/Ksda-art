@@ -7780,7 +7780,7 @@ if (response.status === 200) {
     xpToNextLevel = getXPRequired(playerLevel); // Update the goal based on the loaded level
 
     updateXPBarUI(); 
-updateGiftButtonState(); // 🔥 Add this
+updateGiftButtonState(); 
 
 
             lastSavedScore = score;
@@ -12555,21 +12555,26 @@ function updateGiftButtonState() {
 
     let hasUnclaimed = false;
 
-    // We check from level 1 up to your current playerLevel
+    // Convertim toată lista în numere ca să fim siguri 100%
+    const claimedList = (_GAME_DATA.claimedLevelRewards || []).map(Number);
+
     for (let i = 1; i <= playerLevel; i++) {
-        // If a level has a reward defined but is NOT in your claimed list
-        // We use Number(i) to ensure we aren't comparing a string to a number
-        if (LEVEL_REWARDS_REGISTRY[i] && !_GAME_DATA.claimedLevelRewards.map(Number).includes(Number(i))) {
-            hasUnclaimed = true;
-            break; 
+        // Dacă nivelul 'i' are un premiu definit în registru...
+        if (LEVEL_REWARDS_REGISTRY[i]) {
+            // ...dar NU se află în lista de premii deja luate (claimed)
+            if (!claimedList.includes(Number(i))) {
+                hasUnclaimed = true;
+                break; 
+            }
         }
     }
 
     if (hasUnclaimed) {
-        btn.classList.add('gift-vibrate');
+        btn.classList.add('gift-vibrate'); // Tremură/Strălucește
+        console.log("🎁 INFO: Ai premii de colectat!");
     } else {
-        // This makes the button stop shaking immediately
-        btn.classList.remove('gift-vibrate');
+        btn.classList.remove('gift-vibrate'); // Stă cuminte
+        console.log("✅ INFO: Toate premiile la zi.");
     }
 }
 
@@ -12706,6 +12711,8 @@ function handleClaimLevelReward(lvl) {
 
     // 2. Închidem modalul
     closeLevelDetail();
+    updateGiftButtonState();
+
 
     // 3. Procesăm Recompensele (Scor și Rubine)
     data.rewards.forEach(r => {
@@ -12721,7 +12728,6 @@ function handleClaimLevelReward(lvl) {
 
     // 4. Feedback vizual și sonor
     if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
-    updateGiftButtonState();
     renderEpicWindingMap(); 
     showNotification("PREMIU COLECTAT!", `Ai primit cadoul pentru nivelul ${lvl}!`, "fa-gift");
 
