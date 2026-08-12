@@ -11536,27 +11536,30 @@ const stageList = {
         name: "STRADA",
         accent: "#facc15",
         completionReward: { type: 'score', value: 500 },
-timeBgs: {
-    deepNight: "https://i.ibb.co/v4R0KtYh/deep-night.png",  // 00:00 - 05:00
-    morning:   "https://i.ibb.co/60vsC56y/morning.png",     // 05:00 - 09:00
-    noon:      "https://i.ibb.co/yB6N0j7y/noon.png",        // 09:00 - 17:00
-    golden:    "https://i.ibb.co/QvRKhSBW/golden-hour.png", // 17:00 - 20:00
-    night:     "https://i.ibb.co/B2rqwVM8/night.png"        // 20:00 - 00:00
-}
+        // LINK-URI DIRECTE HD (Nu le schimba, astea sunt cele bune)
+        timeBgs: {
+            morning:   "https://i.ibb.co/k2V40h8/Morning.png",      // 05:00 - 09:00
+            noon:      "https://i.ibb.co/S7qgR7y/Noon.png",         // 09:00 - 17:00
+            golden:    "https://i.ibb.co/kX24z7m/Golden-Hour.png",  // 17:00 - 20:00
+            night:     "https://i.ibb.co/nCByvpx/Night.png",        // 20:00 - 00:00
+            deepNight: "https://i.ibb.co/8Y3tVzG/Deep-Night.png"    // 00:00 - 05:00
+        }
     }
 };
 
 
 function getRomanianTimeBg() {
+    // Luăm ora curentă în format de România
     const roTime = new Date().toLocaleString("en-US", {timeZone: "Europe/Bucharest"});
     const hour = new Date(roTime).getHours();
+    
     const bgs = stageList.street.timeBgs;
 
-    if (hour >= 0 && hour < 5)   return bgs.deepNight;
     if (hour >= 5 && hour < 9)   return bgs.morning;
     if (hour >= 9 && hour < 17)  return bgs.noon;
     if (hour >= 17 && hour < 20) return bgs.golden;
-    return bgs.night;
+    if (hour >= 20 || hour < 0)  return bgs.night;
+    return bgs.deepNight; // Default pentru 00:00 - 05:00
 }
 
 
@@ -11572,15 +11575,22 @@ function applyStage(stageId) {
 
     if (stageNameEl) stageNameEl.innerText = stage.name;
 
+    // Calculăm fundalul în funcție de oră pentru Stage 1
     let finalBg = (stageId === "street") ? getRomanianTimeBg() : stage.bg;
 
     if (gameArea) {
-        // SETĂRI PENTRU CLARITATE MAXIMĂ
-        gameArea.style.backgroundPosition = "center";
+        // RESETĂM STILUL PENTRU CLARITATE
+        gameArea.style.backgroundPosition = "center center";
         gameArea.style.backgroundRepeat = "no-repeat";
-        gameArea.style.backgroundSize = "100% 100%"; // Oprește Zoom-ul urât
-        gameArea.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('${finalBg}')`;
+        gameArea.style.backgroundSize = "cover"; // Acoperă ecranul păstrând proporțiile
+        
+        // Aplicăm imaginea cu un filtru de întunecare foarte mic (0.15) pentru contrastul HUD-ului
+        gameArea.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.15), rgba(0,0,0,0.15)), url('${finalBg}')`;
+        
+        // Opțional: Prevenim efectul de "moale" pe unele browsere
+        gameArea.style.imageRendering = "auto"; 
     }
+    
     currentStageId = stageId;
 }
 function pickupRubyEmoji(e) {
