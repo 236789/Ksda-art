@@ -9659,18 +9659,20 @@ function spawnSpecialEvent() {
         return;
     }
 
-// --- NEW STAGE FILTERING ---
-    // Instead of all keys, we only get keys allowed in the current stage
-    // NEW: We also block "superMagnet" from spawning if one is already active
-    const availableKeys = Object.keys(specialRegistry).filter(key => {
-        const isAllowedInStage = specialRegistry[key].stages.includes(currentStageId);
-        const isDuplicateMagnet = (key === "superMagnet" && isSuperMagnetActive);
-        
-        // NOU: Excludem Rubinul de la extragerea normală, îl calculăm separat!
-        if (key === "rubyDrop") return false;
-        
-        return isAllowedInStage && !isDuplicateMagnet;
-    });
+// --- NEW STAGE & LEVEL FILTERING ---
+const availableKeys = Object.keys(specialRegistry).filter(key => {
+    const data = specialRegistry[key];
+    const isAllowedInStage = data.stages.includes(currentStageId);
+    const isDuplicateMagnet = (key === "superMagnet" && isSuperMagnetActive);
+    
+    // NOU: Verificăm dacă item-ul este deblocat pentru nivelul curent
+    const isLevelUnlocked = isUnlocked(key);
+    
+    // Excludem Rubinul de la extragerea normală (are logică separată mai jos)
+    if (key === "rubyDrop") return false;
+    
+    return isAllowedInStage && !isDuplicateMagnet && isLevelUnlocked;
+});
 
     // Safety check: if no events are valid for this stage, wait and try again
     if (availableKeys.length === 0) {
@@ -9682,14 +9684,17 @@ function spawnSpecialEvent() {
     // ALEGEM UN EVENIMENT RANDOM (From the filtered availableKeys)
     let chosenKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
 
-    // --- NOU: 1% ȘANSĂ PENTRU RUBIN (Doar dacă sunt deblocate) ---
-    if (hasSeenRubyTutorial || rubies > 0) {
-        // Dacă numărul generat (0-100) e mai mic sau egal cu 1, schimbăm eventul în Rubin!
-if (Math.random() < 0.05) { // 2% șansă să apară
+// --- NOU: LOGICĂ RUBIN (Nivel 2 + Șansă 5%) ---
+if (isUnlocked("rubyDrop")) {
+    // Dacă ai deblocat rubinele, verificăm dacă le-ai mai văzut sau dacă ai deja
+    if (hasSeenRubyTutorial || rubies > 0 || Math.random() < 0.05) {
+        // Notă: Math.random aici e doar pentru spawn-ul efectiv pe hartă
+        if (Math.random() < 0.05) { 
             chosenKey = "rubyDrop";
-            console.log("💎 SANSĂ EXTREMĂ! A apărut Rubinul de 1%!");
+            console.log("💎 RUBIN UNLOCKED: A apărut pe hartă!");
         }
     }
+}
 
     // --- LOGICA DE RARITATE 35% PENTRU SLOT MACHINE ---
     if (chosenKey === "slotMachine") {
@@ -12359,6 +12364,23 @@ window.clickEpicNode = function(level, name) {
 };
 
 
+const LEVEL_UNLOCKS = {
+    2: ["slotMachine", "rubyDrop"]
+};
+
+// Funcție care verifică dacă un item este deblocat
+function isUnlocked(itemId) {
+    for (let level in LEVEL_UNLOCKS) {
+        if (LEVEL_UNLOCKS[level].includes(itemId)) {
+            return playerLevel >= parseInt(level);
+        }
+    }
+    return true; // Dacă nu e în listă, e deblocat default (lvl 1)
+}
+
+
+
+
 const LEVEL_REWARDS_REGISTRY = {
     1:  { name: "Bronze",      message: "Bun venit în legendă! Acesta este cadoul tău de început.", rewards: [{ type: "score", value: 500 }, { type: "ruby", value: 5 }] },
     2:  { name: "Silver",      message: "Te miști bine! Ai deblocat primele recompense de argint.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
@@ -12472,21 +12494,33 @@ function openLevelDetail(lvl) {
         </div>
     `;
 
-    // 3. Inject DEBLOCĂRI Section
-    document.getElementById('detailUnlocksSection').innerHTML = `
-        <div class="v3-section-title">
-            <div class="v3-line"></div>
-            <span class="v3-diamonds">◆</span>
-            <i class="fa-solid fa-lock-open"></i>
-            <span>DEBLOCĂRI</span>
-            <span class="v3-diamonds">◆</span>
-            <div class="v3-line"></div>
-        </div>
-        <p class="v3-sub-info">Funcții noi la acest nivel:</p>
-        <div class="v3-unlock-list" style="color:#64748b; text-align:center; padding:10px; font-weight:700; font-size:12px;">
-            Nicio funcție nouă la acest nivel.
-        </div>
-    `;
+// 3. Inject DEBLOCĂRI Section
+const unlocks = LEVEL_UNLOCKS[lvl] || [];
+let unlocksHtml = "";
+
+if (unlocks.length > 0) {
+    unlocks.forEach(id => {
+        const name = (id === "slotMachine") ? "🎰 Slot Machine" : "💎 Rubine Rare";
+        unlocksHtml += `<div style="color:#facc15; font-weight:bold;">🔓 DEBLOCAT: ${name}</div>`;
+    });
+} else {
+    unlocksHtml = "Nicio funcție nouă la acest nivel.";
+}
+
+document.getElementById('detailUnlocksSection').innerHTML = `
+    <div class="v3-section-title">
+        <div class="v3-line"></div>
+        <span class="v3-diamonds">◆</span>
+        <i class="fa-solid fa-lock-open"></i>
+        <span>DEBLOCĂRI</span>
+        <span class="v3-diamonds">◆</span>
+        <div class="v3-line"></div>
+    </div>
+    <p class="v3-sub-info">Ce primești nou:</p>
+    <div class="v3-unlock-list" style="color:#fff; text-align:center; padding:10px; font-weight:700; font-size:14px; font-family:'Oswald';">
+        ${unlocksHtml}
+    </div>
+`;
 
     // 4. Button Logic
     const mainBtn = document.getElementById('replicaMainBtn');
