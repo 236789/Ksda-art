@@ -7780,7 +7780,6 @@ if (response.status === 200) {
     xpToNextLevel = getXPRequired(playerLevel); // Update the goal based on the loaded level
 
     updateXPBarUI(); 
-updateGiftButtonState(); 
 
 
             lastSavedScore = score;
@@ -7794,11 +7793,12 @@ updateGiftButtonState();
             _GAME_DATA.index = data.index || [];
             _GAME_DATA.claimedRewards = data.claimedRewards || [];
             _GAME_DATA.claimedStageRewards = data.claimedStageRewards || [];
-            _GAME_DATA.claimedLevelRewards = data.claimedLevelRewards || []; 
+            _GAME_DATA.claimedLevelRewards = (data.claimedLevelRewards || []).map(Number); // Forțăm numere
             backendUnlockedFeatures = data.unlockedFeatures || []; // 🆕 LOAD EXISTING UNLOCKS
 
 
-            
+            updateGiftButtonState(); 
+
             console.log("📖 Progress loaded:", _GAME_DATA.index.length, "emojis discovered.");
             
             updateLoader(75, 'Sincronizare setări...');
@@ -8036,20 +8036,27 @@ async function syncScoreToFirestore() {
             level: playerLevel,
             xp: playerXP,
             hasSeenRubyTutorial: hasSeenRubyTutorial,
-            claimedLevelRewards: _GAME_DATA.claimedLevelRewards,
+            claimedLevelRewards: _GAME_DATA.claimedLevelRewards, // Trimitem ce avem local
             claimedRewards: _GAME_DATA.claimedRewards,
             claimedStageRewards: _GAME_DATA.claimedStageRewards
         }),
       }); 
 
       if (response.ok) {
-        // 🆕 PARSE BACKEND RESPONSE
         const result = await response.json();
         
-        // 🆕 UPDATE FRONTEND AUTHORITY LIST
+        // 1. Sincronizăm funcțiile deblocate (Slot, Rubine etc.)
         if (result.unlockedFeatures) {
             backendUnlockedFeatures = result.unlockedFeatures;
-            console.log("📡 Backend Unlocks Updated:", backendUnlockedFeatures);
+        }
+
+        // 2. REPARARE BUG VIBRAȚIE: Sincronizăm premiile revendicate cu realitatea din DB
+        if (result.claimedLevelRewards) {
+            // Actualizăm lista locală cu cea confirmată de server (forțăm numere)
+            _GAME_DATA.claimedLevelRewards = result.claimedLevelRewards.map(Number);
+            
+            // Verificăm imediat dacă butonul mai trebuie să vibreze
+            updateGiftButtonState(); 
         }
 
         lastSavedScore = score;
@@ -12554,19 +12561,12 @@ function updateGiftButtonState() {
     if (!btn) return;
 
     let hasUnclaimed = false;
-    let missingLevel = null;
-
-    // Ne asigurăm că lucrăm doar cu Numere
     const claimedList = (_GAME_DATA.claimedLevelRewards || []).map(Number);
-    const currentLvl = Number(playerLevel);
 
-    for (let i = 1; i <= currentLvl; i++) {
-        // Dacă nivelul 'i' are un premiu în registru
+    for (let i = 1; i <= playerLevel; i++) {
         if (LEVEL_REWARDS_REGISTRY[i]) {
-            // Dacă nivelul 'i' NU se află în lista celor revendicate
             if (!claimedList.includes(i)) {
                 hasUnclaimed = true;
-                missingLevel = i;
                 break; 
             }
         }
@@ -12574,13 +12574,10 @@ function updateGiftButtonState() {
 
     if (hasUnclaimed) {
         btn.classList.add('gift-vibrate');
-        console.log(`🎁 INFO: Butonul vibrează pentru premiul necolectat de la Nivelul: ${missingLevel}`);
     } else {
         btn.classList.remove('gift-vibrate');
-        console.log("✅ INFO: Toate premiile sunt colectate la zi.");
     }
 }
-
 
 let currentDetailLevel = 0;
 
