@@ -12738,15 +12738,21 @@ function forceTestSpawn(key) {
 
     console.group(`🛠️ DEV TEST: Spawning [${key}]`);
     console.log(`Current Player Level: ${playerLevel}`);
-    console.log(`Is Unlocked in Frontend? ${isUnlocked(key) ? "✅ YES" : "❌ NO"}`);
-    console.log(`Backend Status: The backend only knows you are Level ${playerLevel}. It doesn't track specific unlocks; the frontend decides if this spawns based on that level.`);
+
+    // This now checks the list RECEIVED from the server
+    const serverConfirmed = isUnlocked(key); 
+    console.log(`Is Unlocked by Backend Authority? ${serverConfirmed ? "✅ YES" : "❌ NO"}`);
     
-    if (!isUnlocked(key)) {
-        console.warn(`⚠️ Warning: This item is currently LOCKED for your level. Spawning it anyway for testing...`);
+    console.log(`Current Backend Features List:`, backendUnlockedFeatures);
+    
+    if (!serverConfirmed) {
+        console.warn(`⚠️ SECURITY WARNING: This item is currently LOCKED in your Cloud Profile. Spawning it for visual testing only.`);
+    } else {
+        console.log(`✅ Success: Your level is high enough and the server has authorized this feature.`);
     }
     console.groupEnd();
 
-    // Visual Spawn Logic (Exact copy of your real logic)
+    // --- Visual Spawn Logic (Keep this part the same) ---
     const item = document.createElement('div');
     item.className = 'special-event-item';
     item.style.backgroundImage = `url('${data.image}')`;
@@ -12756,7 +12762,7 @@ function forceTestSpawn(key) {
     item.style.height = itemSize + 'px';
     
     const area = document.getElementById('gameArea');
-    item.style.left = "50%"; // Spawn in center for easy testing
+    item.style.left = "50%"; 
     item.style.top = "50%";
     item.style.transform = "translate(-50%, -50%)";
     
@@ -12765,9 +12771,7 @@ function forceTestSpawn(key) {
     item.onclick = (e) => {
         e.stopPropagation();
         item.remove();
-        console.log(`🖱️ Test Event Captured! Triggering logic for: ${data.name}`);
-        
-        // Trigger the actual event
+        console.log(`🖱️ Test Event Captured: ${data.name}`);
         data.action(e);
         if (data.duration) {
             showEventIndicator(key, data.duration);
