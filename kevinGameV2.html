@@ -6524,6 +6524,79 @@ input:checked + .s-slider:before {
     box-shadow: 0 2px 5px rgba(0,0,0,0.5);
     border: 1px solid #fff;
 }
+
+
+/* --- ULTIMATE RESULT MODAL (VICTORY/JACKPOT) --- */
+.mega-jackpot-box {
+    background: radial-gradient(circle at top, #2c2a55 0%, #050510 100%) !important;
+    border: 4px solid #facc15 !important;
+    box-shadow: 0 0 50px rgba(250, 204, 21, 0.4), inset 0 0 30px rgba(0,0,0,0.8) !important;
+    border-radius: 30px !important;
+    padding: 40px 25px !important;
+    text-align: center;
+    max-width: 380px !important;
+    animation: resultPopIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes resultPopIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.victory-icon {
+    font-size: 60px;
+    color: #facc15;
+    filter: drop-shadow(0 0 20px rgba(250, 204, 21, 0.6));
+    margin-bottom: 20px;
+    animation: victoryFloat 3s ease-in-out infinite;
+}
+
+@keyframes victoryFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+#resultTitle {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: #ffffff;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    text-shadow: 0 0 15px rgba(255,255,255,0.3);
+}
+
+.result-rewards-wrap {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 25px 0;
+    background: rgba(0,0,0,0.4);
+    padding: 15px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.res-reward-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.res-reward-val {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.res-reward-lab {
+    font-family: 'Oswald', sans-serif;
+    font-size: 10px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
   </style>
 </head>
 <body>
@@ -10551,22 +10624,35 @@ function finalizeSpin(outcome) {
     showSlotResult(title, text, isJackpot);
 }
 
-function showSlotResult(title, message, isJackpot) {
+function showSickResult(title, message, rewardHtml, isVictory, onConfirm = null) {
     const modal = document.getElementById('slotResultModal');
     const box = document.getElementById('resultBox');
-    document.getElementById('resultTitle').innerText = title;
-    // We use innerHTML so we can style the XP and Points separately if needed
-    document.getElementById('resultText').innerHTML = message; 
     
-    if (isJackpot) {
-        box.classList.remove('result-modal-box'); 
-        box.classList.add('mega-jackpot-box');
-    } else {
-        box.classList.remove('mega-jackpot-box');
-        box.classList.add('result-modal-box');
-    }
+    // Set Layout
+    box.className = isVictory ? "modal-box mega-jackpot-box" : "modal-box result-modal-box";
+    
+    box.innerHTML = `
+        <i class="fa-solid ${isVictory ? 'fa-trophy victory-icon' : 'fa-circle-xmark'}" 
+           style="${!isVictory ? 'font-size:60px; color:#ff4444; margin-bottom:20px;' : ''}"></i>
+        
+        <h2 id="resultTitle">${title}</h2>
+        <p style="font-family:'Oswald'; color:#d1d5db; font-size:16px;">${message}</p>
+        
+        ${rewardHtml}
+        
+        <button class="menu-btn play" style="width:100%; height:60px; font-size:24px;" id="resultOkBtn">OK</button>
+    `;
 
     modal.style.display = 'flex';
+
+    document.getElementById('resultOkBtn').onclick = () => {
+        modal.style.display = 'none';
+        if (onConfirm) onConfirm();
+        
+        // Resume Game
+        isPaused = false;
+        startKevinMovement();
+    };
 }
 // Ploaie de bănuți care curg pe ecran la Jackpot!
 function spawnJackpotCoins() {
@@ -10961,40 +11047,38 @@ function finishTrivia(win, reason = "") {
     clearInterval(triviaTimer);
     document.getElementById('triviaModal').style.display = 'none';
     
-    const resultModal = document.getElementById('slotResultModal');
-    const resultBox = document.getElementById('resultBox');
-    
-    // Reset to base theme style
-    resultBox.className = "modal-box result-modal-box"; 
-
     if (win) {
-        pendingWinAmount = 125;
-        const xpWon = 50; // <--- MASSIVE XP REWARD
+        // --- ONLY TRIGGERS ON 5/5 ---
+        const pointsWon = 125;
+        const xpWon = 50; 
+        pendingWinAmount = pointsWon;
 
-        document.getElementById('resultTitle').innerText = "GENIULE!";
-        // 🆕 UPDATED UI TEXT
-        document.getElementById('resultText').innerHTML = `5/5 CORECT!<br><br>Ai câștigat <b style="color:#facc15;">125 Puncte</b> și <b style="color:#ffcc00;">${xpWon} XP</b>!`;
+        const title = "GENIULE!";
+        const message = `Ești de neoprit! Ai răspuns corect la toate întrebările.`;
         
-        resultBox.classList.add('mega-jackpot-box'); 
-        resultModal.style.display = 'flex';
+        // 🆕 Build the Reward UI inside the modal
+        const rewardHtml = `
+            <div class="result-rewards-wrap">
+                <div class="res-reward-item">
+                    <span class="res-reward-val" style="color:#facc15;">+${pointsWon}</span>
+                    <span class="res-reward-lab">Puncte</span>
+                </div>
+                <div class="res-reward-item">
+                    <span class="res-reward-val" style="color:#ffcc00;">+${xpWon}</span>
+                    <span class="res-reward-lab">Experience</span>
+                </div>
+            </div>
+        `;
 
-        // Update the "OK" button logic for this specific win
-        window.closeResultAndSlot = function() {
-            document.getElementById('slotResultModal').style.display = 'none';
-            
-            // 1. Points fly to the score
-            animateScoreFlying(); 
-
-            // 2. 🆕 XP GAIN & FLYER
+        showSickResult(title, message, rewardHtml, true, () => {
+            animateScoreFlying();
             gainXP(xpWon);
             showXPFlyer(window.innerWidth / 2, window.innerHeight / 2, xpWon);
+        });
 
-            resultBox.className = "modal-box result-modal-box"; 
-            isPaused = false;
-            startKevinMovement();
-        };
     } else {
-        showSlotResult("AI RATAT!", reason + " Bonusul a fost pierdut.", false);
+        // --- LOSS: NO XP, NO POINTS ---
+        showSickResult("AI RATAT!", reason, `<p style="color:#ef4444;">Bonusul a fost pierdut.</p>`, false);
     }
 }
 
@@ -11340,38 +11424,39 @@ function startMemoryTimer(totalSeconds) {
 
 function finishMemory(win) {
     clearInterval(memoryTimer);
-    
     document.getElementById('memoryBoard').style.pointerEvents = 'none';
 
     if (win) {
+        // --- VICTORY LOGIC ---
         document.getElementById('memoryModal').style.display = 'none';
         
-        pendingWinAmount = currentMemConfig.win;
-        const xpWon = currentMemConfig.xp; // Get XP based on difficulty
+        const pointsWon = currentMemConfig.win;
+        const xpWon = currentMemConfig.xp;
+        pendingWinAmount = pointsWon;
 
-        // Show the sick result modal with Score + XP
-        const title = "GENIU MEMORIE!";
-        const message = `Ai găsit toate perechile!<br><br>Câștig: <b style="color:#facc15;">+${pendingWinAmount} Scor</b> și <b style="color:#ffcc00;">+${xpWon} XP</b>!`;
-        
-        showSlotResult(title, message, true); // True for Jackpot glow
+        // Build the Sick Reward UI
+        const rewardHtml = `
+            <div class="result-rewards-wrap">
+                <div class="res-reward-item">
+                    <span class="res-reward-val" style="color:#facc15;">+${pointsWon}</span>
+                    <span class="res-reward-lab">Puncte</span>
+                </div>
+                <div class="res-reward-item">
+                    <span class="res-reward-val" style="color:#ffcc00;">+${xpWon}</span>
+                    <span class="res-reward-lab">Experience</span>
+                </div>
+            </div>
+        `;
 
-        // Define what happens when they click "OK"
-        window.closeResultAndSlot = () => {
-            document.getElementById('slotResultModal').style.display = 'none';
-            
-            // 1. Points fly to the top
-            animateScoreFlying(); 
-
-            // 2. 🆕 XP Gain & Visual Flyer
+        showSickResult("GENIU MEMORIE!", "Ai găsit toate perechile la timp!", rewardHtml, true, () => {
+            // Points fly and XP is granted only AFTER pressing OK
+            animateScoreFlying();
             gainXP(xpWon);
             showXPFlyer(window.innerWidth / 2, window.innerHeight / 2, xpWon);
-
-            isPaused = false;
-            startKevinMovement();
-        };
+        });
 
     } else {
-        // --- LOSS LOGIC (Stays the same) ---
+        // --- LOSS LOGIC ---
         if (!isMuted) {
             const alarm = new Audio(memAlarmSnd);
             alarm.volume = sfxVolume;
@@ -11387,8 +11472,12 @@ function finishMemory(win) {
         setTimeout(() => {
             document.getElementById('memoryModal').style.display = 'none';
             pendingWinAmount = currentMemConfig.loss;
-            let msg = pendingWinAmount < 0 ? `Prea lent! Ai pierdut ${Math.abs(pendingWinAmount)} puncte.` : "Timpul a expirat!";
-            showSlotResult("RATAT!", msg, false);
+            
+            let lossMsg = pendingWinAmount < 0 
+                ? `Ești prea lent! Ai pierdut <b style="color:#ff4444;">${Math.abs(pendingWinAmount)} puncte</b>.` 
+                : "Timpul a expirat!";
+            
+            showSickResult("AI RATAT!", lossMsg, "", false);
         }, 2000);
     }
 }
