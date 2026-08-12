@@ -12767,35 +12767,66 @@ function closeLevelDetail() {
     document.getElementById('levelDetailModal').style.display = 'none';
 }
  
-
 function handleClaimLevelReward(lvl) {
     const data = LEVEL_REWARDS_REGISTRY[lvl];
     const lvlNum = Number(lvl);
 
-    // Verificăm dacă a fost deja revendicat folosind numere
+    // 1. Siguranță: Nu lăsăm dublă colectare
     if (!data || _GAME_DATA.claimedLevelRewards.map(Number).includes(lvlNum)) return;
 
-    // 1. Salvăm local ca NUMĂR
+    // 2. Marcăm local premiul ca fiind luat
     _GAME_DATA.claimedLevelRewards.push(lvlNum);
 
-    // 2. Închidem modalul și actualizăm vizual butonul
-    closeLevelDetail();
-    updateGiftButtonState(); // Aceasta va opri vibrația dacă nu mai sunt altele
+    // 3. --- SICK TRANSITION: ÎNCHIDEM TOT ---
+    // Închidem toate modalele deasupra cărora se află butonul
+    document.getElementById('levelDetailModal').style.display = 'none';
+    document.getElementById('milestonesModal').style.display = 'none';
+    document.getElementById('utilitiesModal').style.display = 'none';
 
-    // 3. Procesăm Recompensele
+    // 4. --- JACKPOT PARTY ANIMATIONS ---
+    // Sunet de victorie (cel de la Slot Jackpot)
+    if (typeof playSFX === 'function') playSFX(slotJackpotUrl); 
+
+    // Ploaie de monede și rubine pe tot ecranul
+    spawnJackpotCoins(); 
+    spawnJackpotRubies();
+
+    // 5. --- LOGICA DE ZBOR CĂTRE HUD ---
+    let totalScoreReward = 0;
+    let totalRubyReward = 0;
+
+    // Calculăm totalul din array-ul de rewards al nivelului
     data.rewards.forEach(r => {
-        if (r.type === 'score') { pendingWinAmount = r.value; animateScoreFlying(); }
-        if (r.type === 'ruby') { pendingRubyWin = r.value; setTimeout(() => animateRubyFlying(), 300); }
+        if (r.type === 'score') totalScoreReward += r.value;
+        if (r.type === 'ruby') totalRubyReward += r.value;
     });
 
-    if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
-    renderEpicWindingMap(); 
-    showNotification("PREMIU COLECTAT!", `Ai primit cadoul pentru nivelul ${lvlNum}!`, "fa-gift");
+    // Pornim animația de zbor pentru Scor
+    if (totalScoreReward > 0) {
+        pendingWinAmount = totalScoreReward;
+        animateScoreFlying(); 
+    }
 
-    // 4. Sincronizăm cu serverul
+    // Pornim animația de zbor pentru Rubine (cu un mic delay de 0.4s ca să nu se suprapună)
+    if (totalRubyReward > 0) {
+        setTimeout(() => {
+            pendingRubyWin = totalRubyReward;
+            animateRubyFlying();
+        }, 400); 
+    }
+
+    // 6. --- CLEANUP & RESUME ---
+    isPaused = false;
+    startKevinMovement();      // Kevin începe să sară din nou
+    updateGiftButtonState();   // Oprim vibrația butonului de cadou
+    renderEpicWindingMap();    // Actualizăm harta (nodul devine auriu/bifat)
+    
+    // Notificare Toast pentru feedback final
+    showNotification("RECOMPENSĂ NIVEL", `Ai colectat premiul de Nivel ${lvlNum}!`, "fa-gift");
+
+    // 7. Sincronizare Cloud
     syncScoreToFirestore();
 }
-
 
 function forceTestSpawn(key) {
     const data = specialRegistry[key];
