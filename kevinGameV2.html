@@ -11546,11 +11546,11 @@ const stageList = {
         name: "STRADA",
         accent: "#facc15",
         timeBgs: {
-            morning:   "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/e7c37518-746f-42d6-9ea6-e3f7b028ffdb/ChatGPT+Image+Jun+16%2C+2025%2C+10_03_26+PM.png?format=original",
-            noon:      "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/7ecb7a41-6c85-4bae-922c-5ccde9e09cb7/ChatGPT+Image+Jun+16%2C+2025%2C+10_17_02+PM.png?format=original",
-            golden:    "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/ea8cf05f-ac93-40f4-8686-e59e32ae94dc/ChatGPT+Image+Jun+16%2C+2025%2C+10_03_21+PM.png?format=original",
-            night:     "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/147ce7dc-acfb-4e46-9530-38543788feef/Moonlit+Museum+Street+Scene.png?format=original",
-            deepNight: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/147ce7dc-acfb-4e46-9530-38543788feef/Moonlit+Museum+Street+Scene.png?format=original"
+            morning:   "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/Street%20Morning.png",
+            noon:      "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/Street%20Noon.png",
+            golden:    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/Street%20Golden%20Hour.png",
+            night:     "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/Street%20Night.png",
+            deepNight: "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/Street%20Deep%20Night.png"
         }
     }
 };
@@ -11577,14 +11577,25 @@ function applyStage(stageId) {
     const stage = stageList[stageId];
     if (!stage) return;
 
+    const gameArea = document.getElementById('gameArea');
     const stageNameEl = document.getElementById('stageName');
     if (stageNameEl) stageNameEl.innerText = stage.name;
 
-    // Alegem URL-ul
+    // Pick URL based on time
     let targetUrl = (stageId === "street") ? getRomanianTimeBg() : stage.bg;
 
-    // Aplicăm cu funcția HD
-    setBackgroundHD(targetUrl);
+    // FORCE HD BYPASS CACHE - The V1 Trick
+    const img = new Image();
+    const hdLink = targetUrl + "?v=" + new Date().getTime();
+    
+    img.onload = () => {
+        gameArea.style.backgroundImage = "url('" + hdLink + "')";
+        console.log("✅ GitHub HD Background Applied with 0% Zoom");
+    };
+    img.onerror = () => {
+        console.error("❌ Link Error! Make sure your GitHub repo is set to PUBLIC.");
+    };
+    img.src = hdLink;
     
     currentStageId = stageId;
 }
