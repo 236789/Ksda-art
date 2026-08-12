@@ -12736,23 +12736,29 @@ function forceTestSpawn(key) {
     const data = specialRegistry[key];
     if (!data) return;
 
-    console.group(`🛠️ DEV TEST: Spawning [${key}]`);
-    console.log(`Current Player Level: ${playerLevel}`);
-
-    // This now checks the list RECEIVED from the server
+    // --- THE ULTIMATE SECURITY CHECK ---
     const serverConfirmed = isUnlocked(key); 
-    console.log(`Is Unlocked by Backend Authority? ${serverConfirmed ? "✅ YES" : "❌ NO"}`);
-    
-    console.log(`Current Backend Features List:`, backendUnlockedFeatures);
-    
-    if (!serverConfirmed) {
-        console.warn(`⚠️ SECURITY WARNING: This item is currently LOCKED in your Cloud Profile. Spawning it for visual testing only.`);
-    } else {
-        console.log(`✅ Success: Your level is high enough and the server has authorized this feature.`);
-    }
-    console.groupEnd();
 
-    // --- Visual Spawn Logic (Keep this part the same) ---
+    if (!serverConfirmed) {
+        // 1. Log the rejection
+        console.error(`🚫 SPAWN BLOCKED: User tried to force spawn [${key}], but the Backend Authority says NO.`);
+        
+        // 2. Play a "Fail" sound
+        playMissSFX(); 
+
+        // 3. Make the character mock the player
+        showKevinutaBubble("N-ai tu level de așa ceva! 😂");
+        
+        // 4. Show a professional notification
+        showNotification("BLOCAT", "Trebuie să deblochezi acest element la Nivelul 2!", "fa-lock");
+
+        // 5. STOP HERE - Do not create the item
+        return; 
+    }
+
+    // --- If we reached here, it means it IS unlocked ---
+    console.log(`✅ TEST SPAWN AUTHORIZED: Spawning [${key}]...`);
+
     const item = document.createElement('div');
     item.className = 'special-event-item';
     item.style.backgroundImage = `url('${data.image}')`;
