@@ -6809,12 +6809,6 @@ input:checked + .s-slider:before {
   <div id="kevin"></div>
   <!-- OLD BACK BUTTON REMOVED -->
 
-
-<!-- DEV TESTING CONSOLE (Visible only for testing) -->
-<div id="devTestConsole" style="position: absolute; bottom: 100px; left: 20px; z-index: 5000; display: flex; gap: 10px; pointer-events: auto;">
-    <button onclick="forceTestSpawn('rubyDrop')" style="background: #ff3366; color: white; border: 1px solid white; padding: 5px 10px; border-radius: 5px; font-size: 10px; font-family: 'Orbitron'; cursor: pointer;">TEST RUBY</button>
-    <button onclick="forceTestSpawn('slotMachine')" style="background: #6366f1; color: white; border: 1px solid white; padding: 5px 10px; border-radius: 5px; font-size: 10px; font-family: 'Orbitron'; cursor: pointer;">TEST SLOT</button>
-</div>
 </div>
 
 
@@ -9300,6 +9294,7 @@ const specialRegistry = {
         image: "https://iili.io/Ck27fPs.png",
         type: "bad",
         duration: 10,
+        xpValue: 5, // <--- ADAUGĂ ASTA
         stages: ["street"], // Enabled for Stage 1
     indexReward: { type: 'score', value: 50 },
         description: "Un topor care ricoșează și îți fură scorul dacă te lovește!",
@@ -9310,6 +9305,7 @@ const specialRegistry = {
         image: "https://iili.io/Ck0qyMX.png",
         type: "good",
         duration: 15,
+        xpValue: 5, // <--- ADAUGĂ ASTA
         stages: ["street"], // Enabled for Stage 1
     indexReward: { type: 'score', value: 50 },
         description: "Un mouse glicat care urmărește personajul și dă click-uri automate!",
@@ -9321,6 +9317,7 @@ const specialRegistry = {
     image: "https://iili.io/Ck1l1x1.png",
     type: "good",
     duration: 8,
+        xpValue: 5, // <--- ADAUGĂ ASTA
         stages: ["street"], // Enabled for Stage 1
     indexReward: { type: 'score', value: 50 },
     description: "Timpul s-a oprit! eroul tau este înghețat în loc. Profită și dă click-uri rapide!",
@@ -9332,6 +9329,7 @@ const specialRegistry = {
         image: "https://iili.io/CvBJiDN.png",
         type: "bad",
         duration: 20, // Set to 20 seconds
+        xpValue: 5, // <--- ADAUGĂ ASTA
         stages: ["street"], // Enabled for Stage 1
     indexReward: { type: 'score', value: 50 },
         description: "Ai înghițit o jucărie de câine! Acum scoți sunete ciudate când te miști.",
@@ -9343,6 +9341,7 @@ const specialRegistry = {
     image: "https://iili.io/CvIlhhu.png",
     type: "bad",
     duration: 15,
+        xpValue: 5, // <--- ADAUGĂ ASTA
         stages: ["street"], // Enabled for Stage 1
     indexReward: { type: 'score', value: 50 },
     description: "Eroul tău a mâncat sos iute! E în flăcări, fuge haotic și pierde puncte!",
@@ -9354,6 +9353,7 @@ const specialRegistry = {
     image: "https://iili.io/C8GX6dl.png",
     type: "gamble",
     duration: 8,
+        xpValue: 5, // <--- ADAUGĂ ASTA
         stages: ["street"], // Enabled for Stage 1
     indexReward: { type: 'score', value: 150 },
     description: "Încearcă-ți norocul! Pariază din scorul tău pentru un multiplicator uriaș.",
@@ -9365,6 +9365,7 @@ const specialRegistry = {
     image: "https://iili.io/CSBaA8X.png",
     type: "good",
     duration: 0, 
+        xpValue: 5, // <--- ADAUGĂ ASTA
         stages: ["street"], // Enabled for Stage 1
     indexReward: { type: 'score', value: 50 },
     description: "Răspunde corect la 5 întrebări pentru un bonus masiv. Greșești una? Pierzi tot!",
@@ -9376,6 +9377,7 @@ const specialRegistry = {
     image: "https://iili.io/CSVi2Tb.png", // Added .png
     type: "good",
     duration: 0,
+        xpValue: 5, // <--- ADAUGĂ ASTA
         stages: ["street"], // Enabled for Stage 1
     indexReward: { type: 'score', value: 50 },
     description: "Găsește toate perechile în 25 de secunde pentru un bonus de 50 de puncte!",
@@ -9387,6 +9389,7 @@ const specialRegistry = {
         image: "https://iili.io/CgNnicF.png", // Direct link for the image
         type: "good",
         duration: 35,
+        xpValue: 5, // <--- ADAUGĂ ASTA
         stages: ["street"],
     indexReward: { type: 'score', value: 50 },
         description: "Un magnet extrem de puternic care atrage toate emoji-urile spre eroul tău!",
@@ -9397,6 +9400,7 @@ const specialRegistry = {
         image: "https://iili.io/CrnXNdG.png",
         type: "good",
         duration: 0, // Nu are o durată activă pe ecran, doar îl iei
+        xpValue: 15, // <--- ADAUGĂ ASTA
         stages: ["street"],
     indexReward: { type: 'ruby', value: 1 },
         description: "Un rubin extrem de rar a picat pe stradă! Noroc chior!",
@@ -9903,32 +9907,37 @@ const area = document.getElementById('gameArea');
     }
 
 item.onclick = (e) => {
-        e.stopPropagation();
-        if (!e.isTrusted) return;
-        
-        // --- INDEX DISCOVERY LOGIC ---
-        // Checks if this emoji key is already in the discovered list
-        if (!_GAME_DATA.index.includes(chosenKey)) {
-            _GAME_DATA.index.push(chosenKey);
-            showNotification("DESCOPERIRE!", `Ai deblocat elementul: ${eventData.name}`, "fa-book-open");
-            console.log(`📖 NOUĂ DESCOPERIRE: [${eventData.name}] adăugat în Index!`);
-            syncInventoryToCloud(); // Immediate sync to save the discovery
-        }
+    e.stopPropagation();
+    if (!e.isTrusted) return;
 
-        item.remove();
-        console.log(`🖱️ EVENT PRINS: [${eventData.name}]`);
+    // --- 🆕 NEW: DYNAMIC XP LOGIC ---
+    // Pulls from registry. If not set, defaults to 5.
+    let xpGained = eventData.xpValue || 5; 
+    gainXP(xpGained);
+    showXPFlyer(e.clientX, e.clientY, xpGained);
 
-        // --- NEW INVENTORY DROP LOGIC (50% CHANCE) ---
-        if (Math.random() > 0.5) {
-            addToInventory(chosenKey);
-        }
+    // --- INDEX DISCOVERY LOGIC ---
+    if (!_GAME_DATA.index.includes(chosenKey)) {
+        _GAME_DATA.index.push(chosenKey);
+        showNotification("DESCOPERIRE!", `Ai deblocat elementul: ${eventData.name}`, "fa-book-open");
+        console.log(`📖 NOUĂ DESCOPERIRE: [${eventData.name}] adăugat în Index!`);
+        syncInventoryToCloud(); 
+    }
 
-        // Trigger the actual event action
-        eventData.action(e);
-        if (eventData.duration) {
-            showEventIndicator(chosenKey, eventData.duration);
-        }
-    };
+    item.remove();
+    console.log(`🖱️ EVENT PRINS: [${eventData.name}]`);
+
+    // --- NEW INVENTORY DROP LOGIC (50% CHANCE) ---
+    if (Math.random() > 0.5) {
+        addToInventory(chosenKey);
+    }
+
+    // Trigger the actual event action
+    eventData.action(e);
+    if (eventData.duration) {
+        showEventIndicator(chosenKey, eventData.duration);
+    }
+};
 
     // EMOJI DISPARE DUPĂ 10 SECUNDE (Dacă nu e prins)
     setTimeout(() => { 
@@ -11462,14 +11471,17 @@ function applyStage(stageId) {
 
 
 function pickupRubyEmoji(e) {
-    // Obținem coordonatele unde ai dat click
     const startX = e.clientX;
     const startY = e.clientY;
     
-    // Sunet wow pentru rubin (refolosim cel de jackpot)
+    // --- 🆕 NEW: RUBY XP GAIN (15 XP) ---
+    // We trigger this immediately on click
+    let rubyXP = specialRegistry.rubyDrop.xpValue || 15;
+    gainXP(rubyXP);
+    showXPFlyer(startX, startY, rubyXP);
+
     playSFX(slotJackpotUrl); 
 
-    // Creăm imaginea zburătoare
     const flyer = document.createElement('img');
     flyer.src = 'https://iili.io/CrnXNdG.png';
     flyer.className = 'flying-points'; 
@@ -11483,7 +11495,6 @@ function pickupRubyEmoji(e) {
     flyer.style.transform = 'translate(-50%, -50%)';
     document.body.appendChild(flyer);
 
-    // Zboară direct spre secțiunea RUBINELOR din HUD
     const targetRect = document.getElementById('rubySection').getBoundingClientRect();
     
     setTimeout(() => {
@@ -11492,16 +11503,15 @@ function pickupRubyEmoji(e) {
         flyer.style.transform = 'translate(-50%, -50%) scale(0.2)';
         flyer.style.opacity = '0';
         
-        // Efect de "Pump" pe HUD
         document.getElementById('rubySection').classList.add('score-bump');
         setTimeout(() => document.getElementById('rubySection').classList.remove('score-bump'), 500);
     }, 50);
 
     setTimeout(() => { 
         flyer.remove(); 
-        rubies += 1; // Adăugăm 1 rubin
-        updateScoreUI(); // Sincronizăm HUD-ul
-        syncScoreToFirestore(); // Salvăm progresul în Cloud instantaneu
+        rubies += 1; 
+        updateScoreUI(); 
+        syncScoreToFirestore(); 
     }, 850);
 }
 
@@ -11548,12 +11558,32 @@ function applyMagnetMovement(item, eventData, chosenKey) {
             
             clearInterval(magnetInterval);
             item.remove();
-            console.log(`🧲 Magnet captured: [${eventData.name}]`);
             
-            // Auto-trigger the same logic as the click
+            // --- 🆕 NEW: XP GAIN VIA MAGNET ---
+            let xpAmount = eventData.xpValue || 5;
+            gainXP(xpAmount);
+            showXPFlyer(kRect.left + kRect.width/2, kRect.top + kRect.height/2, xpAmount);
+
+            // --- 🆕 NEW: INDEX UNLOCK VIA MAGNET ---
+            if (!_GAME_DATA.index.includes(chosenKey)) {
+                _GAME_DATA.index.push(chosenKey);
+                showNotification("DESCOPERIRE!", `Ai deblocat elementul: ${eventData.name}`, "fa-book-open");
+                syncInventoryToCloud(); 
+            }
+
+            // --- INVENTORY DROP LOGIC ---
             if (Math.random() > 0.5) addToInventory(chosenKey);
-            eventData.action();
-            if (eventData.duration) showEventIndicator(chosenKey, eventData.duration);
+
+            // --- TRIGGER ACTION ---
+            // We pass the coordinates of Kevin so things like Rubies fly from him
+            eventData.action({ 
+                clientX: kRect.left + kRect.width/2, 
+                clientY: kRect.top + kRect.height/2 
+            });
+
+            if (eventData.duration) {
+                showEventIndicator(chosenKey, eventData.duration);
+            }
         }
     }, 20);
 }
@@ -12828,58 +12858,7 @@ function handleClaimLevelReward(lvl) {
     syncScoreToFirestore();
 }
 
-function forceTestSpawn(key) {
-    const data = specialRegistry[key];
-    if (!data) return;
 
-    // --- THE ULTIMATE SECURITY CHECK ---
-    const serverConfirmed = isUnlocked(key); 
-
-    if (!serverConfirmed) {
-        // 1. Log the rejection
-        console.error(`🚫 SPAWN BLOCKED: User tried to force spawn [${key}], but the Backend Authority says NO.`);
-        
-        // 2. Play a "Fail" sound
-        playMissSFX(); 
-
-        // 3. Make the character mock the player
-        showKevinutaBubble("N-ai tu level de așa ceva! 😂");
-        
-        // 4. Show a professional notification
-        showNotification("BLOCAT", "Trebuie să deblochezi acest element la Nivelul 2!", "fa-lock");
-
-        // 5. STOP HERE - Do not create the item
-        return; 
-    }
-
-    // --- If we reached here, it means it IS unlocked ---
-    console.log(`✅ TEST SPAWN AUTHORIZED: Spawning [${key}]...`);
-
-    const item = document.createElement('div');
-    item.className = 'special-event-item';
-    item.style.backgroundImage = `url('${data.image}')`;
-    
-    const itemSize = (window.innerWidth <= 600) ? 45 : 65;
-    item.style.width = itemSize + 'px';
-    item.style.height = itemSize + 'px';
-    
-    const area = document.getElementById('gameArea');
-    item.style.left = "50%"; 
-    item.style.top = "50%";
-    item.style.transform = "translate(-50%, -50%)";
-    
-    area.appendChild(item);
-
-    item.onclick = (e) => {
-        e.stopPropagation();
-        item.remove();
-        console.log(`🖱️ Test Event Captured: ${data.name}`);
-        data.action(e);
-        if (data.duration) {
-            showEventIndicator(key, data.duration);
-        }
-    };
-}
 
 
 function getRequiredLevel(itemId) {
@@ -12890,6 +12869,35 @@ function getRequiredLevel(itemId) {
         }
     }
     return 1; // Default is level 1
+}
+
+
+function showXPFlyer(x, y, amount) {
+    const el = document.createElement("div");
+    el.className = "xp-flyer"; // Poți să-i faci stil în CSS sau direct aici
+    el.style.position = "fixed";
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+    el.style.color = "#ffcc00"; 
+    el.style.fontFamily = "'Orbitron', sans-serif";
+    el.style.fontWeight = "900";
+    el.style.fontSize = "22px";
+    el.style.pointerEvents = "none";
+    el.style.zIndex = "100000";
+    el.style.textShadow = "0 0 10px rgba(255, 204, 0, 0.8), 2px 2px 0px #000";
+    el.innerText = `+${amount} XP`;
+    
+    document.body.appendChild(el);
+
+    // Animație sick (Urcă și se rotește puțin)
+    el.animate([
+        { transform: 'translate(-50%, -50%) scale(0.5)', opacity: 0 },
+        { transform: 'translate(-50%, -100%) scale(1.2)', opacity: 1, offset: 0.2 },
+        { transform: 'translate(-50%, -200%) scale(1)', opacity: 0 }
+    ], {
+        duration: 1000,
+        easing: 'ease-out'
+    }).onfinish = () => el.remove();
 }
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
@@ -12969,7 +12977,6 @@ window.processBuy = processBuy;
 window.openLevelDetail = openLevelDetail;
 window.closeLevelDetail = closeLevelDetail;
 window.handleClaimLevelReward = handleClaimLevelReward;
-window.forceTestSpawn = forceTestSpawn;
 
 })(); // <-- CLOSES THE SECURE VAULT
 
