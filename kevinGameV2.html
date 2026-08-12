@@ -6597,6 +6597,30 @@ input:checked + .s-slider:before {
     text-transform: uppercase;
     letter-spacing: 1px;
 }
+
+
+#gameArea {
+  display: none; 
+  position: fixed; /* Schimbat din absolute în fixed pentru stabilitate */
+  top: 0; left: 0; 
+  width: 100vw; height: 100vh;
+  
+  /* REPARARE ZOOM & CALITATE */
+  background-size: 100% 100%; /* Forțează imaginea să se încadreze exact pe ecran fără crop */
+  background-position: center center;
+  background-repeat: no-repeat;
+  image-rendering: -webkit-optimize-contrast; /* Îmbunătățește claritatea pe unele browsere */
+  
+  overflow: hidden;
+  z-index: 500;
+}
+
+/* Dacă vrei să păstrezi proporția dar să nu fie pixelat, folosește contain: */
+@media (max-width: 600px) {
+    #gameArea {
+        background-size: cover; /* Pe mobil e mai bine cover pentru a nu alungi imaginea */
+    }
+}
   </style>
 </head>
 <body>
@@ -11575,20 +11599,14 @@ function applyStage(stageId) {
 
     if (stageNameEl) stageNameEl.innerText = stage.name;
 
-    // Calculăm fundalul în funcție de oră pentru Stage 1
+    // Calculăm fundalul corect
     let finalBg = (stageId === "street") ? getRomanianTimeBg() : stage.bg;
 
     if (gameArea) {
-        // RESETĂM STILUL PENTRU CLARITATE
-        gameArea.style.backgroundPosition = "center center";
-        gameArea.style.backgroundRepeat = "no-repeat";
-        gameArea.style.backgroundSize = "cover"; // Acoperă ecranul păstrând proporțiile
-        
-        // Aplicăm imaginea cu un filtru de întunecare foarte mic (0.15) pentru contrastul HUD-ului
-        gameArea.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.15), rgba(0,0,0,0.15)), url('${finalBg}')`;
-        
-        // Opțional: Prevenim efectul de "moale" pe unele browsere
-        gameArea.style.imageRendering = "auto"; 
+        // Aplicăm fundalul cu un strat de protecție (overlay negru transparent) 
+        // pentru ca interfața (scorul) să fie lizibilă
+        gameArea.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('${finalBg}')`;
+        console.log("🌅 Fundal actualizat conform orei RO:", finalBg);
     }
     
     currentStageId = stageId;
