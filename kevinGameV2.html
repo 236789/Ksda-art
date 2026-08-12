@@ -6484,6 +6484,46 @@ input:checked + .s-slider:before {
     color: #5a6288;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+
+/* --- INDEX LEVEL LOCK STYLES --- */
+.index-tile.level-locked {
+    filter: grayscale(1) brightness(0.3) blur(1px) !important;
+    border-color: #ff3366 !important; /* Ruby Red Border */
+    cursor: not-allowed;
+    position: relative;
+}
+
+.index-tile.level-locked img {
+    opacity: 0.2;
+}
+
+.index-tile.level-locked::after {
+    content: "\f023"; /* FontAwesome Lock Icon */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    color: #ff3366;
+    font-size: 18px;
+    text-shadow: 0 0 10px #ff3366;
+}
+
+/* The "Unlocks at Lvl X" text */
+.lock-text-badge {
+    position: absolute;
+    bottom: -8px;
+    background: #ff3366;
+    color: white;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    border: 1px solid #fff;
+}
   </style>
 </head>
 <body>
@@ -11980,20 +12020,43 @@ function showStageIndex(stageId, itemKeys) {
     const grid = document.getElementById('indexEmojiGrid');
     grid.innerHTML = "";
 
-    // Populate emojis
-    itemKeys.forEach(key => {
+itemKeys.forEach(key => {
         const data = specialRegistry[key];
-        const isUnlocked = _GAME_DATA.index.includes(key);
+        const isDiscovered = _GAME_DATA.index.includes(key); // Have you clicked it?
         const isClaimed = _GAME_DATA.claimedRewards.includes(key);
         
+        // NEW: Check if the Backend has authorized this level unlock
+        const isActuallyUnlocked = isUnlocked(key); 
+        const reqLvl = getRequiredLevel(key);
+
         const tile = document.createElement('div');
         let className = "index-tile";
-        if (isUnlocked) className += " unlocked"; else className += " locked";
-        if (isUnlocked && !isClaimed && data.indexReward) className += " reward-ready";
+        
+        if (!isActuallyUnlocked) {
+            // STATE 1: BLOCKED BY LEVEL
+            className += " level-locked";
+            tile.innerHTML = `
+                <img src="${data.image}">
+                <div class="lock-text-badge">LVL ${reqLvl} REQ.</div>
+            `;
+            tile.onclick = () => {
+                playMissSFX();
+                showKevinutaBubble(`Deblochează asta la Nivelul ${reqLvl}!`);
+            };
+        } else if (!isDiscovered) {
+            // STATE 2: UNLOCKED BUT NOT FOUND (Silhouette)
+            className += " locked";
+            tile.innerHTML = `<img src="${data.image}"><span class="q-mark">???</span>`;
+            tile.onclick = () => showKevinutaBubble("Încă nu ai găsit acest obiect pe stradă!");
+        } else {
+            // STATE 3: DISCOVERED & FULLY VISIBLE
+            className += " unlocked";
+            if (!isClaimed && data.indexReward) className += " reward-ready";
+            tile.innerHTML = `<img src="${data.image}">`;
+            tile.onclick = () => showIndexRewardModal(key);
+        }
         
         tile.className = className;
-        tile.innerHTML = `<img src="${data.image}">${!isUnlocked ? '<span class="q-mark">???</span>' : ''}`;
-        if (isUnlocked) tile.onclick = () => showIndexRewardModal(key);
         grid.appendChild(tile);
     });
 
@@ -12785,6 +12848,17 @@ function forceTestSpawn(key) {
             showEventIndicator(key, data.duration);
         }
     };
+}
+
+
+function getRequiredLevel(itemId) {
+    // LEVEL_UNLOCKS is your registry { 2: ["slotMachine", "rubyDrop"] }
+    for (let lvl in LEVEL_UNLOCKS) {
+        if (LEVEL_UNLOCKS[lvl].includes(itemId)) {
+            return parseInt(lvl);
+        }
+    }
+    return 1; // Default is level 1
 }
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
