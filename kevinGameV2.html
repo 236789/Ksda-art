@@ -6392,6 +6392,98 @@ input:checked + .s-slider:before {
     margin-bottom: 15px;
     text-align: center;
 }
+
+
+/* --- PREMIUM UNLOCK ROWS --- */
+.v3-unlock-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    padding: 0 10px;
+}
+
+.v3-unlock-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px;
+    gap: 15px;
+    transition: all 0.3s ease;
+}
+
+/* Left Section: Icon with glow */
+.v3-unlock-left {
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--th-border);
+    box-shadow: 0 0 15px var(--th-glow);
+}
+
+.v3-unlock-left img {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+}
+
+/* Middle Section: Text */
+.v3-unlock-mid {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.v3-unlock-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.v3-unlock-desc {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    color: #94a3b8;
+    line-height: 1.2;
+}
+
+/* Right Section: The Status Pill */
+.v3-status-pill {
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 1px;
+}
+
+.status-unlocked {
+    background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
+    color: #000;
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.4);
+    border: 1px solid #fff;
+}
+
+.status-locked {
+    background: #1a1c33;
+    color: #5a6288;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
   </style>
 </head>
 <body>
@@ -12364,20 +12456,40 @@ window.clickEpicNode = function(level, name) {
 };
 
 
+// 1. THE BRAIN: Defines what level unlocks what ID
 const LEVEL_UNLOCKS = {
-    2: ["slotMachine", "rubyDrop"]
+    2: ["slotMachine", "rubyDrop"],
+    5: ["blackMarket"] // Example for future
 };
 
-// Funcție care verifică dacă un item este deblocat
+// 2. THE BEAUTY: Defines how each ID looks in the UI
+const UNLOCK_METADATA = {
+    "slotMachine": {
+        name: "Neon Slots",
+        desc: "Aparate norocoase care apar pe stradă. Pariază și câștigă!",
+        icon: "https://iili.io/C8GX6dl.png"
+    },
+    "rubyDrop": {
+        name: "Rubine Rare",
+        desc: "O nouă monedă premium. Apare rar și oferă recompense mari!",
+        icon: "https://iili.io/CrnXNdG.png"
+    },
+    "blackMarket": {
+        name: "Piața Neagră",
+        desc: "Locul unde poți vinde obiecte sau cumpăra boost-uri ilegale.",
+        icon: "https://iili.io/Ck27fPs.png" // Example icon
+    }
+};
+
+// 3. THE HELPER: Checks if an ID is unlocked based on playerLevel
 function isUnlocked(itemId) {
     for (let level in LEVEL_UNLOCKS) {
         if (LEVEL_UNLOCKS[level].includes(itemId)) {
             return playerLevel >= parseInt(level);
         }
     }
-    return true; // Dacă nu e în listă, e deblocat default (lvl 1)
+    return true; // Not in registry? Unlocked by default.
 }
-
 
 
 
@@ -12496,31 +12608,46 @@ function openLevelDetail(lvl) {
 
 // 3. Inject DEBLOCĂRI Section
 const unlocks = LEVEL_UNLOCKS[lvl] || [];
-let unlocksHtml = "";
+    let unlocksHtml = "";
+    const unlocksAtThisLevel = LEVEL_UNLOCKS[lvl] || [];
+    const isPlayerLevelTooLow = lvl > playerLevel;
 
-if (unlocks.length > 0) {
-    unlocks.forEach(id => {
-        const name = (id === "slotMachine") ? "🎰 Slot Machine" : "💎 Rubine Rare";
-        unlocksHtml += `<div style="color:#facc15; font-weight:bold;">🔓 DEBLOCAT: ${name}</div>`;
-    });
-} else {
-    unlocksHtml = "Nicio funcție nouă la acest nivel.";
-}
+    if (unlocksAtThisLevel.length > 0) {
+        unlocksAtThisLevel.forEach(id => {
+            const meta = UNLOCK_METADATA[id];
+            if (!meta) return;
 
-document.getElementById('detailUnlocksSection').innerHTML = `
-    <div class="v3-section-title">
-        <div class="v3-line"></div>
-        <span class="v3-diamonds">◆</span>
-        <i class="fa-solid fa-lock-open"></i>
-        <span>DEBLOCĂRI</span>
-        <span class="v3-diamonds">◆</span>
-        <div class="v3-line"></div>
-    </div>
-    <p class="v3-sub-info">Ce primești nou:</p>
-    <div class="v3-unlock-list" style="color:#fff; text-align:center; padding:10px; font-weight:700; font-size:14px; font-family:'Oswald';">
-        ${unlocksHtml}
-    </div>
-`;
+            unlocksHtml += `
+                <div class="v3-unlock-row">
+                    <div class="v3-unlock-left"><img src="${meta.icon}"></div>
+                    <div class="v3-unlock-mid">
+                        <span class="v3-unlock-name">${meta.name}</span>
+                        <span class="v3-unlock-desc">${meta.desc}</span>
+                    </div>
+                    <div class="v3-status-pill ${isPlayerLevelTooLow ? 'status-locked' : 'status-unlocked'}">
+                        ${isPlayerLevelTooLow ? '<i class="fa-solid fa-lock"></i> LOCKED' : '<i class="fa-solid fa-circle-check"></i> UNLOCKED'}
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        unlocksHtml = `<p style="color:#5a6288; font-size:12px; font-family:'Oswald';">Nicio funcție nouă la acest nivel.</p>`;
+    }
+
+    document.getElementById('detailUnlocksSection').innerHTML = `
+        <div class="v3-section-title">
+            <div class="v3-line"></div>
+            <span class="v3-diamonds">◆</span>
+            <i class="fa-solid fa-lock-open"></i>
+            <span>DEBLOCĂRI</span>
+            <span class="v3-diamonds">◆</span>
+            <div class="v3-line"></div>
+        </div>
+        <p class="v3-sub-info">Elemente noi disponibile:</p>
+        <div class="v3-unlock-container">
+            ${unlocksHtml}
+        </div>
+    `;
 
     // 4. Button Logic
     const mainBtn = document.getElementById('replicaMainBtn');
