@@ -11545,31 +11545,36 @@ const stageList = {
         index: 1,
         name: "STRADA",
         accent: "#facc15",
+        // DESKTOP LANDSCAPE IMAGES
         timeBgs: {
             morning:   "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/Street%20Morning.png",
             noon:      "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/Street%20Noon.png",
             golden:    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/Street%20Golden%20Hour.png",
             night:     "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/Street%20Night.png",
             deepNight: "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/Street%20Deep%20Night.png"
+        },
+        // MOBILE PORTRAIT IMAGES (Mapped from your GitHub names)
+        mobileBgs: {
+            morning:   "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/mobile%20size%20Morning%20street%20.png",
+            noon:      "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/noon%20mobile%20size%20street%20.png",
+            golden:    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/golden%20hour%20mobile%20size%20street%20.png",
+            night:     "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/Night%20Mobile%20size%20street%20.png",
+            deepNight: "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/Deep%20Night%20Mobile%20Size%20street.png"
         }
     }
 };
-
 function getRomanianTimeBg() {
     const roTime = new Date().toLocaleString("en-US", {timeZone: "Europe/Bucharest"});
     const hour = new Date(roTime).getHours();
     
-    const bgs = stageList.street.timeBgs;
+    // Detect if we are on Mobile (Portrait) or Desktop (Landscape)
+    const isMobile = window.innerHeight > window.innerWidth;
+    const bgs = isMobile ? stageList.street.mobileBgs : stageList.street.timeBgs;
 
-    // Morning: 6–11
-    if (hour >= 6 && hour < 12) return bgs.morning;
-    // Noon: 12–17
-    if (hour >= 12 && hour < 18) return bgs.noon;
-    // Golden: 18-21
-    if (hour >= 18 && hour < 22) return bgs.golden;
-    // Night: 22-02
-    if (hour >= 22 || hour < 2) return bgs.night;
-    // Deep Night: 02-05
+    if (hour >= 5 && hour < 11) return bgs.morning;
+    if (hour >= 11 && hour < 17) return bgs.noon;
+    if (hour >= 17 && hour < 21) return bgs.golden;
+    if (hour >= 21 || hour < 5) return bgs.night;
     return bgs.deepNight;
 }
 
@@ -11581,25 +11586,27 @@ function applyStage(stageId) {
     const stageNameEl = document.getElementById('stageName');
     if (stageNameEl) stageNameEl.innerText = stage.name;
 
-    // Pick URL based on time
     let targetUrl = (stageId === "street") ? getRomanianTimeBg() : stage.bg;
 
-    // FORCE HD BYPASS CACHE - The V1 Trick
+    // FORCE HD BYPASS CACHE
     const img = new Image();
     const hdLink = targetUrl + "?v=" + new Date().getTime();
     
     img.onload = () => {
         gameArea.style.backgroundImage = "url('" + hdLink + "')";
-        console.log("✅ GitHub HD Background Applied with 0% Zoom");
-    };
-    img.onerror = () => {
-        console.error("❌ Link Error! Make sure your GitHub repo is set to PUBLIC.");
+        console.log("✅ HD Responsive Applied: " + (window.innerHeight > window.innerWidth ? "Mobile" : "Desktop"));
     };
     img.src = hdLink;
     
     currentStageId = stageId;
 }
 
+// OPTIONAL: Update background if user rotates their phone or resizes window
+window.addEventListener('resize', () => {
+    if (document.getElementById('gameArea').style.display === 'block') {
+        applyStage(currentStageId);
+    }
+});
 function setBackgroundHD(url) {
   const el = document.getElementById("gameArea");
   if (el.dataset.bg === url) return;
