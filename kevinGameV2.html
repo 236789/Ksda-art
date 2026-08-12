@@ -6601,25 +6601,19 @@ input:checked + .s-slider:before {
 
 #gameArea {
   display: none; 
-  position: fixed; /* Schimbat din absolute în fixed pentru stabilitate */
+  position: fixed;
   top: 0; left: 0; 
   width: 100vw; height: 100vh;
   
-  /* REPARARE ZOOM & CALITATE */
-  background-size: 100% 100%; /* Forțează imaginea să se încadreze exact pe ecran fără crop */
+  /* REPARARE CALITATE ȘI ZOOM */
+  background-size: cover; /* Umple ecranul perfect fără să deformeze imaginea */
   background-position: center center;
   background-repeat: no-repeat;
-  image-rendering: -webkit-optimize-contrast; /* Îmbunătățește claritatea pe unele browsere */
+  image-rendering: -webkit-optimize-contrast; /* Claritate sporită */
   
   overflow: hidden;
   z-index: 500;
-}
-
-/* Dacă vrei să păstrezi proporția dar să nu fie pixelat, folosește contain: */
-@media (max-width: 600px) {
-    #gameArea {
-        background-size: cover; /* Pe mobil e mai bine cover pentru a nu alungi imaginea */
-    }
+  transition: background-image 1.5s ease-in-out; /* Schimbare fină între zi și noapte */
 }
   </style>
 </head>
@@ -11559,21 +11553,20 @@ const stageList = {
         index: 1,
         name: "STRADA",
         accent: "#facc15",
-        completionReward: { type: 'score', value: 500 },
-        // LINK-URI DIRECTE HD (Nu le schimba, astea sunt cele bune)
+        // LINK-URILE TALE REPARATE (Direct Links)
         timeBgs: {
-            morning:   "https://i.ibb.co/k2V40h8/Morning.png",      // 05:00 - 09:00
-            noon:      "https://i.ibb.co/S7qgR7y/Noon.png",         // 09:00 - 17:00
-            golden:    "https://i.ibb.co/kX24z7m/Golden-Hour.png",  // 17:00 - 20:00
-            night:     "https://i.ibb.co/nCByvpx/Night.png",        // 20:00 - 00:00
-            deepNight: "https://i.ibb.co/8Y3tVzG/Deep-Night.png"    // 00:00 - 05:00
+            morning:   "https://i.ibb.co/G33mJTb4/morning.png",    // 05:00 - 09:00
+            noon:      "https://i.ibb.co/4ZGv32Hp/noon.png",       // 09:00 - 17:00
+            golden:    "https://i.ibb.co/s947Cprz/evening.png",    // 17:00 - 20:00
+            night:     "https://i.ibb.co/67HV6CZL/night.png",      // 20:00 - 00:00
+            deepNight: "https://i.ibb.co/6JpmqWZR/deep-night.png"  // 00:00 - 05:00
         }
     }
 };
 
 
 function getRomanianTimeBg() {
-    // Luăm ora curentă în format de România
+    // Luăm ora curentă de București
     const roTime = new Date().toLocaleString("en-US", {timeZone: "Europe/Bucharest"});
     const hour = new Date(roTime).getHours();
     
@@ -11582,13 +11575,9 @@ function getRomanianTimeBg() {
     if (hour >= 5 && hour < 9)   return bgs.morning;
     if (hour >= 9 && hour < 17)  return bgs.noon;
     if (hour >= 17 && hour < 20) return bgs.golden;
-    if (hour >= 20 || hour < 0)  return bgs.night;
-    return bgs.deepNight; // Default pentru 00:00 - 05:00
+    if (hour >= 20 || hour < 24) return bgs.night;
+    return bgs.deepNight; // Pentru intervalul 00:00 - 05:00
 }
-
-
-let currentStageId = "street";
-
 
 function applyStage(stageId) {
     const stage = stageList[stageId];
@@ -11599,18 +11588,28 @@ function applyStage(stageId) {
 
     if (stageNameEl) stageNameEl.innerText = stage.name;
 
-    // Calculăm fundalul corect
+    // Calculăm fundalul corect în funcție de oră
     let finalBg = (stageId === "street") ? getRomanianTimeBg() : stage.bg;
 
-    if (gameArea) {
-        // Aplicăm fundalul cu un strat de protecție (overlay negru transparent) 
-        // pentru ca interfața (scorul) să fie lizibilă
-        gameArea.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('${finalBg}')`;
-        console.log("🌅 Fundal actualizat conform orei RO:", finalBg);
-    }
+    // PRELOAD: Verificăm dacă imaginea există înainte de a o pune pe fundal
+    const img = new Image();
+    img.onload = () => {
+        gameArea.style.backgroundImage = `url('${finalBg}')`;
+        console.log("🌅 Fundal aplicat: " + finalBg);
+    };
+    img.onerror = () => {
+        // Dacă link-ul de ImgBB dă eroare, punem un fundal de rezervă solid să nu rămână alb
+        gameArea.style.background = "#0f0c29";
+        console.error("❌ Imaginea nu a putut fi încărcată. Verifică link-urile Direct Link.");
+    };
+    img.src = finalBg;
     
     currentStageId = stageId;
 }
+
+let currentStageId = "street";
+
+
 function pickupRubyEmoji(e) {
     const startX = e.clientX;
     const startY = e.clientY;
