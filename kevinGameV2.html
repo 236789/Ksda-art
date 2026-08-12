@@ -6768,6 +6768,13 @@ input:checked + .s-slider:before {
 
   <div id="kevin"></div>
   <!-- OLD BACK BUTTON REMOVED -->
+
+
+<!-- DEV TESTING CONSOLE (Visible only for testing) -->
+<div id="devTestConsole" style="position: absolute; bottom: 100px; left: 20px; z-index: 5000; display: flex; gap: 10px; pointer-events: auto;">
+    <button onclick="forceTestSpawn('rubyDrop')" style="background: #ff3366; color: white; border: 1px solid white; padding: 5px 10px; border-radius: 5px; font-size: 10px; font-family: 'Orbitron'; cursor: pointer;">TEST RUBY</button>
+    <button onclick="forceTestSpawn('slotMachine')" style="background: #6366f1; color: white; border: 1px solid white; padding: 5px 10px; border-radius: 5px; font-size: 10px; font-family: 'Orbitron'; cursor: pointer;">TEST SLOT</button>
+</div>
 </div>
 
 
@@ -12720,6 +12727,50 @@ function handleClaimLevelReward(lvl) {
 
     syncScoreToFirestore();
 }
+
+
+function forceTestSpawn(key) {
+    const data = specialRegistry[key];
+    if (!data) return;
+
+    console.group(`🛠️ DEV TEST: Spawning [${key}]`);
+    console.log(`Current Player Level: ${playerLevel}`);
+    console.log(`Is Unlocked in Frontend? ${isUnlocked(key) ? "✅ YES" : "❌ NO"}`);
+    console.log(`Backend Status: The backend only knows you are Level ${playerLevel}. It doesn't track specific unlocks; the frontend decides if this spawns based on that level.`);
+    
+    if (!isUnlocked(key)) {
+        console.warn(`⚠️ Warning: This item is currently LOCKED for your level. Spawning it anyway for testing...`);
+    }
+    console.groupEnd();
+
+    // Visual Spawn Logic (Exact copy of your real logic)
+    const item = document.createElement('div');
+    item.className = 'special-event-item';
+    item.style.backgroundImage = `url('${data.image}')`;
+    
+    const itemSize = (window.innerWidth <= 600) ? 45 : 65;
+    item.style.width = itemSize + 'px';
+    item.style.height = itemSize + 'px';
+    
+    const area = document.getElementById('gameArea');
+    item.style.left = "50%"; // Spawn in center for easy testing
+    item.style.top = "50%";
+    item.style.transform = "translate(-50%, -50%)";
+    
+    area.appendChild(item);
+
+    item.onclick = (e) => {
+        e.stopPropagation();
+        item.remove();
+        console.log(`🖱️ Test Event Captured! Triggering logic for: ${data.name}`);
+        
+        // Trigger the actual event
+        data.action(e);
+        if (data.duration) {
+            showEventIndicator(key, data.duration);
+        }
+    };
+}
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
 // ==========================================
@@ -12798,6 +12849,7 @@ window.processBuy = processBuy;
 window.openLevelDetail = openLevelDetail;
 window.closeLevelDetail = closeLevelDetail;
 window.handleClaimLevelReward = handleClaimLevelReward;
+window.forceTestSpawn = forceTestSpawn;
 
 })(); // <-- CLOSES THE SECURE VAULT
 
