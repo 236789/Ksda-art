@@ -273,15 +273,22 @@ body, html {
        ========================================== */
 #gameArea {
   display: none; 
-  position: absolute; 
+  position: fixed;
   top: 0; left: 0; 
   width: 100vw; height: 100vh;
-  background-size: cover;
-  background-position: center;
+  
+  /* REPARARE ZOOM: 100% 100% oprește mărirea artificială a pozei */
+  background-size: 100% 100%; 
+  background-position: center center;
   background-repeat: no-repeat;
+
+  /* REPARARE CALITATE: Forțează browserul să randeze pixelii clar */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: high-quality;
+  
   overflow: hidden;
   z-index: 500;
-  /* Removed the hardcoded background URL from here */
+  transition: background-image 1.5s ease-in-out;
 }
 
     .score-icon { height: 35px; }
@@ -6599,22 +6606,7 @@ input:checked + .s-slider:before {
 }
 
 
-#gameArea {
-  display: none; 
-  position: fixed;
-  top: 0; left: 0; 
-  width: 100vw; height: 100vh;
-  
-  /* REPARARE CALITATE ȘI ZOOM */
-  background-size: cover; /* Umple ecranul perfect fără să deformeze imaginea */
-  background-position: center center;
-  background-repeat: no-repeat;
-  image-rendering: -webkit-optimize-contrast; /* Claritate sporită */
-  
-  overflow: hidden;
-  z-index: 500;
-  transition: background-image 1.5s ease-in-out; /* Schimbare fină între zi și noapte */
-}
+
   </style>
 </head>
 <body>
@@ -11553,58 +11545,64 @@ const stageList = {
         index: 1,
         name: "STRADA",
         accent: "#facc15",
-        // LINK-URILE TALE REPARATE (Direct Links)
         timeBgs: {
-            morning:   "https://i.ibb.co/G33mJTb4/morning.png",    // 05:00 - 09:00
-            noon:      "https://i.ibb.co/4ZGv32Hp/noon.png",       // 09:00 - 17:00
-            golden:    "https://i.ibb.co/s947Cprz/evening.png",    // 17:00 - 20:00
-            night:     "https://i.ibb.co/67HV6CZL/night.png",      // 20:00 - 00:00
-            deepNight: "https://i.ibb.co/6JpmqWZR/deep-night.png"  // 00:00 - 05:00
+            morning:   "https://i.ibb.co/G33mJTb4/morning.png",
+            noon:      "https://i.ibb.co/4ZGv32Hp/noon.png",
+            golden:    "https://i.ibb.co/s947Cprz/evening.png",
+            night:     "https://i.ibb.co/67HV6CZL/night.png",
+            deepNight: "https://i.ibb.co/6JpmqWZR/deep-night.png"
         }
     }
 };
 
-
 function getRomanianTimeBg() {
-    // Luăm ora curentă de București
     const roTime = new Date().toLocaleString("en-US", {timeZone: "Europe/Bucharest"});
     const hour = new Date(roTime).getHours();
     
     const bgs = stageList.street.timeBgs;
 
-    if (hour >= 5 && hour < 9)   return bgs.morning;
-    if (hour >= 9 && hour < 17)  return bgs.noon;
-    if (hour >= 17 && hour < 20) return bgs.golden;
-    if (hour >= 20 || hour < 24) return bgs.night;
-    return bgs.deepNight; // Pentru intervalul 00:00 - 05:00
+    // Morning: 6–11
+    if (hour >= 6 && hour < 12) return bgs.morning;
+    // Noon: 12–17
+    if (hour >= 12 && hour < 18) return bgs.noon;
+    // Golden: 18-21
+    if (hour >= 18 && hour < 22) return bgs.golden;
+    // Night: 22-02
+    if (hour >= 22 || hour < 2) return bgs.night;
+    // Deep Night: 02-05
+    return bgs.deepNight;
 }
 
 function applyStage(stageId) {
     const stage = stageList[stageId];
     if (!stage) return;
 
-    const gameArea = document.getElementById('gameArea');
     const stageNameEl = document.getElementById('stageName');
-
     if (stageNameEl) stageNameEl.innerText = stage.name;
 
-    // Calculăm fundalul corect în funcție de oră
-    let finalBg = (stageId === "street") ? getRomanianTimeBg() : stage.bg;
+    // Alegem URL-ul
+    let targetUrl = (stageId === "street") ? getRomanianTimeBg() : stage.bg;
 
-    // PRELOAD: Verificăm dacă imaginea există înainte de a o pune pe fundal
-    const img = new Image();
-    img.onload = () => {
-        gameArea.style.backgroundImage = `url('${finalBg}')`;
-        console.log("🌅 Fundal aplicat: " + finalBg);
-    };
-    img.onerror = () => {
-        // Dacă link-ul de ImgBB dă eroare, punem un fundal de rezervă solid să nu rămână alb
-        gameArea.style.background = "#0f0c29";
-        console.error("❌ Imaginea nu a putut fi încărcată. Verifică link-urile Direct Link.");
-    };
-    img.src = finalBg;
+    // Aplicăm cu funcția HD
+    setBackgroundHD(targetUrl);
     
     currentStageId = stageId;
+}
+
+function setBackgroundHD(url) {
+  const el = document.getElementById("gameArea");
+  if (el.dataset.bg === url) return;
+
+  const img = new Image();
+  // Adăugăm timestamp-ul care a făcut V1 să fie perfect (forțează calitatea full)
+  const highResUrl = url + "?_t=" + Date.now();
+
+  img.onload = () => {
+    el.style.backgroundImage = `url('${highResUrl}')`;
+    el.dataset.bg = url;
+    console.log("✅ Imagine HD încărcată complet");
+  };
+  img.src = highResUrl;
 }
 
 let currentStageId = "street";
