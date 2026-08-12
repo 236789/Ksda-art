@@ -6485,21 +6485,22 @@ input:checked + .s-slider:before {
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-
-/* --- INDEX LEVEL LOCK STYLES --- */
+/* --- INDEX LEVEL LOCK STYLES (REPAIRED) --- */
 .index-tile.level-locked {
-    filter: grayscale(1) brightness(0.3) blur(1px) !important;
-    border-color: #ff3366 !important; /* Ruby Red Border */
+    /* Am eliminat blur(1px) și am urcat brightness la 0.4 */
+    filter: grayscale(1) brightness(0.4) !important; 
+    border-color: #ff3366 !important;
     cursor: not-allowed;
     position: relative;
 }
 
 .index-tile.level-locked img {
-    opacity: 0.2;
+    opacity: 0.3; /* Puțin mai vizibil decât înainte */
 }
 
+/* Restul rămâne la fel pentru iconița de lacăt și badge-ul de nivel */
 .index-tile.level-locked::after {
-    content: "\f023"; /* FontAwesome Lock Icon */
+    content: "\f023"; 
     font-family: "Font Awesome 6 Free";
     font-weight: 900;
     position: absolute;
@@ -6508,7 +6509,6 @@ input:checked + .s-slider:before {
     text-shadow: 0 0 10px #ff3366;
 }
 
-/* The "Unlocks at Lvl X" text */
 .lock-text-badge {
     position: absolute;
     bottom: -8px;
