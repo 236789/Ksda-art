@@ -12554,27 +12554,30 @@ function updateGiftButtonState() {
     if (!btn) return;
 
     let hasUnclaimed = false;
+    let missingLevel = null;
 
-    // Convertim toată lista în numere ca să fim siguri 100%
+    // Ne asigurăm că lucrăm doar cu Numere
     const claimedList = (_GAME_DATA.claimedLevelRewards || []).map(Number);
+    const currentLvl = Number(playerLevel);
 
-    for (let i = 1; i <= playerLevel; i++) {
-        // Dacă nivelul 'i' are un premiu definit în registru...
+    for (let i = 1; i <= currentLvl; i++) {
+        // Dacă nivelul 'i' are un premiu în registru
         if (LEVEL_REWARDS_REGISTRY[i]) {
-            // ...dar NU se află în lista de premii deja luate (claimed)
-            if (!claimedList.includes(Number(i))) {
+            // Dacă nivelul 'i' NU se află în lista celor revendicate
+            if (!claimedList.includes(i)) {
                 hasUnclaimed = true;
+                missingLevel = i;
                 break; 
             }
         }
     }
 
     if (hasUnclaimed) {
-        btn.classList.add('gift-vibrate'); // Tremură/Strălucește
-        console.log("🎁 INFO: Ai premii de colectat!");
+        btn.classList.add('gift-vibrate');
+        console.log(`🎁 INFO: Butonul vibrează pentru premiul necolectat de la Nivelul: ${missingLevel}`);
     } else {
-        btn.classList.remove('gift-vibrate'); // Stă cuminte
-        console.log("✅ INFO: Toate premiile la zi.");
+        btn.classList.remove('gift-vibrate');
+        console.log("✅ INFO: Toate premiile sunt colectate la zi.");
     }
 }
 
@@ -12703,37 +12706,29 @@ function closeLevelDetail() {
 
 function handleClaimLevelReward(lvl) {
     const data = LEVEL_REWARDS_REGISTRY[lvl];
-    // Verificăm dacă există date sau dacă a fost deja revendicat
-    if (!data || _GAME_DATA.claimedLevelRewards.includes(lvl)) return;
+    const lvlNum = Number(lvl);
 
-    // 1. Salvăm local în variabila de joc
-    _GAME_DATA.claimedLevelRewards.push(lvl);
+    // Verificăm dacă a fost deja revendicat folosind numere
+    if (!data || _GAME_DATA.claimedLevelRewards.map(Number).includes(lvlNum)) return;
 
-    // 2. Închidem modalul
+    // 1. Salvăm local ca NUMĂR
+    _GAME_DATA.claimedLevelRewards.push(lvlNum);
+
+    // 2. Închidem modalul și actualizăm vizual butonul
     closeLevelDetail();
-    updateGiftButtonState();
+    updateGiftButtonState(); // Aceasta va opri vibrația dacă nu mai sunt altele
 
-
-    // 3. Procesăm Recompensele (Scor și Rubine)
+    // 3. Procesăm Recompensele
     data.rewards.forEach(r => {
-        if (r.type === 'score') {
-            pendingWinAmount = r.value;
-            animateScoreFlying(); 
-        }
-        if (r.type === 'ruby') {
-            pendingRubyWin = r.value;
-            setTimeout(() => animateRubyFlying(), 300); 
-        }
+        if (r.type === 'score') { pendingWinAmount = r.value; animateScoreFlying(); }
+        if (r.type === 'ruby') { pendingRubyWin = r.value; setTimeout(() => animateRubyFlying(), 300); }
     });
 
-    // 4. Feedback vizual și sonor
     if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
     renderEpicWindingMap(); 
-    showNotification("PREMIU COLECTAT!", `Ai primit cadoul pentru nivelul ${lvl}!`, "fa-gift");
+    showNotification("PREMIU COLECTAT!", `Ai primit cadoul pentru nivelul ${lvlNum}!`, "fa-gift");
 
-    // 5. SINCRONIZARE IMEDIATĂ - Trimitem lista la backend
-    updateGiftButtonState(); // <--- CALL IT HERE
-
+    // 4. Sincronizăm cu serverul
     syncScoreToFirestore();
 }
 
