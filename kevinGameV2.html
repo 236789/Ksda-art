@@ -11536,30 +11536,27 @@ const stageList = {
         name: "STRADA",
         accent: "#facc15",
         completionReward: { type: 'score', value: 500 },
-        // Imaginile dinamice
-        timeBgs: {
-            deepNight: "https://i.ibb.co/G33mJTb4/deep-night.png",  // 00:00 - 05:00
-            morning:   "https://i.ibb.co/s947Cprz/morning.png",     // 05:00 - 09:00
-            noon:      "https://i.ibb.co/6JpmqWZR/noon.png",        // 09:00 - 17:00
-            golden:    "https://i.ibb.co/4ZGv32Hp/golden-hour.png", // 17:00 - 20:00
-            night:     "https://i.ibb.co/67HV6CZL/night.png"        // 20:00 - 00:00
-        }
+timeBgs: {
+    deepNight: "https://i.ibb.co/v4R0KtYh/deep-night.png",  // 00:00 - 05:00
+    morning:   "https://i.ibb.co/60vsC56y/morning.png",     // 05:00 - 09:00
+    noon:      "https://i.ibb.co/yB6N0j7y/noon.png",        // 09:00 - 17:00
+    golden:    "https://i.ibb.co/QvRKhSBW/golden-hour.png", // 17:00 - 20:00
+    night:     "https://i.ibb.co/B2rqwVM8/night.png"        // 20:00 - 00:00
+}
     }
 };
 
 
 function getRomanianTimeBg() {
-    // Luăm ora exactă din România (EET / EEST)
     const roTime = new Date().toLocaleString("en-US", {timeZone: "Europe/Bucharest"});
     const hour = new Date(roTime).getHours();
-    
     const bgs = stageList.street.timeBgs;
 
     if (hour >= 0 && hour < 5)   return bgs.deepNight;
     if (hour >= 5 && hour < 9)   return bgs.morning;
     if (hour >= 9 && hour < 17)  return bgs.noon;
     if (hour >= 17 && hour < 20) return bgs.golden;
-    return bgs.night; // 20:00 - 23:59
+    return bgs.night;
 }
 
 
@@ -11575,23 +11572,17 @@ function applyStage(stageId) {
 
     if (stageNameEl) stageNameEl.innerText = stage.name;
 
-    let finalBg = "";
-
-    // Dacă suntem pe STRADA (Stage 1), calculăm fundalul în funcție de oră
-    if (stageId === "street") {
-        finalBg = getRomanianTimeBg();
-    } else {
-        // Pentru viitoarele stagii (2, 3...), folosim bg-ul lor normal
-        finalBg = stage.bg;
-    }
+    let finalBg = (stageId === "street") ? getRomanianTimeBg() : stage.bg;
 
     if (gameArea) {
-        gameArea.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('${finalBg}')`;
+        // SETĂRI PENTRU CLARITATE MAXIMĂ
+        gameArea.style.backgroundPosition = "center";
+        gameArea.style.backgroundRepeat = "no-repeat";
+        gameArea.style.backgroundSize = "100% 100%"; // Oprește Zoom-ul urât
+        gameArea.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('${finalBg}')`;
     }
-    
     currentStageId = stageId;
 }
-
 function pickupRubyEmoji(e) {
     const startX = e.clientX;
     const startY = e.clientY;
