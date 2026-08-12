@@ -7587,6 +7587,7 @@ let hasSeenRubyTutorial = false; // Flag to track the pop-up
     let lastSavedScore = 0;
 let isSuperMagnetActive = false;
 let isGracePeriodActive = false;
+let backendUnlockedFeatures = []; // This is the ONLY list the game will trust
 
 // --- PROGRESSION SYSTEM ---
     let playerLevel = 1;
@@ -7794,6 +7795,7 @@ updateGiftButtonState(); // 🔥 Add this
             _GAME_DATA.claimedRewards = data.claimedRewards || [];
             _GAME_DATA.claimedStageRewards = data.claimedStageRewards || [];
             _GAME_DATA.claimedLevelRewards = data.claimedLevelRewards || []; 
+            backendUnlockedFeatures = data.unlockedFeatures || []; // 🆕 LOAD EXISTING UNLOCKS
 
 
             
@@ -8020,8 +8022,6 @@ if (e.target.closest('.control-btn') ||
 }
 
 async function syncScoreToFirestore() {
-  // Verificăm dacă avem UID. 
-  // Am scos verificarea strictă de score/XP pentru a permite salvarea listei de "claimed" chiar dacă numerele nu s-au schimbat încă.
   if (currentUID) {
     try {
       const idToken = await firebase.auth().currentUser.getIdToken(true);
@@ -8036,15 +8036,22 @@ async function syncScoreToFirestore() {
             level: playerLevel,
             xp: playerXP,
             hasSeenRubyTutorial: hasSeenRubyTutorial,
-            // --- LISTELE DE PROGRES ---
-            claimedLevelRewards: _GAME_DATA.claimedLevelRewards, // Recompensele de Nivel (1-25)
-            claimedRewards: _GAME_DATA.claimedRewards,           // Recompensele de Emojis (Index)
-            claimedStageRewards: _GAME_DATA.claimedStageRewards  // Recompensele de Zonă (Street, etc.)
+            claimedLevelRewards: _GAME_DATA.claimedLevelRewards,
+            claimedRewards: _GAME_DATA.claimedRewards,
+            claimedStageRewards: _GAME_DATA.claimedStageRewards
         }),
       }); 
 
       if (response.ok) {
-        // Actualizăm cache-ul local pentru a nu trimite date identice în buclă
+        // 🆕 PARSE BACKEND RESPONSE
+        const result = await response.json();
+        
+        // 🆕 UPDATE FRONTEND AUTHORITY LIST
+        if (result.unlockedFeatures) {
+            backendUnlockedFeatures = result.unlockedFeatures;
+            console.log("📡 Backend Unlocks Updated:", backendUnlockedFeatures);
+        }
+
         lastSavedScore = score;
         lastSavedRubies = rubies;
         lastSavedXP = playerXP;
@@ -12488,14 +12495,10 @@ const UNLOCK_METADATA = {
     }
 };
 
-// 3. THE HELPER: Checks if an ID is unlocked based on playerLevel
 function isUnlocked(itemId) {
-    for (let level in LEVEL_UNLOCKS) {
-        if (LEVEL_UNLOCKS[level].includes(itemId)) {
-            return playerLevel >= parseInt(level);
-        }
-    }
-    return true; // Not in registry? Unlocked by default.
+    // We no longer check playerLevel here. 
+    // We only check if the BACKEND said it's okay.
+    return backendUnlockedFeatures.includes(itemId);
 }
 
 
