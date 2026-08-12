@@ -9809,13 +9809,13 @@ if (isUnlocked("rubyDrop")) {
     }
 }
 
-    // --- LOGICA DE RARITATE 35% PENTRU SLOT MACHINE ---
+    // --- LOGICA DE RARITATE (5% Șansă pentru Slot) ---
     if (chosenKey === "slotMachine") {
-        if (Math.random() > 0.35) { // 65% șansă să dea reroll
-            const otherKeys = availableKeys.filter(key => key !== "slotMachine");
-            if (otherKeys.length > 0) {
-                chosenKey = otherKeys[Math.floor(Math.random() * otherKeys.length)];
-                console.log("🎲 Slot Machine a fost filtrat pentru raritate. S-a ales altceva.");
+        if (Math.random() > 0.10) { // Dacă NU avem noroc de 5%
+            // Forțăm alegerea unui obiect de Nivel 1 (Axe, Sos, etc)
+            const basicKeys = availableKeys.filter(k => k !== "slotMachine");
+            if (basicKeys.length > 0) {
+                chosenKey = basicKeys[Math.floor(Math.random() * basicKeys.length)];
             }
         }
     }
@@ -12503,11 +12503,15 @@ const UNLOCK_METADATA = {
 };
 
 function isUnlocked(itemId) {
-    // We no longer check playerLevel here. 
-    // We only check if the BACKEND said it's okay.
+    // 1. Obiectele care au nevoie de permisiune de la server
+    const restricted = ["slotMachine", "rubyDrop",];
+
+    // 2. Dacă obiectul NU este restricționat (ex: axe, hotSauce), dă-i drumul!
+    if (!restricted.includes(itemId)) return true;
+
+    // 3. Dacă este restricționat, verifică dacă serverul a zis DA
     return backendUnlockedFeatures.includes(itemId);
 }
-
 
 
 const LEVEL_REWARDS_REGISTRY = {
