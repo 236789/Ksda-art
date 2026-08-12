@@ -11530,18 +11530,38 @@ function forceCloseMenu() {
 
 
 
-// --- STAGE SYSTEM CONFIGURATION ---
 const stageList = {
     "street": {
         index: 1,
         name: "STRADA",
-        bg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/e7c37518-746f-42d6-9ea6-e3f7b028ffdb/ChatGPT+Image+Jun+16%2C+2025%2C+10_03_26+PM.png",
-        accent: "#facc15", // Gold for the street
-    completionReward: { type: 'score', value: 500 },
-
+        accent: "#facc15",
+        completionReward: { type: 'score', value: 500 },
+        // Imaginile dinamice
+        timeBgs: {
+            deepNight: "https://i.ibb.co/G33mJTb4/deep-night.png",  // 00:00 - 05:00
+            morning:   "https://i.ibb.co/s947Cprz/morning.png",     // 05:00 - 09:00
+            noon:      "https://i.ibb.co/6JpmqWZR/noon.png",        // 09:00 - 17:00
+            golden:    "https://i.ibb.co/4ZGv32Hp/golden-hour.png", // 17:00 - 20:00
+            night:     "https://i.ibb.co/67HV6CZL/night.png"        // 20:00 - 00:00
+        }
     }
-    // Future stages like "beach" or "moon" will go here
 };
+
+
+function getRomanianTimeBg() {
+    // Luăm ora exactă din România (EET / EEST)
+    const roTime = new Date().toLocaleString("en-US", {timeZone: "Europe/Bucharest"});
+    const hour = new Date(roTime).getHours();
+    
+    const bgs = stageList.street.timeBgs;
+
+    if (hour >= 0 && hour < 5)   return bgs.deepNight;
+    if (hour >= 5 && hour < 9)   return bgs.morning;
+    if (hour >= 9 && hour < 17)  return bgs.noon;
+    if (hour >= 17 && hour < 20) return bgs.golden;
+    return bgs.night; // 20:00 - 23:59
+}
+
 
 let currentStageId = "street";
 
@@ -11553,18 +11573,24 @@ function applyStage(stageId) {
     const gameArea = document.getElementById('gameArea');
     const stageNameEl = document.getElementById('stageName');
 
-    // Update UI Text
     if (stageNameEl) stageNameEl.innerText = stage.name;
 
-    // Apply Background with the existing dark tint (0.4)
+    let finalBg = "";
+
+    // Dacă suntem pe STRADA (Stage 1), calculăm fundalul în funcție de oră
+    if (stageId === "street") {
+        finalBg = getRomanianTimeBg();
+    } else {
+        // Pentru viitoarele stagii (2, 3...), folosim bg-ul lor normal
+        finalBg = stage.bg;
+    }
+
     if (gameArea) {
-        gameArea.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('${stage.bg}')`;
+        gameArea.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('${finalBg}')`;
     }
     
     currentStageId = stageId;
-    console.log(`🌍 Stage Loaded: ${stage.name}`);
 }
-
 
 function pickupRubyEmoji(e) {
     const startX = e.clientX;
@@ -12995,6 +13021,14 @@ function showXPFlyer(x, y, amount) {
         easing: 'ease-out'
     }).onfinish = () => el.remove();
 }
+
+
+// Verificăm timpul la fiecare 5 minute pentru a schimba fundalul dacă e cazul
+setInterval(() => {
+    if (currentStageId === "street" && !isPaused) {
+        applyStage("street");
+    }
+}, 5 * 60 * 1000);
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
 // ==========================================
