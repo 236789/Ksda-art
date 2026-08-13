@@ -7761,6 +7761,7 @@ let hasSeenRubyTutorial = false; // Flag to track the pop-up
 let isSuperMagnetActive = false;
 let isGracePeriodActive = false;
 let backendUnlockedFeatures = []; // This is the ONLY list the game will trust
+let activeXPMultiplier = 1; // Default este 1 (normal)
 
 // --- PROGRESSION SYSTEM ---
     let playerLevel = 1;
@@ -8418,7 +8419,9 @@ document.getElementById('kevin').addEventListener('click', (e) => {
 
       // Apply Multiplier to Score
       score += (1 * activeScoreMultiplier);
-      gainXP(2); // <--- ADD THIS LINE HERE
+let xpToGain = (2 * activeClickXPMultiplier); // 2 de bază, sau 4 dacă boost-ul e activ
+gainXP(xpToGain);
+showXPFlyer(e.clientX, e.clientY, xpToGain);
 
       // --- SALVĂM STATISTICILE ---
       totalClicksAllTime += (1 * activeScoreMultiplier);
@@ -9568,7 +9571,14 @@ const boostRegistry = {
         type: "good",
         duration: 60,
         description: "Primești rubine duble la pragurile de combo timp de 60 de secunde!"
-    }
+    },
+    "boost_x2_xp": {
+        name: "X2 XP",
+        image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/boosts/x2%20xp.png",
+        type: "good",
+        duration: 45, // Durata: 45 secunde
+        description: "Dublează experiența primită din orice activitate timp de 45 de secunde!"
+    },
 };
 
 
@@ -10173,9 +10183,7 @@ function showMobileEventModal(eventData, isUseable = false, itemKey = null) {
         }
     };
 }
-
 function activateBoost(key) {
-    // --- BLOCHĂM FOLOSIREA BOOST-URILOR SUB NIVELUL 3 ---
     if (playerLevel < 3) {
         showKevinutaBubble("Boost-urile se pot folosi abia de la Nivelul 3!");
         return;
@@ -10187,18 +10195,17 @@ function activateBoost(key) {
         return;
     }
 
-    // 1. Consume the item
     _GAME_DATA.inventory[key]--;
     renderInventoryUI();
     syncInventoryToCloud();
 
-    // 2. Set Multipliers
     let toastMsg = "";
     if (key === 'boost_x2_score') { activeScoreMultiplier = 2; toastMsg = "Punctele sunt dublate!"; }
     else if (key === 'boost_x2_combo') { activeComboMultiplier = 2; toastMsg = "Combo crește 2x!"; }
     else if (key === 'boost_x2_rubies') { activeRubyMultiplier = 2; toastMsg = "Rubinele sunt dublate!"; }
+    // NOU: Multiplicator doar pentru XP-ul din click
+    else if (key === 'boost_x2_xp') { activeClickXPMultiplier = 2; toastMsg = "XP din click-uri dublat!"; }
 
-    // 3. UI Feedback
     showNotification("BOOST ACTIVAT", `${toastMsg} (${data.duration}s)`, data.image);
     showEventIndicator(key, data.duration);
 
@@ -10206,6 +10213,7 @@ function activateBoost(key) {
         if (key === 'boost_x2_score') activeScoreMultiplier = 1;
         if (key === 'boost_x2_combo') activeComboMultiplier = 1;
         if (key === 'boost_x2_rubies') activeRubyMultiplier = 1;
+        if (key === 'boost_x2_xp') activeClickXPMultiplier = 1; // Resetare
     }, data.duration * 1000);
 
     closeInventory();
@@ -11707,13 +11715,20 @@ function pickupRubyEmoji(e) {
     const startX = e.clientX;
     const startY = e.clientY;
     
-    // --- 🆕 NEW: RUBY XP GAIN (15 XP) ---
-    // We trigger this immediately on click
+    // Calculăm câte rubine primește (1 sau 2 dacă boost-ul e activ)
+    let rubyAmount = (1 * activeRubyMultiplier); 
+
+    // XP Gained
     let rubyXP = specialRegistry.rubyDrop.xpValue || 15;
     gainXP(rubyXP);
     showXPFlyer(startX, startY, rubyXP);
 
     playSFX(slotJackpotUrl); 
+
+    // Notificare dacă boost-ul e activ
+    if(activeRubyMultiplier > 1) {
+        showNotification("BOOST ACTIV!", "Ai primit rubine duble! ♦️x2", "https://iili.io/CrnXNdG.png");
+    }
 
     const flyer = document.createElement('img');
     flyer.src = 'https://iili.io/CrnXNdG.png';
@@ -11742,7 +11757,8 @@ function pickupRubyEmoji(e) {
 
     setTimeout(() => { 
         flyer.remove(); 
-        rubies += 1; 
+        // AICI ERA BUG-UL: Schimbăm de la += 1 la += rubyAmount
+        rubies += rubyAmount; 
         updateScoreUI(); 
         syncScoreToFirestore(); 
     }, 850);
@@ -12560,16 +12576,20 @@ function updateXPBarUI() {
     }
 }
 
-
 function gainXP(amount) {
-    playerXP += amount;
+    // Aplicăm multiplicatorul (va fi 1 normal sau 2 dacă boost-ul e activ)
+    let finalXP = Math.floor(amount * activeXPMultiplier);
+    
+    playerXP += finalXP;
 
-    // Check for Level Up
+    // Verificăm Level Up
     if (playerXP >= xpToNextLevel) {
         levelUp();
     }
 
     updateXPBarUI();
+    // Returnăm valoarea finală pentru a fi afișată corect pe ecran de XPFlyer
+    return finalXP; 
 }
 
 function spawnLevelUpParticles() {
