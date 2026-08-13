@@ -13477,6 +13477,29 @@ function openQuestsTab() {
 function openAchievementsTab() {
     showSlotResult("REALIZĂRI", "Sistemul de realizări va fi implementat în curând!", false);
 }
+
+
+function showSlotResult(title, message, isJackpot = false) {
+    const modal = document.getElementById('slotResultModal');
+    const box = document.getElementById('resultBox');
+    const titleEl = document.getElementById('resultTitle');
+    const textEl = document.getElementById('resultText');
+
+    if (titleEl) titleEl.innerText = title;
+    if (textEl) textEl.innerText = message;
+
+    // Resetăm design-ul și adăugăm glow dacă e jackpot
+    if (box) {
+        box.className = "modal-box result-modal-box";
+        if (isJackpot) box.classList.add('jackpot-glow');
+    }
+
+    if (modal) modal.style.display = 'flex';
+    
+    // Oprim jocul în spate
+    isPaused = true;
+    clearInterval(moveKevinInterval);
+}
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
 // ==========================================
