@@ -7534,6 +7534,76 @@ input:checked + .s-slider:before {
 </div>
 
 
+
+<!-- MODAL SELECȚIE TIP MISIUNE (UȘOR / GREU) -->
+<div id="misiuniSelectionModal" class="modal-overlay" style="z-index: 100010;">
+  <div class="modal-box shop-box">
+    <div class="shop-header">
+      <h2><i class="fa-solid fa-scroll"></i> ALEGE DIFICULTATEA</h2>
+      <div class="selection-line"></div>
+    </div>
+
+    <div class="shop-grid">
+      <!-- MISIUNI UȘOARE -->
+      <button class="shop-card" onclick="event.stopPropagation(); openEasyQuests()">
+        <img src="https://i.ibb.co/PG8F2qzf/easy-quests.png" class="shop-icon" style="width: 50px; height: 50px; object-fit: contain;">
+        <div class="shop-info">
+          <h3 style="color: #4ade80;">MISIUNI UȘOARE</h3>
+          <p>6 misiuni noi la fiecare oră. Recompense rapide!</p>
+        </div>
+      </button>
+
+      <!-- MISIUNI GRELE -->
+      <button class="shop-card" onclick="event.stopPropagation(); openHardQuests()">
+        <img src="https://i.ibb.co/Vpr5D1Jt/hard-quests.png" class="shop-icon" style="width: 50px; height: 50px; object-fit: contain;">
+        <div class="shop-info">
+          <h3 style="color: #ef4444;">MISIUNI GRELE</h3>
+          <p>6 misiuni noi în fiecare zi. XP masiv și Rubine!</p>
+        </div>
+      </button>
+    </div>
+
+    <button class="menu-btn play close-shop-btn" onclick="document.getElementById('misiuniSelectionModal').style.display='none'; document.getElementById('questsMenuModal').style.display='flex';">
+      <span>ÎNAPOI</span>
+    </button>
+  </div>
+</div>
+
+<!-- MODAL LISTĂ: MISIUNI UȘOARE (GOL PENTRU PASUL 3) -->
+<div id="easyQuestsModal" class="modal-overlay" style="z-index: 100020;">
+  <div class="modal-box shop-box">
+    <div class="shop-header">
+      <h2 style="color: #4ade80;"><i class="fa-solid fa-feather"></i> MISIUNI UȘOARE</h2>
+      <div class="selection-line" style="background: #4ade80;"></div>
+      <p style="font-family:'Orbitron'; font-size:10px; color:#94a3b8;">REFRESH: LA FIECARE ORĂ</p>
+    </div>
+    <div id="easyQuestsContainer" style="margin: 20px 0; color: #5a6288; font-family: 'Oswald';">
+      Se încarcă misiunile ușoare... (Pasul 3)
+    </div>
+    <button class="menu-btn play close-shop-btn" onclick="document.getElementById('easyQuestsModal').style.display='none';">
+      <span>ÎNCHIDE</span>
+    </button>
+  </div>
+</div>
+
+<!-- MODAL LISTĂ: MISIUNI GRELE (GOL PENTRU PASUL 3) -->
+<div id="hardQuestsModal" class="modal-overlay" style="z-index: 100020;">
+  <div class="modal-box shop-box">
+    <div class="shop-header">
+      <h2 style="color: #ef4444;"><i class="fa-solid fa-fire"></i> MISIUNI GRELE</h2>
+      <div class="selection-line" style="background: #ef4444;"></div>
+      <p style="font-family:'Orbitron'; font-size:10px; color:#94a3b8;">REFRESH: ZILNIC</p>
+    </div>
+    <div id="hardQuestsContainer" style="margin: 20px 0; color: #5a6288; font-family: 'Oswald';">
+      Se încarcă misiunile grele... (Pasul 3)
+    </div>
+    <button class="menu-btn play close-shop-btn" onclick="document.getElementById('hardQuestsModal').style.display='none';">
+      <span>ÎNCHIDE</span>
+    </button>
+  </div>
+</div>
+
+
 <!-- REPLACED INDEX MODAL PART -->
 <div id="indexModal" class="modal-overlay">
   <div class="modal-box shop-box">
@@ -13469,26 +13539,31 @@ function closeQuestsMenu() {
     }
 }
 
-// ÎNLOCUIEȘTE ACESTE FUNCȚII
+// 1. Modificăm funcția din Hub-ul principal
 function openQuestsTab() {
-    // Închidem meniul de selecție
+    // Închidem Hub-ul (Centru Activități)
     document.getElementById('questsMenuModal').style.display = 'none';
-    // Deschidem lista reală de misiuni (codul de la pasul 2 anterior)
-    const listModal = document.getElementById('questsListModal');
-    if(listModal) {
-        listModal.style.display = 'flex';
-        renderQuests();
-    } else {
-        // Dacă nu ai adăugat încă questsListModal în HTML, dă-i doar un mesaj curat:
-        alert("Misiunile se încarcă...");
-    }
+    // Deschidem selecția de dificultate
+    document.getElementById('misiuniSelectionModal').style.display = 'flex';
+    
+    // IMPORTANT: Resetăm sumele bonus pentru a preveni bug-ul de scor infinit
+    pendingWinAmount = 0;
+    pendingRubyWin = 0;
 }
 
-function openAchievementsTab() {
-    // Folosim o alertă simplă sau un modal nou, NU showSlotResult
-    showNotification("ACHIEVEMENTS", "Sistemul de Realizări va fi activ la nivelul 5!", "fa-trophy");
+// 2. Funcție pentru deschiderea misiunilor Ușoare
+function openEasyQuests() {
+    document.getElementById('misiuniSelectionModal').style.display = 'none';
+    document.getElementById('easyQuestsModal').style.display = 'flex';
+    // Aici vom apela renderEasyQuests() la pasul 3
 }
 
+// 3. Funcție pentru deschiderea misiunilor Grele
+function openHardQuests() {
+    document.getElementById('misiuniSelectionModal').style.display = 'none';
+    document.getElementById('hardQuestsModal').style.display = 'flex';
+    // Aici vom apela renderHardQuests() la pasul 3
+}
 // MODIFICĂ ACEASTĂ FUNCȚIE
 function showSlotResult(title, message, isJackpot = false) {
     const modal = document.getElementById('slotResultModal');
@@ -13609,7 +13684,9 @@ window.handleClaimLevelReward = handleClaimLevelReward;
 window.openQuestsMenu = openQuestsMenu;
 window.closeQuestsMenu = closeQuestsMenu;
 window.openQuestsTab = openQuestsTab;
-window.openAchievementsTab = openAchievementsTab;
+window.openQuestsTab = openQuestsTab;
+window.openEasyQuests = openEasyQuests;
+window.openHardQuests = openHardQuests;
 
 })(); // <-- CLOSES THE SECURE VAULT
 
