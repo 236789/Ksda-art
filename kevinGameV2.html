@@ -7095,7 +7095,11 @@ input:checked + .s-slider:before {
 <button class="control-btn sub-btn" title="Inventory" onclick="openInventory()">
   <i class="fa-solid fa-briefcase"></i>
 </button>
-    <button class="control-btn sub-btn" title="Achievements"><i class="fa-solid fa-trophy"></i></button>
+<!-- Butonul de Misiuni (fostul Achievements) -->
+<button class="control-btn sub-btn" title="Misiuni" onclick="event.stopPropagation(); openQuestsMenu()">
+  <i class="fa-solid fa-list-check"></i>
+</button>
+
 <button class="control-btn sub-btn" style="--i:3" title="Utilități" onclick="openUtilitiesModal()">
   <i class="fa-solid fa-layer-group"></i>
 </button>
@@ -7492,6 +7496,40 @@ input:checked + .s-slider:before {
 <button class="menu-btn play close-shop-btn" style="margin-top: 15px;" onclick="closeUtilitiesModal()">
   <span>ÎNCHIDE</span>
 </button>
+  </div>
+</div>
+
+<!-- MODAL PRINCIPAL MISIUNI & ACHIEVEMENTS -->
+<div id="questsMenuModal" class="modal-overlay">
+  <div class="modal-box shop-box">
+    <div class="shop-header">
+      <h2><i class="fa-solid fa-star"></i> CENTRU ACTIVITĂȚI</h2>
+      <div class="selection-line"></div>
+    </div>
+
+    <div class="shop-grid">
+      <!-- OPȚIUNEA MISIUNI -->
+      <button class="shop-card" onclick="openQuestsTab()">
+        <i class="fa-solid fa-scroll shop-icon" style="color: #facc15;"></i>
+        <div class="shop-info">
+          <h3>MISIUNI</h3>
+          <p>Provocări zilnice pentru XP și puncte.</p>
+        </div>
+      </button>
+
+      <!-- OPȚIUNEA REALIZĂRI -->
+      <button class="shop-card" onclick="openAchievementsTab()">
+        <i class="fa-solid fa-trophy shop-icon" style="color: #ffcc00;"></i>
+        <div class="shop-info">
+          <h3>REALIZĂRI</h3>
+          <p>Trofee deblocate de-a lungul carierei.</p>
+        </div>
+      </button>
+    </div>
+
+    <button class="menu-btn play close-shop-btn" onclick="closeQuestsMenu()">
+      <span>ÎNCHIDE</span>
+    </button>
   </div>
 </div>
 
@@ -13414,6 +13452,31 @@ setInterval(() => {
         applyStage("street");
     }
 }, 5 * 60 * 1000);
+
+
+function openQuestsMenu() {
+    isPaused = true;
+    clearInterval(moveKevinInterval);
+    document.getElementById('questsMenuModal').style.display = 'flex';
+    forceCloseMenu();
+}
+
+function closeQuestsMenu() {
+    document.getElementById('questsMenuModal').style.display = 'none';
+    if (document.getElementById('gameArea').style.display === 'block') {
+        isPaused = false;
+        startKevinMovement();
+    }
+}
+
+// Placeholder pentru pasul următor
+function openQuestsTab() {
+    showSlotResult("MISIUNI", "Sistemul de misiuni va fi implementat la pasul 2!", false);
+}
+
+function openAchievementsTab() {
+    showSlotResult("REALIZĂRI", "Sistemul de realizări va fi implementat în curând!", false);
+}
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
 // ==========================================
@@ -13487,11 +13550,15 @@ window.closeMilestones = closeMilestones;
 
 window.switchBMTab = switchBMTab;
 window.setBuyQty = setBuyQty;
-window.processBuy = processBuy; 
+window.processBuy = processBuy;
 // Add these to the very bottom list of window exports
 window.openLevelDetail = openLevelDetail;
 window.closeLevelDetail = closeLevelDetail;
 window.handleClaimLevelReward = handleClaimLevelReward;
+window.openQuestsMenu = openQuestsMenu;
+window.closeQuestsMenu = closeQuestsMenu;
+window.openQuestsTab = openQuestsTab;
+window.openAchievementsTab = openAchievementsTab;
 
 })(); // <-- CLOSES THE SECURE VAULT
 
