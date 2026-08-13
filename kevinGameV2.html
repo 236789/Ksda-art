@@ -6607,27 +6607,28 @@ input:checked + .s-slider:before {
 }
 
 /* --- STIL PREMIUM PENTRU BUTOANE UTILITĂȚI BLOCATE --- */
+/* --- STIL PREMIUM GRI/BLOCAT PENTRU BUTOANE UTILITĂȚI --- */
 .shop-card {
-    position: relative; /* Esențial pentru ca badge-ul să stea jos */
+    position: relative;
 }
 
 .shop-card.locked-card {
-    background: rgba(0, 0, 0, 0.8) !important;
-    border-color: #ff3366 !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: #444 !important; /* Margine Gri */
     cursor: not-allowed;
     box-shadow: none !important;
     transform: none !important;
 }
 
-/* Întunecăm textul și iconița pe butoanele blocate, dar le păstrăm lizibile */
+/* Întunecăm textul și iconița */
 .shop-card.locked-card .shop-icon,
 .shop-card.locked-card .shop-info h3,
 .shop-card.locked-card .shop-info p {
     filter: grayscale(1);
-    opacity: 0.4;
+    opacity: 0.3;
 }
 
-/* Lacăt mare pe fundalul butonului blocat */
+/* Lacăt mare GRI pe fundal */
 .shop-card.locked-card::after {
     content: "\f023"; 
     font-family: "Font Awesome 6 Free";
@@ -6636,11 +6637,28 @@ input:checked + .s-slider:before {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: #ff3366;
+    color: #666; /* Lacăt Gri */
     font-size: 35px;
     opacity: 0.8;
-    text-shadow: 0 0 15px rgba(255, 51, 102, 0.8);
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
     pointer-events: none;
+}
+
+/* Clasa specială pentru badge-ul gri "LVL 3 REQ." */
+.gray-lock-badge {
+    position: absolute;
+    bottom: -10px;
+    background: #444; /* Fundal Gri */
+    color: white;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    border: 1px solid #777;
 }
 
   </style>
@@ -11310,44 +11328,41 @@ let currentMemConfig = null;
 const memAlarmSnd = "https://www.dropbox.com/scl/fi/cp2xztcnmbaartjzbh2v0/ALARM.mp3?rlkey=48toni2ddlb6cvda2n616o7ur&st=l9r05xlj&dl=1";
 
 const allMemoryIcons = [
-    "https://i.ibb.co/kgY9GFYD/image.png",
-    "https://i.ibb.co/mrz7tHCN/image.png",
-    "https://i.ibb.co/S71cGYh1/image.png",
-    "https://i.ibb.co/WvgVs5sz/image.png",
-    "https://i.ibb.co/1JTf7hgv/image.png",
-    "https://i.ibb.co/bgBmLhPD/image.png",
-    "https://i.ibb.co/MDtSJmWv/image.png",
-    "https://i.ibb.co/GQHJjZth/image.png",
-    "https://i.ibb.co/gFDzqQqk/image.png",
-    "https://i.ibb.co/rRYb4CQ0/image.png",
-    "https://i.ibb.co/gFmG9vB6/image.png",
-    "https://i.ibb.co/cc86j3x1/image.png",
-    "https://i.ibb.co/V03rvg21/image.png",
-    "https://i.ibb.co/Y4xjywxZ/image.png",
-    "https://i.ibb.co/4Z45yfvT/image.png",
-    "https://i.ibb.co/zTFD8kpW/image.png",
-    "https://i.ibb.co/n8mXj7zj/image.png",
-    "https://i.ibb.co/5X33z5RL/image.png",
-    "https://i.ibb.co/zHGn8vhB/image.png",
-    "https://i.ibb.co/KzKFf9SF/image.png",
-    "https://i.ibb.co/60Qs5gwf/image.png",
-    "https://i.ibb.co/KjrXzsRQ/image.png",
-    "https://i.ibb.co/6cMmvNdQ/image.png",
-    "https://i.ibb.co/QFqk0j0q/image.png",
-    "https://i.ibb.co/CstB1pxZ/image.png",
-    "https://i.ibb.co/HLTbcV7y/image.png",
-    "https://i.ibb.co/v4R0KtYh/image.png",
-    "https://i.ibb.co/60vsC56y/image.png",
-    "https://i.ibb.co/QvRKhSBW/image.png",
-    "https://i.ibb.co/B2rqwVM8/image.png",
-    "https://i.ibb.co/zHLmhV7W/image.png",
-    "https://i.ibb.co/B25NQX13/image.png",
-    "https://i.ibb.co/yB6N0j7y/image.png",
-    "https://i.ibb.co/G46sg5gT/image.png",
-    "https://i.ibb.co/XkbqYqSx/image.png",
-    "https://i.ibb.co/MDwCHnst/image.png"
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/777.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/Axe.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/BANANA%20PEAL.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/Barrel.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/Brain(Trivia).png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/Cherry.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/Coin.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/Crown.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/Gem.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/HOT%20SAUCE.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/Mouse%20(AutoClicker%20event).png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/Ruby.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/SUPER%20MEGNET.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/Sleeping%20pills.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/Slot%20Machine.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/Squecky%20toy.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/Stopwatch%20(Slowmotion%20effect).png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/bomb.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/cards.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/clover.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/cufar.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/diamonds.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/emerald.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/father.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/gift.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/grapes.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/key.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/magnet.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/orange.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/poop.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/sahpire.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/star.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/toilet%20papper.png",
+    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/wattermelon.png"
 ];
-
 const memoryDiffs = {
     easy:   { cards: 8,  time: 15, win: 50,  loss: 0,    xp: 25 },  // 🆕 Added XP
     medium: { cards: 12, time: 25, win: 100, loss: -50,   xp: 50 },  // 🆕 Added XP
@@ -11537,7 +11552,6 @@ function finishMemory(win) {
     }
 }
 
-
 function openUtilitiesModal() {
     isPaused = true; 
     clearInterval(moveKevinInterval);
@@ -11549,22 +11563,26 @@ function openUtilitiesModal() {
 
     if (bmBtn) {
         if (playerLevel < 3) {
-            // Aplicăm design-ul de "Locked"
             bmBtn.classList.add('locked-card');
-            if (bmBadge) bmBadge.style.display = 'block';
+            if (bmBadge) {
+                bmBadge.style.display = 'block';
+                bmBadge.className = 'gray-lock-badge'; // Aplicăm design-ul gri
+            }
             
-            // Suprascriem acțiunea
-            bmBtn.onclick = () => { 
+            // e.stopPropagation() OPREȘTE PIERDEREA DE SCOR!
+            bmBtn.onclick = (e) => { 
+                e.stopPropagation(); 
                 playMissSFX(); 
-                showKevinutaBubble("Piața Neagră se deblochează la Nivelul 3!"); 
+                showNotification("ZONĂ BLOCATĂ", "Ai nevoie de Nivelul 3 pentru a accesa Piața Neagră!", "fa-lock");
             };
         } else {
-            // Eliminăm blocajul (Nivel 3 atins)
             bmBtn.classList.remove('locked-card');
             if (bmBadge) bmBadge.style.display = 'none';
             
-            // Restaurăm acțiunea originală
-            bmBtn.onclick = () => { openBlackMarket(); };
+            bmBtn.onclick = (e) => { 
+                e.stopPropagation();
+                openBlackMarket(); 
+            };
         }
     }
     
