@@ -11545,17 +11545,25 @@ function openUtilitiesModal() {
     
     // --- BLOCHĂM PIAȚA NEAGRĂ DACĂ NIVELUL E SUB 3 ---
     const bmBtn = document.getElementById('btnBlackMarketUtil');
+    const bmBadge = document.getElementById('badgeBlackMarketUtil');
+
     if (bmBtn) {
         if (playerLevel < 3) {
-            bmBtn.style.filter = "grayscale(1) brightness(0.4)";
-            bmBtn.style.borderColor = "#ff3366";
+            // Aplicăm design-ul de "Locked"
+            bmBtn.classList.add('locked-card');
+            if (bmBadge) bmBadge.style.display = 'block';
+            
+            // Suprascriem acțiunea
             bmBtn.onclick = () => { 
                 playMissSFX(); 
                 showKevinutaBubble("Piața Neagră se deblochează la Nivelul 3!"); 
             };
         } else {
-            bmBtn.style.filter = "none";
-            bmBtn.style.borderColor = "";
+            // Eliminăm blocajul (Nivel 3 atins)
+            bmBtn.classList.remove('locked-card');
+            if (bmBadge) bmBadge.style.display = 'none';
+            
+            // Restaurăm acțiunea originală
             bmBtn.onclick = () => { openBlackMarket(); };
         }
     }
