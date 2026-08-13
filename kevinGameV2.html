@@ -11567,43 +11567,6 @@ function finishTrivia(win, reason = "") {
     document.getElementById('triviaModal').style.display = 'none';
     
     if (win) {
-        // --- ONLY TRIGGERS ON 5/5 ---
-        const pointsWon = 125;
-        const xpWon = 50; 
-        pendingWinAmount = pointsWon;
-
-        const title = "GENIULE!";
-        const message = `Ești de neoprit! Ai răspuns corect la toate întrebările.`;
-        
-        // 🆕 Build the Reward UI inside the modal
-        const rewardHtml = `
-            <div class="result-rewards-wrap">
-                <div class="res-reward-item">
-                    <span class="res-reward-val" style="color:#facc15;">+${pointsWon}</span>
-                    <span class="res-reward-lab">Puncte</span>
-                </div>
-                <div class="res-reward-item">
-                    <span class="res-reward-val" style="color:#ffcc00;">+${xpWon}</span>
-                    <span class="res-reward-lab">Experience</span>
-                </div>
-            </div>
-        `;
-
-        showSickResult(title, message, rewardHtml, true, () => {
-            animateScoreFlying();
-            gainXP(xpWon);
-            showXPFlyer(window.innerWidth / 2, window.innerHeight / 2, xpWon);
-        });
-
-    } else {
-        // --- LOSS: NO XP, NO POINTS ---
-        showSickResult("AI RATAT!", reason, `<p style="color:#ef4444;">Bonusul a fost pierdut.</p>`, false);
-    }
-function finishTrivia(win, reason = "") {
-    clearInterval(triviaTimer);
-    document.getElementById('triviaModal').style.display = 'none';
-    
-    if (win) {
         // --- NOU: LOGICĂ MISIUNI ---
         updateQuestProgress('trivia_win', 1); // Contorizează o victorie simplă
         questStats.triviasInARow++;           // Crește streak-ul de victorii
@@ -11644,6 +11607,7 @@ function finishTrivia(win, reason = "") {
         showSickResult("AI RATAT!", reason, `<p style="color:#ef4444;">Bonusul a fost pierdut.</p>`, false);
     }
 }
+
 
 
 // ==========================================
