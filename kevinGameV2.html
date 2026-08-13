@@ -10,6 +10,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
@@ -7240,7 +7241,7 @@ input:checked + .s-slider:before {
       </button>
 
 <!-- PIAȚA NEAGRĂ -->
-<button class="shop-card" onclick="openBlackMarket()">
+<button id="btnBlackMarketUtil" class="shop-card" onclick="openBlackMarket()">
   <i class="fa-solid fa-user-ninja shop-icon" style="color: #ff4444; filter: drop-shadow(0 0 8px rgba(255, 68, 68, 0.5));"></i>
   <div class="shop-info">
     <h3 style="color: #ff4444;">PIAȚA NEAGRĂ</h3>
@@ -9933,6 +9934,15 @@ if (isUnlocked("rubyDrop")) {
     }
 }
 
+// --- NOU: LOGICĂ PENTRU MAREA DE CARDURI (Nivel 3+ & Șansă 15%) ---
+    if (isUnlocked("memoryCards")) {
+        // Dacă e deblocat (Lv3+), îi forțăm o șansă mare de 15% să apară
+        if (Math.random() < 0.15) { 
+            chosenKey = "memoryCards";
+            console.log("🃏 MEMORY CARDS: A apărut pe hartă!");
+        }
+    }
+
     // --- LOGICA DE RARITATE (5% Șansă pentru Slot) ---
     if (chosenKey === "slotMachine") {
         if (Math.random() > 0.10) { // Dacă NU avem noroc de 5%
@@ -10110,6 +10120,12 @@ function showMobileEventModal(eventData, isUseable = false, itemKey = null) {
 }
 
 function activateBoost(key) {
+    // --- BLOCHĂM FOLOSIREA BOOST-URILOR SUB NIVELUL 3 ---
+    if (playerLevel < 3) {
+        showKevinutaBubble("Boost-urile se pot folosi abia de la Nivelul 3!");
+        return;
+    }
+
     const data = boostRegistry[key];
     if (!data || !_GAME_DATA.inventory[key] || _GAME_DATA.inventory[key] <= 0) {
         showKevinutaBubble("Nu mai ai acest boost!");
@@ -10127,21 +10143,16 @@ function activateBoost(key) {
     else if (key === 'boost_x2_combo') { activeComboMultiplier = 2; toastMsg = "Combo crește 2x!"; }
     else if (key === 'boost_x2_rubies') { activeRubyMultiplier = 2; toastMsg = "Rubinele sunt dublate!"; }
 
-    // 3. UI Feedback (Only activation toast remains)
+    // 3. UI Feedback
     showNotification("BOOST ACTIVAT", `${toastMsg} (${data.duration}s)`, data.image);
-    
-    // Trigger the bottom-left indicator
     showEventIndicator(key, data.duration);
 
-    // 4. Reset Multipliers after duration (Notification removed)
     setTimeout(() => {
         if (key === 'boost_x2_score') activeScoreMultiplier = 1;
         if (key === 'boost_x2_combo') activeComboMultiplier = 1;
         if (key === 'boost_x2_rubies') activeRubyMultiplier = 1;
-        // The expiration notification has been removed from here
     }, data.duration * 1000);
 
-    // Close inventory and resume game
     closeInventory();
 }
 // --- SMART EVENT INDICATOR (PREVENTS DUPLICATES) ---
@@ -11490,13 +11501,28 @@ function finishMemory(win) {
 }
 
 
-// ==========================================
-// UTILITIES MODAL SYSTEM
-// ==========================================
 function openUtilitiesModal() {
     isPaused = true; 
     clearInterval(moveKevinInterval);
     document.getElementById('utilitiesModal').style.display = 'flex';
+    
+    // --- BLOCHĂM PIAȚA NEAGRĂ DACĂ NIVELUL E SUB 3 ---
+    const bmBtn = document.getElementById('btnBlackMarketUtil');
+    if (bmBtn) {
+        if (playerLevel < 3) {
+            bmBtn.style.filter = "grayscale(1) brightness(0.4)";
+            bmBtn.style.borderColor = "#ff3366";
+            bmBtn.onclick = () => { 
+                playMissSFX(); 
+                showKevinutaBubble("Piața Neagră se deblochează la Nivelul 3!"); 
+            };
+        } else {
+            bmBtn.style.filter = "none";
+            bmBtn.style.borderColor = "";
+            bmBtn.onclick = () => { openBlackMarket(); };
+        }
+    }
+    
     forceCloseMenu();
 }
 
@@ -12383,6 +12409,23 @@ function spawnJackpotRubies() {
     }
 }
 
+function spawnJackpotItems(imgUrl) {
+    for (let i = 0; i < 20; i++) {
+        setTimeout(() => {
+            const item = document.createElement('div');
+            item.className = 'jackpot-ruby'; // Refolosim clasa de cădere a rubinului
+            item.style.backgroundImage = `url('${imgUrl}')`;
+            item.style.left = Math.random() * 90 + 'vw';
+            
+            const duration = Math.random() * 2 + 1.5; 
+            item.style.animationDuration = duration + 's';
+            
+            document.body.appendChild(item);
+            setTimeout(() => item.remove(), duration * 1000);
+        }, i * 50);
+    }
+}
+
 function claimIndexReward(key) {
     const item = specialRegistry[key];
     if (!item || !item.indexReward || _GAME_DATA.claimedRewards.includes(key)) return;
@@ -12729,7 +12772,7 @@ window.clickEpicNode = function(level, name) {
 // 1. THE BRAIN: Defines what level unlocks what ID
 const LEVEL_UNLOCKS = {
     2: ["slotMachine", "rubyDrop"],
-    5: ["blackMarket"] // Example for future
+    3: ["blackMarket", "boosts", "memoryCards"]
 };
 
 // 2. THE BEAUTY: Defines how each ID looks in the UI
@@ -12746,27 +12789,39 @@ const UNLOCK_METADATA = {
     },
     "blackMarket": {
         name: "Piața Neagră",
-        desc: "Locul unde poți vinde obiecte sau cumpăra boost-uri ilegale.",
-        icon: "https://iili.io/Ck27fPs.png" // Example icon
+        desc: "Vinde obiecte sau cumpăra boost-uri.",
+        icon: "https://i.ibb.co/gZZzJvnY/image.png" // Iconița ta
+    },
+    "boosts": {
+        name: "Boost-uri",
+        desc: "Folosește multiplicatori de scor și combo din inventarul tău!",
+        icon: "https://i.ibb.co/XkNcL75P/image.png" // Iconița ta
+    },
+    "memoryCards": {
+        name: "Marea de Carduri",
+        desc: "Mini-joc de memorie. Găsește perechile pentru premii!",
+        icon: "https://iili.io/CSVi2Tb.png" // Iconița existentă
     }
 };
 
 function isUnlocked(itemId) {
-    // 1. Obiectele care au nevoie de permisiune de la server
-    const restricted = ["slotMachine", "rubyDrop",];
+    // 1. Verificăm nivelul necesar
+    const reqLvl = getRequiredLevel(itemId);
+    if (playerLevel < reqLvl) return false;
 
-    // 2. Dacă obiectul NU este restricționat (ex: axe, hotSauce), dă-i drumul!
-    if (!restricted.includes(itemId)) return true;
+    // 2. Pentru cele mai securizate (sloturi, rubine), ne bazăm pe server
+    const restricted = ["slotMachine", "rubyDrop"];
+    if (restricted.includes(itemId)) {
+        return backendUnlockedFeatures.includes(itemId);
+    }
 
-    // 3. Dacă este restricționat, verifică dacă serverul a zis DA
-    return backendUnlockedFeatures.includes(itemId);
+    return true; // Dacă ai nivelul necesar, e deblocat!
 }
 
-
 const LEVEL_REWARDS_REGISTRY = {
-    1:  { name: "Bronze",      message: "Bun venit în legendă! Acesta este cadoul tău de început.", rewards: [{ type: "score", value: 500 }, { type: "ruby", value: 5 }] },
-    2:  { name: "Silver",      message: "Te miști bine! Ai deblocat primele recompense de argint.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
-    3:  { name: "Copper",      message: "Keep it up! Devii din ce în ce mai rapid.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+    1:  { name: "Bronze",      message: "Bun venit în legendă! Acesta este cadoul tău de început.", rewards: [{ type: "score", value: 50 }] },
+    2:  { name: "Silver",      message: "Te miști bine! Ai deblocat funcții noi.", rewards: [{ type: "score", value: 150 }] },
+    3:  { name: "Copper",      message: "Nivelul 3! Acum ai acces la Piața Neagră și Boost-uri.", rewards: [{ type: "score", value: 450 }, { type: "ruby", value: 1 }, { type: "boost", id: "boost_x2_score", value: 1 }] },
     4:  { name: "Sapphire",    message: "Strălucești ca un safir! Click-urile tale sunt precise.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
     5:  { name: "Emerald",     message: "Viteză de smarald! Ești deja peste medie.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
     6:  { name: "Amethyst",    message: "Magic! Reflexele tale încep să pară ireale.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
@@ -12863,8 +12918,10 @@ function openLevelDetail(lvl) {
         </div>
         <p class="v3-sub-info">Vei primi următoarele recompense:</p>
         <div id="detailRewardsGrid" class="v3-rewards-grid">
-            ${data.rewards.map(r => {
-                const icon = (r.type === 'ruby') ? "https://iili.io/CrnXNdG.png" : "https://iili.io/COrCopj.png";
+${data.rewards.map(r => {
+                let icon = "https://iili.io/COrCopj.png"; // score
+                if (r.type === 'ruby') icon = "https://iili.io/CrnXNdG.png";
+                if (r.type === 'boost' && boostRegistry[r.id]) icon = boostRegistry[r.id].image;
                 return `
                     <div class="v3-reward-card">
                         <img src="${icon}">
@@ -12977,14 +13034,24 @@ function handleClaimLevelReward(lvl) {
     spawnJackpotCoins(); 
     spawnJackpotRubies();
 
-    // 5. --- LOGICA DE ZBOR CĂTRE HUD ---
+// 5. --- LOGICA DE ZBOR CĂTRE HUD ȘI PREMII ---
     let totalScoreReward = 0;
     let totalRubyReward = 0;
 
-    // Calculăm totalul din array-ul de rewards al nivelului
     data.rewards.forEach(r => {
         if (r.type === 'score') totalScoreReward += r.value;
         if (r.type === 'ruby') totalRubyReward += r.value;
+        if (r.type === 'boost') {
+            // Adaugă boost-ul fizic în inventarul jucătorului
+            if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
+            _GAME_DATA.inventory[r.id] = (_GAME_DATA.inventory[r.id] || 0) + r.value;
+            
+            // Ploaie de boost-uri pe ecran!
+            if (boostRegistry[r.id]) spawnJackpotItems(boostRegistry[r.id].image);
+            showNotification("AI PRIMIT UN BOOST!", boostRegistry[r.id].name, boostRegistry[r.id].image);
+            
+            syncInventoryToCloud(); // Salvăm direct inventarul
+        }
     });
 
     // Pornim animația de zbor pentru Scor
