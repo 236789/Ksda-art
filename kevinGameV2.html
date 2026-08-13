@@ -6606,7 +6606,42 @@ input:checked + .s-slider:before {
     letter-spacing: 1px;
 }
 
+/* --- STIL PREMIUM PENTRU BUTOANE UTILITĂȚI BLOCATE --- */
+.shop-card {
+    position: relative; /* Esențial pentru ca badge-ul să stea jos */
+}
 
+.shop-card.locked-card {
+    background: rgba(0, 0, 0, 0.8) !important;
+    border-color: #ff3366 !important;
+    cursor: not-allowed;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+/* Întunecăm textul și iconița pe butoanele blocate, dar le păstrăm lizibile */
+.shop-card.locked-card .shop-icon,
+.shop-card.locked-card .shop-info h3,
+.shop-card.locked-card .shop-info p {
+    filter: grayscale(1);
+    opacity: 0.4;
+}
+
+/* Lacăt mare pe fundalul butonului blocat */
+.shop-card.locked-card::after {
+    content: "\f023"; 
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ff3366;
+    font-size: 35px;
+    opacity: 0.8;
+    text-shadow: 0 0 15px rgba(255, 51, 102, 0.8);
+    pointer-events: none;
+}
 
   </style>
 </head>
@@ -7247,6 +7282,8 @@ input:checked + .s-slider:before {
     <h3 style="color: #ff4444;">PIAȚA NEAGRĂ</h3>
     <p>Vinde obiecte pentru scor.</p>
   </div>
+  <!-- Badge-ul roșu LVL REQ -->
+  <div id="badgeBlackMarketUtil" class="lock-text-badge" style="display: none; font-size: 10px; bottom: -10px; padding: 3px 8px;">LVL 3.</div>
 </button>
 
 <!-- INDEX -->
