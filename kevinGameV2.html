@@ -8165,33 +8165,42 @@ function renderQuestList(difficulty) {
     const quests = difficulty === 'easy' ? activeEasyQuests : activeHardQuests;
     
     container.innerHTML = "";
-    container.style.maxHeight = "400px";
+    // Stil pentru container să aibă scroll dacă sunt multe misiuni
+    container.style.maxHeight = "450px";
     container.style.overflowY = "auto";
-    container.style.paddingRight = "10px";
+    container.style.scrollbarWidth = "none";
 
     quests.forEach(q => {
         const pct = Math.min((q.current / q.target) * 100, 100);
         const isDone = q.current >= q.target;
         
+        // Cream rândul folosind clasele tale de la Milestone (v3-unlock-row)
         const row = document.createElement('div');
-        row.className = "v3-unlock-row"; // Refolosim stilul tău de la Milestones
-        row.style.gridTemplateColumns = "1fr 100px"; // Nume/Desc | Progress
-        row.style.opacity = q.claimed ? "0.4" : "1";
-        row.style.marginBottom = "12px";
-
+        row.className = "v3-unlock-row"; 
+        row.style.marginBottom = "10px";
+        row.style.opacity = q.claimed ? "0.5" : "1";
+        
+        // Structură simetrică: Text/Progres în stânga | Status/Buton în dreapta
         row.innerHTML = `
-            <div class="v3-unlock-mid">
-                <span class="v3-unlock-name" style="color:${difficulty === 'easy' ? '#4ade80' : '#ef4444'}">${q.name}</span>
-                <span class="v3-unlock-desc">${q.desc}</span>
-                <div class="loader-container" style="margin-top:10px; height:8px; background:rgba(0,0,0,0.3);">
-                    <div class="loader-bar" style="width:${pct}%; left:0; animation:none; background:${isDone ? '#4ade80' : 'var(--th-accent)'}; box-shadow:none;"></div>
+            <div class="v3-unlock-mid" style="padding-right: 10px;">
+                <span class="v3-unlock-name" style="color: ${difficulty === 'easy' ? '#4ade80' : '#ff3366'}">
+                    ${q.name}
+                </span>
+                <span class="v3-unlock-desc" style="display:block; margin-bottom: 8px;">${q.desc}</span>
+                
+                <!-- Bară de Progres -->
+                <div class="loader-container" style="height: 8px; background: rgba(0,0,0,0.3); border-radius: 10px; position:relative;">
+                    <div class="loader-bar" style="width: ${pct}%; left:0; animation:none; background: ${isDone ? '#4ade80' : 'var(--th-accent)'}; box-shadow: 0 0 10px ${isDone ? '#4ade80' : 'var(--th-glow)'};"></div>
                 </div>
             </div>
-            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;">
-                <span style="font-family:'Orbitron'; font-size:12px; font-weight:900;">${q.current}/${q.target}</span>
+
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-width: 90px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 10px;">
+                <span style="font-family:'Orbitron'; font-size:12px; font-weight:900; margin-bottom:5px;">
+                    ${q.current}/${q.target}
+                </span>
                 ${isDone && !q.claimed ? 
                     `<button class="menu-btn play" style="width:80px; height:30px; font-size:10px; padding:0;" onclick="event.stopPropagation(); claimQuestReward('${q.id}', '${difficulty}')">CLAIM</button>` : 
-                    (q.claimed ? `<i class="fa-solid fa-circle-check" style="color:#4ade80; font-size:20px;"></i>` : '')
+                    (q.claimed ? `<i class="fa-solid fa-circle-check" style="color:#4ade80; font-size:22px;"></i>` : `<i class="fa-solid fa-hourglass-half" style="color:#5a6288; font-size:18px;"></i>`)
                 }
             </div>
         `;
@@ -8207,22 +8216,34 @@ function claimQuestReward(id, difficulty) {
 
     q.claimed = true;
     
-    // Acordare premii
-    if (q.reward.score) {
-        pendingWinAmount = q.reward.score;
-        animateScoreFlying();
-    }
-    if (q.reward.xp) gainXP(q.reward.xp);
-    if (q.reward.rubies) {
-        rubies += q.reward.rubies;
+    // Setăm recompensele
+    let winScore = q.reward.score || 0;
+    let winXP = q.reward.xp || 0;
+    let winRubies = q.reward.rubies || 0;
+
+    // Trigger efecte
+    playSFX(slotJackpotUrl);
+    showNotification("MISIUNE COMPLETATĂ!", `+${winScore} Scor, +${winXP} XP`, "fa-check-double");
+
+    // Procesăm plata (folosim sistemul tău de animație)
+    pendingWinAmount = winScore;
+    animateScoreFlying();
+    
+    gainXP(winXP);
+    
+    if (winRubies > 0) {
+        rubies += winRubies;
         updateScoreUI();
     }
 
-    playSFX(slotJackpotUrl);
-    showNotification("RECOMPENSĂ!", `Ai primit premiul pentru ${q.name}`, "fa-gift");
-    
+    // Refresh la listă pentru a arăta bifa verde
     renderQuestList(difficulty);
+    
+    // Salvare în cloud
     syncScoreToFirestore();
+
+    // Resetăm preventiv pending amount pentru a evita bug-ul de care te-ai lovit înainte
+    setTimeout(() => { pendingWinAmount = 0; }, 1000);
 }
 
     let comboCount = 0;
@@ -13704,18 +13725,16 @@ function openQuestsTab() {
     pendingRubyWin = 0;
 }
 
-// 2. Funcție pentru deschiderea misiunilor Ușoare
 function openEasyQuests() {
     document.getElementById('misiuniSelectionModal').style.display = 'none';
     document.getElementById('easyQuestsModal').style.display = 'flex';
-    // Aici vom apela renderEasyQuests() la pasul 3
+    renderQuestList('easy'); // NOU: Desenează misiunile
 }
 
-// 3. Funcție pentru deschiderea misiunilor Grele
 function openHardQuests() {
     document.getElementById('misiuniSelectionModal').style.display = 'none';
     document.getElementById('hardQuestsModal').style.display = 'flex';
-    // Aici vom apela renderHardQuests() la pasul 3
+    renderQuestList('hard'); // NOU: Desenează misiunile
 }
 // MODIFICĂ ACEASTĂ FUNCȚIE
 function showSlotResult(title, message, isJackpot = false) {
@@ -13840,6 +13859,8 @@ window.openQuestsTab = openQuestsTab;
 window.openQuestsTab = openQuestsTab;
 window.openEasyQuests = openEasyQuests;
 window.openHardQuests = openHardQuests;
+window.renderQuestList = renderQuestList;
+window.claimQuestReward = claimQuestReward;
 
 })(); // <-- CLOSES THE SECURE VAULT
 
