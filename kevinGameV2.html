@@ -8092,6 +8092,138 @@ const _GAME_DATA = {
 
 
 
+// --- SISTEM MISIUNI DINAMIC ---
+let activeEasyQuests = [];
+let activeHardQuests = [];
+
+// Urmărim streak-uri (pentru misiunile grele)
+let questStats = {
+    hitsWithoutMiss: 0,
+    triviasInARow: 0,
+    memoryInARow: 0,
+    sessionStartTime: Date.now(),
+    totalPlayTimeMinutes: 0
+};
+
+// Modele de misiuni (Pool de date)
+const questPool = {
+    easy: [
+        { id: 'e1', name: "Vânătorul", desc: "Prinde personajul de 50 ori", target: 50, action: 'clicks', reward: { score: 100, xp: 50 } },
+        { id: 'e2', name: "Combo Junior", desc: "Atinge un combo de 50", target: 50, action: 'max_combo', reward: { score: 150, xp: 75 } },
+        { id: 'e3', name: "Afaceristul", desc: "Vinde 5 obiecte la Piața Neagră", target: 5, action: 'bm_sell', reward: { score: 200, xp: 100 } },
+        { id: 'e4', name: "Elevul", desc: "Câștigă un joc de Trivia", target: 1, action: 'trivia_win', reward: { score: 100, xp: 100 } },
+        { id: 'e5', name: "Rezistență", desc: "Joacă timp de 5 minute", target: 5, action: 'play_time', reward: { score: 300, xp: 150 } },
+        { id: 'e6', name: "Colecționar", desc: "Adună 3 Topoare (Axe)", target: 3, action: 'collect_axe', reward: { score: 200, xp: 100 } }
+    ],
+    hard: [
+        { id: 'h1', name: "Lunetistul", desc: "50 hit-uri fără nicio ratare", target: 50, action: 'streak_hits', reward: { score: 1000, xp: 500, rubies: 2 } },
+        { id: 'h2', name: "Geniul", desc: "Câștigă 3 Trivia la rând", target: 3, action: 'streak_trivia', reward: { score: 1500, xp: 750, rubies: 5 } },
+        { id: 'h3', name: "Combo God", desc: "Atinge un combo de 300", target: 300, action: 'max_combo', reward: { score: 2000, xp: 1000, rubies: 5 } },
+        { id: 'h4', name: "Veteranul", desc: "Joacă timp de 20 minute", target: 20, action: 'play_time', reward: { score: 3000, xp: 1500, rubies: 10 } },
+        { id: 'h5', name: "Memorie de Elefant", desc: "3 jocuri Memory (Hard) consecutive", target: 3, action: 'streak_memory', reward: { score: 1500, xp: 800, rubies: 5 } },
+        { id: 'h6', name: "Bancherul", desc: "Câștigă 2000 scor într-o sesiune", target: 2000, action: 'session_score', reward: { score: 1000, xp: 500, rubies: 3 } }
+    ]
+};
+
+// Inițializare misiuni (le alegem pe toate din pool pentru testare)
+activeEasyQuests = questPool.easy.map(q => ({ ...q, current: 0, claimed: false }));
+activeHardQuests = questPool.hard.map(q => ({ ...q, current: 0, claimed: false }));
+
+
+function updateQuestProgress(action, value = 1, isAbsolute = false) {
+    const allQuests = [...activeEasyQuests, ...activeHardQuests];
+    
+    allQuests.forEach(q => {
+        if (q.claimed) return;
+        if (q.action === action) {
+            if (isAbsolute) q.current = Math.max(q.current, value);
+            else q.current += value;
+
+            if (q.current >= q.target && q.current - value < q.target) {
+                showNotification("MISIUNE GATA!", `Poți revendica: ${q.name}`, "fa-scroll");
+            }
+        }
+    });
+}
+
+// Cronometru pentru timpul de joc
+setInterval(() => {
+    if(!isPaused && document.getElementById('gameArea').style.display === 'block') {
+        let elapsed = Math.floor((Date.now() - questStats.sessionStartTime) / 60000);
+        if (elapsed > questStats.totalPlayTimeMinutes) {
+            questStats.totalPlayTimeMinutes = elapsed;
+            updateQuestProgress('play_time', questStats.totalPlayTimeMinutes, true);
+        }
+    }
+}, 10000); // Verificăm la fiecare 10 secunde
+
+
+
+function renderQuestList(difficulty) {
+    const containerId = difficulty === 'easy' ? 'easyQuestsContainer' : 'hardQuestsContainer';
+    const container = document.getElementById(containerId);
+    const quests = difficulty === 'easy' ? activeEasyQuests : activeHardQuests;
+    
+    container.innerHTML = "";
+    container.style.maxHeight = "400px";
+    container.style.overflowY = "auto";
+    container.style.paddingRight = "10px";
+
+    quests.forEach(q => {
+        const pct = Math.min((q.current / q.target) * 100, 100);
+        const isDone = q.current >= q.target;
+        
+        const row = document.createElement('div');
+        row.className = "v3-unlock-row"; // Refolosim stilul tău de la Milestones
+        row.style.gridTemplateColumns = "1fr 100px"; // Nume/Desc | Progress
+        row.style.opacity = q.claimed ? "0.4" : "1";
+        row.style.marginBottom = "12px";
+
+        row.innerHTML = `
+            <div class="v3-unlock-mid">
+                <span class="v3-unlock-name" style="color:${difficulty === 'easy' ? '#4ade80' : '#ef4444'}">${q.name}</span>
+                <span class="v3-unlock-desc">${q.desc}</span>
+                <div class="loader-container" style="margin-top:10px; height:8px; background:rgba(0,0,0,0.3);">
+                    <div class="loader-bar" style="width:${pct}%; left:0; animation:none; background:${isDone ? '#4ade80' : 'var(--th-accent)'}; box-shadow:none;"></div>
+                </div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px;">
+                <span style="font-family:'Orbitron'; font-size:12px; font-weight:900;">${q.current}/${q.target}</span>
+                ${isDone && !q.claimed ? 
+                    `<button class="menu-btn play" style="width:80px; height:30px; font-size:10px; padding:0;" onclick="event.stopPropagation(); claimQuestReward('${q.id}', '${difficulty}')">CLAIM</button>` : 
+                    (q.claimed ? `<i class="fa-solid fa-circle-check" style="color:#4ade80; font-size:20px;"></i>` : '')
+                }
+            </div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+function claimQuestReward(id, difficulty) {
+    const list = difficulty === 'easy' ? activeEasyQuests : activeHardQuests;
+    const q = list.find(quest => quest.id === id);
+    
+    if (!q || q.claimed) return;
+
+    q.claimed = true;
+    
+    // Acordare premii
+    if (q.reward.score) {
+        pendingWinAmount = q.reward.score;
+        animateScoreFlying();
+    }
+    if (q.reward.xp) gainXP(q.reward.xp);
+    if (q.reward.rubies) {
+        rubies += q.reward.rubies;
+        updateScoreUI();
+    }
+
+    playSFX(slotJackpotUrl);
+    showNotification("RECOMPENSĂ!", `Ai primit premiul pentru ${q.name}`, "fa-gift");
+    
+    renderQuestList(difficulty);
+    syncScoreToFirestore();
+}
 
     let comboCount = 0;
     let comboTimer = null;
@@ -8459,6 +8591,7 @@ if (e.target.closest('.control-btn') ||
     // 3. Normal miss logic
     playMissSFX(); 
     comboCount = 0; 
+    questStats.hitsWithoutMiss = 0; // NOU: Resetăm streak-ul de click-uri la 0 pentru că ai ratat!
     sessionMisses++; 
     if (score > 0) score--; 
     updateScoreUI(true); 
@@ -8701,6 +8834,15 @@ gainXP(xpToGain);
       totalClicksAllTime += (1 * activeScoreMultiplier);
 
       updateScoreUI();
+
+
+    updateQuestProgress('clicks', 1); // NOU: Incrementăm click-urile totale
+    
+    comboCount += (1 * activeComboMultiplier);
+    updateQuestProgress('max_combo', comboCount, true); // NOU: Verificăm dacă e un combo record pentru misiune
+
+    questStats.hitsWithoutMiss++; // NOU: Creștem streak-ul local
+    updateQuestProgress('streak_hits', questStats.hitsWithoutMiss, true); // NOU: Update misiune Hard
 
       // Apply Multiplier to Combo
       comboCount += (1 * activeComboMultiplier);
@@ -11457,8 +11599,51 @@ function finishTrivia(win, reason = "") {
         // --- LOSS: NO XP, NO POINTS ---
         showSickResult("AI RATAT!", reason, `<p style="color:#ef4444;">Bonusul a fost pierdut.</p>`, false);
     }
-}
+function finishTrivia(win, reason = "") {
+    clearInterval(triviaTimer);
+    document.getElementById('triviaModal').style.display = 'none';
+    
+    if (win) {
+        // --- NOU: LOGICĂ MISIUNI ---
+        updateQuestProgress('trivia_win', 1); // Contorizează o victorie simplă
+        questStats.triviasInARow++;           // Crește streak-ul de victorii
+        updateQuestProgress('streak_trivia', questStats.triviasInARow, true); // Updatează misiunea Hard
+        // ---------------------------
 
+        const pointsWon = 125;
+        const xpWon = 50; 
+        pendingWinAmount = pointsWon;
+
+        const title = "GENIULE!";
+        const message = `Ești de neoprit! Ai răspuns corect la toate întrebările.`;
+        
+        const rewardHtml = `
+            <div class="result-rewards-wrap">
+                <div class="res-reward-item">
+                    <span class="res-reward-val" style="color:#facc15;">+${pointsWon}</span>
+                    <span class="res-reward-lab">Puncte</span>
+                </div>
+                <div class="res-reward-item">
+                    <span class="res-reward-val" style="color:#ffcc00;">+${xpWon}</span>
+                    <span class="res-reward-lab">Experience</span>
+                </div>
+            </div>
+        `;
+
+        showSickResult(title, message, rewardHtml, true, () => {
+            animateScoreFlying();
+            gainXP(xpWon);
+            showXPFlyer(window.innerWidth / 2, window.innerHeight / 2, xpWon);
+        });
+
+    } else {
+        // --- NOU: LOGICĂ MISIUNI ---
+        questStats.triviasInARow = 0; // Resetăm streak-ul pentru că ai pierdut!
+        // ---------------------------
+
+        showSickResult("AI RATAT!", reason, `<p style="color:#ef4444;">Bonusul a fost pierdut.</p>`, false);
+    }
+}
 
 
 // ==========================================
@@ -12486,6 +12671,10 @@ async function processSell() {
     const totalPay = currentSellQty * want.price;
 
     if ((_GAME_DATA.inventory[want.key] || 0) < currentSellQty) return;
+
+    // --- NOU: LOGICĂ MISIUNI ---
+    updateQuestProgress('bm_sell', currentSellQty); // Trimite numărul de obiecte vândute către misiune
+    // ---------------------------
 
     _GAME_DATA.inventory[want.key] -= currentSellQty;
     want.sold += currentSellQty;
