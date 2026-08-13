@@ -13469,36 +13469,64 @@ function closeQuestsMenu() {
     }
 }
 
-// Placeholder pentru pasul următor
+// ÎNLOCUIEȘTE ACESTE FUNCȚII
 function openQuestsTab() {
-    showSlotResult("MISIUNI", "Sistemul de misiuni va fi implementat la pasul 2!", false);
+    // Închidem meniul de selecție
+    document.getElementById('questsMenuModal').style.display = 'none';
+    // Deschidem lista reală de misiuni (codul de la pasul 2 anterior)
+    const listModal = document.getElementById('questsListModal');
+    if(listModal) {
+        listModal.style.display = 'flex';
+        renderQuests();
+    } else {
+        // Dacă nu ai adăugat încă questsListModal în HTML, dă-i doar un mesaj curat:
+        alert("Misiunile se încarcă...");
+    }
 }
 
 function openAchievementsTab() {
-    showSlotResult("REALIZĂRI", "Sistemul de realizări va fi implementat în curând!", false);
+    // Folosim o alertă simplă sau un modal nou, NU showSlotResult
+    showNotification("ACHIEVEMENTS", "Sistemul de Realizări va fi activ la nivelul 5!", "fa-trophy");
 }
 
-
+// MODIFICĂ ACEASTĂ FUNCȚIE
 function showSlotResult(title, message, isJackpot = false) {
     const modal = document.getElementById('slotResultModal');
     const box = document.getElementById('resultBox');
-    const titleEl = document.getElementById('resultTitle');
-    const textEl = document.getElementById('resultText');
+    
+    // !!! REPARAȚIA: Resetăm sumele în așteptare dacă deschidem un mesaj nou !!!
+    // Astfel, dacă e doar un info, nu se vor acorda puncte vechi la închidere.
+    if (!isJackpot && title !== "CÂȘTIGĂTOR!" && title !== "GENIU MEMORIE!") {
+        pendingWinAmount = 0;
+        pendingRubyWin = 0;
+    }
 
-    if (titleEl) titleEl.innerText = title;
-    if (textEl) textEl.innerText = message;
+    if (document.getElementById('resultTitle')) document.getElementById('resultTitle').innerText = title;
+    if (document.getElementById('resultText')) document.getElementById('resultText').innerText = message;
 
-    // Resetăm design-ul și adăugăm glow dacă e jackpot
     if (box) {
         box.className = "modal-box result-modal-box";
         if (isJackpot) box.classList.add('jackpot-glow');
     }
 
     if (modal) modal.style.display = 'flex';
-    
-    // Oprim jocul în spate
     isPaused = true;
     clearInterval(moveKevinInterval);
+}
+
+// MODIFICĂ ȘI ACEASTA PENTRU SIGURANȚĂ
+function closeResultAndSlot() {
+    document.getElementById('slotResultModal').style.display = 'none';
+    
+    if (pendingRubyWin > 0) {
+        animateRubyFlying();
+        pendingRubyWin = 0; // Reset imediat
+    } else if (pendingWinAmount !== 0) {
+        animateScoreFlying();
+        // pendingWinAmount se resetează automat în finishSlotCleanup după animație
+    } else {
+        finishSlotCleanup();
+    }
 }
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
