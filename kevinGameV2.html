@@ -8588,7 +8588,6 @@ document.getElementById('kevin').addEventListener('click', (e) => {
       score += (1 * activeScoreMultiplier);
 let xpToGain = (2 * activeClickXPMultiplier); // 2 de bază, sau 4 dacă boost-ul e activ
 gainXP(xpToGain);
-showXPFlyer(e.clientX, e.clientY, xpToGain);
 
       // --- SALVĂM STATISTICILE ---
       totalClicksAllTime += (1 * activeScoreMultiplier);
@@ -9777,6 +9776,10 @@ function startAutoClickEvent() {
 
 score++;
         comboCount++;
+
+        // --- NOU: LOGICĂ XP PENTRU AUTO CLICKER ---
+        let autoXP = (2 * activeClickXPMultiplier); 
+        gainXP(autoXP); 
         
         // Salvăm best combo-ul și aici
         if (comboCount > bestComboAllTime) {
