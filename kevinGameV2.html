@@ -6661,6 +6661,103 @@ input:checked + .s-slider:before {
     border: 1px solid #777;
 }
 
+
+/* CONTAINERUL PRINCIPAL - Mai mult spațiu lateral */
+.replica-v3-box {
+    max-width: 450px !important;
+    padding: 0 !important;
+}
+
+/* HEADER - Badge-ul și Laureli-ul să fie mereu aliniate */
+.v3-level-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 140px; /* Înălțime fixă pentru a nu sări conținutul */
+    margin: 5px 0;
+}
+
+#detailBadgeImg {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+}
+
+/* RÂNDUL DE DEBLOCĂRI - REPARAT PENTRU SIMETRIE */
+.v3-unlock-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 90px; /* Structură fixă: Icon | Text | Status */
+    align-items: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 10px;
+    gap: 12px;
+    margin-bottom: 8px;
+    min-height: 70px; /* Previne micșorarea dacă textul e scurt */
+}
+
+.v3-unlock-mid {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+    overflow: hidden;
+}
+
+.v3-unlock-name {
+    font-size: 13px !important;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.v3-unlock-desc {
+    font-size: 10px !important;
+    line-height: 1.2;
+    color: #94a3b8;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limitează la 2 rânduri maximum */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* STATUS PILL - Fix pe un singur rând */
+.v3-status-pill {
+    font-size: 8px !important;
+    padding: 5px 8px !important;
+    white-space: nowrap;
+    justify-content: center;
+}
+
+/* BUTONUL DE JOS - REPARARE ICONIȚĂ ȘI TEXT */
+.v3-main-btn {
+    display: flex !important;
+    flex-direction: row !important; /* Forțează iconița lângă text */
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap !important; /* Interzice trecerea pe rândul 2 */
+    font-size: 16px !important;
+    padding: 0 15px !important;
+}
+
+.v3-main-btn i {
+    font-size: 18px;
+}
+
+/* COMPACTARE PE MOBILE */
+@media (max-width: 600px) {
+    .v3-unlock-row {
+        grid-template-columns: 40px 1fr 75px;
+        gap: 8px;
+        padding: 8px;
+    }
+    .v3-level-num { font-size: 70px !important; }
+    .v3-main-btn { font-size: 14px !important; height: 55px !important; }
+}
+
   </style>
 </head>
 <body>
@@ -13077,27 +13174,29 @@ const unlocks = LEVEL_UNLOCKS[lvl] || [];
     mainBtn.style.opacity = "1";
     mainBtn.style.pointerEvents = "auto";
 
-    if (isLocked) {
-        mainBtn.innerText = "BLOCAT (LVL " + lvl + ")";
+if (isLocked) {
+        mainBtn.innerHTML = `<span>BLOCAT (LVL ${lvl})</span>`;
         mainBtn.style.background = "linear-gradient(180deg, #444, #222)";
         mainBtn.style.boxShadow = "none";
         mainBtn.onclick = () => { playMissSFX(); showKevinutaBubble("Nivel prea mic!"); };
     } else if (isClaimed) {
-        mainBtn.innerText = "DEJA REVENDICAT ✓";
+        // REPARAT: Folosim aceleași clase pentru a păstra dimensiunea
+        mainBtn.innerHTML = `<span>DEJA REVENDICAT</span> <i class="fa-solid fa-circle-check"></i>`;
         mainBtn.style.background = "rgba(0, 255, 136, 0.1)";
         mainBtn.style.color = "#00ff88";
         mainBtn.style.border = "2px solid #00ff88";
         mainBtn.style.boxShadow = "none";
+        mainBtn.style.pointerEvents = "none"; // Nu mai poți da click
         mainBtn.onclick = null;
     } else {
-        mainBtn.innerText = "REVENDICĂ ACUM!";
+        mainBtn.innerHTML = `<span>REVENDICĂ ACUM!</span> <i class="fa-solid fa-gift"></i>`;
         mainBtn.style.color = "#fff";
         mainBtn.style.background = "linear-gradient(180deg, #bf00ff 0%, #7000ff 50%, #4b00b0 100%)";
         mainBtn.style.border = "3px solid #fff";
         mainBtn.style.boxShadow = "0 6px 0 #2d0047, 0 10px 20px rgba(0, 0, 0, 0.5)";
+        mainBtn.style.pointerEvents = "auto";
         mainBtn.onclick = () => handleClaimLevelReward(lvl);
     }
-
     document.getElementById('levelDetailModal').style.display = 'flex';
 }
 
