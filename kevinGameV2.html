@@ -12977,13 +12977,16 @@ async function processBuy() {
         await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                idToken: idToken, 
-                score: score, 
-                rubies: rubies,
-                inventory: _GAME_DATA.inventory,
-                bmBuys: buysUpdate // Save the limit state
-            }),
+// MODIFICĂ JSON-ul din interiorul processBuy:
+body: JSON.stringify({ 
+    idToken: idToken, 
+    score: score, 
+    rubies: rubies,
+    level: playerLevel,      // <--- Lipsea!
+    xp: playerXP,            // <--- Lipsea!
+    inventory: _GAME_DATA.inventory,
+    bmBuys: buysUpdate 
+}),
         });
     } catch (e) {
         console.error("Cloud sync failed:", e);
@@ -13155,13 +13158,16 @@ async function processSell() {
         await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                idToken: idToken, 
-                score: score + totalPay, 
-                rubies: rubies,           
-                inventory: _GAME_DATA.inventory,
-                bmSales: salesUpdate 
-            }),
+// MODIFICĂ JSON-ul din interiorul processSell:
+body: JSON.stringify({ 
+    idToken: idToken, 
+    score: score + totalPay, // Trimite scorul nou
+    rubies: rubies,
+    level: playerLevel,      // <--- Lipsea!
+    xp: playerXP,            // <--- Lipsea!
+    inventory: _GAME_DATA.inventory,
+    bmSales: salesUpdate 
+}),
         });
 
         score += totalPay;
