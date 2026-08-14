@@ -8369,6 +8369,57 @@ function updateQuestProgress(action, value = 1, isAbsolute = false) {
     if (changed) syncQuestsWithServer(); // Salvează progresul imediat
 }
 
+
+// --- LOGICA DE AUTO-CLAIM (Recompense & Sincronizare) ---
+function autoClaimQuest(id, difficulty) {
+    const list = difficulty === 'easy' ? activeEasyQuests : activeHardQuests;
+    const q = list.find(quest => quest.id === id);
+    
+    if (!q || q.claimed) return;
+
+    q.claimed = true; // O marcăm ca făcută
+    
+    // Extragem Recompensele
+    let winScore = q.reward.score || 0;
+    let winXP = q.reward.xp || 0;
+    let winRubies = q.reward.rubies || 0;
+
+    // --- EFECTE VIZUALE SI SUNET ---
+    if (typeof playSFX === 'function') playSFX(slotJackpotUrl); 
+    if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins(); 
+    if (winRubies > 0 && typeof spawnJackpotRubies === 'function') spawnJackpotRubies(); 
+
+    // Notificare Toast
+    let msg = `Ai primit: ${winScore?winScore+' Scor ':''}${winXP?winXP+' XP ':''}${winRubies?winRubies+' Rubine':''}`;
+    showNotification("MISIUNE ÎNDEPLINITĂ!", msg, "fa-check-double");
+
+    // Zborul elementelor către HUD
+    if (winScore > 0) {
+        pendingWinAmount = winScore;
+        animateScoreFlying();
+    }
+    
+    if (winRubies > 0) {
+        setTimeout(() => {
+            pendingRubyWin = winRubies;
+            animateRubyFlying();
+        }, 400); 
+    }
+
+    // Acordare XP
+    if (winXP > 0) {
+        gainXP(winXP);
+        showXPFlyer(window.innerWidth / 2, window.innerHeight / 2, winXP);
+    }
+
+    // Salvăm imediat pe server
+    syncQuestsWithServer();
+    syncScoreToFirestore();
+
+    // Refresh UI dacă tab-ul e deschis
+    renderQuestList(difficulty);
+}
+
 // --- LOGICA DE RENDER (DESIGN REPARAT) ---
 function renderQuestList(difficulty) {
     const container = document.getElementById(difficulty === 'easy' ? 'easyQuestsContainer' : 'hardQuestsContainer');
