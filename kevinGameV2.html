@@ -7041,6 +7041,57 @@ input:checked + .s-slider:before {
     margin-top: 10px;
     text-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
 }
+
+
+/* Containerul general de misiuni */
+.quest-list-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important; /* SPAȚIU între misiuni */
+    padding: 10px !important;
+}
+
+/* Rândul unei misiuni - Folosim GRID pentru coloane fixe */
+.q-row {
+    display: grid !important;
+    grid-template-columns: 55px 1fr 85px !important; /* Icon | Text | Rewards */
+    align-items: center !important;
+    gap: 15px !important;
+    background: rgba(22, 25, 43, 0.95) !important;
+    border-radius: 15px !important;
+    padding: 15px !important;
+    border: 2px solid #2a2d4c !important;
+    min-height: 100px !important;
+    transition: all 0.3s ease;
+}
+
+.q-row.q-claimed {
+    border-color: #16a34a !important;
+    background: rgba(22, 163, 74, 0.1) !important;
+}
+
+/* Coloana cu textul (Mijloc) */
+.q-details {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    text-align: left !important; /* Mereu la stânga */
+}
+
+/* Badge-ul de FINALIZATĂ - să apară exact unde era bara de progres */
+.q-completed-badge-area {
+    margin-top: 8px;
+    height: 18px; /* Aceeași înălțime cu bara de progres */
+    display: flex;
+    align-items: center;
+}
+
+.q-completed-stamp {
+    font-size: 13px !important;
+    color: #4ade80 !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+}
   </style>
 </head>
 <body>
@@ -8470,48 +8521,53 @@ function renderQuestList(difficulty) {
     const quests = difficulty === 'easy' ? activeEasyQuests : activeHardQuests;
     if (!container) return;
 
+    container.className = "quest-list-container"; // Forțăm clasa pentru gap
     container.innerHTML = "";
+
     quests.forEach(q => {
-        // Fix: Dacă am atins target-ul, forțăm 100% vizual și starea de claimed
         const isActuallyDone = q.claimed || q.current >= q.target;
         const displayCurrent = Math.min(q.current, q.target);
         const pct = Math.min((displayCurrent / q.target) * 100, 100);
-        
         const iconData = getQuestIcon(q.action);
-        const row = document.createElement('div');
         
+        const row = document.createElement('div');
         row.className = `q-row ${isActuallyDone ? 'q-claimed' : ''}`;
         
         row.innerHTML = `
+            <!-- Coloana 1: Iconița -->
             <div class="q-icon-box" style="border-color: ${isActuallyDone ? '#4ade80' : iconData.color};">
                 <i class="fa-solid ${isActuallyDone ? 'fa-check' : iconData.icon}" style="${isActuallyDone ? 'color:#4ade80' : ''}"></i>
             </div>
 
+            <!-- Coloana 2: Text și Progres (MIJLOC) -->
             <div class="q-details">
-                <div class="q-title">${q.name}</div>
-                <div class="q-desc">${q.desc}</div>
+                <div class="q-title" style="font-family:'Montserrat'; font-weight:900; font-size:15px; color:#fff; text-transform:uppercase;">${q.name}</div>
+                <div class="q-desc" style="font-family:'Oswald'; font-size:12px; color:#94a3b8; margin-bottom:5px;">${q.desc}</div>
                 
-                ${isActuallyDone ? `
-                    <div class="q-completed-stamp">
-                        <i class="fa-solid fa-circle-check"></i> FINALIZATĂ
-                    </div>
-                ` : `
-                    <div class="q-progress-track">
-                        <div class="q-progress-fill" style="width: ${pct}%"></div>
-                        <div class="q-progress-text">${displayCurrent} / ${q.target}</div>
-                    </div>
-                `}
+                <div class="q-status-container" style="width: 100%;">
+                    ${isActuallyDone ? `
+                        <div class="q-completed-badge-area">
+                            <span class="q-completed-stamp"><i class="fa-solid fa-circle-check"></i> FINALIZATĂ</span>
+                        </div>
+                    ` : `
+                        <div class="q-progress-track" style="width:100%; height:18px; background:#000; border-radius:10px; position:relative; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
+                            <div class="q-progress-fill" style="width: ${pct}%; height:100%; background:linear-gradient(90deg, #4ade80, #16a34a); transition:width 0.5s ease;"></div>
+                            <div class="q-progress-text" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:10px; font-weight:900; color:#fff; text-shadow:1px 1px #000;">${displayCurrent} / ${q.target}</div>
+                        </div>
+                    `}
+                </div>
             </div>
 
-            <div class="q-rewards-col">
+            <!-- Coloana 3: Recompense (DREAPTA) -->
+            <div class="q-rewards-col" style="display:flex; flex-direction:column; align-items:center;">
                 ${isActuallyDone ? `
-                    <i class="fa-solid fa-gift" style="font-size: 24px; color: #4ade80; opacity: 0.8; animation: bounce 2s infinite;"></i>
+                    <i class="fa-solid fa-gift" style="font-size: 28px; color: #4ade80; opacity: 0.8;"></i>
                 ` : `
-                    <div class="q-rewards-title">PREMII</div>
-                    <div class="q-rewards-icons">
-                        ${q.reward.score ? `<div class="q-reward-item"><img src="https://iili.io/COrCopj.png"><span class="q-reward-val">${q.reward.score}</span></div>` : ''}
-                        ${q.reward.xp ? `<div class="q-reward-item"><img src="https://i.ibb.co/cBR5wJp/image.png"><span class="q-reward-val">${q.reward.xp}</span></div>` : ''}
-                        ${q.reward.rubies ? `<div class="q-reward-item"><img src="https://iili.io/CrnXNdG.png"><span class="q-reward-val">${q.reward.rubies}</span></div>` : ''}
+                    <div style="font-size:9px; color:#94a3b8; font-weight:bold; text-transform:uppercase; margin-bottom:5px;">PREMII</div>
+                    <div style="display:flex; gap:8px; justify-content:center;">
+                        ${q.reward.score ? `<div style="text-align:center;"><img src="https://iili.io/COrCopj.png" width="16"><div style="font-size:10px; font-weight:900; color:#fff;">${q.reward.score}</div></div>` : ''}
+                        ${q.reward.xp ? `<div style="text-align:center;"><img src="https://i.ibb.co/cBR5wJp/image.png" width="16"><div style="font-size:10px; font-weight:900; color:#fff;">${q.reward.xp}</div></div>` : ''}
+                        ${q.reward.rubies ? `<div style="text-align:center;"><img src="https://iili.io/CrnXNdG.png" width="16"><div style="font-size:10px; font-weight:900; color:#fff;">${q.reward.rubies}</div></div>` : ''}
                     </div>
                 `}
             </div>
