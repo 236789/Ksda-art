@@ -6829,99 +6829,222 @@ input:checked + .s-slider:before {
 
 
 /* ============================================================
-   QUESTS UI - 1:1 REPLICA
+   QUESTS UI - 1:1 REPLICA (BUG-FIXED & BULLETPROOF)
    ============================================================ */
 
-/* Containerul listei cu scroll ascuns */
 .quest-list-container {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 60vh;
-    overflow-y: auto;
-    padding: 5px;
-    scrollbar-width: none; /* Ascunde scrollbar-ul pe Firefox */
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    max-height: 65vh !important;
+    overflow-y: auto !important;
+    padding: 5px !important;
+    scrollbar-width: none !important;
 }
-.quest-list-container::-webkit-scrollbar { display: none; } /* Ascunde pe Chrome/Safari */
+.quest-list-container::-webkit-scrollbar { display: none !important; }
 
-/* Rândul individual al misiunii (Cardul) */
+/* ROW CONTAINER - Forțează un singur rând orizontal */
 .q-row {
-    display: flex;
-    align-items: center;
-    background: #151828; /* Culoare închisă specifică imaginii */
-    border-radius: 12px;
-    padding: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    gap: 12px;
-    transition: opacity 0.3s ease;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    background: #16192b !important; /* Culoare specifică RPG */
+    border-radius: 12px !important;
+    padding: 12px !important;
+    border: 2px solid #2a2d4c !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.6) !important;
+    gap: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
-/* Opacitate redusă pentru cele deja colectate */
-.q-row.q-claimed {
-    opacity: 0.5;
-    filter: grayscale(0.5);
-}
+.q-row.q-claimed { opacity: 0.5 !important; filter: grayscale(1) !important; }
 
-/* 1. Iconița din stânga */
+/* 1. ICON STÂNGA (Mărime Fixă) */
 .q-icon-box {
-    width: 55px;
-    height: 55px;
-    min-width: 55px;
-    background: radial-gradient(circle, #2a2d4c, #0a0b16);
-    border-radius: 10px;
-    border: 2px solid #3b82f6; /* Bordură albastră default */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.8), 0 2px 5px rgba(0,0,0,0.5);
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    flex-shrink: 0 !important;
+    background: radial-gradient(circle at center, #2a2d4c, #0a0b16) !important;
+    border-radius: 10px !important;
+    border: 2px solid #3b82f6 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8) !important;
 }
-.q-icon-box i { font-size: 26px; color: #fff; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+.q-icon-box i { font-size: 24px !important; color: #fff !important; margin: 0 !important; }
 
-/* 2. Zona din mijloc (Text + Progres) */
+/* 2. ZONA DE TEXT ȘI PROGRES */
 .q-details {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-width: 0; /* Previne ruperea layout-ului */
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    overflow: hidden !important;
 }
 .q-title {
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 900;
-    font-size: 14px;
-    color: #ffffff;
-    text-transform: uppercase;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.1;
-    text-shadow: 0 1px 2px #000;
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 900 !important;
+    font-size: 14px !important;
+    color: #ffffff !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+    margin-bottom: 2px !important;
+    line-height: 1 !important;
 }
 .q-desc {
-    font-family: 'Oswald', sans-serif;
-    font-size: 11px;
-    color: #94a3b8;
-    margin-bottom: 6px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-family: 'Oswald', sans-serif !important;
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+    margin-bottom: 8px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1 !important;
 }
 
-/* Bara de progres verde */
+/* BARA DE PROGRES */
 .q-progress-track {
-    width: 100%;
-    height: 16px;
-    background: #000000;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.15);
-    position: relative;
-    overflow: hidden;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+    width: 100% !important;
+    height: 18px !important;
+    background: #000000 !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    position: relative !important;
+    overflow: hidden !important;
 }
 .q-progress-fill {
-    height: 100%;
-    back
+    height: 100% !important;
+    background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%) !important;
+    transition: width 0.4s ease !important;
+}
+.q-progress-text {
+    position: absolute !important;
+    top: 50% !important; left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 900 !important;
+    color: #ffffff !important;
+    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000 !important;
+    white-space: nowrap !important;
+}
+
+/* 3. COLOANA REWARDS */
+.q-rewards-col {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 55px !important;
+    flex-shrink: 0 !important;
+}
+.q-rewards-title {
+    font-family: 'Oswald', sans-serif !important;
+    font-size: 9px !important;
+    color: #94a3b8 !important;
+    text-transform: uppercase !important;
+    margin-bottom: 4px !important;
+    line-height: 1 !important;
+}
+.q-rewards-icons {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+}
+.q-reward-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 2px !important;
+}
+/* 🔥 FIX CRITIC: Forțăm imaginile să fie mici, ignorând CSS-ul principal */
+.q-reward-item img, .q-reward-item i {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    min-height: 18px !important;
+    object-fit: contain !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 16px !important; /* Pentru iconițe FontAwesome */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.q-reward-val {
+    font-family: 'Orbitron', sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    color: #fff !important;
+    line-height: 1 !important;
+}
+
+/* 4. BUTONUL CLAIM (Mărime Fixă) */
+.q-action {
+    width: 80px !important;
+    min-width: 80px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.q-btn {
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 900 !important;
+    font-size: 12px !important;
+    width: 100% !important;
+    height: 38px !important; /* Înălțime fixă pentru a nu se strivi */
+    border-radius: 8px !important;
+    text-transform: uppercase !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transition: all 0.1s !important;
+}
+
+/* Albastru Frumos când e Gata */
+.q-btn-ready {
+    background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%) !important;
+    border: 2px solid #60a5fa !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 0 #1e3a8a, 0 4px 10px rgba(0,0,0,0.4) !important;
+}
+.q-btn-ready:active {
+    transform: translateY(4px) !important;
+    box-shadow: 0 0 0 #1e3a8a !important;
+}
+
+/* Gri când e În Curs */
+.q-btn-locked {
+    background: linear-gradient(180deg, #333333 0%, #111111 100%) !important;
+    border: 2px solid #555555 !important;
+    color: #888888 !important;
+    box-shadow: 0 4px 0 #000000 !important;
+    cursor: not-allowed !important;
+}
+
+/* RESPONSIVE MOBILE */
+@media (max-width: 600px) {
+    .q-row { padding: 10px !important; gap: 8px !important; }
+    .q-icon-box { width: 40px !important; height: 40px !important; min-width: 40px !important; }
+    .q-icon-box i { font-size: 18px !important; }
+    .q-title { font-size: 12px !important; }
+    .q-desc { font-size: 9px !important; margin-bottom: 6px !important; }
+    .q-progress-track { height: 16px !important; }
+    .q-rewards-col { min-width: 45px !important; }
+    .q-reward-item img, .q-reward-item i { width: 14px !important; height: 14px !important; min-width: 14px !important; font-size: 14px !important;}
+    .q-reward-val { font-size: 10px !important; }
+    .q-action { width: 65px !important; min-width: 65px !important; }
+    .q-btn { font-size: 10px !important; height: 32px !important; }
+}
 
   </style>
 </head>
@@ -8254,21 +8377,19 @@ setInterval(() => {
 }, 10000); // Verificăm la fiecare 10 secunde
 
 
-
 // --- FUNCȚIE AJUTĂTOARE PENTRU ICONIȚE DINAMICE ---
 function getQuestIcon(action) {
-    // Returnează o iconiță și o culoare de bordură în funcție de tipul misiunii
     switch(action) {
-        case 'clicks': return { icon: "fa-hand-pointer", color: "#3b82f6" }; // Albastru
-        case 'max_combo': return { icon: "fa-fire", color: "#facc15" }; // Galben
-        case 'bm_sell': return { icon: "fa-coins", color: "#4ade80" }; // Verde
-        case 'trivia_win': return { icon: "fa-brain", color: "#a855f7" }; // Mov
-        case 'play_time': return { icon: "fa-clock", color: "#22d3ee" }; // Cyan
-        case 'collect_axe': return { icon: "fa-gavel", color: "#ef4444" }; // Roșu
-        case 'streak_hits': return { icon: "fa-crosshairs", color: "#ef4444" }; // Roșu
-        case 'streak_trivia': return { icon: "fa-graduation-cap", color: "#a855f7" }; // Mov
-        case 'streak_memory': return { icon: "fa-clone", color: "#3b82f6" }; // Albastru
-        case 'session_score': return { icon: "fa-sack-dollar", color: "#facc15" }; // Galben
+        case 'clicks': return { icon: "fa-hand-pointer", color: "#3b82f6" }; 
+        case 'max_combo': return { icon: "fa-fire", color: "#facc15" }; 
+        case 'bm_sell': return { icon: "fa-coins", color: "#4ade80" }; 
+        case 'trivia_win': return { icon: "fa-brain", color: "#a855f7" }; 
+        case 'play_time': return { icon: "fa-clock", color: "#22d3ee" }; 
+        case 'collect_axe': return { icon: "fa-gavel", color: "#ef4444" }; 
+        case 'streak_hits': return { icon: "fa-crosshairs", color: "#ef4444" }; 
+        case 'streak_trivia': return { icon: "fa-graduation-cap", color: "#a855f7" }; 
+        case 'streak_memory': return { icon: "fa-clone", color: "#3b82f6" }; 
+        case 'session_score': return { icon: "fa-sack-dollar", color: "#facc15" }; 
         default: return { icon: "fa-star", color: "#ffffff" };
     }
 }
@@ -8279,7 +8400,6 @@ function renderQuestList(difficulty) {
     const quests = difficulty === 'easy' ? activeEasyQuests : activeHardQuests;
     
     container.innerHTML = "";
-    // Adăugăm clasa de container (pentru scroll invizibil)
     container.className = "quest-list-container";
 
     quests.forEach(q => {
@@ -8287,10 +8407,10 @@ function renderQuestList(difficulty) {
         const isDone = q.current >= q.target;
         const iconData = getQuestIcon(q.action);
         
-        // --- 1. Generăm HTML-ul pentru recompense ---
+        // --- 1. RECOMPENSE (Fix pentru dimensiuni) ---
         let rewardsHtml = "";
         
-        // Scor (Bănuț)
+        // Bănuț pentru Scor
         if (q.reward.score) {
             rewardsHtml += `
             <div class="q-reward-item">
@@ -8298,15 +8418,15 @@ function renderQuestList(difficulty) {
                 <span class="q-reward-val" style="color:#facc15;">${q.reward.score}</span>
             </div>`;
         }
-        // XP (Stea/Fulger)
+        // Fulger verde pentru XP (Asta previne bug-ul din imagine cu posterul uriaș)
         if (q.reward.xp) {
             rewardsHtml += `
             <div class="q-reward-item">
-                <img src="https://i.ibb.co/XkNcL75P/image.png">
+                <i class="fa-solid fa-bolt" style="color:#4ade80;"></i>
                 <span class="q-reward-val" style="color:#4ade80;">${q.reward.xp}</span>
             </div>`;
         }
-        // Rubine
+        // Rubin
         if (q.reward.rubies) {
             rewardsHtml += `
             <div class="q-reward-item">
@@ -8315,20 +8435,17 @@ function renderQuestList(difficulty) {
             </div>`;
         }
 
-        // --- 2. Generăm Butonul de Acțiune ---
+        // --- 2. BUTONUL DE ACTION ---
         let actionHtml = "";
         if (q.claimed) {
-            // Dacă e revendicat, arată bifa verde
-            actionHtml = `<i class="fa-solid fa-circle-check" style="color:#4ade80; font-size: 28px; filter: drop-shadow(0 0 10px #4ade80);"></i>`;
+            actionHtml = `<i class="fa-solid fa-circle-check" style="color:#4ade80; font-size: 32px !important; filter: drop-shadow(0 0 10px #4ade80); width:100%; display:flex; justify-content:center;"></i>`;
         } else if (isDone) {
-            // Dacă e gata, butonul e Albastru/Claim
             actionHtml = `<button class="q-btn q-btn-ready" onclick="event.stopPropagation(); claimQuestReward('${q.id}', '${difficulty}')">CLAIM</button>`;
         } else {
-            // Dacă NU e gata, butonul e Gri/Locked
             actionHtml = `<button class="q-btn q-btn-locked" disabled>CLAIM</button>`;
         }
 
-        // --- 3. Construim Rândul Misiunii (1:1 cu imaginea) ---
+        // --- 3. CONSTRUIRE RÂND ---
         const row = document.createElement('div');
         row.className = `q-row ${q.claimed ? 'q-claimed' : ''}`;
         
@@ -8338,7 +8455,7 @@ function renderQuestList(difficulty) {
                 <i class="fa-solid ${iconData.icon}"></i>
             </div>
 
-            <!-- ZONA DE MIJLOC: TEXT + PROGRESS -->
+            <!-- MIJLOC (Titlu, Descriere, Bara) -->
             <div class="q-details">
                 <div class="q-title">${q.name}</div>
                 <div class="q-desc">${q.desc}</div>
@@ -8348,7 +8465,7 @@ function renderQuestList(difficulty) {
                 </div>
             </div>
 
-            <!-- ZONA DREAPTA: RECOMPENSE -->
+            <!-- RECOMPENSE -->
             <div class="q-rewards-col">
                 <div class="q-rewards-title">REWARDS</div>
                 <div class="q-rewards-icons">
@@ -8356,7 +8473,7 @@ function renderQuestList(difficulty) {
                 </div>
             </div>
 
-            <!-- BUTON CLAIM -->
+            <!-- BUTON (CLAIM/LOCKED) -->
             <div class="q-action">
                 ${actionHtml}
             </div>
@@ -8365,6 +8482,7 @@ function renderQuestList(difficulty) {
         container.appendChild(row);
     });
 }
+
 function claimQuestReward(id, difficulty) {
     const list = difficulty === 'easy' ? activeEasyQuests : activeHardQuests;
     const q = list.find(quest => quest.id === id);
