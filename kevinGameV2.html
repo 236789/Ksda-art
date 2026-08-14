@@ -8374,7 +8374,7 @@ function updateQuestProgress(action, value = 1, isAbsolute = false) {
     });
 }
 
-// --- LOGICA DE AUTO-CLAIM (Efecte Epice) ---
+// --- LOGICA DE AUTO-CLAIM (Efecte Epice & Notificare cu Iconițe) ---
 function autoClaimQuest(id, difficulty) {
     const list = difficulty === 'easy' ? activeEasyQuests : activeHardQuests;
     const q = list.find(quest => quest.id === id);
@@ -8393,8 +8393,32 @@ function autoClaimQuest(id, difficulty) {
     if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins(); // Ploaie bănuți
     if (winRubies > 0 && typeof spawnJackpotRubies === 'function') spawnJackpotRubies(); // Ploaie Rubine
 
-    // Notificare Toast
-    showNotification("MISIUNE ÎNDEPLINITĂ!", `${q.name} \n +${winScore} Scor / +${winXP} XP`, "fa-check-double");
+    // --- CONSTRUIM MESAJUL NOTIFICĂRII CU ICONIȚE ---
+    let notifMessage = `<div style="margin-bottom: 5px; color: #fff;">${q.name}</div>`;
+    notifMessage += `<div style="display: flex; gap: 10px; align-items: center; font-family: 'Orbitron', sans-serif; font-size: 13px;">`;
+    
+    if (winScore > 0) {
+        notifMessage += `<div style="display:flex; align-items:center; gap:3px;">
+                            <span style="color:#facc15;">+${winScore}</span>
+                            <img src="https://iili.io/COrCopj.png" style="width:14px; height:14px; object-fit:contain;">
+                         </div>`;
+    }
+    if (winXP > 0) {
+        notifMessage += `<div style="display:flex; align-items:center; gap:3px;">
+                            <span style="color:#4ade80;">+${winXP}</span>
+                            <img src="https://i.ibb.co/cBR5wJp/image.png" style="width:14px; height:14px; object-fit:contain;">
+                         </div>`;
+    }
+    if (winRubies > 0) {
+        notifMessage += `<div style="display:flex; align-items:center; gap:3px;">
+                            <span style="color:#ff3366;">+${winRubies}</span>
+                            <img src="https://iili.io/CrnXNdG.png" style="width:14px; height:14px; object-fit:contain;">
+                         </div>`;
+    }
+    notifMessage += `</div>`;
+
+    // Afișăm notificarea șmecheră!
+    showNotification("MISIUNE ÎNDEPLINITĂ!", notifMessage, "fa-check-double");
 
     // Zborul elementelor către HUD
     if (winScore > 0) {
@@ -8464,7 +8488,7 @@ function renderQuestList(difficulty) {
                 rewardsHtml += `
                 <div class="q-reward-item">
                     <!-- Pune link-ul tău direct (.png) aici dacă l-ai schimbat -->
-                    <img src="https://i.ibb.co/XkNcL75P/image.png">
+                    <img src="https://i.ibb.co/cBR5wJp/image.png">
                     <span class="q-reward-val" style="color:#4ade80;">${q.reward.xp}</span>
                 </div>`;
             }
