@@ -8371,27 +8371,38 @@ function startQuestRealTimeTimers() {
     }, 1000);
 }
 
-// --- ACTUALIZARE PROGRES (LOGICĂ REPARATĂ) ---
 function updateQuestProgress(action, value = 1, isAbsolute = false) {
     const all = [...activeEasyQuests, ...activeHardQuests];
     let changed = false;
 
     all.forEach(q => {
-        if (q.claimed || q.action !== action) return;
+        if (q.claimed) return;
+        if (q.action !== action) return;
         
         let oldVal = q.current;
-        if (isAbsolute) q.current = Math.max(q.current, value);
-        else q.current += value;
+        if (isAbsolute) {
+            q.current = Math.max(q.current, value);
+        } else {
+            q.current += value;
+        }
 
+        // IMPORTANT: Verificăm >= target
         if (q.current >= q.target) {
             q.current = q.target;
+            q.claimed = true; // O marcăm local imediat
             const diff = q.id.startsWith('e') ? 'easy' : 'hard';
-            autoClaimQuest(q.id, diff);
+            autoClaimQuest(q.id, diff); // Declanșăm premiul
+            changed = true;
         }
+        
         if (oldVal !== q.current) changed = true;
     });
 
-    if (changed) syncQuestsWithServer(); // Salvează progresul imediat
+    if (changed) {
+        renderQuestList('easy');
+        renderQuestList('hard');
+        syncQuestsWithServer(); 
+    }
 }
 
 
@@ -8461,37 +8472,40 @@ function renderQuestList(difficulty) {
 
     container.innerHTML = "";
     quests.forEach(q => {
-        const pct = Math.min((q.current / q.target) * 100, 100);
+        // Fix: Dacă am atins target-ul, forțăm 100% vizual și starea de claimed
+        const isActuallyDone = q.claimed || q.current >= q.target;
+        const displayCurrent = Math.min(q.current, q.target);
+        const pct = Math.min((displayCurrent / q.target) * 100, 100);
+        
         const iconData = getQuestIcon(q.action);
         const row = document.createElement('div');
         
-        // ADAUGĂM CLASA DE COMPLETAT
-        row.className = `q-row ${q.claimed ? 'q-claimed' : ''}`;
+        row.className = `q-row ${isActuallyDone ? 'q-claimed' : ''}`;
         
         row.innerHTML = `
-            <div class="q-icon-box" style="border-color: ${q.claimed ? '#4ade80' : iconData.color};">
-                <i class="fa-solid ${q.claimed ? 'fa-check' : iconData.icon}" style="${q.claimed ? 'color:#4ade80' : ''}"></i>
+            <div class="q-icon-box" style="border-color: ${isActuallyDone ? '#4ade80' : iconData.color};">
+                <i class="fa-solid ${isActuallyDone ? 'fa-check' : iconData.icon}" style="${isActuallyDone ? 'color:#4ade80' : ''}"></i>
             </div>
 
             <div class="q-details">
                 <div class="q-title">${q.name}</div>
                 <div class="q-desc">${q.desc}</div>
                 
-                ${q.claimed ? `
+                ${isActuallyDone ? `
                     <div class="q-completed-stamp">
                         <i class="fa-solid fa-circle-check"></i> FINALIZATĂ
                     </div>
                 ` : `
                     <div class="q-progress-track">
                         <div class="q-progress-fill" style="width: ${pct}%"></div>
-                        <div class="q-progress-text">${q.current} / ${q.target}</div>
+                        <div class="q-progress-text">${displayCurrent} / ${q.target}</div>
                     </div>
                 `}
             </div>
 
             <div class="q-rewards-col">
-                ${q.claimed ? `
-                    <i class="fa-solid fa-gift" style="font-size: 24px; color: #4ade80; opacity: 0.5;"></i>
+                ${isActuallyDone ? `
+                    <i class="fa-solid fa-gift" style="font-size: 24px; color: #4ade80; opacity: 0.8; animation: bounce 2s infinite;"></i>
                 ` : `
                     <div class="q-rewards-title">PREMII</div>
                     <div class="q-rewards-icons">
