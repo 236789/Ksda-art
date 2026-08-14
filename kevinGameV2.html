@@ -6829,7 +6829,7 @@ input:checked + .s-slider:before {
 
 
 /* ============================================================
-   QUESTS UI - 1:1 REPLICA (BUG-FIXED & BULLETPROOF)
+   QUESTS UI - AUTO-CLAIM EDITION
    ============================================================ */
 
 .quest-list-container {
@@ -6843,26 +6843,32 @@ input:checked + .s-slider:before {
 }
 .quest-list-container::-webkit-scrollbar { display: none !important; }
 
-/* ROW CONTAINER - Forțează un singur rând orizontal */
+/* ROW CONTAINER */
 .q-row {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     align-items: center !important;
     justify-content: space-between !important;
-    background: #16192b !important; /* Culoare specifică RPG */
+    background: #16192b !important; 
     border-radius: 12px !important;
     padding: 12px !important;
     border: 2px solid #2a2d4c !important;
     box-shadow: 0 4px 10px rgba(0,0,0,0.6) !important;
-    gap: 12px !important;
+    gap: 15px !important; /* Spațiu mai mare acum că nu mai e butonul */
     width: 100% !important;
     box-sizing: border-box !important;
+    transition: all 0.3s ease !important;
 }
 
-.q-row.q-claimed { opacity: 0.5 !important; filter: grayscale(1) !important; }
+/* Starea de COMPLETAT - Border Verde și Glow */
+.q-row.q-claimed { 
+    opacity: 0.7 !important; 
+    border-color: #16a34a !important; 
+    background: rgba(22, 163, 74, 0.05) !important;
+}
 
-/* 1. ICON STÂNGA (Mărime Fixă) */
+/* 1. ICON STÂNGA */
 .q-icon-box {
     width: 50px !important;
     height: 50px !important;
@@ -6877,6 +6883,7 @@ input:checked + .s-slider:before {
     box-shadow: inset 0 0 10px rgba(0,0,0,0.8) !important;
 }
 .q-icon-box i { font-size: 24px !important; color: #fff !important; margin: 0 !important; }
+.q-row.q-claimed .q-icon-box { border-color: #4ade80 !important; box-shadow: 0 0 15px rgba(74, 222, 128, 0.4) !important; }
 
 /* 2. ZONA DE TEXT ȘI PROGRES */
 .q-details {
@@ -6889,7 +6896,7 @@ input:checked + .s-slider:before {
 .q-title {
     font-family: 'Montserrat', sans-serif !important;
     font-weight: 900 !important;
-    font-size: 14px !important;
+    font-size: 15px !important;
     color: #ffffff !important;
     text-transform: uppercase !important;
     white-space: nowrap !important;
@@ -6898,7 +6905,7 @@ input:checked + .s-slider:before {
 }
 .q-desc {
     font-family: 'Oswald', sans-serif !important;
-    font-size: 11px !important;
+    font-size: 12px !important;
     color: #94a3b8 !important;
     margin-bottom: 8px !important;
     white-space: nowrap !important;
@@ -6932,6 +6939,7 @@ input:checked + .s-slider:before {
     color: #ffffff !important;
     text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000 !important;
     white-space: nowrap !important;
+    letter-spacing: 1px !important;
 }
 
 /* 3. COLOANA REWARDS */
@@ -6940,12 +6948,12 @@ input:checked + .s-slider:before {
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    min-width: 55px !important;
+    min-width: 60px !important;
     flex-shrink: 0 !important;
 }
 .q-rewards-title {
     font-family: 'Oswald', sans-serif !important;
-    font-size: 9px !important;
+    font-size: 10px !important;
     color: #94a3b8 !important;
     text-transform: uppercase !important;
     margin-bottom: 4px !important;
@@ -6954,96 +6962,58 @@ input:checked + .s-slider:before {
 .q-rewards-icons {
     display: flex !important;
     flex-direction: row !important;
-    gap: 8px !important;
+    gap: 10px !important;
 }
 .q-reward-item {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    gap: 2px !important;
+    gap: 3px !important;
 }
-/* 🔥 FIX CRITIC: Forțăm imaginile să fie mici, ignorând CSS-ul principal */
 .q-reward-item img, .q-reward-item i {
-    width: 18px !important;
-    height: 18px !important;
-    min-width: 18px !important;
-    min-height: 18px !important;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
     object-fit: contain !important;
     margin: 0 !important;
     padding: 0 !important;
-    font-size: 16px !important; /* Pentru iconițe FontAwesome */
+    font-size: 18px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
 }
 .q-reward-val {
     font-family: 'Orbitron', sans-serif !important;
-    font-size: 11px !important;
+    font-size: 12px !important;
     font-weight: 900 !important;
     color: #fff !important;
     line-height: 1 !important;
 }
 
-/* 4. BUTONUL CLAIM (Mărime Fixă) */
-.q-action {
-    width: 80px !important;
-    min-width: 80px !important;
-    flex-shrink: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-.q-btn {
+/* Checkmark Completat pe Misiune */
+.q-completed-stamp {
     font-family: 'Montserrat', sans-serif !important;
     font-weight: 900 !important;
-    font-size: 12px !important;
-    width: 100% !important;
-    height: 38px !important; /* Înălțime fixă pentru a nu se strivi */
-    border-radius: 8px !important;
+    font-size: 14px !important;
+    color: #4ade80 !important;
     text-transform: uppercase !important;
-    cursor: pointer !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    transition: all 0.1s !important;
-}
-
-/* Albastru Frumos când e Gata */
-.q-btn-ready {
-    background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%) !important;
-    border: 2px solid #60a5fa !important;
-    color: #ffffff !important;
-    box-shadow: 0 4px 0 #1e3a8a, 0 4px 10px rgba(0,0,0,0.4) !important;
-}
-.q-btn-ready:active {
-    transform: translateY(4px) !important;
-    box-shadow: 0 0 0 #1e3a8a !important;
-}
-
-/* Gri când e În Curs */
-.q-btn-locked {
-    background: linear-gradient(180deg, #333333 0%, #111111 100%) !important;
-    border: 2px solid #555555 !important;
-    color: #888888 !important;
-    box-shadow: 0 4px 0 #000000 !important;
-    cursor: not-allowed !important;
+    gap: 5px !important;
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.5) !important;
 }
 
 /* RESPONSIVE MOBILE */
 @media (max-width: 600px) {
-    .q-row { padding: 10px !important; gap: 8px !important; }
+    .q-row { padding: 10px !important; gap: 10px !important; }
     .q-icon-box { width: 40px !important; height: 40px !important; min-width: 40px !important; }
     .q-icon-box i { font-size: 18px !important; }
-    .q-title { font-size: 12px !important; }
-    .q-desc { font-size: 9px !important; margin-bottom: 6px !important; }
+    .q-title { font-size: 13px !important; }
+    .q-desc { font-size: 10px !important; }
     .q-progress-track { height: 16px !important; }
-    .q-rewards-col { min-width: 45px !important; }
-    .q-reward-item img, .q-reward-item i { width: 14px !important; height: 14px !important; min-width: 14px !important; font-size: 14px !important;}
+    .q-reward-item img, .q-reward-item i { width: 16px !important; height: 16px !important; min-width: 16px !important; font-size: 16px !important;}
     .q-reward-val { font-size: 10px !important; }
-    .q-action { width: 65px !important; min-width: 65px !important; }
-    .q-btn { font-size: 10px !important; height: 32px !important; }
+    .q-completed-stamp { font-size: 11px !important; }
 }
 
   </style>
@@ -8348,36 +8318,7 @@ const questPool = {
 activeEasyQuests = questPool.easy.map(q => ({ ...q, current: 0, claimed: false }));
 activeHardQuests = questPool.hard.map(q => ({ ...q, current: 0, claimed: false }));
 
-
-function updateQuestProgress(action, value = 1, isAbsolute = false) {
-    const allQuests = [...activeEasyQuests, ...activeHardQuests];
-    
-    allQuests.forEach(q => {
-        if (q.claimed) return;
-        if (q.action === action) {
-            if (isAbsolute) q.current = Math.max(q.current, value);
-            else q.current += value;
-
-            if (q.current >= q.target && q.current - value < q.target) {
-                showNotification("MISIUNE GATA!", `Poți revendica: ${q.name}`, "fa-scroll");
-            }
-        }
-    });
-}
-
-// Cronometru pentru timpul de joc
-setInterval(() => {
-    if(!isPaused && document.getElementById('gameArea').style.display === 'block') {
-        let elapsed = Math.floor((Date.now() - questStats.sessionStartTime) / 60000);
-        if (elapsed > questStats.totalPlayTimeMinutes) {
-            questStats.totalPlayTimeMinutes = elapsed;
-            updateQuestProgress('play_time', questStats.totalPlayTimeMinutes, true);
-        }
-    }
-}, 10000); // Verificăm la fiecare 10 secunde
-
-
-// --- FUNCȚIE AJUTĂTOARE PENTRU ICONIȚE DINAMICE ---
+// --- FUNCȚIE AJUTĂTOARE ICONIȚE ---
 function getQuestIcon(action) {
     switch(action) {
         case 'clicks': return { icon: "fa-hand-pointer", color: "#3b82f6" }; 
@@ -8394,6 +8335,82 @@ function getQuestIcon(action) {
     }
 }
 
+// --- ACTUALIZARE PROGRES (AUTO-CLAIM INTEGRAT) ---
+function updateQuestProgress(action, value = 1, isAbsolute = false) {
+    const allQuests = [...activeEasyQuests, ...activeHardQuests];
+    
+    allQuests.forEach(q => {
+        if (q.claimed) return; // Ignorăm dacă e deja gata
+
+        if (q.action === action) {
+            if (isAbsolute) q.current = Math.max(q.current, value);
+            else q.current += value;
+
+            // Dacă a atins obiectivul, facem CLAIM AUTOMAT
+            if (q.current >= q.target) {
+                q.current = q.target; // Cap la valoarea maximă vizual
+                const difficulty = q.id.startsWith('e') ? 'easy' : 'hard';
+                autoClaimQuest(q.id, difficulty);
+            }
+        }
+    });
+}
+
+// --- LOGICA DE AUTO-CLAIM (Efecte Epice) ---
+function autoClaimQuest(id, difficulty) {
+    const list = difficulty === 'easy' ? activeEasyQuests : activeHardQuests;
+    const q = list.find(quest => quest.id === id);
+    
+    if (!q || q.claimed) return;
+
+    q.claimed = true; // O marcăm ca făcută
+    
+    // Extragem Recompensele
+    let winScore = q.reward.score || 0;
+    let winXP = q.reward.xp || 0;
+    let winRubies = q.reward.rubies || 0;
+
+    // --- ANIMAȚII EPICE (Fix ca la Milestone) ---
+    if (typeof playSFX === 'function') playSFX(slotJackpotUrl); // Sunet de Win
+    if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins(); // Ploaie bănuți
+    if (winRubies > 0 && typeof spawnJackpotRubies === 'function') spawnJackpotRubies(); // Ploaie Rubine
+
+    // Notificare Toast
+    showNotification("MISIUNE ÎNDEPLINITĂ!", `${q.name} \n +${winScore} Scor / +${winXP} XP`, "fa-check-double");
+
+    // Zborul elementelor către HUD
+    if (winScore > 0) {
+        pendingWinAmount = winScore;
+        animateScoreFlying();
+    }
+    
+    if (winRubies > 0) {
+        setTimeout(() => {
+            pendingRubyWin = winRubies;
+            animateRubyFlying();
+        }, 400); // Mic delay să nu se suprapună
+    }
+
+    // Acordare XP
+    if (winXP > 0) {
+        gainXP(winXP);
+        showXPFlyer(window.innerWidth / 2, window.innerHeight / 2, winXP);
+    }
+
+    // Refresh Interfață Vizuală (dacă meniul e deschis)
+    const easyModal = document.getElementById('easyQuestsModal');
+    const hardModal = document.getElementById('hardQuestsModal');
+    if (easyModal && easyModal.style.display === 'flex') renderQuestList('easy');
+    if (hardModal && hardModal.style.display === 'flex') renderQuestList('hard');
+    
+    // Salvăm progresul în Cloud
+    syncScoreToFirestore();
+
+    // Reset de siguranță după ce zboară pe ecran
+    setTimeout(() => { pendingWinAmount = 0; pendingRubyWin = 0; }, 1500);
+}
+
+// --- RENDER UI (FĂRĂ BUTON DE CLAIM) ---
 function renderQuestList(difficulty) {
     const containerId = difficulty === 'easy' ? 'easyQuestsContainer' : 'hardQuestsContainer';
     const container = document.getElementById(containerId);
@@ -8404,48 +8421,42 @@ function renderQuestList(difficulty) {
 
     quests.forEach(q => {
         const pct = Math.min((q.current / q.target) * 100, 100);
-        const isDone = q.current >= q.target;
         const iconData = getQuestIcon(q.action);
         
-        // --- 1. RECOMPENSE (Fix pentru dimensiuni) ---
         let rewardsHtml = "";
         
-        // Bănuț pentru Scor
-        if (q.reward.score) {
-            rewardsHtml += `
-            <div class="q-reward-item">
-                <img src="https://iili.io/COrCopj.png">
-                <span class="q-reward-val" style="color:#facc15;">${q.reward.score}</span>
-            </div>`;
-        }
-        // Fulger verde pentru XP (Asta previne bug-ul din imagine cu posterul uriaș)
-        if (q.reward.xp) {
-            rewardsHtml += `
-            <div class="q-reward-item">
-                <i class="fa-solid fa-bolt" style="color:#4ade80;"></i>
-                <span class="q-reward-val" style="color:#4ade80;">${q.reward.xp}</span>
-            </div>`;
-        }
-        // Rubin
-        if (q.reward.rubies) {
-            rewardsHtml += `
-            <div class="q-reward-item">
-                <img src="https://iili.io/CrnXNdG.png">
-                <span class="q-reward-val" style="color:#ff3366;">${q.reward.rubies}</span>
-            </div>`;
-        }
-
-        // --- 2. BUTONUL DE ACTION ---
-        let actionHtml = "";
+        // Dacă e deja "claimed", arătăm doar textul COMPLETAT în loc de recompense
         if (q.claimed) {
-            actionHtml = `<i class="fa-solid fa-circle-check" style="color:#4ade80; font-size: 32px !important; filter: drop-shadow(0 0 10px #4ade80); width:100%; display:flex; justify-content:center;"></i>`;
-        } else if (isDone) {
-            actionHtml = `<button class="q-btn q-btn-ready" onclick="event.stopPropagation(); claimQuestReward('${q.id}', '${difficulty}')">CLAIM</button>`;
+            rewardsHtml = `
+                <div class="q-completed-stamp">
+                    <i class="fa-solid fa-circle-check"></i> FINALIZAT
+                </div>`;
         } else {
-            actionHtml = `<button class="q-btn q-btn-locked" disabled>CLAIM</button>`;
+            // Dacă nu e completat, arătăm ce va câștiga
+            if (q.reward.score) {
+                rewardsHtml += `
+                <div class="q-reward-item">
+                    <img src="https://iili.io/COrCopj.png">
+                    <span class="q-reward-val" style="color:#facc15;">${q.reward.score}</span>
+                </div>`;
+            }
+            if (q.reward.xp) {
+                rewardsHtml += `
+                <div class="q-reward-item">
+                    <i class="fa-solid fa-bolt" style="color:#4ade80;"></i>
+                    <span class="q-reward-val" style="color:#4ade80;">${q.reward.xp}</span>
+                </div>`;
+            }
+            if (q.reward.rubies) {
+                rewardsHtml += `
+                <div class="q-reward-item">
+                    <img src="https://iili.io/CrnXNdG.png">
+                    <span class="q-reward-val" style="color:#ff3366;">${q.reward.rubies}</span>
+                </div>`;
+            }
         }
 
-        // --- 3. CONSTRUIRE RÂND ---
+        // Construim Rândul
         const row = document.createElement('div');
         row.className = `q-row ${q.claimed ? 'q-claimed' : ''}`;
         
@@ -8460,25 +8471,82 @@ function renderQuestList(difficulty) {
                 <div class="q-title">${q.name}</div>
                 <div class="q-desc">${q.desc}</div>
                 <div class="q-progress-track">
-                    <div class="q-progress-fill" style="width: ${pct}%;"></div>
-                    <div class="q-progress-text">${q.current} / ${q.target}</div>
+                    <div class="q-progress-fill" style="width: ${pct}%; ${q.claimed ? 'background: #16a34a;' : ''}"></div>
+                    <div class="q-progress-text">${q.claimed ? 'COMPLETAT' : q.current + ' / ' + q.target}</div>
                 </div>
             </div>
 
-            <!-- RECOMPENSE -->
-            <div class="q-rewards-col">
-                <div class="q-rewards-title">REWARDS</div>
+            <!-- RECOMPENSE (sau Text Completat) -->
+            <div class="q-rewards-col" style="${q.claimed ? 'width: auto;' : ''}">
+                ${!q.claimed ? `<div class="q-rewards-title">REWARDS</div>` : ''}
                 <div class="q-rewards-icons">
                     ${rewardsHtml}
                 </div>
             </div>
-
-            <!-- BUTON (CLAIM/LOCKED) -->
-            <div class="q-action">
-                ${actionHtml}
-            </div>
         `;
         
+        container.appendChild(row);
+    });
+}
+
+// Cronometru pentru timpul de joc
+setInterval(() => {
+    if(!isPaused && document.getElementById('gameArea').style.display === 'block') {
+        let elapsed = Math.floor((Date.now() - questStats.sessionStartTime) / 60000);
+        if (elapsed > questStats.totalPlayTimeMinutes) {
+            questStats.totalPlayTimeMinutes = elapsed;
+            updateQuestProgress('play_time', questStats.totalPlayTimeMinutes, true);
+        }
+    }
+}, 10000); // Verificăm la fiecare 10 secunde
+
+
+
+function renderQuestList(difficulty) {
+    const containerId = difficulty === 'easy' ? 'easyQuestsContainer' : 'hardQuestsContainer';
+    const container = document.getElementById(containerId);
+    const quests = difficulty === 'easy' ? activeEasyQuests : activeHardQuests;
+    
+    container.innerHTML = "";
+    // Stil pentru container să aibă scroll dacă sunt multe misiuni
+    container.style.maxHeight = "450px";
+    container.style.overflowY = "auto";
+    container.style.scrollbarWidth = "none";
+
+    quests.forEach(q => {
+        const pct = Math.min((q.current / q.target) * 100, 100);
+        const isDone = q.current >= q.target;
+        
+        // Cream rândul folosind clasele tale de la Milestone (v3-unlock-row)
+        const row = document.createElement('div');
+        row.className = "v3-unlock-row"; 
+        row.style.marginBottom = "10px";
+        row.style.opacity = q.claimed ? "0.5" : "1";
+        
+        // Structură simetrică: Text/Progres în stânga | Status/Buton în dreapta
+        row.innerHTML = `
+            <div class="v3-unlock-mid" style="padding-right: 10px;">
+                <span class="v3-unlock-name" style="color: ${difficulty === 'easy' ? '#4ade80' : '#ff3366'}">
+                    ${q.name}
+                </span>
+                <span class="v3-unlock-desc" style="display:block; margin-bottom: 8px;">${q.desc}</span>
+                
+                <!-- Bară de Progres -->
+                <div class="loader-container" style="height: 8px; background: rgba(0,0,0,0.3); border-radius: 10px; position:relative;">
+                    <div class="loader-bar" style="width: ${pct}%; left:0; animation:none; background: ${isDone ? '#4ade80' : 'var(--th-accent)'}; box-shadow: 0 0 10px ${isDone ? '#4ade80' : 'var(--th-glow)'};"></div>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-width: 90px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 10px;">
+                <span style="font-family:'Orbitron'; font-size:12px; font-weight:900; margin-bottom:5px;">
+                    ${q.current}/${q.target}
+                </span>
+                ${isDone && !q.claimed ? 
+                    `<button class="menu-btn play" style="width:80px; height:30px; font-size:10px; padding:0;" onclick="event.stopPropagation(); claimQuestReward('${q.id}', '${difficulty}')">CLAIM</button>` : 
+                    (q.claimed ? `<i class="fa-solid fa-circle-check" style="color:#4ade80; font-size:22px;"></i>` : `<i class="fa-solid fa-hourglass-half" style="color:#5a6288; font-size:18px;"></i>`)
+                }
+            </div>
+        `;
         container.appendChild(row);
     });
 }
