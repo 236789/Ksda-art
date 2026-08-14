@@ -8335,6 +8335,24 @@ function getQuestIcon(action) {
     }
 }
 
+
+// --- FUNCȚIE AJUTĂTOARE ICONIȚE MISIUNI ---
+function getQuestIcon(action) {
+    switch(action) {
+        case 'clicks': return { icon: "fa-hand-pointer", color: "#3b82f6" }; 
+        case 'max_combo': return { icon: "fa-fire", color: "#facc15" }; 
+        case 'bm_sell': return { icon: "fa-coins", color: "#4ade80" }; 
+        case 'trivia_win': return { icon: "fa-brain", color: "#a855f7" }; 
+        case 'play_time': return { icon: "fa-clock", color: "#22d3ee" }; 
+        case 'collect_axe': return { icon: "fa-gavel", color: "#ef4444" }; 
+        case 'streak_hits': return { icon: "fa-crosshairs", color: "#ef4444" }; 
+        case 'streak_trivia': return { icon: "fa-graduation-cap", color: "#a855f7" }; 
+        case 'streak_memory': return { icon: "fa-clone", color: "#3b82f6" }; 
+        case 'session_score': return { icon: "fa-sack-dollar", color: "#facc15" }; 
+        default: return { icon: "fa-star", color: "#ffffff" };
+    }
+}
+
 // --- ACTUALIZARE PROGRES (AUTO-CLAIM INTEGRAT) ---
 function updateQuestProgress(action, value = 1, isAbsolute = false) {
     const allQuests = [...activeEasyQuests, ...activeHardQuests];
@@ -8410,7 +8428,7 @@ function autoClaimQuest(id, difficulty) {
     setTimeout(() => { pendingWinAmount = 0; pendingRubyWin = 0; }, 1500);
 }
 
-// --- RENDER UI (FĂRĂ BUTON DE CLAIM) ---
+// --- RENDER UI (NO CLAIM BUTTON, PURE RPG LAYOUT) ---
 function renderQuestList(difficulty) {
     const containerId = difficulty === 'easy' ? 'easyQuestsContainer' : 'hardQuestsContainer';
     const container = document.getElementById(containerId);
@@ -8502,92 +8520,7 @@ setInterval(() => {
 
 
 
-function renderQuestList(difficulty) {
-    const containerId = difficulty === 'easy' ? 'easyQuestsContainer' : 'hardQuestsContainer';
-    const container = document.getElementById(containerId);
-    const quests = difficulty === 'easy' ? activeEasyQuests : activeHardQuests;
-    
-    container.innerHTML = "";
-    // Stil pentru container să aibă scroll dacă sunt multe misiuni
-    container.style.maxHeight = "450px";
-    container.style.overflowY = "auto";
-    container.style.scrollbarWidth = "none";
 
-    quests.forEach(q => {
-        const pct = Math.min((q.current / q.target) * 100, 100);
-        const isDone = q.current >= q.target;
-        
-        // Cream rândul folosind clasele tale de la Milestone (v3-unlock-row)
-        const row = document.createElement('div');
-        row.className = "v3-unlock-row"; 
-        row.style.marginBottom = "10px";
-        row.style.opacity = q.claimed ? "0.5" : "1";
-        
-        // Structură simetrică: Text/Progres în stânga | Status/Buton în dreapta
-        row.innerHTML = `
-            <div class="v3-unlock-mid" style="padding-right: 10px;">
-                <span class="v3-unlock-name" style="color: ${difficulty === 'easy' ? '#4ade80' : '#ff3366'}">
-                    ${q.name}
-                </span>
-                <span class="v3-unlock-desc" style="display:block; margin-bottom: 8px;">${q.desc}</span>
-                
-                <!-- Bară de Progres -->
-                <div class="loader-container" style="height: 8px; background: rgba(0,0,0,0.3); border-radius: 10px; position:relative;">
-                    <div class="loader-bar" style="width: ${pct}%; left:0; animation:none; background: ${isDone ? '#4ade80' : 'var(--th-accent)'}; box-shadow: 0 0 10px ${isDone ? '#4ade80' : 'var(--th-glow)'};"></div>
-                </div>
-            </div>
-
-            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-width: 90px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 10px;">
-                <span style="font-family:'Orbitron'; font-size:12px; font-weight:900; margin-bottom:5px;">
-                    ${q.current}/${q.target}
-                </span>
-                ${isDone && !q.claimed ? 
-                    `<button class="menu-btn play" style="width:80px; height:30px; font-size:10px; padding:0;" onclick="event.stopPropagation(); claimQuestReward('${q.id}', '${difficulty}')">CLAIM</button>` : 
-                    (q.claimed ? `<i class="fa-solid fa-circle-check" style="color:#4ade80; font-size:22px;"></i>` : `<i class="fa-solid fa-hourglass-half" style="color:#5a6288; font-size:18px;"></i>`)
-                }
-            </div>
-        `;
-        container.appendChild(row);
-    });
-}
-
-function claimQuestReward(id, difficulty) {
-    const list = difficulty === 'easy' ? activeEasyQuests : activeHardQuests;
-    const q = list.find(quest => quest.id === id);
-    
-    if (!q || q.claimed) return;
-
-    q.claimed = true;
-    
-    // Setăm recompensele
-    let winScore = q.reward.score || 0;
-    let winXP = q.reward.xp || 0;
-    let winRubies = q.reward.rubies || 0;
-
-    // Trigger efecte
-    playSFX(slotJackpotUrl);
-    showNotification("MISIUNE COMPLETATĂ!", `+${winScore} Scor, +${winXP} XP`, "fa-check-double");
-
-    // Procesăm plata (folosim sistemul tău de animație)
-    pendingWinAmount = winScore;
-    animateScoreFlying();
-    
-    gainXP(winXP);
-    
-    if (winRubies > 0) {
-        rubies += winRubies;
-        updateScoreUI();
-    }
-
-    // Refresh la listă pentru a arăta bifa verde
-    renderQuestList(difficulty);
-    
-    // Salvare în cloud
-    syncScoreToFirestore();
-
-    // Resetăm preventiv pending amount pentru a evita bug-ul de care te-ai lovit înainte
-    setTimeout(() => { pendingWinAmount = 0; }, 1000);
-}
 
     let comboCount = 0;
     let comboTimer = null;
@@ -14203,8 +14136,6 @@ window.openQuestsTab = openQuestsTab;
 window.openEasyQuests = openEasyQuests;
 window.openHardQuests = openHardQuests;
 window.renderQuestList = renderQuestList;
-window.claimQuestReward = claimQuestReward;
-
 })(); // <-- CLOSES THE SECURE VAULT
 
 </script>
