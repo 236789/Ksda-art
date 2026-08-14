@@ -7131,6 +7131,66 @@ input:checked + .s-slider:before {
 .selection-line {
     margin: 10px auto !important;
 }
+
+
+/* Containerul de misiuni reparat */
+.quest-list-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding: 10px !important;
+}
+
+/* Rândul misiunii - Am mărit spațiul pentru text */
+.q-row {
+    display: grid !important;
+    grid-template-columns: 50px 1fr 90px !important; /* Icon | Text | Rewards */
+    align-items: center !important;
+    gap: 12px !important;
+    background: #16192b !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    border: 2px solid #2a2d4c !important;
+    transition: all 0.3s ease;
+}
+
+/* Starea de completat */
+.q-row.q-claimed {
+    border-color: #16a34a !important;
+    background: rgba(22, 163, 74, 0.08) !important;
+}
+
+/* Fix pentru zona unde apare FINALIZATA */
+.q-completed-badge-area {
+    margin-top: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.q-completed-stamp {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 11px !important; /* Puțin mai mic să nu se rupă pe ecrane mici */
+    color: #4ade80 !important;
+    font-weight: 900 !important;
+    text-transform: uppercase !important;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    letter-spacing: 0.5px;
+}
+
+/* FIX NOTIFICARE: Trebuie să fie deasupra tuturor modalelor */
+#toastContainer {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999999 !important; /* Peste 200000 cât au modalele tale */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
   </style>
 </head>
 <body>
@@ -13390,23 +13450,26 @@ function showNotification(title, message, iconOrUrl = 'fa-circle-info') {
     const toast = document.createElement('div');
     toast.className = 'toast-item';
     
-    // Logic to handle FontAwesome icons or Image URLs (like the Ruby)
-    const isUrl = iconOrUrl.startsWith('http');
+    // Logica pentru iconița FontAwesome sau URL imagine
+    const isUrl = iconOrUrl.includes('http');
     const iconHtml = isUrl 
-        ? `<img src="${iconOrUrl}" style="width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">`
+        ? `<img src="${iconOrUrl}" style="width: 28px; height: 28px; object-fit: contain;">`
         : `<i class="fa-solid ${iconOrUrl}"></i>`;
 
     toast.innerHTML = `
         <div class="toast-icon">${iconHtml}</div>
-        <div class="toast-text" style="display:flex; flex-direction:column;">
-            <span class="toast-title">${title}</span>
-            <span class="toast-msg">${message}</span>
+        <div class="toast-content" style="display:flex; flex-direction:column; text-align:left;">
+            <span class="toast-title" style="color:var(--th-accent); font-weight:900; font-size:12px;">${title}</span>
+            <span class="toast-msg" style="color:#fff; font-size:14px;">${message}</span>
         </div>
     `;
 
     container.appendChild(toast);
 
-    // Auto-remove sequence
+    // Sunet de notificare (opțional)
+    if (typeof playSFX === 'function') playSFX(popSounds[0]);
+
+    // Eliminare automată
     setTimeout(() => {
         toast.classList.add('leaving');
         setTimeout(() => toast.remove(), 500);
