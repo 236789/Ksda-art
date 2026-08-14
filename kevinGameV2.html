@@ -8428,7 +8428,7 @@ function autoClaimQuest(id, difficulty) {
     setTimeout(() => { pendingWinAmount = 0; pendingRubyWin = 0; }, 1500);
 }
 
-// --- RENDER UI (NO CLAIM BUTTON, PURE RPG LAYOUT) ---
+// --- RENDER UI (FĂRĂ BUTON DE CLAIM, CU IMAGINEA TA PENTRU XP) ---
 function renderQuestList(difficulty) {
     const containerId = difficulty === 'easy' ? 'easyQuestsContainer' : 'hardQuestsContainer';
     const container = document.getElementById(containerId);
@@ -8458,13 +8458,17 @@ function renderQuestList(difficulty) {
                     <span class="q-reward-val" style="color:#facc15;">${q.reward.score}</span>
                 </div>`;
             }
+            
+            // AICI AM PUS IMAGINEA TA PENTRU XP
             if (q.reward.xp) {
                 rewardsHtml += `
                 <div class="q-reward-item">
-                    <i class="fa-solid fa-bolt" style="color:#4ade80;"></i>
+                    <!-- Pune link-ul tău direct (.png) aici dacă l-ai schimbat -->
+                    <img src="https://i.ibb.co/XkNcL75P/image.png">
                     <span class="q-reward-val" style="color:#4ade80;">${q.reward.xp}</span>
                 </div>`;
             }
+            
             if (q.reward.rubies) {
                 rewardsHtml += `
                 <div class="q-reward-item">
