@@ -8687,11 +8687,23 @@ function renderQuestList(difficulty) {
                 ${isActuallyDone ? `
                     <i class="fa-solid fa-gift" style="font-size: 28px; color: #4ade80; opacity: 0.8;"></i>
                 ` : `
-                    <div style="font-size:9px; color:#94a3b8; font-weight:bold; text-transform:uppercase; margin-bottom:5px;">PREMII</div>
-                    <div style="display:flex; gap:8px; justify-content:center;">
-                        ${q.reward.score ? `<div style="text-align:center;"><img src="https://iili.io/COrCopj.png" width="16"><div style="font-size:10px; font-weight:900; color:#fff;">${q.reward.score}</div></div>` : ''}
-                        ${q.reward.xp ? `<div style="text-align:center;"><img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/boosts/XP.png" width="16"><div style="font-size:10px; font-weight:900; color:#fff;">${q.reward.xp}</div></div>` : ''}
-                        ${q.reward.rubies ? `<div style="text-align:center;"><img src="https://iili.io/CrnXNdG.png" width="16"><div style="font-size:10px; font-weight:900; color:#fff;">${q.reward.rubies}</div></div>` : ''}
+                    <div style="font-family: 'Montserrat', sans-serif; font-size: 10px; color:#94a3b8; font-weight:900; text-transform:uppercase; margin-bottom:6px; letter-spacing: 0.5px;">RECOMPENSE</div>
+                    <div style="display:flex; gap:12px; justify-content:center; align-items: flex-end;">
+                        ${q.reward.score ? `
+                            <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+                                <img src="https://iili.io/COrCopj.png" style="width:18px; height:18px; object-fit:contain;">
+                                <div style="font-family:'Orbitron', sans-serif; font-size:11px; font-weight:900; color:#fff; line-height:1;">${q.reward.score}</div>
+                            </div>` : ''}
+                        ${q.reward.xp ? `
+                            <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+                                <img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/boosts/XP.png" style="width:18px; height:18px; object-fit:contain;">
+                                <div style="font-family:'Orbitron', sans-serif; font-size:11px; font-weight:900; color:#fff; line-height:1;">${q.reward.xp}</div>
+                            </div>` : ''}
+                        ${q.reward.rubies ? `
+                            <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+                                <img src="https://iili.io/CrnXNdG.png" style="width:18px; height:18px; object-fit:contain;">
+                                <div style="font-family:'Orbitron', sans-serif; font-size:11px; font-weight:900; color:#fff; line-height:1;">${q.reward.rubies}</div>
+                            </div>` : ''}
                     </div>
                 `}
             </div>
@@ -9037,7 +9049,7 @@ async function saveNewUsername() {
     }
 
 function startGameUI() {
-    applyStage(currentStageId); // Add this line here
+  applyStage(currentStageId); 
   document.getElementById('mainMenu').style.display = 'none';
   document.getElementById('gameArea').style.display = 'block';
 
@@ -9048,8 +9060,18 @@ function startGameUI() {
 
   comboCount = 0;
   updateScoreUI();
-  updateComboBarUI(0); // <--- ADAUGĂ ASTA AICI
+  updateComboBarUI(0); 
   setInterval(syncQuestsWithServer, 60000);
+
+  // ⏱️ NOU: TRACKER PENTRU MISIUNEA DE TIMP (PLAYTIME)
+  if (window.playtimeTracker) clearInterval(window.playtimeTracker);
+  window.playtimeTracker = setInterval(() => {
+      // Verificăm dacă jocul NU este pe pauză
+      if (!isPaused) {
+          questStats.totalPlayTimeMinutes++;
+          updateQuestProgress('play_time', 1); // Adaugă 1 minut la progres
+      }
+  }, 60000); // 60.000 milisecunde = 1 minut
 
   if (!kevin.style.backgroundImage) {
       kevin.style.backgroundImage = currentPlayImg;
@@ -9071,26 +9093,26 @@ function startGameUI() {
   // Spawns the first event between 8 to 15 seconds after starting
   eventTimeout = setTimeout(spawnSpecialEvent, 30000);
 
-document.getElementById('gameArea').onclick = (e) => {
-    // 1. If paused OR the 3-second shield is active, do nothing
-    if (isPaused || isGracePeriodActive) return;
+  document.getElementById('gameArea').onclick = (e) => {
+      // 1. If paused OR the 3-second shield is active, do nothing
+      if (isPaused || isGracePeriodActive) return;
 
-if (e.target.closest('.control-btn') || 
-    e.target.closest('.active-event-box') || 
-    e.target.closest('.hud-mini-btn') || 
-    e.target.closest('#scoreBoard')) { 
-    return; 
-}
-    // 3. Normal miss logic
-    playMissSFX(); 
-    comboCount = 0; 
-    questStats.hitsWithoutMiss = 0; // NOU: Resetăm streak-ul de click-uri la 0 pentru că ai ratat!
-    sessionMisses++; 
-    if (score > 0) score--; 
-    updateScoreUI(true); 
-    showComboText(e.clientX, e.clientY, 0, true); 
-    updateComboBarUI(0);
-};
+      if (e.target.closest('.control-btn') || 
+          e.target.closest('.active-event-box') || 
+          e.target.closest('.hud-mini-btn') || 
+          e.target.closest('#scoreBoard')) { 
+          return; 
+      }
+      // 3. Normal miss logic
+      playMissSFX(); 
+      comboCount = 0; 
+      questStats.hitsWithoutMiss = 0; 
+      sessionMisses++; 
+      if (score > 0) score--; 
+      updateScoreUI(true); 
+      showComboText(e.clientX, e.clientY, 0, true); 
+      updateComboBarUI(0);
+  };
 }
 
 async function syncScoreToFirestore() {
