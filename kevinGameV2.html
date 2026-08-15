@@ -7706,10 +7706,10 @@ input:checked + .s-slider:before {
     <!-- TIMER DISPLAY -->
     <div id="bmTimerDisplay" class="bm-timer-text">REFRESH ÎN: 00:00</div>
 
-    <div class="bm-nav">
-      <button class="bm-tab active" id="tabBmBuy" onclick="switchBMTab('buy')">CUMPĂRĂ</button>
+<div class="bm-nav">
+      <button class="bm-tab" id="tabBmBuy" onclick="switchBMTab('buy')">CUMPĂRĂ</button>
       <button class="bm-tab" id="tabBmSell" onclick="switchBMTab('sell')">VINDE</button>
-      <button class="bm-tab" onclick="showComingSoon()">SCHIMB</button>
+      <button class="bm-tab" id="tabBmTrade" onclick="switchBMTab('trade')">SCHIMB</button>
     </div>
 
     <!-- BUY VIEW -->
@@ -7720,6 +7720,13 @@ input:checked + .s-slider:before {
     <!-- SELL VIEW -->
     <div id="bm-sell-view" style="display: none;">
         <div id="blackMarketGrid" class="inventory-v1-grid" style="grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 10px 5px;"></div>
+    </div>
+
+    <!-- TRADE VIEW (NEW) -->
+    <div id="bm-trade-view" style="display: none;">
+        <div id="blackMarketTradeGrid" class="inventory-v1-grid" style="grid-template-columns: 1fr; gap: 10px; padding: 10px 5px;">
+            <!-- Trade cards will be injected here -->
+        </div>
     </div>
 
     <button class="menu-btn play close-shop-btn" style="margin-top: 20px; border-color: #ff2a2a;" onclick="closeBlackMarket()">ÎNAPOI</button>
@@ -12941,18 +12948,91 @@ function startBMTimer() {
 function switchBMTab(tab) {
     document.getElementById('tabBmBuy').classList.remove('active');
     document.getElementById('tabBmSell').classList.remove('active');
+    document.getElementById('tabBmTrade').classList.remove('active');
+
+    document.getElementById('bm-buy-view').style.display = 'none';
+    document.getElementById('bm-sell-view').style.display = 'none';
+    document.getElementById('bm-trade-view').style.display = 'none';
 
     if (tab === 'buy') {
         document.getElementById('tabBmBuy').classList.add('active');
         document.getElementById('bm-buy-view').style.display = 'block';
-        document.getElementById('bm-sell-view').style.display = 'none';
         renderBlackMarketBuyGrid();
-    } else {
+    } else if (tab === 'sell') {
         document.getElementById('tabBmSell').classList.add('active');
-        document.getElementById('bm-buy-view').style.display = 'none';
         document.getElementById('bm-sell-view').style.display = 'block';
         renderBlackMarketGrid();
+    } else if (tab === 'trade') {
+        document.getElementById('tabBmTrade').classList.add('active');
+        document.getElementById('bm-trade-view').style.display = 'block';
+        renderBlackMarketTradeGrid();
     }
+}
+
+
+let playerTradeLimits = { s2r: 0, r2s: 0, r2x: 0 }; // Tracked from backend
+
+function renderBlackMarketTradeGrid() {
+    const grid = document.getElementById('blackMarketTradeGrid');
+    grid.innerHTML = "";
+
+    const trades = [
+        { id: 's2r', name: 'Investiție Rubin', cost: '1000 Scor', get: '1 Rubin', limit: 5, current: playerTradeLimits.s2r, icon: 'https://iili.io/CrnXNdG.png' },
+        { id: 'r2s', name: 'Vânzare Rubin', cost: '1 Rubin', get: '500 Scor', limit: 10, current: playerTradeLimits.r2s, icon: 'https://iili.io/COrCopj.png' },
+        { id: 'r2x', name: 'Antrenament Rubin', cost: '1 Rubin', get: (50 * activeXPMultiplier) + ' XP', limit: 10, current: playerTradeLimits.r2x, icon: 'https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/boosts/XP.png' }
+    ];
+
+    trades.forEach(t => {
+        const remaining = t.limit - t.current;
+        const card = document.createElement('div');
+        card.className = "shop-card";
+        if (remaining <= 0) card.classList.add('bm-sold-out');
+        
+        card.innerHTML = `
+            <div class="shop-icon"><img src="${t.icon}" width="35"></div>
+            <div class="shop-info">
+                <h3>${t.name}</h3>
+                <p>Cost: ${t.cost} | Limită: ${remaining} rămase</p>
+            </div>
+            <button class="menu-btn play" style="width:70px; height:40px; font-size:12px; padding:0;" 
+                onclick="processBMTrade('${t.id}')" ${remaining <= 0 ? 'disabled' : ''}>SCHIMB</button>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+async function processBMTrade(tradeId) {
+    // 1. Client-side checks
+    if (tradeId === 's2r' && score < 1000) return showKevinutaBubble("N-ai destul Scor!");
+    if ((tradeId === 'r2s' || tradeId === 'r2x') && rubies < 1) return showKevinutaBubble("N-ai destule Rubine!");
+
+    try {
+        const idToken = await firebase.auth().currentUser.getIdToken(true);
+        const response = await fetch('https://kevin-backend-qodc.onrender.com/bm-trade', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken, tradeId, xpMult: activeXPMultiplier })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            // Update local values
+            score = data.newScore;
+            rubies = data.newRubies;
+            playerXP = data.newXP;
+            playerLevel = data.newLevel;
+            playerTradeLimits = data.newLimits;
+
+            updateScoreUI();
+            updateXPBarUI();
+            renderBlackMarketTradeGrid();
+            playSFX(slotJackpotUrl);
+            showNotification("SCHIMB REUȘIT!", "Afacere încheiată cu succes!", "fa-handshake");
+        } else {
+            const err = await response.text();
+            showKevinutaBubble(err);
+        }
+    } catch (e) { console.error(e); }
 }
 
 async function openBlackMarket() {
