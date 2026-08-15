@@ -14308,36 +14308,35 @@ function closeResultAndSlot() {
 }
 
 
+// --- FUNCȚII PENTRU ÎNCHIDERE MODALE MISIUNI ȘI REPORNIRE JOC ---
 
-// Function to handle closing the Easy Quests list
 function closeEasyQuests() {
     document.getElementById('easyQuestsModal').style.display = 'none';
-    resumeQuestSystem();
+    resumeFromQuest();
 }
 
-// Function to handle closing the Hard Quests list
 function closeHardQuests() {
     document.getElementById('hardQuestsModal').style.display = 'none';
-    resumeQuestSystem();
+    resumeFromQuest();
 }
 
-// Function to handle closing the Selection (Easy/Hard) menu
-function closeMisiuniSelection() {
+function backFromMisiuniSelection() {
     document.getElementById('misiuniSelectionModal').style.display = 'none';
-    resumeQuestSystem();
+    document.getElementById('questsMenuModal').style.display = 'flex';
+    // Aici nu dăm resume, pentru că ne întoarcem la Hub-ul principal de misiuni
 }
 
-// Central helper to make sure the game actually starts moving again
-function resumeQuestSystem() {
-    // Only resume if we are actually in the game area
+function resumeFromQuest() {
+    // Verificăm dacă suntem în joc pentru a nu porni mișcarea aiurea din Meniu
     if (document.getElementById('gameArea').style.display === 'block') {
         isPaused = false;
         const kevin = document.getElementById('kevin');
         if (kevin) kevin.style.pointerEvents = 'auto';
         
+        // Repornim mișcarea lui Kevin
         startKevinMovement();
         startTiredCycle();
-        console.log("▶️ Quest closed - Game Resumed");
+        console.log("▶️ Joc reluat după misiuni.");
     }
 }
 // Ensure the ninja icon in Utilities opens the Market
@@ -14425,8 +14424,12 @@ window.openQuestsTab = openQuestsTab;
 window.openEasyQuests = openEasyQuests;
 window.openHardQuests = openHardQuests;
 window.renderQuestList = renderQuestList;
+window.closeEasyQuests = closeEasyQuests;
+window.closeHardQuests = closeHardQuests;
+window.backFromMisiuniSelection = backFromMisiuniSelection;
+window.resumeFromQuest = resumeFromQuest;
 })(); // <-- CLOSES THE SECURE VAULT
 
 </script>
 </body>
-</html>
+</html> 
