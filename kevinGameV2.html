@@ -9363,72 +9363,73 @@ function startTiredCycle() {
     }, 60000); // Happens every 60 seconds
 }
 document.getElementById('kevin').addEventListener('click', (e) => {
-      e.stopPropagation(); 
+    e.stopPropagation(); 
 
-      if (!e.isTrusted) {
-          console.warn("🚨 Synthetic click detected and blocked!");
-          return; 
-      }
+    if (!e.isTrusted) {
+        console.warn("🚨 Synthetic click detected and blocked!");
+        return; 
+    }
 
-      if (!canClickKevin) return;
-      canClickKevin = false;
+    if (!canClickKevin) return;
+    canClickKevin = false;
+    // FIX 1: Reduced lock from 100ms to 30ms so quests register fast clicks
+    setTimeout(() => { canClickKevin = true; }, 30); 
 
-      playRandomPop(); 
+    playRandomPop(); 
 
-      // Apply Multiplier to Score
-      score += (1 * activeScoreMultiplier);
-let xpToGain = (2 * activeClickXPMultiplier); // 2 de bază, sau 4 dacă boost-ul e activ
-gainXP(xpToGain);
+    // Apply Multiplier to Score
+    score += (1 * activeScoreMultiplier);
+    let xpToGain = (2 * activeClickXPMultiplier); // 2 de bază, sau 4 dacă boost-ul e activ
+    gainXP(xpToGain);
 
-      // --- SALVĂM STATISTICILE ---
-      totalClicksAllTime += (1 * activeScoreMultiplier);
+    // --- SALVĂM STATISTICILE ---
+    totalClicksAllTime += (1 * activeScoreMultiplier);
 
-      updateScoreUI();
+    updateScoreUI();
 
-
-    updateQuestProgress('clicks', 1); // NOU: Incrementăm click-urile totale
+    // --- THE QUEST FIXES ---
+    updateQuestProgress('clicks', 1); // Generic click quest
     
+    // FIX 2: Specific character catch (This makes "Catch Kevinuță" work!)
+    const charId = window.currentPlayingCharId || "kevin";
+    updateQuestProgress('catch_' + charId, 1);
+    
+    // Apply Multiplier to Combo
     comboCount += (1 * activeComboMultiplier);
-    updateQuestProgress('max_combo', comboCount, true); // NOU: Verificăm dacă e un combo record pentru misiune
+    
+    updateQuestProgress('max_combo', comboCount, true); 
+    questStats.hitsWithoutMiss++; 
+    updateQuestProgress('streak_hits', questStats.hitsWithoutMiss, true); 
 
-    questStats.hitsWithoutMiss++; // NOU: Creștem streak-ul local
-    updateQuestProgress('streak_hits', questStats.hitsWithoutMiss, true); // NOU: Update misiune Hard
+    if (comboCount > bestComboAllTime) {
+        bestComboAllTime = comboCount;
+    }
+    
+    // 💎 SISTEMUL NOU PENTRU RUBINE (Respects Ruby Multiplier)
+    if (comboCount > 0 && comboCount % 100 === 0) {
+        rubies += (1 * activeRubyMultiplier);
+        updateScoreUI(); 
+        
+        if (!hasSeenRubyTutorial) {
+            openRubyDiscovery();
+        } else {
+            showNotification("COMBO REÎNNOIT!", `Ai atins 100 Combo: +${1 * activeRubyMultiplier} Rubin primit!`, "https://iili.io/CrnXNdG.png");
+        }
+    }
+    
+    showComboText(e.clientX, e.clientY, comboCount);
+    updateComboBarUI(comboCount); 
 
-      // Apply Multiplier to Combo
-      comboCount += (1 * activeComboMultiplier);
+    clearTimeout(comboTimer);
+    comboTimer = setTimeout(() => { 
+        comboCount = 0; 
+        updateComboBarUI(0); 
+    }, 2000);
 
-      if (comboCount > bestComboAllTime) {
-          bestComboAllTime = comboCount;
-      }
-      
-      // 💎 SISTEMUL NOU PENTRU RUBINE (Respects Ruby Multiplier)
-      if (comboCount > 0 && comboCount % 100 === 0) {
-          rubies += (1 * activeRubyMultiplier);
-          updateScoreUI(); // Sincronizează HUD-ul (arată +X rubine)
-          
-          // Arată tutorialul prima dată, altfel Kevin doar se laudă
-          if (!hasSeenRubyTutorial) {
-              openRubyDiscovery();
-          } else {
-              showNotification("COMBO REÎNNOIT!", `Ai atins 100 Combo: +${1 * activeRubyMultiplier} Rubin primit!`, "https://iili.io/CrnXNdG.png");
-          }
-      }
-      
-      showComboText(e.clientX, e.clientY, comboCount);
-      updateComboBarUI(comboCount); 
-
-      clearTimeout(comboTimer);
-      comboTimer = setTimeout(() => { 
-          comboCount = 0; 
-          updateComboBarUI(0); 
-      }, 2000);
-
-      if (!isKevinTired) {
-        moveKevinAway();
-        startKevinMovement(); 
-      }
-
-      setTimeout(() => { canClickKevin = true; }, 100); 
+    if (!isKevinTired) {
+      moveKevinAway();
+      startKevinMovement(); 
+    }
 });
 
 const comboMilestones = {
