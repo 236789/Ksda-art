@@ -7916,9 +7916,9 @@ input:checked + .s-slider:before {
       </button>
     </div>
 
-    <button class="menu-btn play close-shop-btn" onclick="closeQuestsMenu()">
-      <span>ÎNCHIDE</span>
-    </button>
+ <button class="menu-btn play close-shop-btn" onclick="closeMisiuniSelection()">
+  <span>ÎNCHIDE</span>
+</button>
   </div>
 </div>
 
@@ -7952,9 +7952,9 @@ input:checked + .s-slider:before {
       </button>
     </div>
 
-    <button class="menu-btn play close-shop-btn" onclick="document.getElementById('misiuniSelectionModal').style.display='none'; document.getElementById('questsMenuModal').style.display='flex';">
-      <span>ÎNAPOI</span>
-    </button>
+<button class="menu-btn play close-shop-btn" onclick="backFromMisiuniSelection()">
+  <span>ÎNAPOI</span>
+</button>
   </div>
 </div>
 
@@ -7969,8 +7969,9 @@ input:checked + .s-slider:before {
     <div id="easyQuestsContainer" style="margin: 20px 0; color: #5a6288; font-family: 'Oswald';">
       Se încarcă misiunile ușoare... (Pasul 3)
     </div>
-    <button class="menu-btn play close-shop-btn" onclick="document.getElementById('easyQuestsModal').style.display='none';">
-      <span>ÎNCHIDE</span>
+<button class="menu-btn play close-shop-btn" onclick="closeEasyQuests()">
+  <span>ÎNCHIDE</span>
+</button>
     </button>
   </div>
 </div>
@@ -7986,9 +7987,9 @@ input:checked + .s-slider:before {
     <div id="hardQuestsContainer" style="margin: 20px 0; color: #5a6288; font-family: 'Oswald';">
       Se încarcă misiunile grele... (Pasul 3)
     </div>
-    <button class="menu-btn play close-shop-btn" onclick="document.getElementById('hardQuestsModal').style.display='none';">
-      <span>ÎNCHIDE</span>
-    </button>
+<button class="menu-btn play close-shop-btn" onclick="closeHardQuests()">
+  <span>ÎNCHIDE</span>
+</button>
   </div>
 </div>
 
@@ -14303,6 +14304,40 @@ function closeResultAndSlot() {
         // pendingWinAmount se resetează automat în finishSlotCleanup după animație
     } else {
         finishSlotCleanup();
+    }
+}
+
+
+
+// Function to handle closing the Easy Quests list
+function closeEasyQuests() {
+    document.getElementById('easyQuestsModal').style.display = 'none';
+    resumeQuestSystem();
+}
+
+// Function to handle closing the Hard Quests list
+function closeHardQuests() {
+    document.getElementById('hardQuestsModal').style.display = 'none';
+    resumeQuestSystem();
+}
+
+// Function to handle closing the Selection (Easy/Hard) menu
+function closeMisiuniSelection() {
+    document.getElementById('misiuniSelectionModal').style.display = 'none';
+    resumeQuestSystem();
+}
+
+// Central helper to make sure the game actually starts moving again
+function resumeQuestSystem() {
+    // Only resume if we are actually in the game area
+    if (document.getElementById('gameArea').style.display === 'block') {
+        isPaused = false;
+        const kevin = document.getElementById('kevin');
+        if (kevin) kevin.style.pointerEvents = 'auto';
+        
+        startKevinMovement();
+        startTiredCycle();
+        console.log("▶️ Quest closed - Game Resumed");
     }
 }
 // Ensure the ninja icon in Utilities opens the Market
