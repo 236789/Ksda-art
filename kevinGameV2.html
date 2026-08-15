@@ -8720,17 +8720,21 @@ function renderQuestList(difficulty) {
 }
 
 function getQuestIcon(action) {
+    // 🎯 NOU: Verificăm dacă este o misiune dinamică de prins emoji-uri
+    if (action.startsWith('catch_')) {
+        return { icon: "fa-hand-sparkles", color: "#22d3ee" }; // O iconiță cool albastră
+    }
+
     const icons = {
         clicks: {icon:"fa-hand-pointer", color:"#3b82f6"},
         max_combo: {icon:"fa-fire", color:"#facc15"},
         bm_sell: {icon:"fa-coins", color:"#4ade80"},
         trivia_win: {icon:"fa-brain", color:"#a855f7"},
         play_time: {icon:"fa-clock", color:"#22d3ee"},
-        collect_axe: {icon:"fa-gavel", color:"#ef4444"},
         streak_hits: {icon:"fa-crosshairs", color:"#ef4444"},
         streak_trivia: {icon:"fa-graduation-cap", color:"#a855f7"},
         streak_memory: {icon:"fa-clone", color:"#3b82f6"},
-        session_score: {icon:"fa-sack-dollar", color:"#facc15"}
+        earn_score: {icon:"fa-sack-dollar", color:"#facc15"}
     };
     return icons[action] || {icon:"fa-star", color:"#fff"};
 }
@@ -11038,6 +11042,10 @@ item.onclick = (e) => {
     gainXP(xpGained);
     showXPFlyer(e.clientX, e.clientY, xpGained);
 
+
+    updateQuestProgress('catch_' + chosenKey, 1);
+
+
     // --- INDEX DISCOVERY LOGIC ---
     if (!_GAME_DATA.index.includes(chosenKey)) {
         _GAME_DATA.index.push(chosenKey);
@@ -12788,6 +12796,9 @@ function applyMagnetMovement(item, eventData, chosenKey) {
             let xpAmount = eventData.xpValue || 5;
             gainXP(xpAmount);
             showXPFlyer(kRect.left + kRect.width/2, kRect.top + kRect.height/2, xpAmount);
+
+            updateQuestProgress('catch_' + chosenKey, 1);
+
 
             // --- 🆕 NEW: INDEX UNLOCK VIA MAGNET ---
             if (!_GAME_DATA.index.includes(chosenKey)) {
