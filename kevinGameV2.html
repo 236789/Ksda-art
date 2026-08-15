@@ -9048,6 +9048,9 @@ async function saveNewUsername() {
       document.getElementById('logoutBtn').style.display = 'none';
     }
 
+// --- Adaugă această variabilă globală oriunde deasupra funcției ---
+let previousScoreForTracking = 0; 
+
 function startGameUI() {
   applyStage(currentStageId); 
   document.getElementById('mainMenu').style.display = 'none';
@@ -9059,19 +9062,22 @@ function startGameUI() {
   kevin.style.pointerEvents = 'auto'; 
 
   comboCount = 0;
+  
+  // 🛑 FIX IMPORTANT PENTRU MISIUNEA DE SCOR:
+  previousScoreForTracking = score; // Salvăm scorul cu care ai intrat în joc ca să nu dea auto-complete!
+  
   updateScoreUI();
   updateComboBarUI(0); 
   setInterval(syncQuestsWithServer, 60000);
 
-  // ⏱️ NOU: TRACKER PENTRU MISIUNEA DE TIMP (PLAYTIME)
+  // ⏱️ TRACKER PENTRU MISIUNEA DE TIMP (PLAYTIME)
   if (window.playtimeTracker) clearInterval(window.playtimeTracker);
   window.playtimeTracker = setInterval(() => {
-      // Verificăm dacă jocul NU este pe pauză
       if (!isPaused) {
           questStats.totalPlayTimeMinutes++;
           updateQuestProgress('play_time', 1); // Adaugă 1 minut la progres
       }
-  }, 60000); // 60.000 milisecunde = 1 minut
+  }, 60000); 
 
   if (!kevin.style.backgroundImage) {
       kevin.style.backgroundImage = currentPlayImg;
@@ -9088,13 +9094,10 @@ function startGameUI() {
   if (saveScoreInterval) clearInterval(saveScoreInterval);
   saveScoreInterval = setInterval(syncScoreToFirestore, 5000);
 
-  // 🔥 START THE SPECIAL EVENT LOOP HERE 🔥
   clearTimeout(eventTimeout);
-  // Spawns the first event between 8 to 15 seconds after starting
   eventTimeout = setTimeout(spawnSpecialEvent, 30000);
 
   document.getElementById('gameArea').onclick = (e) => {
-      // 1. If paused OR the 3-second shield is active, do nothing
       if (isPaused || isGracePeriodActive) return;
 
       if (e.target.closest('.control-btn') || 
@@ -9103,7 +9106,6 @@ function startGameUI() {
           e.target.closest('#scoreBoard')) { 
           return; 
       }
-      // 3. Normal miss logic
       playMissSFX(); 
       comboCount = 0; 
       questStats.hitsWithoutMiss = 0; 
@@ -9192,12 +9194,17 @@ async function closeRubyDiscovery() {
       document.getElementById('mainMenu').style.display = 'flex';
     }
 
-// 2. UPDATED updateScoreUI function
 function updateScoreUI(isLoss = false) {
   const sb = document.getElementById('scoreSection'); 
   const st = document.getElementById('scoreText');
   const rt = document.getElementById('rubyText');
-      updateQuestProgress('session_score', score, true); // Actualizează misiunea de scor în timp real
+  
+  // 🛑 NOU: Calculăm doar scorul CÂȘTIGAT în această sesiune (Fără să dăm auto-complete)
+  if (score > previousScoreForTracking && !isLoss) {
+      let gainedScore = score - previousScoreForTracking;
+      updateQuestProgress('earn_score', gainedScore, false); // Acum folosim acțiunea 'earn_score'
+  }
+  previousScoreForTracking = score; // Actualizăm tracker-ul pentru următorul click
 
   // Use nFormatter here for both Score and Rubies
   if (st) st.innerText = nFormatter(score);
