@@ -8574,12 +8574,17 @@ function updateQuestProgress(action, value = 1, isAbsolute = false) {
         if (oldVal !== q.current) changed = true;
     });
 
-    if (changed) {
+if (changed) {
         renderQuestList('easy');
         renderQuestList('hard');
-        syncQuestsWithServer(); 
+        
+        // Only sync to server if it's not a standard playtime tick, 
+        // OR if the quest was just completed (claimed).
+        // This prevents lagging the game every second.
+        if (action !== 'play_time' || value === 0 || (value > 0 && q.current >= q.target)) {
+             syncQuestsWithServer();
+        }
     }
-}
 
 
 function autoClaimQuest(id, difficulty) {
@@ -8655,12 +8660,8 @@ function renderQuestList(difficulty) {
         const pct = Math.min((displayCurrent / q.target) * 100, 100);
         const iconData = getQuestIcon(q.action);
         
-        // --- NOU: FORMATĂM TIMPUL ÎN MM:SS DACA E MISIUNE DE TIMP ---
+// Display raw seconds for playtime instead of MM:SS
         let progressText = `${displayCurrent} / ${q.target}`;
-        if (q.action === 'play_time') {
-            const formatTime = (s) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
-            progressText = `${formatTime(displayCurrent)} / ${formatTime(q.target)}`;
-        }
         
         const row = document.createElement('div');
         row.className = `q-row ${isActuallyDone ? 'q-claimed' : ''}`;
@@ -9082,13 +9083,18 @@ function startGameUI() {
   updateComboBarUI(0); 
   setInterval(syncQuestsWithServer, 60000);
 
-// ⏱️ TRACKER PENTRU MISIUNEA DE TIMP (REAL-TIME: 1 SECUNDĂ)
+// ⏱️ TRACKER PENTRU MISIUNEA DE TIMP (REAL-TIME UPDATES)
   if (window.playtimeTracker) clearInterval(window.playtimeTracker);
   window.playtimeTracker = setInterval(() => {
       if (!isPaused && document.getElementById('gameArea').style.display === 'block') {
-          updateQuestProgress('play_time', 1); // Adaugă 1 SECUNDĂ la progres
+          // Update the numbers
+          updateQuestProgress('play_time', 1); 
+          
+          // Force UI refresh only if a quest modal is actually open
+          if (document.getElementById('easyQuestsModal').style.display === 'flex') renderQuestList('easy');
+          if (document.getElementById('hardQuestsModal').style.display === 'flex') renderQuestList('hard');
       }
-  }, 1000); // 1000 ms = 1 secundă
+  }, 1000);
 
   if (!kevin.style.backgroundImage) {
       kevin.style.backgroundImage = currentPlayImg;
@@ -14419,7 +14425,6 @@ window.closeLevelDetail = closeLevelDetail;
 window.handleClaimLevelReward = handleClaimLevelReward;
 window.openQuestsMenu = openQuestsMenu;
 window.closeQuestsMenu = closeQuestsMenu;
-window.openQuestsTab = openQuestsTab;
 window.openQuestsTab = openQuestsTab;
 window.openEasyQuests = openEasyQuests;
 window.openHardQuests = openHardQuests;
