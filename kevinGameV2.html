@@ -8592,58 +8592,67 @@ function autoClaimQuest(id, difficulty) {
     const list = difficulty === 'easy' ? activeEasyQuests : activeHardQuests;
     const q = list.find(quest => quest.id === id);
     
-    if (!q || q.claimed) return;
+    if (!q) return;
 
-    q.claimed = true; // Marcată ca terminată în memorie
-    
+    // 1. Logic Rewards
     let winScore = q.reward.score || 0;
     let winXP = q.reward.xp || 0;
     let winRubies = q.reward.rubies || 0;
 
-    // --- SUNET ȘI EFECTE ---
+    // 2. Play Sounds & Effects
     if (typeof playSFX === 'function') playSFX(slotJackpotUrl); 
     if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins(); 
 
-    // --- NOTIFICARE PREMIUM CU ICONIȚE ȘI NUME MISIUNE ---
-    let notifMsg = `<div style="font-family:'Montserrat'; font-weight:900; color:#fff; font-size:14px; margin-bottom:4px; text-transform:uppercase;">${q.name}</div>`;
-    notifMsg += `<div style="display:flex; gap:12px; align-items:center; font-family:'Orbitron'; font-size:12px;">`;
+    // 3. Construct Premium Notification HTML with Icons
+    let rewardLine = `<div style="display:flex; gap:12px; align-items:center; margin-top:5px;">`;
     
     if (winScore > 0) {
-        notifMsg += `<div style="display:flex; align-items:center; gap:4px;">
-                        <img src="https://iili.io/COrCopj.png" width="14" height="14">
-                        <span style="color:#facc15;">+${winScore}</span>
+        rewardLine += `<div style="display:flex; align-items:center; gap:4px;">
+                        <img src="https://iili.io/COrCopj.png" width="16" height="16">
+                        <span style="color:#facc15; font-weight:900; font-family:'Orbitron'; font-size:12px;">+${winScore}</span>
                      </div>`;
     }
-if (winXP > 0) {
-        notifMsg += `<div style="display:flex; align-items:center; gap:4px;">
-                        <img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/boosts/XP.png" width="14" height="14">
-                        <span style="color:#4ade80;">+${winXP}</span>
+    if (winXP > 0) {
+        rewardLine += `<div style="display:flex; align-items:center; gap:4px;">
+                        <img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/boosts/XP.png" width="16" height="16">
+                        <span style="color:#4ade80; font-weight:900; font-family:'Orbitron'; font-size:12px;">+${winXP}</span>
                      </div>`;
     }
     if (winRubies > 0) {
-        notifMsg += `<div style="display:flex; align-items:center; gap:4px;">
-                        <img src="https://iili.io/CrnXNdG.png" width="14" height="14">
-                        <span style="color:#ff3366;">+${winRubies}</span>
+        rewardLine += `<div style="display:flex; align-items:center; gap:4px;">
+                        <img src="https://iili.io/CrnXNdG.png" width="16" height="16">
+                        <span style="color:#ff3366; font-weight:900; font-family:'Orbitron'; font-size:12px;">+${winRubies}</span>
                      </div>`;
     }
-    notifMsg += `</div>`;
+    rewardLine += `</div>`;
 
-    showNotification("MISIUNE ÎNDEPLINITĂ!", notifMsg, "fa-trophy");
+    // Trigger the Toast
+    showNotification(
+        "MISIUNE COMPLETĂ!", 
+        `<div style="font-family:'Montserrat'; font-weight:800; color:#fff; font-size:14px; text-transform:uppercase;">${q.name}</div>${rewardLine}`, 
+        "fa-trophy"
+    );
 
-    // --- LOGICĂ RECOMPENSE (ZBOR CĂTRE HUD) ---
-    if (winScore > 0) { pendingWinAmount = winScore; animateScoreFlying(); }
+    // 4. Physical Reward Processing (Animate them flying to HUD)
+    if (winScore > 0) { 
+        pendingWinAmount = winScore; 
+        animateScoreFlying(); 
+    }
     if (winRubies > 0) { 
-        setTimeout(() => { pendingRubyWin = winRubies; animateRubyFlying(); }, 400); 
+        setTimeout(() => { 
+            pendingRubyWin = winRubies; 
+            animateRubyFlying(); 
+        }, 400); 
     }
     if (winXP > 0) { 
         gainXP(winXP); 
         showXPFlyer(window.innerWidth / 2, window.innerHeight / 2, winXP); 
     }
 
-    // --- SALVARE ȘI RE-RENDARE INSTANTANEE ---
-    syncQuestsWithServer();   // Trimite starea "claimed: true" la backend
-    syncScoreToFirestore();   // Salvează noile resurse
-    renderQuestList(difficulty); // RE-RENDARE: Șterge bara și pune bifa verde
+    // 5. Final Sync & UI Refresh
+    syncQuestsWithServer();   
+    syncScoreToFirestore();   
+    renderQuestList(difficulty); 
 }
 
 function renderQuestList(difficulty) {
