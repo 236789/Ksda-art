@@ -8550,6 +8550,7 @@ function startQuestRealTimeTimers() {
 function updateQuestProgress(action, value = 1, isAbsolute = false) {
     const all = [...activeEasyQuests, ...activeHardQuests];
     let changed = false;
+    let questJustFinished = false; // Flag to track completion inside the loop
 
     all.forEach(q => {
         if (q.claimed) return;
@@ -8562,30 +8563,29 @@ function updateQuestProgress(action, value = 1, isAbsolute = false) {
             q.current += value;
         }
 
-        // IMPORTANT: Verificăm >= target
         if (q.current >= q.target) {
             q.current = q.target;
-            q.claimed = true; // O marcăm local imediat
+            q.claimed = true; 
+            questJustFinished = true; // One of the quests is done!
             const diff = q.id.startsWith('e') ? 'easy' : 'hard';
-            autoClaimQuest(q.id, diff); // Declanșăm premiul
+            autoClaimQuest(q.id, diff); 
             changed = true;
         }
         
         if (oldVal !== q.current) changed = true;
     });
 
-if (changed) {
+    if (changed) {
         renderQuestList('easy');
         renderQuestList('hard');
         
-        // Only sync to server if it's not a standard playtime tick, 
-        // OR if the quest was just completed (claimed).
-        // This prevents lagging the game every second.
-        if (action !== 'play_time' || value === 0 || (value > 0 && q.current >= q.target)) {
+        // REPAIRED LOGIC: 
+        // We sync if it's NOT playtime, OR if a quest was just completed.
+        if (action !== 'play_time' || questJustFinished) {
              syncQuestsWithServer();
         }
     }
-} 
+}
 
 
 function autoClaimQuest(id, difficulty) {
