@@ -13674,68 +13674,7 @@ function setTradeQty(qtyVal, btnElement) {
     document.getElementById('tradeConfirmBtn').disabled = (maxAfford < 1 || remainingLimit < 1);
 }
 
-async function confirmTrade() {
-    const tradeId = currentTradeId;
-    const qty = currentTradeQty; // Luăm cantitatea selectată din variabila globală
-    const btn = document.getElementById('tradeConfirmBtn');
-    const trades = getTradeDefinitions();
-    const t = trades.find(tr => tr.id === tradeId);
-    
-    if (!t) return;
 
-    const totalCost = t.costVal * qty;
-
-    // Verificări rapide client-side pentru a nu trimite cereri inutile
-    if (tradeId === 's2r' && score < totalCost) return showKevinutaBubble("N-ai destul Scor!");
-    if ((tradeId === 'r2s' || tradeId === 'r2x') && rubies < totalCost) return showKevinutaBubble("N-ai destule Rubine!");
-
-    btn.disabled = true;
-    btn.innerText = "SE PROCESEAZĂ...";
-
-    try {
-        const idToken = await firebase.auth().currentUser.getIdToken(true);
-        const response = await fetch('https://kevin-backend-qodc.onrender.com/bm-trade', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                idToken, 
-                tradeId, 
-                qty: qty, // <--- ACEASTA ERA CHEIA REPARĂRII
-                xpMult: activeXPMultiplier 
-            })
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            // Actualizăm valorile locale cu cele confirmate de server
-            score = data.newScore;
-            rubies = data.newRubies;
-            playerXP = data.newXP;
-            playerLevel = data.newLevel;
-            playerTradeLimits = data.newLimits;
-
-            updateScoreUI();
-            updateXPBarUI();
-            renderBlackMarketTradeGrid(); 
-            
-            document.getElementById('tradeDetailModal').style.display = 'none';
-            if (typeof playSFX === 'function') playSFX(slotJackpotUrl); 
-
-            // Notificare de succes
-            showNotification("SCHIMB REUȘIT", `Ai schimbat x${qty} unități.`, "fa-handshake");
-        } else {
-            // Dacă serverul trimite 400, afișăm mesajul de eroare exact (ex: "Limită atinsă")
-            const errorText = await response.text();
-            showKevinutaBubble(errorText);
-        }
-    } catch (e) { 
-        console.error("Eroare conexiune:", e);
-        showKevinutaBubble("Eroare de server!");
-    } finally {
-        btn.disabled = false;
-        btn.innerText = "CONFIRMĂ SCHIMBUL";
-    }
-}
 
 // AFIȘARE CARDURI (CÂND DAI CLICK PE ELE, DESCHIDE MODALUL)
 function renderBlackMarketTradeGrid() {
