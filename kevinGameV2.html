@@ -7767,6 +7767,17 @@ div.inv-tile div.bm-limit-tag {
     align-items: center !important;
     justify-content: center !important;
 }
+
+
+/* Forțăm grosimea maximă pentru textele VEI PLĂTI / VEI PRIMI */
+.tc-label {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    letter-spacing: 1px !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important;
+    text-transform: uppercase !important;
+}
   </style>
 </head>
 <body>
@@ -8331,8 +8342,7 @@ div.inv-tile div.bm-limit-tag {
     </div>
 </div>
 
-
-<!-- TRADE DETAIL MODAL -->
+<!-- TRADE DETAIL MODAL (CU CANTITATE) -->
 <div id="tradeDetailModal" class="modal-overlay" style="z-index: 100010;">
     <div class="modal-box info-modal-box bm-box" style="border-color: #facc15 !important;">
         <h2 id="tradeDetailName" style="color: #facc15 !important; margin-bottom: 5px;">NUME SCHIMB</h2>
@@ -8355,8 +8365,14 @@ div.inv-tile div.bm-limit-tag {
             </div>
         </div>
 
+        <!-- Butoane Selector Cantitate (1 sau MAX) -->
+        <div class="bet-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 15px;">
+            <button class="menu-btn play bet-btn active-bet" id="tBtn1" onclick="setTradeQty(1, this)">1 SCHIMB</button>
+            <button class="menu-btn play bet-btn" id="tBtnMax" onclick="setTradeQty('max', this)">MAXIM</button>
+        </div>
+
         <!-- Panoul de Limite -->
-        <div class="sell-stats-row" style="border-color: rgba(250, 204, 21, 0.3);">
+        <div class="sell-stats-row" style="border-color: rgba(250, 204, 21, 0.3); margin-top: 0;">
             <div class="stat-item">
                 <span class="stat-label">Limită Totală</span>
                 <span id="tradeLimitVal" class="stat-val" style="color: #94a3b8;">0</span>
@@ -13574,41 +13590,32 @@ function switchBMTab(tab) {
 
 let playerTradeLimits = { s2r: 0, r2s: 0, r2x: 0 }; // Tracked from backend
 
-// VARIABILĂ GLOBALĂ PENTRU A ȘTI CE SCHIMB E SELECTAT
+// VARIABILE GLOBALE PENTRU SCHIMB
 let currentTradeId = null;
+let currentTradeQty = 1;
 
-// DEFINIȚIILE SCHIMBURILOR (Reparate cu termeni de "Trading")
 function getTradeDefinitions() {
     return [
         { 
-            id: 's2r', 
-            name: 'CUMPĂRĂ RUBIN', 
+            id: 's2r', name: 'CUMPĂRĂ RUBIN', 
             costVal: 1000, costText: 'Scor', 
             getVal: 1, getText: 'Rubin', 
             limit: 5, current: playerTradeLimits.s2r, 
-            theme: 'c-red', 
-            iconLeft: `<i class="fa-solid fa-hand-pointer"></i>`, 
-            iconRight: `<img src="https://iili.io/CrnXNdG.png">` 
+            theme: 'c-red', iconLeft: `<i class="fa-solid fa-hand-pointer"></i>`, iconRight: `<img src="https://iili.io/CrnXNdG.png">` 
         },
         { 
-            id: 'r2s', 
-            name: 'VINDE RUBIN', 
+            id: 'r2s', name: 'VINDE RUBIN', 
             costVal: 1, costText: 'Rubin', 
             getVal: 500, getText: 'Scor', 
             limit: 10, current: playerTradeLimits.r2s, 
-            theme: 'c-gold', 
-            iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, 
-            iconRight: `<i class="fa-solid fa-hand-pointer"></i>` 
+            theme: 'c-gold', iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, iconRight: `<i class="fa-solid fa-hand-pointer"></i>` 
         },
         { 
-            id: 'r2x', 
-            name: 'SCHIMB PENTRU XP', 
+            id: 'r2x', name: 'SCHIMB PENTRU XP', 
             costVal: 1, costText: 'Rubin', 
             getVal: (50 * activeXPMultiplier), getText: 'XP', 
             limit: 10, current: playerTradeLimits.r2x, 
-            theme: 'c-green', 
-            iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, 
-            iconRight: `<img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/boosts/XP.png">` 
+            theme: 'c-green', iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, iconRight: `<img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/boosts/XP.png">` 
         }
     ];
 }
@@ -13619,35 +13626,68 @@ function openTradeDetail(tradeId) {
     const t = trades.find(tr => tr.id === tradeId);
     if (!t) return;
 
-    const remaining = t.limit - t.current;
-
-    // Populăm datele în Modal
+    // Setăm titlul și iconițele (astea nu se schimbă la cantitate)
     document.getElementById('tradeDetailName').innerText = t.name.toUpperCase();
     document.getElementById('tradeGiveIcon').innerHTML = t.iconLeft;
-    document.getElementById('tradeGiveText').innerText = `${t.costVal} ${t.costText}`;
-    
     document.getElementById('tradeGetIcon').innerHTML = t.iconRight;
-    document.getElementById('tradeGetText').innerText = `${t.getVal} ${t.getText}`;
     
     document.getElementById('tradeLimitVal').innerText = t.limit;
-    document.getElementById('tradeRemainingVal').innerText = remaining;
+    document.getElementById('tradeRemainingVal').innerText = t.limit - t.current;
+
+    // Setăm default la 1 schimb
+    setTradeQty(1, document.getElementById('tBtn1'));
 
     document.getElementById('tradeDetailModal').style.display = 'flex';
 }
 
+function setTradeQty(qtyVal, btnElement) {
+    const trades = getTradeDefinitions();
+    const t = trades.find(tr => tr.id === currentTradeId);
+    if (!t) return;
+
+    const remainingLimit = t.limit - t.current;
+    let maxAfford = 0;
+
+    // Câte schimburi își permite jucătorul?
+    if (t.id === 's2r') maxAfford = Math.floor(score / t.costVal);
+    else if (t.id === 'r2s' || t.id === 'r2x') maxAfford = Math.floor(rubies / t.costVal);
+
+    if (qtyVal === 'max') {
+        currentTradeQty = Math.min(remainingLimit, maxAfford);
+    } else {
+        currentTradeQty = Math.min(qtyVal, remainingLimit, maxAfford);
+    }
+
+    // Siguranță
+    if (currentTradeQty < 1) currentTradeQty = 1;
+
+    // Update vizual cu înmulțirea
+    document.getElementById('tradeGiveText').innerText = `${t.costVal * currentTradeQty} ${t.costText}`;
+    document.getElementById('tradeGetText').innerText = `${t.getVal * currentTradeQty} ${t.getText}`;
+
+    // Styling butoane
+    document.getElementById('tBtn1').classList.remove('active-bet');
+    document.getElementById('tBtnMax').classList.remove('active-bet');
+    if (btnElement) btnElement.classList.add('active-bet');
+
+    // Dezactivăm butonul dacă nu are bani pentru măcar 1 schimb
+    document.getElementById('tradeConfirmBtn').disabled = (maxAfford < 1 || remainingLimit < 1);
+}
+
 async function confirmTrade() {
     const tradeId = currentTradeId;
+    const qty = currentTradeQty; // Trimitem cantitatea
     const btn = document.getElementById('tradeConfirmBtn');
-    
-    // Obținem datele schimbului pentru modalul de succes
     const trades = getTradeDefinitions();
     const t = trades.find(tr => tr.id === tradeId);
     
-    // Verificări rapide client-side
-    if (tradeId === 's2r' && score < 1000) return showKevinutaBubble("N-ai destul Scor!");
-    if ((tradeId === 'r2s' || tradeId === 'r2x') && rubies < 1) return showKevinutaBubble("N-ai destule Rubine!");
+    const totalCost = t.costVal * qty;
+    const totalGet = t.getVal * qty;
 
-    // Blocăm butonul vizual
+    // Verificări rapide client-side
+    if (tradeId === 's2r' && score < totalCost) return showKevinutaBubble("N-ai destul Scor!");
+    if ((tradeId === 'r2s' || tradeId === 'r2x') && rubies < totalCost) return showKevinutaBubble("N-ai destule Rubine!");
+
     btn.disabled = true;
     btn.innerText = "SE PROCESEAZĂ...";
 
@@ -13656,12 +13696,13 @@ async function confirmTrade() {
         const response = await fetch('https://kevin-backend-qodc.onrender.com/bm-trade', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idToken, tradeId, xpMult: activeXPMultiplier })
+            // ATENȚIE: Trimitem și `qty` către backend! 
+            // (Asigură-te că backend-ul tău înmulțește cu `qty`)
+            body: JSON.stringify({ idToken, tradeId, qty: qty, xpMult: activeXPMultiplier })
         });
 
         if (response.ok) {
             const data = await response.json();
-            // Update local values
             score = data.newScore;
             rubies = data.newRubies;
             playerXP = data.newXP;
@@ -13672,25 +13713,25 @@ async function confirmTrade() {
             updateXPBarUI();
             renderBlackMarketTradeGrid(); 
             
-            // Închidem modalul de Trade
             document.getElementById('tradeDetailModal').style.display = 'none';
             playSFX(slotJackpotUrl); 
 
-            // --- NOU: MODAL DE SUCCES (Arată exact ce ai dat și ce ai primit) ---
+            // MODALUL "CHITANȚĂ" (ARATĂ EXACT CE S-A ÎNTÂMPLAT)
             const rewardHtml = `
-                <div class="result-rewards-wrap">
-                    <div class="res-reward-item">
-                        <span class="res-reward-val" style="color:#ef4444;">-${t.costVal}</span>
-                        <span class="res-reward-lab">${t.costText}</span>
+                <div style="background: rgba(0,0,0,0.5); border: 2px solid #333; padding: 15px; border-radius: 12px; margin: 15px 0;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom: 10px; font-family:'Oswald'; color:#ef4444; font-size:18px;">
+                        <span>AI PLĂTIT:</span>
+                        <span style="font-family:'Orbitron'; font-weight:900;">${totalCost} ${t.costText}</span>
                     </div>
-                    <div class="res-reward-item">
-                        <span class="res-reward-val" style="color:#4ade80;">+${t.getVal}</span>
-                        <span class="res-reward-lab">${t.getText}</span>
+                    <div style="display:flex; justify-content:space-between; font-family:'Oswald'; color:#4ade80; font-size:18px;">
+                        <span>AI PRIMIT:</span>
+                        <span style="font-family:'Orbitron'; font-weight:900;">${totalGet} ${t.getText}</span>
                     </div>
                 </div>
             `;
-            // Folosim funcția ta "showSickResult" pentru a arăta confirmarea
-            showSickResult("SCHIMB REUȘIT!", `Tranzacția a fost finalizată cu succes.`, rewardHtml, true);
+            
+            // Folosim showSickResult pentru un display mare central
+            showSickResult("TRANZACȚIE REUȘITĂ", `Ai efectuat ${qty} schimb(uri).`, rewardHtml, true);
 
         } else {
             const err = await response.text();
@@ -13700,7 +13741,6 @@ async function confirmTrade() {
         console.error(e); 
         showKevinutaBubble("Eroare de conexiune la server!");
     } finally {
-        // Deblocăm butonul
         btn.disabled = false;
         btn.innerText = "CONFIRMĂ SCHIMBUL";
     }
@@ -15308,6 +15348,7 @@ window.resumeFromQuest = resumeFromQuest;
 window.closeMisiuniSelection = closeMisiuniSelection;
 window.openTradeDetail = openTradeDetail;
 window.confirmTrade = confirmTrade;
+window.setTradeQty = setTradeQty;
 
 
 
