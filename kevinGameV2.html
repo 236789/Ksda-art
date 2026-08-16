@@ -7847,6 +7847,24 @@ div.inv-tile div.bm-limit-tag {
     z-index: 10;
     box-shadow: 0 0 15px rgba(0,0,0,0.5);
 }
+
+
+/* Badge pentru Tab-ul de Trading */
+.tab-lock-badge {
+    position: absolute;
+    bottom: -2px;
+    background: #ff3366; /* Roșu Rubin */
+    color: white;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    font-weight: 900;
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    z-index: 20;
+    pointer-events: none; /* Să nu blocheze click-ul pe tab */
+}
   </style>
 </head>
 <body>
@@ -13635,24 +13653,26 @@ function startBMTimer() {
 }
 
 function switchBMTab(tab) {
-    // --- NOU: VERIFICARE SECURITATE NIVEL 4 ---
+    // Prevent the click from "hitting" the background and losing score
+    if (window.event) window.event.stopPropagation();
+
+    // --- LVL 4 SECURITY CHECK ---
     if (tab === 'trade' && playerLevel < 4) {
-        playMissSFX(); // Sunet de eroare
-        showKevinutaBubble("Schimburile se deblochează la Nivelul 4!");
-        return; // Oprim funcția aici, nu se schimbă tab-ul
+        playMissSFX();
+        showNotification("BLOCAT", "Ai nevoie de Nivelul 4 pentru Schimburi!", "fa-lock");
+        showKevinutaBubble("Revin-o când ești mai experimentat (LVL 4)!");
+        return; 
     }
 
-    // Resetăm starea vizuală a butoanelor
+    // Normal Tab Switching Logic
     document.getElementById('tabBmBuy').classList.remove('active');
     document.getElementById('tabBmSell').classList.remove('active');
     document.getElementById('tabBmTrade').classList.remove('active');
 
-    // Ascundem toate secțiunile
     document.getElementById('bm-buy-view').style.display = 'none';
     document.getElementById('bm-sell-view').style.display = 'none';
     document.getElementById('bm-trade-view').style.display = 'none';
 
-    // Activăm tab-ul selectat
     if (tab === 'buy') {
         document.getElementById('tabBmBuy').classList.add('active');
         document.getElementById('bm-buy-view').style.display = 'block';
@@ -13883,16 +13903,25 @@ async function openBlackMarket() {
     clearInterval(moveKevinInterval);
     document.getElementById('utilitiesModal').style.display = 'none';
     document.getElementById('blackMarketModal').style.display = 'flex';
-    
-    // --- FIX: BLOCARE VIZUALĂ TAB SCHIMB (LVL 4) ---
-    const tradeTabBtn = document.getElementById('tabBmTrade');
+
+    // --- LVL 4 LOCK SETUP ---
+    const tradeTab = document.getElementById('tabBmTrade');
+    // Remove old badge if it exists to avoid duplicates
+    const oldBadge = tradeTab.querySelector('.tab-lock-badge');
+    if (oldBadge) oldBadge.remove();
+
     if (playerLevel < 4) {
-        tradeTabBtn.style.filter = "grayscale(1) brightness(0.3)";
-        tradeTabBtn.style.cursor = "not-allowed";
-        tradeTabBtn.title = "Necesită Nivelul 4";
+        tradeTab.style.filter = "grayscale(1) brightness(0.3)";
+        tradeTab.style.cursor = "not-allowed";
+        
+        // Create and add the LVL 4 Badge
+        const badge = document.createElement('div');
+        badge.className = 'tab-lock-badge';
+        badge.innerText = "LVL 4";
+        tradeTab.appendChild(badge);
     } else {
-        tradeTabBtn.style.filter = "none";
-        tradeTabBtn.style.cursor = "pointer";
+        tradeTab.style.filter = "none";
+        tradeTab.style.cursor = "pointer";
     }
 
     switchBMTab('buy');
@@ -13912,7 +13941,6 @@ async function openBlackMarket() {
         if (response.ok) {
             const data = await response.json();
             if (data.playerTradeLimits) playerTradeLimits = data.playerTradeLimits;
-
             lastMarketRefresh = data.lastRefresh;
             blackMarketWants = data.offers.map(off => ({ ...off, sold: data.playerSales[off.key] || 0 }));
             blackMarketOffers = data.buyOffers.map(off => ({ ...off, bought: data.playerBuys[off.key] || 0 }));
@@ -15215,7 +15243,7 @@ function openQuestsTab() {
         if (!easyCard.querySelector('.gray-lock-badge')) {
             const badge = document.createElement('div');
             badge.className = 'gray-lock-badge';
-            badge.innerText = "LVL 4 REQ.";
+            badge.innerText = "LVL 4.";
             easyCard.appendChild(badge);
         }
     } else {
