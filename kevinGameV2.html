@@ -9260,14 +9260,21 @@ function startQuestRealTimeTimers() {
 }
 
 function updateQuestProgress(action, value = 1, isAbsolute = false) {
+    // FILTRU: Misiunile Ușoare (easy) nu se contorizează sub Nivelul 4
+    // Misiunile Grele (hard) presupunem că rămân active sau au altă logică
     const all = [...activeEasyQuests, ...activeHardQuests];
+    
     let changed = false;
-    let questJustFinished = false; // Flag to track completion inside the loop
+    let questJustFinished = false;
 
     all.forEach(q => {
         if (q.claimed) return;
         if (q.action !== action) return;
-        
+
+        // VERIFICARE NIVEL: Dacă e misiune ușoară și ai lvl < 4, dăm skip
+        const isEasy = q.id.startsWith('e');
+        if (isEasy && playerLevel < 4) return; 
+
         let oldVal = q.current;
         if (isAbsolute) {
             q.current = Math.max(q.current, value);
@@ -9278,8 +9285,8 @@ function updateQuestProgress(action, value = 1, isAbsolute = false) {
         if (q.current >= q.target) {
             q.current = q.target;
             q.claimed = true; 
-            questJustFinished = true; // One of the quests is done!
-            const diff = q.id.startsWith('e') ? 'easy' : 'hard';
+            questJustFinished = true;
+            const diff = isEasy ? 'easy' : 'hard';
             autoClaimQuest(q.id, diff); 
             changed = true;
         }
@@ -9290,9 +9297,6 @@ function updateQuestProgress(action, value = 1, isAbsolute = false) {
     if (changed) {
         renderQuestList('easy');
         renderQuestList('hard');
-        
-        // REPAIRED LOGIC: 
-        // We sync if it's NOT playtime, OR if a quest was just completed.
         if (action !== 'play_time' || questJustFinished) {
              syncQuestsWithServer();
         }
