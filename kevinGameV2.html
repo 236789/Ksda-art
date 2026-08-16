@@ -7681,6 +7681,74 @@ div.inv-tile div.bm-limit-tag {
     z-index: 10 !important;
     box-shadow: 0 2px 4px rgba(0,0,0,0.8) !important;
 }
+
+
+
+/* ==========================================
+   TRADE CONVERSION MODAL STYLES
+   ========================================== */
+.trade-conversion-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: radial-gradient(circle at center, #1f0404 0%, #000000 100%);
+    border: 3px solid #450a0a;
+    border-radius: 16px;
+    padding: 20px 10px;
+    margin: 15px 0 25px 0;
+    box-shadow: inset 0 10px 20px rgba(0,0,0,0.9), 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.tc-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 40%;
+}
+
+.tc-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.tc-icon-big {
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tc-icon-big img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8));
+}
+
+.tc-icon-big i {
+    font-size: 45px;
+    color: #94a3b8;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8));
+}
+
+.tc-val {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+}
+
+.tc-arrow-mid {
+    font-size: 35px;
+    color: #facc15;
+    filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.5));
+    animation: arrowFlow 1s infinite linear;
+}
   </style>
 </head>
 <body>
@@ -8242,6 +8310,47 @@ div.inv-tile div.bm-limit-tag {
 
         <button class="menu-btn play" id="sellFinalBtn" style="width: 100%; height: 55px;" onclick="processSell()">VINDE</button>
         <button class="cancel-btn" style="margin-top: 15px;" onclick="document.getElementById('sellDetailModal').style.display='none'">ANULEAZĂ</button>
+    </div>
+</div>
+
+
+<!-- TRADE DETAIL MODAL -->
+<div id="tradeDetailModal" class="modal-overlay" style="z-index: 100010;">
+    <div class="modal-box info-modal-box bm-box" style="border-color: #facc15 !important;">
+        <h2 id="tradeDetailName" style="color: #facc15 !important; margin-bottom: 5px;">NUME SCHIMB</h2>
+        <div class="selection-line" style="background: #facc15; width: 60px; margin-bottom: 20px;"></div>
+        
+        <!-- Panoul Vizual de Conversie -->
+        <div class="trade-conversion-display">
+            <div class="tc-side">
+                <span class="tc-label" style="color: #ef4444;">VEI PLĂTI</span>
+                <div id="tradeGiveIcon" class="tc-icon-big"></div>
+                <span id="tradeGiveText" class="tc-val">0</span>
+            </div>
+            
+            <div class="tc-arrow-mid"><i class="fa-solid fa-arrow-right"></i></div>
+            
+            <div class="tc-side">
+                <span class="tc-label" style="color: #4ade80;">VEI PRIMI</span>
+                <div id="tradeGetIcon" class="tc-icon-big"></div>
+                <span id="tradeGetText" class="tc-val">0</span>
+            </div>
+        </div>
+
+        <!-- Panoul de Limite -->
+        <div class="sell-stats-row" style="border-color: rgba(250, 204, 21, 0.3);">
+            <div class="stat-item">
+                <span class="stat-label">Limită Totală</span>
+                <span id="tradeLimitVal" class="stat-val" style="color: #94a3b8;">0</span>
+            </div>
+            <div class="stat-item" style="border-left: 1px solid rgba(255,255,255,0.1);">
+                <span class="stat-label">Rămase Disponibile</span>
+                <span id="tradeRemainingVal" class="stat-val" style="color: #facc15;">0</span>
+            </div>
+        </div>
+
+        <button class="menu-btn play" id="tradeConfirmBtn" style="width: 100%; height: 55px; background: linear-gradient(180deg, #facc15, #b45309); color: #000; border-color: #fff; box-shadow: 0 6px 0 #78350f, 0 10px 20px rgba(0,0,0,0.5);" onclick="confirmTrade()">CONFIRMĂ SCHIMBUL</button>
+        <button class="cancel-btn" style="margin-top: 15px;" onclick="document.getElementById('tradeDetailModal').style.display='none'">ANULEAZĂ</button>
     </div>
 </div>
 
@@ -13447,50 +13556,63 @@ function switchBMTab(tab) {
 
 let playerTradeLimits = { s2r: 0, r2s: 0, r2x: 0 }; // Tracked from backend
 
-function renderBlackMarketTradeGrid() {
-    const grid = document.getElementById('blackMarketTradeGrid');
-    
-    // Asigură-te că folosim noua clasă pentru container
-    grid.className = "bm-trade-list-v2";
-    grid.innerHTML = "";
+// VARIABILĂ GLOBALĂ PENTRU A ȘTI CE SCHIMB E SELECTAT
+let currentTradeId = null;
 
-    const trades = [
+// DEFINIȚIILE SCHIMBURILOR
+function getTradeDefinitions() {
+    return [
         { 
             id: 's2r', 
-            limit: 5, 
-            current: playerTradeLimits.s2r, 
-            theme: 'c-red', // Roșu
-            iconLeft: `<i class="fa-solid fa-hand-pointer"></i>`, // Scor (Cursor)
-            iconRight: `<img src="https://iili.io/CrnXNdG.png">` // Rubin
+            name: 'Investiție Rubin', 
+            costVal: 1000, costText: 'Scor', 
+            getVal: 1, getText: 'Rubin', 
+            limit: 5, current: playerTradeLimits.s2r, 
+            theme: 'c-red', 
+            iconLeft: `<i class="fa-solid fa-hand-pointer"></i>`, 
+            iconRight: `<img src="https://iili.io/CrnXNdG.png">` 
         },
         { 
             id: 'r2s', 
-            limit: 10, 
-            current: playerTradeLimits.r2s, 
-            theme: 'c-gold', // Auriu
-            iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, // Rubin
-            iconRight: `<i class="fa-solid fa-hand-pointer"></i>` // Scor (Cursor)
+            name: 'Vânzare Rubin', 
+            costVal: 1, costText: 'Rubin', 
+            getVal: 500, getText: 'Scor', 
+            limit: 10, current: playerTradeLimits.r2s, 
+            theme: 'c-gold', 
+            iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, 
+            iconRight: `<i class="fa-solid fa-hand-pointer"></i>` 
         },
         { 
             id: 'r2x', 
-            limit: 10, 
-            current: playerTradeLimits.r2x, 
-            theme: 'c-green', // Verde
-            iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, // Rubin
-            iconRight: `<img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/boosts/XP.png">` // XP
+            name: 'Antrenament Rubin', 
+            costVal: 1, costText: 'Rubin', 
+            getVal: (50 * activeXPMultiplier), getText: 'XP', 
+            limit: 10, current: playerTradeLimits.r2x, 
+            theme: 'c-green', 
+            iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, 
+            iconRight: `<img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/boosts/XP.png">` 
         }
     ];
+}
+
+// AFIȘARE CARDURI (CÂND DAI CLICK PE ELE, DESCHIDE MODALUL)
+function renderBlackMarketTradeGrid() {
+    const grid = document.getElementById('blackMarketTradeGrid');
+    grid.className = "bm-trade-list-v2";
+    grid.innerHTML = "";
+
+    const trades = getTradeDefinitions();
 
     trades.forEach((t, index) => {
         const remaining = t.limit - t.current;
-        
         const card = document.createElement('div');
-        // Adăugăm un delay la animația de float ca să nu se miște toate la fel
         card.style.animationDelay = `${index * 0.2}s`;
         card.className = `trade-card-v2 ${t.theme} ${remaining <= 0 ? 'sold-out' : ''}`;
         
-        // Când apeși pe oriunde pe card, se face schimbul
-        card.onclick = () => processBMTrade(t.id);
+        // MODIFICARE AICI: Când dai click, deschizi Modalul de Detalii!
+        card.onclick = () => {
+            if (remaining > 0) openTradeDetail(t.id);
+        };
         
         card.innerHTML = `
             <div class="tc-icon">${t.iconLeft}</div>
@@ -13501,10 +13623,41 @@ function renderBlackMarketTradeGrid() {
     });
 }
 
-async function processBMTrade(tradeId) {
-    // 1. Client-side checks
+// DESCHIDEREA MODALULUI CU DETALIILE SPECIFICE
+function openTradeDetail(tradeId) {
+    currentTradeId = tradeId;
+    const trades = getTradeDefinitions();
+    const t = trades.find(tr => tr.id === tradeId);
+    if (!t) return;
+
+    const remaining = t.limit - t.current;
+
+    // Populăm datele în Modal
+    document.getElementById('tradeDetailName').innerText = t.name.toUpperCase();
+    document.getElementById('tradeGiveIcon').innerHTML = t.iconLeft;
+    document.getElementById('tradeGiveText').innerText = `${t.costVal} ${t.costText}`;
+    
+    document.getElementById('tradeGetIcon').innerHTML = t.iconRight;
+    document.getElementById('tradeGetText').innerText = `${t.getVal} ${t.getText}`;
+    
+    document.getElementById('tradeLimitVal').innerText = t.limit;
+    document.getElementById('tradeRemainingVal').innerText = remaining;
+
+    document.getElementById('tradeDetailModal').style.display = 'flex';
+}
+
+// LOGICA FINALĂ - CÂND APERI "CONFIRMĂ SCHIMBUL" ÎN MODAL
+async function confirmTrade() {
+    const tradeId = currentTradeId;
+    const btn = document.getElementById('tradeConfirmBtn');
+    
+    // 1. Verificări rapide client-side
     if (tradeId === 's2r' && score < 1000) return showKevinutaBubble("N-ai destul Scor!");
     if ((tradeId === 'r2s' || tradeId === 'r2x') && rubies < 1) return showKevinutaBubble("N-ai destule Rubine!");
+
+    // Blocăm butonul vizual cât procesăm
+    btn.disabled = true;
+    btn.innerText = "SE PROCESEAZĂ...";
 
     try {
         const idToken = await firebase.auth().currentUser.getIdToken(true);
@@ -13525,14 +13678,25 @@ async function processBMTrade(tradeId) {
 
             updateScoreUI();
             updateXPBarUI();
-            renderBlackMarketTradeGrid();
-            playSFX(slotJackpotUrl);
+            renderBlackMarketTradeGrid(); // Dă refresh la numărul de schimburi rămase
+            
+            // Închidem modalul și afișăm succes
+            document.getElementById('tradeDetailModal').style.display = 'none';
+            playSFX(slotJackpotUrl); // Sunet specific
             showNotification("SCHIMB REUȘIT!", "Afacere încheiată cu succes!", "fa-handshake");
+
         } else {
             const err = await response.text();
             showKevinutaBubble(err);
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error(e); 
+        showKevinutaBubble("Eroare de conexiune la server!");
+    } finally {
+        // Deblocăm butonul pentru următoarea dată
+        btn.disabled = false;
+        btn.innerText = "CONFIRMĂ SCHIMBUL";
+    }
 }
 
 async function openBlackMarket() {
