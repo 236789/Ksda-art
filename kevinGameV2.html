@@ -13666,29 +13666,18 @@ function openTradeDetail(tradeId) {
     const t = trades.find(tr => tr.id === tradeId);
     if (!t) return;
 
-    const remaining = t.limit - t.current;
+    const remaining = Math.max(0, t.limit - t.current);
 
-    // Populăm datele în Modal
     document.getElementById('tradeDetailName').innerText = t.name.toUpperCase();
     document.getElementById('tradeGiveIcon').innerHTML = t.iconLeft;
     document.getElementById('tradeGetIcon').innerHTML = t.iconRight;
     
     document.getElementById('tradeLimitVal').innerText = t.limit;
-    document.getElementById('tradeRemainingVal').innerText = Math.max(0, remaining);
+    document.getElementById('tradeRemainingVal').innerText = remaining;
 
-    // Blocăm butonul de Confirmare dacă limita a fost atinsă între timp
-    const confirmBtn = document.getElementById('tradeConfirmBtn');
-    if (remaining <= 0) {
-        confirmBtn.disabled = true;
-        confirmBtn.innerText = "LIMITĂ ATINSĂ!";
-        confirmBtn.style.background = "#444";
-    } else {
-        confirmBtn.disabled = false;
-        confirmBtn.innerText = "CONFIRMĂ SCHIMBUL";
-        confirmBtn.style.background = ""; // Revine la tema originală
-    }
-
-    setTradeQty(1, document.getElementById('tBtn1'));
+    // Set initial quantity. If remaining is 0, start at 0.
+    setTradeQty(remaining > 0 ? 1 : 0, document.getElementById('tBtn1'));
+    
     document.getElementById('tradeDetailModal').style.display = 'flex';
 }
 
@@ -13805,35 +13794,46 @@ function setTradeQty(qtyVal, btnElement) {
     const t = trades.find(tr => tr.id === currentTradeId);
     if (!t) return;
 
-    const remainingLimit = t.limit - t.current;
+    const remainingLimit = Math.max(0, t.limit - t.current); // Force non-negative
     let maxAfford = 0;
 
-    // Calculăm cât își permite jucătorul
+    // Calculate affordability
     if (t.id === 's2r') maxAfford = Math.floor(score / t.costVal);
     else if (t.id === 'r2s' || t.id === 'r2x') maxAfford = Math.floor(rubies / t.costVal);
 
     if (qtyVal === 'max') {
-        currentTradeQty = Math.max(1, Math.min(remainingLimit, maxAfford));
+        // Now it will correctly pick 0 if remainingLimit is 0
+        currentTradeQty = Math.min(remainingLimit, maxAfford);
     } else {
         currentTradeQty = Math.min(qtyVal, remainingLimit, maxAfford);
     }
 
-    if (currentTradeQty < 1) currentTradeQty = 1;
+    // IMPORTANT: If limit is hit, currentTradeQty must be 0
+    if (remainingLimit <= 0) currentTradeQty = 0;
 
-    // Update vizual în modal
+    // Update UI
     const giveText = document.getElementById('tradeGiveText');
     const getText = document.getElementById('tradeGetText');
     
     if (giveText) giveText.innerText = `${t.costVal * currentTradeQty} ${t.costText}`;
     if (getText) getText.innerText = `${t.getVal * currentTradeQty} ${t.getText}`;
 
-    // Styling butoane (le face albe pe cele selectate)
+    // Update Buttons UI
     document.getElementById('tBtn1').classList.remove('active-bet');
     document.getElementById('tBtnMax').classList.remove('active-bet');
-    if (btnElement) btnElement.classList.add('active-bet');
+    if (btnElement && currentTradeQty > 0) btnElement.classList.add('active-bet');
 
-    // Dezactivăm butonul dacă nu are resurse
-    document.getElementById('tradeConfirmBtn').disabled = (maxAfford < 1 || remainingLimit < 1);
+    // Disable confirm button if qty is 0
+    const confirmBtn = document.getElementById('tradeConfirmBtn');
+    if (currentTradeQty <= 0) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerText = "LIMITĂ ATINSĂ!";
+        confirmBtn.style.opacity = "0.5";
+    } else {
+        confirmBtn.disabled = false;
+        confirmBtn.innerText = "CONFIRMĂ SCHIMBUL";
+        confirmBtn.style.opacity = "1";
+    }
 }
 
 async function openBlackMarket() {
