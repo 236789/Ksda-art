@@ -7818,6 +7818,35 @@ div.inv-tile div.bm-limit-tag {
     text-align: center;
     text-transform: uppercase;
 }
+
+
+/* Darkens the card and grays it out */
+.trade-card-v2.limit-reached {
+    filter: grayscale(1) brightness(0.3) !important;
+    cursor: not-allowed !important;
+    position: relative;
+    pointer-events: auto; /* Required to allow the click bubble to show */
+}
+
+/* Creates the diagonal "LIMITĂ ATINSĂ" ribbon */
+.trade-card-v2.limit-reached::after {
+    content: "LIMITĂ ATINSĂ";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    background: #ff2a2a;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    padding: 5px 15px;
+    border-radius: 4px;
+    border: 2px solid white;
+    white-space: nowrap;
+    z-index: 10;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
   </style>
 </head>
 <body>
@@ -9598,7 +9627,8 @@ if (response.status === 200) {
     updateIndicatorsSetting(showEventIndicators); 
 
 
-                
+         if (data.tradeLimits) playerTradeLimits = data.tradeLimits; 
+           
                 // --- EXTRAGEM STATISTICILE AICI ---
                 bestComboAllTime = data.settings.bestCombo ?? 0;
                 totalClicksAllTime = data.settings.totalClicks ?? 0;
@@ -13633,33 +13663,40 @@ let playerTradeLimits = { s2r: 0, r2s: 0, r2x: 0 }; // Tracked from backend
 // VARIABILE GLOBALE PENTRU SCHIMB
 let currentTradeId = null;
 let currentTradeQty = 1;
-
 function getTradeDefinitions() {
     return [
         { 
             id: 's2r', name: 'CUMPĂRĂ RUBIN', 
             costVal: 1000, costText: 'Scor', 
             getVal: 1, getText: 'Rubin', 
-            limit: 5, current: playerTradeLimits.s2r, 
-            theme: 'c-red', iconLeft: `<i class="fa-solid fa-hand-pointer"></i>`, iconRight: `<img src="https://iili.io/CrnXNdG.png">` 
+            limit: 5, 
+            current: playerTradeLimits.s2r || 0, // This must match the backend key
+            theme: 'c-red', 
+            iconLeft: `<i class="fa-solid fa-hand-pointer"></i>`, 
+            iconRight: `<img src="https://iili.io/CrnXNdG.png">` 
         },
         { 
             id: 'r2s', name: 'VINDE RUBIN', 
             costVal: 1, costText: 'Rubin', 
             getVal: 500, getText: 'Scor', 
-            limit: 10, current: playerTradeLimits.r2s, 
-            theme: 'c-gold', iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, iconRight: `<i class="fa-solid fa-hand-pointer"></i>` 
+            limit: 10, 
+            current: playerTradeLimits.r2s || 0, 
+            theme: 'c-gold', 
+            iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, 
+            iconRight: `<i class="fa-solid fa-hand-pointer"></i>` 
         },
         { 
             id: 'r2x', name: 'SCHIMB PENTRU XP', 
             costVal: 1, costText: 'Rubin', 
             getVal: (50 * activeXPMultiplier), getText: 'XP', 
-            limit: 10, current: playerTradeLimits.r2x, 
-            theme: 'c-green', iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, iconRight: `<img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/boosts/XP.png">` 
+            limit: 10, 
+            current: playerTradeLimits.r2x || 0, 
+            theme: 'c-green', 
+            iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, 
+            iconRight: `<img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/boosts/XP.png">` 
         }
     ];
 }
-
 function openTradeDetail(tradeId) {
     currentTradeId = tradeId;
     const trades = getTradeDefinitions();
@@ -13687,22 +13724,27 @@ function openTradeDetail(tradeId) {
 function renderBlackMarketTradeGrid() {
     const grid = document.getElementById('blackMarketTradeGrid');
     if (!grid) return;
-    grid.className = "bm-trade-list-v2";
     grid.innerHTML = "";
 
     const trades = getTradeDefinitions();
 
     trades.forEach((t, index) => {
-        const remaining = t.limit - t.current;
+        // Calculate remaining uses based on playerTradeLimits from backend
+        const remaining = Math.max(0, t.limit - t.current); 
         const card = document.createElement('div');
         
         card.style.animationDelay = `${index * 0.1}s`;
-        card.className = `trade-card-v2 ${t.theme}`;
         
-        // --- VERIFICARE LIMITĂ ---
+        // 🔥 VISUAL LOCK LOGIC
         if (remaining <= 0) {
-            card.classList.add('limit-reached');
+            card.className = `trade-card-v2 ${t.theme} limit-reached`;
+            card.onclick = (e) => {
+                e.stopPropagation();
+                playMissSFX();
+                showKevinutaBubble("Limita de schimb a fost atinsă!");
+            };
         } else {
+            card.className = `trade-card-v2 ${t.theme}`;
             card.onclick = () => openTradeDetail(t.id);
         }
         
@@ -13713,17 +13755,6 @@ function renderBlackMarketTradeGrid() {
         `;
         grid.appendChild(card);
     });
-
-    // Adăugăm un text explicativ sub timer dacă există limite atinse
-    let hasReachedLimit = trades.some(t => (t.limit - t.current) <= 0);
-    let hint = document.getElementById('bmRefreshHint');
-    if (!hint) {
-        hint = document.createElement('div');
-        hint.id = 'bmRefreshHint';
-        hint.className = 'bm-refresh-hint';
-        document.getElementById('bmTimerDisplay').after(hint);
-    }
-    hint.innerText = hasReachedLimit ? "Schimburile se resetează la fiecare oră!" : "";
 }
 
 // --- FUNCȚIA REPARATĂ: CONFIRMĂ SCHIMBUL ---
@@ -13839,55 +13870,40 @@ function setTradeQty(qtyVal, btnElement) {
 async function openBlackMarket() {
     isPaused = true;
     clearInterval(moveKevinInterval);
-    
     document.getElementById('utilitiesModal').style.display = 'none';
     document.getElementById('blackMarketModal').style.display = 'flex';
-    
     switchBMTab('buy');
-
-    const gridBuy = document.getElementById('blackMarketBuyGrid');
-    const gridSell = document.getElementById('blackMarketGrid');
-    const loadingHtml = `<div style="grid-column: span 3; text-align: center; padding: 40px; color: var(--th-accent); font-family: 'Orbitron'; font-size: 14px; opacity: 0.7;"><i class="fa-solid fa-spinner fa-spin"></i> SE CONECTEAZĂ...</div>`;
-    gridBuy.innerHTML = loadingHtml;
-    gridSell.innerHTML = loadingHtml;
-
-    const myAvailableKeys = Object.keys(specialRegistry).filter(k => k !== "rubyDrop" && k !== "trivia");
-    const myBuyKeys = Object.keys(boostRegistry); // Send Boosts to backend
 
     try {
         const idToken = await firebase.auth().currentUser.getIdToken(true);
-        
         const response = await fetch('https://kevin-backend-qodc.onrender.com/sync-black-market', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 idToken: idToken,
-                availableKeys: myAvailableKeys,
-                buyKeys: myBuyKeys // Send this!
+                availableKeys: Object.keys(specialRegistry).filter(k => k !== "rubyDrop" && k !== "trivia"),
+                buyKeys: Object.keys(boostRegistry)
             })
         });
 
         if (response.ok) {
             const data = await response.json();
-            lastMarketRefresh = data.lastRefresh;
             
-            // Sync Backend Data
-            blackMarketWants = data.offers.map(off => ({
-                ...off,
-                sold: data.playerSales[off.key] || 0
-            }));
+            // 🔥 THE FIX: Update the global limits variable
+            if (data.playerTradeLimits) {
+                playerTradeLimits = data.playerTradeLimits;
+            }
 
-            blackMarketOffers = data.buyOffers.map(off => ({
-                ...off,
-                bought: data.playerBuys[off.key] || 0
-            }));
+            lastMarketRefresh = data.lastRefresh;
+            blackMarketWants = data.offers.map(off => ({ ...off, sold: data.playerSales[off.key] || 0 }));
+            blackMarketOffers = data.buyOffers.map(off => ({ ...off, bought: data.playerBuys[off.key] || 0 }));
 
             renderBlackMarketBuyGrid();
             renderBlackMarketGrid();
+            renderBlackMarketTradeGrid(); // Now uses synced playerTradeLimits
             startBMTimer();
         }
     } catch (e) {
-        gridSell.innerHTML = `<div style="grid-column: span 3; text-align: center; color: #ff4444;">Eroare de conexiune.</div>`;
         console.error("BM Sync Error:", e);
     }
 }
