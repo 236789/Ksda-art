@@ -7351,10 +7351,10 @@ input:checked + .s-slider:before {
 
 
 /* ==========================================
-   PIATA NEAGRA - FULL MODAL REVAMP (V2)
+   PIATA NEAGRA - FULL MODAL REVAMP (V2) - POLISHED
    ========================================== */
 
-/* Resets the default modal-box styles for this specific container */
+/* Containerul invizibil de bază */
 .bm-container-v2 {
     background: transparent !important;
     border: none !important;
@@ -7368,101 +7368,109 @@ input:checked + .s-slider:before {
     margin-top: 20px;
 }
 
-/* --- THE TABS (FOLDER STYLE) --- */
+/* --- THE TABS (PERFECTLY ANCHORED FOLDER STYLE) --- */
 .bm-nav-v2 {
     display: flex;
-    gap: 8px;
-    padding-left: 15px;
-    margin-bottom: -4px; /* Pulls it down to overlap the body border */
-    z-index: 2;
+    gap: 6px;
+    padding-left: 20px; /* Împins puțin spre dreapta pentru estetică */
+    margin-bottom: -5px; /* Trage tab-urile FIX peste marginea de sus a cutiei */
+    position: relative;
+    z-index: 10; /* Tab-urile trebuie să fie peste cutia principală */
 }
 
 .bm-tab-v2 {
     flex: 1;
-    max-width: 100px;
-    height: 55px;
+    max-width: 90px;
+    height: 50px;
     border-radius: 16px 16px 0 0;
-    border: 4px solid;
+    /* Marginea tab-ului inactiv e mai întunecată */
+    border: 5px solid #5a0000; 
     border-bottom: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
+    font-size: 24px;
     cursor: pointer;
-    box-shadow: inset 0 8px 15px rgba(255,255,255,0.2), 0 -5px 10px rgba(0,0,0,0.5);
+    box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
 }
 
 /* Inactive Tab Colors */
-.bm-tab-v2.t-buy { background: linear-gradient(180deg, #7f1d1d, #450a0a); border-color: #991b1b; color: #7f1d1d; }
-.bm-tab-v2.t-sell { background: linear-gradient(180deg, #b45309, #78350f); border-color: #d97706; color: #92400e; }
-.bm-tab-v2.t-trade { background: linear-gradient(180deg, #b91c1c, #7f1d1d); border-color: #ef4444; color: #991b1b; }
+.bm-tab-v2.t-buy { background: #450a0a; color: #7f1d1d; }
+.bm-tab-v2.t-sell { background: #5c2602; color: #92400e; border-color:#7a3000; }
+.bm-tab-v2.t-trade { background: #450a0a; color: #7f1d1d; }
 
-/* Inactive Tab Icons (Darkened) */
 .bm-tab-v2 i { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8)); transition: 0.2s; }
 
-/* ACTIVE TAB LOGIC (Pops up, turns bright, hides bottom border) */
+/* ACTIVE TAB LOGIC (Se sudează de rama roșie) */
 .bm-tab-v2.active {
-    height: 65px;
-    transform: translateY(-10px);
-    z-index: 5;
+    height: 62px;
+    transform: translateY(-7px);
+    z-index: 15;
     color: #fff;
-    box-shadow: inset 0 10px 20px rgba(255,255,255,0.4), 0 -8px 15px rgba(0,0,0,0.6);
+    /* Marginea tab-ului activ devine IDENTICĂ cu rama exterioară a cutiei */
+    border-color: #b91c1c; 
+    padding-bottom: 5px; /* Acoperă vizual linia de tăiere */
+    box-shadow: inset 0 10px 15px rgba(255,255,255,0.2), 0 -5px 10px rgba(0,0,0,0.4);
 }
-
-/* The active border MUST match the main body border to look seamless */
-.bm-tab-v2.active { border-color: #991b1b; } 
 
 .bm-tab-v2.t-buy.active { background: linear-gradient(180deg, #ef4444, #991b1b); }
-.bm-tab-v2.t-sell.active { background: linear-gradient(180deg, #fbbf24, #b45309); }
+.bm-tab-v2.t-sell.active { background: linear-gradient(180deg, #fbbf24, #b45309); border-color:#d97706; }
 .bm-tab-v2.t-trade.active { background: linear-gradient(180deg, #ef4444, #991b1b); }
 
-/* --- THE MAIN BODY (The big red box) --- */
+/* --- THE MAIN BODY (The big glossy red box) --- */
 .bm-body-v2 {
-    background: radial-gradient(circle at top, #7f1d1d 0%, #450a0a 100%);
-    border: 4px solid #991b1b;
-    border-radius: 20px;
+    background: linear-gradient(180deg, #7f1d1d 0%, #2a0505 100%);
+    border: 5px solid #b91c1c; /* Rama roșie strălucitoare */
+    border-radius: 24px;
     padding: 15px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.8);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 4px 10px rgba(255,255,255,0.15);
     position: relative;
-    z-index: 4; /* Sits below active tab, above inactive tabs */
+    z-index: 5;
 }
 
-/* The inner black screen where content sits */
+/* Dacă tab-ul de mijloc e activ, schimbăm culoarea ramei ca să se potrivească cu el */
+.bm-container-v2:has(.t-sell.active) .bm-body-v2 {
+    border-color: #d97706;
+}
+
+/* --- THE INNER BACKGROUND (Rezolvarea ecranului negru "mort") --- */
 .bm-inner-v2 {
-    background: #000000;
-    border-radius: 12px;
-    border: 3px solid #450a0a;
+    /* Gradient roșiatic/maroniu extrem de întunecat pentru un aer premium */
+    background: radial-gradient(circle at center, #1f0404 0%, #0a0000 100%);
+    border-radius: 16px;
+    border: 2px solid #450a0a; /* O ramă interioară foarte subtilă */
     padding: 15px 10px;
-    box-shadow: inset 0 0 30px rgba(0,0,0,1);
+    box-shadow: inset 0 10px 30px rgba(0,0,0,0.9);
     min-height: 350px;
 }
 
-/* --- THE FLOATING CLOSE BUTTON --- */
+/* --- THE FLOATING CLOSE BUTTON (Ancorat corect) --- */
 .bm-close-v2 {
     position: absolute;
-    top: 5px;
-    right: -10px;
-    width: 50px;
-    height: 50px;
+    /* Aliniat exact la colțul din dreapta-sus al RAMEI roșii (nu al containerului gol) */
+    top: 35px; 
+    right: -12px; 
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     background: linear-gradient(180deg, #ef4444, #991b1b);
-    border: 4px solid #7f1d1d;
+    border: 3px solid #ffb3b3; /* Ramă albicioasă/roz pentru pop-out */
     color: #fff;
-    font-size: 24px;
+    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 10;
-    box-shadow: 0 8px 15px rgba(0,0,0,0.6), inset 0 5px 10px rgba(255,255,255,0.4);
+    z-index: 20;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 0 10px rgba(255,255,255,0.4);
     transition: transform 0.1s ease;
 }
 
 .bm-close-v2:active {
-    transform: scale(0.9) translateY(4px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+    transform: scale(0.9);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.8);
 }
 
 /* --- TIMER FIX --- */
@@ -7472,19 +7480,20 @@ input:checked + .s-slider:before {
     font-weight: 900;
     color: #facc15;
     text-align: center;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     letter-spacing: 2px;
     text-shadow: 0 0 15px rgba(250, 204, 21, 0.6);
 }
 
-/* Clean up old inventory grids so they fit the new black box */
+/* Ajustare estetică a cardurilor de Vinde/Cumpără ca să se potrivească pe noul fundal */
 #bm-buy-view .inv-tile, #bm-sell-view .inv-tile {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: #450a0a;
+    background: rgba(255, 255, 255, 0.03);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
 }
 #bm-buy-view .inv-tile:hover, #bm-sell-view .inv-tile:hover {
     border-color: #ef4444;
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
 }
   </style>
 </head>
