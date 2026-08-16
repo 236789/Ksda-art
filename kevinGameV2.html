@@ -7216,6 +7216,137 @@ input:checked + .s-slider:before {
 .q-progress-track {
     margin: 0 auto; 
 }
+
+
+/* ==========================================
+   PIATA NEAGRA - TRADE TAB REVAMP (STEP 1)
+   ========================================== */
+.bm-trade-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px 5px;
+    width: 100%;
+}
+
+/* Structura panoului orizontal */
+.trade-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+    border: 3px solid;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,0,0,0.5);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.trade-banner:hover {
+    transform: scale(1.02);
+}
+
+.trade-banner.sold-out {
+    filter: grayscale(1) brightness(0.5);
+    pointer-events: none;
+}
+
+/* Cele 3 culori specifice din imagine */
+.trade-banner.t-red {
+    background: linear-gradient(180deg, #991b1b, #7f1d1d);
+    border-color: #f87171;
+}
+.trade-banner.t-gold {
+    background: linear-gradient(180deg, #b45309, #78350f);
+    border-color: #fbbf24;
+}
+.trade-banner.t-green {
+    background: linear-gradient(180deg, #15803d, #14532d);
+    border-color: #4ade80;
+}
+
+/* Zona din stânga: Iconițe și Săgeată */
+.trade-visuals {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.t-icon-box {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: #475569;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    -webkit-text-stroke: 2px #94a3b8; /* Contur gri pentru cursor */
+}
+
+.t-icon-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8));
+    -webkit-text-stroke: 0; /* Scoatem conturul pt imagini */
+}
+
+/* Săgeata de conversie cu culorile din poză */
+.t-arrow {
+    font-size: 28px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+}
+.t-red .t-arrow { color: #ef4444; }
+.t-gold .t-arrow { color: #facc15; }
+.t-green .t-arrow { color: #4ade80; }
+
+/* Zona din dreapta: Costuri și Buton */
+.trade-action-area {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.trade-text-info {
+    text-align: right;
+    line-height: 1.1;
+}
+
+.t-cost {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 1px 1px 2px #000;
+}
+
+.t-limit {
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    color: #cbd5e1;
+    text-shadow: 1px 1px 2px #000;
+}
+
+.trade-btn {
+    height: 35px !important;
+    padding: 0 20px !important;
+    font-size: 14px !important;
+    border-radius: 8px !important;
+    border-width: 2px !important;
+}
+
+/* Adaptare pt telefoane mici */
+@media (max-width: 450px) {
+    .trade-visuals { gap: 10px; }
+    .t-icon-box { width: 35px; height: 35px; font-size: 26px; }
+    .t-arrow { font-size: 20px; }
+    .t-cost { font-size: 11px; }
+    .t-limit { font-size: 9px; }
+    .trade-btn { padding: 0 12px !important; font-size: 12px !important; height: 30px !important; }
+}
   </style>
 </head>
 <body>
@@ -7722,10 +7853,10 @@ input:checked + .s-slider:before {
         <div id="blackMarketGrid" class="inventory-v1-grid" style="grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 10px 5px;"></div>
     </div>
 
-    <!-- TRADE VIEW (NEW) -->
+<!-- TRADE VIEW (NEW) -->
     <div id="bm-trade-view" style="display: none;">
-        <div id="blackMarketTradeGrid" class="inventory-v1-grid" style="grid-template-columns: 1fr; gap: 10px; padding: 10px 5px;">
-            <!-- Trade cards will be injected here -->
+        <div id="blackMarketTradeGrid" class="bm-trade-list">
+            <!-- Panourile orizontale vor fi generate aici de JS -->
         </div>
     </div>
 
@@ -12976,28 +13107,65 @@ function renderBlackMarketTradeGrid() {
     const grid = document.getElementById('blackMarketTradeGrid');
     grid.innerHTML = "";
 
+    // Definim datele + styling-ul vizual pentru fiecare rând
     const trades = [
-        { id: 's2r', name: 'Investiție Rubin', cost: '1000 Scor', get: '1 Rubin', limit: 5, current: playerTradeLimits.s2r, icon: 'https://iili.io/CrnXNdG.png' },
-        { id: 'r2s', name: 'Vânzare Rubin', cost: '1 Rubin', get: '500 Scor', limit: 10, current: playerTradeLimits.r2s, icon: 'https://iili.io/COrCopj.png' },
-        { id: 'r2x', name: 'Antrenament Rubin', cost: '1 Rubin', get: (50 * activeXPMultiplier) + ' XP', limit: 10, current: playerTradeLimits.r2x, icon: 'https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/boosts/XP.png' }
+        { 
+            id: 's2r', 
+            name: 'Investiție Rubin', 
+            cost: '1000 Scor', 
+            limit: 5, 
+            current: playerTradeLimits.s2r, 
+            theme: 't-red', // Panoul Roșu
+            iconLeft: `<i class="fa-solid fa-hand-pointer"></i>`, // Cursor
+            iconRight: `<img src="https://iili.io/CrnXNdG.png">` // Rubin
+        },
+        { 
+            id: 'r2s', 
+            name: 'Vânzare Rubin', 
+            cost: '1 Rubin', 
+            limit: 10, 
+            current: playerTradeLimits.r2s, 
+            theme: 't-gold', // Panoul Portocaliu/Auriu
+            iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, // Rubin
+            iconRight: `<i class="fa-solid fa-hand-pointer"></i>` // Cursor
+        },
+        { 
+            id: 'r2x', 
+            name: 'Antrenament Rubin', 
+            cost: '1 Rubin', 
+            limit: 10, 
+            current: playerTradeLimits.r2x, 
+            theme: 't-green', // Panoul Verde
+            iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, // Rubin
+            iconRight: `<img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/boosts/XP.png">` // XP
+        }
     ];
 
     trades.forEach(t => {
         const remaining = t.limit - t.current;
-        const card = document.createElement('div');
-        card.className = "shop-card";
-        if (remaining <= 0) card.classList.add('bm-sold-out');
+        const banner = document.createElement('div');
+        banner.className = `trade-banner ${t.theme} ${remaining <= 0 ? 'sold-out' : ''}`;
         
-        card.innerHTML = `
-            <div class="shop-icon"><img src="${t.icon}" width="35"></div>
-            <div class="shop-info">
-                <h3>${t.name}</h3>
-                <p>Cost: ${t.cost} | Limită: ${remaining} rămase</p>
+        banner.innerHTML = `
+            <!-- Partea vizuală din stânga (Iconițe + Săgeată) -->
+            <div class="trade-visuals">
+                <div class="t-icon-box">${t.iconLeft}</div>
+                <i class="fa-solid fa-arrow-right t-arrow"></i>
+                <div class="t-icon-box">${t.iconRight}</div>
             </div>
-            <button class="menu-btn play" style="width:70px; height:40px; font-size:12px; padding:0;" 
-                onclick="processBMTrade('${t.id}')" ${remaining <= 0 ? 'disabled' : ''}>SCHIMB</button>
+            
+            <!-- Partea dreaptă (Informații + Buton) -->
+            <div class="trade-action-area">
+                <div class="trade-text-info">
+                    <div class="t-cost">COST: ${t.cost}</div>
+                    <div class="t-limit">LIMITĂ: ${remaining}/${t.limit}</div>
+                </div>
+                <button class="menu-btn play trade-btn" onclick="processBMTrade('${t.id}')" ${remaining <= 0 ? 'disabled' : ''}>
+                    ${remaining <= 0 ? 'EPUIZAT' : 'SCHIMBĂ'}
+                </button>
+            </div>
         `;
-        grid.appendChild(card);
+        grid.appendChild(banner);
     });
 }
 
