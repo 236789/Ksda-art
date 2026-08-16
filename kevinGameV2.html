@@ -7219,133 +7219,134 @@ input:checked + .s-slider:before {
 
 
 /* ==========================================
-   PIATA NEAGRA - TRADE TAB REVAMP (STEP 1)
+   PIATA NEAGRA - TRADE TAB REVAMP (CLEAN & ANIMATED)
    ========================================== */
-.bm-trade-list {
+.bm-trade-list-v2 {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 10px 5px;
+    gap: 15px;
+    padding: 10px 0;
     width: 100%;
 }
 
-/* Structura panoului orizontal */
-.trade-banner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 15px;
-    border-radius: 16px;
-    position: relative;
-    overflow: hidden;
-    border: 3px solid;
-    box-shadow: 0 8px 15px rgba(0,0,0,0.6), inset 0 0 20px rgba(0,0,0,0.5);
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.trade-banner:hover {
-    transform: scale(1.02);
-}
-
-.trade-banner.sold-out {
-    filter: grayscale(1) brightness(0.5);
-    pointer-events: none;
-}
-
-/* Cele 3 culori specifice din imagine */
-.trade-banner.t-red {
-    background: linear-gradient(180deg, #991b1b, #7f1d1d);
-    border-color: #f87171;
-}
-.trade-banner.t-gold {
-    background: linear-gradient(180deg, #b45309, #78350f);
-    border-color: #fbbf24;
-}
-.trade-banner.t-green {
-    background: linear-gradient(180deg, #15803d, #14532d);
-    border-color: #4ade80;
-}
-
-/* Zona din stânga: Iconițe și Săgeată */
-.trade-visuals {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.t-icon-box {
-    width: 45px;
-    height: 45px;
+/* Cardul Principal (Acum e un buton 3D masiv) */
+.trade-card-v2 {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
-    color: #475569;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-    -webkit-text-stroke: 2px #94a3b8; /* Contur gri pentru cursor */
+    gap: 30px; /* Spațiu între iconițe */
+    height: 90px;
+    border-radius: 20px;
+    cursor: pointer;
+    position: relative;
+    border: 4px solid;
+    
+    /* Animație de plutire (respiră) pentru a nu părea mort */
+    animation: cardFloat 3s ease-in-out infinite;
+    transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.t-icon-box img {
+/* Umbre 3D și Highlight-uri interioare pentru volum */
+.trade-card-v2::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 40%, rgba(0,0,0,0.5) 100%);
+    pointer-events: none;
+}
+
+/* TEMA ROȘIE */
+.trade-card-v2.c-red {
+    background: linear-gradient(180deg, #b91c1c, #7f1d1d);
+    border-color: #ef4444;
+    box-shadow: 0 8px 0 #450a0a, 0 15px 20px rgba(0,0,0,0.6), inset 0 0 20px #ef4444;
+}
+
+/* TEMA AURIE */
+.trade-card-v2.c-gold {
+    background: linear-gradient(180deg, #d97706, #92400e);
+    border-color: #fbbf24;
+    box-shadow: 0 8px 0 #451a03, 0 15px 20px rgba(0,0,0,0.6), inset 0 0 20px #fbbf24;
+}
+
+/* TEMA VERDE */
+.trade-card-v2.c-green {
+    background: linear-gradient(180deg, #16a34a, #14532d);
+    border-color: #4ade80;
+    box-shadow: 0 8px 0 #052e16, 0 15px 20px rgba(0,0,0,0.6), inset 0 0 20px #4ade80;
+}
+
+/* HOVER & CLICK EFFECTS */
+.trade-card-v2:hover {
+    filter: brightness(1.15);
+    transform: translateY(-4px) scale(1.02) !important;
+}
+
+.trade-card-v2:active {
+    transform: translateY(8px) scale(0.98) !important;
+    box-shadow: 0 0 0 transparent, 0 5px 10px rgba(0,0,0,0.6), inset 0 0 30px rgba(0,0,0,0.8);
+}
+
+/* ICONIȚELE URIAȘE */
+.tc-icon {
+    width: 55px;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+
+.tc-icon img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.8));
-    -webkit-text-stroke: 0; /* Scoatem conturul pt imagini */
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.7));
+    animation: iconPulse 2s infinite alternate;
 }
 
-/* Săgeata de conversie cu culorile din poză */
-.t-arrow {
-    font-size: 28px;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
-}
-.t-red .t-arrow { color: #ef4444; }
-.t-gold .t-arrow { color: #facc15; }
-.t-green .t-arrow { color: #4ade80; }
-
-/* Zona din dreapta: Costuri și Buton */
-.trade-action-area {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
+.tc-icon i.fa-hand-pointer {
+    font-size: 50px;
+    color: #334155; /* Gri închis ca în imagine */
+    -webkit-text-stroke: 3px #cbd5e1; /* Margine gri deschis */
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.7));
 }
 
-.trade-text-info {
-    text-align: right;
-    line-height: 1.1;
+/* SĂGEATA ANIMATĂ (Se mișcă spre dreapta) */
+.tc-arrow {
+    font-size: 40px;
+    z-index: 2;
+    animation: arrowFlow 1s infinite linear;
+}
+.c-red .tc-arrow { color: #fca5a5; filter: drop-shadow(0 0 10px #f87171); }
+.c-gold .tc-arrow { color: #fde047; filter: drop-shadow(0 0 10px #facc15); }
+.c-green .tc-arrow { color: #86efac; filter: drop-shadow(0 0 10px #4ade80); }
+
+/* SOLD OUT STATE */
+.trade-card-v2.sold-out {
+    filter: grayscale(1) brightness(0.4);
+    pointer-events: none;
+    animation: none;
+    box-shadow: 0 4px 0 #111, inset 0 0 10px #000;
+    transform: translateY(4px);
 }
 
-.t-cost {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 13px;
-    font-weight: 900;
-    color: #fff;
-    text-shadow: 1px 1px 2px #000;
+/* --- KEYFRAMES --- */
+@keyframes cardFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
 }
 
-.t-limit {
-    font-family: 'Oswald', sans-serif;
-    font-size: 11px;
-    color: #cbd5e1;
-    text-shadow: 1px 1px 2px #000;
+@keyframes arrowFlow {
+    0% { transform: translateX(-5px); opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { transform: translateX(10px); opacity: 0.5; }
 }
 
-.trade-btn {
-    height: 35px !important;
-    padding: 0 20px !important;
-    font-size: 14px !important;
-    border-radius: 8px !important;
-    border-width: 2px !important;
-}
-
-/* Adaptare pt telefoane mici */
-@media (max-width: 450px) {
-    .trade-visuals { gap: 10px; }
-    .t-icon-box { width: 35px; height: 35px; font-size: 26px; }
-    .t-arrow { font-size: 20px; }
-    .t-cost { font-size: 11px; }
-    .t-limit { font-size: 9px; }
-    .trade-btn { padding: 0 12px !important; font-size: 12px !important; height: 30px !important; }
+@keyframes iconPulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.08); }
 }
   </style>
 </head>
@@ -13105,67 +13106,55 @@ let playerTradeLimits = { s2r: 0, r2s: 0, r2x: 0 }; // Tracked from backend
 
 function renderBlackMarketTradeGrid() {
     const grid = document.getElementById('blackMarketTradeGrid');
+    
+    // Asigură-te că folosim noua clasă pentru container
+    grid.className = "bm-trade-list-v2";
     grid.innerHTML = "";
 
-    // Definim datele + styling-ul vizual pentru fiecare rând
     const trades = [
         { 
             id: 's2r', 
-            name: 'Investiție Rubin', 
-            cost: '1000 Scor', 
             limit: 5, 
             current: playerTradeLimits.s2r, 
-            theme: 't-red', // Panoul Roșu
-            iconLeft: `<i class="fa-solid fa-hand-pointer"></i>`, // Cursor
+            theme: 'c-red', // Roșu
+            iconLeft: `<i class="fa-solid fa-hand-pointer"></i>`, // Scor (Cursor)
             iconRight: `<img src="https://iili.io/CrnXNdG.png">` // Rubin
         },
         { 
             id: 'r2s', 
-            name: 'Vânzare Rubin', 
-            cost: '1 Rubin', 
             limit: 10, 
             current: playerTradeLimits.r2s, 
-            theme: 't-gold', // Panoul Portocaliu/Auriu
+            theme: 'c-gold', // Auriu
             iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, // Rubin
-            iconRight: `<i class="fa-solid fa-hand-pointer"></i>` // Cursor
+            iconRight: `<i class="fa-solid fa-hand-pointer"></i>` // Scor (Cursor)
         },
         { 
             id: 'r2x', 
-            name: 'Antrenament Rubin', 
-            cost: '1 Rubin', 
             limit: 10, 
             current: playerTradeLimits.r2x, 
-            theme: 't-green', // Panoul Verde
+            theme: 'c-green', // Verde
             iconLeft: `<img src="https://iili.io/CrnXNdG.png">`, // Rubin
             iconRight: `<img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/boosts/XP.png">` // XP
         }
     ];
 
-    trades.forEach(t => {
+    trades.forEach((t, index) => {
         const remaining = t.limit - t.current;
-        const banner = document.createElement('div');
-        banner.className = `trade-banner ${t.theme} ${remaining <= 0 ? 'sold-out' : ''}`;
         
-        banner.innerHTML = `
-            <!-- Partea vizuală din stânga (Iconițe + Săgeată) -->
-            <div class="trade-visuals">
-                <div class="t-icon-box">${t.iconLeft}</div>
-                <i class="fa-solid fa-arrow-right t-arrow"></i>
-                <div class="t-icon-box">${t.iconRight}</div>
-            </div>
-            
-            <!-- Partea dreaptă (Informații + Buton) -->
-            <div class="trade-action-area">
-                <div class="trade-text-info">
-                    <div class="t-cost">COST: ${t.cost}</div>
-                    <div class="t-limit">LIMITĂ: ${remaining}/${t.limit}</div>
-                </div>
-                <button class="menu-btn play trade-btn" onclick="processBMTrade('${t.id}')" ${remaining <= 0 ? 'disabled' : ''}>
-                    ${remaining <= 0 ? 'EPUIZAT' : 'SCHIMBĂ'}
-                </button>
-            </div>
+        const card = document.createElement('div');
+        // Adăugăm un delay la animația de float ca să nu se miște toate la fel
+        card.style.animationDelay = `${index * 0.2}s`;
+        card.className = `trade-card-v2 ${t.theme} ${remaining <= 0 ? 'sold-out' : ''}`;
+        
+        // Când apeși pe oriunde pe card, se face schimbul
+        card.onclick = () => processBMTrade(t.id);
+        
+        card.innerHTML = `
+            <div class="tc-icon">${t.iconLeft}</div>
+            <i class="fa-solid fa-play tc-arrow"></i>
+            <div class="tc-icon">${t.iconRight}</div>
         `;
-        grid.appendChild(banner);
+        grid.appendChild(card);
     });
 }
 
