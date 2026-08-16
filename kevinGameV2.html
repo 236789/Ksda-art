@@ -7778,6 +7778,46 @@ div.inv-tile div.bm-limit-tag {
     text-shadow: 0 2px 4px rgba(0,0,0,0.8) !important;
     text-transform: uppercase !important;
 }
+
+
+
+/* Card de schimb blocat */
+.trade-card-v2.limit-reached {
+    filter: grayscale(1) brightness(0.4) !important;
+    pointer-events: none; /* Nu mai poți da click deloc */
+    cursor: not-allowed;
+}
+
+/* Badge pentru limita atinsă */
+.trade-card-v2.limit-reached::after {
+    content: "LIMITĂ ATINSĂ";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    background: #ff2a2a;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    padding: 5px 15px;
+    border-radius: 4px;
+    border: 2px solid white;
+    white-space: nowrap;
+    z-index: 10;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+/* Mesaj de revenire sub timer */
+.bm-refresh-hint {
+    font-family: 'Oswald', sans-serif;
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: -20px;
+    margin-bottom: 20px;
+    text-align: center;
+    text-transform: uppercase;
+}
   </style>
 </head>
 <body>
@@ -13626,27 +13666,38 @@ function openTradeDetail(tradeId) {
     const t = trades.find(tr => tr.id === tradeId);
     if (!t) return;
 
-    // Setăm titlul și iconițele (astea nu se schimbă la cantitate)
+    const remaining = t.limit - t.current;
+
+    // Populăm datele în Modal
     document.getElementById('tradeDetailName').innerText = t.name.toUpperCase();
     document.getElementById('tradeGiveIcon').innerHTML = t.iconLeft;
     document.getElementById('tradeGetIcon').innerHTML = t.iconRight;
     
     document.getElementById('tradeLimitVal').innerText = t.limit;
-    document.getElementById('tradeRemainingVal').innerText = t.limit - t.current;
+    document.getElementById('tradeRemainingVal').innerText = Math.max(0, remaining);
 
-    // Setăm default la 1 schimb
+    // Blocăm butonul de Confirmare dacă limita a fost atinsă între timp
+    const confirmBtn = document.getElementById('tradeConfirmBtn');
+    if (remaining <= 0) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerText = "LIMITĂ ATINSĂ!";
+        confirmBtn.style.background = "#444";
+    } else {
+        confirmBtn.disabled = false;
+        confirmBtn.innerText = "CONFIRMĂ SCHIMBUL";
+        confirmBtn.style.background = ""; // Revine la tema originală
+    }
+
     setTradeQty(1, document.getElementById('tBtn1'));
-
     document.getElementById('tradeDetailModal').style.display = 'flex';
 }
 
 
 
 
-
-// AFIȘARE CARDURI (CÂND DAI CLICK PE ELE, DESCHIDE MODALUL)
 function renderBlackMarketTradeGrid() {
     const grid = document.getElementById('blackMarketTradeGrid');
+    if (!grid) return;
     grid.className = "bm-trade-list-v2";
     grid.innerHTML = "";
 
@@ -13655,13 +13706,16 @@ function renderBlackMarketTradeGrid() {
     trades.forEach((t, index) => {
         const remaining = t.limit - t.current;
         const card = document.createElement('div');
-        card.style.animationDelay = `${index * 0.2}s`;
-        card.className = `trade-card-v2 ${t.theme} ${remaining <= 0 ? 'sold-out' : ''}`;
         
-        // MODIFICARE AICI: Când dai click, deschizi Modalul de Detalii!
-        card.onclick = () => {
-            if (remaining > 0) openTradeDetail(t.id);
-        };
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.className = `trade-card-v2 ${t.theme}`;
+        
+        // --- VERIFICARE LIMITĂ ---
+        if (remaining <= 0) {
+            card.classList.add('limit-reached');
+        } else {
+            card.onclick = () => openTradeDetail(t.id);
+        }
         
         card.innerHTML = `
             <div class="tc-icon">${t.iconLeft}</div>
@@ -13670,8 +13724,18 @@ function renderBlackMarketTradeGrid() {
         `;
         grid.appendChild(card);
     });
-}
 
+    // Adăugăm un text explicativ sub timer dacă există limite atinse
+    let hasReachedLimit = trades.some(t => (t.limit - t.current) <= 0);
+    let hint = document.getElementById('bmRefreshHint');
+    if (!hint) {
+        hint = document.createElement('div');
+        hint.id = 'bmRefreshHint';
+        hint.className = 'bm-refresh-hint';
+        document.getElementById('bmTimerDisplay').after(hint);
+    }
+    hint.innerText = hasReachedLimit ? "Schimburile se resetează la fiecare oră!" : "";
+}
 
 // --- FUNCȚIA REPARATĂ: CONFIRMĂ SCHIMBUL ---
 async function confirmTrade() {
