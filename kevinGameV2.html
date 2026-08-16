@@ -7348,6 +7348,144 @@ input:checked + .s-slider:before {
     0% { transform: scale(1); }
     100% { transform: scale(1.08); }
 }
+
+
+/* ==========================================
+   PIATA NEAGRA - FULL MODAL REVAMP (V2)
+   ========================================== */
+
+/* Resets the default modal-box styles for this specific container */
+.bm-container-v2 {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    width: 95vw;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    margin-top: 20px;
+}
+
+/* --- THE TABS (FOLDER STYLE) --- */
+.bm-nav-v2 {
+    display: flex;
+    gap: 8px;
+    padding-left: 15px;
+    margin-bottom: -4px; /* Pulls it down to overlap the body border */
+    z-index: 2;
+}
+
+.bm-tab-v2 {
+    flex: 1;
+    max-width: 100px;
+    height: 55px;
+    border-radius: 16px 16px 0 0;
+    border: 4px solid;
+    border-bottom: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    cursor: pointer;
+    box-shadow: inset 0 8px 15px rgba(255,255,255,0.2), 0 -5px 10px rgba(0,0,0,0.5);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+}
+
+/* Inactive Tab Colors */
+.bm-tab-v2.t-buy { background: linear-gradient(180deg, #7f1d1d, #450a0a); border-color: #991b1b; color: #7f1d1d; }
+.bm-tab-v2.t-sell { background: linear-gradient(180deg, #b45309, #78350f); border-color: #d97706; color: #92400e; }
+.bm-tab-v2.t-trade { background: linear-gradient(180deg, #b91c1c, #7f1d1d); border-color: #ef4444; color: #991b1b; }
+
+/* Inactive Tab Icons (Darkened) */
+.bm-tab-v2 i { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8)); transition: 0.2s; }
+
+/* ACTIVE TAB LOGIC (Pops up, turns bright, hides bottom border) */
+.bm-tab-v2.active {
+    height: 65px;
+    transform: translateY(-10px);
+    z-index: 5;
+    color: #fff;
+    box-shadow: inset 0 10px 20px rgba(255,255,255,0.4), 0 -8px 15px rgba(0,0,0,0.6);
+}
+
+/* The active border MUST match the main body border to look seamless */
+.bm-tab-v2.active { border-color: #991b1b; } 
+
+.bm-tab-v2.t-buy.active { background: linear-gradient(180deg, #ef4444, #991b1b); }
+.bm-tab-v2.t-sell.active { background: linear-gradient(180deg, #fbbf24, #b45309); }
+.bm-tab-v2.t-trade.active { background: linear-gradient(180deg, #ef4444, #991b1b); }
+
+/* --- THE MAIN BODY (The big red box) --- */
+.bm-body-v2 {
+    background: radial-gradient(circle at top, #7f1d1d 0%, #450a0a 100%);
+    border: 4px solid #991b1b;
+    border-radius: 20px;
+    padding: 15px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.9), inset 0 0 40px rgba(0,0,0,0.8);
+    position: relative;
+    z-index: 4; /* Sits below active tab, above inactive tabs */
+}
+
+/* The inner black screen where content sits */
+.bm-inner-v2 {
+    background: #000000;
+    border-radius: 12px;
+    border: 3px solid #450a0a;
+    padding: 15px 10px;
+    box-shadow: inset 0 0 30px rgba(0,0,0,1);
+    min-height: 350px;
+}
+
+/* --- THE FLOATING CLOSE BUTTON --- */
+.bm-close-v2 {
+    position: absolute;
+    top: 5px;
+    right: -10px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #ef4444, #991b1b);
+    border: 4px solid #7f1d1d;
+    color: #fff;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.6), inset 0 5px 10px rgba(255,255,255,0.4);
+    transition: transform 0.1s ease;
+}
+
+.bm-close-v2:active {
+    transform: scale(0.9) translateY(4px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+}
+
+/* --- TIMER FIX --- */
+.bm-timer-text-v2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    color: #facc15;
+    text-align: center;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 15px rgba(250, 204, 21, 0.6);
+}
+
+/* Clean up old inventory grids so they fit the new black box */
+#bm-buy-view .inv-tile, #bm-sell-view .inv-tile {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: #450a0a;
+}
+#bm-buy-view .inv-tile:hover, #bm-sell-view .inv-tile:hover {
+    border-color: #ef4444;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+}
   </style>
 </head>
 <body>
@@ -7827,41 +7965,51 @@ input:checked + .s-slider:before {
 </div>
 
 
-<!-- BLACK MARKET MAIN MODAL -->
-<div id="blackMarketModal" class="modal-overlay">
-  <div class="modal-box shop-box bm-box">
-    <div class="shop-header">
-      <h2 style="color: #ff2a2a !important;"><i class="fa-solid fa-user-ninja"></i> PIAȚA NEAGRĂ</h2>
-      <div class="selection-line" style="background: #ff2a2a;"></div>
+<!-- BLACK MARKET MAIN MODAL V2 (PREMIUM) -->
+<div id="blackMarketModal" class="modal-overlay" style="z-index: 100005;">
+  <div class="modal-box bm-container-v2">
+    
+    <!-- FLOATING CLOSE BUTTON (Like the image) -->
+    <button class="bm-close-v2" onclick="closeBlackMarket()">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <!-- FOLDER TABS (ICONS ONLY) -->
+    <div class="bm-nav-v2">
+      <button class="bm-tab-v2 t-buy active" id="tabBmBuy" onclick="switchBMTab('buy')">
+        <i class="fa-solid fa-cart-shopping"></i>
+      </button>
+      <button class="bm-tab-v2 t-sell" id="tabBmSell" onclick="switchBMTab('sell')">
+        <i class="fa-solid fa-tags"></i>
+      </button>
+      <button class="bm-tab-v2 t-trade" id="tabBmTrade" onclick="switchBMTab('trade')">
+        <i class="fa-solid fa-rotate"></i>
+      </button>
     </div>
 
-    <!-- TIMER DISPLAY -->
-    <div id="bmTimerDisplay" class="bm-timer-text">REFRESH ÎN: 00:00</div>
+    <!-- MAIN BODY -->
+    <div class="bm-body-v2">
+        <div class="bm-inner-v2">
+            <!-- TIMER DISPLAY -->
+            <div id="bmTimerDisplay" class="bm-timer-text-v2">REFRESH ÎN: 00:00</div>
 
-<div class="bm-nav">
-      <button class="bm-tab" id="tabBmBuy" onclick="switchBMTab('buy')">CUMPĂRĂ</button>
-      <button class="bm-tab" id="tabBmSell" onclick="switchBMTab('sell')">VINDE</button>
-      <button class="bm-tab" id="tabBmTrade" onclick="switchBMTab('trade')">SCHIMB</button>
-    </div>
+            <!-- BUY VIEW -->
+            <div id="bm-buy-view">
+                <div id="blackMarketBuyGrid" class="inventory-v1-grid" style="grid-template-columns: repeat(3, 1fr); gap: 12px;"></div>
+            </div>
 
-    <!-- BUY VIEW -->
-    <div id="bm-buy-view">
-        <div id="blackMarketBuyGrid" class="inventory-v1-grid" style="grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 10px 5px;"></div>
-    </div>
+            <!-- SELL VIEW -->
+            <div id="bm-sell-view" style="display: none;">
+                <div id="blackMarketGrid" class="inventory-v1-grid" style="grid-template-columns: repeat(3, 1fr); gap: 12px;"></div>
+            </div>
 
-    <!-- SELL VIEW -->
-    <div id="bm-sell-view" style="display: none;">
-        <div id="blackMarketGrid" class="inventory-v1-grid" style="grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 10px 5px;"></div>
-    </div>
-
-<!-- TRADE VIEW (NEW) -->
-    <div id="bm-trade-view" style="display: none;">
-        <div id="blackMarketTradeGrid" class="bm-trade-list">
-            <!-- Panourile orizontale vor fi generate aici de JS -->
+            <!-- TRADE VIEW -->
+            <div id="bm-trade-view" style="display: none;">
+                <div id="blackMarketTradeGrid" class="bm-trade-list-v2"></div>
+            </div>
         </div>
     </div>
 
-    <button class="menu-btn play close-shop-btn" style="margin-top: 20px; border-color: #ff2a2a;" onclick="closeBlackMarket()">ÎNAPOI</button>
   </div>
 </div>
 
