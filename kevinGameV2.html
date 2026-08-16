@@ -13640,39 +13640,7 @@ function openTradeDetail(tradeId) {
     document.getElementById('tradeDetailModal').style.display = 'flex';
 }
 
-function setTradeQty(qtyVal, btnElement) {
-    const trades = getTradeDefinitions();
-    const t = trades.find(tr => tr.id === currentTradeId);
-    if (!t) return;
 
-    const remainingLimit = t.limit - t.current;
-    let maxAfford = 0;
-
-    // Câte schimburi își permite jucătorul?
-    if (t.id === 's2r') maxAfford = Math.floor(score / t.costVal);
-    else if (t.id === 'r2s' || t.id === 'r2x') maxAfford = Math.floor(rubies / t.costVal);
-
-    if (qtyVal === 'max') {
-        currentTradeQty = Math.min(remainingLimit, maxAfford);
-    } else {
-        currentTradeQty = Math.min(qtyVal, remainingLimit, maxAfford);
-    }
-
-    // Siguranță
-    if (currentTradeQty < 1) currentTradeQty = 1;
-
-    // Update vizual cu înmulțirea
-    document.getElementById('tradeGiveText').innerText = `${t.costVal * currentTradeQty} ${t.costText}`;
-    document.getElementById('tradeGetText').innerText = `${t.getVal * currentTradeQty} ${t.getText}`;
-
-    // Styling butoane
-    document.getElementById('tBtn1').classList.remove('active-bet');
-    document.getElementById('tBtnMax').classList.remove('active-bet');
-    if (btnElement) btnElement.classList.add('active-bet');
-
-    // Dezactivăm butonul dacă nu are bani pentru măcar 1 schimb
-    document.getElementById('tradeConfirmBtn').disabled = (maxAfford < 1 || remainingLimit < 1);
-}
 
 
 
@@ -13704,39 +13672,23 @@ function renderBlackMarketTradeGrid() {
     });
 }
 
-// DESCHIDEREA MODALULUI CU DETALIILE SPECIFICE
-function openTradeDetail(tradeId) {
-    currentTradeId = tradeId;
-    const trades = getTradeDefinitions();
-    const t = trades.find(tr => tr.id === tradeId);
-    if (!t) return;
 
-    const remaining = t.limit - t.current;
-
-    // Populăm datele în Modal
-    document.getElementById('tradeDetailName').innerText = t.name.toUpperCase();
-    document.getElementById('tradeGiveIcon').innerHTML = t.iconLeft;
-    document.getElementById('tradeGiveText').innerText = `${t.costVal} ${t.costText}`;
-    
-    document.getElementById('tradeGetIcon').innerHTML = t.iconRight;
-    document.getElementById('tradeGetText').innerText = `${t.getVal} ${t.getText}`;
-    
-    document.getElementById('tradeLimitVal').innerText = t.limit;
-    document.getElementById('tradeRemainingVal').innerText = remaining;
-
-    document.getElementById('tradeDetailModal').style.display = 'flex';
-}
-
-// LOGICA FINALĂ - CÂND APERI "CONFIRMĂ SCHIMBUL" ÎN MODAL
+// --- FUNCȚIA REPARATĂ: CONFIRMĂ SCHIMBUL ---
 async function confirmTrade() {
     const tradeId = currentTradeId;
+    const qty = currentTradeQty; 
     const btn = document.getElementById('tradeConfirmBtn');
+    const trades = getTradeDefinitions();
+    const t = trades.find(tr => tr.id === tradeId);
     
-    // 1. Verificări rapide client-side
-    if (tradeId === 's2r' && score < 1000) return showKevinutaBubble("N-ai destul Scor!");
-    if ((tradeId === 'r2s' || tradeId === 'r2x') && rubies < 1) return showKevinutaBubble("N-ai destule Rubine!");
+    if (!t) return;
 
-    // Blocăm butonul vizual cât procesăm
+    const totalCost = t.costVal * qty;
+
+    // Verificări rapide înainte de a trimite
+    if (tradeId === 's2r' && score < totalCost) return showKevinutaBubble("N-ai destul Scor!");
+    if ((tradeId === 'r2s' || tradeId === 'r2x') && rubies < totalCost) return showKevinutaBubble("N-ai destule Rubine!");
+
     btn.disabled = true;
     btn.innerText = "SE PROCESEAZĂ...";
 
@@ -13745,12 +13697,18 @@ async function confirmTrade() {
         const response = await fetch('https://kevin-backend-qodc.onrender.com/bm-trade', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idToken, tradeId, xpMult: activeXPMultiplier })
+            body: JSON.stringify({ 
+                idToken: idToken, 
+                tradeId: tradeId, 
+                qty: qty, 
+                xpMult: activeXPMultiplier 
+            })
         });
 
+        const resultText = await response.text(); // Citim mesajul de eroare de la server
+
         if (response.ok) {
-            const data = await response.json();
-            // Update local values
+            const data = JSON.parse(resultText);
             score = data.newScore;
             rubies = data.newRubies;
             playerXP = data.newXP;
@@ -13759,25 +13717,59 @@ async function confirmTrade() {
 
             updateScoreUI();
             updateXPBarUI();
-            renderBlackMarketTradeGrid(); // Dă refresh la numărul de schimburi rămase
+            renderBlackMarketTradeGrid(); 
             
-            // Închidem modalul și afișăm succes
             document.getElementById('tradeDetailModal').style.display = 'none';
-            playSFX(slotJackpotUrl); // Sunet specific
-            showNotification("SCHIMB REUȘIT!", "Afacere încheiată cu succes!", "fa-handshake");
-
+            if (typeof playSFX === 'function') playSFX(slotJackpotUrl); 
+            showNotification("SUCCES", "Schimb realizat!", "fa-handshake");
         } else {
-            const err = await response.text();
-            showKevinutaBubble(err);
+            // AICI îți va zice exact de ce dă 400 (ex: "Limită atinsă" sau "Scor insuficient")
+            showKevinutaBubble(resultText); 
+            console.error("Eroare Server 400:", resultText);
         }
     } catch (e) { 
-        console.error(e); 
-        showKevinutaBubble("Eroare de conexiune la server!");
+        console.error("Eroare rețea:", e);
+        showKevinutaBubble("Eroare conexiune!");
     } finally {
-        // Deblocăm butonul pentru următoarea dată
         btn.disabled = false;
         btn.innerText = "CONFIRMĂ SCHIMBUL";
+    } 
+}
+
+function setTradeQty(qtyVal, btnElement) {
+    const trades = getTradeDefinitions();
+    const t = trades.find(tr => tr.id === currentTradeId);
+    if (!t) return;
+
+    const remainingLimit = t.limit - t.current;
+    let maxAfford = 0;
+
+    // Calculăm cât își permite jucătorul
+    if (t.id === 's2r') maxAfford = Math.floor(score / t.costVal);
+    else if (t.id === 'r2s' || t.id === 'r2x') maxAfford = Math.floor(rubies / t.costVal);
+
+    if (qtyVal === 'max') {
+        currentTradeQty = Math.max(1, Math.min(remainingLimit, maxAfford));
+    } else {
+        currentTradeQty = Math.min(qtyVal, remainingLimit, maxAfford);
     }
+
+    if (currentTradeQty < 1) currentTradeQty = 1;
+
+    // Update vizual în modal
+    const giveText = document.getElementById('tradeGiveText');
+    const getText = document.getElementById('tradeGetText');
+    
+    if (giveText) giveText.innerText = `${t.costVal * currentTradeQty} ${t.costText}`;
+    if (getText) getText.innerText = `${t.getVal * currentTradeQty} ${t.getText}`;
+
+    // Styling butoane (le face albe pe cele selectate)
+    document.getElementById('tBtn1').classList.remove('active-bet');
+    document.getElementById('tBtnMax').classList.remove('active-bet');
+    if (btnElement) btnElement.classList.add('active-bet');
+
+    // Dezactivăm butonul dacă nu are resurse
+    document.getElementById('tradeConfirmBtn').disabled = (maxAfford < 1 || remainingLimit < 1);
 }
 
 async function openBlackMarket() {
