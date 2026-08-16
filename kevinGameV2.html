@@ -13635,14 +13635,24 @@ function startBMTimer() {
 }
 
 function switchBMTab(tab) {
+    // --- NOU: VERIFICARE SECURITATE NIVEL 4 ---
+    if (tab === 'trade' && playerLevel < 4) {
+        playMissSFX(); // Sunet de eroare
+        showKevinutaBubble("Schimburile se deblochează la Nivelul 4!");
+        return; // Oprim funcția aici, nu se schimbă tab-ul
+    }
+
+    // Resetăm starea vizuală a butoanelor
     document.getElementById('tabBmBuy').classList.remove('active');
     document.getElementById('tabBmSell').classList.remove('active');
     document.getElementById('tabBmTrade').classList.remove('active');
 
+    // Ascundem toate secțiunile
     document.getElementById('bm-buy-view').style.display = 'none';
     document.getElementById('bm-sell-view').style.display = 'none';
     document.getElementById('bm-trade-view').style.display = 'none';
 
+    // Activăm tab-ul selectat
     if (tab === 'buy') {
         document.getElementById('tabBmBuy').classList.add('active');
         document.getElementById('bm-buy-view').style.display = 'block';
@@ -13873,6 +13883,18 @@ async function openBlackMarket() {
     clearInterval(moveKevinInterval);
     document.getElementById('utilitiesModal').style.display = 'none';
     document.getElementById('blackMarketModal').style.display = 'flex';
+    
+    // --- FIX: BLOCARE VIZUALĂ TAB SCHIMB (LVL 4) ---
+    const tradeTabBtn = document.getElementById('tabBmTrade');
+    if (playerLevel < 4) {
+        tradeTabBtn.style.filter = "grayscale(1) brightness(0.3)";
+        tradeTabBtn.style.cursor = "not-allowed";
+        tradeTabBtn.title = "Necesită Nivelul 4";
+    } else {
+        tradeTabBtn.style.filter = "none";
+        tradeTabBtn.style.cursor = "pointer";
+    }
+
     switchBMTab('buy');
 
     try {
@@ -13889,11 +13911,7 @@ async function openBlackMarket() {
 
         if (response.ok) {
             const data = await response.json();
-            
-            // 🔥 THE FIX: Update the global limits variable
-            if (data.playerTradeLimits) {
-                playerTradeLimits = data.playerTradeLimits;
-            }
+            if (data.playerTradeLimits) playerTradeLimits = data.playerTradeLimits;
 
             lastMarketRefresh = data.lastRefresh;
             blackMarketWants = data.offers.map(off => ({ ...off, sold: data.playerSales[off.key] || 0 }));
@@ -13901,7 +13919,7 @@ async function openBlackMarket() {
 
             renderBlackMarketBuyGrid();
             renderBlackMarketGrid();
-            renderBlackMarketTradeGrid(); // Now uses synced playerTradeLimits
+            renderBlackMarketTradeGrid(); 
             startBMTimer();
         }
     } catch (e) {
@@ -14760,8 +14778,13 @@ window.clickEpicNode = function(level, name) {
 const LEVEL_UNLOCKS = {
     1: ["stage1", "feedback", "settings", "themes"], // Adăugate pentru aspect vizual
     2: ["slotMachine", "rubyDrop"],
-    3: ["blackMarket", "boosts", "memoryCards"]
+    3: ["blackMarket", "boosts", "memoryCards"],
+    4: ["trading", "easyQuests"], // NOU
+
 };
+
+
+const repoRandom = "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/";
 
 // 2. THE BEAUTY: Defines how each ID looks in the UI
 const UNLOCK_METADATA = {
@@ -14811,7 +14834,19 @@ const UNLOCK_METADATA = {
         name: "Marea de Carduri",
         desc: "Mini-joc de memorie. Găsește perechile pentru premii!",
         icon: "https://iili.io/CSVi2Tb.png" // Iconița existentă
-    }
+    },
+   // --- NIVEL 4 ---
+"trading": {
+        name: "Sistem Trading",
+        desc: "Schimbă scorul pe rubine sau rubinele pe XP în Piața Neagră.",
+        icon: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Trading.png"
+    },
+    "easyQuests": {
+        name: "Misiuni Ușoare",
+        desc: "Deblochează misiuni rapide care se resetează la fiecare oră.",
+        icon: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Eazy%20Quests%20.png"
+    },
+
 };
 
 function isUnlocked(itemId) {
@@ -14832,7 +14867,7 @@ const LEVEL_REWARDS_REGISTRY = {
     1:  { name: "Bronze",      message: "Bun venit în legendă! Acesta este cadoul tău de început.", rewards: [{ type: "score", value: 50 }] },
     2:  { name: "Silver",      message: "Te miști bine! Ai deblocat funcții noi.", rewards: [{ type: "score", value: 150 }] },
     3:  { name: "Copper",      message: "Nivelul 3! Acum ai acces la Piața Neagră și Boost-uri.", rewards: [{ type: "score", value: 450 }, { type: "ruby", value: 1 }, { type: "boost", id: "boost_x2_score", value: 1 }] },
-    4:  { name: "Sapphire",    message: "Strălucești ca un safir! Click-urile tale sunt precise.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
+4: { name: "Sapphire", message: "Strălucești ca un safir! Acum poți face schimburi comerciale și misiuni zilnice.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }, { type: "boost", id: "boost_x2_score", value: 1 }, { type: "boost", id: "boost_x2_xp", value: 1 }] },
     5:  { name: "Emerald",     message: "Viteză de smarald! Ești deja peste medie.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
     6:  { name: "Amethyst",    message: "Magic! Reflexele tale încep să pară ireale.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
     7:  { name: "Gold",        message: "Mânu de aur! Ai ajuns în liga jucătorilor serioși.", rewards: [{ type: "score", value: 1000 }, { type: "ruby", value: 10 }] },
@@ -15159,14 +15194,38 @@ function closeQuestsMenu() {
     }
 }
 
-// 1. Modificăm funcția din Hub-ul principal
 function openQuestsTab() {
-    // Închidem Hub-ul (Centru Activități)
     document.getElementById('questsMenuModal').style.display = 'none';
-    // Deschidem selecția de dificultate
     document.getElementById('misiuniSelectionModal').style.display = 'flex';
     
-    // IMPORTANT: Resetăm sumele bonus pentru a preveni bug-ul de scor infinit
+    // Selectăm prima carte (Misiuni Ușoare) din grila de selecție
+    const easyCard = document.querySelector('#misiuniSelectionModal .shop-card:nth-child(1)');
+    
+    if (playerLevel < 4) {
+        // Stil blocat (Gri + Lacăt)
+        easyCard.classList.add('locked-card');
+        
+        easyCard.onclick = (e) => {
+            e.stopPropagation();
+            playMissSFX();
+            showNotification("ZONĂ BLOCATĂ", "Ai nevoie de Nivelul 4 pentru Misiuni Ușoare!", "fa-lock");
+        };
+
+        // Adăugăm badge-ul gri LVL 4 REQ dacă nu există deja
+        if (!easyCard.querySelector('.gray-lock-badge')) {
+            const badge = document.createElement('div');
+            badge.className = 'gray-lock-badge';
+            badge.innerText = "LVL 4 REQ.";
+            easyCard.appendChild(badge);
+        }
+    } else {
+        // Deblocat
+        easyCard.classList.remove('locked-card');
+        easyCard.onclick = (e) => { e.stopPropagation(); openEasyQuests(); };
+        const badge = easyCard.querySelector('.gray-lock-badge');
+        if (badge) badge.remove();
+    }
+    
     pendingWinAmount = 0;
     pendingRubyWin = 0;
 }
