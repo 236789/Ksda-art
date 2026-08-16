@@ -7543,6 +7543,69 @@ input:checked + .s-slider:before {
     color: #cbd5e1 !important;
     font-family: 'Orbitron', sans-serif !important;
 }
+
+
+/* ==========================================
+   BLACK MARKET CARDS - FINAL POLISH FIX
+   ========================================== */
+
+/* 1. MAKE MAIN IMAGE BIG, BUT IGNORE THE RUBY ICON */
+#bm-buy-view .inv-tile > img, 
+#bm-sell-view .inv-tile > img {
+    width: 65px !important;
+    height: 65px !important;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8)) !important;
+    margin-bottom: 8px; /* Lift it slightly so the stock tag doesn't cover it */
+    z-index: 2;
+}
+
+/* 2. FIX THE HUGE PRICE TAG */
+.bm-ruby-tag, .bm-price-tag {
+    position: absolute !important;
+    top: 8px !important;
+    left: 8px !important;
+    /* Sleek gradient background */
+    background: linear-gradient(135deg, #ef4444, #991b1b) !important;
+    border: 2px solid #ffb3b3 !important;
+    color: #fff !important;
+    font-family: 'Orbitron', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    padding: 3px 8px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.6) !important;
+    z-index: 5 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+/* 3. FORCE THE RUBY ICON INSIDE THE TAG TO STAY TINY */
+.bm-ruby-tag img, .bm-price-tag img {
+    width: 14px !important;
+    height: 14px !important;
+    margin: 0 !important;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5)) !important; /* Soft shadow, no blowout */
+}
+
+/* 4. CLEAN UP THE STOCK TAG AT THE BOTTOM */
+.bm-limit-tag {
+    position: absolute !important;
+    bottom: 8px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    background: rgba(0, 0, 0, 0.85) !important;
+    border: 1px solid #7f1d1d !important;
+    color: #fca5a5 !important; /* Soft red text */
+    font-family: 'Orbitron', sans-serif !important;
+    font-size: 10px !important;
+    font-weight: bold !important;
+    padding: 4px 12px !important;
+    border-radius: 6px !important;
+    white-space: nowrap !important;
+    z-index: 5 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.8) !important;
+}
   </style>
 </head>
 <body>
