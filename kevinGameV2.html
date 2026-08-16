@@ -7351,10 +7351,10 @@ input:checked + .s-slider:before {
 
 
 /* ==========================================
-   PIATA NEAGRA - FULL MODAL REVAMP (V2) - POLISHED
+   PIATA NEAGRA - FULL MODAL REVAMP (V2) - ULTIMATE FIX
    ========================================== */
 
-/* Containerul invizibil de bază */
+/* Containerul de bază */
 .bm-container-v2 {
     background: transparent !important;
     border: none !important;
@@ -7368,61 +7368,60 @@ input:checked + .s-slider:before {
     margin-top: 20px;
 }
 
-/* --- THE TABS (PERFECTLY ANCHORED FOLDER STYLE) --- */
+/* --- THE TABS (PERFECTLY SUED TO THE BORDER) --- */
 .bm-nav-v2 {
     display: flex;
-    gap: 6px;
-    padding-left: 20px; /* Împins puțin spre dreapta pentru estetică */
-    margin-bottom: -5px; /* Trage tab-urile FIX peste marginea de sus a cutiei */
+    align-items: flex-end; /* SECRETUL 1: Ține toate tab-urile lipite de partea de jos */
+    gap: 8px;
+    padding-left: 25px;
+    margin-bottom: -5px; /* SECRETUL 2: Trage tab-urile fix peste bordura de 5px a cutiei */
     position: relative;
-    z-index: 10; /* Tab-urile trebuie să fie peste cutia principală */
+    z-index: 10;
 }
 
 .bm-tab-v2 {
     flex: 1;
-    max-width: 90px;
-    height: 50px;
+    max-width: 95px;
+    height: 50px; /* Înălțimea când e inactiv */
     border-radius: 16px 16px 0 0;
-    /* Marginea tab-ului inactiv e mai întunecată */
     border: 5px solid #5a0000; 
-    border-bottom: none;
+    border-bottom: none; /* Fără margine jos pentru a se putea îmbina */
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 24px;
     cursor: pointer;
-    box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);
+    box-shadow: inset 0 5px 10px rgba(0,0,0,0.5);
     transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    position: relative;
+    transform: none !important; /* ELIMINAT: Fără translate, nu mai "zboară" în aer */
 }
 
-/* Inactive Tab Colors */
+/* Inactive Colors */
 .bm-tab-v2.t-buy { background: #450a0a; color: #7f1d1d; }
-.bm-tab-v2.t-sell { background: #5c2602; color: #92400e; border-color:#7a3000; }
+.bm-tab-v2.t-sell { background: #5c2602; color: #92400e; border-color: #7a3000; }
 .bm-tab-v2.t-trade { background: #450a0a; color: #7f1d1d; }
 
 .bm-tab-v2 i { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.8)); transition: 0.2s; }
 
-/* ACTIVE TAB LOGIC (Se sudează de rama roșie) */
+/* ACTIVE TAB LOGIC (Crește în sus, stă lipit jos) */
 .bm-tab-v2.active {
-    height: 62px;
-    transform: translateY(-7px);
+    height: 65px; /* Crește înălțimea, ridicându-se deasupra celorlalte natural */
     z-index: 15;
     color: #fff;
-    /* Marginea tab-ului activ devine IDENTICĂ cu rama exterioară a cutiei */
-    border-color: #b91c1c; 
-    padding-bottom: 5px; /* Acoperă vizual linia de tăiere */
-    box-shadow: inset 0 10px 15px rgba(255,255,255,0.2), 0 -5px 10px rgba(0,0,0,0.4);
+    border-color: #b91c1c; /* Identic cu rama cutiei */
+    padding-bottom: 5px; /* Acoperă vizual linia de joncțiune */
+    box-shadow: inset 0 10px 15px rgba(255,255,255,0.2);
 }
 
-.bm-tab-v2.t-buy.active { background: linear-gradient(180deg, #ef4444, #991b1b); }
-.bm-tab-v2.t-sell.active { background: linear-gradient(180deg, #fbbf24, #b45309); border-color:#d97706; }
-.bm-tab-v2.t-trade.active { background: linear-gradient(180deg, #ef4444, #991b1b); }
+/* Gradientul activ se termină în #7f1d1d (Culoarea de top a cutiei) pentru o fuziune perfectă! */
+.bm-tab-v2.t-buy.active { background: linear-gradient(180deg, #ef4444 0%, #7f1d1d 100%); }
+.bm-tab-v2.t-sell.active { background: linear-gradient(180deg, #fbbf24 0%, #7f1d1d 100%); border-color: #d97706; }
+.bm-tab-v2.t-trade.active { background: linear-gradient(180deg, #ef4444 0%, #7f1d1d 100%); }
 
-/* --- THE MAIN BODY (The big glossy red box) --- */
+/* --- THE MAIN BODY --- */
 .bm-body-v2 {
     background: linear-gradient(180deg, #7f1d1d 0%, #2a0505 100%);
-    border: 5px solid #b91c1c; /* Rama roșie strălucitoare */
+    border: 5px solid #b91c1c; 
     border-radius: 24px;
     padding: 15px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.8), inset 0 4px 10px rgba(255,255,255,0.15);
@@ -7430,35 +7429,37 @@ input:checked + .s-slider:before {
     z-index: 5;
 }
 
-/* Dacă tab-ul de mijloc e activ, schimbăm culoarea ramei ca să se potrivească cu el */
+/* Când tab-ul portocaliu e activ, schimbăm culoarea ramei cutiei */
 .bm-container-v2:has(.t-sell.active) .bm-body-v2 {
     border-color: #d97706;
 }
 
-/* --- THE INNER BACKGROUND (Rezolvarea ecranului negru "mort") --- */
+/* Ecranul Negru Interior */
 .bm-inner-v2 {
-    /* Gradient roșiatic/maroniu extrem de întunecat pentru un aer premium */
     background: radial-gradient(circle at center, #1f0404 0%, #0a0000 100%);
     border-radius: 16px;
-    border: 2px solid #450a0a; /* O ramă interioară foarte subtilă */
-    padding: 15px 10px;
+    border: 2px solid #450a0a; 
+    padding: 20px 15px;
     box-shadow: inset 0 10px 30px rgba(0,0,0,0.9);
-    min-height: 350px;
+    min-height: 400px;
+    
+    /* Ne ajută să centrăm contentul pe verticală pentru a elimina spațiul gol */
+    display: flex;
+    flex-direction: column;
 }
 
-/* --- THE FLOATING CLOSE BUTTON (Ancorat corect) --- */
+/* --- THE FLOATING CLOSE BUTTON --- */
 .bm-close-v2 {
     position: absolute;
-    /* Aliniat exact la colțul din dreapta-sus al RAMEI roșii (nu al containerului gol) */
-    top: 35px; 
-    right: -12px; 
-    width: 42px;
-    height: 42px;
+    top: 35px; /* Ancorat fix pe rama roșie superioară */
+    right: -10px; 
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
     background: linear-gradient(180deg, #ef4444, #991b1b);
-    border: 3px solid #ffb3b3; /* Ramă albicioasă/roz pentru pop-out */
+    border: 3px solid #ffb3b3; 
     color: #fff;
-    font-size: 20px;
+    font-size: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -7468,32 +7469,79 @@ input:checked + .s-slider:before {
     transition: transform 0.1s ease;
 }
 
-.bm-close-v2:active {
-    transform: scale(0.9);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.8);
+.bm-close-v2:active { transform: scale(0.9); }
+
+/* --- FIX PENTRU SPAȚIUL GOL (GRID & CARDURI MAI MARI) --- */
+#bmTimerDisplay { margin-bottom: 25px; }
+
+/* Centrarea div-urilor de buy/sell pentru a ocupa spațiul vertical */
+#bm-buy-view, #bm-sell-view {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* --- TIMER FIX --- */
-.bm-timer-text-v2 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 16px;
-    font-weight: 900;
-    color: #facc15;
-    text-align: center;
-    margin-bottom: 20px;
-    letter-spacing: 2px;
-    text-shadow: 0 0 15px rgba(250, 204, 21, 0.6);
+/* FORȚĂM Grid-ul să fie pe 2 coloane, nu 3 (Suprascriem HTML-ul) */
+#blackMarketBuyGrid, #blackMarketGrid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 15px !important;
+    width: 100%;
+    padding: 0 !important;
 }
 
-/* Ajustare estetică a cardurilor de Vinde/Cumpără ca să se potrivească pe noul fundal */
+/* Upgrade complet la design-ul cardurilor (Mai înalte, mai "cărnoase") */
 #bm-buy-view .inv-tile, #bm-sell-view .inv-tile {
-    background: rgba(255, 255, 255, 0.03);
-    border: 2px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
+    width: 100% !important;
+    height: 125px !important; /* Mult mai înalte */
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0,0,0,0.6)) !important;
+    border: 3px solid #450a0a !important;
+    border-radius: 16px !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.8) !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
+
 #bm-buy-view .inv-tile:hover, #bm-sell-view .inv-tile:hover {
-    border-color: #ef4444;
-    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+    border-color: #ef4444 !important;
+    box-shadow: 0 5px 20px rgba(239, 68, 68, 0.4), inset 0 0 20px rgba(239, 68, 68, 0.2) !important;
+    transform: translateY(-4px) scale(1.02);
+}
+
+/* Facem imaginile din carduri mai mari */
+#bm-buy-view .inv-tile img, #bm-sell-view .inv-tile img {
+    width: 60px !important;
+    height: 60px !important;
+    filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8)) !important;
+    margin-bottom: 5px;
+}
+
+/* Estetica textelor din carduri (Cost & Limită) */
+.bm-ruby-tag, .bm-price-tag {
+    top: 8px !important;
+    left: 8px !important;
+    font-size: 14px !important;
+    padding: 4px 8px !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.6) !important;
+}
+
+.bm-limit-tag {
+    position: absolute !important;
+    bottom: 8px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    font-size: 11px !important;
+    padding: 3px 12px !important;
+    border-radius: 6px !important;
+    background: rgba(0,0,0,0.8) !important;
+    border: 1px solid #444 !important;
+    width: max-content !important;
+    color: #cbd5e1 !important;
+    font-family: 'Orbitron', sans-serif !important;
 }
   </style>
 </head>
