@@ -8060,11 +8060,12 @@ div.inv-tile div.bm-limit-tag {
 .teleport-overlay.closing .tp-door-top { transform: translateY(0); }
 .teleport-overlay.closing .tp-door-bottom { transform: translateY(0); }
 
-/* --- TEXTUL CENTRAL --- */
+/* --- TEXTUL CENTRAL & LINIA NEON --- */
 .tp-content {
     position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;
     opacity: 0; transform: scale(0.9);
     transition: all 0.4s ease-out;
+    width: 100%;
 }
 
 .teleport-overlay.charging .tp-content {
@@ -8073,15 +8074,21 @@ div.inv-tile div.bm-limit-tag {
 
 .tp-text {
     font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 14px;
-    color: #94a3b8; letter-spacing: 4px; margin-bottom: 5px; text-transform: uppercase;
+    color: #94a3b8; letter-spacing: 4px; text-transform: uppercase;
+}
+
+.tp-neon-line {
+    width: 80%; max-width: 400px; height: 3px;
+    background: #00f0ff;
+    box-shadow: 0 0 10px #00f0ff, 0 0 20px rgba(0, 240, 255, 0.8);
+    margin: 8px 0;
 }
 
 .tp-dest-text {
-    font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 38px;
-    color: #00f0ff; text-shadow: 0 0 20px #00f0ff; letter-spacing: 2px;
+    font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 32px;
+    color: #00f0ff; text-shadow: 0 0 20px rgba(0, 240, 255, 0.8); letter-spacing: 2px;
     text-transform: uppercase; text-align: center;
 }
-
 /* Flash-ul alb */
 .tp-flash {
     position: absolute; inset: 0; background: #ffffff; z-index: 10;
@@ -8837,9 +8844,10 @@ div.inv-tile div.bm-limit-tag {
         <div class="tp-door-edge bottom-edge"></div>
     </div>
     
-    <!-- Textul Minimalist -->
+<!-- Textul Minimalist cu Linie Neon -->
     <div class="tp-content">
         <div class="tp-text">CĂLĂTORIE PORNITĂ</div>
+        <div class="tp-neon-line"></div> <!-- Linia strălucitoare din mijloc -->
         <div id="tpDestText" class="tp-dest-text">DESTINAȚIE: NECUNOSCUTĂ</div>
     </div>
 
@@ -11507,11 +11515,11 @@ const specialRegistry = {
         type: "good",
         duration: 0, // Nu are o durată activă pe ecran, doar îl iei
         xpValue: 15, // <--- ADAUGĂ ASTA
-        stages: ["street"],
+        stages: ["street"] ["beach"],
     indexReward: { type: 'ruby', value: 1 },
         description: "Un rubin extrem de rar a picat pe stradă! Noroc chior!",
         action: (e) => pickupRubyEmoji(e)
-    },
+    }, 
 
 };
 
@@ -15697,7 +15705,7 @@ function renderTeleporterGrid() {
     });
 }
 
-// Funcția pentru declanșarea teleportării cinematice
+// Funcția pentru declanșarea teleportării cinematice (FĂRĂ GHOSTING)
 function travelToStage(stageId) {
     if (currentStageId === stageId) {
         if (typeof playMissSFX === 'function') playMissSFX();
@@ -15712,12 +15720,13 @@ function travelToStage(stageId) {
     const overlay = document.getElementById('teleportOverlay');
     const destText = document.getElementById('tpDestText');
     const bgPreview = document.getElementById('tpBgPreview');
+    const gameArea = document.getElementById('gameArea');
     const stage = stageList[stageId];
     
     // Setăm Textul
     destText.innerText = `DESTINAȚIE: ${stage.name}`;
     
-    // Setăm imaginea destinației pe fundalul overlay-ului
+    // Setăm imaginea destinației pe fundalul overlay-ului (pentru acel efect de sticlă mată)
     const bgImgUrl = stage.bg || stage.timeBgs.noon;
     bgPreview.style.backgroundImage = `url('${bgImgUrl}')`;
     
@@ -15733,30 +15742,57 @@ function travelToStage(stageId) {
     // 4. Faza 2: Apare textul
     setTimeout(() => {
         overlay.classList.add('charging');
-    }, 600); // 600ms = după ce se închid ușile
+    }, 600);
 
-    // 5. Faza 3: Flash și schimbarea oficială a nivelului
-    setTimeout(() => {
-        overlay.classList.add('flash');
+    // 🚀 5. FAZA 3: PRELOADER INTELIGENT
+    // Începem să descărcăm imaginea EXACTĂ (cu tot cu vremea dinamică)
+    let targetUrl = stage.timeBgs ? getRomanianTimeBg(stageId) : stage.bg;
+    const hdLink = targetUrl + "?v=" + new Date().getTime();
+    const img = new Image();
+    
+    img.onload = () => {
+        // Când ajungem aici, înseamnă că internetul a terminat de descărcat poza!
         
-        applyStage(stageId); 
-        showNotification("WARP COMPLET", `Ai ajuns în zona: ${stage.name}`, "fa-bolt");
-    }, 2200); // Durează cam 1.5s să citești textul
+        // Așteptăm măcar o secundă ca jucătorul să poată citi textul de pe ecran
+        setTimeout(() => {
+            overlay.classList.add('flash'); // BANG! Ecran alb
+            
+            // 🚨 FIX-UL PENTRU GHOSTING: Oprim tranziția lentă din CSS
+            gameArea.style.transition = 'none'; 
+            
+            // Aplicăm imaginea și actualizăm datele
+            gameArea.style.backgroundImage = "url('" + hdLink + "')";
+            currentStageId = stageId;
+            
+            const stageNameEl = document.getElementById('stageName');
+            if (stageNameEl) stageNameEl.innerText = stage.name;
+            
+            showNotification("WARP COMPLET", `Ai ajuns în zona: ${stage.name}`, "fa-bolt");
+            
+            // Faza 4: Dispare flash-ul și se deschid ușile
+            setTimeout(() => {
+                overlay.classList.remove('flash');
+                overlay.classList.remove('charging'); 
+                overlay.classList.remove('closing');  
+                if (typeof playSFX === 'function') playSFX(slotWooshUrl); 
+                
+                // Repunem tranziția lentă înapoi pentru ciclul zi/noapte de mai târziu
+                setTimeout(() => {
+                    gameArea.style.transition = 'background-image 1.5s ease-in-out';
+                }, 100);
+            }, 300); // 300ms durează flash-ul
 
-    // 6. Faza 4: Dispare flash-ul și se deschid ușile
-    setTimeout(() => {
-        overlay.classList.remove('flash');
-        overlay.classList.remove('charging'); 
-        overlay.classList.remove('closing');  
-        if (typeof playSFX === 'function') playSFX(slotWooshUrl); 
-    }, 2500);
+            // Faza 5: Curățare completă
+            setTimeout(() => {
+                overlay.classList.remove('active'); 
+                isPaused = false;
+                startKevinMovement();
+            }, 1000);
 
-    // 7. Faza 5: Curățare
-    setTimeout(() => {
-        overlay.classList.remove('active'); 
-        isPaused = false;
-        startKevinMovement();
-    }, 3200);
+        }, 1200); // Timp de așteptare citire text
+    };
+    
+    img.src = hdLink; // Această linie pornește de fapt descărcarea!
 }
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
