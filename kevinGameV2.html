@@ -8011,6 +8011,103 @@ div.inv-tile div.bm-limit-tag {
 .teleport-overlay.active .right-door { transform: translateX(0); }
 .teleport-overlay.active .tp-text { opacity: 1; transition-delay: 0.4s; }
 .teleport-overlay.flash .tp-flash { opacity: 1; }
+
+
+
+/* ==========================================
+   TELEPORTER V3: CINEMATIC WARP JUMP
+   ========================================== */
+
+/* FIX IMPORTANT: Ascunde complet overlay-ul pentru a nu bloca jocul */
+.teleport-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 300000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    visibility: hidden; /* Asta rezolvă bug-ul în care rămânea mereu pe ecran! */
+    pointer-events: none;
+}
+
+/* Când teleportarea începe, overlay-ul devine activ și blochează click-urile externe */
+.teleport-overlay.active {
+    visibility: visible;
+    pointer-events: all;
+}
+
+/* --- UȘILE MASIVE SCI-FI --- */
+.tp-door-top, .tp-door-bottom {
+    position: absolute; left: 0; width: 100vw; height: 50vh;
+    background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.9);
+    transition: transform 0.8s cubic-bezier(0.65, 0, 0.15, 1);
+    z-index: 1;
+}
+
+.tp-door-top { top: 0; transform: translateY(-100%); }
+.tp-door-bottom { bottom: 0; transform: translateY(100%); }
+
+/* Marginile strălucitoare ale ușilor */
+.tp-door-edge {
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 8px;
+    background: #00f0ff;
+    box-shadow: 0 0 20px #00f0ff, 0 0 40px #00f0ff;
+}
+.bottom-edge { top: 0; bottom: auto; }
+
+/* Declanșatorul pentru închiderea ușilor */
+.teleport-overlay.closing .tp-door-top { transform: translateY(0); }
+.teleport-overlay.closing .tp-door-bottom { transform: translateY(0); }
+
+/* --- ECRANUL CENTRAL (Apare doar după ce ușile se închid) --- */
+.tp-content {
+    position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center;
+    opacity: 0; transform: scale(0.8);
+    transition: all 0.5s ease-out;
+}
+
+.teleport-overlay.charging .tp-content {
+    opacity: 1; transform: scale(1);
+}
+
+.tp-spinner {
+    font-size: 60px; color: #b533ff;
+    filter: drop-shadow(0 0 15px rgba(181, 51, 255, 0.8));
+    animation: spinCore 2s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spinCore { to { transform: rotate(360deg); } }
+
+.tp-text {
+    font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 16px;
+    color: #94a3b8; letter-spacing: 4px; margin-bottom: 5px; text-transform: uppercase;
+}
+
+.tp-dest-text {
+    font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 32px;
+    color: #00f0ff; text-shadow: 0 0 20px #00f0ff; letter-spacing: 2px;
+    text-transform: uppercase; text-align: center;
+}
+
+/* Bara de încărcare a warp-ului */
+.tp-progress-bar {
+    width: 250px; height: 6px; background: rgba(255,255,255,0.1);
+    border-radius: 10px; margin-top: 20px; overflow: hidden;
+}
+
+.tp-progress-fill {
+    width: 0%; height: 100%; background: #00f0ff;
+    box-shadow: 0 0 10px #00f0ff;
+    transition: width 2.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.teleport-overlay.charging .tp-progress-fill { width: 100%; }
+
+/* --- FLASH-UL ORBITOR --- */
+.tp-flash {
+    position: absolute; inset: 0; background: #ffffff; z-index: 10;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s ease-out;
+}
+
+.teleport-overlay.flash .tp-flash { opacity: 1; }
   </style>
 </head>
 <body>
@@ -8747,14 +8844,27 @@ div.inv-tile div.bm-limit-tag {
 </div>
 
 
-<!-- OVERLAY ANIMATIE TELEPORTARE (UȘILE) -->
+<!-- OVERLAY ANIMATIE TELEPORTARE (UȘILE SCI-FI) -->
 <div id="teleportOverlay" class="teleport-overlay">
-    <div class="tp-door left-door"></div>
-    <div class="tp-door right-door"></div>
-    <div class="tp-flash"></div>
-    <div class="tp-text">SE INIȚIALIZEAZĂ TELEPORTAREA...</div>
-</div>
+    <!-- Ușile masive -->
+    <div class="tp-door-top">
+        <div class="tp-door-edge"></div>
+    </div>
+    <div class="tp-door-bottom">
+        <div class="tp-door-edge bottom-edge"></div>
+    </div>
+    
+    <!-- Ecranul de încărcare din centru -->
+    <div class="tp-content">
+        <i class="fa-solid fa-atom tp-spinner"></i>
+        <div class="tp-text">SE CALIBREAZĂ PORTALUL</div>
+        <div id="tpDestText" class="tp-dest-text">DESTINAȚIE: NECUNOSCUTĂ</div>
+        <div class="tp-progress-bar"><div class="tp-progress-fill"></div></div>
+    </div>
 
+    <!-- Flash-ul orbitor -->
+    <div class="tp-flash"></div>
+</div>
 <!-- NOUUL MODAL: TERMINAL DE CĂLĂTORIE -->
 <div id="teleporterModal" class="modal-overlay" style="z-index: 100010;">
   <div class="modal-box tp-modal-box">
@@ -15606,47 +15716,72 @@ function renderTeleporterGrid() {
     });
 }
 
+// Funcția pentru declanșarea teleportării cinematice
 function travelToStage(stageId) {
-    // Dacă utilizatorul alege zona în care se află deja (Cerința #4)
+    // 1. Verificăm dacă suntem deja aici
     if (currentStageId === stageId) {
-        if (typeof playMissSFX === 'function') playMissSFX(); // Sunet de eroare/miss
-        showNotification("CĂLĂTORIE RESPINSĂ", "Te afli deja în această zonă!", "fa-location-dot");
+        if (typeof playMissSFX === 'function') playMissSFX();
+        showNotification("TELEPORTARE EȘUATĂ", "Te afli deja în această zonă!", "fa-location-dot");
         return; 
     }
 
-    // 1. Închidem Modalul și meniul
+    // 2. Închidem Meniul și Pregătim Overlay-ul
     document.getElementById('teleporterModal').style.display = 'none';
     forceCloseMenu();
     
-    // 2. Declanșăm Animația Ușilor care se închid
     const overlay = document.getElementById('teleportOverlay');
+    const destText = document.getElementById('tpDestText');
+    const progressFill = document.querySelector('.tp-progress-fill');
+    
+    // Setăm textul destinației
+    destText.innerText = `DESTINAȚIE: ${stageList[stageId].name}`;
+    
+    // Resetăm bara de progres
+    progressFill.style.transition = 'none';
+    progressFill.style.width = '0%';
+    
+    // Activăm overlay-ul (devine vizibil)
     overlay.classList.add('active');
-    if (typeof playSFX === 'function') playSFX(slotWooshUrl); // Sunet de viteză/ușă
-
-    // 3. După ce ușile s-au închis (500ms)
+    
+    // 3. Faza 1: Se închid ușile masive (0.1 secunde)
     setTimeout(() => {
-        // Flash alb
+        overlay.classList.add('closing');
+        if (typeof playSFX === 'function') playSFX(slotWooshUrl); // Sunet de ușă grea
+    }, 100);
+
+    // 4. Faza 2: Apare textul și începe "încărcarea" (1.0 secunde - așteptăm ușile)
+    setTimeout(() => {
+        overlay.classList.add('charging');
+        // Repornim animația barei de progres
+        progressFill.style.transition = 'width 2.5s cubic-bezier(0.25, 1, 0.5, 1)';
+        progressFill.style.width = '100%';
+    }, 1000);
+
+    // 5. Faza 3: FLASH ORBITOR și schimbarea decorului (3.5 secunde)
+    setTimeout(() => {
         overlay.classList.add('flash');
         
-        // Efectuăm schimbarea efectivă a backgroundului
-        applyStage(stageId);
+        // În acest moment ecranul e complet alb, acum schimbăm nivelul în fundal!
+        applyStage(stageId); 
         
-        // Notificare
-        showNotification("CĂLĂTORIE ÎNCHEIATĂ", `Bine ai venit în: ${stageList[stageId].name}`, "fa-bolt");
-    }, 500);
+        // Trimitere Notificare
+        showNotification("WARP COMPLET", `Ai ajuns în zona: ${stageList[stageId].name}`, "fa-bolt");
+    }, 3500);
 
-    // 4. Deschidem ușile la loc și ridicăm flash-ul
+    // 6. Faza 4: Dispare flash-ul și se deschid ușile (3.8 secunde)
     setTimeout(() => {
         overlay.classList.remove('flash');
-        overlay.classList.remove('active');
-        if (typeof playSFX === 'function') playSFX(slotWooshUrl); // Sunet ușă care se deschide
-    }, 900);
+        overlay.classList.remove('charging'); // Ascunde textul
+        overlay.classList.remove('closing');  // Deschide ușile
+        if (typeof playSFX === 'function') playSFX(slotWooshUrl); 
+    }, 3800);
 
-    // 5. Reluăm jocul când e gata (1400ms)
+    // 7. Faza 5: Overlay-ul dispare complet și jocul se reia (4.8 secunde)
     setTimeout(() => {
+        overlay.classList.remove('active'); // Devine iar visibility: hidden
         isPaused = false;
         startKevinMovement();
-    }, 1400);
+    }, 4800); // Ne asigurăm că lăsăm timp suficient pentru a vedea noua hartă apărând
 }
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
