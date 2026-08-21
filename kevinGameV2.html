@@ -8588,19 +8588,39 @@ div.inv-tile div.bm-limit-tag {
   </div>
 </button>
 
-      <!-- TELEPORTOR -->
-      <button class="shop-card" onclick="showComingSoon()">
-        <i class="fa-solid fa-door-open shop-icon" style="color: #b533ff; filter: drop-shadow(0 0 8px rgba(181, 51, 255, 0.5));"></i>
-        <div class="shop-info">
-          <h3 style="color: #b533ff;">TELEPORTOR</h3>
-          <p>Călătorește în alte zone.</p>
-        </div>
-      </button>
+<!-- TELEPORTOR MODIFICAT -->
+<button class="shop-card" onclick="openTeleporterModal()">
+  <i class="fa-solid fa-door-open shop-icon" style="color: #b533ff; filter: drop-shadow(0 0 8px rgba(181, 51, 255, 0.5));"></i>
+  <div class="shop-info">
+    <h3 style="color: #b533ff;">TELEPORTOR</h3>
+    <p>Călătorește în alte zone.</p>
+  </div>
+</button>
     </div>
 
 <button class="menu-btn play close-shop-btn" style="margin-top: 15px;" onclick="closeUtilitiesModal()">
   <span>ÎNCHIDE</span>
 </button>
+  </div>
+</div>
+
+
+<!-- MODAL: TELEPORTOR -->
+<div id="teleporterModal" class="modal-overlay" style="z-index: 100010;">
+  <div class="modal-box shop-box">
+    <div class="shop-header">
+      <h2><i class="fa-solid fa-door-open"></i> TELEPORTOR</h2>
+      <div class="selection-line"></div>
+      <p style="font-family:'Oswald'; color:#94a3b8; font-size: 13px; margin-top: 5px;">Călătorește spre alte zone.</p>
+    </div>
+
+    <div class="shop-grid" id="teleporterGrid">
+      <!-- Generat dinamic de Javascript -->
+    </div>
+
+    <button class="menu-btn play close-shop-btn" style="margin-top: 15px;" onclick="closeTeleporterModal()">
+      <span>ÎNAPOI</span>
+    </button>
   </div>
 </div>
 
@@ -13370,15 +13390,40 @@ const stageList = {
             night:     "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/Night%20Mobile%20size%20street%20.png",
             deepNight: "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/Deep%20Night%20Mobile%20Size%20street.png"
         }
+    },
+
+"beach": {
+        index: 2,
+        name: "PLAJA",
+        accent: "#00f0ff",
+        icon: "fa-umbrella-beach",
+        timeBgs: {
+            morning:   "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/BeachStage/Stage%202%20Beach%20Morning.png",
+            noon:      "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/BeachStage/Stage%202%20Beach%20noon.png",
+            golden:    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/BeachStage/Stage%202%20Beach%20Golden%20Hour.png",
+            night:     "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/BeachStage/Stage%202%20Beach%20Night.png",
+            deepNight: "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/BeachStage/Stage%202%20Beach%20Deep%20Night.png"
+        },
+        mobileBgs: {
+            // Nu ai pus încă poze de mobil pentru plajă, așa că folosim variantele PC momentan
+            morning:   "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/BeachStage/Stage%202%20Beach%20Morning.png",
+            noon:      "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/BeachStage/Stage%202%20Beach%20noon.png",
+            golden:    "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/BeachStage/Stage%202%20Beach%20Golden%20Hour.png",
+            night:     "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/BeachStage/Stage%202%20Beach%20Night.png",
+            deepNight: "https://cdn.jsdelivr.net/gh/236789/Ksda-art@main/backgrounds/BeachStage/Stage%202%20Beach%20Deep%20Night.png"
+        }
     }
 };
-function getRomanianTimeBg() {
+
+function getRomanianTimeBg(stageId) {
     const roTime = new Date().toLocaleString("en-US", {timeZone: "Europe/Bucharest"});
     const hour = new Date(roTime).getHours();
     
-    // Detect if we are on Mobile (Portrait) or Desktop (Landscape)
+    const stage = stageList[stageId];
+    if (!stage || !stage.timeBgs) return stage ? stage.bg : "";
+
     const isMobile = window.innerHeight > window.innerWidth;
-    const bgs = isMobile ? stageList.street.mobileBgs : stageList.street.timeBgs;
+    const bgs = isMobile && stage.mobileBgs ? stage.mobileBgs : stage.timeBgs;
 
     if (hour >= 5 && hour < 11) return bgs.morning;
     if (hour >= 11 && hour < 17) return bgs.noon;
@@ -13395,26 +13440,31 @@ function applyStage(stageId) {
     const stageNameEl = document.getElementById('stageName');
     if (stageNameEl) stageNameEl.innerText = stage.name;
 
-    let targetUrl = (stageId === "street") ? getRomanianTimeBg() : stage.bg;
+    // Folosește funcția dinamică
+    let targetUrl = stage.timeBgs ? getRomanianTimeBg(stageId) : stage.bg;
 
-    // FORCE HD BYPASS CACHE
     const img = new Image();
     const hdLink = targetUrl + "?v=" + new Date().getTime();
     
     img.onload = () => {
         gameArea.style.backgroundImage = "url('" + hdLink + "')";
-        console.log("✅ HD Responsive Applied: " + (window.innerHeight > window.innerWidth ? "Mobile" : "Desktop"));
+        console.log(`✅ HD Responsive Applied: Stage [${stage.name}]`);
     };
     img.src = hdLink;
     
-    currentStageId = stageId;
+    currentStageId = stageId; 
 }
 
 // OPTIONAL: Update background if user rotates their phone or resizes window
+let resizeTimer;
 window.addEventListener('resize', () => {
-    if (document.getElementById('gameArea').style.display === 'block') {
-        applyStage(currentStageId);
-    }
+    clearTimeout(resizeTimer);
+    // Așteaptă 300ms după ce ai terminat de rotit/redimensionat ecranul
+    resizeTimer = setTimeout(() => {
+        if (document.getElementById('gameArea').style.display === 'block') {
+            applyStage(currentStageId);
+        }
+    }, 300);
 });
 function setBackgroundHD(url) {
   const el = document.getElementById("gameArea");
@@ -15355,6 +15405,74 @@ function resumeFromQuest() {
         console.log("▶️ Joc reluat după misiuni.");
     }
 }
+
+
+// ==========================================
+// TELEPORTER LOGIC
+// ==========================================
+function openTeleporterModal() {
+    isPaused = true;
+    clearInterval(moveKevinInterval);
+    document.getElementById('utilitiesModal').style.display = 'none';
+    document.getElementById('teleporterModal').style.display = 'flex';
+    
+    renderTeleporterGrid();
+}
+
+function closeTeleporterModal() {
+    document.getElementById('teleporterModal').style.display = 'none';
+    document.getElementById('utilitiesModal').style.display = 'flex';
+}
+
+function renderTeleporterGrid() {
+    const grid = document.getElementById('teleporterGrid');
+    grid.innerHTML = "";
+
+    Object.keys(stageList).forEach(stageKey => {
+        const stage = stageList[stageKey];
+        const isActive = currentStageId === stageKey;
+
+        const btn = document.createElement('button');
+        btn.className = "shop-card";
+        
+        if (isActive) {
+            btn.classList.add('locked-card'); // Folosim clasa de locked pentru starea "ești deja aici"
+            btn.innerHTML = `
+                <i class="fa-solid ${stage.icon} shop-icon" style="color: #666;"></i>
+                <div class="shop-info">
+                  <h3 style="color: #666;">${stage.name}</h3>
+                  <p>Te afli deja în această zonă.</p>
+                </div>
+            `;
+        } else {
+            btn.innerHTML = `
+                <i class="fa-solid ${stage.icon} shop-icon" style="color: ${stage.accent}; filter: drop-shadow(0 0 8px ${stage.accent}88);"></i>
+                <div class="shop-info">
+                  <h3 style="color: ${stage.accent};">${stage.name}</h3>
+                  <p>Călătorește în această zonă.</p>
+                </div>
+            `;
+            btn.onclick = () => travelToStage(stageKey);
+        }
+        grid.appendChild(btn);
+    });
+}
+
+function travelToStage(stageId) {
+    document.getElementById('teleporterModal').style.display = 'none';
+    
+    // Notificare cinematică
+    if (typeof playSFX === 'function') playSFX(slotWooshUrl);
+    showNotification("CĂLĂTORIE...", `Te-ai teleportat în zona: ${stageList[stageId].name}`, "fa-bolt");
+    
+    // Aplică zona nouă
+    applyStage(stageId);
+    
+    // Închide meniurile și reia jocul
+    forceCloseMenu();
+    isPaused = false;
+    startKevinMovement();
+}
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
 // ==========================================
@@ -15447,7 +15565,9 @@ window.closeMisiuniSelection = closeMisiuniSelection;
 window.openTradeDetail = openTradeDetail;
 window.confirmTrade = confirmTrade;
 window.setTradeQty = setTradeQty;
-
+window.openTeleporterModal = openTeleporterModal;
+window.closeTeleporterModal = closeTeleporterModal;
+window.travelToStage = travelToStage;
 
 
 })(); // <-- CLOSES THE SECURE VAULT
