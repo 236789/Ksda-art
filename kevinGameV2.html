@@ -7869,6 +7869,148 @@ div.inv-tile div.bm-limit-tag {
     z-index: 20;
     pointer-events: none; /* Să nu blocheze click-ul pe tab */
 }
+
+
+/* ==========================================
+   TELEPORTER V2: CINEMATIC UI & ANIMATIONS
+   ========================================== */
+
+/* Noul design pentru Modalul Teleportorului */
+.tp-modal-box {
+    max-width: 450px !important;
+    background: radial-gradient(circle at top, #1c0a2a 0%, #05010a 100%) !important;
+    border: 4px solid #b533ff !important;
+    box-shadow: 0 0 40px rgba(181, 51, 255, 0.4), inset 0 0 20px rgba(0,0,0,0.8) !important;
+    padding: 25px !important;
+}
+
+.tp-header h2 { color: #d8b4fe !important; text-shadow: 0 0 15px #b533ff; letter-spacing: 1px; }
+.tp-header p { font-family: 'Oswald'; font-size: 13px; color: #94a3b8; margin: 10px 0 20px 0; }
+
+.tp-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+    max-height: 50vh;
+    overflow-y: auto;
+    scrollbar-width: none; /* Ascunde scrollbar-ul pe Firefox */
+}
+.tp-grid::-webkit-scrollbar { display: none; } /* Ascunde scrollbar-ul pe Chrome */
+
+/* Cardul Destinației (Butonul cu Poză) */
+.tp-dest-card {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    border-radius: 16px;
+    border: 3px solid rgba(255,255,255,0.2);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.6);
+    background-size: cover;
+    background-position: center;
+}
+
+.tp-dest-card:hover {
+    transform: scale(1.03);
+    border-color: #00f0ff;
+    box-shadow: 0 0 25px rgba(0, 240, 255, 0.6);
+}
+
+.tp-dest-card:active { transform: scale(0.97); }
+
+/* Overlay Negru pentru lizibilitate */
+.tp-dest-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.9) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.tp-dest-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 0 15px #00f0ff, 3px 3px 0 #000;
+    margin: 0;
+}
+
+.tp-dest-subtitle {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    color: #00f0ff;
+    letter-spacing: 2px;
+    background: rgba(0,0,0,0.6);
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-top: 8px;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+}
+
+/* Badge pentru Locația Curentă */
+.tp-current-indicator {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: #4ade80;
+    color: #000;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    box-shadow: 0 0 10px #4ade80;
+    text-transform: uppercase;
+}
+
+/* Buton Închidere Terminal */
+.tp-close-btn {
+    width: 100%; height: 55px; font-size: 18px;
+    background: linear-gradient(180deg, #b533ff, #59008c) !important;
+    border-color: #fff !important; box-shadow: 0 6px 0 #2d0047, 0 10px 20px rgba(0,0,0,0.5) !important;
+}
+.tp-close-btn:active { box-shadow: 0 2px 0 #2d0047 !important; }
+
+/* -----------------------------------
+   ANIMAȚIA CINEMATICĂ (UȘILE)
+   ----------------------------------- */
+.teleport-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none; z-index: 300000; display: flex; align-items: center; justify-content: center;
+}
+
+.tp-door {
+    position: absolute; top: 0; height: 100%; width: 50vw;
+    background: #020617; /* Cyberpunk Dark */
+    box-shadow: 0 0 50px #00f0ff;
+    transition: transform 0.5s cubic-bezier(0.8, 0, 0.2, 1);
+}
+.left-door { left: 0; transform: translateX(-100%); border-right: 4px solid #00f0ff; }
+.right-door { right: 0; transform: translateX(100%); border-left: 4px solid #00f0ff; }
+
+.tp-flash {
+    position: absolute; inset: 0; background: #fff; opacity: 0; transition: opacity 0.2s ease-out;
+}
+
+.tp-text {
+    font-family: 'Montserrat'; font-weight: 900; font-size: clamp(20px, 5vw, 40px); color: #fff;
+    text-shadow: 0 0 20px #00f0ff; opacity: 0; letter-spacing: 5px; transition: opacity 0.3s;
+    text-align: center;
+}
+
+/* Când se activează JS-ul, adaugă clasele astea */
+.teleport-overlay.active .left-door { transform: translateX(0); }
+.teleport-overlay.active .right-door { transform: translateX(0); }
+.teleport-overlay.active .tp-text { opacity: 1; transition-delay: 0.4s; }
+.teleport-overlay.flash .tp-flash { opacity: 1; }
   </style>
 </head>
 <body>
@@ -8605,21 +8747,29 @@ div.inv-tile div.bm-limit-tag {
 </div>
 
 
-<!-- MODAL: TELEPORTOR -->
+<!-- OVERLAY ANIMATIE TELEPORTARE (UȘILE) -->
+<div id="teleportOverlay" class="teleport-overlay">
+    <div class="tp-door left-door"></div>
+    <div class="tp-door right-door"></div>
+    <div class="tp-flash"></div>
+    <div class="tp-text">SE INIȚIALIZEAZĂ TELEPORTAREA...</div>
+</div>
+
+<!-- NOUUL MODAL: TERMINAL DE CĂLĂTORIE -->
 <div id="teleporterModal" class="modal-overlay" style="z-index: 100010;">
-  <div class="modal-box shop-box">
-    <div class="shop-header">
-      <h2><i class="fa-solid fa-door-open"></i> TELEPORTOR</h2>
-      <div class="selection-line"></div>
-      <p style="font-family:'Oswald'; color:#94a3b8; font-size: 13px; margin-top: 5px;">Călătorește spre alte zone.</p>
+  <div class="modal-box tp-modal-box">
+    <div class="tp-header">
+        <h2><i class="fa-solid fa-door-open"></i> TERMINAL CĂLĂTORIE</h2>
+        <div class="selection-line" style="background: #b533ff; width: 80px;"></div>
+        <p>Alege destinația din harta globală.</p>
     </div>
 
-    <div class="shop-grid" id="teleporterGrid">
-      <!-- Generat dinamic de Javascript -->
+    <div class="tp-grid" id="teleporterGrid">
+      <!-- Generat dinamic cu poze -->
     </div>
 
-    <button class="menu-btn play close-shop-btn" style="margin-top: 15px;" onclick="closeTeleporterModal()">
-      <span>ÎNAPOI</span>
+    <button class="menu-btn play tp-close-btn" onclick="closeTeleporterModal()">
+      <span>ÎNCHIDE </span>
     </button>
   </div>
 </div>
@@ -15406,10 +15556,10 @@ function resumeFromQuest() {
     }
 }
 
+// ==========================================
+// CINEMATIC TELEPORTER LOGIC
+// ==========================================
 
-// ==========================================
-// TELEPORTER LOGIC
-// ==========================================
 function openTeleporterModal() {
     isPaused = true;
     clearInterval(moveKevinInterval);
@@ -15432,46 +15582,71 @@ function renderTeleporterGrid() {
         const stage = stageList[stageKey];
         const isActive = currentStageId === stageKey;
 
-        const btn = document.createElement('button');
-        btn.className = "shop-card";
+        // Folosim prima poză din stage ca fundal pentru buton (ex: imaginea default bg)
+        const bgImg = stage.bg || stage.timeBgs.noon;
+
+        const card = document.createElement('div');
+        card.className = "tp-dest-card";
+        card.style.backgroundImage = `url('${bgImg}')`;
         
-        if (isActive) {
-            btn.classList.add('locked-card'); // Folosim clasa de locked pentru starea "ești deja aici"
-            btn.innerHTML = `
-                <i class="fa-solid ${stage.icon} shop-icon" style="color: #666;"></i>
-                <div class="shop-info">
-                  <h3 style="color: #666;">${stage.name}</h3>
-                  <p>Te afli deja în această zonă.</p>
-                </div>
-            `;
-        } else {
-            btn.innerHTML = `
-                <i class="fa-solid ${stage.icon} shop-icon" style="color: ${stage.accent}; filter: drop-shadow(0 0 8px ${stage.accent}88);"></i>
-                <div class="shop-info">
-                  <h3 style="color: ${stage.accent};">${stage.name}</h3>
-                  <p>Călătorește în această zonă.</p>
-                </div>
-            `;
-            btn.onclick = () => travelToStage(stageKey);
-        }
-        grid.appendChild(btn);
+        // Indicator verde doar dacă ești pe acea zonă
+        const currentBadge = isActive ? `<div class="tp-current-indicator"><i class="fa-solid fa-location-dot"></i> ZONA CURENTĂ</div>` : '';
+
+        card.innerHTML = `
+            ${currentBadge}
+            <div class="tp-dest-overlay">
+                <h3 class="tp-dest-title"><i class="fa-solid ${stage.icon}"></i> ${stage.name}</h3>
+                <div class="tp-dest-subtitle">APASĂ PENTRU A CĂLĂTORI</div>
+            </div>
+        `;
+
+        card.onclick = () => travelToStage(stageKey);
+        
+        grid.appendChild(card);
     });
 }
 
 function travelToStage(stageId) {
+    // Dacă utilizatorul alege zona în care se află deja (Cerința #4)
+    if (currentStageId === stageId) {
+        if (typeof playMissSFX === 'function') playMissSFX(); // Sunet de eroare/miss
+        showNotification("CĂLĂTORIE RESPINSĂ", "Te afli deja în această zonă!", "fa-location-dot");
+        return; 
+    }
+
+    // 1. Închidem Modalul și meniul
     document.getElementById('teleporterModal').style.display = 'none';
-    
-    // Notificare cinematică
-    if (typeof playSFX === 'function') playSFX(slotWooshUrl);
-    showNotification("CĂLĂTORIE...", `Te-ai teleportat în zona: ${stageList[stageId].name}`, "fa-bolt");
-    
-    // Aplică zona nouă
-    applyStage(stageId);
-    
-    // Închide meniurile și reia jocul
     forceCloseMenu();
-    isPaused = false;
-    startKevinMovement();
+    
+    // 2. Declanșăm Animația Ușilor care se închid
+    const overlay = document.getElementById('teleportOverlay');
+    overlay.classList.add('active');
+    if (typeof playSFX === 'function') playSFX(slotWooshUrl); // Sunet de viteză/ușă
+
+    // 3. După ce ușile s-au închis (500ms)
+    setTimeout(() => {
+        // Flash alb
+        overlay.classList.add('flash');
+        
+        // Efectuăm schimbarea efectivă a backgroundului
+        applyStage(stageId);
+        
+        // Notificare
+        showNotification("CĂLĂTORIE ÎNCHEIATĂ", `Bine ai venit în: ${stageList[stageId].name}`, "fa-bolt");
+    }, 500);
+
+    // 4. Deschidem ușile la loc și ridicăm flash-ul
+    setTimeout(() => {
+        overlay.classList.remove('flash');
+        overlay.classList.remove('active');
+        if (typeof playSFX === 'function') playSFX(slotWooshUrl); // Sunet ușă care se deschide
+    }, 900);
+
+    // 5. Reluăm jocul când e gata (1400ms)
+    setTimeout(() => {
+        isPaused = false;
+        startKevinMovement();
+    }, 1400);
 }
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
