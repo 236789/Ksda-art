@@ -8845,12 +8845,15 @@ div.inv-tile div.bm-limit-tag {
 
     <div class="shop-grid">
       <!-- MAGAZIN NORMAL -->
-      <button class="shop-card" onclick="openShopFromUtilities()">
+<!-- MAGAZIN NORMAL -->
+      <button id="btnShopUtil" class="shop-card" onclick="openShopFromUtilities()">
         <i class="fa-solid fa-cart-shopping shop-icon"></i>
         <div class="shop-info">
           <h3>MAGAZIN</h3>
           <p>Upgrade-uri și cosmetice.</p>
         </div>
+        <!-- Badge-ul roșu LVL REQ -->
+        <div id="badgeShopUtil" class="gray-lock-badge" style="display: none; font-size: 10px; bottom: -10px; padding: 3px 8px;">LVL 4</div>
       </button>
 
       <!-- PIAȚA NEAGRĂ -->
@@ -11532,7 +11535,7 @@ const specialRegistry = {
     type: "gamble",
     duration: 8,
         xpValue: 5, // <--- ADAUGĂ ASTA
-    stages: ["street", "beach"], // <--- Adăugăm "beach"
+        stages: ["street"], // Enabled for Stage 1
     indexReward: { type: 'score', value: 150 },
     description: "Încearcă-ți norocul! Pariază din scorul tău pentru un multiplicator uriaș.",
     action: (e) => openSlotMachine()
@@ -11544,7 +11547,7 @@ const specialRegistry = {
     type: "good",
     duration: 0, 
         xpValue: 5, // <--- ADAUGĂ ASTA
-    stages: ["street", "beach"], // <--- Adăugăm "beach"
+        stages: ["street"], // Enabled for Stage 1
     indexReward: { type: 'score', value: 50 },
     description: "Răspunde corect la 5 întrebări pentru un bonus masiv. Greșești una? Pierzi tot!",
     action: (e) => startTriviaEvent()
@@ -11556,7 +11559,7 @@ const specialRegistry = {
     type: "good",
     duration: 0,
         xpValue: 5, // <--- ADAUGĂ ASTA
-    stages: ["street", "beach"], // <--- Adăugăm "beach"
+        stages: ["street"], // Enabled for Stage 1
     indexReward: { type: 'score', value: 50 },
     description: "Găsește toate perechile în 25 de secunde pentru un bonus de 50 de puncte!",
     action: (e) => startMemoryGame()
@@ -11568,7 +11571,7 @@ const specialRegistry = {
         type: "good",
         duration: 35,
         xpValue: 5, // <--- ADAUGĂ ASTA
-    stages: ["street", "beach"], // <--- Adăugăm "beach"
+        stages: ["street"],
     indexReward: { type: 'score', value: 50 },
         description: "Un magnet extrem de puternic care atrage toate emoji-urile spre eroul tău!",
         action: (e) => startSuperMagnetEvent()
@@ -13609,10 +13612,33 @@ function openUtilitiesModal() {
     clearInterval(moveKevinInterval);
     document.getElementById('utilitiesModal').style.display = 'flex';
     
-    // --- BLOCHĂM PIAȚA NEAGRĂ (LVL 3) ---
-    // (Aici este codul tău existent pentru Black Market) ...
-    
-    // --- BLOCHĂM TELEPORTORUL (LVL 3) ---
+    // --- 1. BLOCHĂM PIAȚA NEAGRĂ (LVL 3) ---
+    const bmBtn = document.getElementById('btnBlackMarketUtil');
+    const bmBadge = document.getElementById('badgeBlackMarketUtil');
+
+    if (bmBtn) {
+        if (playerLevel < 3) {
+            bmBtn.classList.add('locked-card');
+            if (bmBadge) {
+                bmBadge.style.display = 'block';
+                bmBadge.innerText = 'LVL 3'; 
+            }
+            bmBtn.onclick = (e) => { 
+                e.stopPropagation(); 
+                if (typeof playMissSFX === 'function') playMissSFX(); 
+                showNotification("ZONĂ BLOCATĂ", "Ai nevoie de Nivelul 3 pentru Piața Neagră!", "fa-lock");
+            };
+        } else {
+            bmBtn.classList.remove('locked-card');
+            if (bmBadge) bmBadge.style.display = 'none';
+            bmBtn.onclick = (e) => { 
+                e.stopPropagation();
+                openBlackMarket(); 
+            };
+        }
+    }
+
+    // --- 2. BLOCHĂM TELEPORTORUL (LVL 3) ---
     const tpBtn = document.getElementById('btnTeleporterUtil');
     const tpBadge = document.getElementById('badgeTeleporterUtil');
 
@@ -13621,7 +13647,7 @@ function openUtilitiesModal() {
             tpBtn.classList.add('locked-card');
             if (tpBadge) {
                 tpBadge.style.display = 'block';
-                tpBadge.innerText = 'LVL 3'; // Doar textul LVL X
+                tpBadge.innerText = 'LVL 3';
             }
             tpBtn.onclick = (e) => { 
                 e.stopPropagation(); 
@@ -13634,6 +13660,32 @@ function openUtilitiesModal() {
             tpBtn.onclick = (e) => { 
                 e.stopPropagation();
                 openTeleporterModal(); 
+            };
+        }
+    }
+
+    // --- 3. BLOCHĂM MAGAZINUL (LVL 4) ---
+    const shopBtn = document.getElementById('btnShopUtil');
+    const shopBadge = document.getElementById('badgeShopUtil');
+
+    if (shopBtn) {
+        if (playerLevel < 4) {
+            shopBtn.classList.add('locked-card');
+            if (shopBadge) {
+                shopBadge.style.display = 'block';
+                shopBadge.innerText = 'LVL 4';
+            }
+            shopBtn.onclick = (e) => { 
+                e.stopPropagation(); 
+                if (typeof playMissSFX === 'function') playMissSFX(); 
+                showNotification("ZONĂ BLOCATĂ", "Ai nevoie de Nivelul 4 pentru Magazin!", "fa-lock");
+            };
+        } else {
+            shopBtn.classList.remove('locked-card');
+            if (shopBadge) shopBadge.style.display = 'none';
+            shopBtn.onclick = (e) => { 
+                e.stopPropagation();
+                openShopFromUtilities(); 
             };
         }
     }
@@ -14598,7 +14650,7 @@ const itemsInStage = Object.keys(specialRegistry).filter(key => {
             if (key === "rubyDrop" && stageId !== "street") return false;
             
             return true;
-        }); 
+        });
      const discovered = itemsInStage.filter(key => _GAME_DATA.index.includes(key));
 
         const card = document.createElement('div');
@@ -15192,7 +15244,7 @@ const LEVEL_UNLOCKS = {
     1: ["stage1", "feedback", "settings", "themes"], // Adăugate pentru aspect vizual
     2: ["slotMachine", "rubyDrop"],
     3: ["blackMarket", "boosts", "memoryCards", "teleporter"], // <--- Adăugat teleporter la 3
-    4: ["trading", "easyQuests"], // NOU
+    4: ["trading", "easyQuests", "magazin"], // <--- Adăugat "magazin" la Nivelul 4
     5: ["beachStage"] // <--- Adăugat plaja la 5
 
 };
@@ -15259,6 +15311,12 @@ const UNLOCK_METADATA = {
         name: "Misiuni Ușoare",
         desc: "Deblochează misiuni rapide care se resetează la fiecare oră.",
         icon: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Eazy%20Quests%20.png"
+    },
+
+    "magazin": { // <--- NOU: Detaliile pentru ecranul de Level Up
+        name: "Magazin",
+        desc: "Cumpără upgrade-uri permanente și cosmetice pentru personajele tale.",
+        icon: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/MAGAZIN.png"
     },
 "teleporter": {
         name: "Teleportor",
