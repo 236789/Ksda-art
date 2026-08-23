@@ -4889,16 +4889,15 @@ input:checked + .s-slider:before {
 
 /* 2. SUBTITLE STYLING */
 #indexSubtitle {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 14px;
+    font-family: 'Montserrat', sans-serif !important; /* Fontul gros */
+    font-weight: 900 !important; /* Grosime maximă */
+    font-size: 16px !important;
     color: var(--th-accent);
     text-transform: uppercase;
     letter-spacing: 2px;
-    margin-top: -10px;
-    margin-bottom: 15px;
-    opacity: 0.8;
+    margin-top: 5px !important; /* Am schimbat din -10px în 5px pentru a adăuga spațiu */
+    margin-bottom: 15px !important;
 }
-
 /* 3. BIG CLAIM BUTTON STYLING */
 .stage-claim-btn {
     background: linear-gradient(180deg, #facc15 0%, #d97706 100%) !important;
@@ -11533,7 +11532,7 @@ const specialRegistry = {
     type: "gamble",
     duration: 8,
         xpValue: 5, // <--- ADAUGĂ ASTA
-        stages: ["street"], // Enabled for Stage 1
+    stages: ["street", "beach"], // <--- Adăugăm "beach"
     indexReward: { type: 'score', value: 150 },
     description: "Încearcă-ți norocul! Pariază din scorul tău pentru un multiplicator uriaș.",
     action: (e) => openSlotMachine()
@@ -11545,7 +11544,7 @@ const specialRegistry = {
     type: "good",
     duration: 0, 
         xpValue: 5, // <--- ADAUGĂ ASTA
-        stages: ["street"], // Enabled for Stage 1
+    stages: ["street", "beach"], // <--- Adăugăm "beach"
     indexReward: { type: 'score', value: 50 },
     description: "Răspunde corect la 5 întrebări pentru un bonus masiv. Greșești una? Pierzi tot!",
     action: (e) => startTriviaEvent()
@@ -11557,7 +11556,7 @@ const specialRegistry = {
     type: "good",
     duration: 0,
         xpValue: 5, // <--- ADAUGĂ ASTA
-        stages: ["street"], // Enabled for Stage 1
+    stages: ["street", "beach"], // <--- Adăugăm "beach"
     indexReward: { type: 'score', value: 50 },
     description: "Găsește toate perechile în 25 de secunde pentru un bonus de 50 de puncte!",
     action: (e) => startMemoryGame()
@@ -11569,7 +11568,7 @@ const specialRegistry = {
         type: "good",
         duration: 35,
         xpValue: 5, // <--- ADAUGĂ ASTA
-        stages: ["street"],
+    stages: ["street", "beach"], // <--- Adăugăm "beach"
     indexReward: { type: 'score', value: 50 },
         description: "Un magnet extrem de puternic care atrage toate emoji-urile spre eroul tău!",
         action: (e) => startSuperMagnetEvent()
@@ -14591,12 +14590,16 @@ function renderIndexMain() {
     list.innerHTML = "";
     Object.keys(stageList).forEach(stageId => {
         const stage = stageList[stageId];
-const itemsInStage = Object.keys(specialRegistry).filter(key => 
-    specialRegistry[key].stages && 
-    specialRegistry[key].stages.includes(stageId) && 
-    key !== "rubyDrop" // <--- Excludem forțat rubinul de aici!
-);
-        const discovered = itemsInStage.filter(key => _GAME_DATA.index.includes(key));
+const itemsInStage = Object.keys(specialRegistry).filter(key => {
+            const inStage = specialRegistry[key].stages && specialRegistry[key].stages.includes(stageId);
+            if (!inStage) return false;
+            
+            // Arată Rubinul DOAR în indexul etapei "street" (Etapa 1)
+            if (key === "rubyDrop" && stageId !== "street") return false;
+            
+            return true;
+        }); 
+     const discovered = itemsInStage.filter(key => _GAME_DATA.index.includes(key));
 
         const card = document.createElement('div');
         card.className = "index-stage-card";
