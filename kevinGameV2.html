@@ -9941,6 +9941,11 @@ if (response.status === 200) {
 
     updateXPBarUI(); 
 
+    if (data.currentStage) {
+        currentStageId = data.currentStage;
+        console.log("🗺️ Locație salvată găsită:", currentStageId);
+    }
+
 
             lastSavedScore = score;
             lastSavedRubies = rubies;
@@ -10218,7 +10223,9 @@ async function syncScoreToFirestore() {
             hasSeenRubyTutorial: hasSeenRubyTutorial,
             claimedLevelRewards: _GAME_DATA.claimedLevelRewards, // Trimitem ce avem local
             claimedRewards: _GAME_DATA.claimedRewards,
-            claimedStageRewards: _GAME_DATA.claimedStageRewards
+            claimedStageRewards: _GAME_DATA.claimedStageRewards,
+            currentStage: currentStageId, // <--- NOU
+
         }),
       }); 
 
@@ -14417,6 +14424,7 @@ body: JSON.stringify({
     rubies: rubies,
     level: playerLevel,      // <--- Lipsea!
     xp: playerXP,            // <--- Lipsea!
+    currentStage: currentStageId, // <--- NOU
     inventory: _GAME_DATA.inventory,
     bmBuys: buysUpdate 
 }),
@@ -14598,6 +14606,7 @@ body: JSON.stringify({
     rubies: rubies,
     level: playerLevel,      // <--- Lipsea!
     xp: playerXP,            // <--- Lipsea!
+    currentStage: currentStageId, // <--- NOU
     inventory: _GAME_DATA.inventory,
     bmSales: salesUpdate 
 }),
