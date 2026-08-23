@@ -9630,10 +9630,12 @@ function updateQuestProgress(action, value = 1, isAbsolute = false) {
         if (oldVal !== q.current) changed = true;
     });
 
-    if (changed) {
+if (changed) {
         renderQuestList('easy');
         renderQuestList('hard');
-        if (action !== 'play_time' || questJustFinished) {
+        
+        // 🔥 FIX PENTRU QUOTA EXCEEDED: Salvăm pe server DOAR când s-a finalizat misiunea, nu la fiecare click!
+        if (questJustFinished) {
              syncQuestsWithServer();
         }
     }
