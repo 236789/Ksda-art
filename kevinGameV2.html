@@ -12034,7 +12034,7 @@ if (isUnlocked("rubyDrop") && specialRegistry["rubyDrop"].stages.includes(curren
     // Dacă ai deblocat rubinele, verificăm dacă le-ai mai văzut sau dacă ai deja
     if (hasSeenRubyTutorial || rubies > 0 || Math.random() < 0.05) {
         // Notă: Math.random aici e doar pentru spawn-ul efectiv pe hartă
-        if (Math.random() < 0.5) { 
+        if (Math.random() < 0.05) { 
             chosenKey = "rubyDrop";
             console.log("💎 RUBIN UNLOCKED: A apărut pe hartă!");
         }
@@ -14635,44 +14635,48 @@ function showStageIndex(stageId, itemKeys) {
     grid.innerHTML = "";
 
 itemKeys.forEach(key => {
-        const data = specialRegistry[key];
-        const isDiscovered = _GAME_DATA.index.includes(key); // Have you clicked it?
-        const isClaimed = _GAME_DATA.claimedRewards.includes(key);
-        
-        // NEW: Check if the Backend has authorized this level unlock
-        const isActuallyUnlocked = isUnlocked(key); 
-        const reqLvl = getRequiredLevel(key);
+    const data = specialRegistry[key];
+    
+    // 🚨 FIX PENTRU EROAREA "UNDEFINED" DIN CONSOLĂ 🚨
+    if (!data) return; 
 
-        const tile = document.createElement('div');
-        let className = "index-tile";
-        
-        if (!isActuallyUnlocked) {
-            // STATE 1: BLOCKED BY LEVEL
-            className += " level-locked";
-            tile.innerHTML = `
-                <img src="${data.image}">
-                <div class="lock-text-badge">LVL ${reqLvl} REQ.</div>
-            `;
-            tile.onclick = () => {
-                playMissSFX();
-                showKevinutaBubble(`Deblochează asta la Nivelul ${reqLvl}!`);
-            };
-        } else if (!isDiscovered) {
-            // STATE 2: UNLOCKED BUT NOT FOUND (Silhouette)
-            className += " locked";
-            tile.innerHTML = `<img src="${data.image}"><span class="q-mark">???</span>`;
-            tile.onclick = () => showKevinutaBubble("Încă nu ai găsit acest obiect pe stradă!");
-        } else {
-            // STATE 3: DISCOVERED & FULLY VISIBLE
-            className += " unlocked";
-            if (!isClaimed && data.indexReward) className += " reward-ready";
-            tile.innerHTML = `<img src="${data.image}">`;
-            tile.onclick = () => showIndexRewardModal(key);
-        }
-        
-        tile.className = className;
-        grid.appendChild(tile);
-    });
+    const isDiscovered = _GAME_DATA.index.includes(key); // Have you clicked it?
+    const isClaimed = _GAME_DATA.claimedRewards.includes(key);
+    
+    // NEW: Check if the Backend has authorized this level unlock
+    const isActuallyUnlocked = isUnlocked(key); 
+    const reqLvl = getRequiredLevel(key);
+
+    const tile = document.createElement('div');
+    let className = "index-tile";
+    
+    if (!isActuallyUnlocked) {
+        // STATE 1: BLOCKED BY LEVEL
+        className += " level-locked";
+        tile.innerHTML = `
+            <img src="${data.image}">
+            <div class="lock-text-badge">LVL ${reqLvl} REQ.</div>
+        `;
+        tile.onclick = () => {
+            playMissSFX();
+            showKevinutaBubble(`Deblochează asta la Nivelul ${reqLvl}!`);
+        };
+    } else if (!isDiscovered) {
+        // STATE 2: UNLOCKED BUT NOT FOUND (Silhouette)
+        className += " locked";
+        tile.innerHTML = `<img src="${data.image}"><span class="q-mark">???</span>`;
+        tile.onclick = () => showKevinutaBubble("Încă nu ai găsit acest obiect pe stradă!");
+    } else {
+        // STATE 3: DISCOVERED & FULLY VISIBLE
+        className += " unlocked";
+        if (!isClaimed && data.indexReward) className += " reward-ready";
+        tile.innerHTML = `<img src="${data.image}">`;
+        tile.onclick = () => showIndexRewardModal(key);
+    }
+    
+    tile.className = className;
+    grid.appendChild(tile);
+});
 
     const isStageComplete = itemKeys.length > 0 && itemKeys.every(k => _GAME_DATA.index.includes(k));
     const isStageClaimed = _GAME_DATA.claimedStageRewards.includes(stageId);
