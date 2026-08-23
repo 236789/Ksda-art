@@ -11578,7 +11578,7 @@ const specialRegistry = {
         type: "good",
         duration: 0, // Nu are o durată activă pe ecran, doar îl iei
         xpValue: 15, // <--- ADAUGĂ ASTA
-        stages: ["street"],
+    stages: ["street", "beach"], // <--- Adăugăm "beach"
     indexReward: { type: 'ruby', value: 1 },
         description: "Un rubin extrem de rar a picat pe stradă! Noroc chior!",
         action: (e) => pickupRubyEmoji(e)
@@ -12030,11 +12030,11 @@ const availableKeys = Object.keys(specialRegistry).filter(key => {
     let chosenKey = availableKeys[Math.floor(Math.random() * availableKeys.length)];
 
 // --- NOU: LOGICĂ RUBIN (Nivel 2 + Șansă 5%) ---
-if (isUnlocked("rubyDrop")) {
+if (isUnlocked("rubyDrop") && specialRegistry["rubyDrop"].stages.includes(currentStageId)) {
     // Dacă ai deblocat rubinele, verificăm dacă le-ai mai văzut sau dacă ai deja
     if (hasSeenRubyTutorial || rubies > 0 || Math.random() < 0.05) {
         // Notă: Math.random aici e doar pentru spawn-ul efectiv pe hartă
-        if (Math.random() < 0.05) { 
+        if (Math.random() < 0.5) { 
             chosenKey = "rubyDrop";
             console.log("💎 RUBIN UNLOCKED: A apărut pe hartă!");
         }
@@ -14589,7 +14589,11 @@ function renderIndexMain() {
     list.innerHTML = "";
     Object.keys(stageList).forEach(stageId => {
         const stage = stageList[stageId];
-        const itemsInStage = Object.keys(specialRegistry).filter(key => specialRegistry[key].stages && specialRegistry[key].stages.includes(stageId));
+const itemsInStage = Object.keys(specialRegistry).filter(key => 
+    specialRegistry[key].stages && 
+    specialRegistry[key].stages.includes(stageId) && 
+    key !== "rubyDrop" // <--- Excludem forțat rubinul de aici!
+);
         const discovered = itemsInStage.filter(key => _GAME_DATA.index.includes(key));
 
         const card = document.createElement('div');
