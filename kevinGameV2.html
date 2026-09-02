@@ -11473,7 +11473,13 @@ function playMissSFX() {
 }
 
 
-
+// --- SEAGULL ASSETS (Defined before they are used) ---
+const seagullAssets = {
+    up: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Seagoul%20fly%20up%20.png",
+    middle: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Seagoul%20fly%20middle%20.png",
+    down: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Seagoul%20fly%20down%20.png",
+    icon: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Thief%20Seagoul%20.png"
+};
 
 
 const specialRegistry = {
@@ -11594,8 +11600,20 @@ const specialRegistry = {
         description: "Un rubin extrem de rar a picat pe stradă! Noroc chior!",
         action: (e) => pickupRubyEmoji(e)
     }, 
+"thiefSeagull": {
+    name: "Pescărușul Hoț",
+    image: seagullAssets.icon,
+    type: "bad",
+    duration: 20,
+    xpValue: 10,
+    stages: ["beach"], // Only spawns on the beach
+    indexReward: { type: 'ruby', value: 2 },
+    description: "Un pescăruș viclean care pândește din înaltul cerului. Ai grijă la buzunare!",
+    action: () => startSeagullEvent()
+},
 
 };
+
 
 
 
@@ -12527,6 +12545,8 @@ const hotSauceAssets = {
         lines: ["IT'S TOO HOT!", "MY MOUTH IS ON FIRE!", "WATER! I NEED WATER!", "SPICY! HELP!", "WHO PUT GHOST PEPPERS IN THIS?!"]
     }
 };
+
+
 
 
 
@@ -15973,6 +15993,160 @@ function travelToStage(stageId) {
     
     img.src = hdLink; // Această linie pornește de fapt descărcarea!
 }
+
+
+
+let stolenFromPlayer = null; // Stores what the seagull took
+
+function startSeagullEvent() {
+    const gameArea = document.getElementById('gameArea');
+    const kevin = document.getElementById('kevin');
+    
+    // 1. FREEZE CHARACTER
+    isPaused = true;
+    clearInterval(moveKevinInterval);
+    kevin.style.pointerEvents = 'none';
+
+    // 2. CREATE SEAGULL
+    const seagull = document.createElement('div');
+    seagull.id = "activeSeagull";
+    seagull.style.cssText = `
+        position: absolute; width: 100px; height: 100px;
+        background-size: contain; background-repeat: no-repeat;
+        z-index: 2000; top: 50px; left: -120px;
+        transition: left 0.8s linear, top 0.8s linear;
+        cursor: crosshair;
+    `;
+    gameArea.appendChild(seagull);
+
+    // 3. ANIMATION CYCLE (Up -> Middle -> Down)
+    let frame = 0;
+    const frames = [seagullAssets.up, seagullAssets.middle, seagullAssets.down, seagullAssets.middle];
+    const animInterval = setInterval(() => {
+        seagull.style.backgroundImage = `url('${frames[frame % 4]}')`;
+        frame++;
+    }, 150);
+
+    // 4. MOVEMENT LOGIC
+    let isDiving = false;
+    let hasStolen = false;
+
+    const flyRandomly = () => {
+        if (isDiving || !seagull.parentElement) return;
+        
+        const nextX = Math.random() * (window.innerWidth - 100);
+        const currentX = parseFloat(seagull.style.left);
+        
+        // Flip image based on direction
+        seagull.style.transform = nextX > currentX ? "scaleX(-1)" : "scaleX(1)";
+        seagull.style.left = nextX + "px";
+        seagull.style.top = (Math.random() * 100 + 20) + "px";
+
+        // 30% chance to lunge every 2 seconds
+        if (Math.random() < 0.3 && !hasStolen) {
+            triggerLunge();
+        } else {
+            setTimeout(flyRandomly, 2000);
+        }
+    };
+
+    const triggerLunge = () => {
+        isDiving = true;
+        const kRect = kevin.getBoundingClientRect();
+        
+        // Use "Up" image for the dive as requested
+        clearInterval(animInterval);
+        seagull.style.backgroundImage = `url('${seagullAssets.up}')`;
+        seagull.style.transition = "all 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045)"; // Aggressive dive
+        
+        // Dive to Kevin
+        seagull.style.left = (kRect.left) + "px";
+        seagull.style.top = (kRect.top) + "px";
+
+        setTimeout(() => { 
+            // THE STEAL
+            executeSteal();
+            hasStolen = true;
+
+            // Complete the Triangle (Fly up to the opposite side)
+            seagull.style.left = (parseFloat(seagull.style.left) > window.innerWidth/2 ? -150 : window.innerWidth + 150) + "px";
+            seagull.style.top = "-150px";
+
+            // Unfreeze Character after dive
+            setTimeout(() => {
+                cleanupSeagull();
+            }, 1000);
+        }, 600);
+    };
+
+    const executeSteal = () => {
+        const stolenScore = Math.min(score, Math.floor(Math.random() * 401) + 100);
+        const stolenRubies = Math.min(rubies, Math.floor(Math.random() * 2) + 1);
+        
+        // Steal Emojis
+        let stolenEmojis = {};
+        const ownedItems = Object.keys(_GAME_DATA.inventory).filter(k => _GAME_DATA.inventory[k] > 0);
+        if (ownedItems.length > 0) {
+            for(let i=0; i<5; i++) { // Try to steal up to 5 stacks
+                const randomKey = ownedItems[Math.floor(Math.random() * ownedItems.length)];
+                const amount = Math.min(_GAME_DATA.inventory[randomKey], Math.floor(Math.random() * 3) + 1);
+                if (amount > 0) {
+                    stolenEmojis[randomKey] = amount;
+                    _GAME_DATA.inventory[randomKey] -= amount;
+                }
+            }
+        }
+
+        stolenFromPlayer = { score: stolenScore, rubies: stolenRubies, emojis: stolenEmojis };
+        
+        score -= stolenScore;
+        rubies -= stolenRubies;
+        updateScoreUI(true);
+        showNotification("HOȚ DETECTAT!", `Pescărușul ți-a furat bunurile!`, "fa-mask");
+    };
+
+    const cleanupSeagull = () => {
+        clearInterval(animInterval);
+        if(seagull.parentElement) seagull.remove();
+        isPaused = false;
+        kevin.style.pointerEvents = 'auto';
+        startKevinMovement();
+        syncScoreToFirestore();
+    };
+
+    // 5. CLICK TO KILL (10% Chance)
+    seagull.onclick = (e) => {
+        e.stopPropagation();
+        if (Math.random() < 0.10) {
+            // KILL SUCCESS
+            seagull.style.filter = "brightness(0) saturate(100%) invert(18%) sepia(95%) saturate(7403%) hue-rotate(357deg) brightness(91%) contrast(118%)"; // Red RPG effect
+            seagull.style.pointerEvents = "none";
+            
+            if (stolenFromPlayer) {
+                score += stolenFromPlayer.score;
+                rubies += stolenFromPlayer.rubies;
+                Object.keys(stolenFromPlayer.emojis).forEach(k => {
+                    _GAME_DATA.inventory[k] += stolenFromPlayer.emojis[k];
+                });
+                showNotification("RĂZBUNARE!", "Ai recuperat tot ce a fost furat!", "fa-shield-heart");
+                stolenFromPlayer = null;
+            }
+
+            setTimeout(() => {
+                seagull.style.opacity = "0";
+                setTimeout(cleanupSeagull, 300);
+            }, 400);
+        } else {
+            // Flash red briefly to show hit but no kill
+            seagull.style.filter = "sepia(1) hue-rotate(-50deg) saturate(5)";
+            setTimeout(() => { seagull.style.filter = ""; }, 100);
+        }
+    };
+
+    flyRandomly();
+}
+
+
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
 // ==========================================
@@ -16072,6 +16246,9 @@ window.travelToStage = travelToStage;
 
 })(); // <-- CLOSES THE SECURE VAULT
 
+
+
+
 </script>
 </body>
-</html> 
+</html>  
