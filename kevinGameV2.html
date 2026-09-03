@@ -8173,6 +8173,161 @@ div.inv-tile div.bm-limit-tag {
     50% { filter: brightness(0) saturate(100%) invert(18%) sepia(95%) saturate(7403%) hue-rotate(357deg); transform: scale(1.2); }
     100% { opacity: 0; transform: scale(0.5); }
 }
+
+
+/* ==========================================
+   HERO SHOP SHOWCASE STYLES
+   ========================================== */
+.hero-showcase-box {
+    max-width: 450px !important;
+    background: radial-gradient(circle at center, #1a0b2e 0%, #050510 100%) !important;
+    border-color: #b533ff !important;
+    box-shadow: 0 0 50px rgba(181, 51, 255, 0.3), inset 0 0 30px rgba(0,0,0,0.8) !important;
+}
+
+.hero-showcase-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.hero-rarity-tag {
+    font-family: 'Orbitron';
+    font-size: 10px;
+    font-weight: 900;
+    color: #ffcc00;
+    letter-spacing: 2px;
+    border: 1px solid #ffcc00;
+    padding: 2px 10px;
+    border-radius: 50px;
+    background: rgba(255, 204, 0, 0.1);
+}
+
+#heroDisplayName {
+    font-family: 'Montserrat';
+    font-weight: 900;
+    font-size: 32px;
+    color: #fff;
+    margin: 10px 0 0 0;
+    text-transform: uppercase;
+    text-shadow: 0 0 15px rgba(255,255,255,0.3);
+}
+
+/* SCENA EROULUI */
+.hero-view-stage {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 220px;
+    margin: 10px 0;
+    position: relative;
+}
+
+.hero-spotlight {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.hero-main-img {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    z-index: 2;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
+    animation: heroFloat 3s ease-in-out infinite;
+}
+
+.hero-platform {
+    width: 120px;
+    height: 20px;
+    background: #2a1b4d;
+    border-radius: 50%;
+    margin-top: -20px;
+    filter: blur(5px);
+    opacity: 0.6;
+    box-shadow: 0 0 30px #b533ff;
+}
+
+/* ABILITATE & DESCRIERE */
+.hero-info-container {
+    padding: 0 10px;
+    text-align: center;
+}
+
+.hero-description {
+    font-family: 'Oswald';
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.4;
+    margin-bottom: 20px;
+}
+
+.hero-ability-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(181, 51, 255, 0.3);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-align: left;
+}
+
+.hero-ability-box i {
+    font-size: 24px;
+    color: #b533ff;
+    text-shadow: 0 0 10px #b533ff;
+}
+
+.ability-title {
+    display: block;
+    font-family: 'Orbitron';
+    font-weight: 900;
+    font-size: 11px;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.ability-desc {
+    font-family: 'Oswald';
+    font-size: 13px;
+    color: #b533ff;
+    font-weight: bold;
+}
+
+/* FOOTER & PRET */
+.showcase-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.hero-price-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,0,0,0.4);
+    padding: 5px 20px;
+    border-radius: 50px;
+    border: 1px solid #ff3366;
+}
+
+.price-ruby-icon {
+    width: 18px;
+    height: 18px;
+}
+
+#heroDisplayPrice {
+    font-family: 'Orbitron';
+    font-weight: 900;
+    font-size: 20px;
+    color: #fff;
+}
   </style>
 </head>
 <body>
@@ -8957,6 +9112,74 @@ div.inv-tile div.bm-limit-tag {
   </div>
 </div>
 
+
+<!-- MODAL: MAGAZIN EROI (PREMIUM SHOWCASE) -->
+<div id="heroShopModal" class="modal-overlay" style="z-index: 100020;">
+    <div class="modal-box replica-v3-box hero-showcase-box">
+        
+        <!-- Buton Închidere -->
+        <button class="v3-close" onclick="closeHeroShop()">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="v3-scroll-area">
+            <!-- Header: Numele Eroului -->
+            <div class="hero-showcase-header">
+                <span class="hero-rarity-tag" id="heroRarity">LEGENDAR</span>
+                <h2 id="heroDisplayName">???</h2>
+            </div>
+
+            <!-- Scena Centrală: Imagine + Săgeți -->
+            <div class="hero-view-stage">
+                <button class="nav-arrow-v2 left" onclick="navHeroShop(-1)">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                
+                <div class="hero-spotlight">
+                    <img id="heroDisplayImg" src="https://iili.io/CNURdSR.png" class="hero-main-img">
+                    <div class="hero-platform"></div>
+                </div>
+
+                <button class="nav-arrow-v2 right" onclick="navHeroShop(1)">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <div class="v3-section-title">
+                <div class="v3-line"></div>
+                <span class="v3-diamonds">◆</span>
+                <span>DETALII EROU</span>
+                <span class="v3-diamonds">◆</span>
+                <div class="v3-line"></div>
+            </div>
+
+            <!-- Descriere și Abilitate -->
+            <div class="hero-info-container">
+                <p id="heroDisplayDesc" class="hero-description">Acest erou este încă învăluit în mister. Continuă să joci pentru a-i afla povestea!</p>
+                
+                <div class="hero-ability-box">
+                    <i class="fa-solid fa-bolt-lightning"></i>
+                    <div class="ability-text">
+                        <span class="ability-title">EFECT SPECIAL:</span>
+                        <span id="heroDisplayEffect" class="ability-desc">???</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer: Preț și Buton Cumpărare -->
+        <div class="v3-footer showcase-footer">
+            <div class="hero-price-tag">
+                <img src="https://iili.io/CrnXNdG.png" class="price-ruby-icon">
+                <span id="heroDisplayPrice">999</span>
+            </div>
+            <button id="heroBuyBtn" class="v3-main-btn" onclick="buyHero()">
+                CUMPĂRĂ EROU
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL PRINCIPAL MISIUNI & ACHIEVEMENTS -->
 <div id="questsMenuModal" class="modal-overlay">
   <div class="modal-box shop-box">
@@ -9101,13 +9324,13 @@ div.inv-tile div.bm-limit-tag {
 
     <div class="shop-grid">
       <!-- EROI -->
-<button class="shop-card" onclick="openIndex()">
-        <i class="fa-solid fa-mask shop-icon"></i>
-        <div class="shop-info">
-          <h3>EROI</h3>
-          <p>Deblochează legende noi.</p>
-        </div>
-      </button>
+<button class="shop-card" onclick="openHeroShop()">
+    <i class="fa-solid fa-mask shop-icon"></i>
+    <div class="shop-info">
+        <h3>EROI</h3>
+        <p>Deblochează legende noi.</p>
+    </div>
+</button>
 
       <!-- UPGRADES -->
       <button class="shop-card">
@@ -16185,6 +16408,99 @@ function startSeagullEvent() {
 }
 
 
+
+// 1. REGISTRUL DE EROI DIN MAGAZIN (Placeholders)
+const heroShopList = [
+    {
+        id: "hero_mystic",
+        name: "???",
+        rarity: "LEGENDAR",
+        desc: "O figură misterioasă care apare doar în nopțile cu lună plină. Se spune că poate încetini timpul doar cu o privire.",
+        effect: "ÎNGHEȚ TEMPORAL +2 SECUNDE",
+        price: 25,
+        img: "https://iili.io/CNURdSR.png", // Silhouette/Placeholder
+        color: "#b533ff"
+    },
+    {
+        id: "hero_gold",
+        name: "???",
+        rarity: "MITIC",
+        desc: "Un războinic ce poartă o armură din aur pur. Unde calcă el, scorul crește de la sine.",
+        effect: "MULTI-CLICK X1.2 PERMANENT",
+        price: 50,
+        img: "https://iili.io/CNURvUv.png",
+        color: "#facc15"
+    },
+    {
+        id: "hero_shadow",
+        name: "???",
+        rarity: "EPIC",
+        desc: "Un maestru al umbrelor. Nimeni nu l-a văzut, dar toată lumea i-a simțit prezența în combo-uri.",
+        effect: "COMBO DUREAZĂ CU 1s MAI MULT",
+        price: 15,
+        img: "https://iili.io/CNURciu.png",
+        color: "#94a3b8"
+    }
+];
+
+let currentHeroIdx = 0;
+
+// 2. FUNCȚIILE DE CONTROL
+function openHeroShop() {
+    isPaused = true;
+    clearInterval(moveKevinInterval);
+    document.getElementById('shopModal').style.display = 'none';
+    document.getElementById('heroShopModal').style.display = 'flex';
+    currentHeroIdx = 0;
+    renderHeroInShop();
+}
+
+function closeHeroShop() {
+    document.getElementById('heroShopModal').style.display = 'none';
+    document.getElementById('shopModal').style.display = 'flex';
+}
+
+function navHeroShop(dir) {
+    currentHeroIdx += dir;
+    if (currentHeroIdx < 0) currentHeroIdx = heroShopList.length - 1;
+    if (currentHeroIdx >= heroShopList.length) currentHeroIdx = 0;
+    
+    // Sunet de navigare
+    if (typeof playSFX === 'function') playSFX(slotWooshUrl);
+    renderHeroInShop();
+}
+
+function renderHeroInShop() {
+    const hero = heroShopList[currentHeroIdx];
+    
+    document.getElementById('heroDisplayName').innerText = hero.name;
+    document.getElementById('heroRarity').innerText = hero.rarity;
+    document.getElementById('heroDisplayDesc').innerText = hero.desc;
+    document.getElementById('heroDisplayEffect').innerText = hero.effect;
+    document.getElementById('heroDisplayPrice').innerText = hero.price;
+    document.getElementById('heroDisplayImg').src = hero.img;
+    
+    // Schimbăm culorile temei în funcție de raritate
+    const rarityTag = document.getElementById('heroRarity');
+    rarityTag.style.color = hero.color;
+    rarityTag.style.borderColor = hero.color;
+    document.getElementById('heroDisplayEffect').style.color = hero.color;
+}
+
+function buyHero() {
+    const hero = heroShopList[currentHeroIdx];
+    if (rubies < hero.price) {
+        if (typeof playMissSFX === 'function') playMissSFX();
+        showKevinutaBubble("Nu ai destule rubine pentru acest erou! ♦️");
+        return;
+    }
+    
+    // Momentan doar un mesaj, deoarece personajele sunt "???"
+    showNotification("MAGAZIN", "Acest erou va fi disponibil în curând!", "fa-lock");
+}
+
+
+
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
 // ==========================================
@@ -16280,7 +16596,10 @@ window.setTradeQty = setTradeQty;
 window.openTeleporterModal = openTeleporterModal;
 window.closeTeleporterModal = closeTeleporterModal;
 window.travelToStage = travelToStage;
-
+window.openHeroShop = openHeroShop;
+window.closeHeroShop = closeHeroShop;
+window.navHeroShop = navHeroShop;
+window.buyHero = buyHero;
 
 })(); // <-- CLOSES THE SECURE VAULT
 
