@@ -12146,15 +12146,38 @@ function toggleFullScreen() {
 
 
 
-
 function openShop() {
-    // Optional: Pause game movement while shopping
-    // isPaused = true; 
-    
     document.getElementById('shopModal').style.display = 'flex';
+    forceCloseMenu();
+
+    // --- LOGICĂ DE BLOCARE PENTRU MAGAZINUL DE EROI ---
+    const heroBtn = document.getElementById('btnHeroesShop');
+    const heroBadge = document.getElementById('badgeHeroesShop');
+    const REQ_LEVEL = 2; // <--- Schimbă acest număr dacă vrei să se deblocheze la alt nivel
     
-    // Close the floating menu automatically when shop opens
-forceCloseMenu();
+    if (heroBtn) {
+        if (playerLevel < REQ_LEVEL) {
+            // Blochează butonul
+            heroBtn.classList.add('locked-card');
+            if (heroBadge) {
+                heroBadge.style.display = 'block';
+                heroBadge.innerText = `LVL ${REQ_LEVEL}`;
+            }
+            heroBtn.onclick = (e) => { 
+                e.stopPropagation(); 
+                if (typeof playMissSFX === 'function') playMissSFX(); 
+                showNotification("ZONĂ BLOCATĂ", `Ai nevoie de Nivelul ${REQ_LEVEL} pentru Magazinul de Eroi!`, "fa-lock");
+            };
+        } else {
+            // Deblochează butonul
+            heroBtn.classList.remove('locked-card');
+            if (heroBadge) heroBadge.style.display = 'none';
+            heroBtn.onclick = (e) => { 
+                e.stopPropagation();
+                openHeroModal(); 
+            };
+        }
+    }
 }
 
 function closeShop() {
@@ -16565,7 +16588,7 @@ const LEVEL_UNLOCKS = {
     2: ["slotMachine", "rubyDrop"],
     3: ["blackMarket", "boosts", "memoryCards", "teleporter"], // <--- Adăugat teleporter la 3
     4: ["trading", "easyQuests", "magazin"], // <--- Adăugat "magazin" la Nivelul 4
-    5: ["beachStage"] // <--- Adăugat plaja la 5
+    5: ["beachStage", "heroes",] // <--- Adăugat plaja la 5
 
 };
 
@@ -16647,6 +16670,11 @@ const UNLOCK_METADATA = {
         name: "Plaja",
         desc: "O nouă zonă însorită accesibilă din Teleportor!",
         icon: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Beach%20Map.png" 
+    },
+"heroes": {
+        name: "Magazin Eroi",
+        desc: "Recrutează personaje noi cu abilități speciale folosind Rubine.",
+        icon: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Design%20f%C4%83r%C4%83%20titlu.png"
     },
  
 };
