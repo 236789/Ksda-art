@@ -8723,95 +8723,56 @@ div.inv-tile div.bm-limit-tag {
     filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.2));
 }
 
-/* --- HUGE HERO VIEWER --- */
-.eroi-viewer {
-    height: 320px !important; /* Increased from 150px */
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 10px 0;
-}
+/* ==========================================
+   EROI MODAL - THE MASSIVE COLLECTOR FIX
+   ========================================== */
 
-.eroi-img-stage {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-}
-
-.eroi-img-stage img {
-    height: 300px !important; /* MASSIVE HEROES */
-    width: auto;
-    object-fit: contain;
-    filter: drop-shadow(0 15px 30px rgba(0,0,0,0.6));
-}
-
-/* --- PRICE TAG AT THE BOTTOM --- */
-.eroi-divider-simple {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    width: 100%;
-    margin-bottom: 25px;
-    opacity: 0.3;
-}
-
-.eroi-price-badge-final {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    background: linear-gradient(135deg, #ef4444, #991b1b);
-    border: 2px solid #ffb3b3;
-    padding: 6px 20px;
-    border-radius: 12px;
-    margin-bottom: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-}
-
-.eroi-price-badge-final span {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900;
-    color: white;
-    font-size: 22px;
-}
-
-.eroi-price-badge-final img { width: 24px; height: 24px; }
-
-
-/* --- MODAL SCROLLING CONFIG --- */
 .eroi-main-box {
-    max-height: 85vh !important; /* Limits height to fit screen */
-    width: 440px !important;
-    overflow-y: auto !important; /* Enables scrolling */
-    display: flex;
-    flex-direction: column;
+    max-height: 85vh !important;
+    width: 460px !important;
+    max-width: 95vw !important;
+    overflow-y: auto !important; /* Forces scrolling */
+    overflow-x: hidden;
+    display: block !important; /* Essential to let children take full height */
+    background: radial-gradient(circle at center, #1b1c3a 0%, #0a0b16 100%) !important;
+    border: 3px solid #facc15 !important;
+    border-radius: 20px !important;
+    padding: 30px 20px !important;
     scrollbar-width: none;
-    padding: 25px 20px !important;
 }
 .eroi-main-box::-webkit-scrollbar { display: none; }
 
-/* --- BLACK NAMES FOR CONTRAST --- */
+/* HEADER NAME - BLACK TEXT */
 .eroi-title-box {
-    color: #000 !important;
+    display: block;
+    width: fit-content;
+    padding: 8px 40px;
+    background: #facc15;
+    color: #000 !important; /* HIGH CONTRAST BLACK */
+    font-family: 'Montserrat', sans-serif;
     font-weight: 900;
+    text-transform: uppercase;
+    clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%);
+    margin: 0 auto 20px auto;
+    font-size: 24px;
 }
 
-/* --- RAINBOW FOR LESBICONI --- */
+/* RAINBOW FOR LESBICONI */
 .rainbow-name {
     background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-text-fill-color: transparent !important;
     filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.2));
 }
 
-/* --- THE MASSIVE HERO STAGE --- */
+/* THE MASSIVE VIEWER AREA */
 .eroi-viewer-massive {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    min-height: 500px; /* Forces the viewport to be tall */
+    height: 550px !important; /* FORCED HUGE SPACE */
     width: 100%;
-    margin-bottom: 20px;
+    position: relative;
 }
 
 .eroi-img-stage {
@@ -8819,70 +8780,86 @@ div.inv-tile div.bm-limit-tag {
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 100%;
 }
 
-.eroi-img-stage img {
-    height: 480px !important; /* THE SCALE YOU WANTED */
+#eroiImg {
+    height: 520px !important; /* MASSIVE HERO HEIGHT */
     width: auto;
     object-fit: contain;
-    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.7));
+    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.8));
+    transform: scale(1.1); /* Extra pop */
 }
 
-/* --- NAVIGATION BUTTONS --- */
+/* NAVIGATION BUTTONS */
 .eroi-nav-btn {
-    width: 45px;
-    height: 45px;
-    background: rgba(255,255,255,0.05);
-    border: 2px solid rgba(255,255,255,0.15);
-    color: white;
+    width: 50px;
+    height: 60px;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.2);
     border-radius: 12px;
+    color: white;
+    font-size: 24px;
     cursor: pointer;
     z-index: 10;
 }
 
-/* --- COMPACT PRICE PILL --- */
-.eroi-price-pill-compact {
+/* TACTICAL SEPARATOR WITH COMPACT PRICE */
+.eroi-divider-simple {
     display: flex;
     align-items: center;
-    gap: 6px;
-    background: linear-gradient(180deg, #ef4444, #991b1b);
-    border: 2px solid #ffb3b3;
-    padding: 3px 15px;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    justify-content: center;
+    margin: 30px 0;
 }
 
-.eroi-price-pill-compact img { width: 16px; height: 16px; }
-.eroi-price-pill-compact span {
+.eroi-line { flex: 1; height: 2px; background: rgba(255,255,255,0.15); }
+
+.eroi-price-tag-mini {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #ef4444, #991b1b);
+    border: 2px solid #ffb3b3;
+    padding: 4px 15px;
+    border-radius: 10px;
+    margin: 0 15px;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+}
+.eroi-price-tag-mini img { width: 18px; height: 18px; }
+.eroi-price-tag-mini span {
     font-family: 'Orbitron', sans-serif;
     font-weight: 900;
     color: white;
-    font-size: 16px;
+    font-size: 18px;
 }
 
-/* --- DETAILS AREA (UNDER THE IMAGE) --- */
+/* DATA PADS (BOLD FOR ROMANIAN) */
 .eroi-details-scroll-zone {
     display: flex;
     flex-direction: column;
     gap: 15px;
     margin-bottom: 30px;
-    padding: 0 10px;
 }
 
-.eroi-footer-fixed {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding-bottom: 10px;
+.eroi-data-pad {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 5px solid #5a6288;
+    padding: 15px;
+    border-radius: 4px 15px 15px 4px;
 }
+.eroi-data-pad.highlight { border-left-color: #facc15; background: rgba(250, 204, 21, 0.05); }
 
+.pad-label { font-size: 10px; font-weight: 900; color: #94a3b8; letter-spacing: 2px; margin-bottom: 5px; }
+.pad-content { font-family: 'Montserrat'; font-weight: 800; color: #fff; line-height: 1.4; }
+
+/* BUY BUTTON */
 .eroi-buy-btn {
     width: 100% !important;
-    height: 60px !important;
-    font-size: 22px !important;
+    height: 65px !important;
     font-family: 'Montserrat', sans-serif !important;
     font-weight: 900 !important;
+    font-size: 22px !important;
 }
   </style>
 </head>
@@ -9669,15 +9646,10 @@ div.inv-tile div.bm-limit-tag {
 </div>
 
 
-<!-- MODAL: SELECTIE EROI (TACTICAL V2) -->
 <div id="heroModal" class="modal-overlay" style="z-index: 100020;">
 <div class="modal-box eroi-main-box">
-    <!-- Close Button -->
-    <button class="eroi-close-x" onclick="closeHeroModal()">
-        <i class="fa-solid fa-xmark"></i>
-    </button>
+    <button class="eroi-close-x" onclick="closeHeroModal()"><i class="fa-solid fa-xmark"></i></button>
 
-    <!-- Header Name -->
     <div class="eroi-header">
         <h2 id="eroiName" class="eroi-title-box">???</h2>
     </div>
@@ -9685,44 +9657,37 @@ div.inv-tile div.bm-limit-tag {
     <!-- THE MASSIVE VIEWER -->
     <div class="eroi-viewer-massive">
         <button class="eroi-nav-btn" onclick="navEroi(-1)"><i class="fa-solid fa-angle-left"></i></button>
-        
         <div class="eroi-img-stage">
             <img id="eroiImg" src="">
         </div>
-
         <button class="eroi-nav-btn" onclick="navEroi(1)"><i class="fa-solid fa-angle-right"></i></button>
     </div>
 
-    <!-- TACTICAL DIVIDER -->
+    <!-- TACTICAL DIVIDER WITH PRICE -->
     <div class="eroi-divider-simple">
         <div class="eroi-line"></div>
-        <i class="fa-solid fa-shield-halved"></i>
-        <div class="eroi-line"></div>
-    </div>
-
-    <!-- DETAILS (Pushed down, hidden by default) -->
-    <div class="eroi-details-scroll-zone">
-        <div class="eroi-data-pad">
-            <div class="pad-label">INFORMAȚII MISIUNE</div>
-            <div id="eroiDesc" class="pad-content">...</div>
-        </div>
-
-        <div class="eroi-data-pad highlight">
-            <div class="pad-label">ABILITATE SPECIALĂ</div>
-            <div id="eroiEffect" class="pad-content bold-ro">???</div>
-        </div>
-    </div>
-
-    <!-- COMPACT FOOTER -->
-    <div class="eroi-footer-fixed">
-        <div class="eroi-price-pill-compact">
+        <div class="eroi-price-tag-mini">
             <img src="https://iili.io/CrnXNdG.png">
             <span id="eroiPrice">0</span>
         </div>
-        <button class="menu-btn play eroi-buy-btn" onclick="buyHeroAction()">
-            CUMPĂRĂ EROUL
-        </button>
+        <div class="eroi-line"></div>
     </div>
+
+    <!-- DETAILS AREA -->
+    <div class="eroi-details-scroll-zone">
+        <div class="eroi-data-pad">
+            <div class="pad-label">INFORMAȚII EROU</div>
+            <div id="eroiDesc" class="pad-content">...</div>
+        </div>
+        <div class="eroi-data-pad highlight">
+            <div class="pad-label">ABILITATE SPECIALĂ</div>
+            <div id="eroiEffect" class="pad-content">???</div>
+        </div>
+    </div>
+
+    <button class="menu-btn play eroi-buy-btn" onclick="buyHeroAction()">
+        CUMPĂRĂ EROUL
+    </button>
 </div>
 </div>
 
@@ -17087,17 +17052,10 @@ function renderErou() {
     const nameEl = document.getElementById('eroiName');
     
     nameEl.innerText = hero.name;
-    
-    // Reset and apply Rainbow class
     nameEl.classList.remove('rainbow-name');
-    if (hero.id === "lesbiconi") {
-        nameEl.classList.add('rainbow-name');
-    }
+    if (hero.id === "lesbiconi") nameEl.classList.add('rainbow-name');
 
-    // Load massive image
     document.getElementById('eroiImg').src = hero.img;
-    
-    // Update labels
     document.getElementById('eroiDesc').innerText = hero.desc;
     document.getElementById('eroiEffect').innerText = hero.effect;
     document.getElementById('eroiPrice').innerText = hero.price;
