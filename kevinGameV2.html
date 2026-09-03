@@ -10132,17 +10132,17 @@ div.inv-tile div.bm-limit-tag {
     </div>
 
     <div class="shop-grid">
-      <!-- EROI -->
-<!-- EROI -->
-      <button id="btnHeroesShop" class="shop-card" onclick="openHeroModal()">
-        <img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Design%20f%C4%83r%C4%83%20titlu.png" class="shop-icon" style="width: 55px; height: 55px; object-fit: contain; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));">
-        <div class="shop-info">
-            <h3>EROI</h3>
-            <p>Deblochează legende noi.</p>
-        </div>
-        <!-- Badge-ul gri LVL 5 REQ -->
-        <div id="badgeHeroesShop" class="gray-lock-badge" style="display: none; font-size: 10px; bottom: -10px; padding: 3px 8px;">LVL 5</div>
-      </button>
+
+<!-- Caută acest buton în HTML-ul tău și înlocuiește-l -->
+<button id="btnHeroesShop" class="shop-card" onclick="openHeroModal()">
+  <img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Design%20f%C4%83r%C4%83%20titlu.png" class="shop-icon" style="width: 55px; height: 55px; object-fit: contain;">
+  <div class="shop-info">
+      <h3>EROI</h3>
+      <p>Deblochează legende noi.</p>
+  </div>
+  <!-- Badge-ul de nivel necesar -->
+  <div id="badgeHeroesShop" class="gray-lock-badge" style="display: none;">LVL 5</div>
+</button>
 
       <!-- UPGRADES -->
       <button class="shop-card">
@@ -12153,28 +12153,29 @@ function openShop() {
     document.getElementById('shopModal').style.display = 'flex';
     forceCloseMenu();
 
-    // --- LOGICĂ DE BLOCARE PENTRU MAGAZINUL DE EROI ---
     const heroBtn = document.getElementById('btnHeroesShop');
     const heroBadge = document.getElementById('badgeHeroesShop');
-    const REQ_LEVEL = 2; // <--- Schimbă acest număr dacă vrei să se deblocheze la alt nivel
-    
+    const REQ_LEVEL = 5; // Nivelul la care se deblochează
+
     if (heroBtn) {
         if (playerLevel < REQ_LEVEL) {
-            // Blochează butonul
+            // STARE BLOCATĂ
             heroBtn.classList.add('locked-card');
             if (heroBadge) {
                 heroBadge.style.display = 'block';
                 heroBadge.innerText = `LVL ${REQ_LEVEL}`;
             }
+            // Suprascriem click-ul pentru a arăta notificare
             heroBtn.onclick = (e) => { 
                 e.stopPropagation(); 
-                if (typeof playMissSFX === 'function') playMissSFX(); 
-                showNotification("ZONĂ BLOCATĂ", `Ai nevoie de Nivelul ${REQ_LEVEL} pentru Magazinul de Eroi!`, "fa-lock");
+                playMissSFX(); 
+                showNotification("BLOCAT", `Ai nevoie de Nivelul ${REQ_LEVEL} pentru Eroi!`, "fa-lock");
             };
         } else {
-            // Deblochează butonul
+            // STARE DEBLOCATĂ
             heroBtn.classList.remove('locked-card');
             if (heroBadge) heroBadge.style.display = 'none';
+            // Restaurăm funcția originală
             heroBtn.onclick = (e) => { 
                 e.stopPropagation();
                 openHeroModal(); 
@@ -16591,7 +16592,7 @@ const LEVEL_UNLOCKS = {
     2: ["slotMachine", "rubyDrop"],
     3: ["blackMarket", "boosts", "memoryCards", "teleporter"], // <--- Adăugat teleporter la 3
     4: ["trading", "easyQuests", "magazin"], // <--- Adăugat "magazin" la Nivelul 4
-    5: ["beachStage", "heroes",] // <--- Adăugat plaja la 5
+    5: ["beachStage", "heroes"] 
 
 };
 
@@ -16674,7 +16675,7 @@ const UNLOCK_METADATA = {
         desc: "O nouă zonă însorită accesibilă din Teleportor!",
         icon: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Beach%20Map.png" 
     },
-"heroes": {
+ "heroes": {
         name: "Magazin Eroi",
         desc: "Recrutează personaje noi cu abilități speciale folosind Rubine.",
         icon: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Design%20f%C4%83r%C4%83%20titlu.png"
@@ -17584,13 +17585,28 @@ let eroiIndex = 0;
 let pendingHeroId = null;
 
 function openHeroModal() {
+    const REQ_LEVEL = 5;
+
+    if (playerLevel < REQ_LEVEL) {
+        // Redăm sunetul de eroare
+        if (typeof playMissSFX === 'function') playMissSFX();
+        
+        // Afișăm notificarea toast în loc de bula lui Kevin
+        showNotification(
+            "ACCES RESTRICȚIONAT", 
+            `Ai nevoie de Nivelul ${REQ_LEVEL} pentru a intra în Magazinul de Eroi!`, 
+            "fa-lock"
+        );
+        return;
+    }
+
+    // Dacă are nivelul necesar, deschidem modalul normal
     isPaused = true;
     clearInterval(moveKevinInterval);
     document.getElementById('shopModal').style.display = 'none';
     document.getElementById('heroModal').style.display = 'flex';
     renderErou();
 }
-
 function closeHeroModal() {
     document.getElementById('heroModal').style.display = 'none';
     document.getElementById('shopModal').style.display = 'flex';
