@@ -9634,7 +9634,7 @@ div.inv-tile div.bm-limit-tag {
 <div id="teleportOverlay" class="teleport-overlay">
     <!-- Fundalul care va arăta imaginea destinației -->
     <div id="tpBgPreview" class="tp-preview-bg"></div>
-
+ 
     <!-- Ușile semi-transparente -->
     <div class="tp-door-top">
         <div class="tp-door-edge"></div>
@@ -9719,15 +9719,29 @@ div.inv-tile div.bm-limit-tag {
 </div>
 
 
-<!-- MODAL: CONFIRMARE CUMPĂRARE -->
+<!-- MODAL: CONFIRMARE RECRUTARE EROU -->
 <div id="buyConfirmModal" class="modal-overlay" style="z-index: 100030;">
-    <div class="modal-box info-modal-box" style="border-color: #facc15 !important;">
-        <h2 style="color: #facc15 !important;">RECRUTARE</h2>
-        <p id="buyConfirmText">Vrei să cumperi acest erou?</p>
-        <img id="confirmHeroImg" src="" style="height: 120px; margin: 15px 0; filter: drop-shadow(0 0 10px gold);">
-        <div style="display: flex; gap: 10px; width: 100%;">
-            <button class="menu-btn play" style="flex:1; font-size: 18px;" onclick="executePurchase()">DA</button>
-            <button class="menu-btn play" style="flex:1; font-size: 18px; background: #444;" onclick="document.getElementById('buyConfirmModal').style.display='none'">NU</button>
+    <div class="modal-box info-modal-box" style="border-color: #facc15 !important; max-width: 350px !important;">
+        <h2 style="color: #facc15 !important; font-family: 'Orbitron'; letter-spacing: 2px;">RECRUTARE</h2>
+        
+        <!-- Character Preview in Modal -->
+        <div style="position: relative; margin: 20px 0;">
+            <div style="position: absolute; inset: 0; background: radial-gradient(circle, rgba(250, 204, 21, 0.2) 0%, transparent 70%); z-index: 0;"></div>
+            <img id="confirmHeroImg" src="" style="height: 140px; position: relative; z-index: 1; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));">
+        </div>
+
+        <p id="buyConfirmText" style="font-family: 'Oswald'; font-size: 18px; color: #fff; line-height: 1.4; margin-bottom: 25px;">
+            Vrei să-l deblochezi pe acest erou definitiv?
+        </p>
+
+        <!-- Choice Buttons -->
+        <div style="display: flex; gap: 15px; width: 100%;">
+            <button class="menu-btn play" style="flex:1; font-size: 20px; height: 55px;" onclick="executePurchase()">
+                <span>DA</span>
+            </button>
+            <button class="menu-btn play" style="flex:1; font-size: 20px; height: 55px; background: linear-gradient(180deg, #444, #222); box-shadow: 0 6px 0 #111;" onclick="document.getElementById('buyConfirmModal').style.display='none'">
+                <span>NU</span>
+            </button>
         </div>
     </div>
 </div>
@@ -10753,7 +10767,8 @@ if (response.status === 200) {
             _GAME_DATA.claimedRewards = data.claimedRewards || [];
             _GAME_DATA.claimedStageRewards = data.claimedStageRewards || [];
             _GAME_DATA.claimedLevelRewards = (data.claimedLevelRewards || []).map(Number); // Forțăm numere
-            ownedHeros = data.ownedHeros || ['kevin']
+// Starters are given for free if the array is empty
+ownedHeros = data.ownedHeros || ['kevin', 'emmanuel', 'antonio'];
             backendUnlockedFeatures = data.unlockedFeatures || []; // 🆕 LOAD EXISTING UNLOCKS
 
 
@@ -11477,32 +11492,28 @@ bgMusic.onerror = (e) => {
     console.error("❌ Eroare la fișierul audio:", bgMusic.src);
     setTimeout(playRandomTrack, 2000); // Încearcă următoarea piesă după 2 secunde
 };
+
+
+const eroiPath = "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/";
+
 const characterList = [
-    { 
-        id: "kevin", 
-        name: "KEVINUȚĂ", 
-        desc: "Un puști plin de energie din cartier. Viteza este arma lui secretă!",
-        displayImg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w",
-        playImg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w",
-        tiredImg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/0b5ac0f4-618a-4346-9684-8c1f3c0a5fcb/20716c49-4365-417d-97e9-fc8601ae5403_removalai_preview.png?format=500w"
-    },
-    { 
-        id: "emmanuel", 
-        name: "EMMANUEL", 
-        desc: "Are 18 ani și e foarte politicos... până când îl enervezi. Atunci mai bine fugi!",
-        displayImg: "https://iili.io/CNUBdIj.png", 
-        playImg: "https://iili.io/CNURdSR.png",
-        tiredImg: "https://iili.io/CNURciu.png"
-    },
-    { 
-        id: "antonio", 
-        name: "ANTONIO", 
-        desc: "Vorbește doar în engleză. Sper că ai Google Translate la îndemână, altfel ești pierdut!",
-        displayImg: "https://iili.io/CNUnzsR.png",
-        playImg: "https://iili.io/CNURvUv.png",
-        tiredImg: "https://iili.io/CNU5Fgj.png"
-    }
-];
+    // STARTERS (Price 0)
+    { id: "kevin", name: "KEVINUȚĂ", price: 0, desc: "Un puști plin de energie. Viteza este aliatul lui!", displayImg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w", playImg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w", tiredImg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/0b5ac0f4-618a-4346-9684-8c1f3c0a5fcb/20716c49-4365-417d-97e9-fc8601ae5403_removalai_preview.png?format=500w" },
+    { id: "emmanuel", name: "EMMANUEL", price: 0, desc: "Artistul cartierului. Politicos, dar iute la mânie!", displayImg: "https://iili.io/CNUBdIj.png", playImg: "https://iili.io/CNURdSR.png", tiredImg: "https://iili.io/CNURciu.png" },
+    { id: "antonio", name: "ANTONIO", price: 0, desc: "Vorbește doar engleză. Good luck catching him!", displayImg: "https://iili.io/CNUnzsR.png", playImg: "https://iili.io/CNURvUv.png", tiredImg: "https://iili.io/CNU5Fgj.png" },
+    
+    // SHOP HEROES (Requires Rubies)
+    { id: "george", name: "CĂLIN", price: 150, desc: "Expert în echilibru și pace interioară.", displayImg: eroiPath + "Calin%20georgescu.%20prezentare.png", playImg: eroiPath + "Calin%20georgescu%20running%20.png", tiredImg: eroiPath + "Calin%20georgescu%20tired%20.png" },
+    { id: "ciocanul", name: "CIORDACU", price: 100, desc: "Lovește unde doare mai tare: în buget!", displayImg: eroiPath + "Cholan%20standing.png", playImg: eroiPath + "chiolan%20running%20.png", tiredImg: eroiPath + "chiolan%20tired.png" },
+    { id: "gigi", name: "GIGI", price: 500, desc: "Dacă îl prinzi, s-ar putea să-ți dea o oaie.", displayImg: eroiPath + "GIgi%20milionaru%20standing%20.png", playImg: eroiPath + "GIgi%20milionaru%20running%20.png", tiredImg: eroiPath + "GIgi%20milionaru%20tired%20.png" },
+    { id: "dulapul", name: "DULAPUL", price: 300, desc: "Se mișcă încet, dar cu mare atenție.", displayImg: eroiPath + "IOHANIS%20standing%20.png", playImg: eroiPath + "IOHANIS%20RUNNING%20.png", tiredImg: eroiPath + "iohanis%20tired%20.png" },
+    { id: "muci", name: "MUCUȘOR", price: 50, desc: "Un caracter lipicios care refuză să plece.", displayImg: eroiPath + "Muci%20standing%20.png", playImg: eroiPath + "Muci%20running%20.png", tiredImg: eroiPath + "Muci%20tired%20.png" },
+    { id: "puta", name: "PUTĂ", price: 80, desc: "Un personaj controversat care se bagă peste tot.", displayImg: eroiPath + "Puta%20standing%20.png", playImg: eroiPath + "Puta%20running%20.png", tiredImg: eroiPath + "puta%20tried.png" },
+    { id: "lesbiconi", name: "LESBICONI", price: 200, desc: "Stil franțuzesc și viteză de invidiat.", displayImg: eroiPath + "lesbiconi%20standing.png", playImg: eroiPath + "lesbiconi%20running%20.png", tiredImg: eroiPath + "lesbiconi%20tired.png" },
+    { id: "piatra", name: "PIATRA", price: 120, desc: "Tare ca stânca, dar cam greu de cap.", displayImg: eroiPath + "piatra%20standing.png", playImg: eroiPath + "piatra%20running%20.png", tiredImg: eroiPath + "piatra%20Trired%20png.png" },
+    { id: "turu2", name: "TURU DOI", price: 250, desc: "Singurul lui scop este să ajungă în turul doi.", displayImg: eroiPath + "simion%20standing.png", playImg: eroiPath + "simion%20standing%20running%20.png", tiredImg: eroiPath + "simion%20tired%20.png" },
+    { id: "vladim", name: "VLADIM", price: 400, desc: "Un tribun adevărat care urlă la tine dacă ratezi.", displayImg: eroiPath + "vladim%20tudor%20standing%20.png", playImg: eroiPath + "vladim%20tudor%20running%20.png", tiredImg: eroiPath + "vladim%20tudor%20tired%20.png" }
+]; 
 
 function changeChar(dir) {
     charIndex += dir;
@@ -11510,14 +11521,26 @@ function changeChar(dir) {
     if (charIndex >= characterList.length) charIndex = 0;
 
     const char = characterList[charIndex];
-    
-    // CORECCȚIE: Folosim displayImg pentru că așa e numit în listă
     const heroImgEl = document.getElementById('charHeroImg');
+    const btn = document.querySelector('.select-hero-btn span');
+    const btnParent = document.querySelector('.select-hero-btn');
+
     heroImgEl.style.backgroundImage = `url('${char.displayImg}')`;
-    
     document.getElementById('charHeroName').innerText = char.name;
     document.getElementById('charHeroDesc').innerText = char.desc;
+
+    // Toggle button state based on ownership
+    if (ownedHeros.includes(char.id)) {
+        btn.innerText = "SELECTEAZĂ";
+        btnParent.style.background = ""; // Default yellow/orange
+        btnParent.style.borderColor = "#fff";
+    } else {
+        btn.innerText = `DEBLOCHEAZĂ (${char.price} ♦️)`;
+        btnParent.style.background = "linear-gradient(180deg, #ff3366, #990033)"; // Red for Buy
+        btnParent.style.borderColor = "#ff99b3";
+    }
 }
+
 
 
 // --- NEW: MOBILE AUTO-FULLSCREEN & UI SYNC ---
@@ -11546,25 +11569,34 @@ document.addEventListener('fullscreenchange', () => {
     }
 });
 
+
 async function confirmCharacter() {
-    // --- AUTO FULLSCREEN FOR MOBILE ---
-    autoFullscreenForMobile();
-
-    // --- START MUZICĂ ---
-    if (!musicStarted) {
-        musicStarted = true;
-        playRandomTrack();
-    }
-    // --------------------
-
     const selected = characterList[charIndex];
+
+    // If NOT owned, trigger the buy modal
+    if (!ownedHeros.includes(selected.id)) {
+        if (rubies < selected.price) {
+            playMissSFX();
+            showNotification("RUBINE INSUFICIENTE", `Ai nevoie de ${selected.price} Rubine!`, "fa-gem");
+            return;
+        }
+        
+        // Setup and show your Buy Confirm Modal
+        pendingHeroId = selected.id;
+        document.getElementById('confirmHeroImg').src = selected.displayImg;
+        document.getElementById('buyConfirmText').innerHTML = `Vrei să-l recrutezi pe <b>${selected.name}</b> definitiv pentru <span style="color:#ff3366">${selected.price} Rubine</span>?`;
+        document.getElementById('buyConfirmModal').style.display = 'flex';
+        return;
+    }
+
+    // If OWNED, proceed to start game
+    autoFullscreenForMobile();
+    if (!musicStarted) { musicStarted = true; playRandomTrack(); }
+
     document.getElementById('loadingModal').style.display = 'flex';
     
     try {
-        // 1. Get the Passport (Token)
         const idToken = await firebase.auth().currentUser.getIdToken(true);
-        
-        // 2. Ask the Backend to change the skin
         const response = await fetch('https://kevin-backend-qodc.onrender.com/set-character', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -11572,29 +11604,19 @@ async function confirmCharacter() {
         });
 
         if (response.ok) {
-            // Success! Update the visuals
             currentPlayImg = `url('${selected.playImg}')`;
             currentTiredImg = `url('${selected.tiredImg}')`;
             window.currentPlayingCharId = selected.id;
-
             document.getElementById('kevin').style.backgroundImage = currentPlayImg;
             document.getElementById('charSelectorModal').style.display = 'none';
             document.getElementById('loadingModal').style.display = 'none';
-            
-            // Start the game
             startGameUI(); 
-        } else if (response.status === 429) {
-            alert("⚠️ Prea multe schimbări! Așteaptă 10 secunde.");
-            document.getElementById('loadingModal').style.display = 'none';
-        } else {
-            alert("Eroare la salvarea caracterului!");
-            document.getElementById('loadingModal').style.display = 'none';
         }
     } catch (e) {
-        console.error("Connection Error:", e);
         document.getElementById('loadingModal').style.display = 'none';
     }
 }
+
 // 4. UPDATE handlePlayClick (The brain of the logic)
 function handlePlayClick() {
     if (!currentUID) {
@@ -13819,7 +13841,6 @@ let ownedHeros = ['kevin']; // Lista locală
 let pendingHeroId = null;
 
 // ACTUALIZARE: În funcția checkUserInFirestore, după data = await response.json(), adaugă:
-// ownedHeros = data.ownedHeros || ['kevin'];
 
 function renderErou() {
     const hero = eroiCatalog[eroiIndex];
@@ -13851,28 +13872,40 @@ function renderErou() {
 async function buyHeroAction() {
     const hero = eroiCatalog[eroiIndex];
 
+    // 1. If already owned, equip immediately
     if (ownedHeros.includes(hero.id)) {
-        equipHero(hero); // Dacă îl are, îl echipează direct
+        equipHero(hero); 
         return;
     }
 
+    // 2. Check if player has enough rubies
     if (rubies < hero.price) {
-        playMissSFX();
-        showNotification("FĂRĂ RUBINE", "Ai nevoie de mai multe rubine!", "fa-gem");
+        if (typeof playMissSFX === 'function') playMissSFX();
+        showNotification("FĂRĂ RUBINE", `Ai nevoie de ${hero.price} ♦️ pentru ${hero.name}!`, "fa-gem");
         return;
     }
 
-    // Arătăm modalul de confirmare
+    // 3. Setup Custom Confirmation Modal (NO BROWSER ALERTS)
     pendingHeroId = hero.id;
+    
+    // Fill the modal with the specific hero's info
     document.getElementById('confirmHeroImg').src = hero.img;
-    document.getElementById('buyConfirmText').innerHTML = `Îl recrutezi pe <b>${hero.name}</b> pentru <span style="color:#ff3366">${hero.price} Rubine</span>?`;
+    document.getElementById('buyConfirmText').innerHTML = `
+        Ești sigur că vrei să-l recrutezi pe <b style="color:#facc15">${hero.name}</b> 
+        pentru <b style="color:#ff3366">${hero.price} Rubine</b>?
+    `;
+
+    // Show the modal
     document.getElementById('buyConfirmModal').style.display = 'flex';
 }
 
 async function executePurchase() {
     const heroId = pendingHeroId;
+    
+    // Close the confirm modal and show loading
     document.getElementById('buyConfirmModal').style.display = 'none';
     document.getElementById('loadingModal').style.display = 'flex';
+    updateLoader(50, "Se procesează tranzacția...");
 
     try {
         const idToken = await firebase.auth().currentUser.getIdToken(true);
@@ -13884,28 +13917,49 @@ async function executePurchase() {
 
         if (response.ok) {
             const data = await response.json();
+            
+            // 1. Update your local variables
             rubies = data.newRubies;
             ownedHeros = data.ownedHeros;
+            
+            // 2. Refresh UI
             updateScoreUI();
-            renderErou();
-            showNotification("RECRUTARE REUȘITĂ", "Eroul a fost adăugat în colecție!", "fa-check-circle");
+            renderErou(); // Updates the button in the Shop to say "ECHIPEAZĂ"
+            
+            // 3. Success Feedback
+            showNotification("RECRUTARE REUȘITĂ", "Eroul a fost adăugat în colecție!", "fa-check-double");
+            if (typeof playSFX === 'function') playSFX(slotJackpotUrl); // Celebration sound
+            
         } else {
-            alert(await response.text());
+            // Handle server-side errors (like "Not enough rubies")
+            const errorMsg = await response.text();
+            showNotification("RECRUTARE EȘUATĂ", errorMsg, "fa-circle-xmark");
         }
-    } catch (e) { console.error(e); }
-    document.getElementById('loadingModal').style.display = 'none';
+    } catch (e) {
+        console.error("Purchase Error:", e);
+        showNotification("EROARE REȚEA", "Nu am putut contacta serverul.", "fa-wifi");
+    } finally {
+        document.getElementById('loadingModal').style.display = 'none';
+    }
 }
-
+ 
 function equipHero(hero) {
+    // Set the global images for the game
     currentPlayImg = `url('${hero.playImg}')`;
     currentTiredImg = `url('${hero.tiredImg}')`;
     window.currentPlayingCharId = hero.id;
-    document.getElementById('kevin').style.backgroundImage = currentPlayImg;
-    showNotification("EROO ECHIPAT", `${hero.name} este acum pe stradă!`, "fa-user-check");
-    closeHeroModal();
-    syncScoreToFirestore(); // Salvăm skin-ul echipat
-}
 
+    // Apply instantly if in game, or just update background
+    document.getElementById('kevin').style.backgroundImage = currentPlayImg;
+    
+    showNotification("EROO ECHIPAT", `${hero.name} este gata de acțiune!`, "fa-user-check");
+    
+    // Close modals
+    closeHeroModal();
+    
+    // Save current selection to cloud
+    syncScoreToFirestore(); 
+}
 async function buyHeroAction() {
     const hero = eroiCatalog[eroiIndex];
 
@@ -17126,7 +17180,6 @@ function startSeagullEvent() {
     setTimeout(moveSeagull, 100);
 }
 
-const eroiPath = "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/";
 
 const eroiCatalog = [
     {
