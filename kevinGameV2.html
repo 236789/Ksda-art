@@ -9719,19 +9719,15 @@ div.inv-tile div.bm-limit-tag {
 </div>
 
 
-<!-- MODAL: CONFIRMARE CUMPĂRARE EROU -->
+<!-- MODAL: CONFIRMARE CUMPĂRARE -->
 <div id="buyConfirmModal" class="modal-overlay" style="z-index: 100030;">
-    <div class="modal-box result-modal-box" style="border-color: #facc15 !important;">
-        <h2 style="color: #facc15;">CONFIRMARE</h2>
+    <div class="modal-box info-modal-box" style="border-color: #facc15 !important;">
+        <h2 style="color: #facc15 !important;">RECRUTARE</h2>
         <p id="buyConfirmText">Vrei să cumperi acest erou?</p>
-        
-        <div id="buyConfirmVisual" style="margin: 20px 0;">
-             <img id="confirmHeroImg" src="" style="height: 100px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));">
-        </div>
-
-        <div style="display: flex; gap: 10px;">
-            <button class="menu-btn play" style="flex: 1; font-size: 18px;" onclick="executePurchase()">DA, CUMPĂRĂ</button>
-            <button class="menu-btn play" style="flex: 1; font-size: 18px; background: #444; border-color: #666;" onclick="closeBuyConfirm()">NU</button>
+        <img id="confirmHeroImg" src="" style="height: 120px; margin: 15px 0; filter: drop-shadow(0 0 10px gold);">
+        <div style="display: flex; gap: 10px; width: 100%;">
+            <button class="menu-btn play" style="flex:1; font-size: 18px;" onclick="executePurchase()">DA</button>
+            <button class="menu-btn play" style="flex:1; font-size: 18px; background: #444;" onclick="document.getElementById('buyConfirmModal').style.display='none'">NU</button>
         </div>
     </div>
 </div>
@@ -10757,6 +10753,7 @@ if (response.status === 200) {
             _GAME_DATA.claimedRewards = data.claimedRewards || [];
             _GAME_DATA.claimedStageRewards = data.claimedStageRewards || [];
             _GAME_DATA.claimedLevelRewards = (data.claimedLevelRewards || []).map(Number); // Forțăm numere
+            ownedHeros = data.ownedHeros || ['kevin']
             backendUnlockedFeatures = data.unlockedFeatures || []; // 🆕 LOAD EXISTING UNLOCKS
 
 
@@ -13818,39 +13815,95 @@ function finishSlotCleanup() {
 
 
 
-let ownedHeros = ['kevin']; // Se va popula la login
+let ownedHeros = ['kevin']; // Lista locală
 let pendingHeroId = null;
 
-// Modifică funcția checkUserInFirestore (partea unde primești data de la server)
-// Adaugă:
+// ACTUALIZARE: În funcția checkUserInFirestore, după data = await response.json(), adaugă:
 // ownedHeros = data.ownedHeros || ['kevin'];
 
 function renderErou() {
     const hero = eroiCatalog[eroiIndex];
     const nameEl = document.getElementById('eroiName');
     const buyBtn = document.querySelector('.eroi-buy-btn');
+    const priceArea = document.querySelector('.eroi-divider-simple');
     
     nameEl.innerText = hero.name;
-    nameEl.classList.remove('rainbow-name');
-    if (hero.id === "lesbiconi") nameEl.classList.add('rainbow-name');
-
+    nameEl.classList.toggle('rainbow-name', hero.id === "lesbiconi");
     document.getElementById('eroiImg').src = hero.img;
     document.getElementById('eroiDesc').innerText = hero.desc;
     document.getElementById('eroiEffect').innerText = hero.effect;
     document.getElementById('eroiPrice').innerText = hero.price;
 
-    // Verificăm dacă eroul este deja cumpărat
+    // Verificăm dacă jucătorul deține eroul
     if (ownedHeros.includes(hero.id)) {
-        buyBtn.innerHTML = "FOLOSEȘTE EROUL";
+        buyBtn.innerHTML = "ECHIPEAZĂ EROUL";
         buyBtn.style.background = "linear-gradient(180deg, #4ade80 0%, #16a34a 100%)";
         buyBtn.style.boxShadow = "0 6px 0 #064e3b";
-        document.querySelector('.eroi-divider-simple').style.display = 'none'; // Ascundem prețul
+        priceArea.style.display = 'none'; // Ascundem prețul dacă e cumpărat
     } else {
         buyBtn.innerHTML = "CUMPĂRĂ EROUL";
-        buyBtn.style.background = ""; // Revine la tema default
+        buyBtn.style.background = ""; // Revine la mov/auriu
         buyBtn.style.boxShadow = "";
-        document.querySelector('.eroi-divider-simple').style.display = 'flex';
+        priceArea.style.display = 'flex';
     }
+}
+
+async function buyHeroAction() {
+    const hero = eroiCatalog[eroiIndex];
+
+    if (ownedHeros.includes(hero.id)) {
+        equipHero(hero); // Dacă îl are, îl echipează direct
+        return;
+    }
+
+    if (rubies < hero.price) {
+        playMissSFX();
+        showNotification("FĂRĂ RUBINE", "Ai nevoie de mai multe rubine!", "fa-gem");
+        return;
+    }
+
+    // Arătăm modalul de confirmare
+    pendingHeroId = hero.id;
+    document.getElementById('confirmHeroImg').src = hero.img;
+    document.getElementById('buyConfirmText').innerHTML = `Îl recrutezi pe <b>${hero.name}</b> pentru <span style="color:#ff3366">${hero.price} Rubine</span>?`;
+    document.getElementById('buyConfirmModal').style.display = 'flex';
+}
+
+async function executePurchase() {
+    const heroId = pendingHeroId;
+    document.getElementById('buyConfirmModal').style.display = 'none';
+    document.getElementById('loadingModal').style.display = 'flex';
+
+    try {
+        const idToken = await firebase.auth().currentUser.getIdToken(true);
+        const response = await fetch('https://kevin-backend-qodc.onrender.com/buy-hero', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken, heroId })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            rubies = data.newRubies;
+            ownedHeros = data.ownedHeros;
+            updateScoreUI();
+            renderErou();
+            showNotification("RECRUTARE REUȘITĂ", "Eroul a fost adăugat în colecție!", "fa-check-circle");
+        } else {
+            alert(await response.text());
+        }
+    } catch (e) { console.error(e); }
+    document.getElementById('loadingModal').style.display = 'none';
+}
+
+function equipHero(hero) {
+    currentPlayImg = `url('${hero.playImg}')`;
+    currentTiredImg = `url('${hero.tiredImg}')`;
+    window.currentPlayingCharId = hero.id;
+    document.getElementById('kevin').style.backgroundImage = currentPlayImg;
+    showNotification("EROO ECHIPAT", `${hero.name} este acum pe stradă!`, "fa-user-check");
+    closeHeroModal();
+    syncScoreToFirestore(); // Salvăm skin-ul echipat
 }
 
 async function buyHeroAction() {
