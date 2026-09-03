@@ -12148,8 +12148,21 @@ forceCloseMenu();
 
 function closeShop() {
     document.getElementById('shopModal').style.display = 'none';
+    
+    // Dacă jucătorul se află în zona de joc activă, reluăm gameplay-ul automat
+    if (document.getElementById('gameArea').style.display === 'block') {
+        isPaused = false;
+        
+        const kevin = document.getElementById('kevin');
+        if (kevin) kevin.style.pointerEvents = 'auto'; // Reactivăm click-ul pe personaj
+        
+        // Repornim timerele de mișcare și oboseală
+        startKevinMovement();
+        startTiredCycle();
+        
+        console.log("▶️ Joc reluat automat la închiderea Magazinului.");
+    }
 }
-
 // Ensure clicks on the shop modal don't count as "Misses"
 document.getElementById('shopModal').addEventListener('click', (e) => {
     e.stopPropagation();
@@ -13753,24 +13766,27 @@ function startHotSauceEvent() {
     const duration = specialRegistry.hotSauce.duration;
 
     // --- LOGICA DE REFRESH (FIX BUG) ---
-    // Dacă eventul e deja activ, oprim cronometrele vechi ca să le luăm de la capăt
     if (hotSauceCleanupTimeout) clearTimeout(hotSauceCleanupTimeout);
     if (hotSauceScoreInterval) clearInterval(hotSauceScoreInterval);
     if (moveKevinInterval) clearInterval(moveKevinInterval);
 
-    // Salvăm replicile originale DOAR dacă nu sunt deja salvate 
-    // (prevenim salvarea replicilor de sos peste cele normale la refresh)
-    if (!isHotSauceActive) {
+    // Verificăm dacă eroul curent are imagini de Sos Iute în baza de date
+    const hasAssets = !!assets;
+
+    // Salvăm replicile originale DOAR dacă nu sunt deja salvate și avem ce înlocui
+    if (!isHotSauceActive && hasAssets) {
         savedOriginalDialogues = [...characterDialogues[charId]];
     }
 
     isHotSauceActive = true;
 
-    // STEP 1: Schimbăm Imaginile & Replicile (Instant din cache)
-    currentPlayImg = `url('${assets.play}')`;
-    currentTiredImg = `url('${assets.tired}')`;
-    kevin.style.backgroundImage = currentPlayImg;
-    characterDialogues[charId] = assets.lines;
+    // STEP 1: Schimbăm Imaginile & Replicile doar dacă avem fișiere pentru caracterul curent
+    if (hasAssets) {
+        currentPlayImg = `url('${assets.play}')`;
+        currentTiredImg = `url('${assets.tired}')`;
+        kevin.style.backgroundImage = currentPlayImg;
+        characterDialogues[charId] = assets.lines;
+    }
 
     // STEP 2: Viteză Insană (0.35s)
     moveKevinInterval = setInterval(() => {
@@ -13790,15 +13806,17 @@ function startHotSauceEvent() {
         isHotSauceActive = false;
         clearInterval(hotSauceScoreInterval);
         
-        // Revenire la setările de bază (le luăm din characterList pentru siguranță)
+        // Revenire la setările de bază ale caracterului echipat (pentru siguranță)
         const baseChar = characterList.find(c => c.id === charId) || characterList[0];
         currentPlayImg = `url('${baseChar.playImg}')`;
         currentTiredImg = `url('${baseChar.tiredImg}')`;
         kevin.style.backgroundImage = isKevinTired ? currentTiredImg : currentPlayImg;
 
         // Revenire la replicile originale salvate la început
-        characterDialogues[charId] = savedOriginalDialogues;
-        savedOriginalDialogues = null;
+        if (hasAssets && savedOriginalDialogues) {
+            characterDialogues[charId] = savedOriginalDialogues;
+            savedOriginalDialogues = null;
+        }
 
         // Revenire la viteză normală
         startKevinMovement(); 
