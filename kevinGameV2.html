@@ -10652,10 +10652,7 @@ function startQuestRealTimeTimers() {
 }
 
 function updateQuestProgress(action, value = 1, isAbsolute = false) {
-    // FILTRU: Misiunile Ușoare (easy) nu se contorizează sub Nivelul 4
-    // Misiunile Grele (hard) presupunem că rămân active sau au altă logică
     const all = [...activeEasyQuests, ...activeHardQuests];
-    
     let changed = false;
     let questJustFinished = false;
 
@@ -10663,9 +10660,12 @@ function updateQuestProgress(action, value = 1, isAbsolute = false) {
         if (q.claimed) return;
         if (q.action !== action) return;
 
-        // VERIFICARE NIVEL: Dacă e misiune ușoară și ai lvl < 4, dăm skip
+        // --- SECURITY LOCKS ---
         const isEasy = q.id.startsWith('e');
-        if (isEasy && playerLevel < 4) return; 
+        const isHard = q.id.startsWith('h');
+
+        if (isEasy && playerLevel < 4) return; // Lock Easy to Lvl 4
+        if (isHard && playerLevel < 5) return; // Lock Hard to Lvl 5
 
         let oldVal = q.current;
         if (isAbsolute) {
@@ -10686,11 +10686,9 @@ function updateQuestProgress(action, value = 1, isAbsolute = false) {
         if (oldVal !== q.current) changed = true;
     });
 
-if (changed) {
+    if (changed) {
         renderQuestList('easy');
         renderQuestList('hard');
-        
-        // 🔥 FIX PENTRU QUOTA EXCEEDED: Salvăm pe server DOAR când s-a finalizat misiunea, nu la fiecare click!
         if (questJustFinished) {
              syncQuestsWithServer();
         }
@@ -14572,18 +14570,23 @@ function finishTrivia(win, reason = "") {
 const INV_LIMIT = 500;
 
 function openInventory() {
-    document.getElementById('inventoryModal').style.display = 'flex';
+    // 1. Force close the floating menu first
     forceCloseMenu();
 
-    
-    // Pause game
-    isPaused = true; 
-    clearInterval(moveKevinInterval);
+    // 2. Clear out any other potential blocking overlays
+    document.getElementById('questsMenuModal').style.display = 'none';
+    document.getElementById('utilitiesModal').style.display = 'none';
 
-    // Force default tab to Items visually
+    // 3. Open Inventory
+    document.getElementById('inventoryModal').style.display = 'flex';
+    
+    // 4. Game State
+    isPaused = true; 
+    if (moveKevinInterval) clearInterval(moveKevinInterval);
+
+    // 5. Render
     const itemsBtn = document.querySelector('#inventoryModal .tab-btn:first-child');
     if (itemsBtn) switchInvTab('items', itemsBtn); 
-
     renderInventoryUI();
 }
 
@@ -16592,7 +16595,7 @@ const LEVEL_UNLOCKS = {
     2: ["slotMachine", "rubyDrop"],
     3: ["blackMarket", "boosts", "memoryCards", "teleporter"], // <--- Adăugat teleporter la 3
     4: ["trading", "easyQuests", "magazin"], // <--- Adăugat "magazin" la Nivelul 4
-    5: ["beachStage", "heroes"] 
+    5: ["beachStage", "heroes", "hardQuests"] // Added hardQuests here
 
 };
 
@@ -16679,6 +16682,11 @@ const UNLOCK_METADATA = {
         name: "Magazin Eroi",
         desc: "Recrutează personaje noi cu abilități speciale folosind Rubine.",
         icon: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Design%20f%C4%83r%C4%83%20titlu.png"
+    },
+    "hardQuests": {
+        name: "Misiuni Grele",
+        desc: "Deblochează provocări zilnice cu recompense masive în Rubine!",
+        icon: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Hard%20Quests.png" 
     },
  
 };
@@ -17029,39 +17037,50 @@ function closeQuestsMenu() {
 }
 
 function openQuestsTab() {
+    // Hide the main activity center, show selection
     document.getElementById('questsMenuModal').style.display = 'none';
     document.getElementById('misiuniSelectionModal').style.display = 'flex';
     
-    // Selectăm prima carte (Misiuni Ușoare) din grila de selecție
+    // --- EASY QUESTS LOCK (LVL 4) ---
     const easyCard = document.querySelector('#misiuniSelectionModal .shop-card:nth-child(1)');
-    
     if (playerLevel < 4) {
-        // Stil blocat (Gri + Lacăt)
         easyCard.classList.add('locked-card');
-        
-        easyCard.onclick = (e) => {
-            e.stopPropagation();
-            playMissSFX();
-            showNotification("ZONĂ BLOCATĂ", "Ai nevoie de Nivelul 4 pentru Misiuni Ușoare!", "fa-lock");
-        };
-
-        // Adăugăm badge-ul gri LVL 4 REQ dacă nu există deja
         if (!easyCard.querySelector('.gray-lock-badge')) {
             const badge = document.createElement('div');
             badge.className = 'gray-lock-badge';
-            badge.innerText = "LVL 4.";
+            badge.innerText = "LVL 4";
             easyCard.appendChild(badge);
         }
+        easyCard.onclick = (e) => {
+            e.stopPropagation();
+            playMissSFX();
+            showNotification("BLOCAT", "Ai nevoie de Nivelul 4 pentru Misiuni Ușoare!", "fa-lock");
+        };
     } else {
-        // Deblocat
         easyCard.classList.remove('locked-card');
+        const b = easyCard.querySelector('.gray-lock-badge'); if(b) b.remove();
         easyCard.onclick = (e) => { e.stopPropagation(); openEasyQuests(); };
-        const badge = easyCard.querySelector('.gray-lock-badge');
-        if (badge) badge.remove();
     }
-    
-    pendingWinAmount = 0;
-    pendingRubyWin = 0;
+
+    // --- HARD QUESTS LOCK (LVL 5) ---
+    const hardCard = document.getElementById('btnHardQuests');
+    const hardBadge = document.getElementById('badgeHardQuests');
+    if (playerLevel < 5) {
+        hardCard.classList.add('locked-card');
+        if (hardBadge) {
+            hardBadge.style.display = 'block';
+            hardBadge.innerText = "LVL 5";
+        }
+        hardCard.onclick = (e) => {
+            e.stopPropagation();
+            playMissSFX();
+            showNotification("BLOCAT", "Ai nevoie de Nivelul 5 pentru Misiuni Grele!", "fa-lock");
+        };
+    } else {
+        hardCard.classList.remove('locked-card');
+        if (hardBadge) hardBadge.style.display = 'none';
+        hardCard.onclick = (e) => { e.stopPropagation(); openHardQuests(); };
+    }
 }
 
 function openEasyQuests() {
