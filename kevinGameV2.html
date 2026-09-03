@@ -8500,6 +8500,131 @@ div.inv-tile div.bm-limit-tag {
     pointer-events: none;
     opacity: 0.3;
 }
+
+
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap');
+
+/* --- MAIN MODAL BOX --- */
+.eroi-main-box {
+    max-width: 430px !important;
+    background: radial-gradient(circle at center, #1b1c3a 0%, #0a0b16 100%) !important;
+    border: 3px solid #facc15 !important;
+    border-radius: 20px !important;
+    padding: 35px 25px !important;
+    font-family: 'Montserrat', sans-serif !important;
+}
+
+/* --- DATA PADS (Separated Labels) --- */
+.eroi-details-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Gap between labels so they don't touch */
+    margin-bottom: 25px;
+}
+
+.eroi-data-pad {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 5px solid #5a6288;
+    padding: 12px 15px;
+    border-radius: 4px 12px 12px 4px;
+    text-align: left;
+}
+
+.eroi-data-pad.highlight {
+    border-left-color: #facc15;
+    background: rgba(250, 204, 21, 0.05);
+}
+
+.pad-label {
+    font-size: 10px;
+    font-weight: 900;
+    color: #94a3b8;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.pad-content {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 700; /* Bold for Romanian characters */
+    color: #cbd5e1;
+    line-height: 1.4;
+}
+
+.bold-ro {
+    font-weight: 900;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+/* --- BM STYLE PRICE TAG --- */
+.eroi-price-badge {
+    position: relative !important; /* Overriding absolute positioning */
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #ef4444, #991b1b) !important;
+    border: 2px solid #ffb3b3 !important;
+    padding: 6px 15px !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
+    margin-bottom: 10px;
+    transform: scale(1.2); /* Make it pop */
+}
+
+.eroi-price-badge span {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    color: white;
+    font-size: 18px;
+}
+
+.eroi-price-badge img {
+    width: 20px !important;
+    height: 20px !important;
+}
+
+/* --- FOOTER & BUTTON --- */
+.eroi-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.eroi-buy-btn {
+    width: 100% !important;
+    height: 60px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 900 !important;
+    font-size: 20px !important;
+    letter-spacing: 1px;
+}
+
+/* --- VIEWER IMPROVEMENTS --- */
+.eroi-viewer {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.eroi-img-stage img {
+    max-height: 180px;
+    filter: drop-shadow(0 15px 25px rgba(0,0,0,0.7));
+}
+
+.eroi-nav-btn {
+    width: 50px;
+    height: 50px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+}
   </style>
 </head>
 <body>
@@ -9287,68 +9412,61 @@ div.inv-tile div.bm-limit-tag {
 
 <!-- MODAL: SELECTIE EROI (TACTICAL V2) -->
 <div id="heroModal" class="modal-overlay" style="z-index: 100020;">
-    <div class="modal-box eroi-main-box">
-        
-        <!-- Buton inchidere X simplu -->
-        <button class="eroi-close-x" onclick="closeHeroModal()">
-            <i class="fa-solid fa-xmark"></i>
+<div class="modal-box eroi-main-box">
+    <!-- Close Button -->
+    <button class="eroi-close-x" onclick="closeHeroModal()">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+
+    <!-- Header Name -->
+    <div class="eroi-header">
+        <h2 id="eroiName" class="eroi-title-box">???</h2>
+    </div>
+
+    <!-- Viewer -->
+    <div class="eroi-viewer">
+        <button class="eroi-nav-btn" onclick="navEroi(-1)"><i class="fa-solid fa-angle-left"></i></button>
+        <div class="eroi-img-stage">
+            <img id="eroiImg" src="https://iili.io/CNURdSR.png">
+        </div>
+        <button class="eroi-nav-btn" onclick="navEroi(1)"><i class="fa-solid fa-angle-right"></i></button>
+    </div>
+
+    <!-- Separator -->
+    <div class="eroi-divider">
+        <div class="eroi-line"></div>
+        <i class="fa-solid fa-shield-halved"></i>
+        <div class="eroi-line"></div>
+    </div>
+
+    <!-- DATA PADS (Separated) -->
+    <div class="eroi-details-container">
+        <!-- Pad 1: Description -->
+        <div class="eroi-data-pad">
+            <div class="pad-label">INFORMAȚII MISIUNE</div>
+            <div id="eroiDesc" class="pad-content">
+                Identitate necunoscută. Acest erou nu a fost încă recrutat în echipa ta.
+            </div>
+        </div>
+
+        <!-- Pad 2: Ability -->
+        <div class="eroi-data-pad highlight">
+            <div class="pad-label">ABILITATE SPECIALĂ</div>
+            <div id="eroiEffect" class="pad-content bold-ro">???</div>
+        </div>
+    </div>
+
+    <!-- Footer with BM Style Price Tag -->
+    <div class="eroi-footer">
+        <div class="bm-ruby-tag eroi-price-badge">
+            <img src="https://iili.io/CrnXNdG.png">
+            <span id="eroiPrice">0</span>
+        </div>
+        <button class="menu-btn play eroi-buy-btn" onclick="buyHeroAction()">
+            CUMPĂRĂ EROUL
         </button>
-
-        <!-- NUME EROU (Top Middle) -->
-        <div class="eroi-header">
-            <h2 id="eroiName" class="eroi-title-box">???</h2>
-        </div>
-
-        <!-- VIEWER: Sageti + Imagine (Middle) -->
-        <div class="eroi-viewer">
-            <button class="eroi-nav-btn" onclick="navEroi(-1)">
-                <i class="fa-solid fa-angle-left"></i>
-            </button>
-
-            <div class="eroi-img-stage">
-                <img id="eroiImg" src="https://iili.io/CNURdSR.png" alt="Hero">
-            </div>
-
-            <button class="eroi-nav-btn" onclick="navEroi(1)">
-                <i class="fa-solid fa-angle-right"></i>
-            </button>
-        </div>
-
-        <!-- SEPARATOR TACTIC -->
-        <div class="eroi-divider">
-            <div class="eroi-line"></div>
-            <i class="fa-solid fa-shield-halved"></i>
-            <div class="eroi-line"></div>
-        </div>
-
-<!-- DESCRIERE & ABILITATE (Details) -->
-<div class="eroi-details">
-
-    <div class="eroi-stat-row">
-        <span class="eroi-stat-label">DESCRIERE:</span>
-        <span id="eroiDesc" class="eroi-stat-val">
-            Identitate necunoscută. Acest erou nu a fost încă recrutat în echipa ta.
-        </span>
     </div>
-
-    <div class="eroi-stat-row">
-        <span class="eroi-stat-label">ABILITATE:</span>
-        <span id="eroiEffect" class="eroi-stat-val">???</span>
-    </div>
-
 </div>
-
-        <!-- FOOTER: Pret + Buton Cumpara -->
-        <div class="eroi-footer">
-            <div class="eroi-price">
-                <img src="https://iili.io/CrnXNdG.png">
-                <span id="eroiPrice">0</span>
-            </div>
-            <button class="menu-btn play eroi-buy-btn" onclick="buyHeroAction()">
-                CUMPARA EROUL
-            </button>
-        </div>
-    </div>
 </div>
 
 <!-- MODAL PRINCIPAL MISIUNI & ACHIEVEMENTS -->
