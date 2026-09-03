@@ -9939,19 +9939,16 @@ div.inv-tile div.bm-limit-tag {
     </div>
 </div>
 
-<!-- MODAL: RECRUTARE REUȘITĂ -->
+<!-- MODAL: RECRUTARE REUȘITĂ (COMPACT) -->
 <div id="postBuyModal" class="modal-overlay" style="z-index: 100040;">
-    <div class="modal-box hero-modal-reset success-modal-box">
+    <div class="modal-box hero-modal-reset success-modal-box" style="max-width: 340px !important; padding: 25px 20px !important;">
         
         <div class="tactical-header-success">RECRUTARE REUȘITĂ</div>
 
-        <div class="hero-success-stage">
-            <img id="postBuyHeroImg" src="">
-        </div>
-
-        <div style="text-align: center; margin-bottom: 20px;">
-            <h2 id="postBuyHeroName" style="font-family: 'Montserrat'; font-weight: 900; color: #fff; text-transform: uppercase; margin: 0; font-size: 24px; letter-spacing: 1px;">NUME EROU</h2>
-            <p style="font-family: 'Oswald'; color: #94a3b8; font-size: 14px; margin-top: 5px;">A fost adăugat cu succes în dulapul tău!</p>
+        <div style="text-align: center; margin-bottom: 25px; margin-top: 15px;">
+            <p style="font-family: 'Oswald'; color: #cbd5e1; font-size: 16px; margin: 0; line-height: 1.5;">
+                Noul tău erou a fost adăugat cu succes în dulap!
+            </p>
         </div>
 
         <div class="success-stack">
@@ -14096,19 +14093,7 @@ async function executePurchase() {
             updateScoreUI();
             renderErou();
 
-            // Sincronizare imagine și nume în modalul de confirmare a succesului
-            const heroData = eroiCatalog.find(h => h.id === heroId);
-            if (heroData) {
-                const imgEl = document.getElementById('postBuyHeroImg');
-                const nameEl = document.getElementById('postBuyHeroName');
-
-                if (imgEl) imgEl.src = heroData.img; 
-                if (nameEl) {
-                    nameEl.innerText = heroData.name;
-                    nameEl.classList.toggle('rainbow-name', heroId === "lesbiconi");
-                }
-            }
-
+            // Ascundem ecranul de încărcare și deschidem direct modalul compact
             document.getElementById('loadingModal').style.display = 'none';
             document.getElementById('postBuyModal').style.display = 'flex';
 
