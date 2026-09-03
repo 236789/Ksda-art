@@ -8890,79 +8890,83 @@ div.inv-tile div.bm-limit-tag {
 }
 
 
-
 /* ==========================================
-   HERO MODALS REVAMP - TACTICAL & PREMIUM
+   FIXED MODAL LAYOUT - NO OVERFLOW
    ========================================== */
 
-/* The Stage where the Hero stands */
+/* Fix the base container for Hero Buy/Success */
+.hero-modal-reset {
+    width: 95vw !important;
+    max-width: 380px !important;
+    padding: 25px 15px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    height: auto !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+}
+
+/* Constrain the image stage so it doesn't push buttons out */
 .hero-confirm-stage {
-    position: relative;
-    width: 100%;
-    height: 180px;
-    background: radial-gradient(circle, rgba(250, 204, 21, 0.15) 0%, transparent 75%);
+    width: 100% !important;
+    height: 140px !important; /* Fixed height for image area */
+    background: radial-gradient(circle, rgba(250, 204, 21, 0.1) 0%, transparent 70%);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 15px 0;
-    border-radius: 20px;
+    margin: 10px 0;
 }
 
 .hero-confirm-stage img {
-    height: 160px;
-    width: auto;
-    object-fit: contain;
-    filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
-    z-index: 2;
-    animation: heroFloat 3s ease-in-out infinite;
+    max-height: 130px !important;
+    width: auto !important;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
 }
 
-/* Tactical Clipped Header */
-.tactical-header {
-    display: inline-block;
-    padding: 6px 30px;
-    background: var(--th-border);
-    color: #000 !important;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 900;
-    text-transform: uppercase;
-    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
-    margin: 0 auto 15px auto;
-    font-size: 18px;
-    letter-spacing: 2px;
+/* Force buttons to behave inside the modal */
+.hero-modal-reset .menu-btn.play {
+    width: 100% !important;
+    padding: 12px 0 !important; /* Vertical padding only */
+    height: 55px !important;    /* Controlled height */
+    font-size: 18px !important; /* Reasonable font size */
+    margin: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    letter-spacing: 1px !important;
 }
 
-/* Success Modal Specifics */
-.success-modal-box {
-    border-color: #4ade80 !important;
-    box-shadow: 0 0 50px rgba(74, 222, 128, 0.25), inset 0 0 20px rgba(0,0,0,0.8) !important;
-}
-
-.success-icon-wrap {
-    font-size: 50px;
-    color: #4ade80;
-    margin-bottom: 10px;
-    filter: drop-shadow(0 0 15px rgba(74, 222, 128, 0.5));
-}
-
-/* Button Layouts */
+/* Yes/No Row */
 .modal-button-row {
-    display: flex;
-    gap: 12px;
-    width: 100%;
-    margin-top: 10px;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-top: 10px !important;
 }
 
-.btn-secondary {
-    background: linear-gradient(180deg, #444, #222) !important;
+/* Success Modal Stack */
+.success-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+}
+
+/* Style for the secondary/no button */
+.btn-no {
+    background: linear-gradient(180deg, #555, #222) !important;
     box-shadow: 0 6px 0 #111 !important;
-    border-color: #666 !important;
-    color: #991b1b;
+    color: #999 !important;
+    border-color: #777 !important;
 }
 
 .equip-btn {
     background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%) !important;
     box-shadow: 0 6px 0 #052e16 !important;
+    color: #fff !important;
 }
   </style>
 </head>
@@ -9797,22 +9801,22 @@ div.inv-tile div.bm-limit-tag {
 
 <!-- MODAL: CONFIRMARE RECRUTARE -->
 <div id="buyConfirmModal" class="modal-overlay" style="z-index: 100030;">
-    <div class="modal-box info-modal-box">
-        <div class="tactical-header">RECRUTARE</div>
+    <div class="modal-box hero-modal-reset">
+        <div class="eroi-title-box">RECRUTARE</div>
         
         <div class="hero-confirm-stage">
             <img id="confirmHeroImg" src="">
         </div>
 
-        <p id="buyConfirmText" style="font-family: 'Oswald'; font-size: 17px; line-height: 1.4; color: #cbd5e1; margin-bottom: 20px;">
-            <!-- Injected via JS -->
+        <p id="buyConfirmText" style="font-family: 'Oswald'; font-size: 16px; color: #fff; line-height: 1.4; margin-bottom: 20px; text-align: center;">
+            <!-- Text injected via JS -->
         </p>
 
         <div class="modal-button-row">
-            <button class="menu-btn play" style="flex:1;" onclick="executePurchase()">
+            <button class="menu-btn play" onclick="executePurchase()">
                 <span>DA</span>
             </button>
-            <button class="menu-btn play btn-secondary" style="flex:1;" onclick="document.getElementById('buyConfirmModal').style.display='none'">
+            <button class="menu-btn play btn-no" onclick="document.getElementById('buyConfirmModal').style.display='none'">
                 <span>NU</span>
             </button>
         </div>
@@ -9821,19 +9825,19 @@ div.inv-tile div.bm-limit-tag {
 
 <!-- MODAL: RECRUTARE REUȘITĂ -->
 <div id="postBuyModal" class="modal-overlay" style="z-index: 100040;">
-    <div class="modal-box info-modal-box success-modal-box">
-        <div class="success-icon-wrap">
+    <div class="modal-box hero-modal-reset" style="border-color: #4ade80 !important;">
+        <div class="success-icon-wrap" style="color: #4ade80; font-size: 40px; margin-bottom: 10px;">
             <i class="fa-solid fa-circle-check"></i>
         </div>
         
-        <h2 style="color: #4ade80 !important; font-size: 24px; margin-bottom: 5px;">RECRUTARE REUȘITĂ!</h2>
-        <p style="font-family: 'Oswald'; color: #94a3b8; margin-bottom: 25px;">Eroul a fost adăugat în dulapul tău.</p>
+        <h2 style="color: #4ade80 !important; font-size: 22px; margin-bottom: 5px; text-transform: uppercase;">RECRUTARE REUȘITĂ!</h2>
+        <p style="font-family: 'Oswald'; color: #94a3b8; font-size: 14px; margin-bottom: 20px; text-align: center;">Eroul a fost adăugat în dulapul tău.</p>
 
-        <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+        <div class="success-stack">
             <button class="menu-btn play equip-btn" onclick="useHeroNow()">
-                <i class="fa-solid fa-shirt"></i> <span>FOLOȘESTE ACUM</span>
+                <i class="fa-solid fa-shirt" style="margin-right: 8px;"></i> <span>FOLOȘESTE ACUM</span>
             </button>
-            <button class="menu-btn play btn-secondary" style="height: 50px !important; font-size: 14px !important;" onclick="document.getElementById('postBuyModal').style.display='none'">
+            <button class="menu-btn play btn-no" style="font-size: 14px !important;" onclick="document.getElementById('postBuyModal').style.display='none'">
                 <span>PĂSTREAZĂ ÎN DULAP</span>
             </button>
         </div>
@@ -13954,17 +13958,17 @@ async function buyHeroAction() {
 
     if (rubies < hero.price) {
         if (typeof playMissSFX === 'function') playMissSFX();
-        showNotification("FĂRĂ RUBINE", `Ai nevoie de ${hero.price} ♦️ pentru ${hero.name}!`, "fa-gem");
+        showNotification("FĂRĂ RUBINE", `Ai nevoie de ${hero.price} ♦️!`, "fa-gem");
         return;
     }
 
     pendingHeroId = hero.id;
     document.getElementById('confirmHeroImg').src = hero.img;
     
-    // Clean, formatted text injection
+    // Keep text short to prevent height overflow
     document.getElementById('buyConfirmText').innerHTML = 
-        `Vrei să-l recrutezi pe <b style="color:#fff; font-family:Montserrat;">${hero.name}</b><br>` +
-        `pentru <span style="color:#ff3366; font-weight:900;">${hero.price} Rubine</span>?`;
+        `Îl recrutezi pe <b style="color:#facc15">${hero.name}</b><br>` +
+        `pentru <b style="color:#ff3366">${hero.price} Rubine</b>?`;
 
     document.getElementById('buyConfirmModal').style.display = 'flex';
 }
