@@ -17036,49 +17036,56 @@ function closeQuestsMenu() {
 }
 
 function openQuestsTab() {
-    // Hide the main activity center, show selection
+    // Închidem meniul anterior
     document.getElementById('questsMenuModal').style.display = 'none';
+    // Deschidem selecția
     document.getElementById('misiuniSelectionModal').style.display = 'flex';
     
-    // --- EASY QUESTS LOCK (LVL 4) ---
-    const easyCard = document.querySelector('#misiuniSelectionModal .shop-card:nth-child(1)');
-    if (playerLevel < 4) {
-        easyCard.classList.add('locked-card');
-        if (!easyCard.querySelector('.gray-lock-badge')) {
-            const badge = document.createElement('div');
-            badge.className = 'gray-lock-badge';
-            badge.innerText = "LVL 4";
-            easyCard.appendChild(badge);
+    // --- 1. LOGICĂ LOCK MISIUNI UȘOARE (LVL 4) ---
+    const easyBtn = document.getElementById('btnEasyQuests');
+    if (easyBtn) {
+        if (playerLevel < 4) {
+            easyBtn.classList.add('locked-card');
+            if (!easyBtn.querySelector('.gray-lock-badge')) {
+                const b = document.createElement('div');
+                b.className = 'gray-lock-badge';
+                b.innerText = "LVL 4";
+                easyBtn.appendChild(b);
+            }
+            easyBtn.onclick = (e) => {
+                e.stopPropagation();
+                playMissSFX();
+                showNotification("BLOCAT", "Ai nevoie de Nivelul 4 pentru Misiuni Ușoare!", "fa-lock");
+            };
+        } else {
+            easyBtn.classList.remove('locked-card');
+            const b = easyBtn.querySelector('.gray-lock-badge'); if(b) b.remove();
+            easyBtn.onclick = (e) => { e.stopPropagation(); openEasyQuests(); };
         }
-        easyCard.onclick = (e) => {
-            e.stopPropagation();
-            playMissSFX();
-            showNotification("BLOCAT", "Ai nevoie de Nivelul 4 pentru Misiuni Ușoare!", "fa-lock");
-        };
-    } else {
-        easyCard.classList.remove('locked-card');
-        const b = easyCard.querySelector('.gray-lock-badge'); if(b) b.remove();
-        easyCard.onclick = (e) => { e.stopPropagation(); openEasyQuests(); };
     }
 
-    // --- HARD QUESTS LOCK (LVL 5) ---
-    const hardCard = document.getElementById('btnHardQuests');
-    const hardBadge = document.getElementById('badgeHardQuests');
-    if (playerLevel < 5) {
-        hardCard.classList.add('locked-card');
-        if (hardBadge) {
-            hardBadge.style.display = 'block';
-            hardBadge.innerText = "LVL 5";
+    // --- 2. LOGICĂ LOCK MISIUNI GRELE (LVL 5) ---
+    const hardBtn = document.getElementById('btnHardQuests');
+    if (hardBtn) {
+        if (playerLevel < 5) {
+            hardBtn.classList.add('locked-card');
+            // Dacă nu există deja badge-ul, îl creăm
+            if (!hardBtn.querySelector('.gray-lock-badge')) {
+                const b = document.createElement('div');
+                b.className = 'gray-lock-badge';
+                b.innerText = "LVL 5";
+                hardBtn.appendChild(b);
+            }
+            hardBtn.onclick = (e) => {
+                e.stopPropagation();
+                playMissSFX();
+                showNotification("BLOCAT", "Ai nevoie de Nivelul 5 pentru Misiuni Grele!", "fa-lock");
+            };
+        } else {
+            hardBtn.classList.remove('locked-card');
+            const b = hardBtn.querySelector('.gray-lock-badge'); if(b) b.remove();
+            hardBtn.onclick = (e) => { e.stopPropagation(); openHardQuests(); };
         }
-        hardCard.onclick = (e) => {
-            e.stopPropagation();
-            playMissSFX();
-            showNotification("BLOCAT", "Ai nevoie de Nivelul 5 pentru Misiuni Grele!", "fa-lock");
-        };
-    } else {
-        hardCard.classList.remove('locked-card');
-        if (hardBadge) hardBadge.style.display = 'none';
-        hardCard.onclick = (e) => { e.stopPropagation(); openHardQuests(); };
     }
 }
 
