@@ -8696,6 +8696,86 @@ div.inv-tile div.bm-limit-tag {
     font-size: 20px;
     margin-bottom: 10px;
 }
+
+
+/* --- MODAL SCROLLABLE --- */
+.eroi-main-box {
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+    display: flex;
+    flex-direction: column;
+}
+.eroi-main-box::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome */
+
+/* --- HEADER NAME: BLACK --- */
+.eroi-title-box {
+    color: #000 !important; /* Forces black text for contrast */
+    font-weight: 900;
+    text-shadow: none !important;
+}
+
+/* --- RAINBOW TEXT FOR LESBICONI --- */
+.rainbow-name {
+    background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.2));
+}
+
+/* --- HUGE HERO VIEWER --- */
+.eroi-viewer {
+    height: 320px !important; /* Increased from 150px */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px 0;
+}
+
+.eroi-img-stage {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.eroi-img-stage img {
+    height: 300px !important; /* MASSIVE HEROES */
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 15px 30px rgba(0,0,0,0.6));
+}
+
+/* --- PRICE TAG AT THE BOTTOM --- */
+.eroi-divider-simple {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 25px;
+    opacity: 0.3;
+}
+
+.eroi-price-badge-final {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #ef4444, #991b1b);
+    border: 2px solid #ffb3b3;
+    padding: 6px 20px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+}
+
+.eroi-price-badge-final span {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    color: white;
+    font-size: 22px;
+}
+
+.eroi-price-badge-final img { width: 24px; height: 24px; }
   </style>
 </head>
 <body>
@@ -9484,44 +9564,51 @@ div.inv-tile div.bm-limit-tag {
 <!-- MODAL: SELECTIE EROI (TACTICAL V2) -->
 <div id="heroModal" class="modal-overlay" style="z-index: 100020;">
 <div class="modal-box eroi-main-box">
-    <button class="eroi-close-x" onclick="closeHeroModal()"><i class="fa-solid fa-xmark"></i></button>
+    <!-- Close Button -->
+    <button class="eroi-close-x" onclick="closeHeroModal()">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
 
+    <!-- Header -->
     <div class="eroi-header">
         <h2 id="eroiName" class="eroi-title-box">???</h2>
     </div>
 
-    <!-- Shorter Viewer -->
+    <!-- HUGE VIEWER -->
     <div class="eroi-viewer">
         <button class="eroi-nav-btn" onclick="navEroi(-1)"><i class="fa-solid fa-angle-left"></i></button>
         <div class="eroi-img-stage">
-            <img id="eroiImg" src="https://iili.io/CNURdSR.png">
+            <img id="eroiImg" src="">
         </div>
         <button class="eroi-nav-btn" onclick="navEroi(1)"><i class="fa-solid fa-angle-right"></i></button>
     </div>
 
-    <!-- TACTICAL SEPARATOR WITH PRICE INSIDE -->
-    <div class="eroi-divider">
+    <!-- SIMPLE DIVIDER -->
+    <div class="eroi-divider-simple">
         <div class="eroi-line"></div>
-        <div class="eroi-price-tag-mini">
-            <img src="https://iili.io/CrnXNdG.png">
-            <span id="eroiPrice">0</span>
-        </div>
+        <i class="fa-solid fa-shield-halved"></i>
         <div class="eroi-line"></div>
     </div>
 
+    <!-- DETAILS (Will require scrolling) -->
     <div class="eroi-details-container">
         <div class="eroi-data-pad">
-            <div class="pad-label">INFORMAȚII</div>
+            <div class="pad-label">INFORMAȚII MISIUNE</div>
             <div id="eroiDesc" class="pad-content">...</div>
         </div>
 
         <div class="eroi-data-pad highlight">
-            <div class="pad-label">ABILITATE</div>
+            <div class="pad-label">ABILITATE SPECIALĂ</div>
             <div id="eroiEffect" class="pad-content bold-ro">???</div>
         </div>
     </div>
 
+    <!-- FOOTER: Price Badge + Buy Button -->
     <div class="eroi-footer">
+        <div class="eroi-price-badge-final">
+            <img src="https://iili.io/CrnXNdG.png">
+            <span id="eroiPrice">0</span>
+        </div>
         <button class="menu-btn play eroi-buy-btn" onclick="buyHeroAction()">
             CUMPĂRĂ EROUL
         </button>
@@ -16887,8 +16974,20 @@ function navEroi(dir) {
 
 function renderErou() {
     const hero = eroiCatalog[eroiIndex];
-    document.getElementById('eroiName').innerText = hero.name;
+    const nameEl = document.getElementById('eroiName');
+    
+    // Set Name and Handle Rainbow Logic
+    nameEl.innerText = hero.name;
+    if (hero.id === "lesbiconi") {
+        nameEl.classList.add('rainbow-name');
+    } else {
+        nameEl.classList.remove('rainbow-name');
+    }
+
+    // Update Image (Big and clear)
     document.getElementById('eroiImg').src = hero.img;
+    
+    // Update Details
     document.getElementById('eroiDesc').innerText = hero.desc;
     document.getElementById('eroiEffect').innerText = hero.effect;
     document.getElementById('eroiPrice').innerText = hero.price;
