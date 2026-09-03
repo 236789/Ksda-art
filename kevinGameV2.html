@@ -16756,29 +16756,108 @@ function startSeagullEvent() {
     setTimeout(moveSeagull, 100);
 }
 
-
+const eroiPath = "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/";
 
 const eroiCatalog = [
     {
-        name: "???",
-        desc: "Un luptător de elită care refuză să își dezvăluie chipul până nu este plătit.",
-        effect: "NECUNOSCUT",
-        price: 50,
-        img: "https://iili.io/CNURdSR.png"
+        id: "george",
+        name: "GEORGE",
+        desc: "Expert în echilibru și pace interioară. Nu fuge, el 'plutește' peste problemele țării în timp ce bea apă plată.",
+        effect: "NICI UNA",
+        price: 150,
+        img: eroiPath + "Calin%20georgescu.%20prezentare.png",
+        playImg: eroiPath + "Calin%20georgescu%20running%20.png",
+        tiredImg: eroiPath + "Calin%20georgescu%20tired%20.png"
     },
     {
-        name: "???",
-        desc: "O umbră care a fost văzută doar în cele mai mari combo-uri ale istoriei.",
-        effect: "COMBINAȚIE SECRETĂ",
+        id: "ciocanul",
+        name: "CIOCANUL",
+        desc: "Lovește unde doare mai tare: în buget! Un erou greu de clintit care dă ordine chiar și când e pe pauză.",
+        effect: "NICI UNA",
         price: 100,
-        img: "https://iili.io/CNURciu.png"
+        img: eroiPath + "Cholan%20standing.png",
+        playImg: eroiPath + "chiolan%20running%20.png",
+        tiredImg: eroiPath + "chiolan%20tired.png"
     },
     {
-        name: "???",
-        desc: "Un veteran al străzii care știe toate scurtăturile către scorul maxim.",
-        effect: "MULTIPLICARE X2",
+        id: "gigi",
+        name: "GIGI MILIONARU",
+        desc: "Are milioane, are palate, dar tot după Kevin aleargă. Dacă îl prinzi, s-ar putea să-ți dea o oaie bonus.",
+        effect: "NICI UNA",
+        price: 500,
+        img: eroiPath + "Glgi%20milionaru%20standing%20.png",
+        playImg: eroiPath + "Glgi%20milionaru%20running%20.png",
+        tiredImg: eroiPath + "Glgi%20milionaru%20tired%20.png"
+    },
+    {
+        id: "dulapul",
+        name: "DULAPUL",
+        desc: "Se mișcă încet, dar cu mare atenție și îngrijorare. Preferă excursiile scumpe în locul alergatului prin joc.",
+        effect: "NICI UNA",
+        price: 300,
+        img: eroiPath + "IOHANIS%20standing%20.png",
+        playImg: eroiPath + "IOHANIS%20RUNNING%20.png",
+        tiredImg: eroiPath + "iohanis%20tired%20.png"
+    },
+    {
+        id: "muci",
+        name: "MUCI",
+        desc: "Un caracter lipicios care refuză să plece. E mic, e verde și e extrem de enervant când se lipește de scorul tău.",
+        effect: "NICI UNA",
+        price: 50,
+        img: eroiPath + "Muci%20standing%20.png",
+        playImg: eroiPath + "Muci%20running%20.png",
+        tiredImg: eroiPath + "Muci%20tired%20.png"
+    },
+    {
+        id: "puta",
+        name: "PUTĂ",
+        desc: "Numele spune totul. Un personaj controversat care se bagă peste tot, chiar și acolo unde nu îi fierbe oala.",
+        effect: "NICI UNA",
+        price: 80,
+        img: eroiPath + "Puta%20standing%20.png",
+        playImg: eroiPath + "Puta%20running%20.png",
+        tiredImg: eroiPath + "puta%20tried.png"
+    },
+    {
+        id: "lesbiconi",
+        name: "LESBICONI",
+        desc: "Direct din Paris, cu un stil vestimentar ce lasă de dorit și o viteză de invidiat. Très chic, dar cam periculos!",
+        effect: "NICI UNA",
+        price: 200,
+        img: eroiPath + "lesbiconi%20standing%20.png",
+        playImg: eroiPath + "lesbiconi%20running%20.png",
+        tiredImg: eroiPath + "lesbiconi%20tired%20.png"
+    },
+    {
+        id: "piatra",
+        name: "PIATRA",
+        desc: "Tare ca stânca, dar cam greu de cap. Dacă se lovește de marginea ecranului, s-ar putea să crape... monitorul tău.",
+        effect: "NICI UNA",
+        price: 120,
+        img: eroiPath + "piatra%20standing.png",
+        playImg: eroiPath + "piatra%20running%20.png",
+        tiredImg: eroiPath + "piatra%20Trired%20png.png"
+    },
+    {
+        id: "turu2",
+        name: "TURU DOI",
+        desc: "Singurul lui scop în viață este să ajungă în turul doi. În joc, scopul lui e să nu fie prins de degetele tale rapide.",
+        effect: "NICI UNA",
         price: 250,
-        img: "https://iili.io/CNURvUv.png"
+        img: eroiPath + "simion%20standing%20.png",
+        playImg: eroiPath + "simion%20standing%20running%20.png",
+        tiredImg: eroiPath + "simion%20tired%20.png"
+    },
+    {
+        id: "vladim",
+        name: "VLADIM",
+        desc: "Un tribun adevărat care urlă la tine dacă ratezi click-ul. Recită poezii patriotice în timp ce fuge de tine.",
+        effect: "NICI UNA",
+        price: 400,
+        img: eroiPath + "vladim%20tudor%20standing%20.png",
+        playImg: eroiPath + "vladim%20tudor%20running%20.png",
+        tiredImg: eroiPath + "vladim%20tudor%20tired%20.png"
     }
 ];
 
@@ -16815,14 +16894,32 @@ function renderErou() {
     document.getElementById('eroiPrice').innerText = hero.price;
 }
 
-function buyHeroAction() {
+async function buyHeroAction() {
     const hero = eroiCatalog[eroiIndex];
+    
+    // Verificăm dacă are bani
     if (rubies < hero.price) {
         if (typeof playMissSFX === 'function') playMissSFX();
-        showKevinutaBubble("Nu ai destule rubine!");
+        showNotification("FĂRĂ RUBINE", "Nu ai destule rubine pentru acest erou!", "fa-gem");
         return;
     }
-    showNotification("BLOCAT", "Acest personaj va fi disponibil în versiunea următoare!", "fa-lock");
+
+    // Confirmare de cumpărare (Deocamdată simulăm, poți adăuga salvare în DB mai târziu)
+    if(confirm(`Vrei să-l recrutezi pe ${hero.name} pentru ${hero.price} Rubine?`)) {
+        rubies -= hero.price;
+        updateScoreUI();
+        
+        // ACTIVARE IMEDIATĂ: Schimbăm skin-ul jucătorului
+        currentPlayImg = `url('${hero.playImg}')`;
+        currentTiredImg = `url('${hero.tiredImg}')`;
+        window.currentPlayingCharId = hero.id;
+
+        document.getElementById('kevin').style.backgroundImage = currentPlayImg;
+        
+        showNotification("EROO RECRUTAT", `${hero.name} a intrat în echipă!`, "fa-check-double");
+        closeHeroModal();
+        syncScoreToFirestore(); // Salvăm rubinele consumate
+    }
 }
 
 // Add these to your window exports at the bottom!
