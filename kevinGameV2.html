@@ -8765,14 +8765,16 @@ div.inv-tile div.bm-limit-tag {
     filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.2));
 }
 
-/* THE MASSIVE VIEWER AREA */
+/* THE VIEWER AREA - FIXED */
 .eroi-viewer-massive {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    height: 550px !important; /* FORCED HUGE SPACE */
+    justify-content: center;
+    height: 320px !important; /* Reduced from 550px to stop pushing text */
     width: 100%;
     position: relative;
+    margin-top: 10px;
+    background: radial-gradient(circle, rgba(250, 204, 21, 0.15) 0%, transparent 70%);
 }
 
 .eroi-img-stage {
@@ -8784,26 +8786,34 @@ div.inv-tile div.bm-limit-tag {
 }
 
 #eroiImg {
-    height: 520px !important; /* MASSIVE HERO HEIGHT */
+    height: 300px !important; /* Fits inside the 320px container */
     width: auto;
     object-fit: contain;
-    filter: drop-shadow(0 20px 40px rgba(0,0,0,0.8));
-    transform: scale(1.1); /* Extra pop */
+    filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8));
+    /* Increased scale to 1.6 to make the character look much bigger */
+    transform: scale(1.6); 
+    z-index: 2;
+    transition: transform 0.3s ease;
 }
 
-/* NAVIGATION BUTTONS */
 .eroi-nav-btn {
-    width: 50px;
-    height: 60px;
-    background: rgba(255,255,255,0.08);
-    border: 2px solid rgba(255,255,255,0.2);
-    border-radius: 12px;
+    position: absolute; /* Floating buttons */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 45px;
+    height: 55px;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent */
+    border: 2px solid var(--th-border);
+    border-radius: 10px;
     color: white;
     font-size: 24px;
     cursor: pointer;
     z-index: 10;
 }
 
+/* Position one on the left, one on the right */
+.eroi-nav-btn:first-child { left: 0; }
+.eroi-nav-btn:last-child { right: 0; }
 /* TACTICAL SEPARATOR WITH COMPACT PRICE */
 .eroi-divider-simple {
     display: flex;
@@ -8833,20 +8843,19 @@ div.inv-tile div.bm-limit-tag {
     font-size: 18px;
 }
 
-/* DATA PADS (BOLD FOR ROMANIAN) */
 .eroi-details-scroll-zone {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    margin-bottom: 30px;
+    gap: 8px; /* Tighter gap */
+    margin-bottom: 20px;
 }
 
 .eroi-data-pad {
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-left: 5px solid #5a6288;
-    padding: 15px;
-    border-radius: 4px 15px 15px 4px;
+    border-left: 4px solid #5a6288;
+    padding: 10px 15px; /* Smaller padding */
+    border-radius: 8px;
 }
 .eroi-data-pad.highlight { border-left-color: #facc15; background: rgba(250, 204, 21, 0.05); }
 
