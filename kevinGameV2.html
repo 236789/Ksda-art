@@ -9099,6 +9099,17 @@ div.inv-tile div.bm-limit-tag {
 .success-stack .keep-btn:active {
     box-shadow: 0 2px 0 #111 !important;
 }
+
+/* RAINBOW FOR LESBICONI - REPARAT */
+.rainbow-name {
+    background: linear-gradient(to right, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    display: inline-block;
+    filter: drop-shadow(1px 1px 0px rgba(0,0,0,0.3)); /* Umbră mai fină ca să nu se taie ciudat */
+}
   </style>
 </head>
 <body>
@@ -17569,9 +17580,12 @@ function renderErou() {
     const buyBtn = document.querySelector('.eroi-buy-btn');
     const priceArea = document.querySelector('.eroi-divider-simple');
     
-    nameEl.innerText = hero.name;
-    nameEl.classList.remove('rainbow-name');
-    if (hero.id === "lesbiconi") nameEl.classList.add('rainbow-name');
+// Punem numele într-un SPAN ca să nu stricăm cutia galbenă
+    if (hero.id === "lesbiconi") {
+        nameEl.innerHTML = `<span class="rainbow-name">${hero.name}</span>`;
+    } else {
+        nameEl.innerHTML = `<span>${hero.name}</span>`;
+    }
 
     document.getElementById('eroiImg').src = hero.img;
     document.getElementById('eroiDesc').innerText = hero.desc;
