@@ -8625,6 +8625,77 @@ div.inv-tile div.bm-limit-tag {
     color: white;
     cursor: pointer;
 }
+
+
+
+/* --- COMPACT BOX --- */
+.eroi-main-box {
+    max-width: 400px !important;
+    padding: 20px 20px 25px 20px !important; /* Reduced vertical padding */
+}
+
+/* --- COMPACT VIEWER --- */
+.eroi-viewer {
+    height: 150px; /* Shorter image area */
+    margin: 10px 0;
+}
+.eroi-img-stage img { max-height: 140px; }
+
+/* --- SEPARATOR WITH INTEGRATED PRICE --- */
+.eroi-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 20px 0;
+    width: 100%;
+}
+
+.eroi-line {
+    flex: 1;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.eroi-price-tag-mini {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(180deg, #ef4444, #991b1b);
+    border: 2px solid #ffb3b3;
+    padding: 2px 12px;
+    border-radius: 8px;
+    margin: 0 10px;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+    z-index: 5;
+}
+
+.eroi-price-tag-mini img { width: 14px; height: 14px; }
+.eroi-price-tag-mini span {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    color: white;
+    font-size: 14px;
+}
+
+/* --- COMPACT DATA PADS --- */
+.eroi-details-container { gap: 10px; margin-bottom: 20px; }
+.eroi-data-pad { padding: 8px 12px; }
+.pad-label { font-size: 9px; margin-bottom: 2px; }
+.pad-content { font-size: 13px; }
+
+/* --- COMPACT BUTTON --- */
+.eroi-buy-btn {
+    height: 50px !important;
+    font-size: 18px !important;
+}
+
+/* --- HEADER FIX --- */
+.eroi-title-box {
+    padding: 6px 30px;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
   </style>
 </head>
 <body>
@@ -9413,17 +9484,13 @@ div.inv-tile div.bm-limit-tag {
 <!-- MODAL: SELECTIE EROI (TACTICAL V2) -->
 <div id="heroModal" class="modal-overlay" style="z-index: 100020;">
 <div class="modal-box eroi-main-box">
-    <!-- Close Button -->
-    <button class="eroi-close-x" onclick="closeHeroModal()">
-        <i class="fa-solid fa-xmark"></i>
-    </button>
+    <button class="eroi-close-x" onclick="closeHeroModal()"><i class="fa-solid fa-xmark"></i></button>
 
-    <!-- Header Name -->
     <div class="eroi-header">
         <h2 id="eroiName" class="eroi-title-box">???</h2>
     </div>
 
-    <!-- Viewer -->
+    <!-- Shorter Viewer -->
     <div class="eroi-viewer">
         <button class="eroi-nav-btn" onclick="navEroi(-1)"><i class="fa-solid fa-angle-left"></i></button>
         <div class="eroi-img-stage">
@@ -9432,36 +9499,29 @@ div.inv-tile div.bm-limit-tag {
         <button class="eroi-nav-btn" onclick="navEroi(1)"><i class="fa-solid fa-angle-right"></i></button>
     </div>
 
-    <!-- Separator -->
+    <!-- TACTICAL SEPARATOR WITH PRICE INSIDE -->
     <div class="eroi-divider">
         <div class="eroi-line"></div>
-        <i class="fa-solid fa-shield-halved"></i>
+        <div class="eroi-price-tag-mini">
+            <img src="https://iili.io/CrnXNdG.png">
+            <span id="eroiPrice">0</span>
+        </div>
         <div class="eroi-line"></div>
     </div>
 
-    <!-- DATA PADS (Separated) -->
     <div class="eroi-details-container">
-        <!-- Pad 1: Description -->
         <div class="eroi-data-pad">
-            <div class="pad-label">INFORMAȚII MISIUNE</div>
-            <div id="eroiDesc" class="pad-content">
-                Identitate necunoscută. Acest erou nu a fost încă recrutat în echipa ta.
-            </div>
+            <div class="pad-label">INFORMAȚII</div>
+            <div id="eroiDesc" class="pad-content">...</div>
         </div>
 
-        <!-- Pad 2: Ability -->
         <div class="eroi-data-pad highlight">
-            <div class="pad-label">ABILITATE SPECIALĂ</div>
+            <div class="pad-label">ABILITATE</div>
             <div id="eroiEffect" class="pad-content bold-ro">???</div>
         </div>
     </div>
 
-    <!-- Footer with BM Style Price Tag -->
     <div class="eroi-footer">
-        <div class="bm-ruby-tag eroi-price-badge">
-            <img src="https://iili.io/CrnXNdG.png">
-            <span id="eroiPrice">0</span>
-        </div>
         <button class="menu-btn play eroi-buy-btn" onclick="buyHeroAction()">
             CUMPĂRĂ EROUL
         </button>
