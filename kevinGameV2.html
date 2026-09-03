@@ -8969,26 +8969,97 @@ div.inv-tile div.bm-limit-tag {
     color: #fff !important;
 }
 
+/* ==========================================
+   FIXED SUCCESS MODAL (POST-BUY)
+   ========================================== */
 
 .success-modal-box {
     border-color: #4ade80 !important;
     background: radial-gradient(circle at top, #13261a 0%, #0a0b16 100%) !important;
     box-shadow: 0 0 40px rgba(74, 222, 128, 0.2), inset 0 0 20px rgba(0,0,0,0.8) !important;
+    padding: 30px 20px !important;
 }
 
-.equip-btn {
+/* Header-ul tactic "RECRUTARE REUȘITĂ" */
+.tactical-header-success {
+    display: inline-block;
+    padding: 6px 30px;
+    background: #4ade80;
+    color: #000 !important;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+/* Container Imagine Erou */
+.hero-success-stage {
+    width: 100%;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle, rgba(74, 222, 128, 0.15) 0%, transparent 70%);
+    margin-bottom: 15px;
+}
+
+.hero-success-stage img {
+    height: 160px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6));
+    transform: scale(1.2); /* Îl face să pară mai mare */
+}
+
+/* UNIFORMIZARE BUTOANE (Stivă) */
+.success-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.success-stack .menu-btn.play {
+    width: 100% !important;
+    height: 55px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 16px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 900 !important;
+    border-radius: 12px !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Butonul Verde (Echipează) */
+.success-stack .equip-btn {
     background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%) !important;
     border: 3px solid #ffffff !important;
     color: #fff !important;
-    font-family: 'Montserrat', sans-serif !important;
-    font-weight: 900 !important;
-    text-transform: uppercase;
-    box-shadow: 0 6px 0 #052e16, 0 10px 20px rgba(0,0,0,0.4) !important;
+    box-shadow: 0 6px 0 #052e16, 0 10px 20px rgba(0,0,0,0.3) !important;
 }
 
-.equip-btn:active {
+/* Butonul Gri (Păstrează) */
+.success-stack .keep-btn {
+    background: linear-gradient(180deg, #555 0%, #222 100%) !important;
+    border: 3px solid #777 !important;
+    color: #aaa !important;
+    box-shadow: 0 6px 0 #111, 0 10px 20px rgba(0,0,0,0.3) !important;
+}
+
+.success-stack .menu-btn:active {
     transform: translateY(4px) !important;
-    box-shadow: 0 2px 0 #052e16 !important;
+    box-shadow: 0 2px 0 #052e16 !important; /* pt verde */
+}
+.success-stack .keep-btn:active {
+    box-shadow: 0 2px 0 #111 !important;
 }
   </style>
 </head>
@@ -9845,16 +9916,14 @@ div.inv-tile div.bm-limit-tag {
     </div>
 </div>
 
-<!-- MODAL: RECRUTARE REUȘITĂ (FULL REVAMP) -->
+<!-- MODAL: RECRUTARE REUȘITĂ -->
 <div id="postBuyModal" class="modal-overlay" style="z-index: 100040;">
     <div class="modal-box hero-modal-reset success-modal-box">
         
-        <!-- Tactical Top Header -->
-        <div class="tactical-header" style="background: #4ade80;">RECRUTARE REUȘITĂ</div>
+        <div class="tactical-header-success">RECRUTARE REUȘITĂ</div>
 
-        <!-- Hero Spotlight -->
-        <div class="hero-confirm-stage" style="background: radial-gradient(circle, rgba(74, 222, 128, 0.2) 0%, transparent 70%); height: 200px !important;">
-            <img id="postBuyHeroImg" src="" style="max-height: 180px !important;">
+        <div class="hero-success-stage">
+            <img id="postBuyHeroImg" src="">
         </div>
 
         <div style="text-align: center; margin-bottom: 20px;">
@@ -9862,13 +9931,12 @@ div.inv-tile div.bm-limit-tag {
             <p style="font-family: 'Oswald'; color: #94a3b8; font-size: 14px; margin-top: 5px;">A fost adăugat cu succes în dulapul tău!</p>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="success-stack" style="width: 100%; display: flex; flex-direction: column; gap: 12px;">
-            <button class="menu-btn play equip-btn" onclick="useHeroNow()" style="height: 60px !important;">
+        <div class="success-stack">
+            <button class="menu-btn play equip-btn" onclick="useHeroNow()">
                 <i class="fa-solid fa-shirt"></i> <span>ECHIPEAZĂ ACUM</span>
             </button>
             
-            <button class="menu-btn play btn-no" onclick="document.getElementById('postBuyModal').style.display='none'" style="height: 50px !important; font-size: 14px !important; opacity: 0.8;">
+            <button class="menu-btn play keep-btn" onclick="document.getElementById('postBuyModal').style.display='none'">
                 <span>PĂSTREAZĂ ÎN DULAP</span>
             </button>
         </div>
@@ -14005,7 +14073,7 @@ async function buyHeroAction() {
 }
 
 async function executePurchase() {
-    const heroId = pendingHeroId;
+    const heroId = pendingHeroId; // Luăm ID-ul salvat la click pe buy
     document.getElementById('buyConfirmModal').style.display = 'none';
     document.getElementById('loadingModal').style.display = 'flex';
 
@@ -14025,13 +14093,17 @@ async function executePurchase() {
             updateScoreUI();
             renderErou(); 
 
-            // --- NEW: INJECT HERO DATA INTO SUCCESS MODAL ---
+            // --- REPARAȚIA PENTRU IMAGINE ȘI NUME ---
             const heroData = eroiCatalog.find(h => h.id === heroId);
             if (heroData) {
-                document.getElementById('postBuyHeroImg').src = heroData.img;
-                document.getElementById('postBuyHeroName').innerText = heroData.name;
-                // Add rainbow effect if it's Lesbiconi
-                document.getElementById('postBuyHeroName').classList.toggle('rainbow-name', heroId === "lesbiconi");
+                const imgEl = document.getElementById('postBuyHeroImg');
+                const nameEl = document.getElementById('postBuyHeroName');
+                
+                imgEl.src = heroData.img; // Setează imaginea corectă (ex: Călin, Gigi, etc)
+                nameEl.innerText = heroData.name;
+                
+                // Efect curcubeu dacă e Lesbiconi
+                nameEl.classList.toggle('rainbow-name', heroId === "lesbiconi");
             }
 
             document.getElementById('loadingModal').style.display = 'none';
