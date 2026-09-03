@@ -8328,6 +8328,135 @@ div.inv-tile div.bm-limit-tag {
     font-size: 20px;
     color: #fff;
 }
+
+
+/* ==========================================
+   EROI MODAL - TACTICAL DESIGN
+   ========================================== */
+.eroi-main-box {
+    max-width: 420px !important;
+    background: #0a0b16 !important; /* Deep Dark */
+    border: 3px solid #facc15 !important; /* Gold Border */
+    border-radius: 0px !important; /* Sharp corners for tactical look */
+    padding: 30px 20px !important;
+    position: relative;
+}
+
+/* X Button - Simple Square */
+.eroi-close-x {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: #facc15;
+    color: #000;
+    border: none;
+    width: 30px; height: 30px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+/* Hero Name - Using the Clipped Style from your Milestones */
+.eroi-title-box {
+    display: inline-block;
+    padding: 8px 40px;
+    background: #facc15;
+    color: #000;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    clip-path: polygon(15% 0, 100% 0, 85% 100%, 0 100%);
+    margin: 0 auto 20px auto;
+    font-size: 24px;
+}
+
+.eroi-header { text-align: center; width: 100%; }
+
+/* Viewer Section */
+.eroi-viewer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.eroi-img-stage {
+    flex: 1;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.eroi-img-stage img {
+    max-height: 100%;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+}
+
+.eroi-nav-btn {
+    background: none;
+    border: 2px solid #5a6288;
+    color: #fff;
+    width: 45px; height: 45px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.eroi-nav-btn:hover { background: #facc15; color: #000; border-color: #facc15; }
+
+/* Divider */
+.eroi-divider {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 15px 0;
+    color: #5a6288;
+}
+.eroi-line { flex: 1; height: 2px; background: #5a6288; opacity: 0.3; }
+
+/* Details */
+.eroi-details { text-align: center; margin-bottom: 25px; }
+#eroiDesc {
+    font-family: 'Oswald';
+    font-size: 15px;
+    color: #94a3b8;
+    margin-bottom: 15px;
+}
+
+.eroi-stat-row {
+    background: rgba(255,255,255,0.03);
+    padding: 10px;
+    border-left: 4px solid #facc15;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Orbitron';
+    font-size: 12px;
+}
+.eroi-stat-label { color: #facc15; font-weight: 900; }
+.eroi-stat-val { color: #fff; }
+
+/* Footer */
+.eroi-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.eroi-price {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Orbitron';
+    font-weight: 900;
+    font-size: 22px;
+    color: #fff;
+}
+.eroi-price img { width: 22px; height: 22px; }
+
+.eroi-buy-btn {
+    width: 100% !important;
+    height: 60px !important;
+    font-size: 20px !important;
+}
   </style>
 </head>
 <body>
@@ -9113,68 +9242,60 @@ div.inv-tile div.bm-limit-tag {
 </div>
 
 
-<!-- MODAL: MAGAZIN EROI (PREMIUM SHOWCASE) -->
-<div id="heroShopModal" class="modal-overlay" style="z-index: 100020;">
-    <div class="modal-box replica-v3-box hero-showcase-box">
+<!-- MODAL: SELECTIE EROI (TACTICAL V2) -->
+<div id="heroModal" class="modal-overlay" style="z-index: 100020;">
+    <div class="modal-box eroi-main-box">
         
-        <!-- Buton Închidere -->
-        <button class="v3-close" onclick="closeHeroShop()">
+        <!-- Buton inchidere X simplu -->
+        <button class="eroi-close-x" onclick="closeHeroModal()">
             <i class="fa-solid fa-xmark"></i>
         </button>
 
-        <div class="v3-scroll-area">
-            <!-- Header: Numele Eroului -->
-            <div class="hero-showcase-header">
-                <span class="hero-rarity-tag" id="heroRarity">LEGENDAR</span>
-                <h2 id="heroDisplayName">???</h2>
+        <!-- NUME EROU (Top Middle) -->
+        <div class="eroi-header">
+            <h2 id="eroiName" class="eroi-title-box">???</h2>
+        </div>
+
+        <!-- VIEWER: Sageti + Imagine (Middle) -->
+        <div class="eroi-viewer">
+            <button class="eroi-nav-btn" onclick="navEroi(-1)">
+                <i class="fa-solid fa-angle-left"></i>
+            </button>
+
+            <div class="eroi-img-stage">
+                <img id="eroiImg" src="https://iili.io/CNURdSR.png" alt="Hero">
             </div>
 
-            <!-- Scena Centrală: Imagine + Săgeți -->
-            <div class="hero-view-stage">
-                <button class="nav-arrow-v2 left" onclick="navHeroShop(-1)">
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
-                
-                <div class="hero-spotlight">
-                    <img id="heroDisplayImg" src="https://iili.io/CNURdSR.png" class="hero-main-img">
-                    <div class="hero-platform"></div>
-                </div>
+            <button class="eroi-nav-btn" onclick="navEroi(1)">
+                <i class="fa-solid fa-angle-right"></i>
+            </button>
+        </div>
 
-                <button class="nav-arrow-v2 right" onclick="navHeroShop(1)">
-                    <i class="fa-solid fa-chevron-right"></i>
-                </button>
-            </div>
+        <!-- SEPARATOR TACTIC -->
+        <div class="eroi-divider">
+            <div class="eroi-line"></div>
+            <i class="fa-solid fa-shield-halved"></i>
+            <div class="eroi-line"></div>
+        </div>
 
-            <div class="v3-section-title">
-                <div class="v3-line"></div>
-                <span class="v3-diamonds">◆</span>
-                <span>DETALII EROU</span>
-                <span class="v3-diamonds">◆</span>
-                <div class="v3-line"></div>
-            </div>
-
-            <!-- Descriere și Abilitate -->
-            <div class="hero-info-container">
-                <p id="heroDisplayDesc" class="hero-description">Acest erou este încă învăluit în mister. Continuă să joci pentru a-i afla povestea!</p>
-                
-                <div class="hero-ability-box">
-                    <i class="fa-solid fa-bolt-lightning"></i>
-                    <div class="ability-text">
-                        <span class="ability-title">EFECT SPECIAL:</span>
-                        <span id="heroDisplayEffect" class="ability-desc">???</span>
-                    </div>
-                </div>
+        <!-- DESCRIERE & ABILITATE (Details) -->
+        <div class="eroi-details">
+            <p id="eroiDesc">Identitate necunoscută. Acest erou nu a fost încă recrutat în echipa ta.</p>
+            
+            <div class="eroi-stat-row">
+                <span class="eroi-stat-label">ABILITATE:</span>
+                <span id="eroiEffect" class="eroi-stat-val">???</span>
             </div>
         </div>
 
-        <!-- Footer: Preț și Buton Cumpărare -->
-        <div class="v3-footer showcase-footer">
-            <div class="hero-price-tag">
-                <img src="https://iili.io/CrnXNdG.png" class="price-ruby-icon">
-                <span id="heroDisplayPrice">999</span>
+        <!-- FOOTER: Pret + Buton Cumpara -->
+        <div class="eroi-footer">
+            <div class="eroi-price">
+                <img src="https://iili.io/CrnXNdG.png">
+                <span id="eroiPrice">0</span>
             </div>
-            <button id="heroBuyBtn" class="v3-main-btn" onclick="buyHero()">
-                CUMPĂRĂ EROU
+            <button class="menu-btn play eroi-buy-btn" onclick="buyHeroAction()">
+                RECURETEAZĂ EROUL
             </button>
         </div>
     </div>
@@ -9324,7 +9445,7 @@ div.inv-tile div.bm-limit-tag {
 
     <div class="shop-grid">
       <!-- EROI -->
-<button class="shop-card" onclick="openHeroShop()">
+<button class="shop-card" onclick="openHeroModal()">
     <i class="fa-solid fa-mask shop-icon"></i>
     <div class="shop-info">
         <h3>EROI</h3>
@@ -16409,97 +16530,79 @@ function startSeagullEvent() {
 
 
 
-// 1. REGISTRUL DE EROI DIN MAGAZIN (Placeholders)
-const heroShopList = [
+const eroiCatalog = [
     {
-        id: "hero_mystic",
         name: "???",
-        rarity: "LEGENDAR",
-        desc: "O figură misterioasă care apare doar în nopțile cu lună plină. Se spune că poate încetini timpul doar cu o privire.",
-        effect: "ÎNGHEȚ TEMPORAL +2 SECUNDE",
-        price: 25,
-        img: "https://iili.io/CNURdSR.png", // Silhouette/Placeholder
-        color: "#b533ff"
-    },
-    {
-        id: "hero_gold",
-        name: "???",
-        rarity: "MITIC",
-        desc: "Un războinic ce poartă o armură din aur pur. Unde calcă el, scorul crește de la sine.",
-        effect: "MULTI-CLICK X1.2 PERMANENT",
+        desc: "Un luptător de elită care refuză să își dezvăluie chipul până nu este plătit.",
+        effect: "NECUNOSCUT",
         price: 50,
-        img: "https://iili.io/CNURvUv.png",
-        color: "#facc15"
+        img: "https://iili.io/CNURdSR.png"
     },
     {
-        id: "hero_shadow",
         name: "???",
-        rarity: "EPIC",
-        desc: "Un maestru al umbrelor. Nimeni nu l-a văzut, dar toată lumea i-a simțit prezența în combo-uri.",
-        effect: "COMBO DUREAZĂ CU 1s MAI MULT",
-        price: 15,
-        img: "https://iili.io/CNURciu.png",
-        color: "#94a3b8"
+        desc: "O umbră care a fost văzută doar în cele mai mari combo-uri ale istoriei.",
+        effect: "COMBINAȚIE SECRETĂ",
+        price: 100,
+        img: "https://iili.io/CNURciu.png"
+    },
+    {
+        name: "???",
+        desc: "Un veteran al străzii care știe toate scurtăturile către scorul maxim.",
+        effect: "MULTIPLICARE X2",
+        price: 250,
+        img: "https://iili.io/CNURvUv.png"
     }
 ];
 
-let currentHeroIdx = 0;
+let eroiIndex = 0;
 
-// 2. FUNCȚIILE DE CONTROL
-function openHeroShop() {
+function openHeroModal() {
     isPaused = true;
     clearInterval(moveKevinInterval);
     document.getElementById('shopModal').style.display = 'none';
-    document.getElementById('heroShopModal').style.display = 'flex';
-    currentHeroIdx = 0;
-    renderHeroInShop();
+    document.getElementById('heroModal').style.display = 'flex';
+    renderErou();
 }
 
-function closeHeroShop() {
-    document.getElementById('heroShopModal').style.display = 'none';
+function closeHeroModal() {
+    document.getElementById('heroModal').style.display = 'none';
     document.getElementById('shopModal').style.display = 'flex';
 }
 
-function navHeroShop(dir) {
-    currentHeroIdx += dir;
-    if (currentHeroIdx < 0) currentHeroIdx = heroShopList.length - 1;
-    if (currentHeroIdx >= heroShopList.length) currentHeroIdx = 0;
+function navEroi(dir) {
+    eroiIndex += dir;
+    if (eroiIndex < 0) eroiIndex = eroiCatalog.length - 1;
+    if (eroiIndex >= eroiCatalog.length) eroiIndex = 0;
     
-    // Sunet de navigare
     if (typeof playSFX === 'function') playSFX(slotWooshUrl);
-    renderHeroInShop();
+    renderErou();
 }
 
-function renderHeroInShop() {
-    const hero = heroShopList[currentHeroIdx];
-    
-    document.getElementById('heroDisplayName').innerText = hero.name;
-    document.getElementById('heroRarity').innerText = hero.rarity;
-    document.getElementById('heroDisplayDesc').innerText = hero.desc;
-    document.getElementById('heroDisplayEffect').innerText = hero.effect;
-    document.getElementById('heroDisplayPrice').innerText = hero.price;
-    document.getElementById('heroDisplayImg').src = hero.img;
-    
-    // Schimbăm culorile temei în funcție de raritate
-    const rarityTag = document.getElementById('heroRarity');
-    rarityTag.style.color = hero.color;
-    rarityTag.style.borderColor = hero.color;
-    document.getElementById('heroDisplayEffect').style.color = hero.color;
+function renderErou() {
+    const hero = eroiCatalog[eroiIndex];
+    document.getElementById('eroiName').innerText = hero.name;
+    document.getElementById('eroiImg').src = hero.img;
+    document.getElementById('eroiDesc').innerText = hero.desc;
+    document.getElementById('eroiEffect').innerText = hero.effect;
+    document.getElementById('eroiPrice').innerText = hero.price;
 }
 
-function buyHero() {
-    const hero = heroShopList[currentHeroIdx];
+function buyHeroAction() {
+    const hero = eroiCatalog[eroiIndex];
     if (rubies < hero.price) {
         if (typeof playMissSFX === 'function') playMissSFX();
-        showKevinutaBubble("Nu ai destule rubine pentru acest erou! ♦️");
+        showKevinutaBubble("Nu ai destule rubine!");
         return;
     }
-    
-    // Momentan doar un mesaj, deoarece personajele sunt "???"
-    showNotification("MAGAZIN", "Acest erou va fi disponibil în curând!", "fa-lock");
+    showNotification("BLOCAT", "Acest personaj va fi disponibil în versiunea următoare!", "fa-lock");
 }
 
-
+// Add these to your window exports at the bottom!
+window.openHeroModal = openHeroModal;
+window.closeHeroModal = closeHeroModal;
+window.navEroi = navEroi;
+window.buyHeroAction = buyHeroAction;
+ 
 
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
@@ -16596,10 +16699,7 @@ window.setTradeQty = setTradeQty;
 window.openTeleporterModal = openTeleporterModal;
 window.closeTeleporterModal = closeTeleporterModal;
 window.travelToStage = travelToStage;
-window.openHeroShop = openHeroShop;
-window.closeHeroShop = closeHeroShop;
-window.navHeroShop = navHeroShop;
-window.buyHero = buyHero;
+
 
 })(); // <-- CLOSES THE SECURE VAULT
 
