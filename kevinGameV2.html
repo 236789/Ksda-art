@@ -8457,6 +8457,49 @@ div.inv-tile div.bm-limit-tag {
     height: 60px !important;
     font-size: 20px !important;
 }
+
+
+/* ==========================================
+   EROI BACKGROUND UPDATE
+   ========================================== */
+.eroi-main-box {
+    max-width: 420px !important;
+    /* Changed from flat black to a deep navy radial gradient */
+    background: radial-gradient(circle at center, #1b1c3a 0%, #0a0b16 100%) !important;
+    border: 3px solid #facc15 !important;
+    border-radius: 12px !important; /* Slightly rounded for a more premium feel */
+    padding: 30px 20px !important;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(250, 204, 21, 0.1) !important;
+}
+
+.eroi-img-stage {
+    flex: 1;
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    /* Adds a subtle "Spotlight" glow behind the hero */
+    background: radial-gradient(circle, rgba(250, 204, 21, 0.1) 0%, transparent 70%);
+}
+
+.eroi-img-stage img {
+    max-height: 100%;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.7));
+    z-index: 2;
+}
+
+/* Adds a tactical grid pattern overlay (optional, but looks very cool) */
+.eroi-main-box::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    opacity: 0.3;
+}
   </style>
 </head>
 <body>
@@ -9278,15 +9321,20 @@ div.inv-tile div.bm-limit-tag {
             <div class="eroi-line"></div>
         </div>
 
-        <!-- DESCRIERE & ABILITATE (Details) -->
-        <div class="eroi-details">
-            <p id="eroiDesc">Identitate necunoscută. Acest erou nu a fost încă recrutat în echipa ta.</p>
-            
-            <div class="eroi-stat-row">
-                <span class="eroi-stat-label">ABILITATE:</span>
-                <span id="eroiEffect" class="eroi-stat-val">???</span>
-            </div>
-        </div>
+<!-- DESCRIERE & ABILITATE (Details) -->
+<div class="eroi-details">
+    <div class="eroi-stat-row">
+        <span class="eroi-stat-label">DESCRIERE:</span>
+        <span id="eroiDesc" class="eroi-stat-val">
+            Identitate necunoscută. Acest erou nu a fost încă recrutat în echipa ta.
+        </span>
+    </div>
+
+    <div class="eroi-stat-row">
+        <span class="eroi-stat-label">ABILITATE:</span>
+        <span id="eroiEffect" class="eroi-stat-val">???</span>
+    </div>
+</div>
 
         <!-- FOOTER: Pret + Buton Cumpara -->
         <div class="eroi-footer">
@@ -9295,7 +9343,7 @@ div.inv-tile div.bm-limit-tag {
                 <span id="eroiPrice">0</span>
             </div>
             <button class="menu-btn play eroi-buy-btn" onclick="buyHeroAction()">
-                RECURETEAZĂ EROUL
+                CUMPARA EROUL
             </button>
         </div>
     </div>
