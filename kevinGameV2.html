@@ -298,13 +298,28 @@ body, html {
 
     .score-icon { height: 35px; }
     
+/* Dimensiunea de bază pentru telefoane/tablete (Neschimbată) */
 #kevin {
-      position: absolute; width: 120px; height: 120px; background-size: contain;
-      background-repeat: no-repeat; background-position: center; cursor: pointer; z-index: 999;
-      transition: left 0.3s ease-out, top 0.3s ease-out;
-      -webkit-tap-highlight-color: transparent; /* Removes the blue flash on mobile */
-      outline: none;
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    z-index: 999;
+    transition: left 0.3s ease-out, top 0.3s ease-out;
+    -webkit-tap-highlight-color: transparent; /* Elimină sclipirea albastră pe mobil */
+    outline: none;
+}
+
+/* Dimensiune mărită special pentru calculatoare (PC / Laptop) */
+@media screen and (min-width: 850px) {
+    #kevin {
+        width: 190px !important;  /* Dimensiune mărită pe PC */
+        height: 190px !important;
     }
+}
 /* ==========================================
    ARCADE COMBO STYLING (REVAMPED)
 /* ==========================================
@@ -11199,8 +11214,7 @@ function startGameUI() {
       kevin.style.backgroundImage = currentPlayImg;
   }
   
-  kevin.style.width = "120px";
-  kevin.style.height = "120px";
+
   
   isKevinTired = false;
   moveKevinAway(); 
