@@ -9110,17 +9110,6 @@ div.inv-tile div.bm-limit-tag {
     display: inline-block;
     filter: drop-shadow(1px 1px 0px rgba(0,0,0,0.3)); /* Umbră mai fină ca să nu se taie ciudat */
 }
-
-/* Centrare universală pentru toate butoanele de tip ÎNAPOI/ÎNCHIDE */
-.close-shop-btn {
-    width: 200px !important;
-    height: 50px !important;
-    margin: 20px auto 0 !important;
-    display: flex !important;
-    justify-content: center;
-    align-items: center;
-    font-size: 18px !important;
-}
   </style>
 </head>
 <body>
@@ -16604,7 +16593,7 @@ const LEVEL_UNLOCKS = {
     2: ["slotMachine", "rubyDrop"],
     3: ["blackMarket", "boosts", "memoryCards", "teleporter"], // <--- Adăugat teleporter la 3
     4: ["trading", "easyQuests", "magazin"], // <--- Adăugat "magazin" la Nivelul 4
-    5: ["beachStage", "heroes", "hardQuests"] // Adăugat aici
+    5: ["beachStage", "heroes"] 
 
 };
 
@@ -16691,11 +16680,6 @@ const UNLOCK_METADATA = {
         name: "Magazin Eroi",
         desc: "Recrutează personaje noi cu abilități speciale folosind Rubine.",
         icon: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Design%20f%C4%83r%C4%83%20titlu.png"
-    },
-    "hardQuests": {
-        name: "Misiuni Grele",
-        desc: "Provocări de elită pentru jucători experimentați. Recompense în Rubine!",
-        icon: "https://i.ibb.co/Vpr5D1Jt/hard-quests.png"
     },
  
 };
@@ -17049,32 +17033,36 @@ function openQuestsTab() {
     document.getElementById('questsMenuModal').style.display = 'none';
     document.getElementById('misiuniSelectionModal').style.display = 'flex';
     
-    // Logic for Hard Quests (LVL 5)
-    const hardCard = document.getElementById('btnHardQuests');
-    const hardBadge = document.getElementById('badgeHardQuests');
+    // Selectăm prima carte (Misiuni Ușoare) din grila de selecție
+    const easyCard = document.querySelector('#misiuniSelectionModal .shop-card:nth-child(1)');
+    
+    if (playerLevel < 4) {
+        // Stil blocat (Gri + Lacăt)
+        easyCard.classList.add('locked-card');
+        
+        easyCard.onclick = (e) => {
+            e.stopPropagation();
+            playMissSFX();
+            showNotification("ZONĂ BLOCATĂ", "Ai nevoie de Nivelul 4 pentru Misiuni Ușoare!", "fa-lock");
+        };
 
-    if (playerLevel < 5) {
-        // LOCK STATE
-        hardCard.classList.add('locked-card');
-        if (hardBadge) hardBadge.style.display = 'block';
-        
-        // Override the click to show a notification
-        hardCard.onclick = (e) => {
-            e.stopPropagation();
-            if (typeof playMissSFX === 'function') playMissSFX();
-            showNotification("ZONĂ BLOCATĂ", "Ai nevoie de Nivelul 5 pentru Misiuni Grele!", "fa-lock");
-        };
+        // Adăugăm badge-ul gri LVL 4 REQ dacă nu există deja
+        if (!easyCard.querySelector('.gray-lock-badge')) {
+            const badge = document.createElement('div');
+            badge.className = 'gray-lock-badge';
+            badge.innerText = "LVL 4.";
+            easyCard.appendChild(badge);
+        }
     } else {
-        // UNLOCK STATE
-        hardCard.classList.remove('locked-card');
-        if (hardBadge) hardBadge.style.display = 'none';
-        
-        // Set normal click function
-        hardCard.onclick = (e) => {
-            e.stopPropagation();
-            openHardQuests();
-        };
+        // Deblocat
+        easyCard.classList.remove('locked-card');
+        easyCard.onclick = (e) => { e.stopPropagation(); openEasyQuests(); };
+        const badge = easyCard.querySelector('.gray-lock-badge');
+        if (badge) badge.remove();
     }
+    
+    pendingWinAmount = 0;
+    pendingRubyWin = 0;
 }
 
 function openEasyQuests() {
@@ -17084,14 +17072,9 @@ function openEasyQuests() {
 }
 
 function openHardQuests() {
-    if (playerLevel < 5) {
-        if (typeof playMissSFX === 'function') playMissSFX();
-        showNotification("ACCES RESTRICȚIONAT", "Misiunile Grele se deblochează la Nivelul 5!", "fa-lock");
-        return;
-    }
     document.getElementById('misiuniSelectionModal').style.display = 'none';
     document.getElementById('hardQuestsModal').style.display = 'flex';
-    renderQuestList('hard');
+    renderQuestList('hard'); // NOU: Desenează misiunile
 }
 // MODIFICĂ ACEASTĂ FUNCȚIE
 function showSlotResult(title, message, isJackpot = false) {
