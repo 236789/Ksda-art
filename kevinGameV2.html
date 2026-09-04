@@ -12167,6 +12167,10 @@ function updateBubblesSetting(val) {
 
 // 🧠 INTERVALUL DE TRASH TALK (Sistem tip Playlist / Shuffle Deck)
 setInterval(() => {
+  // 🛑 FIX: Verificăm dacă jucătorul este efectiv în joc (nu în meniul principal)
+  const gameArea = document.getElementById('gameArea');
+  if (!gameArea || gameArea.style.display !== 'block') return; 
+
   if (window.isGamePaused) return;
   if (isPaused || !showBubbles) return;
 
