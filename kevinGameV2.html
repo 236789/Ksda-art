@@ -9262,38 +9262,42 @@ div.inv-tile div.bm-limit-tag {
   </div>
 
 
-<!-- OVERLAY: CHARACTER SELECTION V2 (Cinematic) -->
+<!-- OVERLAY: CHARACTER SELECTION (Premium Tactical Style) -->
 <div id="charSelectorModal" class="modal-overlay">
-  <div class="modal-box char-selection-v2">
+  <div class="modal-box eroi-main-box">
     
-    <!-- Title at the top -->
-    <div class="selection-header">
-      <h2>ALEGE-ȚI EROUL</h2>
-      <div class="selection-line"></div>
+    <div class="eroi-header">
+        <h2 id="charHeroName" class="eroi-title-box">???</h2>
     </div>
 
-    <!-- Main Character Area (No Box) -->
-    <div class="char-viewport">
-      <button class="nav-arrow-v2 left" onclick="changeChar(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-      
-      <div class="char-stage">
-        <!-- The character image (Floating freely) -->
-        <div id="charHeroImg"></div>
-        <!-- Subtle shadow on the "ground" -->
-        <div class="char-shadow"></div>
-      </div>
-
-      <button class="nav-arrow-v2 right" onclick="changeChar(1)"><i class="fa-solid fa-chevron-right"></i></button>
+    <!-- THE MASSIVE VIEWER -->
+    <div class="eroi-viewer-massive">
+        <button class="eroi-nav-btn" onclick="changeChar(-1)"><i class="fa-solid fa-angle-left"></i></button>
+        <div class="eroi-img-stage">
+            <img id="charHeroImg" src="" alt="Erou">
+        </div>
+        <button class="eroi-nav-btn" onclick="changeChar(1)"><i class="fa-solid fa-angle-right"></i></button>
     </div>
 
-    <!-- Description Area -->
-    <div class="char-details">
-      <h3 id="charHeroName">KEVINUȚĂ</h3>
-      <p id="charHeroDesc">Un puști plin de energie care nu poate sta locului. Viteza este aliatul lui principal!</p>
+    <!-- TACTICAL DIVIDER WITHOUT PRICE -->
+    <div class="eroi-divider-simple">
+        <div class="eroi-line"></div>
     </div>
 
-    <button class="menu-btn play select-hero-btn" onclick="confirmCharacter()">
-      <span>SELECTEAZĂ</span>
+    <!-- DETAILS AREA -->
+    <div class="eroi-details-scroll-zone">
+        <div class="eroi-data-pad">
+            <div class="pad-label">INFORMAȚII EROU</div>
+            <div id="charHeroDesc" class="pad-content">...</div>
+        </div>
+        <div class="eroi-data-pad highlight">
+            <div class="pad-label">ABILITATE SPECIALĂ</div>
+            <div id="charHeroEffect" class="pad-content">???</div>
+        </div>
+    </div>
+
+    <button class="menu-btn play eroi-buy-btn select-hero-btn" onclick="confirmCharacter()">
+        <span>SELECTEAZĂ</span>
     </button>
   </div>
 </div>
@@ -11802,15 +11806,30 @@ function changeChar(dir) {
 
     const char = owned[charIndex];
     const heroImgEl = document.getElementById('charHeroImg');
-    
-    // Updates UI
-    heroImgEl.style.backgroundImage = `url('${char.displayImg}')`;
-    document.getElementById('charHeroName').innerText = char.name;
-    document.getElementById('charHeroDesc').innerText = char.desc;
-    
-    // The button is always "SELECTEAZĂ" now because locked ones are hidden
-    const btnSpan = document.querySelector('.select-hero-btn span');
-    btnSpan.innerText = "SELECTEAZĂ";
+
+    // Updates image source
+    if (heroImgEl) {
+        heroImgEl.src = char.displayImg || char.playImg;
+    }
+
+    // Pull ability details from eroiCatalog if available
+    const catalogHero = eroiCatalog.find(h => h.id === char.id);
+    const effectText = catalogHero ? catalogHero.effect : "NICI UNA";
+
+    const nameEl = document.getElementById('charHeroName');
+    if (nameEl) {
+        if (char.id === "lesbiconi") {
+            nameEl.innerHTML = `<span class="rainbow-name">${char.name}</span>`;
+        } else {
+            nameEl.innerHTML = `<span>${char.name}</span>`;
+        }
+    }
+
+    const descEl = document.getElementById('charHeroDesc');
+    if (descEl) descEl.innerText = char.desc;
+
+    const effectEl = document.getElementById('charHeroEffect');
+    if (effectEl) effectEl.innerText = effectText;
 }
 
 async function confirmCharacter() {
