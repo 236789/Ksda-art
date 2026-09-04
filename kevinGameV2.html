@@ -11881,17 +11881,47 @@ const characterDialogues = {
     "LOL, my cat has better reflexes.",
     "I'm bored... can you move faster?"
   ],
-  emmanuel: [
-    "Bună ziua! Cu ce vă pot ajuta?",
-    "Un portret costă 150 RON. Cash sau Revolut? 🎨",
-    "Vă rog frumos, nu atingeți exponatele.",
-    "O zi plină de inspirație să aveți! ✨",
-    "Arta cere sacrificii, domnule.",
-    "Sunt un artist serios, vă rog să rețineți.",
-    "P*** mea, ce cald e azi...",
-    "Băgămi-aș **** în ea de treabă!",
-    "F***-i gura mă-sii de viață...",
-    "Mă p*** pe el de stres!"
+emmanuel: [
+    { 
+      text: "Bună ziua! Cu ce vă pot ajuta?", 
+      audio: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/emmanuel/buna%20ziua%20cu%20ce%20va%20pot%20ajuta.ogg" 
+    },
+    { 
+      text: "Un portret costă 150 RON. Cash sau Revolut? 🎨", 
+      audio: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/emmanuel/Un%20portret%20cost%C4%83%20150%20RON.%20Cash%20sau%20Revolut.ogg" 
+    },
+    { 
+      text: "Vă rog frumos, nu atingeți exponatele.", 
+      audio: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/emmanuel/V%C4%83%20rog%20frumos%2C%20nu%20atinge%C8%9Bi%20exponatele.ogg" 
+    },
+    { 
+      text: "O zi plină de inspirație să aveți! ✨", 
+      audio: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/emmanuel/O%20zi%20plin%C4%83%20de%20inspira%C8%9Bie%20s%C4%83%20ave%C8%9B.ogg" 
+    },
+    { 
+      text: "Arta cere sacrificii, domnule.", 
+      audio: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/emmanuel/Arta%20cere%20sacrificii%2C%20domnule.ogg" 
+    },
+    { 
+      text: "Sunt un artist serios, vă rog să rețineți.", 
+      audio: null // Lipseste fisierul audio din folder, va afisa doar textul
+    },
+    { 
+      text: "P*** mea, ce cald e azi...", 
+      audio: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/emmanuel/Pula%20mea%20ce%20cald%20e%20azi.ogg" 
+    },
+    { 
+      text: "Băgămi-aș **** în ea de treabă!", 
+      audio: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/emmanuel/bagamias%20pula%20in%20ea%20de%20treaba.ogg" 
+    },
+    { 
+      text: "F***-i gura mă-sii de viață...", 
+      audio: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/emmanuel/futui%20gura%20masi%20de%20treaba.ogg" 
+    },
+    { 
+      text: "Mă p*** pe el de stres!", 
+      audio: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/emmanuel/ma%20pis%20pe%20al%20de%20stress.ogg" 
+    }
   ],
   
   // GEORGE (Călin Georgescu) - Hipnotic, spiritual, daci liberi, arogant energetic
@@ -12049,29 +12079,62 @@ function updateIndicatorsSetting(val) {
     }
 }
 
+// Variabilă globală pentru a opri o voce dacă începe alta (să nu se suprapună)
+let currentVoiceLineAudio = null;
+
 function updateBubblesSetting(val) {
     showBubbles = val;
     console.log("Dialoguri eroi:", showBubbles ? "PORNITE" : "OPRITE");
+    
+    // Dacă jucătorul oprește bulele din setări în timp ce personajul vorbește, oprim sunetul instant
+    if (!showBubbles && currentVoiceLineAudio) {
+        currentVoiceLineAudio.pause();
+        currentVoiceLineAudio.currentTime = 0;
+    }
 }
 
-// 🧠 INTERVALUL DE TRASH TALK (Actualizat pentru V2)
+// 🧠 INTERVALUL DE TRASH TALK (Actualizat pentru V3 - Sistem Voicelines Audio)
 setInterval(() => {
   if (window.isGamePaused) return;
   if (isPaused || !showBubbles) return;
 
-
   // 1. Identificăm ID-ul caracterului curent (setat la confirmare sau încărcare)
-  // Folosim o variabilă globală window.currentPlayingCharId pe care o setăm mai jos
   const charId = window.currentPlayingCharId || "kevin";
   
   // 2. Alegem lista potrivită (sau kevin ca fallback)
   const lines = characterDialogues[charId] || characterDialogues.kevin;
   
   // 3. Alegem o replică random
-  const msg = lines[Math.floor(Math.random() * lines.length)];
+  const randomLine = lines[Math.floor(Math.random() * lines.length)];
   
-  // 4. Afișăm bula
-  showKevinutaBubble(msg);
+  let msgText = "";
+  let audioUrl = null;
+
+  // 4. Verificăm dacă personajul are noul sistem (Obiect cu text+audio) sau e pe sistemul vechi (doar text)
+  if (typeof randomLine === 'object') {
+      msgText = randomLine.text;
+      audioUrl = randomLine.audio;
+  } else {
+      msgText = randomLine; // Sistemul vechi (ex: Kevin, Gigi)
+  }
+  
+  // 5. Afișăm bula pe ecran cu textul
+  showKevinutaBubble(msgText);
+
+  // 6. Redăm fișierul audio (dacă există și dacă jocul nu are sunetul oprit)
+  if (audioUrl && !isMuted) {
+      // Oprim vocea precedentă dacă cumva încă vorbește
+      if (currentVoiceLineAudio) {
+          currentVoiceLineAudio.pause();
+          currentVoiceLineAudio.currentTime = 0;
+      }
+      
+      // Creăm și redăm noul audio, respectând volumul SFX din setări
+      currentVoiceLineAudio = new Audio(audioUrl);
+      currentVoiceLineAudio.volume = sfxVolume; 
+      currentVoiceLineAudio.play().catch(e => console.warn("Eroare la redarea vocii:", e));
+  }
+
 }, 12000); // Apare o replică la fiecare 12 secunde
 
 // --- FUNCȚIA CARE CREEAZĂ BULA DE TEXT ---
@@ -12099,7 +12162,7 @@ function showKevinutaBubble(text) {
   updatePosition();
   const positionInterval = setInterval(updatePosition, 50);
 
-  // Animăm dispariția bulei după 3 secunde
+  // Animăm dispariția bulei după 3 secunde (La fel ca textul, sunetul va continua să cânte dacă e mai lung de 3 sec, ceea ce e normal)
   setTimeout(() => {
     bubble.style.opacity = "0";
     bubble.style.transform = "translate(-50%, -120%) scale(0.8)";
@@ -12109,7 +12172,6 @@ function showKevinutaBubble(text) {
     }, 500);
   }, 3000);
 }
-
 
 // 1. Toggle Menu Open/Close
 function toggleMenu() {
