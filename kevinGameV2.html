@@ -9339,6 +9339,9 @@ div.inv-tile div.bm-limit-tag {
             <div class="pad-label">INFORMAȚII EROU</div>
             <div id="charHeroDesc" class="pad-content">...</div>
         </div>
+
+        <div id="charSelectorVocabContainer" style="width: 100%;"></div>
+
         <div class="eroi-data-pad highlight">
             <div class="pad-label">ABILITATE SPECIALĂ</div>
             <div id="charHeroEffect" class="pad-content">???</div>
@@ -9981,6 +9984,9 @@ div.inv-tile div.bm-limit-tag {
             <div class="pad-label">INFORMAȚII EROU</div>
             <div id="eroiDesc" class="pad-content">...</div>
         </div>
+
+        <div id="heroShopVocabContainer" style="width: 100%;"></div>
+
         <div class="eroi-data-pad highlight">
             <div class="pad-label">ABILITATE SPECIALĂ</div>
             <div id="eroiEffect" class="pad-content">???</div>
@@ -10583,6 +10589,7 @@ let isGracePeriodActive = false;
 let backendUnlockedFeatures = []; // This is the ONLY list the game will trust
 let activeXPMultiplier = 1; // Default este 1 (normal)
 let activeClickXPMultiplier = 1; // <--- ACEASTA LIPSEA!
+let ownedHeros = []; // Add this declaration here
 
 // --- PROGRESSION SYSTEM ---
     let playerLevel = 1;
@@ -11879,6 +11886,12 @@ function changeChar(dir) {
 
     const effectEl = document.getElementById('charHeroEffect');
     if (effectEl) effectEl.innerText = effectText;
+
+    // 🆕 Inserare bară de vocabular pentru Selectorul de Caractere
+    const vocabContainer = document.getElementById('charSelectorVocabContainer');
+    if (vocabContainer) {
+        vocabContainer.innerHTML = generateVocabularyBar(char.id);
+    }
 }
 
 async function confirmCharacter() {
@@ -17923,7 +17936,7 @@ function renderErou() {
     const buyBtn = document.querySelector('.eroi-buy-btn');
     const priceArea = document.querySelector('.eroi-divider-simple');
     
-// Punem numele într-un SPAN ca să nu stricăm cutia galbenă
+    // Punem numele într-un SPAN ca să nu stricăm cutia galbenă
     if (hero.id === "lesbiconi") {
         nameEl.innerHTML = `<span class="rainbow-name">${hero.name}</span>`;
     } else {
@@ -17934,6 +17947,12 @@ function renderErou() {
     document.getElementById('eroiDesc').innerText = hero.desc;
     document.getElementById('eroiEffect').innerText = hero.effect;
     document.getElementById('eroiPrice').innerText = hero.price;
+
+    // 🆕 Inserare bară de vocabular pentru Magazinul de Eroi
+    const shopVocabContainer = document.getElementById('heroShopVocabContainer');
+    if (shopVocabContainer) {
+        shopVocabContainer.innerHTML = generateVocabularyBar(hero.id);
+    }
 
     // Check if player owns this hero
     if (ownedHeros.includes(hero.id)) {
@@ -18032,6 +18051,65 @@ function equipHero(hero) {
     
     // Save selection to Cloud
     syncScoreToFirestore(); 
+}
+
+
+// ==========================================
+// 🆕 HERO VOCABULARY REGISTRY & RENDER ENGINE
+// ==========================================
+const HERO_VOCABULARY_DATA = {
+    kevin: { level: 3, desc: "Kevin folosește replici clasice de puști ambițios. Uneori tăios, dar se menține în limite sigure." },
+    emmanuel: { level: 4, desc: "Emmanuel vorbește foarte politicos la prima vedere, dar sub presiune se dezlănțuie complet." },
+    antonio: { level: 2, desc: "Antonio se exprimă mai mult în engleză cu argouri de internet. Este destul de prietenos și politicos." },
+    george: { level: 1, desc: "Călin folosește un limbaj extrem de elevat și protocolar. O politețe totală, pură." },
+    ciocanul: { level: 3, desc: "Ciordacu adoptă un vocabular tipic politic, dar are adesea lapsusuri memorabile și autoironice." },
+    gigi: { level: 5, desc: "Gigi nu se cenzurează! Trece instantaneu de la predici și pilde la amenințări zgomotoase!" },
+    dulapul: { level: 1, desc: "Dulapul se exprimă extrem de rar, vorbind solemn și cu foarte mare... atenție." },
+    muci: { level: 2, desc: "Mucușor vorbește strict matematic și calculat. Limbajul său este curat, chiar dacă uneori tăios." },
+    puta: { level: 4, desc: "Pută folosește replici reci, kgb-iste, cu amenințări subtile și replici destul de aspre." },
+    lesbiconi: { level: 3, desc: "Lesbiconi îmbină stilul dramatic de televiziune cu accente locale, fiind directă, dar controlată." },
+    piatra: { level: 2, desc: "Piatra comunică strict administrativ, sec și organizat, fără derapaje vulgare." },
+    turu2: { level: 4, desc: "Simion are un vocabular adaptat transmisiunilor live din stradă, adesea zgomotos și plin de scandal." },
+    vladim: { level: 5, desc: "Vladim este definiția furiei verbale! O avalanșă spectaculoasă de insulte unice în istorie." }
+};
+
+function generateVocabularyBar(charId) {
+    const data = HERO_VOCABULARY_DATA[charId];
+    if (!data) return '';
+
+    const level = data.level;
+    let segmentsHtml = '';
+    
+    // Create 5 segment blocks
+    for (let i = 1; i <= 5; i++) {
+        let activeClass = '';
+        if (i <= level) {
+            activeClass = `active-${level}`; // applies the color level to all active blocks
+        }
+        segmentsHtml += `<div class="vocab-segment ${activeClass}"></div>`;
+    }
+
+    return `
+        <div class="vocab-bar-container" onclick="event.stopPropagation();">
+            <span class="vocab-label">VOCABULAR: ${level}/5</span>
+            <div class="vocab-segments">
+                ${segmentsHtml}
+            </div>
+            <button class="vocab-help-btn" onclick="event.stopPropagation(); showVocabInfo('${charId}')">?</button>
+        </div>
+    `;
+}
+
+function showVocabInfo(charId) {
+    const data = HERO_VOCABULARY_DATA[charId];
+    if (!data) return;
+
+    // Retrieve name for custom title mapping
+    const char = characterList.find(c => c.id === charId) || eroiCatalog.find(h => h.id === charId);
+    const charName = char ? char.name : "Erou";
+
+    // Call your existing custom toaster notification
+    showNotification(`${charName} - VOCABULAR`, data.desc, "fa-circle-info");
 }
 
 // ==========================================
@@ -18140,6 +18218,7 @@ window.setTradeQty = setTradeQty;
 window.openTeleporterModal = openTeleporterModal;
 window.closeTeleporterModal = closeTeleporterModal;
 window.travelToStage = travelToStage;
+window.showVocabInfo = showVocabInfo;
 
 
 })(); // <-- CLOSES THE SECURE VAULT
