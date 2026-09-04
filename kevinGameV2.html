@@ -12142,17 +12142,17 @@ function updateIndicatorsSetting(val) {
     }
 }
 
-// Variabilă globală pentru a opri o voce dacă începe alta (să nu se suprapună)
+// Variabilă globală pentru a opri o voce dacă începe alta
 let currentVoiceLineAudio = null;
-
-// Variabilă pentru a memora ultima replică spusă (prevenim repetiția)
 let lastPlayedLineText = "";
+
+// NOU: Păstrăm un "pachet de cărți" cu replicile rămase
+let availableVoiceLines = [];
+let lastCharIdForLines = "";
 
 function updateBubblesSetting(val) {
     showBubbles = val;
     console.log("Dialoguri eroi:", showBubbles ? "PORNITE" : "OPRITE");
-    
-    // Dacă jucătorul oprește bulele din setări în timp ce personajul vorbește, oprim sunetul și ștergem bula instantaneu
     if (!showBubbles) {
         if (currentVoiceLineAudio) {
             currentVoiceLineAudio.pause();
@@ -12165,38 +12165,48 @@ function updateBubblesSetting(val) {
     }
 }
 
-// 🧠 INTERVALUL DE TRASH TALK (Actualizat: Anti-repetiție + Audio)
+// 🧠 INTERVALUL DE TRASH TALK (Sistem tip Playlist / Shuffle Deck)
 setInterval(() => {
   if (window.isGamePaused) return;
   if (isPaused || !showBubbles) return;
 
-  // 1. Identificăm ID-ul caracterului curent
   const charId = window.currentPlayingCharId || "kevin";
-  
-  // 2. Alegem lista potrivită (sau kevin ca fallback)
   const lines = characterDialogues[charId] || characterDialogues.kevin;
-  
-  let randomLine;
-  let msgText = "";
-  let audioUrl = null;
 
-  // 3. 🔄 Buclă care extrage o replică și verifică să NU fie la fel ca ultima!
-  do {
-      randomLine = lines[Math.floor(Math.random() * lines.length)];
-      msgText = typeof randomLine === 'object' ? randomLine.text : randomLine;
-  } while (msgText === lastPlayedLineText && lines.length > 1);
+  // Dacă personajul s-a schimbat SAU am terminat toate replicile din pachet, creăm un pachet nou și îl amestecăm
+  if (charId !== lastCharIdForLines || availableVoiceLines.length === 0) {
+      lastCharIdForLines = charId;
+      availableVoiceLines = [...lines]; // Copiem toate replicile
+      
+      // Amestecăm pachetul (Fisher-Yates Shuffle)
+      for (let i = availableVoiceLines.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [availableVoiceLines[i], availableVoiceLines[j]] = [availableVoiceLines[j], availableVoiceLines[i]];
+      }
 
-  // Salvăm replica extrasă ca fiind "ultima spusă"
-  lastPlayedLineText = msgText;
-
-  // 4. Extragem audio-ul dacă există
-  if (typeof randomLine === 'object') {
-      audioUrl = randomLine.audio;
+      // Ca să fim siguri 100%, dacă prima replică din pachetul nou amestecat e fix ultima pe care o zisese, o mutăm la final
+      if (availableVoiceLines.length > 1) {
+          let firstText = typeof availableVoiceLines[0] === 'object' ? availableVoiceLines[0].text : availableVoiceLines[0];
+          if (firstText === lastPlayedLineText) {
+              // Inversăm prima carte cu ultima
+              let temp = availableVoiceLines[0];
+              availableVoiceLines[0] = availableVoiceLines[availableVoiceLines.length - 1];
+              availableVoiceLines[availableVoiceLines.length - 1] = temp;
+          }
+      }
   }
+
+  // Tragem următoarea replică din pachet
+  const randomLine = availableVoiceLines.pop();
   
+  let msgText = typeof randomLine === 'object' ? randomLine.text : randomLine;
+  let audioUrl = typeof randomLine === 'object' ? randomLine.audio : null;
+
+  // Salvăm ce am zis
+  lastPlayedLineText = msgText;
   let newAudioObj = null;
 
-  // 5. Dacă avem audio și nu e pe MUTE, îl pregătim
+  // Redăm fișierul audio (dacă există și nu suntem pe mute)
   if (audioUrl && !isMuted) {
       if (currentVoiceLineAudio) {
           currentVoiceLineAudio.pause();
@@ -12210,10 +12220,11 @@ setInterval(() => {
       newAudioObj.play().catch(e => console.warn("Eroare la redarea vocii:", e));
   }
   
-  // 6. Afișăm bula pe ecran, dar îi dăm și fișierul audio ca să știe cât să o țină pe ecran!
+  // Afișăm bula pe ecran
   showKevinutaBubble(msgText, newAudioObj);
 
 }, 12000); // Apare o replică la fiecare 12 secunde
+
 
 // --- FUNCȚIA CARE CREEAZĂ BULA DE TEXT ---
 function showKevinutaBubble(text, audioObj = null) {
