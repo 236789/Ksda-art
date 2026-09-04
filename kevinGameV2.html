@@ -12145,21 +12145,27 @@ function updateIndicatorsSetting(val) {
 // Variabilă globală pentru a opri o voce dacă începe alta (să nu se suprapună)
 let currentVoiceLineAudio = null;
 
-// NOU: Variabilă pentru a memora ultima replică spusă (prevenim repetiția)
+// Variabilă pentru a memora ultima replică spusă (prevenim repetiția)
 let lastPlayedLineText = "";
 
 function updateBubblesSetting(val) {
     showBubbles = val;
     console.log("Dialoguri eroi:", showBubbles ? "PORNITE" : "OPRITE");
     
-    // Dacă jucătorul oprește bulele din setări în timp ce personajul vorbește, oprim sunetul instant
-    if (!showBubbles && currentVoiceLineAudio) {
-        currentVoiceLineAudio.pause();
-        currentVoiceLineAudio.currentTime = 0;
+    // Dacă jucătorul oprește bulele din setări în timp ce personajul vorbește, oprim sunetul și ștergem bula instantaneu
+    if (!showBubbles) {
+        if (currentVoiceLineAudio) {
+            currentVoiceLineAudio.pause();
+            currentVoiceLineAudio.currentTime = 0;
+        }
+        if (window.activeKevinBubble) {
+            window.activeKevinBubble.remove();
+            window.activeKevinBubble = null;
+        }
     }
 }
 
-// 🧠 INTERVALUL DE TRASH TALK (Actualizat cu Anti-Repetiție)
+// 🧠 INTERVALUL DE TRASH TALK (Actualizat: Anti-repetiție + Audio)
 setInterval(() => {
   if (window.isGamePaused) return;
   if (isPaused || !showBubbles) return;
@@ -12174,13 +12180,13 @@ setInterval(() => {
   let msgText = "";
   let audioUrl = null;
 
-  // 3. 🔄 NOU: Buclă care extrage o replică și verifică să NU fie la fel ca ultima!
+  // 3. 🔄 Buclă care extrage o replică și verifică să NU fie la fel ca ultima!
   do {
       randomLine = lines[Math.floor(Math.random() * lines.length)];
       msgText = typeof randomLine === 'object' ? randomLine.text : randomLine;
   } while (msgText === lastPlayedLineText && lines.length > 1);
 
-  // Salvăm replica extrasă ca fiind "ultima spusă" pentru data viitoare
+  // Salvăm replica extrasă ca fiind "ultima spusă"
   lastPlayedLineText = msgText;
 
   // 4. Extragem audio-ul dacă există
@@ -12188,32 +12194,35 @@ setInterval(() => {
       audioUrl = randomLine.audio;
   }
   
-  // 5. Afișăm bula pe ecran cu textul
-  showKevinutaBubble(msgText);
+  let newAudioObj = null;
 
-  // 6. Redăm fișierul audio (dacă există și dacă jocul nu are sunetul oprit)
+  // 5. Dacă avem audio și nu e pe MUTE, îl pregătim
   if (audioUrl && !isMuted) {
-      // Oprim vocea precedentă dacă cumva încă vorbește
       if (currentVoiceLineAudio) {
           currentVoiceLineAudio.pause();
           currentVoiceLineAudio.currentTime = 0;
       }
       
-      // Creăm și redăm noul audio, respectând volumul SFX din setări
-      currentVoiceLineAudio = new Audio(audioUrl);
-      currentVoiceLineAudio.volume = sfxVolume; 
-      currentVoiceLineAudio.play().catch(e => console.warn("Eroare la redarea vocii:", e));
+      newAudioObj = new Audio(audioUrl);
+      newAudioObj.volume = sfxVolume; 
+      currentVoiceLineAudio = newAudioObj;
+      
+      newAudioObj.play().catch(e => console.warn("Eroare la redarea vocii:", e));
   }
+  
+  // 6. Afișăm bula pe ecran, dar îi dăm și fișierul audio ca să știe cât să o țină pe ecran!
+  showKevinutaBubble(msgText, newAudioObj);
 
 }, 12000); // Apare o replică la fiecare 12 secunde
 
 // --- FUNCȚIA CARE CREEAZĂ BULA DE TEXT ---
-function showKevinutaBubble(text) {
+function showKevinutaBubble(text, audioObj = null) {
   const kevin = document.getElementById("kevin");
   if (!kevin) return;
 
-  // Ștergem bula veche dacă există
+  // Ștergem bula veche și oprim timer-ul vechi dacă există
   if (window.activeKevinBubble) window.activeKevinBubble.remove();
+  if (window.activeKevinBubbleTimeout) clearTimeout(window.activeKevinBubbleTimeout);
 
   const bubble = document.createElement("div");
   bubble.className = "kevin-speech-bubble";
@@ -12232,17 +12241,31 @@ function showKevinutaBubble(text) {
   updatePosition();
   const positionInterval = setInterval(updatePosition, 50);
 
-  // Animăm dispariția bulei după 3 secunde (La fel ca textul, sunetul va continua să cânte dacă e mai lung de 3 sec, ceea ce e normal)
-  setTimeout(() => {
+  // Funcția internă care face bula să dispară elegant
+  const removeBubble = () => {
     bubble.style.opacity = "0";
     bubble.style.transform = "translate(-50%, -120%) scale(0.8)";
     setTimeout(() => {
       clearInterval(positionInterval);
-      bubble.remove();
+      if (bubble.parentNode) bubble.remove();
+      if (window.activeKevinBubble === bubble) window.activeKevinBubble = null;
     }, 500);
-  }, 3000);
-}
+  };
 
+  // 🕒 LOGICA NOUĂ DE TIMP: Cât stă bula pe ecran?
+  if (audioObj) {
+      // 1. Dacă personajul vorbește, bula dispare EXACT când se termină fișierul MP3/OGG
+      audioObj.onended = () => {
+          removeBubble();
+      };
+      // Failsafe: Dacă audio-ul se blochează, ascundem forțat la 11.5 secunde (ca să fie loc pt următoarea)
+      window.activeKevinBubbleTimeout = setTimeout(removeBubble, 11500);
+  } else {
+      // 2. Dacă NU există audio (ex: Kevin clasic), calculăm timpul în funcție de lungimea textului (3 - 6 secunde)
+      const readTime = Math.max(3000, Math.min(text.length * 60, 6000));
+      window.activeKevinBubbleTimeout = setTimeout(removeBubble, readTime);
+  }
+}
 // 1. Toggle Menu Open/Close
 function toggleMenu() {
     const wrapper = document.getElementById('menuWrapper');
