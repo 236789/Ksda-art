@@ -9341,6 +9341,151 @@ div.inv-tile div.bm-limit-tag {
 .vocab-info-btn:active {
     transform: scale(0.9);
 }
+    
+
+/* ==========================================
+   VOCABULAR MODAL PREMIUM REDESIGN
+   ========================================== */
+
+/* Main modal container with gold glowing borders and dark canvas background */
+.vocab-modal-box {
+    background: radial-gradient(circle at top, #2c2a55 0%, #0a0b16 100%) !important;
+    border: 3px solid #facc15 !important;
+    box-shadow: 0 0 40px rgba(250, 204, 21, 0.35), inset 0 0 20px rgba(0,0,0,0.8) !important;
+    border-radius: 24px !important;
+    padding: 30px 20px !important;
+    max-width: 400px !important;
+    width: 90vw !important;
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif !important;
+    text-align: center;
+    box-sizing: border-box;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Glowing top question mark circle */
+.vocab-modal-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid #facc15;
+    background: radial-gradient(circle, #201a40 0%, #0d0920 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 15px auto;
+    box-shadow: 0 0 15px rgba(250, 204, 21, 0.4);
+}
+
+.vocab-modal-icon span {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 36px;
+    font-weight: 900;
+    color: #facc15;
+    text-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
+    line-height: 1;
+}
+
+.vocab-modal-title {
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 900 !important;
+    font-size: 26px;
+    color: #facc15;
+    text-shadow: 0 0 15px rgba(250, 204, 21, 0.4);
+    margin: 5px 0;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.vocab-modal-line {
+    width: 80px;
+    height: 3px;
+    background: #facc15;
+    margin: 10px auto 20px auto;
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
+}
+
+.vocab-modal-intro {
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    color: #cbd5e1;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Flex layout to handle list hierarchy */
+.vocab-level-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 25px;
+    width: 100%;
+}
+
+/* Horizontal card rows for levels */
+.vocab-level-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 8px 12px;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+
+.vocab-level-row:hover {
+    border-color: rgba(250, 204, 21, 0.2);
+}
+
+.vocab-level-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 4px 8px;
+    border-radius: 6px;
+    min-width: 42px;
+    text-align: center;
+    color: #000;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    flex-shrink: 0;
+}
+
+/* Segment-matching colors for each level badge */
+.vocab-badge-1 { background-color: #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.4); }
+.vocab-badge-2 { background-color: #a3e635; box-shadow: 0 0 8px rgba(163, 230, 53, 0.4); }
+.vocab-badge-3 { background-color: #eab308; box-shadow: 0 0 8px rgba(234, 179, 8, 0.4); }
+.vocab-badge-4 { background-color: #f97316; box-shadow: 0 0 8px rgba(249, 115, 22, 0.4); }
+.vocab-badge-5 { background-color: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); color: #fff; }
+
+.vocab-level-text {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    color: #cbd5e1;
+    text-align: left;
+    line-height: 1.3;
+}
+
+.vocab-level-text b {
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+}
+
+/* Modal close button */
+.vocab-close-btn {
+    width: 100%;
+    height: 50px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 900 !important;
+    font-size: 16px !important;
+    letter-spacing: 1px;
+    border-radius: 12px !important;
+}
   </style>
 </head>
 <body>
@@ -10027,68 +10172,59 @@ div.inv-tile div.bm-limit-tag {
 
 <!-- MODAL: INFO VOCABULAR -->
 <div id="vocabInfoModal" class="modal-overlay" style="z-index: 200010;">
-    <div class="modal-box info-modal-box" style="border-color: #facc15 !important;">
-
-        <!-- ICON -->
-        <div class="score-icon-wrapper" style="
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 2px solid #facc15;
-            background: transparent;
-            color: #facc15;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px auto;
-            box-shadow: 0 0 15px rgba(250, 204, 21, 0.4);
-        ">
-            <span style="
-                font-family: 'Orbitron', sans-serif;
-                font-size: 32px;
-                font-weight: 900;
-            ">?</span>
+    <div class="vocab-modal-box">
+        
+        <!-- Glowing Circle Icon -->
+        <div class="vocab-modal-icon">
+            <span>?</span>
         </div>
 
-        <!-- TITLE -->
-        <h2>SISTEM VOCABULAR</h2>
+        <!-- Title -->
+        <h2 class="vocab-modal-title">SISTEM VOCABULAR</h2>
+        <div class="vocab-modal-line"></div>
 
-        <!-- ACCENT LINE -->
-        <div class="selection-line" style="
-            background: #facc15;
-            width: 60px;
-            margin-bottom: 20px;
-        "></div>
-
-        <!-- DESCRIPTION -->
-        <p>
-            Scorul de vocabular determină
-            <b>felul în care vorbește eroul tău</b>
-            și cât de intensă este personalitatea sa în timpul jocului.
-            <br><br>
-
-            Cu cât scorul este mai mare, cu atât eroul devine mai
-            <b>agresiv, obraznic, intimidant și lipsit de milă</b>.
-            <br><br>
-
-            <b>1/5</b> — Foarte politicos și respectuos.<br>
-            <b>2/5</b> — Politicos, dar începe să-și arate personalitatea.<br>
-            <b>3/5</b> — Direct, sigur pe el și mai puțin răbdător.<br>
-            <b>4/5</b> — Arogant, agresiv și provocator.<br>
-            <b>5/5</b> — <b>COMPLET MENACE.</b> Fără milă, fără frică și gata să intimideze pe oricine.
+        <!-- Intro Text -->
+        <p class="vocab-modal-intro">
+            Determină complexitatea dialogurilor. Nivelurile ridicate aduc o atitudine mai asertivă în joc.
         </p>
 
-        <!-- CLOSE BUTTON -->
-        <button
-            class="menu-btn play"
-            style="
-                width: 100%;
-                height: 50px;
-                font-size: 18px;
-                padding: 0;
-            "
-            onclick="closeVocabModal()"
-        >
+        <!-- Level Rows (Tactical Design) -->
+        <div class="vocab-level-list">
+            
+            <!-- LVL 1 -->
+            <div class="vocab-level-row">
+                <span class="vocab-level-badge vocab-badge-1">1/5</span>
+                <div class="vocab-level-text"><b>POLITICOS</b> — Exprimare simplă, amabilă și respectuoasă.</div>
+            </div>
+
+            <!-- LVL 2 -->
+            <div class="vocab-level-row">
+                <span class="vocab-level-badge vocab-badge-2">2/5</span>
+                <div class="vocab-level-text"><b>ECHILIBRAT</b> — Își exprimă personalitatea în limite sigure.</div>
+            </div>
+
+            <!-- LVL 3 -->
+            <div class="vocab-level-row">
+                <span class="vocab-level-badge vocab-badge-3">3/5</span>
+                <div class="vocab-level-text"><b>INDIVIDUAL</b> — Replicile devin îndrăznețe și asertive.</div>
+            </div>
+
+            <!-- LVL 4 -->
+            <div class="vocab-level-row">
+                <span class="vocab-level-badge vocab-badge-4">4/5</span>
+                <div class="vocab-level-text"><b>PROVOCATOR</b> — Un stil arogant, curajos și combativ.</div>
+            </div>
+
+            <!-- LVL 5 -->
+            <div class="vocab-level-row">
+                <span class="vocab-level-badge vocab-badge-5">5/5</span>
+                <div class="vocab-level-text"><b>MENACE</b> — Replicile sunt tăioase, dure și pline de atitudine.</div>
+            </div>
+
+        </div>
+
+        <!-- Styled 3D Close Button -->
+        <button class="menu-btn play vocab-close-btn" onclick="closeVocabModal()">
             AM ÎNȚELES
         </button>
 
