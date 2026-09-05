@@ -9486,11 +9486,23 @@ div.inv-tile div.bm-limit-tag {
     letter-spacing: 1px;
     border-radius: 12px !important;
 }
+
+/* Predefined animation classes for the seagull */
+.sg-frame-up { background-image: url('https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Seagoul%20fly%20up%20.png') !important; }
+.sg-frame-mid { background-image: url('https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Seagoul%20fly%20middle%20.png') !important; }
+.sg-frame-down { background-image: url('https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Seagoul%20fly%20down%20.png') !important; }
   </style>
 </head>
 <body>
 
 <div id="slowMoOverlay"></div>
+
+<!-- Hidden preloader to keep seagull frames decoded in memory and prevent flickering -->
+<div style="position: absolute; width: 0; height: 0; overflow: hidden; opacity: 0; pointer-events: none;" aria-hidden="true">
+    <img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Seagoul%20fly%20up%20.png">
+    <img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Seagoul%20fly%20middle%20.png">
+    <img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Seagoul%20fly%20down%20.png">
+</div>
 
   <!-- ==========================================
        MODALS (OVERLAYS)
@@ -18033,6 +18045,8 @@ function startSeagullEvent() {
     // 2. CREATE SEAGULL
     const seagull = document.createElement('div');
     seagull.id = "activeSeagull";
+    seagull.classList.add('sg-frame-mid'); // Initialize with a mid-flight frame to prevent initial blank frame
+    
     // Starting position off-screen
     seagull.style.cssText = `
         position: absolute; width: 100px; height: 100px;
@@ -18041,12 +18055,16 @@ function startSeagullEvent() {
     `;
     gameArea.appendChild(seagull);
 
-    // 3. FLAPPING ANIMATION (Using a very stable loop)
+    // 3. FLAPPING ANIMATION (Using CSS Class Toggling to prevent flicker)
     let frame = 0;
-    const frames = [seagullAssets.up, seagullAssets.middle, seagullAssets.down, seagullAssets.middle];
+    const classes = ['sg-frame-up', 'sg-frame-mid', 'sg-frame-down', 'sg-frame-mid'];
     let animInterval = setInterval(() => {
         if (!seagull.parentElement) return clearInterval(animInterval);
-        seagull.style.backgroundImage = `url('${frames[frame % 4]}')`;
+        
+        // Remove active frames to prevent rule overlaps, then add current frame
+        seagull.classList.remove('sg-frame-up', 'sg-frame-mid', 'sg-frame-down');
+        seagull.classList.add(classes[frame % 4]);
+        
         frame++;
     }, 200);
 
@@ -18088,8 +18106,10 @@ function startSeagullEvent() {
         
         const kRect = kevin.getBoundingClientRect();
         
-        // Prepare for dive
-        seagull.style.backgroundImage = `url('${seagullAssets.up}')`;
+        // Prepare for dive with class toggling
+        seagull.classList.remove('sg-frame-up', 'sg-frame-mid', 'sg-frame-down');
+        seagull.classList.add('sg-frame-up');
+        
         // Speed up the transition ONLY for the dive
         seagull.style.transition = "left 0.7s cubic-bezier(0.5, 0, 0.5, 1), top 0.7s cubic-bezier(0.5, 0, 0.5, 1)";
         
