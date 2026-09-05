@@ -12137,8 +12137,10 @@ function changeChar(dir) {
     const effectEl = document.getElementById('charHeroEffect');
     if (effectEl) effectEl.innerText = effectText;
 
-    // --- INTEGRATED: Updates segments in selector ---
-    updateVocabUI(char.vocab || 5, 'selectorVocabBlock'); 
+    // --- INTEGRATED: Dynamically updates the vocabulary in the Selector ---
+    const vocabInfo = HERO_VOCABULARY_DATA[char.id];
+    const vocabLevel = vocabInfo ? vocabInfo.level : 5;
+    updateVocabUI(vocabLevel, 'charSelectorVocabContainer'); 
 }
 
 async function confirmCharacter() {
@@ -18207,8 +18209,10 @@ function renderErou() {
         priceArea.style.display = 'flex';
     }
 
-    // --- INTEGRATED: Updates segments in shop ---
-    updateVocabUI(hero.vocab || 5, 'shopVocabBlock');
+    // --- INTEGRATED: Dynamically updates the vocabulary in the Shop ---
+    const vocabInfo = HERO_VOCABULARY_DATA[hero.id];
+    const vocabLevel = vocabInfo ? vocabInfo.level : 5;
+    updateVocabUI(vocabLevel, 'heroShopVocabContainer');
 }
 
 async function buyHeroAction() {
@@ -18356,27 +18360,38 @@ function showVocabInfo(charId) {
 }
 
 
-function updateVocabUI(vocabValue) {
-    const countText = document.getElementById('vocabCountText');
-    const segmentsContainer = document.getElementById('vocabSegmentsContainer');
-    if (!countText || !segmentsContainer) return;
+function updateVocabUI(vocabValue, parentContainerId) {
+    const container = document.getElementById(parentContainerId);
+    if (!container) return;
 
-    // Normalize value between 1 and 5
+    // Constrain value between 1 and 5
     const val = Math.max(1, Math.min(vocabValue || 5, 5));
 
-    // Update Text to x/5
-    countText.innerText = `${val}/5`;
-
-    // Empty and rebuild segments
-    segmentsContainer.innerHTML = "";
+    // Build segments dynamically with active color classes (active-1, active-2, etc.)
+    let segmentsHtml = '';
     for (let i = 1; i <= 5; i++) {
-        const segment = document.createElement('div');
-        segment.className = "vocab-segment";
-        if (i <= val) {
-            segment.classList.add('active'); // Apply red glow
-        }
-        segmentsContainer.appendChild(segment);
+        const activeClass = (i <= val) ? `active active-${val}` : '';
+        segmentsHtml += `<div class="vocab-segment ${activeClass}"></div>`;
     }
+
+    // Inject the structured golden block inside the target container
+    container.innerHTML = `
+        <div class="vocab-container" onclick="event.stopPropagation();">
+            <!-- Row 1: Text & Dynamic Count -->
+            <div class="vocab-text-row">
+                <span class="vocab-label">VOCABULAR</span>
+                <span class="vocab-count">${val}/5</span>
+            </div>
+            
+            <!-- Row 2: Progress segments & Info Button -->
+            <div class="vocab-bar-row">
+                <div class="vocab-segments">
+                    ${segmentsHtml}
+                </div>
+                <button class="vocab-info-btn" onclick="openVocabModal(event)">?</button>
+            </div>
+        </div>
+    `;
 }
 
 function openVocabModal(event) {
