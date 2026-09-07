@@ -9539,6 +9539,29 @@ div.inv-tile div.bm-limit-tag {
     60% { transform: translate(-5px, -10px); filter: hue-rotate(90deg); }
     100% { transform: translate(0,0); }
 }
+
+
+/* Unique Background Shaders */
+.scene-1 { background: linear-gradient(45deg, #3d1f05, #000); } /* Bronze */
+.scene-2 { background: radial-gradient(circle, #444, #000); }    /* Silver */
+.scene-5 { background: repeating-linear-gradient(45deg, #1b3a08 0%, #000 10%); } /* Toxic */
+.scene-7 { background: conic-gradient(from 180deg, #ffd700, #000, #ffd700); } /* Gold */
+.scene-9 { background: radial-gradient(circle, #ff0000 0%, #500 50%, #000 100%); } /* Ruby */
+.scene-12 { background: url('https://www.transparenttextures.com/patterns/stardust.png'), #0b001a; animation: cinePan 60s infinite linear; }
+.scene-18 { background: #000; border-left: 2px solid #39ff14; box-shadow: inset 50px 0 100px #39ff1422; }
+.scene-23 { background: linear-gradient(to top, #ff4500, #000); }
+.scene-25 { background: #fff; filter: invert(1); animation: godFlicker 0.1s infinite; } /* The Singularity */
+
+@keyframes cinePan { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
+@keyframes godFlicker { 0% { opacity: 0.8; } 100% { opacity: 1; } }
+
+/* Universal Level Animations */
+@keyframes stressLevel {
+    0%, 100% { transform: scale(1) rotate(0); }
+    25% { transform: scale(1.1) rotate(-2deg); filter: blur(2px) hue-rotate(90deg); }
+    50% { transform: scale(1.2) rotate(2deg); filter: contrast(2); }
+}
+.is-stressing { animation: stressLevel 0.15s infinite; }
   </style>
 </head>
 <body>
@@ -9552,32 +9575,28 @@ div.inv-tile div.bm-limit-tag {
     <img src="https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Seagoul%20fly%20down%20.png">
 </div>
 
+<!-- AAA CINEMATIC LEVEL UP - 25 UNIQUE SCENES EDITION -->
+<div id="cinematicOverlay" style="display: none; position: fixed; inset: 0; z-index: 2000000; background: #000; overflow: hidden; pointer-events: all;">
+    <!-- The Dynamic Layer (Changes every level) -->
+    <div id="cineSceneLayer" style="position: absolute; inset: 0; z-index: 1;"></div>
+    <div id="cineVignette" style="position: absolute; inset: 0; background: radial-gradient(circle, transparent 10%, #000 120%); z-index: 2;"></div>
 
-<!-- AAA CINEMATIC LEVEL UP -->
-<div id="cinematicOverlay" style="display: none; position: fixed; inset: 0; z-index: 2000000; background: #000; overflow: hidden; pointer-events: all; touch-action: none;">
-    
-    <!-- DYNAMIC BACKGROUND LAYERS -->
-    <div id="cineBgStatic" style="position: absolute; inset: 0; z-index: 1;"></div>
-    <div id="cineBgAnimated" style="position: absolute; inset: 0; z-index: 2; opacity: 0.5;"></div>
-    <div id="cineVignette" style="position: absolute; inset: 0; background: radial-gradient(circle, transparent 20%, #000 100%); z-index: 3;"></div>
-
-    <!-- RESPONSIVE UI CONTAINER -->
-    <div id="cineContainer" style="position: relative; z-index: 10; height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-family: 'Montserrat', sans-serif; padding: 20px;">
+    <div id="cineUI" style="position: relative; z-index: 10; height: 100%; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px;">
         
-        <!-- 1. Rank Box (Responsive Tactical) -->
-        <div id="cineRankBox" class="eroi-title-box" style="font-size: clamp(14px, 4vw, 20px); min-width: min(300px, 80vw); margin-bottom: 10px; color: #000 !important; font-weight: 900; transition: background 0.5s;">RANK</div>
+        <!-- 1. Rank Name (Tactical Box) -->
+        <div id="cineRankBox" class="eroi-title-box" style="font-size: clamp(14px, 4vw, 22px); min-width: 260px; margin-bottom: 10px; color: #000 !important; font-weight: 900; font-family: 'Montserrat';">RANK</div>
 
-        <!-- 2. Level Number (Smaller & Bold) -->
-        <div id="cineLevelNum" style="font-weight: 900; font-size: clamp(28px, 10vw, 48px); color: #fff; letter-spacing: 2px; line-height: 1; margin-bottom: 2vh; text-shadow: 0 0 15px rgba(255,255,255,0.4);">LEVEL 1</div>
+        <!-- 2. Level Number (Professional Size) -->
+        <div id="cineLevelNum" style="font-family: 'Montserrat'; font-weight: 900; font-size: clamp(32px, 8vw, 50px); color: #fff; letter-spacing: 2px; margin-bottom: 2vh; text-shadow: 0 0 20px rgba(255,255,255,0.4);">LEVEL 1</div>
 
-        <!-- 3. Badge Stage (Responsive Size) -->
-        <div id="cineBadgeStage" style="position: relative; width: min(300px, 70vw); height: min(300px, 70vw); display: flex; align-items: center; justify-content: center;">
-             <div id="cineAura" style="position: absolute; inset: -15%; border-radius: 50%; opacity: 0; transition: all 1s ease;"></div>
+        <!-- 3. Badge Stage -->
+        <div id="cineBadgeStage" style="position: relative; width: min(280px, 65vw); height: min(280px, 65vw); display: flex; align-items: center; justify-content: center;">
+             <div id="cineAura" style="position: absolute; inset: -20%; border-radius: 50%; opacity: 0;"></div>
              <img id="cineBadgeImg" src="" style="width: 100%; height: 100%; object-fit: contain; z-index: 5;">
         </div>
 
-        <!-- 4. Message (Montserrat Bold) -->
-        <div id="cineLevelDesc" style="font-weight: 800; font-size: clamp(12px, 3.5vw, 17px); color: #fff; max-width: 500px; margin-top: 4vh; opacity: 0; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 2px 4px #000; padding: 0 10px;">
+        <!-- 4. Level Message -->
+        <div id="cineLevelDesc" style="font-family: 'Montserrat'; font-weight: 800; font-size: clamp(12px, 3.5vw, 16px); color: #fff; max-width: 550px; margin-top: 4vh; opacity: 0; text-transform: uppercase; letter-spacing: 1px; line-height: 1.4; padding: 0 15px;">
             ...
         </div>
     </div>
@@ -12039,7 +12058,7 @@ document.getElementById('kevin').addEventListener('click', (e) => {
 
     // Apply Multiplier to Score
     score += (1 * activeScoreMultiplier);
-    let xpToGain = (2000 * activeClickXPMultiplier); // 2 de bază, sau 4 dacă boost-ul e activ
+    let xpToGain = (500 * activeClickXPMultiplier); // 2 de bază, sau 4 dacă boost-ul e activ
     gainXP(xpToGain);
 
     // --- SALVĂM STATISTICILE ---
@@ -17206,111 +17225,7 @@ function spawnLevelUpParticles() {
 
 let selectedLvlNode = 1;
 
-async function levelUp() {
-    const MAX_LEVEL = 25;
-    if (playerLevel >= MAX_LEVEL) return;
 
-    // 1. Data Prep
-    const oldLvl = playerLevel;
-    const newLvl = playerLevel + 1;
-    const oldTier = mapTiers[oldLvl - 1];
-    const newTier = mapTiers[newLvl - 1];
-    const rewardData = LEVEL_REWARDS_REGISTRY[newLvl];
-
-    // 2. PAUSE & BLOCK GAME UI
-    isPaused = true;
-    clearInterval(moveKevinInterval);
-    forceCloseMenu(); // Ensure the side menu doesn't block the screen
-
-    const overlay = document.getElementById('cinematicOverlay');
-    const badge = document.getElementById('cineBadgeImg');
-    const rankBox = document.getElementById('cineRankBox');
-    const levelNum = document.getElementById('cineLevelNum');
-    const desc = document.getElementById('cineLevelDesc');
-    const nebula = document.getElementById('cineNebula');
-    const flash = document.getElementById('cineFlash');
-    const aura = document.getElementById('cineAura');
-
-    // 3. SET INITIAL STATE (The Level you are leaving)
-    overlay.style.display = 'block';
-    overlay.style.opacity = '1';
-    nebula.style.background = `radial-gradient(circle, ${oldTier.color} 0%, #000 70%)`;
-    
-    badge.src = `https://i.ibb.co/${oldTier.id}/image.png`;
-    badge.className = ""; // Clear classes
-    badge.style.animation = "none";
-    
-    rankBox.innerText = oldTier.name;
-    rankBox.style.background = oldTier.color;
-    rankBox.style.opacity = "1";
-    
-    levelNum.innerText = `LEVEL ${oldLvl}`;
-    levelNum.style.opacity = "1";
-    
-    desc.style.opacity = "0"; // Hide description at start
-    aura.style.opacity = "0";
-
-    await delay(1200);
-
-    // --- PHASE 1: THE STRESS (Old Badge starts to break) ---
-    badge.style.animation = "cineStress 0.2s infinite";
-    if (typeof playSFX === 'function') playSFX(slotWooshUrl);
-    
-    await delay(2000);
-
-    // --- PHASE 2: THE SWITCH (The big flash) ---
-    flash.style.transition = "none";
-    flash.style.opacity = "1";
-    if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
-
-    // UPDATE ACTUAL DATA HERE
-    playerLevel = newLvl;
-    playerXP = Math.max(0, playerXP - xpToNextLevel); 
-    xpToNextLevel = getXPRequired(playerLevel);
-
-    // Apply New Visuals
-    badge.style.animation = "none";
-    badge.src = `https://i.ibb.co/${newTier.id}/image.png`;
-    badge.classList.add('cine-impact');
-    
-    // Add Unique Shaders based on level
-    if (newLvl > 20) badge.classList.add('shader-god');
-    else if (newLvl > 10) badge.classList.add('shader-neon');
-    else badge.classList.add('shader-metal');
-
-    nebula.style.background = `radial-gradient(circle, ${newTier.color} 0%, #000 70%)`;
-    overlay.style.setProperty('--t-glow', newTier.color);
-    
-    rankBox.innerText = newTier.name;
-    rankBox.style.background = newTier.color;
-    levelNum.innerText = `LEVEL ${newLvl}`;
-    
-    // Reveal message and Aura
-    desc.innerText = rewardData.message;
-    desc.style.opacity = "1";
-    aura.style.background = `radial-gradient(circle, ${newTier.color}dd 0%, transparent 70%)`;
-    aura.style.opacity = "0.5";
-
-    // Fade flash
-    setTimeout(() => { flash.style.transition = "opacity 1s ease"; flash.style.opacity = '0'; }, 50);
-    createParticlesAtCine(newTier.color, 100);
-
-    await delay(4500);
-
-    // --- EXIT ---
-    overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1000, fill: 'forwards' });
-    
-    await delay(1000);
-    overlay.style.display = 'none';
-    
-    // Resume Game
-    isPaused = false;
-    updateXPBarUI();
-    updateGiftButtonState();
-    syncScoreToFirestore();
-    startKevinMovement();
-    startTiredCycle();
-}
 
 
 
@@ -18769,20 +18684,21 @@ function closeVocabModal() {
     document.getElementById('vocabInfoModal').style.display = 'none';
 }
 
-// --- HELPER: PARTICLE ENGINE (Put this inside your secure vault) ---
+
+// --- THE MISSING PARTICLE FUNCTION (FIXED) ---
 function createParticlesAtCine(color, amount) {
     const container = document.getElementById('cineParticles');
     if (!container) return;
     for (let i = 0; i < amount; i++) {
         const p = document.createElement('div');
-        p.style.cssText = `position:absolute; left:50%; top:50%; width:6px; height:6px; background:${color}; border-radius:50%; box-shadow:0 0 10px ${color};`;
+        p.style.cssText = `position:absolute; left:50%; top:50%; width:6px; height:6px; background:${color}; border-radius:50%; box-shadow:0 0 15px ${color};`;
         const angle = Math.random() * Math.PI * 2;
-        const velocity = Math.random() * 500 + 200;
+        const velocity = Math.random() * 600 + 200;
         const tx = Math.cos(angle) * velocity;
         const ty = Math.sin(angle) * velocity;
         container.appendChild(p);
-        p.animate([{transform:'translate(-50%,-50%) scale(1)', opacity:1}, {transform:`translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity:0}], 
-        {duration: 1500, easing: 'cubic-bezier(0.15, 0.8, 0.2, 1)'}).onfinish = () => p.remove();
+        p.animate([{transform:'translate(-50%,-50%) scale(1.5)', opacity:1}, {transform:`translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity:0}], 
+        {duration: 2000, easing: 'cubic-bezier(0.15, 0.8, 0.2, 1)'}).onfinish = () => p.remove();
     }
 }
 
@@ -18802,29 +18718,23 @@ async function levelUp() {
     forceCloseMenu();
 
     const overlay = document.getElementById('cinematicOverlay');
+    const scene = document.getElementById('cineSceneLayer');
     const badge = document.getElementById('cineBadgeImg');
     const rankBox = document.getElementById('cineRankBox');
     const levelNum = document.getElementById('cineLevelNum');
     const desc = document.getElementById('cineLevelDesc');
-    const bgAnim = document.getElementById('cineBgAnimated');
-    const bgStatic = document.getElementById('cineBgStatic');
     const flash = document.getElementById('cineFlash');
     const aura = document.getElementById('cineAura');
 
-    // 2. SET INITIAL BACKGROUND STYLE
-    bgAnim.className = "cine-bg"; 
-    if (oldLvl < 6) bgAnim.classList.add('bg-style-nebula');
-    else if (oldLvl < 15) bgAnim.classList.add('bg-style-grid');
-    else bgAnim.classList.add('bg-style-stars');
-
-    // Initial View (Old Level)
+    // 2. SET INITIAL STATE (Old Level)
     overlay.style.display = 'block';
-    overlay.style.setProperty('--t-glow', oldTier.color);
-    bgStatic.style.background = `radial-gradient(circle, ${oldTier.color}33 0%, #000 80%)`;
+    scene.className = `scene-${oldLvl}`; // Apply level-specific CSS
+    if (!scene.className) scene.style.background = oldTier.color + "22";
     
     badge.src = `https://i.ibb.co/${oldTier.id}/image.png`;
-    badge.style.animation = "none";
-    badge.style.opacity = "1";
+    badge.classList.remove('is-stressing');
+    badge.style.transform = "scale(1)";
+    
     rankBox.innerText = oldTier.name;
     rankBox.style.background = oldTier.color;
     levelNum.innerText = `LEVEL ${oldLvl}`;
@@ -18833,53 +18743,54 @@ async function levelUp() {
 
     await delay(1500);
 
-    // --- PHASE 1: STRESS ---
-    badge.style.animation = "cineStress 0.2s infinite";
+    // --- PHASE 1: THE STRESS (Old rank breaks) ---
+    badge.classList.add('is-stressing');
     if (typeof playSFX === 'function') playSFX(slotWooshUrl);
     
-    await delay(2000);
+    await delay(2200);
 
-    // --- PHASE 2: SWITCH ---
+    // --- PHASE 2: THE SWITCH (The Big Impact) ---
     flash.style.transition = "none";
     flash.style.opacity = "1";
     if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
 
-    // Update Data
+    // UPDATE DATA
     playerLevel = newLvl;
     playerXP = Math.max(0, playerXP - xpToNextLevel); 
     xpToNextLevel = getXPRequired(playerLevel);
 
     // Apply New Visuals
-    badge.style.animation = "none";
+    badge.classList.remove('is-stressing');
     badge.src = `https://i.ibb.co/${newTier.id}/image.png`;
-    badge.animate([{transform:'scale(4)', filter:'brightness(10)'}, {transform:'scale(1)', filter:'brightness(1)'}], {duration: 600, easing: 'ease-out'});
+    
+    // Set New Scene
+    scene.className = `scene-${newLvl}`;
+    if (newLvl === 25) { 
+        createParticlesAtCine("#fff", 300); // Massive explosion for Max Level
+    }
 
-    // Switch Background Tier Style
-    bgAnim.className = "cine-bg";
-    if (newLvl < 6) bgAnim.classList.add('bg-style-nebula');
-    else if (newLvl < 15) bgAnim.classList.add('bg-style-grid');
-    else bgAnim.classList.add('bg-style-stars');
-
-    overlay.style.setProperty('--t-glow', newTier.color);
-    bgStatic.style.background = `radial-gradient(circle, ${newTier.color}33 0%, #000 80%)`;
     rankBox.innerText = newTier.name;
     rankBox.style.background = newTier.color;
     levelNum.innerText = `LEVEL ${newLvl}`;
     desc.innerText = rewardData.message;
     desc.style.opacity = "1";
+    
     aura.style.background = `radial-gradient(circle, ${newTier.color} 0%, transparent 70%)`;
-    aura.style.opacity = "0.4";
+    aura.style.opacity = "0.6";
 
-    setTimeout(() => { flash.style.transition = "opacity 1.5s ease"; flash.style.opacity = '0'; }, 50);
-    createParticlesAtCine(newTier.color, 120);
+    // Animations
+    badge.animate([{transform:'scale(5)', filter:'brightness(10)'}, {transform:'scale(1)', filter:'brightness(1)'}], {duration: 800, easing: 'ease-out'});
+    setTimeout(() => { flash.style.transition = "opacity 2s ease"; flash.style.opacity = '0'; }, 50);
+    createParticlesAtCine(newTier.color, 150);
 
-    await delay(5000);
+    await delay(6000); // Slower, AAA timing
 
     // --- EXIT ---
-    overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1000, fill: 'forwards' });
-    await delay(1000);
+    overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1500, fill: 'forwards' });
+    await delay(1500);
     overlay.style.display = 'none';
     
+    // Final Resume
     isPaused = false;
     updateXPBarUI();
     updateGiftButtonState();
@@ -18887,7 +18798,6 @@ async function levelUp() {
     startKevinMovement();
     startTiredCycle();
 }
-
 // ==========================================
 // 🔐 WINDOW EXPORTS
 // ==========================================
