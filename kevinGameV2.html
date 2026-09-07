@@ -9493,39 +9493,25 @@ div.inv-tile div.bm-limit-tag {
 .sg-frame-down { background-image: url('https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/Seagoul%20fly%20down%20.png') !important; }
 
 
-@keyframes cineSlamIn {
-    0% { transform: scale(3) translateY(-100px); opacity: 0; filter: blur(20px) brightness(5); }
-    100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0px) brightness(1); }
+@keyframes cineSlamBadge {
+    0% { transform: scale(5); filter: brightness(10) blur(20px); opacity: 0; }
+    100% { transform: scale(1); filter: brightness(1) blur(0px); opacity: 1; }
 }
 
-@keyframes cineFadeUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes cineTextIn {
+    from { opacity: 0; transform: translateY(20px); letter-spacing: 15px; }
+    to { opacity: 1; transform: translateY(0); letter-spacing: 2px; }
 }
 
-/* Fixed Centered Glitch */
-@keyframes cineGlitchCenter {
-    0% { transform: translate(0,0); }
-    10% { transform: translate(-15px, 5px) skew(10deg); filter: hue-rotate(90deg) brightness(2); }
-    20% { transform: translate(15px, -5px) skew(-10deg); }
-    30% { transform: translate(-5px, 15px); filter: hue-rotate(180deg); }
-    40% { transform: translate(0,0) scale(1.1); }
-    100% { transform: translate(0,0); }
+@keyframes cineShakeBadge {
+    0%, 100% { transform: translate(0,0) rotate(0deg); }
+    20% { transform: translate(-5px, 2px) rotate(-2deg); }
+    40% { transform: translate(5px, -2px) rotate(2deg); filter: hue-rotate(45deg); }
+    60% { transform: translate(-2px, 5px) rotate(-1deg); }
+    80% { transform: translate(2px, -5px) rotate(1deg); }
 }
 
-.cine-glitch-active { animation: cineGlitchCenter 0.2s infinite !important; }
-
-/* Cinematic Haze/Background Smoke */
-@keyframes cineHazeMove {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-#cineBgAtmosphere {
-    background-size: 200% 200%;
-    animation: cineHazeMove 15s ease infinite;
-}
+.cine-shaking { animation: cineShakeBadge 0.15s infinite linear; }
   </style>
 </head>
 <body>
@@ -9541,37 +9527,36 @@ div.inv-tile div.bm-limit-tag {
 
 
 
-<!-- ULTIMATE AAA CINEMATIC LEVEL UP -->
-<div id="cinematicOverlay" style="display: none; position: fixed; inset: 0; z-index: 999999; background: #000; overflow: hidden; cursor: default;">
-    <!-- Cinematic Background -->
-    <div id="cineBgAtmosphere" style="position: absolute; inset: 0; transition: background 2s ease; opacity: 0.8;"></div>
-    <div style="position: absolute; inset: 0; background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.8) 100%); z-index: 1;"></div>
-    
-    <!-- Content Container -->
-    <div id="cineMainContent" style="position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-family: 'Montserrat', sans-serif;">
+<!-- AAA CINEMATIC LEVEL UP -->
+<div id="cinematicOverlay" style="display: none; position: fixed; inset: 0; z-index: 999999; background: #000; overflow: hidden;">
+    <!-- Background Layers -->
+    <div id="cineNebula" style="position: absolute; inset: 0; background: radial-gradient(circle at center, var(--t-glow) 0%, #000 70%); opacity: 0.4; filter: blur(50px); transition: background 2s ease;"></div>
+    <div id="cineGrid" style="position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 50px 50px; transform: perspective(500px) rotateX(60deg) translateY(-200px); opacity: 0.2;"></div>
+    <div style="position: absolute; inset: 0; background: linear-gradient(to bottom, #000 0%, transparent 50%, #000 100%); z-index: 2;"></div>
+
+    <!-- Main Content -->
+    <div id="cineContainer" style="position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-family: 'Montserrat', sans-serif;">
         
-        <!-- 1. Rank Name in Tactical Box -->
-        <div id="cineRankBox" class="eroi-title-box" style="transform: translateY(-50px); opacity: 0; font-size: 28px; margin-bottom: 10px; min-width: 250px;">BRONZE</div>
+        <!-- Tactical Rank Box -->
+        <div id="cineRankBox" class="eroi-title-box" style="opacity: 0; font-size: 18px; letter-spacing: 4px; margin-bottom: 5px;">RANK</div>
 
-        <!-- 2. Level Number (Massive & Bold) -->
-        <div id="cineLevelNum" style="font-weight: 900; font-size: 80px; color: #fff; letter-spacing: -2px; transform: scale(0.5); opacity: 0; line-height: 1;">LEVEL 1</div>
+        <!-- Level Number (Fixed Size) -->
+        <div id="cineLevelNum" style="font-weight: 900; font-size: 42px; color: #fff; letter-spacing: 2px; opacity: 0; margin-bottom: 20px;">LEVEL 1</div>
 
-        <!-- 3. The Badge Stage -->
-        <div id="cineBadgeStage" style="position: relative; width: 350px; height: 350px; display: flex; align-items: center; justify-content: center; margin: 20px 0;">
-             <!-- Energy Aura -->
-             <div id="cineAura" style="position: absolute; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, var(--t-glow) 0%, transparent 70%); opacity: 0; filter: blur(20px);"></div>
-             <img id="cineBadgeImg" src="" style="width: 280px; height: 280px; object-fit: contain; z-index: 5; filter: drop-shadow(0 0 30px rgba(0,0,0,0.8));">
+        <!-- Badge Stage -->
+        <div id="cineBadgeStage" style="position: relative; width: 220px; height: 220px; display: flex; align-items: center; justify-content: center;">
+             <div id="cineAura" style="position: absolute; inset: -40px; border-radius: 50%; background: radial-gradient(circle, var(--t-glow) 0%, transparent 70%); opacity: 0;"></div>
+             <img id="cineBadgeImg" src="" style="width: 100%; height: 100%; object-fit: contain; z-index: 5;">
         </div>
 
-        <!-- 4. Level Description (Bold Montserrat) -->
-        <div id="cineLevelDesc" style="font-weight: 800; font-size: 18px; color: #cbd5e1; max-width: 80%; line-height: 1.4; opacity: 0; transform: translateY(30px); text-transform: uppercase; letter-spacing: 1px;">
-            Bun venit în legendă! Acesta este cadoul tău de început.
+        <!-- Description (Montserrat Bold) -->
+        <div id="cineLevelDesc" style="font-weight: 800; font-size: 15px; color: #94a3b8; max-width: 350px; margin-top: 30px; opacity: 0; text-transform: uppercase; letter-spacing: 2px;">
+            ...
         </div>
     </div>
 
-    <!-- Screen Effects -->
     <div id="cineFlash" style="position: absolute; inset: 0; background: #fff; opacity: 0; z-index: 100; pointer-events: none;"></div>
-    <div id="cineParticles" style="position: absolute; inset: 0; pointer-events: none; z-index: 2;"></div>
+    <div id="cineParticles" style="position: absolute; inset: 0; pointer-events: none; z-index: 5;"></div>
 </div>
   <!-- ==========================================
        MODALS (OVERLAYS)
@@ -17205,92 +17190,78 @@ async function levelUp() {
     const newTier = mapTiers[newLvl - 1];
     const rewardData = LEVEL_REWARDS_REGISTRY[newLvl];
 
-    // Pause Game
     isPaused = true;
     clearInterval(moveKevinInterval);
     
-    // 2. Element References
     const overlay = document.getElementById('cinematicOverlay');
-    const bg = document.getElementById('cineBgAtmosphere');
+    const badge = document.getElementById('cineBadgeImg');
     const rankBox = document.getElementById('cineRankBox');
     const levelNum = document.getElementById('cineLevelNum');
-    const badge = document.getElementById('cineBadgeImg');
     const desc = document.getElementById('cineLevelDesc');
     const aura = document.getElementById('cineAura');
     const flash = document.getElementById('cineFlash');
 
-    // 3. Initial State (Old Level)
+    // Setup Initial State (Only Old Badge)
     overlay.style.display = 'block';
-    badge.src = `https://i.ibb.co/${oldTier.id}/image.png`;
-    rankBox.innerText = oldTier.name;
-    rankBox.style.background = oldTier.color;
-    levelNum.innerText = `LEVEL ${oldLvl}`;
-    desc.innerText = LEVEL_REWARDS_REGISTRY[oldLvl].message;
-    bg.style.background = `radial-gradient(circle at center, ${oldTier.color}aa 0%, #050509 75%)`;
     overlay.style.setProperty('--t-glow', oldTier.color);
+    badge.src = `https://i.ibb.co/${oldTier.id}/image.png`;
+    badge.style.opacity = "1";
+    badge.style.animation = "none";
+    
+    // Reset Text (Invisible)
+    rankBox.style.opacity = "0";
+    levelNum.style.opacity = "0";
+    desc.style.opacity = "0";
 
-    // Initial Appearance
-    rankBox.style.animation = "cineFadeUp 0.8s forwards";
-    levelNum.style.animation = "cineFadeUp 0.8s 0.2s forwards";
-    badge.style.animation = "cineSlamIn 1s 0.4s forwards";
-    desc.style.animation = "cineFadeUp 0.8s 0.6s forwards";
+    await delay(1000);
 
-    await delay(2000); // Let player see old rank
-
-    // --- PHASE: THE POWER UP (Glitches start) ---
-    badge.classList.add('cine-glitch-active');
-    aura.style.opacity = '1';
-    aura.animate([{ transform: 'scale(0.5)', opacity: 0 }, { transform: 'scale(1.5)', opacity: 1 }], { duration: 1500 });
+    // --- PHASE 1: Build-up (The old badge starts to fail) ---
+    badge.classList.add('cine-shaking');
     if (typeof playSFX === 'function') playSFX(slotWooshUrl);
     
-    await delay(1500);
+    await delay(2000);
 
-    // --- PHASE: THE IMPACT (The Switch) ---
+    // --- PHASE 2: The Impact (The Swap) ---
+    flash.style.transition = "none";
     flash.style.opacity = '1';
     if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
 
-    // Update Data
+    // Apply New Level Internally
     playerLevel = newLvl;
     playerXP = Math.max(0, playerXP - xpToNextLevel); 
     xpToNextLevel = getXPRequired(playerLevel);
 
-    // Switch Visuals to New Level
+    // Switch to New Visuals
+    badge.classList.remove('cine-shaking');
     badge.src = `https://i.ibb.co/${newTier.id}/image.png`;
+    overlay.style.setProperty('--t-glow', newTier.color);
+    
     rankBox.innerText = newTier.name;
     rankBox.style.background = newTier.color;
     levelNum.innerText = `LEVEL ${newLvl}`;
     desc.innerText = rewardData.message;
-    bg.style.background = `radial-gradient(circle at center, ${newTier.color}aa 0%, #050509 75%)`;
-    
-    // Impact Visuals
-    setTimeout(() => { 
-        flash.style.opacity = '0'; 
-        flash.style.transition = "opacity 1.5s ease"; 
-    }, 50);
 
-    badge.classList.remove('cine-glitch-active');
-    badge.style.animation = "none";
-    void badge.offsetWidth; // Reset animation
-    badge.style.animation = "cineSlamIn 0.8s forwards";
-    
-    createParticlesAtCine(newTier.color, 100);
+    // Show Text
+    rankBox.style.animation = "cineTextIn 0.8s forwards";
+    levelNum.style.animation = "cineTextIn 0.8s 0.2s forwards";
+    badge.style.animation = "cineSlamBadge 0.6s forwards";
+    desc.style.animation = "cineTextIn 0.8s 0.4s forwards";
 
-    await delay(4000); // 4 Seconds to enjoy the new rank
+    // Fade flash
+    setTimeout(() => { flash.style.transition = "opacity 1.5s ease"; flash.style.opacity = '0'; }, 50);
+    
+    createParticlesAtCine(newTier.color, 80);
+    aura.style.opacity = "1";
+
+    await delay(4500); // Wait for player to enjoy result
 
     // --- EXIT ---
-    overlay.style.transition = "opacity 1.5s ease";
-    overlay.style.opacity = "0";
+    overlay.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1000, fill: 'forwards' });
     
-    await delay(1500);
-    
+    await delay(1000);
     overlay.style.display = 'none';
-    overlay.style.opacity = "1";
-    overlay.style.transition = "none";
     
-    // Clear animations for next time
-    [rankBox, levelNum, badge, desc].forEach(el => el.style.animation = "none");
-
-    // Resume Game
+    // Resume
     isPaused = false;
     updateXPBarUI();
     updateGiftButtonState();
@@ -17299,6 +17270,37 @@ async function levelUp() {
     startTiredCycle();
 }
 
+// THE MISSING FUNCTION
+function createParticlesAtCine(color, amount) {
+    const container = document.getElementById('cineParticles');
+    if (!container) return;
+    for (let i = 0; i < amount; i++) {
+        const p = document.createElement('div');
+        p.style.position = 'absolute';
+        p.style.left = '50%';
+        p.style.top = '50%';
+        p.style.width = '5px';
+        p.style.height = '5px';
+        p.style.background = color;
+        p.style.borderRadius = '50%';
+        p.style.boxShadow = `0 0 10px ${color}`;
+        
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 400 + 100;
+        const tx = Math.cos(angle) * velocity;
+        const ty = Math.sin(angle) * velocity;
+        
+        container.appendChild(p);
+        
+        p.animate([
+            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
+            { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity: 0 }
+        ], {
+            duration: 1500,
+            easing: 'cubic-bezier(0, .8, .2, 1)'
+        }).onfinish = () => p.remove();
+    }
+}
 
 
 // ==========================================
