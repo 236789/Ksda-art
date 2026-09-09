@@ -11665,11 +11665,11 @@ async function saveNewUsername() {
     return;
   }
 
-  // 2. Verificare Simboluri Frontend
-  const regex = /^[a-zA-Z0-9]+$/;
+  // 2. Verificare Simboluri Frontend (Litere, cifre, spațiu, underscore, diacritice)
+  const regex = /^[a-zA-Z0-9 _ăîșțâĂÎȘȚÂ]+$/;
   if (!regex.test(input)) {
     if (errorEl) {
-        errorEl.innerText = "Sunt permise DOAR litere și cifre (fără spații sau simboluri)!";
+        errorEl.innerText = "Sunt permise doar litere, cifre, spații, '_' și diacritice!";
         errorEl.style.display = 'block';
     }
     return;
@@ -11713,12 +11713,11 @@ async function saveNewUsername() {
       handlePlayClick(); 
       
     } else {
-      // Dacă backend-ul a respins cererea (din cauza cuvintelor interzise, etc)
       const errorMsg = await response.text();
       document.getElementById('loadingModal').style.display = 'none';
       document.getElementById('usernameModal').style.display = 'flex';
       if (errorEl) {
-          errorEl.innerText = errorMsg; // Afișează eroarea exactă de la Backend
+          errorEl.innerText = errorMsg; 
           errorEl.style.display = 'block';
       }
     }
