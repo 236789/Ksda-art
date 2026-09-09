@@ -9931,6 +9931,44 @@ div.inv-tile div.bm-limit-tag {
 .pet-modal-box-v2 {
     overflow: visible !important; /* Permite butonului să iasă în afara cutiei */
 }
+
+
+
+/* Stil pentru modalul de cumpărare (The "Buy Detail" look) */
+.cat-shop-modal {
+    background: #050505 !important;
+    border: 3px solid #ff3366 !important; /* Margine roșu-neon */
+    box-shadow: 0 0 30px rgba(255, 51, 102, 0.2) !important;
+    border-radius: 20px !important;
+    padding: 25px !important;
+    color: white;
+}
+
+.cat-price-box {
+    display: flex;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #333;
+    padding: 15px;
+    border-radius: 12px;
+    margin: 20px 0;
+}
+
+.cat-stat { display: flex; flex-direction: column; align-items: center; }
+.cat-stat-label { font-size: 9px; color: #666; text-transform: uppercase; }
+.cat-stat-val { font-family: 'Orbitron'; font-size: 16px; color: #fff; }
+
+/* Butonul CUMPĂRĂ (Stilul din poză: Gri-Argintiu Metalic) */
+.cat-buy-btn {
+    width: 100%; height: 60px;
+    background: linear-gradient(180deg, #d1d5db 0%, #6b7280 100%) !important;
+    border: 3px solid #9ca3af !important;
+    font-family: 'Montserrat'; font-weight: 900; font-size: 24px;
+    color: #000;
+    box-shadow: 0 6px 0 #374151;
+    border-radius: 10px;
+}
+.cat-buy-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #374151; }
   </style>
 </head>
 <body>
@@ -19351,24 +19389,89 @@ function closePetShop() {
 }
 
 function switchPetTab(type, btn) {
-    // 1. Schimbă active class
     document.querySelectorAll('.pm-tab-v2').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
 
-    // 2. Schimbă background-ul bordurii cutiei în funcție de tab (opțional)
-    const body = document.querySelector('.pm-body-v2');
-    
-    // 3. Update conținut
-    const content = document.getElementById('pet-content');
-    content.innerHTML = `
-        <div class="pet-empty-state">
-            <i class="fa-solid fa-screwdriver-wrench" style="font-size: 40px; margin-bottom: 10px;"></i>
-            <p>Secțiunea ${type.toUpperCase()} va veni în curând!</p>
-        </div>
-    `;
+    const grid = document.getElementById('petShopGrid');
+    grid.innerHTML = "";
+
+    if (type === 'boxes') {
+        renderPetShop();
+    } else {
+        grid.innerHTML = `<div class="pet-empty-state">Secțiune în lucru</div>`;
+    }
 }
 
+const catShopItems = [
+    { id: "cat_box_1", name: "Cufăr Pisicesc", price: 10, img: "https://i.ibb.co/1Y8tZMFz/cat-boxes.png", desc: "O cutie misterioasă cu o pisică drăgălașă înăuntru." }
+];
 
+function renderPetShop() {
+    const grid = document.getElementById('petShopGrid');
+    grid.innerHTML = "";
+    
+    catShopItems.forEach(item => {
+        const tile = document.createElement('div');
+        tile.className = "inv-tile";
+        tile.onclick = () => openCatDetail(item);
+        tile.innerHTML = `
+            <img src="${item.img}">
+            <div class="bm-ruby-tag">${item.price} <img src="https://iili.io/CrnXNdG.png"></div>
+        `;
+        grid.appendChild(tile);
+    });
+}
+
+function openCatDetail(item) {
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.style.display = 'flex';
+    modal.style.zIndex = '200000';
+    
+    modal.innerHTML = `
+        <div class="modal-box cat-shop-modal">
+            <img src="${item.img}" style="width: 100px; margin-bottom: 10px;">
+            <h2 style="color: #ff3366; font-family: 'Montserrat'; font-weight: 900;">${item.name.toUpperCase()}</h2>
+            <p style="color: #94a3b8; font-family: 'Oswald';">${item.desc}</p>
+            
+            <div class="cat-price-box">
+                <div class="cat-stat">
+                    <span class="cat-stat-label">PREȚ (RUBINE)</span>
+                    <span class="cat-stat-val">${item.price} <img src="https://iili.io/CrnXNdG.png" width="12"></span>
+                </div>
+                <div class="cat-stat">
+                    <span class="cat-stat-label">ÎN INVENTAR</span>
+                    <span class="cat-stat-val">${_GAME_DATA.inventory[item.id] || 0}</span>
+                </div>
+                <div class="cat-stat">
+                    <span class="cat-stat-label">STOC MAGAZIN</span>
+                    <span class="cat-stat-val">∞</span>
+                </div>
+            </div>
+
+            <button class="cat-buy-btn" onclick="buyCatItem('${item.id}', ${item.price})">CUMPĂRĂ</button>
+            <button class="cancel-btn" style="margin-top:15px;" onclick="this.closest('.modal-overlay').remove()">ANULEAZĂ</button>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+async function buyCatItem(id, price) {
+    if (rubies < price) {
+        showKevinutaBubble("Nu ai destule rubine!");
+        return;
+    }
+
+    rubies -= price;
+    _GAME_DATA.inventory[id] = (_GAME_DATA.inventory[id] || 0) + 1;
+    
+    updateScoreUI();
+    renderPetShop(); // Refresh grid
+    syncInventoryToCloud(); 
+    
+    document.getElementById('petShopModal').style.display = 'none'; // Închide shop-ul după cumpărare
+    showNotification("ACHIZIȚIE", "Pisicuța a fost adăugată în inventar!", "https://i.ibb.co/1Y8tZMFz/cat-boxes.png");
+}
 // ==========================================
 // 🔐 WINDOW EXPORTS
 // ==========================================
