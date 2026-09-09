@@ -9784,6 +9784,42 @@ div.inv-tile div.bm-limit-tag {
     border: 2px solid #facc15;
     background: #0a0b16;
 }
+
+
+/* PET SHOP MODAL - STIL ORGANIC (Verde/Maro) */
+.pet-modal-box {
+    background: radial-gradient(circle at top, #1a2e1a 0%, #050a05 100%) !important;
+    border: 3px solid #22c55e !important;
+    box-shadow: 0 0 40px rgba(34, 197, 94, 0.3), inset 0 0 20px rgba(0,0,0,0.9) !important;
+}
+
+/* Tab-uri tip "Frunză" */
+.pm-nav { display: flex; gap: 5px; margin-bottom: -5px; padding-left: 20px; position: relative; z-index: 10; }
+.pm-tab {
+    flex: 1; max-width: 100px; height: 45px;
+    border-radius: 12px 12px 0 0;
+    background: #143014; color: #4ade80;
+    border: 3px solid #166534; border-bottom: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: 0.2s;
+}
+.pm-tab.active { background: #166534; color: #fff; height: 55px; }
+
+/* Corpul modalului */
+.pm-body {
+    background: #061206;
+    border: 3px solid #166534;
+    border-radius: 20px;
+    padding: 20px;
+    min-height: 350px;
+}
+
+/* Placeholder pentru conținut gol */
+.pet-empty-state {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; height: 300px; color: #4ade80;
+    font-family: 'Oswald'; opacity: 0.6;
+}
   </style>
 </head>
 <body>
@@ -10515,6 +10551,31 @@ div.inv-tile div.bm-limit-tag {
   </div>
 </div>
 
+
+<!-- MODAL: PET SHOP -->
+<div id="petShopModal" class="modal-overlay" style="z-index: 100005;">
+  <div class="modal-box pet-modal-box">
+    
+    <!-- Navigare Tab-uri -->
+    <div class="pm-nav">
+      <button class="pm-tab active" onclick="switchPetTab('boxes', this)">BOX</button>
+      <button class="pm-tab" onclick="switchPetTab('eggs', this)">OUĂ</button>
+      <button class="pm-tab" onclick="switchPetTab('treats', this)">TRATAMENTE</button>
+    </div>
+
+    <!-- Corp -->
+    <div class="pm-body">
+        <div id="pet-content" class="pet-empty-state">
+            <i class="fa-solid fa-paw" style="font-size: 50px; margin-bottom: 10px;"></i>
+            <p>Această secțiune este în curs de dezvoltare...</p>
+        </div>
+    </div>
+
+    <button class="menu-btn play" style="width: 100%; height: 50px; margin-top: 15px;" onclick="closePetShop()">
+      ÎNCHIDE
+    </button>
+  </div>
+</div>
 
 
 <!-- MODAL: INFO VOCABULAR -->
@@ -19159,6 +19220,33 @@ function closeVocabModal() {
     document.getElementById('vocabInfoModal').style.display = 'none';
 }
 
+
+function openPetShop() {
+    document.getElementById('petShopModal').style.display = 'flex';
+    // Dacă vrei să oprești jocul când intri în shop
+    isPaused = true; 
+}
+
+function closePetShop() {
+    document.getElementById('petShopModal').style.display = 'none';
+    isPaused = false;
+}
+
+function switchPetTab(type, btn) {
+    // Schimbă culoarea tab-urilor
+    document.querySelectorAll('.pm-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+
+    const content = document.getElementById('pet-content');
+    content.innerHTML = `
+        <div class="pet-empty-state">
+            <i class="fa-solid fa-person-digging" style="font-size: 40px; margin-bottom: 10px;"></i>
+            <p>Secțiunea ${type.toUpperCase()} va fi disponibilă în curând!</p>
+        </div>
+    `;
+}
+
+
 // ==========================================
 // 🔐 WINDOW EXPORTS
 // ==========================================
@@ -19268,6 +19356,10 @@ window.travelToStage = travelToStage;
 window.showVocabInfo = showVocabInfo;
 window.openVocabModal = openVocabModal;
 window.closeVocabModal = closeVocabModal;
+// Nu uita să adaugi la export-ul de la finalul scriptului:
+window.openPetShop = openPetShop;
+window.closePetShop = closePetShop;
+window.switchPetTab = switchPetTab;
 
 })(); // <-- CLOSES THE SECURE VAULT
 
