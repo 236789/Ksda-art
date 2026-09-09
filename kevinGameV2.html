@@ -9707,6 +9707,30 @@ div.inv-tile div.bm-limit-tag {
     transform: scale(1.6) !important;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+    
+    
+    .kevin-speech-bubble {
+  position: fixed;
+  background: white;
+  color: black;
+  padding: 8px 12px;
+  border-radius: 15px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: bold;
+  font-size: 14px;
+  z-index: 10000;
+  pointer-events: none;
+  
+  /* ADD THESE LINES */
+  min-width: 100px;       /* Asigură o dimensiune minimă */
+  max-width: 250px;       /* Nu o lăsa să devină enormă */
+  text-align: center;     /* Centrare text uniformă */
+  
+  transform: translate(-50%, -100%) scale(1);
+  transition: opacity 0.5s, transform 0.5s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  border: 2px solid #333;
+}
   </style>
 </head>
 <body>
@@ -13135,13 +13159,18 @@ function showKevinutaBubble(text, audioObj = null) {
   document.body.appendChild(bubble);
   window.activeKevinBubble = bubble;
 
-  // Funcție care actualizează poziția bulei ca să stea fix deasupra capului personajului
-  const updatePosition = () => {
+// În funcția showKevinutaBubble din JavaScript-ul tău:
+const updatePosition = () => {
+    const kevin = document.getElementById("kevin");
+    if (!kevin) return;
+    
     const rect = kevin.getBoundingClientRect();
     bubble.style.left = `${rect.left + rect.width / 2}px`;
-    bubble.style.top = `${rect.top - 20}px`;
-  };
-
+    
+    // În loc să-l poziționăm exact deasupra, îi dăm o distanță fixă față de top-ul personajului
+    // Am scăzut 30px (înălțimea bulei aprox) pentru a fi mereu deasupra
+    bubble.style.top = `${rect.top - 40}px`; 
+};
   updatePosition();
   const positionInterval = setInterval(updatePosition, 50);
 
