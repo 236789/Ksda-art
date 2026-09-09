@@ -10029,6 +10029,29 @@ div.inv-tile div.bm-limit-tag {
     border-color: #22c55e !important;
     transform: translateY(-4px) scale(1.02);
 }
+
+/* Fix pentru spațiul imens din Grid */
+#petShopGrid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important; /* 3 coloane ca la Black Market */
+    gap: 10px !important;
+    padding: 10px !important;
+    align-content: start; /* Fix: Aliniază cardurile sus, nu le întinde */
+}
+
+/* Card mai compact */
+.pet-shop-card {
+    width: 100% !important;
+    height: 100px !important; /* Mai mic */
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #166534;
+    background: rgba(0,0,0,0.4);
+    border-radius: 12px;
+}
   </style>
 </head>
 <body>
@@ -19499,22 +19522,29 @@ function renderPetShop() {
     });
 }
 
+// Mută asta la nivelul principal al scriptului (lângă syncScoreToFirestore)
 async function buyCatItem(id, price) {
+    console.log("Încerc să cumpăr:", id, price);
+    
+    if (typeof rubies === 'undefined') rubies = 0;
+
     if (rubies < price) {
         showKevinutaBubble("Nu ai destule rubine!");
         return;
     }
 
     rubies -= price;
+    // Asigură-te că _GAME_DATA e inițializat
+    if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
     _GAME_DATA.inventory[id] = (_GAME_DATA.inventory[id] || 0) + 1;
     
     updateScoreUI();
     renderPetShop(); // Refresh la grid
-    syncInventoryToCloud(); // Salvează în Firebase
+    syncInventoryToCloud(); 
     
     // Închide modalul de detalii (dacă există)
-    const detailModal = document.querySelector('.cat-shop-modal')?.closest('.modal-overlay');
-    if (detailModal) detailModal.remove();
+    const modal = document.querySelector('.modal-overlay[style*="display: flex"]');
+    if (modal) modal.remove();
     
     showNotification("ACHIZIȚIE", "Obiectul a fost adăugat în inventar!", "https://i.ibb.co/1Y8tZMFz/cat-boxes.png");
 }
@@ -19682,6 +19712,7 @@ window.closeVocabModal = closeVocabModal;
 window.openPetShop = openPetShop;
 window.closePetShop = closePetShop;
 window.switchPetTab = switchPetTab;
+window.buyCatItem = buyCatItem; // <--- ACEASTA LIPSEA ȘI DĂ EROAREA
 
 })(); // <-- CLOSES THE SECURE VAULT
 
