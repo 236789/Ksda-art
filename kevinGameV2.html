@@ -9969,6 +9969,66 @@ div.inv-tile div.bm-limit-tag {
     border-radius: 10px;
 }
 .cat-buy-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #374151; }
+
+
+/* Stil pentru cardurile din Pet Shop să arate ca în Black Market */
+#petShopGrid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* 2 coloane ca în imaginea ta */
+    gap: 15px !important;
+    padding: 10px !important;
+}
+
+.pet-shop-card {
+    width: 100% !important;
+    height: 125px !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0,0,0,0.6)) !important;
+    border: 3px solid #064e3b !important; /* Verde închis */
+    border-radius: 16px !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.8) !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.pet-shop-card:hover {
+    border-color: #22c55e !important;
+    transform: translateY(-4px) scale(1.02);
+}
+
+
+/* Stil pentru cardurile din Pet Shop să arate ca în Black Market */
+#petShopGrid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* 2 coloane ca în imaginea ta */
+    gap: 15px !important;
+    padding: 10px !important;
+}
+
+.pet-shop-card {
+    width: 100% !important;
+    height: 125px !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0,0,0,0.6)) !important;
+    border: 3px solid #064e3b !important; /* Verde închis */
+    border-radius: 16px !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.8) !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.pet-shop-card:hover {
+    border-color: #22c55e !important;
+    transform: translateY(-4px) scale(1.02);
+}
   </style>
 </head>
 <body>
@@ -11183,6 +11243,7 @@ div.inv-tile div.bm-limit-tag {
     <div class="pm-body-v2">
         <div class="pm-inner-v2" id="pet-content">
             <!-- Conținutul tău aici -->
+        <div id="petShopGrid" class="inventory-v1-grid"></div>
         </div>
     </div>
 
@@ -19421,21 +19482,43 @@ const catShopItems = [
 
 function renderPetShop() {
     const grid = document.getElementById('petShopGrid');
-    if (!grid) return; // Protecție: dacă grid-ul nu există, nu face nimic
+    if (!grid) return;
     
     grid.innerHTML = "";
     
     catShopItems.forEach(item => {
         const tile = document.createElement('div');
-        tile.className = "inv-tile";
+        tile.className = "pet-shop-card"; // Clasa nouă pentru stil
         tile.onclick = () => openCatDetail(item);
+        
         tile.innerHTML = `
-            <img src="${item.img}">
             <div class="bm-ruby-tag">${item.price} <img src="https://iili.io/CrnXNdG.png"></div>
+            <img src="${item.img}" style="width: 60px; height: 60px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8));">
         `;
         grid.appendChild(tile);
     });
 }
+
+async function buyCatItem(id, price) {
+    if (rubies < price) {
+        showKevinutaBubble("Nu ai destule rubine!");
+        return;
+    }
+
+    rubies -= price;
+    _GAME_DATA.inventory[id] = (_GAME_DATA.inventory[id] || 0) + 1;
+    
+    updateScoreUI();
+    renderPetShop(); // Refresh la grid
+    syncInventoryToCloud(); // Salvează în Firebase
+    
+    // Închide modalul de detalii (dacă există)
+    const detailModal = document.querySelector('.cat-shop-modal')?.closest('.modal-overlay');
+    if (detailModal) detailModal.remove();
+    
+    showNotification("ACHIZIȚIE", "Obiectul a fost adăugat în inventar!", "https://i.ibb.co/1Y8tZMFz/cat-boxes.png");
+}
+
 function openCatDetail(item) {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
