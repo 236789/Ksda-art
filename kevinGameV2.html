@@ -19378,9 +19378,13 @@ function closeVocabModal() {
 
 
 function openPetShop() {
+    document.getElementById('utilitiesModal').style.display = 'none';
     document.getElementById('petShopModal').style.display = 'flex';
-    // Dacă vrei să oprești jocul când intri în shop
     isPaused = true; 
+    
+    // FORȚEAZĂ AFIȘAREA PRIMULUI TAB LA DESCHIDERE
+    const firstTab = document.querySelector('.pm-tab-v2');
+    if(firstTab) switchPetTab('boxes', firstTab);
 }
 
 function closePetShop() {
@@ -19392,13 +19396,22 @@ function switchPetTab(type, btn) {
     document.querySelectorAll('.pm-tab-v2').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
 
+    const content = document.getElementById('pet-content');
+    
+    // Înlocuim conținutul cu un container nou
+    content.innerHTML = `
+        <div id="petShopGrid" class="inventory-v1-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%;">
+            <!-- Aici se va popula -->
+        </div>
+    `;
+
+    // Acum că am creat elementul mai sus, putem să-l selectăm
     const grid = document.getElementById('petShopGrid');
-    grid.innerHTML = "";
 
     if (type === 'boxes') {
-        renderPetShop();
+        renderPetShop(); // Aici populăm grid-ul dacă e tab-ul de boxes
     } else {
-        grid.innerHTML = `<div class="pet-empty-state">Secțiune în lucru</div>`;
+        grid.innerHTML = `<div class="pet-empty-state">Secțiunea ${type.toUpperCase()} va fi disponibilă în curând!</div>`;
     }
 }
 
@@ -19408,6 +19421,8 @@ const catShopItems = [
 
 function renderPetShop() {
     const grid = document.getElementById('petShopGrid');
+    if (!grid) return; // Protecție: dacă grid-ul nu există, nu face nimic
+    
     grid.innerHTML = "";
     
     catShopItems.forEach(item => {
@@ -19421,7 +19436,6 @@ function renderPetShop() {
         grid.appendChild(tile);
     });
 }
-
 function openCatDetail(item) {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
