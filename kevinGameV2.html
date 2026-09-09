@@ -9894,6 +9894,29 @@ div.inv-tile div.bm-limit-tag {
     justify-content: center;
     color: #22c55e;
 }
+
+/* BUTON X FLOATING (Stil Piața Neagră adaptat pentru Pet Shop) */
+.pm-close-v2 {
+    position: absolute;
+    top: 35px; /* Ancorat fix pe rama verde superioară */
+    right: -10px; 
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #22c55e, #166534);
+    border: 3px solid #86efac; 
+    color: #fff;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 20;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 0 10px rgba(255,255,255,0.4);
+    transition: transform 0.1s ease;
+}
+
+.pm-close-v2:active { transform: scale(0.9); }
   </style>
 </head>
 <body>
@@ -11087,8 +11110,14 @@ div.inv-tile div.bm-limit-tag {
 <div id="petShopModal" class="modal-overlay" style="z-index: 100005;">
   <div class="modal-box pet-modal-box-v2">
     
+    <!-- BUTONUL X FLOATING -->
+    <button class="pm-close-v2" onclick="closePetShop()">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+
     <!-- Tab-uri cu Iconițe -->
     <div class="pm-nav-v2">
+      <!-- ... restul tab-urilor rămân la fel ... -->
       <button class="pm-tab-v2 active" onclick="switchPetTab('boxes', this)">
         <i class="fa-solid fa-box-open"></i>
       </button>
@@ -11103,12 +11132,10 @@ div.inv-tile div.bm-limit-tag {
     <!-- Corp -->
     <div class="pm-body-v2">
         <div class="pm-inner-v2" id="pet-content">
-            <div class="pet-empty-state">
-                <i class="fa-solid fa-paw" style="font-size: 50px;"></i>
-                <p>Secțiune goală</p>
-            </div>
+            <!-- Conținutul tău aici -->
         </div>
     </div>
+
   </div>
 </div>
 
