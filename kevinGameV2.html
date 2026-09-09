@@ -9971,49 +9971,91 @@ div.inv-tile div.bm-limit-tag {
 .cat-buy-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #374151; }
 
 
-/* ==========================================
-   PET SHOP GRID - OPTIMIZAT
-   ========================================== */
+/* --- FIX 1 & 2: REPARARE CONTAINER & X --- */
+.pet-modal-box-v2 {
+    width: 95vw !important;
+    max-width: 480px !important;
+    position: relative !important;
+    margin-top: 50px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: transparent !important;
+    overflow: visible !important; /* Esențial pentru butonul X */
+}
 
-/* Grid-ul - 3 coloane, aliniat sus */
+.pm-close-v2 {
+    position: absolute;
+    top: -15px; 
+    right: -10px; /* Ajustat ușor */
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #22c55e, #166534);
+    border: 3px solid #ffffff;
+    color: #fff;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+/* --- FIX 3: PREȚUL ȘI GRID-UL --- */
 #petShopGrid {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important; 
-    gap: 12px !important;
-    padding: 10px 5px !important;
-    align-content: start !important;
+    gap: 10px !important;
+    padding: 5px !important;
     width: 100% !important;
 }
 
-/* Cardul unic - Stil Premium Organic */
 .pet-shop-card {
+    position: relative; /* Pentru ca eticheta de preț să stea corect */
     width: 100% !important;
-    height: 100px !important; /* Înălțime fixă pentru consistență */
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0,0,0,0.6)) !important;
-    border: 3px solid #166534 !important; /* Verde închis */
-    border-radius: 16px !important;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.8) !important;
+    height: 90px !important; /* Redus puțin */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    position: relative;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0,0,0,0.6)) !important;
+    border: 2px solid #166534 !important;
+    border-radius: 12px !important;
 }
 
-.pet-shop-card:hover {
-    border-color: #22c55e !important;
-    transform: translateY(-4px) scale(1.05);
-    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3) !important;
+/* Badge-ul de preț (Reparat) */
+.bm-ruby-tag {
+    position: absolute !important;
+    top: 5px !important;
+    left: 5px !important;
+    background: #ff3366 !important;
+    color: #fff !important;
+    font-size: 10px !important; /* Mult mai mic */
+    font-weight: 900 !important;
+    padding: 2px 5px !important;
+    border-radius: 4px !important;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    z-index: 10;
 }
 
-/* Fix imagine în card */
+.bm-ruby-tag img {
+    width: 10px !important; /* Rubinul mic */
+    height: 10px !important;
+}
+
+/* Fix spațiu gol (min-height dinamic) */
+.pm-inner-v2 {
+    min-height: auto !important; /* Nu mai forțăm 350px */
+    padding: 15px !important;
+}
+
 .pet-shop-card img {
-    width: 50px !important;
-    height: 50px !important;
-    object-fit: contain;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+    width: 40px !important;
+    height: 40px !important;
+    margin-top: 5px;
 }
   </style>
 </head>
