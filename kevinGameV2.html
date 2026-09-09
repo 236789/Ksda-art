@@ -9971,19 +9971,26 @@ div.inv-tile div.bm-limit-tag {
 .cat-buy-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #374151; }
 
 
-/* Stil pentru cardurile din Pet Shop să arate ca în Black Market */
+/* ==========================================
+   PET SHOP GRID - OPTIMIZAT
+   ========================================== */
+
+/* Grid-ul - 3 coloane, aliniat sus */
 #petShopGrid {
     display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important; /* 2 coloane ca în imaginea ta */
-    gap: 15px !important;
-    padding: 10px !important;
+    grid-template-columns: repeat(3, 1fr) !important; 
+    gap: 12px !important;
+    padding: 10px 5px !important;
+    align-content: start !important;
+    width: 100% !important;
 }
 
+/* Cardul unic - Stil Premium Organic */
 .pet-shop-card {
     width: 100% !important;
-    height: 125px !important;
+    height: 100px !important; /* Înălțime fixă pentru consistență */
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0,0,0,0.6)) !important;
-    border: 3px solid #064e3b !important; /* Verde închis */
+    border: 3px solid #166534 !important; /* Verde închis */
     border-radius: 16px !important;
     box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.8) !important;
     display: flex;
@@ -9991,66 +9998,22 @@ div.inv-tile div.bm-limit-tag {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
 }
 
 .pet-shop-card:hover {
     border-color: #22c55e !important;
-    transform: translateY(-4px) scale(1.02);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3) !important;
 }
 
-
-/* Stil pentru cardurile din Pet Shop să arate ca în Black Market */
-#petShopGrid {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important; /* 2 coloane ca în imaginea ta */
-    gap: 15px !important;
-    padding: 10px !important;
-}
-
-.pet-shop-card {
-    width: 100% !important;
-    height: 125px !important;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0,0,0,0.6)) !important;
-    border: 3px solid #064e3b !important; /* Verde închis */
-    border-radius: 16px !important;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.8) !important;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-}
-
-.pet-shop-card:hover {
-    border-color: #22c55e !important;
-    transform: translateY(-4px) scale(1.02);
-}
-
-/* Fix pentru spațiul imens din Grid */
-#petShopGrid {
-    display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important; /* 3 coloane ca la Black Market */
-    gap: 10px !important;
-    padding: 10px !important;
-    align-content: start; /* Fix: Aliniază cardurile sus, nu le întinde */
-}
-
-/* Card mai compact */
-.pet-shop-card {
-    width: 100% !important;
-    height: 100px !important; /* Mai mic */
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #166534;
-    background: rgba(0,0,0,0.4);
-    border-radius: 12px;
+/* Fix imagine în card */
+.pet-shop-card img {
+    width: 50px !important;
+    height: 50px !important;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
 }
   </style>
 </head>
@@ -19583,22 +19546,7 @@ function openCatDetail(item) {
     document.body.appendChild(modal);
 }
 
-async function buyCatItem(id, price) {
-    if (rubies < price) {
-        showKevinutaBubble("Nu ai destule rubine!");
-        return;
-    }
 
-    rubies -= price;
-    _GAME_DATA.inventory[id] = (_GAME_DATA.inventory[id] || 0) + 1;
-    
-    updateScoreUI();
-    renderPetShop(); // Refresh grid
-    syncInventoryToCloud(); 
-    
-    document.getElementById('petShopModal').style.display = 'none'; // Închide shop-ul după cumpărare
-    showNotification("ACHIZIȚIE", "Pisicuța a fost adăugată în inventar!", "https://i.ibb.co/1Y8tZMFz/cat-boxes.png");
-}
 // ==========================================
 // 🔐 WINDOW EXPORTS
 // ==========================================
