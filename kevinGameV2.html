@@ -9971,91 +9971,86 @@ div.inv-tile div.bm-limit-tag {
 .cat-buy-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #374151; }
 
 
-/* --- FIX 1 & 2: REPARARE CONTAINER & X --- */
-.pet-modal-box-v2 {
-    width: 95vw !important;
-    max-width: 480px !important;
-    position: relative !important;
-    margin-top: 50px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    background: transparent !important;
-    overflow: visible !important; /* Esențial pentru butonul X */
-}
-
-.pm-close-v2 {
-    position: absolute;
-    top: -15px; 
-    right: -10px; /* Ajustat ușor */
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(180deg, #22c55e, #166534);
-    border: 3px solid #ffffff;
-    color: #fff;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 100;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-}
-
-/* --- FIX 3: PREȚUL ȘI GRID-UL --- */
+/* Stil pentru cardurile din Pet Shop să arate ca în Black Market */
 #petShopGrid {
     display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important; 
-    gap: 10px !important;
-    padding: 5px !important;
-    width: 100% !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* 2 coloane ca în imaginea ta */
+    gap: 15px !important;
+    padding: 10px !important;
 }
 
 .pet-shop-card {
-    position: relative; /* Pentru ca eticheta de preț să stea corect */
     width: 100% !important;
-    height: 90px !important; /* Redus puțin */
+    height: 125px !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0,0,0,0.6)) !important;
+    border: 3px solid #064e3b !important; /* Verde închis */
+    border-radius: 16px !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.8) !important;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.pet-shop-card:hover {
+    border-color: #22c55e !important;
+    transform: translateY(-4px) scale(1.02);
+}
+
+
+/* Stil pentru cardurile din Pet Shop să arate ca în Black Market */
+#petShopGrid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* 2 coloane ca în imaginea ta */
+    gap: 15px !important;
+    padding: 10px !important;
+}
+
+.pet-shop-card {
+    width: 100% !important;
+    height: 125px !important;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0,0,0,0.6)) !important;
-    border: 2px solid #166534 !important;
-    border-radius: 12px !important;
-}
-
-/* Badge-ul de preț (Reparat) */
-.bm-ruby-tag {
-    position: absolute !important;
-    top: 5px !important;
-    left: 5px !important;
-    background: #ff3366 !important;
-    color: #fff !important;
-    font-size: 10px !important; /* Mult mai mic */
-    font-weight: 900 !important;
-    padding: 2px 5px !important;
-    border-radius: 4px !important;
+    border: 3px solid #064e3b !important; /* Verde închis */
+    border-radius: 16px !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.8) !important;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 3px;
-    z-index: 10;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
 }
 
-.bm-ruby-tag img {
-    width: 10px !important; /* Rubinul mic */
-    height: 10px !important;
+.pet-shop-card:hover {
+    border-color: #22c55e !important;
+    transform: translateY(-4px) scale(1.02);
 }
 
-/* Fix spațiu gol (min-height dinamic) */
-.pm-inner-v2 {
-    min-height: auto !important; /* Nu mai forțăm 350px */
-    padding: 15px !important;
+/* Fix pentru spațiul imens din Grid */
+#petShopGrid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important; /* 3 coloane ca la Black Market */
+    gap: 10px !important;
+    padding: 10px !important;
+    align-content: start; /* Fix: Aliniază cardurile sus, nu le întinde */
 }
 
-.pet-shop-card img {
-    width: 40px !important;
-    height: 40px !important;
-    margin-top: 5px;
+/* Card mai compact */
+.pet-shop-card {
+    width: 100% !important;
+    height: 100px !important; /* Mai mic */
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #166534;
+    background: rgba(0,0,0,0.4);
+    border-radius: 12px;
 }
   </style>
 </head>
@@ -19588,7 +19583,22 @@ function openCatDetail(item) {
     document.body.appendChild(modal);
 }
 
+async function buyCatItem(id, price) {
+    if (rubies < price) {
+        showKevinutaBubble("Nu ai destule rubine!");
+        return;
+    }
 
+    rubies -= price;
+    _GAME_DATA.inventory[id] = (_GAME_DATA.inventory[id] || 0) + 1;
+    
+    updateScoreUI();
+    renderPetShop(); // Refresh grid
+    syncInventoryToCloud(); 
+    
+    document.getElementById('petShopModal').style.display = 'none'; // Închide shop-ul după cumpărare
+    showNotification("ACHIZIȚIE", "Pisicuța a fost adăugată în inventar!", "https://i.ibb.co/1Y8tZMFz/cat-boxes.png");
+}
 // ==========================================
 // 🔐 WINDOW EXPORTS
 // ==========================================
