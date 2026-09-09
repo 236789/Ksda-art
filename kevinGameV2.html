@@ -17446,6 +17446,15 @@ async function levelUp() {
     isPaused = true;
     clearInterval(moveKevinInterval);
 
+    // ==========================================
+    // 🛑 PRELOADER: Forțăm descărcarea imaginilor ÎNAINTE de animație
+    // ==========================================
+    await Promise.all([
+        preloadImage(oldBadgeUrl),
+        preloadImage(newBadgeUrl),
+        preloadImage(xpIconUrl)
+    ]);
+
     const overlay = document.getElementById('cinematicOverlay');
     const dynamicBg = document.getElementById('cineDynamicBg');
     const contentWrapper = document.getElementById('cineContentWrapper');
@@ -17483,12 +17492,10 @@ async function levelUp() {
     let currentBadgeScale = 1;
     
     for (let i = 1; i <= 5; i++) {
-        // 1. Creăm un element XP
         const xp = document.createElement('img');
         xp.src = xpIconUrl;
         xp.className = 'cine-xp-particle';
         
-        // 2. Generăm o poziție de start în afara razei centrale
         const angle = Math.random() * Math.PI * 2;
         const distance = window.innerWidth / 2 + 100; 
         const startX = window.innerWidth / 2 + Math.cos(angle) * distance;
@@ -17498,12 +17505,10 @@ async function levelUp() {
         xp.style.top = `${startY}px`;
         overlay.appendChild(xp);
 
-        // 3. Calculăm coordonatele centrului emblemei
         const badgeRect = badgeImg.getBoundingClientRect();
-        const targetX = badgeRect.left + badgeRect.width / 2 - 22; // -22 pt a centra imaginea de 45px
+        const targetX = badgeRect.left + badgeRect.width / 2 - 22; 
         const targetY = badgeRect.top + badgeRect.height / 2 - 22;
 
-        // 4. Animația de zbor (Din ce în ce mai rapidă)
         const duration = 600 - (i * 60); 
         
         const flight = xp.animate([
@@ -17513,40 +17518,35 @@ async function levelUp() {
 
         await new Promise(r => flight.onfinish = r);
         
-        // 5. IMPACT!
         xp.remove();
-        if (typeof playSFX === 'function') playSFX(popSounds[0]); // Sunet de hit
+        if (typeof playSFX === 'function') playSFX(popSounds[0]); 
         
-        // Creștem emblema
         currentBadgeScale += 0.08; 
         badgeImg.style.setProperty('--current-scale', currentBadgeScale);
         badgeImg.style.transform = `scale(${currentBadgeScale})`;
         
-        // Tremurăm emblema
         badgeImg.classList.remove('badge-hit-anim');
         void badgeImg.offsetWidth; 
         badgeImg.classList.add('badge-hit-anim');
 
-        if (i < 5) await delay(150); // Pauză scurtă între XP-uri
+        if (i < 5) await delay(150); 
     }
 
     // ==========================================
     // FAZA 3: EVOLUȚIA (GLITCH & FLASH ALB)
     // ==========================================
     await delay(300);
-    if (typeof playSFX === 'function') playSFX(slotWooshUrl); // Sunet de încărcare energie
+    if (typeof playSFX === 'function') playSFX(slotWooshUrl); 
 
-    // Transformăm emblema într-o lumină albă orbitoare
     badgeImg.classList.add('badge-evolve-flash');
     
-    await delay(350); // Așteptăm să ajungă la luminozitate maximă
+    await delay(350); 
 
     // ==========================================
-    // FAZA 4: REVEAL NOUL NIVEL (În timp ce e albă)
+    // FAZA 4: REVEAL NOUL NIVEL
     // ==========================================
-    if (typeof playSFX === 'function') playSFX(slotJackpotUrl); // BUM!
+    if (typeof playSFX === 'function') playSFX(slotJackpotUrl); 
     
-    // Actualizăm datele în fundal
     playerLevel = newLvl;
     playerXP = Math.max(0, playerXP - xpToNextLevel); 
     xpToNextLevel = getXPRequired(playerLevel);
@@ -17555,21 +17555,18 @@ async function levelUp() {
     dynamicBg.style.background = `radial-gradient(circle at center, ${newTier.color}66 0%, #020205 80%)`;
     
     document.getElementById('cineLevelLabel').innerText = `LEVEL ${newLvl}`;
-    badgeImg.src = newBadgeUrl; // SCHIMBĂM IMAGINEA
+    badgeImg.src = newBadgeUrl; // Acum se va schimba instantaneu, fiind deja în memorie!
     document.getElementById('cineRankName').innerText = newTier.name;
     document.getElementById('cineFlavorText').innerText = `"${flavorText}"`;
     document.getElementById('cineFlavorText').style.opacity = "1";
 
-    // Explozie de particule în culoarea noului nivel
     createParticlesAtCine(newTier.color, 120);
 
-    // Luăm lumina albă de pe emblemă și o lovim cu un "bounce" înapoi la mărimea normală
     badgeImg.classList.remove('badge-evolve-flash');
     badgeImg.classList.remove('badge-hit-anim');
     badgeImg.style.transform = "scale(1)";
     badgeImg.style.filter = `drop-shadow(0 15px 25px rgba(0,0,0,0.8))`;
 
-    // Lăsăm jucătorul să admire 4 secunde
     await delay(4000);
 
     // ==========================================
@@ -17583,7 +17580,6 @@ async function levelUp() {
     overlay.style.display = 'none';
     overlay.style.transition = "none";
     
-    // Reluăm jocul
     isPaused = false;
     updateXPBarUI();
     updateGiftButtonState();
@@ -17591,7 +17587,6 @@ async function levelUp() {
     startKevinMovement();
     startTiredCycle();
 }
-
 function createParticlesAtCine(color, amount) {
     const container = document.getElementById('cineParticlesLayer');
     container.innerHTML = ""; // Curățăm particulele vechi
