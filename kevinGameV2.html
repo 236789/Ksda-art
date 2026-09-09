@@ -11084,28 +11084,31 @@ div.inv-tile div.bm-limit-tag {
   </div>
 </div>
 
-<!-- MODAL: PET SHOP -->
 <div id="petShopModal" class="modal-overlay" style="z-index: 100005;">
-  <div class="modal-box pet-modal-box">
+  <div class="modal-box pet-modal-box-v2">
     
-    <!-- Navigare Tab-uri -->
-    <div class="pm-nav">
-      <button class="pm-tab active" onclick="switchPetTab('boxes', this)">BOX</button>
-      <button class="pm-tab" onclick="switchPetTab('eggs', this)">OUĂ</button>
-      <button class="pm-tab" onclick="switchPetTab('treats', this)">TRATAMENTE</button>
+    <!-- Tab-uri cu Iconițe -->
+    <div class="pm-nav-v2">
+      <button class="pm-tab-v2 active" onclick="switchPetTab('boxes', this)">
+        <i class="fa-solid fa-box-open"></i>
+      </button>
+      <button class="pm-tab-v2" onclick="switchPetTab('eggs', this)">
+        <i class="fa-solid fa-egg"></i>
+      </button>
+      <button class="pm-tab-v2" onclick="switchPetTab('treats', this)">
+        <i class="fa-solid fa-cookie-bite"></i>
+      </button>
     </div>
 
     <!-- Corp -->
-    <div class="pm-body">
-        <div id="pet-content" class="pet-empty-state">
-            <i class="fa-solid fa-paw" style="font-size: 50px; margin-bottom: 10px;"></i>
-            <p>Această secțiune este în curs de dezvoltare...</p>
+    <div class="pm-body-v2">
+        <div class="pm-inner-v2" id="pet-content">
+            <div class="pet-empty-state">
+                <i class="fa-solid fa-paw" style="font-size: 50px;"></i>
+                <p>Secțiune goală</p>
+            </div>
         </div>
     </div>
-
-    <button class="menu-btn play" style="width: 100%; height: 50px; margin-top: 15px;" onclick="closePetShop()">
-      ÎNCHIDE
-    </button>
   </div>
 </div>
 
@@ -19309,15 +19312,19 @@ function closePetShop() {
 }
 
 function switchPetTab(type, btn) {
-    // Schimbă culoarea tab-urilor
-    document.querySelectorAll('.pm-tab').forEach(t => t.classList.remove('active'));
+    // 1. Schimbă active class
+    document.querySelectorAll('.pm-tab-v2').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
 
+    // 2. Schimbă background-ul bordurii cutiei în funcție de tab (opțional)
+    const body = document.querySelector('.pm-body-v2');
+    
+    // 3. Update conținut
     const content = document.getElementById('pet-content');
     content.innerHTML = `
         <div class="pet-empty-state">
-            <i class="fa-solid fa-person-digging" style="font-size: 40px; margin-bottom: 10px;"></i>
-            <p>Secțiunea ${type.toUpperCase()} va fi disponibilă în curând!</p>
+            <i class="fa-solid fa-screwdriver-wrench" style="font-size: 40px; margin-bottom: 10px;"></i>
+            <p>Secțiunea ${type.toUpperCase()} va veni în curând!</p>
         </div>
     `;
 }
