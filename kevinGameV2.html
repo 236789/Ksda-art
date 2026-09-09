@@ -9649,6 +9649,33 @@ div.inv-tile div.bm-limit-tag {
     position: absolute; inset: 0; background: #fff;
     opacity: 0; z-index: 100; pointer-events: none;
 }
+
+
+/* --- CINEMATIC TENSION ANIMATIONS --- */
+@keyframes cineShakeFixed {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-3px, 3px) rotate(-1deg); }
+    50% { transform: translate(3px, -3px) rotate(1deg); }
+    75% { transform: translate(-3px, -3px) rotate(0deg); }
+    100% { transform: translate(0, 0); }
+}
+
+@keyframes cineGlitchFixed {
+    0% { filter: hue-rotate(0deg) contrast(1) brightness(1); transform: scale(1); }
+    20% { filter: hue-rotate(90deg) contrast(2) brightness(1.5); transform: scale(1.1) skewX(5deg); }
+    40% { filter: hue-rotate(-90deg) contrast(3) brightness(2); transform: scale(0.9) skewX(-5deg); }
+    60% { filter: hue-rotate(180deg) contrast(1) brightness(1.2); transform: scale(1.05); }
+    80% { filter: hue-rotate(45deg) contrast(2) brightness(2); transform: scale(1.15) skewY(2deg); }
+    100% { filter: hue-rotate(0deg) contrast(1) brightness(1); transform: scale(1); }
+}
+
+.cine-shaking {
+    animation: cineShakeFixed 0.1s infinite !important;
+}
+
+.cine-glitching {
+    animation: cineGlitchFixed 0.15s infinite !important;
+}
   </style>
 </head>
 <body>
@@ -17373,110 +17400,128 @@ async function levelUp() {
     const MAX_LEVEL = 25;
     if (playerLevel >= MAX_LEVEL) return;
 
-    // Setările noului nivel
+    // 1. Pregătim datele pentru AMBELE niveluri (Vechi și Nou)
+    const oldLvl = playerLevel;
     const newLvl = playerLevel + 1;
+    
+    const oldTier = mapTiers[oldLvl - 1];
     const newTier = mapTiers[newLvl - 1];
     
-    // Obținem textul din registru pentru noul nivel!
+    const oldBadgeUrl = `https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/badges/${oldTier.fileName}`;
+    const newBadgeUrl = `https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/badges/${newTier.fileName}`;
+
     const rewardData = LEVEL_REWARDS_REGISTRY[newLvl];
     const flavorText = rewardData ? rewardData.message : "Continuă să urci!";
 
-    // Url-ul de la GitHub folosind fileName
-    const badgeUrl = `https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/badges/${newTier.fileName}`;
-
+    // Oprim jocul pe fundal
     isPaused = true;
     clearInterval(moveKevinInterval);
     
     const overlay = document.getElementById('cinematicOverlay');
     const dynamicBg = document.getElementById('cineDynamicBg');
     const contentWrapper = document.getElementById('cineContentWrapper');
+    const badgeImg = document.getElementById('cineBadgeImg');
     const flash = document.getElementById('cineFlash');
 
-    // 1. Aplicăm culorile tematice (Folosind variabile CSS pe Wrapper)
-    contentWrapper.style.setProperty('--tier-color', newTier.color);
-    dynamicBg.style.background = `radial-gradient(circle at center, ${newTier.color}66 0%, #020205 80%)`;
+    // ==========================================
+    // FAZA 1: INTRAREA (NIVELUL VECHI)
+    // ==========================================
+    // Setăm culorile și textele VECHI
+    contentWrapper.style.setProperty('--tier-color', oldTier.color);
+    dynamicBg.style.background = `radial-gradient(circle at center, ${oldTier.color}44 0%, #020205 80%)`;
+    
+    document.getElementById('cineLevelLabel').innerText = `LEVEL ${oldLvl}`;
+    badgeImg.src = oldBadgeUrl;
+    document.getElementById('cineRankName').innerText = oldTier.name;
+    document.getElementById('cineFlavorText').innerText = "Evoluție iminentă...";
+    document.getElementById('cineFlavorText').style.opacity = "0.5"; // Dim text initially
 
-    // 2. Populăm datele (DOAR PENTRU NOUL NIVEL!)
-    document.getElementById('cineLevelLabel').innerText = `LEVEL ${newLvl}`;
-    document.getElementById('cineBadgeImg').src = badgeUrl;
-    document.getElementById('cineRankName').innerText = newTier.name;
-    document.getElementById('cineFlavorText').innerText = `"${flavorText}"`;
-
-    // 3. Pornim animația - Partea 1: Flash orbitor
     overlay.style.display = 'block';
     overlay.style.opacity = '1';
-    contentWrapper.classList.remove('cine-show-content');
-    contentWrapper.style.opacity = '0';
     
-    flash.style.opacity = '1';
+    // Animația de intrare a nivelului vechi
+    contentWrapper.classList.remove('cine-show-content');
+    void contentWrapper.offsetWidth; // Trigger reflow
+    contentWrapper.classList.add('cine-show-content');
+
+    // Lăsăm jucătorul să vadă nivelul vechi timp de 2 secunde
+    await delay(2000);
+
+    // ==========================================
+    // FAZA 2: TENSIUNEA (SHAKE & GLITCH)
+    // ==========================================
+    if (typeof playSFX === 'function') playSFX(slotWooshUrl); // Sunet de tensiune
+    
+    contentWrapper.classList.add('cine-shaking');
+    badgeImg.classList.add('cine-glitching');
+    
+    // Așteptăm 1.5 secunde în timp ce ecranul tremură și culorile o iau razna
+    await delay(1500);
+
+    // ==========================================
+    // FAZA 3: IMPACTUL (FLASH-UL ALB)
+    // ==========================================
+    flash.style.transition = "none";
+    flash.style.opacity = '1'; // BANG! Ecran complet alb
     if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
 
-    // Salvăm noul nivel
+    // Oprim tremuratul
+    contentWrapper.classList.remove('cine-shaking');
+    badgeImg.classList.remove('cine-glitching');
+
+    // 🚨 APLICĂM NOILE DATE ÎN TIMP CE ECRANUL E ALB 🚨
     playerLevel = newLvl;
     playerXP = Math.max(0, playerXP - xpToNextLevel); 
     xpToNextLevel = getXPRequired(playerLevel);
 
-    // 4. Partea 2: Flash-ul dispare, cutia intră glorios în ecran
-    setTimeout(() => { 
-        flash.style.transition = "opacity 0.8s ease-out";
-        flash.style.opacity = '0'; 
-        
-        contentWrapper.classList.add('cine-show-content');
-        createParticlesAtCine(newTier.color, 120);
-    }, 100);
+    contentWrapper.style.setProperty('--tier-color', newTier.color);
+    dynamicBg.style.background = `radial-gradient(circle at center, ${newTier.color}66 0%, #020205 80%)`;
+    
+    document.getElementById('cineLevelLabel').innerText = `LEVEL ${newLvl}`;
+    badgeImg.src = newBadgeUrl;
+    document.getElementById('cineRankName').innerText = newTier.name;
+    document.getElementById('cineFlavorText').innerText = `"${flavorText}"`;
+    document.getElementById('cineFlavorText').style.opacity = "1";
 
-    // 5. Menținem ecranul timp de 4 secunde ca jucătorul să admire
+    // Explozie de particule cu noua culoare
+    createParticlesAtCine(newTier.color, 150);
+
+    // Așteptăm 100ms ca browserul să randeze noile imagini sub flash
+    await delay(100);
+
+    // ==========================================
+    // FAZA 4: DEZVĂLUIREA NOULUI NIVEL
+    // ==========================================
+    flash.style.transition = "opacity 1.5s ease-out"; // Se stinge încet
+    flash.style.opacity = '0';
+
+    // Badge-ul pulsează grandios la apariție
+    badgeImg.animate([
+        { transform: 'scale(1.5)', filter: 'brightness(3)' },
+        { transform: 'scale(1)', filter: 'brightness(1)' }
+    ], { duration: 1000, easing: 'ease-out' });
+
+    // Lăsăm jucătorul să admire noul nivel timp de 4 secunde
     await delay(4000);
 
-    // 6. Ieșire lină
-    overlay.style.transition = "opacity 0.6s ease-in";
+    // ==========================================
+    // FAZA 5: IEȘIREA
+    // ==========================================
+    overlay.style.transition = "opacity 0.8s ease-in";
     overlay.style.opacity = "0";
     
-    await delay(600);
+    await delay(800);
     
     overlay.style.display = 'none';
     overlay.style.transition = "none";
     
-    // Reluăm jocul
+    // Reluăm jocul și actualizăm interfața din spate
     isPaused = false;
     updateXPBarUI();
     updateGiftButtonState();
     syncScoreToFirestore();
     startKevinMovement();
     startTiredCycle();
-}
-
-function createParticlesAtCine(color, amount) {
-    const container = document.getElementById('cineParticlesLayer');
-    container.innerHTML = ""; // Curățăm particulele vechi
-    
-    for (let i = 0; i < amount; i++) {
-        const p = document.createElement('div');
-        p.style.position = 'absolute';
-        p.style.left = '50%';
-        p.style.top = '50%';
-        p.style.width = Math.random() * 6 + 4 + 'px';
-        p.style.height = p.style.width;
-        p.style.background = color;
-        p.style.borderRadius = '50%';
-        p.style.boxShadow = `0 0 15px ${color}, 0 0 30px #fff`;
-        p.style.zIndex = '5';
-        
-        const angle = Math.random() * Math.PI * 2;
-        const velocity = Math.random() * 60 + 20; // Viteza în procente de ecran (vw)
-        const tx = Math.cos(angle) * velocity;
-        const ty = Math.sin(angle) * velocity;
-        
-        container.appendChild(p);
-        
-        p.animate([
-            { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
-            { transform: `translate(calc(-50% + ${tx}vw), calc(-50% + ${ty}vh)) scale(0)`, opacity: 0 }
-        ], {
-            duration: 1500 + Math.random() * 1500,
-            easing: 'cubic-bezier(0.15, 0.8, 0.2, 1)'
-        }).onfinish = () => p.remove();
-    }
 }
 
 
