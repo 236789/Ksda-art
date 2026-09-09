@@ -11654,37 +11654,43 @@ async function saveNewUsername() {
   const input = document.getElementById('usernameInput').value.trim();
   const errorEl = document.getElementById('usernameErrorText');
   
-  // Ascunde eroarea veche dacă încearcă din nou
   if (errorEl) errorEl.style.display = 'none';
 
-  if (input.length < 3) {
+  // 1. Verificare Lungime Frontend
+  if (input.length < 5 || input.length > 20) {
     if (errorEl) {
-        errorEl.innerText = "Numele trebuie să aibă minim 3 caractere!";
+        errorEl.innerText = "Numele trebuie să aibă între 5 și 20 de caractere!";
         errorEl.style.display = 'block';
     }
     return;
   }
 
-  // Punem jocul în loading
+  // 2. Verificare Simboluri Frontend
+  const regex = /^[a-zA-Z0-9]+$/;
+  if (!regex.test(input)) {
+    if (errorEl) {
+        errorEl.innerText = "Sunt permise DOAR litere și cifre (fără spații sau simboluri)!";
+        errorEl.style.display = 'block';
+    }
+    return;
+  }
+
   document.getElementById('usernameModal').style.display = 'none';
   document.getElementById('loadingModal').style.display = 'flex';
 
   try {
-    // 🚨 PASUL 1: VERIFICĂM DACĂ NUMELE EXISTĂ DEJA ÎN BAZA DE DATE 🚨
     const snapshot = await db.collection('players').where('username', '==', input).get();
     
     if (!snapshot.empty) {
-        // Numele există deja! Oprim tot și arătăm eroarea.
         document.getElementById('loadingModal').style.display = 'none';
         document.getElementById('usernameModal').style.display = 'flex';
         if (errorEl) {
             errorEl.innerText = "Numele este deja folosit! Alege altul.";
             errorEl.style.display = 'block';
         }
-        return; // Oprește funcția aici
+        return;
     }
 
-    // 🚨 PASUL 2: NUMELE E LIBER. CREĂM CONTUL NORMAL 🚨
     const idToken = await firebase.auth().currentUser.getIdToken(true);
     
     const response = await fetch('https://kevin-backend-qodc.onrender.com/create-user', {
@@ -11699,19 +11705,20 @@ async function saveNewUsername() {
       score = 0;
       lastSavedScore = 0;
       
-      // 🚨 NOU: Forțăm mereu cei 3 eroi de start, combinându-i cu ce dă baza de date!
       const dbHeroes = data.ownedHeros || [];
-      ownedHeros = [...new Set(['kevin', 'emmanuel', 'antonio', ...dbHeroes])];      
+      ownedHeros = [...new Set(['kevin', 'emmanuel', 'antonio', ...dbHeroes])];
+      
       document.getElementById('loadingModal').style.display = 'none';
       showLoggedInUI();
       handlePlayClick(); 
       
     } else {
-      // Backend-ul a respins numele
+      // Dacă backend-ul a respins cererea (din cauza cuvintelor interzise, etc)
+      const errorMsg = await response.text();
       document.getElementById('loadingModal').style.display = 'none';
       document.getElementById('usernameModal').style.display = 'flex';
       if (errorEl) {
-          errorEl.innerText = "Eroare la crearea contului! Încearcă din nou.";
+          errorEl.innerText = errorMsg; // Afișează eroarea exactă de la Backend
           errorEl.style.display = 'block';
       }
     }
