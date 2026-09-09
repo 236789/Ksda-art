@@ -9517,6 +9517,138 @@ div.inv-tile div.bm-limit-tag {
 
 .cine-shaking { animation: cineShake 0.1s infinite; }
 .cine-glitching { animation: cineGlitch 0.2s infinite; }
+
+
+
+/* ==========================================
+   AAA CINEMATIC LEVEL UP STYLES
+   ========================================== */
+#cinematicOverlay {
+    background: #000;
+}
+
+#cineDynamicBg {
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at center, #333 0%, #000 100%);
+    background-size: 200% 200%;
+    animation: pulseBg 4s ease-in-out infinite alternate;
+    z-index: 1;
+}
+
+@keyframes pulseBg {
+    0% { background-position: 50% 50%; transform: scale(1); }
+    100% { background-position: 50% 50%; transform: scale(1.1); }
+}
+
+#cineScanlines {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.3) 50%);
+    background-size: 100% 4px;
+    z-index: 2;
+    pointer-events: none;
+}
+
+#cineContentWrapper {
+    position: relative; z-index: 10;
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 15px; /* Spațiu uniform între elemente */
+    opacity: 0;
+}
+
+/* Animația de intrare glorioasă */
+.cine-show-content {
+    animation: aaaEntrance 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes aaaEntrance {
+    0% { opacity: 0; transform: scale(0.5) translateY(50px); filter: blur(10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }
+}
+
+/* 1. Level Label */
+#cineLevelLabel {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: clamp(35px, 8vw, 60px);
+    color: #ffffff;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 10px;
+    text-shadow: 0 5px 15px rgba(0,0,0,0.8);
+}
+
+/* 2. Badge Wrapper */
+#cineBadgeWrapper {
+    position: relative;
+    width: clamp(150px, 40vw, 280px);
+    height: clamp(150px, 40vw, 280px);
+    display: flex; align-items: center; justify-content: center;
+    animation: floatBadge 3s ease-in-out infinite;
+}
+
+@keyframes floatBadge {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+#cineBadgeImg {
+    width: 100%; height: 100%;
+    object-fit: contain; /* Asta previne tăierea/zoom-ul imaginilor! */
+    filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
+    z-index: 3;
+}
+
+/* Efectul luminos rotativ din spatele emblemei */
+.cine-glow-ring {
+    position: absolute;
+    width: 120%; height: 120%;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--tier-color, #fff) 0%, transparent 60%);
+    opacity: 0.4;
+    animation: spinGlowRing 5s linear infinite;
+    z-index: 1;
+}
+
+@keyframes spinGlowRing { to { transform: rotate(360deg); } }
+
+/* 3. Rank Box (The Special Box) */
+#cineRankBox {
+    background: rgba(0, 0, 0, 0.6);
+    border: 3px solid var(--tier-color, #fff);
+    padding: 10px 40px;
+    clip-path: polygon(15px 0, 100% 0, calc(100% - 15px) 100%, 0 100%);
+    box-shadow: 0 0 20px var(--tier-color, #fff);
+    margin-top: 10px;
+}
+
+#cineRankName {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: clamp(24px, 5vw, 40px);
+    color: var(--tier-color, #fff);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-shadow: 0 0 10px var(--tier-color, #fff);
+}
+
+/* 4. Flavor Text */
+#cineFlavorText {
+    font-family: 'Oswald', sans-serif;
+    font-size: clamp(14px, 3.5vw, 20px);
+    color: #d1d5db;
+    text-align: center;
+    max-width: 80%;
+    margin-top: 10px;
+    line-height: 1.4;
+    text-shadow: 0 2px 5px #000;
+}
+
+/* The White Flash */
+#cineFlash {
+    position: absolute; inset: 0; background: #fff;
+    opacity: 0; z-index: 100; pointer-events: none;
+}
   </style>
 </head>
 <body>
@@ -9532,26 +9664,38 @@ div.inv-tile div.bm-limit-tag {
 
 
 
-<!-- AAA CINEMATIC LEVEL UP OVERLAY -->
-<div id="cinematicOverlay" style="display: none; position: fixed; inset: 0; z-index: 500000; overflow: hidden; pointer-events: auto;">
-    <div id="cineBackground" style="position: absolute; inset: 0; transition: background 1s ease;"></div>
-    <div id="cineScanlines" style="position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.1) 50%); background-size: 100% 4px; z-index: 2;"></div>
+<!-- AAA CINEMATIC LEVEL UP OVERLAY V2 -->
+<div id="cinematicOverlay" style="display: none; position: fixed; inset: 0; z-index: 500000; overflow: hidden; pointer-events: none;">
     
-    <!-- Central Stage -->
-    <div id="cineStage" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%;">
+    <!-- Straturile de Fundal Animat -->
+    <div id="cineDynamicBg"></div>
+    <div id="cineScanlines"></div>
+    <div id="cineParticlesLayer"></div>
+    
+    <!-- Containerul Central (Flexbox fixează totul perfect pe centru) -->
+    <div id="cineContentWrapper">
         
-        <div id="cineLevelLabel" style="font-family: 'Orbitron'; font-size: 20px; color: #fff; letter-spacing: 10px; margin-bottom: 10px; opacity: 0;">LEVEL 1</div>
+        <!-- 1. Textul cu Nivelul -->
+        <h1 id="cineLevelLabel">LEVEL 2</h1>
         
-        <div id="cineBadgeWrapper" style="position: relative; display: inline-block; width: 250px; height: 250px; margin: 20px 0;">
-            <div id="cineEnergyRing" style="position: absolute; inset: -20px; border: 2px solid #fff; border-radius: 50%; opacity: 0; transform: scale(0.5);"></div>
-            <img id="cineBadgeImg" src="" style="width: 100%; height: 100%; object-fit: contain; position: relative; z-index: 10; filter: drop-shadow(0 0 20px rgba(255,255,255,0.5));">
+        <!-- 2. Emblema -->
+        <div id="cineBadgeWrapper">
+            <div class="cine-glow-ring"></div>
+            <img id="cineBadgeImg" src="" alt="Badge">
         </div>
 
-        <div id="cineRankName" style="font-family: 'Montserrat'; font-weight: 900; font-size: 50px; color: #fff; text-transform: uppercase; letter-spacing: 5px; margin-top: 10px; opacity: 0;">BRONZE</div>
+        <!-- 3. Cutia pentru Numele Rangului -->
+        <div id="cineRankBox">
+            <span id="cineRankName">SILVER</span>
+        </div>
+
+        <!-- 4. Textul de încurajare -->
+        <p id="cineFlavorText">"Mesaj de încurajare pentru nivelul nou!"</p>
+
     </div>
 
-    <div id="cineFlash" style="position: absolute; inset: 0; background: #fff; opacity: 0; z-index: 100; pointer-events: none;"></div>
-    <div id="cineParticles" style="position: absolute; inset: 0; pointer-events: none;"></div>
+    <!-- Flash-ul de tranziție -->
+    <div id="cineFlash"></div>
 </div>
   <!-- ==========================================
        MODALS (OVERLAYS)
@@ -17229,105 +17373,71 @@ async function levelUp() {
     const MAX_LEVEL = 25;
     if (playerLevel >= MAX_LEVEL) return;
 
-    // 1. Setup Data
-    const oldLvl = playerLevel;
+    // Setările noului nivel
     const newLvl = playerLevel + 1;
-    const oldTier = mapTiers[oldLvl - 1];
     const newTier = mapTiers[newLvl - 1];
+    
+    // Obținem textul din registru pentru noul nivel!
+    const rewardData = LEVEL_REWARDS_REGISTRY[newLvl];
+    const flavorText = rewardData ? rewardData.message : "Continuă să urci!";
 
-    // Pause the game logic
+    // Url-ul de la GitHub folosind fileName
+    const badgeUrl = `https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/badges/${newTier.fileName}`;
+
     isPaused = true;
     clearInterval(moveKevinInterval);
     
-    // 2. Open Overlay
     const overlay = document.getElementById('cinematicOverlay');
-    const bg = document.getElementById('cineBackground');
-    const badge = document.getElementById('cineBadgeImg');
-    const label = document.getElementById('cineLevelLabel');
-    const rankText = document.getElementById('cineRankName');
-    const ring = document.getElementById('cineEnergyRing');
+    const dynamicBg = document.getElementById('cineDynamicBg');
+    const contentWrapper = document.getElementById('cineContentWrapper');
     const flash = document.getElementById('cineFlash');
 
-    // Reset Elements
+    // 1. Aplicăm culorile tematice (Folosind variabile CSS pe Wrapper)
+    contentWrapper.style.setProperty('--tier-color', newTier.color);
+    dynamicBg.style.background = `radial-gradient(circle at center, ${newTier.color}66 0%, #020205 80%)`;
+
+    // 2. Populăm datele (DOAR PENTRU NOUL NIVEL!)
+    document.getElementById('cineLevelLabel').innerText = `LEVEL ${newLvl}`;
+    document.getElementById('cineBadgeImg').src = badgeUrl;
+    document.getElementById('cineRankName').innerText = newTier.name;
+    document.getElementById('cineFlavorText').innerText = `"${flavorText}"`;
+
+    // 3. Pornim animația - Partea 1: Flash orbitor
     overlay.style.display = 'block';
-    bg.style.background = `radial-gradient(circle at center, ${oldTier.color}dd 0%, #050509 70%)`;
-    badge.src = `https://i.ibb.co/${oldTier.id}/image.png`;
-    badge.style.filter = `drop-shadow(0 0 20px ${oldTier.color})`;
+    overlay.style.opacity = '1';
+    contentWrapper.classList.remove('cine-show-content');
+    contentWrapper.style.opacity = '0';
     
-    label.innerText = `LEVEL ${oldLvl}`;
-    label.style.opacity = '1';
-    rankText.innerText = oldTier.name;
-    rankText.style.opacity = '1';
-    rankText.style.color = oldTier.color;
-
-    // --- PHASE 1: The Build-up (0s - 1.5s) ---
-    label.style.animation = "cineTextReveal 0.5s forwards";
-    rankText.style.animation = "cineTextReveal 0.5s 0.2s forwards";
-    
-    await delay(1000);
-    
-    // Start shaking & particles
-    document.getElementById('cineStage').classList.add('cine-shaking');
-    createParticlesAtCine(oldTier.color, 50);
-
-    // --- PHASE 2: The Glitch (1.5s - 2.5s) ---
-    await delay(500);
-    badge.classList.add('cine-glitching');
-    if (typeof playSFX === 'function') playSFX(slotWooshUrl);
-    
-    // Intense energy ring
-    ring.style.opacity = '1';
-    ring.style.borderColor = newTier.color;
-    ring.animate([
-        { transform: 'translate(-50%, -50%) scale(0.5)', opacity: 1 },
-        { transform: 'translate(-50%, -50%) scale(2)', opacity: 0 }
-    ], { duration: 1000, iterations: 2 });
-
-    await delay(1000);
-
-    // --- PHASE 3: THE IMPACT (The Switch) ---
     flash.style.opacity = '1';
     if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
 
-    // Apply New Level Data Exactly during flash
+    // Salvăm noul nivel
     playerLevel = newLvl;
     playerXP = Math.max(0, playerXP - xpToNextLevel); 
     xpToNextLevel = getXPRequired(playerLevel);
 
-    badge.src = `https://i.ibb.co/${newTier.id}/image.png`;
-    bg.style.background = `radial-gradient(circle at center, ${newTier.color}dd 0%, #050509 80%)`;
-    label.innerText = `LEVEL ${newLvl}`;
-    rankText.innerText = newTier.name;
-    rankText.style.color = newTier.color;
-    badge.style.filter = `drop-shadow(0 0 40px ${newTier.color})`;
+    // 4. Partea 2: Flash-ul dispare, cutia intră glorios în ecran
+    setTimeout(() => { 
+        flash.style.transition = "opacity 0.8s ease-out";
+        flash.style.opacity = '0'; 
+        
+        contentWrapper.classList.add('cine-show-content');
+        createParticlesAtCine(newTier.color, 120);
+    }, 100);
 
-    // Flash Fadeout
-    setTimeout(() => { flash.style.opacity = '0'; flash.style.transition = "opacity 1s ease"; }, 50);
+    // 5. Menținem ecranul timp de 4 secunde ca jucătorul să admire
+    await delay(4000);
 
-    // Clear Glitches
-    badge.classList.remove('cine-glitching');
-    document.getElementById('cineStage').classList.remove('cine-shaking');
-    createParticlesAtCine(newTier.color, 100);
-
-    // --- PHASE 4: The Reveal (2.5s - 4.5s) ---
-    badge.animate([
-        { transform: 'scale(1.5)', filter: 'brightness(5) blur(10px)' },
-        { transform: 'scale(1)', filter: 'brightness(1) blur(0px)' }
-    ], { duration: 800, easing: 'ease-out' });
-
-    await delay(3000);
-
-    // --- PHASE 5: Exit ---
-    overlay.style.transition = "opacity 1s ease";
+    // 6. Ieșire lină
+    overlay.style.transition = "opacity 0.6s ease-in";
     overlay.style.opacity = "0";
     
-    await delay(1000);
+    await delay(600);
     
     overlay.style.display = 'none';
-    overlay.style.opacity = "1";
     overlay.style.transition = "none";
     
-    // Resume Game
+    // Reluăm jocul
     isPaused = false;
     updateXPBarUI();
     updateGiftButtonState();
@@ -17336,22 +17446,24 @@ async function levelUp() {
     startTiredCycle();
 }
 
-// Particle Helper for the Cinematic
 function createParticlesAtCine(color, amount) {
-    const container = document.getElementById('cineParticles');
+    const container = document.getElementById('cineParticlesLayer');
+    container.innerHTML = ""; // Curățăm particulele vechi
+    
     for (let i = 0; i < amount; i++) {
         const p = document.createElement('div');
         p.style.position = 'absolute';
         p.style.left = '50%';
         p.style.top = '50%';
-        p.style.width = '6px';
-        p.style.height = '6px';
+        p.style.width = Math.random() * 6 + 4 + 'px';
+        p.style.height = p.style.width;
         p.style.background = color;
         p.style.borderRadius = '50%';
-        p.style.boxShadow = `0 0 10px ${color}`;
+        p.style.boxShadow = `0 0 15px ${color}, 0 0 30px #fff`;
+        p.style.zIndex = '5';
         
         const angle = Math.random() * Math.PI * 2;
-        const velocity = Math.random() * 500 + 200;
+        const velocity = Math.random() * 60 + 20; // Viteza în procente de ecran (vw)
         const tx = Math.cos(angle) * velocity;
         const ty = Math.sin(angle) * velocity;
         
@@ -17359,46 +17471,46 @@ function createParticlesAtCine(color, amount) {
         
         p.animate([
             { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
-            { transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0)`, opacity: 0 }
+            { transform: `translate(calc(-50% + ${tx}vw), calc(-50% + ${ty}vh)) scale(0)`, opacity: 0 }
         ], {
-            duration: 1000 + Math.random() * 1000,
+            duration: 1500 + Math.random() * 1500,
             easing: 'cubic-bezier(0.15, 0.8, 0.2, 1)'
         }).onfinish = () => p.remove();
     }
 }
 
 
-
 // ==========================================
 // CINEMATIC WINDING MAP LOGIC (V3)
 // ==========================================
 
+// Actualizat cu numele exacte ale fișierelor de pe GitHub
 const mapTiers = [
-    { name: "Bronze", id: "wFth4chq", color: "#cd7f32" },
-    { name: "Silver", id: "r21M97q5", color: "#c0c0c0" },
-    { name: "Copper", id: "vxHM1ffF", color: "#b87333" },
-    { name: "Sapphire", id: "RGTWgFS2", color: "#0088ff" },
-    { name: "Emerald", id: "23FZKwXX", color: "#10b981" },
-    { name: "Amethyst", id: "3ywhPtDX", color: "#a855f7" },
-    { name: "Gold", id: "Xf2gynsP", color: "#facc15" },
-    { name: "Ice Crystal", id: "RGnRdDRs", color: "#67e8f9" },
-    { name: "Ruby", id: "8nS1TM3x", color: "#ef4444" },
-    { name: "Royal Gold", id: "qL5kJs5H", color: "#d4af37" },
-    { name: "Jade", id: "67QVCSfs", color: "#10b981" },
-    { name: "Astral", id: "WWttKxPB", color: "#8b5cf6" },
-    { name: "Azure", id: "pBfztNy2", color: "#3b82f6" },
-    { name: "Obsidian", id: "MyC7Q2GK", color: "#ea580c" }, 
-    { name: "Geode", id: "KcNG1RqF", color: "#d946ef" },
-    { name: "Frost", id: "4gnrPFt0", color: "#22d3ee" },
-    { name: "Mythril", id: "qLTkBP7P", color: "#e879f9" },
-    { name: "Toxicium", id: "vfRpjjT", color: "#22c55e" },
-    { name: "Void", id: "WSGsNSP", color: "#7c3aed" },
-    { name: "Cel. Gold", id: "YBwnKJyj", color: "#fde047" },
-    { name: "Cosmic", id: "pBdxJVhc", color: "#4f46e5" },
-    { name: "Diamond", id: "6J1CRmtr", color: "#93c5fd" },
-    { name: "Infernal", id: "S2z2pFW", color: "#dc2626" },
-    { name: "Divine", id: "Z6vM7YBx", color: "#f0f9ff" },
-    { name: "Eternal", id: "B5QKGyLM", color: "#ff00ff" } // Ultimate Pink/Purple
+    { name: "Bronze", fileName: "Bronze.png", color: "#cd7f32" },
+    { name: "Silver", fileName: "Silver.png", color: "#c0c0c0" },
+    { name: "Copper", fileName: "Copper.png", color: "#b87333" },
+    { name: "Sapphire", fileName: "Sapphire.png", color: "#0088ff" },
+    { name: "Emerald", fileName: "Emerald.png", color: "#10b981" },
+    { name: "Amethyst", fileName: "Amethyst.png", color: "#a855f7" },
+    { name: "Gold", fileName: "Gold.png", color: "#facc15" },
+    { name: "Ice Crystal", fileName: "Ice%20Crystal.png", color: "#67e8f9" },
+    { name: "Ruby", fileName: "Ruby.png", color: "#ef4444" },
+    { name: "Royal Gold", fileName: "Royal%20Gold.png", color: "#d4af37" },
+    { name: "Jade", fileName: "Jade.png", color: "#10b981" },
+    { name: "Astral", fileName: "Astral.png", color: "#8b5cf6" },
+    { name: "Azure", fileName: "Azure%20Crystal.png", color: "#3b82f6" },
+    { name: "Obsidian", fileName: "Obsidian.png", color: "#ea580c" }, 
+    { name: "Geode", fileName: "Amethyst%20Geode.png", color: "#d946ef" },
+    { name: "Frost", fileName: "Frost.png", color: "#22d3ee" },
+    { name: "Mythril", fileName: "Mythril.png", color: "#e879f9" },
+    { name: "Toxicium", fileName: "Toxicium.png", color: "#22c55e" },
+    { name: "Void", fileName: "Void.png", color: "#7c3aed" },
+    { name: "Cel. Gold", fileName: "Celestial%20Gold.png", color: "#fde047" },
+    { name: "Cosmic", fileName: "Cosmic.png", color: "#4f46e5" },
+    { name: "Diamond", fileName: "Celestial%20Diamond.png", color: "#93c5fd" },
+    { name: "Infernal", fileName: "Infernal.png", color: "#dc2626" },
+    { name: "Divine", fileName: "Divine.png", color: "#f0f9ff" },
+    { name: "Eternal", fileName: "Eternal.png", color: "#ff00ff" } 
 ];
 
 function openLevelMilestones() {
