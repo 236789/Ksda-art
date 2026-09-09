@@ -11528,7 +11528,8 @@ if (response.status === 200) {
             _GAME_DATA.claimedStageRewards = data.claimedStageRewards || [];
             _GAME_DATA.claimedLevelRewards = (data.claimedLevelRewards || []).map(Number); // Forțăm numere
 // Starters are given for free if the array is empty
-ownedHeros = data.ownedHeros || ['kevin', 'emmanuel', 'antonio'];
+const dbHeroes = data.ownedHeros || [];
+ownedHeros = [...new Set(['kevin', 'emmanuel', 'antonio', ...dbHeroes])];
             backendUnlockedFeatures = data.unlockedFeatures || []; // 🆕 LOAD EXISTING UNLOCKS
 
 
@@ -11698,8 +11699,9 @@ async function saveNewUsername() {
       score = 0;
       lastSavedScore = 0;
       
-      ownedHeros = data.ownedHeros || ['kevin', 'emmanuel', 'antonio'];
-      
+      // 🚨 NOU: Forțăm mereu cei 3 eroi de start, combinându-i cu ce dă baza de date!
+      const dbHeroes = data.ownedHeros || [];
+      ownedHeros = [...new Set(['kevin', 'emmanuel', 'antonio', ...dbHeroes])];      
       document.getElementById('loadingModal').style.display = 'none';
       showLoggedInUI();
       handlePlayClick(); 
