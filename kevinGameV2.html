@@ -9883,19 +9883,40 @@ div.inv-tile div.bm-limit-tag {
     z-index: 5;
 }
 
-/* Ecranul Negru Interior - Aliniat sus, la fel ca la Piața Neagră */
+/* Ecranul Negru Interior - Restaurat la estetica originală, dar aliniat sus */
 .pm-inner-v2 {
     background: radial-gradient(circle at center, #0a1f0a 0%, #020502 100%);
     border-radius: 16px;
     border: 2px solid #064e3b;
-    padding: 20px 15px; /* Un padding mai uniform */
+    padding: 20px;
     min-height: 350px;
-    
-    /* FIX-ul pentru spațiul gol: Le aliniază frumos de sus în jos */
     display: flex;
-    flex-direction: column; 
-    
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Asta rezolvă gaura imensă de sus! */
     color: #22c55e;
+}
+
+/* Cardurile Pet Shop - Reparate să arate masiv și premium ca la Piața Neagră */
+.pet-shop-card {
+    width: 100% !important;
+    height: 125px !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0,0,0,0.6)) !important;
+    border: 3px solid #064e3b !important; 
+    border-radius: 16px !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 15px rgba(0,0,0,0.8) !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative !important; /* CRITIC: Asta oprește textele să iasă din card! */
+}
+
+.pet-shop-card:hover {
+    border-color: #22c55e !important;
+    transform: translateY(-4px) scale(1.02);
 }
 /* CONTAINERUL PRINCIPAL */
 .pet-modal-box-v2 {
@@ -19512,22 +19533,20 @@ function switchPetTab(type, btn) {
 
     const content = document.getElementById('pet-content');
     
-    // Înlocuim conținutul cu un container nou
-    content.innerHTML = `
-        <div id="petShopGrid" class="inventory-v1-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%;">
-            <!-- Aici se va popula -->
-        </div>
-    `;
-
-    // Acum că am creat elementul mai sus, putem să-l selectăm
-    const grid = document.getElementById('petShopGrid');
-
+    // We inject the Timer AND the Grid together so the timer never gets deleted!
     if (type === 'boxes') {
-        renderPetShop(); // Aici populăm grid-ul dacă e tab-ul de boxes
+        content.innerHTML = `
+            <div id="petTimerDisplay" style="color: #4ade80; font-family: 'Orbitron'; font-size: 14px; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px; text-align: center; width: 100%;">REFRESH ÎN: 00:00</div>
+            <div id="petShopGrid" class="inventory-v1-grid" style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%;">
+                <!-- Aici se va popula -->
+            </div>
+        `;
+        renderPetShop(); 
     } else {
-        grid.innerHTML = `<div class="pet-empty-state">Secțiunea ${type.toUpperCase()} va fi disponibilă în curând!</div>`;
+        content.innerHTML = `<div class="pet-empty-state">Secțiunea ${type.toUpperCase()} va fi disponibilă în curând!</div>`;
     }
 }
+
 function closePetShop() {
     document.getElementById('petShopModal').style.display = 'none';
     isPaused = false;
@@ -19597,10 +19616,11 @@ function renderPetShop() {
             tile.onclick = () => openCatDetail(offer.key);
         }
         
+        // Changed "GATA" to "FĂRĂ STOC"
         tile.innerHTML = `
             <div class="bm-ruby-tag">${item.price} <img src="https://iili.io/CrnXNdG.png"></div>
-            <img src="${item.img}" style="width: 60px; height: 60px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8)); margin-bottom: 5px;">
-            <div class="bm-limit-tag" style="background:#064e3b; border-color:#16a34a;">${remaining > 0 ? 'STOC: '+remaining : 'GATA'}</div>
+            <img src="${item.img}" style="width: 65px; height: 65px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8)); margin-bottom: 8px; position: relative; z-index: 2;">
+            <div class="bm-limit-tag" style="background:#064e3b; border-color:#16a34a;">${remaining > 0 ? 'STOC: '+remaining : 'FĂRĂ STOC'}</div>
         `;
         grid.appendChild(tile);
     });
