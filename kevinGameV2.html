@@ -10056,6 +10056,41 @@ div.inv-tile div.bm-limit-tag {
     background: rgba(0,0,0,0.4);
     border-radius: 12px;
 }
+
+
+/* Baza tab-ului activ (Crește în înălțime, prinde umbră) */
+.pm-tab-v2.active {
+    height: 65px;
+    z-index: 15;
+    color: #fff;
+    box-shadow: inset 0 10px 15px rgba(255,255,255,0.2);
+}
+
+/* 🟢 TAB 1: BOXES (VERDE) */
+.pm-tab-v2.t-boxes { color: #10b981; } /* Culoare inactivă */
+.pm-tab-v2.t-boxes.active {
+    background: linear-gradient(180deg, #22c55e 0%, #064e3b 100%);
+    border-color: #16a34a;
+}
+
+/* 🔵 TAB 2: EGGS (CYAN / ALBASTRU MISTIC) */
+.pm-tab-v2.t-eggs { color: #06b6d4; } /* Culoare inactivă */
+.pm-tab-v2.t-eggs.active {
+    background: linear-gradient(180deg, #06b6d4 0%, #064e3b 100%);
+    border-color: #0891b2;
+}
+
+/* 🟠 TAB 3: TREATS (PORTOCALIU / BISCUITE) */
+.pm-tab-v2.t-treats { color: #f97316; } /* Culoare inactivă */
+.pm-tab-v2.t-treats.active {
+    background: linear-gradient(180deg, #f97316 0%, #064e3b 100%);
+    border-color: #ea580c;
+}
+
+/* 🎨 Schimbă culoarea ramei principale a modalului în funcție de tab-ul activ */
+.pet-modal-box-v2:has(.t-boxes.active) .pm-body-v2 { border-color: #16a34a; }
+.pet-modal-box-v2:has(.t-eggs.active) .pm-body-v2 { border-color: #0891b2; }
+.pet-modal-box-v2:has(.t-treats.active) .pm-body-v2 { border-color: #ea580c; }
   </style>
 </head>
 <body>
@@ -11254,16 +11289,15 @@ div.inv-tile div.bm-limit-tag {
    <button class="pm-close-v2" onclick="closePetShop()">
         <i class="fa-solid fa-xmark"></i>
     </button>
-    <!-- Tab-uri cu Iconițe -->
+<!-- Tab-uri cu Iconițe -->
     <div class="pm-nav-v2">
-      <!-- ... restul tab-urilor rămân la fel ... -->
-      <button class="pm-tab-v2 active" onclick="switchPetTab('boxes', this)">
+      <button class="pm-tab-v2 t-boxes active" onclick="switchPetTab('boxes', this)">
         <i class="fa-solid fa-box-open"></i>
       </button>
-      <button class="pm-tab-v2" onclick="switchPetTab('eggs', this)">
+      <button class="pm-tab-v2 t-eggs" onclick="switchPetTab('eggs', this)">
         <i class="fa-solid fa-egg"></i>
       </button>
-      <button class="pm-tab-v2" onclick="switchPetTab('treats', this)">
+      <button class="pm-tab-v2 t-treats" onclick="switchPetTab('treats', this)">
         <i class="fa-solid fa-cookie-bite"></i>
       </button>
     </div>
