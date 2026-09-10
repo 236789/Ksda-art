@@ -11302,14 +11302,13 @@ div.inv-tile div.bm-limit-tag {
       </button>
     </div>
 
-    <!-- Corp -->
-    <div class="pm-body-v2">
-        <div class="pm-inner-v2" id="pet-content">
-            <!-- Conținutul tău aici -->
-        <div id="petShopGrid" class="inventory-v1-grid"></div>
+<div class="pm-inner-v2" id="pet-content">
+            <!-- ADAUGĂ TIMER-UL AICI -->
+            <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                <div id="petTimerDisplay" style="color: #4ade80; font-family: 'Orbitron'; font-size: 14px; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px;">REFRESH ÎN: 00:00</div>
+                <div id="petShopGrid" class="inventory-v1-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%;"></div>
+            </div>
         </div>
-    </div>
-
   </div>
 </div>
 
@@ -16894,14 +16893,22 @@ function startBMTimer() {
 
         const mins = Math.floor(timeLeft / 60000);
         const secs = Math.floor((timeLeft % 60000) / 1000);
+        const timeString = `REFRESH ÎN: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         
-        const display = document.getElementById('bmTimerDisplay');
-        if (display) display.innerText = `REFRESH ÎN: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        const bmDisplay = document.getElementById('bmTimerDisplay');
+        const petDisplay = document.getElementById('petTimerDisplay'); // <-- Added
+
+        if (bmDisplay) bmDisplay.innerText = timeString;
+        if (petDisplay) petDisplay.innerText = timeString; // <-- Added
 
         if (timeLeft <= 0) {
             refreshBlackMarketWants();
             renderBlackMarketBuyGrid();
             renderBlackMarketGrid();
+            
+            // Re-fetch everything to get the fresh stock
+            if (document.getElementById('blackMarketModal').style.display === 'flex') openBlackMarket();
+            if (document.getElementById('petShopModal').style.display === 'flex') openPetShop();
         }
     }, 1000);
 }
@@ -19499,23 +19506,6 @@ function openVocabModal(event) {
 function closeVocabModal() {
     document.getElementById('vocabInfoModal').style.display = 'none';
 }
-
-
-function openPetShop() {
-    document.getElementById('utilitiesModal').style.display = 'none';
-    document.getElementById('petShopModal').style.display = 'flex';
-    isPaused = true; 
-    
-    // FORȚEAZĂ AFIȘAREA PRIMULUI TAB LA DESCHIDERE
-    const firstTab = document.querySelector('.pm-tab-v2');
-    if(firstTab) switchPetTab('boxes', firstTab);
-}
-
-function closePetShop() {
-    document.getElementById('petShopModal').style.display = 'none';
-    isPaused = false;
-}
-
 function switchPetTab(type, btn) {
     document.querySelectorAll('.pm-tab-v2').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
@@ -19538,58 +19528,89 @@ function switchPetTab(type, btn) {
         grid.innerHTML = `<div class="pet-empty-state">Secțiunea ${type.toUpperCase()} va fi disponibilă în curând!</div>`;
     }
 }
+function closePetShop() {
+    document.getElementById('petShopModal').style.display = 'none';
+    isPaused = false;
+}
 
-const catShopItems = [
-    { id: "cat_box_1", name: "Cufăr Pisicesc", price: 10, img: "https://i.ibb.co/1Y8tZMFz/cat-boxes.png", desc: "O cutie misterioasă cu o pisică drăgălașă înăuntru." }
-];
+// Global variable for Pet Stock
+let petShopOffers = [];
+
+// Dictionary for pet items
+const catShopItems = {
+    "cat_box_1": { name: " Cutia cu Pisici", price: 10, img: "https://i.ibb.co/1Y8tZMFz/cat-boxes.png", desc: "O cutie misterioasă cu o pisică drăgălașă înăuntru." }
+};
+
+async function openPetShop() {
+    document.getElementById('utilitiesModal').style.display = 'none';
+    document.getElementById('petShopModal').style.display = 'flex';
+    isPaused = true; 
+    
+    const firstTab = document.querySelector('.pm-tab-v2');
+    if(firstTab) switchPetTab('boxes', firstTab);
+
+    // FETCH STOCK FROM SERVER (Same as Black Market)
+    try {
+        const idToken = await firebase.auth().currentUser.getIdToken(true);
+        const response = await fetch('https://kevin-backend-qodc.onrender.com/sync-black-market', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                idToken: idToken,
+                availableKeys: Object.keys(specialRegistry).filter(k => k !== "rubyDrop" && k !== "trivia"),
+                buyKeys: Object.keys(boostRegistry)
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            lastMarketRefresh = data.lastRefresh;
+            
+            // Load Pet Data
+            petShopOffers = data.petOffers.map(off => ({ ...off, bought: data.playerPetBuys[off.key] || 0 }));
+            
+            renderPetShop();
+            startBMTimer(); // Start the shared timer
+        }
+    } catch (e) {
+        console.error("Pet Shop Sync Error:", e);
+    }
+}
 
 function renderPetShop() {
     const grid = document.getElementById('petShopGrid');
     if (!grid) return;
-    
     grid.innerHTML = "";
     
-    catShopItems.forEach(item => {
+    petShopOffers.forEach((offer) => {
+        const item = catShopItems[offer.key];
+        if (!item) return;
+
+        const remaining = offer.limit - offer.bought;
         const tile = document.createElement('div');
-        tile.className = "pet-shop-card"; // Clasa nouă pentru stil
-        tile.onclick = () => openCatDetail(item);
+        
+        if (remaining <= 0) {
+            tile.className = "pet-shop-card bm-sold-out";
+            tile.onclick = () => showKevinutaBubble("Stoc epuizat până la refresh!");
+        } else {
+            tile.className = "pet-shop-card";
+            tile.onclick = () => openCatDetail(offer.key);
+        }
         
         tile.innerHTML = `
             <div class="bm-ruby-tag">${item.price} <img src="https://iili.io/CrnXNdG.png"></div>
-            <img src="${item.img}" style="width: 60px; height: 60px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8));">
+            <img src="${item.img}" style="width: 60px; height: 60px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8)); margin-bottom: 5px;">
+            <div class="bm-limit-tag" style="background:#064e3b; border-color:#16a34a;">${remaining > 0 ? 'STOC: '+remaining : 'GATA'}</div>
         `;
         grid.appendChild(tile);
     });
 }
 
-// Mută asta la nivelul principal al scriptului (lângă syncScoreToFirestore)
-async function buyCatItem(id, price) {
-    console.log("Încerc să cumpăr:", id, price);
-    
-    if (typeof rubies === 'undefined') rubies = 0;
+function openCatDetail(offerKey) {
+    const offer = petShopOffers.find(o => o.key === offerKey);
+    const item = catShopItems[offerKey];
+    const remaining = offer.limit - offer.bought;
 
-    if (rubies < price) {
-        showKevinutaBubble("Nu ai destule rubine!");
-        return;
-    }
-
-    rubies -= price;
-    // Asigură-te că _GAME_DATA e inițializat
-    if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
-    _GAME_DATA.inventory[id] = (_GAME_DATA.inventory[id] || 0) + 1;
-    
-    updateScoreUI();
-    renderPetShop(); // Refresh la grid
-    syncInventoryToCloud(); 
-    
-    // Închide modalul de detalii (dacă există)
-    const modal = document.querySelector('.modal-overlay[style*="display: flex"]');
-    if (modal) modal.remove();
-    
-    showNotification("ACHIZIȚIE", "Obiectul a fost adăugat în inventar!", "https://i.ibb.co/1Y8tZMFz/cat-boxes.png");
-}
-
-function openCatDetail(item) {
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.style.display = 'flex';
@@ -19597,47 +19618,86 @@ function openCatDetail(item) {
     
     modal.innerHTML = `
         <div class="modal-box cat-shop-modal">
-            <img src="${item.img}" style="width: 100px; margin-bottom: 10px;">
+            <img src="${item.img}" style="width: 100px; margin-bottom: 10px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.8));">
             <h2 style="color: #ff3366; font-family: 'Montserrat'; font-weight: 900;">${item.name.toUpperCase()}</h2>
             <p style="color: #94a3b8; font-family: 'Oswald';">${item.desc}</p>
             
             <div class="cat-price-box">
                 <div class="cat-stat">
-                    <span class="cat-stat-label">PREȚ (RUBINE)</span>
+                    <span class="cat-stat-label">PREȚ</span>
                     <span class="cat-stat-val">${item.price} <img src="https://iili.io/CrnXNdG.png" width="12"></span>
                 </div>
                 <div class="cat-stat">
-                    <span class="cat-stat-label">ÎN INVENTAR</span>
-                    <span class="cat-stat-val">${_GAME_DATA.inventory[item.id] || 0}</span>
+                    <span class="cat-stat-label">DEȚII</span>
+                    <span class="cat-stat-val">${_GAME_DATA.inventory[offerKey] || 0}</span>
                 </div>
                 <div class="cat-stat">
-                    <span class="cat-stat-label">STOC MAGAZIN</span>
-                    <span class="cat-stat-val">∞</span>
+                    <span class="cat-stat-label">STOC</span>
+                    <span class="cat-stat-val" style="color:#4ade80;">${remaining}</span>
                 </div>
             </div>
 
-            <button class="cat-buy-btn" onclick="buyCatItem('${item.id}', ${item.price})">CUMPĂRĂ</button>
+            <button class="cat-buy-btn" onclick="buyCatItem('${offerKey}')">CUMPĂRĂ</button>
             <button class="cancel-btn" style="margin-top:15px;" onclick="this.closest('.modal-overlay').remove()">ANULEAZĂ</button>
         </div>
     `;
     document.body.appendChild(modal);
 }
 
-async function buyCatItem(id, price) {
-    if (rubies < price) {
+async function buyCatItem(offerKey) {
+    const offer = petShopOffers.find(o => o.key === offerKey);
+    const item = catShopItems[offerKey];
+    
+    if (offer.limit - offer.bought <= 0) {
+        showKevinutaBubble("Stoc epuizat!");
+        return;
+    }
+
+    if (rubies < item.price) {
         showKevinutaBubble("Nu ai destule rubine!");
         return;
     }
 
-    rubies -= price;
-    _GAME_DATA.inventory[id] = (_GAME_DATA.inventory[id] || 0) + 1;
+    // 1. Update Locally
+    rubies -= item.price;
+    offer.bought += 1;
+    if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
+    _GAME_DATA.inventory[offerKey] = (_GAME_DATA.inventory[offerKey] || 0) + 1;
     
     updateScoreUI();
-    renderPetShop(); // Refresh grid
-    syncInventoryToCloud(); 
+    renderPetShop(); 
     
-    document.getElementById('petShopModal').style.display = 'none'; // Închide shop-ul după cumpărare
-    showNotification("ACHIZIȚIE", "Pisicuța a fost adăugată în inventar!", "https://i.ibb.co/1Y8tZMFz/cat-boxes.png");
+    // Close the detail modal
+    const detailModal = document.querySelector('.cat-shop-modal').parentElement;
+    if (detailModal) detailModal.remove();
+    
+    showNotification("ACHIZIȚIE REUȘITĂ", `${item.name} a fost adăugat în inventar!`, item.img);
+
+    // 2. Sync to Backend
+    const petBuysUpdate = {};
+    petShopOffers.forEach(o => {
+        if (o.bought > 0) petBuysUpdate[o.key] = o.bought;
+    });
+
+    try {
+        const idToken = await firebase.auth().currentUser.getIdToken(true);
+        await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                idToken: idToken, 
+                score: score, 
+                rubies: rubies,
+                level: playerLevel,
+                xp: playerXP,
+                currentStage: currentStageId,
+                inventory: _GAME_DATA.inventory,
+                petBuys: petBuysUpdate // SENDS PET STOCK DATA
+            }),
+        });
+    } catch (e) {
+        console.error("Cloud sync failed:", e);
+    }
 }
 // ==========================================
 // 🔐 WINDOW EXPORTS
