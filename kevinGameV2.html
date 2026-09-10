@@ -9899,7 +9899,8 @@ div.inv-tile div.bm-limit-tag {
     width: 95vw !important;
     max-width: 480px !important;
     position: relative !important; /* Esențial pentru ancorarea X-ului */
-    margin-top: 50px !important; 
+    margin-top: 0 !important; /* Changed from 50px */
+    padding-top: 20px !important; /* Add padding here instead */
     display: flex !important;
     flex-direction: column !important;
     background: transparent !important; /* Ne asigurăm că e transparent */
@@ -19460,18 +19461,32 @@ function closeVocabModal() {
 
 
 function openPetShop() {
+    // 1. Close Utilities modal but keep the game paused
     document.getElementById('utilitiesModal').style.display = 'none';
+    
+    // 2. Open Pet Shop
     document.getElementById('petShopModal').style.display = 'flex';
+    
+    // 3. Ensure the game state is marked as paused
     isPaused = true; 
     
-    // FORȚEAZĂ AFIȘAREA PRIMULUI TAB LA DESCHIDERE
+    // 4. Force stop Kevin movement
+    clearInterval(moveKevinInterval); 
+    
+    // FORȚEAZĂ AFIȘAREA PRIMULUI TAB
     const firstTab = document.querySelector('.pm-tab-v2');
     if(firstTab) switchPetTab('boxes', firstTab);
 }
 
 function closePetShop() {
     document.getElementById('petShopModal').style.display = 'none';
+    
+    // Resume game logic:
     isPaused = false;
+    startKevinMovement(); 
+    
+    // If you want the utilities modal to reopen when closing the pet shop:
+     document.getElementById('utilitiesModal').style.display = 'flex';
 }
 
 function switchPetTab(type, btn) {
