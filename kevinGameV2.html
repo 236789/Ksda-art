@@ -17504,10 +17504,11 @@ body: JSON.stringify({
 
 function renderBlackMarketBuyGrid() {
     const grid = document.getElementById('blackMarketBuyGrid');
+    if (!grid) return;
     grid.innerHTML = "";
 
     blackMarketOffers.forEach((offer, index) => {
-        const data = boostRegistry[offer.key]; // <-- CHANGED HERE
+        const data = boostRegistry[offer.key];
         const remaining = offer.limit - offer.bought;
 
         const tile = document.createElement('div');
@@ -17517,7 +17518,7 @@ function renderBlackMarketBuyGrid() {
 
         tile.onclick = () => {
             if (remaining > 0) openBuyDetail(index);
-            else showKevinutaBubble("Stoc epuizat!");
+            else showKevinutaBubble("Stoc epuizat până la refresh!");
         };
 
         tile.innerHTML = `
@@ -17525,12 +17526,11 @@ function renderBlackMarketBuyGrid() {
                 ${offer.price} <img src="https://iili.io/CrnXNdG.png" style="width:10px; height:10px;">
             </div>
             <img src="${data.image}">
-            <div class="bm-limit-tag" style="background:#ff3366;">${remaining > 0 ? 'STOC: '+remaining : 'GATA'}</div>
+            <div class="bm-limit-tag" style="background:#ff3366;">${remaining > 0 ? 'STOC: '+remaining : 'FĂRĂ STOC'}</div>
         `;
         grid.appendChild(tile);
     });
 }
-
 function openBuyDetail(idx) {
     currentBuyIdx = idx;
     const offer = blackMarketOffers[idx];
