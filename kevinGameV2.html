@@ -19721,6 +19721,7 @@ function renderPetShop() {
         const remaining = offer.limit - offer.bought;
         const tile = document.createElement('div');
         
+        // Use the same Sold Out class logic from your BM
         if (remaining <= 0) {
             tile.className = "pet-shop-card bm-sold-out";
             tile.onclick = () => showKevinutaBubble("Stoc epuizat până la refresh!");
@@ -19729,10 +19730,10 @@ function renderPetShop() {
             tile.onclick = () => openCatDetail(offer.key);
         }
         
-        // Changed "GATA" to "FĂRĂ STOC"
+        // This keeps the price tag and stock tag consistent with the Black Market
         tile.innerHTML = `
             <div class="bm-ruby-tag">${item.price} <img src="https://iili.io/CrnXNdG.png"></div>
-            <img src="${item.img}" style="width: 65px; height: 65px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8)); margin-bottom: 8px; position: relative; z-index: 2;">
+            <img src="${item.img}" style="width: 60px; height: 60px; object-fit: contain; margin-bottom: 8px;">
             <div class="bm-limit-tag" style="background:#064e3b; border-color:#16a34a;">${remaining > 0 ? 'STOC: '+remaining : 'FĂRĂ STOC'}</div>
         `;
         grid.appendChild(tile);
@@ -19838,7 +19839,31 @@ function openAchievementsTab() {
 }
 
  
+// Add this variable to track independent timer if needed
+let petTimerInterval = null;
 
+function startPetShopTimer() {
+    if (petTimerInterval) clearInterval(petTimerInterval);
+    
+    petTimerInterval = setInterval(() => {
+        const now = Date.now();
+        const oneHour = 60 * 60 * 1000;
+        // lastMarketRefresh is global in your code (from the BM system)
+        const timeLeft = Math.max(0, oneHour - (now - lastMarketRefresh));
+
+        const mins = Math.floor(timeLeft / 60000);
+        const secs = Math.floor((timeLeft % 60000) / 1000);
+        const timeString = `REFRESH ÎN: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        
+        const petDisplay = document.getElementById('petTimerDisplay');
+        if (petDisplay) petDisplay.innerText = timeString;
+
+        if (timeLeft <= 0) {
+            // Re-fetch pet data when time hits zero
+            openPetShop(); 
+        }
+    }, 1000);
+}
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
 // ==========================================
