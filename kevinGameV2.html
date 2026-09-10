@@ -16478,15 +16478,88 @@ function renderInventoryUI() {
 }
 
 function showItemInfo(key) {
-    // Look in boosts if not in specials
-    const data = specialRegistry[key] || boostRegistry[key];
+    // Look up data across all item registries (Specials, Boosts, and Pets)
+    const data = specialRegistry[key] || boostRegistry[key] || catShopItems[key];
     if (!data) return;
 
-    // Check if it's a boost key to show the "FOLOSEȘTE" button
-    const isBoost = key.includes('boost_');
-    showMobileEventModal(data, isBoost, key); 
+    // Check if it's a boost OR a pet box that can be opened/used
+    const isActionable = key.includes('boost_') || key.includes('cat_box_');
+    
+    // If it's a cat box, we can trigger the action modal
+    if (key.includes('cat_box_')) {
+        showInventoryBoxModal(key, data);
+    } else {
+        showMobileEventModal(data, isActionable, key); 
+    }
 }
 
+// Special modal when clicking a box inside the inventory
+function showInventoryBoxModal(key, itemData) {
+    forceCloseMenu();
+    isPaused = true;
+
+    // Remove any existing inventory box modals to prevent stacking
+    const existing = document.getElementById('inventoryBoxActionModal');
+    if (existing) existing.remove();
+
+    const modalOverlay = document.createElement('div');
+    modalOverlay.id = 'inventoryBoxActionModal';
+    modalOverlay.className = 'modal-overlay';
+    modalOverlay.style.display = 'flex';
+    modalOverlay.style.zIndex = '200000';
+
+    modalOverlay.innerHTML = `
+        <div class="modal-box info-modal-box" style="max-width: 360px !important; border-color: #22c55e !important; background: radial-gradient(circle at top, #13261a 0%, #0a0b16 100%) !important;">
+            <div style="display: inline-block; padding: 6px 25px; background: #22c55e; color: #000; font-family: 'Montserrat', sans-serif; font-weight: 900; text-transform: uppercase; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); margin-bottom: 15px; font-size: 13px;">
+                INVENTAR OBIECT
+            </div>
+
+            <div style="width: 100%; height: 130px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, transparent 70%); margin-bottom: 15px; position: relative;">
+                <img src="${itemData.image}" style="height: 110px; width: auto; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6);">
+            </div>
+
+            <h3 style="font-family: 'Montserrat'; font-weight: 900; font-size: 20px; color: #fff; margin-bottom: 5px; text-transform: uppercase;">${itemData.name}</h3>
+            <p style="font-family: 'Oswald'; color: #94a3b8; font-size: 14px; margin-bottom: 25px;">${itemData.desc}</p>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                <button class="menu-btn play" style="font-size: 14px !important; white-space: nowrap !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; padding: 0 20px !important; height: 48px !important; position: relative !important;" onclick="useInventoryBox('${key}')">
+                    <i class="fa-solid fa-box-open" style="position: absolute; left: 20px;"></i>
+                    <span style="flex-grow: 1; text-align: center;">DESCHIDE ACUM</span>
+                </button>
+                
+                <button class="menu-btn play" style="font-size: 14px !important; white-space: nowrap !important; display: flex !important; align-items: center !important; justify-content: flex-start !important; padding: 0 20px !important; height: 48px !important; position: relative !important; background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.3) !important;" onclick="document.getElementById('inventoryBoxActionModal').remove();">
+                    <i class="fa-solid fa-xmark" style="position: absolute; left: 20px;"></i>
+                    <span style="flex-grow: 1; text-align: center;">ÎNCHIDE</span>
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modalOverlay);
+}
+
+function useInventoryBox(key) {
+    // Remove one from inventory count
+    if (_GAME_DATA.inventory[key] && _GAME_DATA.inventory[key] > 0) {
+        _GAME_DATA.inventory[key]--;
+        renderInventoryUI();
+        syncInventoryToCloud();
+    }
+
+    // Close the modal
+    const modal = document.getElementById('inventoryBoxActionModal');
+    if (modal) modal.remove();
+
+    // Placeholder notification for opening from inventory
+    const itemData = catShopItems[key];
+    showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.image);
+    
+    // Resume game if not inside inventory menu anymore
+    if (document.getElementById('inventoryModal').style.display !== 'flex') {
+        isPaused = false;
+        startKevinMovement();
+    }
+}
 async function syncInventoryToCloud() {
     if (!currentUID) return;
 
@@ -19845,9 +19918,8 @@ function closePetShop() {
 // Global variable for Pet Stock
 let petShopOffers = [];
 
-// Dictionary for pet items
 const catShopItems = {
-    "cat_box_1": { name: " Cutia cu Pisici", price: 10, img: "https://i.ibb.co/1Y8tZMFz/cat-boxes.png", desc: "O cutie misterioasă cu o pisică drăgălașă înăuntru." }
+    "cat_box_1": { name: "Cutia cu Pisici", price: 10, image: "https://i.ibb.co/1Y8tZMFz/cat-boxes.png", desc: "O cutie misterioasă cu o pisică drăgălașă înăuntru." }
 };
 
 let lastOpenModal = null; // Asigură-te că ai această variabilă definită global
@@ -20162,7 +20234,8 @@ window.openPetShop = openPetShop;
 window.closePetShop = closePetShop;
 window.switchPetTab = switchPetTab;
 window.buyCatItem = buyCatItem; // <--- ACEASTA LIPSEA ȘI DĂ EROAREA
-
+window.showInventoryBoxModal = showInventoryBoxModal;
+window.useInventoryBox = useInventoryBox;
 })(); // <-- CLOSES THE SECURE VAULT
 
 
