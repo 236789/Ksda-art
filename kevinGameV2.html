@@ -10223,38 +10223,6 @@ div.inv-tile div.bm-limit-tag {
 /* DYNAMIC INNER SCREEN BACKGROUND (Optional polish) */
 .pet-modal-box-v2:has(.t-eggs.active) .pm-inner-v2 { border-color: #083344 !important; background: radial-gradient(circle at center, #083344 0%, #020502 100%) !important; }
 .pet-modal-box-v2:has(.t-treats.active) .pm-inner-v2 { border-color: #431407 !important; background: radial-gradient(circle at center, #431407 0%, #020502 100%) !important; }
-
-
-/* Force the grid to act correctly */
-.pet-shop-grid-wrapper {
-    display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 10px !important;
-    width: 100% !important;
-}
-
-/* Force the thick borders on cards */
-.pet-shop-card {
-    width: 100% !important;
-    height: 100px !important;
-    background: rgba(0,0,0,0.4) !important;
-    border: 3px solid #166534 !important; /* THICK BORDER */
-    border-radius: 12px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    position: relative !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
-}
-
-/* Fix text positioning inside the card */
-.pet-shop-card .bm-ruby-tag {
-    position: absolute !important;
-    top: 5px !important;
-    left: 5px !important;
-}
   </style>
 </head>
 <body>
@@ -19676,17 +19644,19 @@ function switchPetTab(type, btn) {
     document.querySelectorAll('.pm-tab-v2').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
 
-    // Select the content container
     const content = document.getElementById('pet-content');
     
-    // We only inject the inner container. The Timer is now moved to the HTML template in openPetShop.
-    const inner = document.getElementById('pet-tab-inner');
-    
+    // We inject the Timer AND the Grid together so the timer never gets deleted!
     if (type === 'boxes') {
-        inner.innerHTML = `<div id="petShopGrid" class="pet-shop-grid-wrapper"></div>`;
+        content.innerHTML = `
+            <div id="petTimerDisplay" style="color: #4ade80; font-family: 'Orbitron'; font-size: 14px; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px; text-align: center; width: 100%;">REFRESH ÎN: 00:00</div>
+            <div id="petShopGrid" class="inventory-v1-grid" style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%;">
+                <!-- Aici se va popula -->
+            </div>
+        `;
         renderPetShop(); 
     } else {
-        inner.innerHTML = `<div class="pet-empty-state">Secțiunea ${type.toUpperCase()} va fi disponibilă în curând!</div>`;
+        content.innerHTML = `<div class="pet-empty-state">Secțiunea ${type.toUpperCase()} va fi disponibilă în curând!</div>`;
     }
 }
 
@@ -19707,19 +19677,11 @@ async function openPetShop() {
     document.getElementById('utilitiesModal').style.display = 'none';
     document.getElementById('petShopModal').style.display = 'flex';
     isPaused = true; 
-
-    // Build the permanent structure once
-    const content = document.getElementById('pet-content');
-    content.innerHTML = `
-        <div id="petTimerDisplay" style="color: #4ade80; font-family: 'Orbitron'; font-size: 14px; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px; text-align: center; width: 100%;">REFRESH ÎN: --:--</div>
-        <div id="pet-tab-inner" style="width:100%;"></div>
-    `;
     
-    const firstTab = document.querySelector('.t-boxes');
+    const firstTab = document.querySelector('.pm-tab-v2');
     if(firstTab) switchPetTab('boxes', firstTab);
 
-    startBMTimer();
-
+    // FETCH STOCK FROM SERVER (Same as Black Market)
     try {
         const idToken = await firebase.auth().currentUser.getIdToken(true);
         const response = await fetch('https://kevin-backend-qodc.onrender.com/sync-black-market', {
@@ -19735,10 +19697,16 @@ async function openPetShop() {
         if (response.ok) {
             const data = await response.json();
             lastMarketRefresh = data.lastRefresh;
-            petShopOffers = data.petOffers.map(off => ({ ...off, bought: (data.playerPetBuys && data.playerPetBuys[off.key]) || 0 }));
+            
+            // Load Pet Data
+            petShopOffers = data.petOffers.map(off => ({ ...off, bought: data.playerPetBuys[off.key] || 0 }));
+            
             renderPetShop();
+            startBMTimer(); // Start the shared timer
         }
-    } catch (e) { console.error("Pet Shop Sync Error:", e); }
+    } catch (e) {
+        console.error("Pet Shop Sync Error:", e);
+    }
 }
 
 function renderPetShop() {
@@ -19751,24 +19719,22 @@ function renderPetShop() {
         if (!item) return;
 
         const remaining = offer.limit - offer.bought;
-        
         const tile = document.createElement('div');
         
-        // THIS CLASS IS WHAT TRIGGERS THE CSS BORDERS
-        tile.className = remaining > 0 ? "pet-shop-card" : "pet-shop-card bm-sold-out";
+        if (remaining <= 0) {
+            tile.className = "pet-shop-card bm-sold-out";
+            tile.onclick = () => showKevinutaBubble("Stoc epuizat până la refresh!");
+        } else {
+            tile.className = "pet-shop-card";
+            tile.onclick = () => openCatDetail(offer.key);
+        }
         
-        tile.onclick = () => {
-            if (remaining > 0) openCatDetail(offer.key);
-            else showKevinutaBubble("Stoc epuizat până la refresh!");
-        };
-        
-        // Ensure the inner structure matches what the CSS expects for tags
+        // Changed "GATA" to "FĂRĂ STOC"
         tile.innerHTML = `
             <div class="bm-ruby-tag">${item.price} <img src="https://iili.io/CrnXNdG.png"></div>
-            <img src="${item.img}" style="width: 65px; height: 65px; object-fit: contain; margin-bottom: 8px; position: relative; z-index: 2;">
+            <img src="${item.img}" style="width: 65px; height: 65px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8)); margin-bottom: 8px; position: relative; z-index: 2;">
             <div class="bm-limit-tag" style="background:#064e3b; border-color:#16a34a;">${remaining > 0 ? 'STOC: '+remaining : 'FĂRĂ STOC'}</div>
         `;
-        
         grid.appendChild(tile);
     });
 }
@@ -19870,33 +19836,18 @@ async function buyCatItem(offerKey) {
 function openAchievementsTab() {
     showNotification("ÎN CURÂND", "Realizările sunt în lucru!", "fa-trophy");
 }
-
+window.openAchievementsTab = openAchievementsTab;
+// ==========================================
+// 🔐 WINDOW EXPORTS
+// ==========================================
+window.openHeroModal = openHeroModal;
+window.closeHeroModal = closeHeroModal;
+window.navEroi = navEroi;
+window.buyHeroAction = buyHeroAction;
+window.executePurchase = executePurchase;
+window.useHeroNow = useHeroNow;
  
-// Add this variable to track independent timer if needed
-let petTimerInterval = null;
 
-function startPetShopTimer() {
-    if (petTimerInterval) clearInterval(petTimerInterval);
-    
-    petTimerInterval = setInterval(() => {
-        const now = Date.now();
-        const oneHour = 60 * 60 * 1000;
-        // lastMarketRefresh is global in your code (from the BM system)
-        const timeLeft = Math.max(0, oneHour - (now - lastMarketRefresh));
-
-        const mins = Math.floor(timeLeft / 60000);
-        const secs = Math.floor((timeLeft % 60000) / 1000);
-        const timeString = `REFRESH ÎN: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        
-        const petDisplay = document.getElementById('petTimerDisplay');
-        if (petDisplay) petDisplay.innerText = timeString;
-
-        if (timeLeft <= 0) {
-            // Re-fetch pet data when time hits zero
-            openPetShop(); 
-        }
-    }, 1000);
-}
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
 // ==========================================
@@ -20000,16 +19951,7 @@ window.openPetShop = openPetShop;
 window.closePetShop = closePetShop;
 window.switchPetTab = switchPetTab;
 window.buyCatItem = buyCatItem; // <--- ACEASTA LIPSEA ȘI DĂ EROAREA
-window.openAchievementsTab = openAchievementsTab;
-// ==========================================
-// 🔐 WINDOW EXPORTS
-// ==========================================
-window.openHeroModal = openHeroModal;
-window.closeHeroModal = closeHeroModal;
-window.navEroi = navEroi;
-window.buyHeroAction = buyHeroAction;
-window.executePurchase = executePurchase;
-window.useHeroNow = useHeroNow;
+
 })(); // <-- CLOSES THE SECURE VAULT
 
 
