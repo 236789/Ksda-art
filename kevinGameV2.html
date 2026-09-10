@@ -11638,11 +11638,11 @@ div.inv-tile div.bm-limit-tag {
         <div id="inventoryBoostsGrid" class="inventory-v1-grid"></div>
     </div>
 
-    <!-- TAB CONTENT: PETS (Placeholder) -->
-    <div id="inv-pets" class="tab-content">
-        <div class="placeholder-text">Animalele de companie vin în curând!</div>
+<!-- TAB CONTENT: PETS -->
+    <div id="inv-pets" class="tab-content" style="max-height: 50vh; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;">
+        <style>#inv-pets::-webkit-scrollbar { display: none; }</style>
+        <div id="inventoryPetsGrid" class="inventory-v1-grid"></div>
     </div>
-
     <button class="menu-btn play close-shop-btn" style="margin-top: 15px;" onclick="closeInventory()">
       <span>ÎNAPOI</span>
     </button>
@@ -16403,45 +16403,58 @@ function addToInventory(itemKey) {
 function renderInventoryUI() {
     const itemsGrid = document.getElementById('inventoryGrid');
     const boostsGrid = document.getElementById('inventoryBoostsGrid');
+    const petsGrid = document.getElementById('inventoryPetsGrid'); // <-- Added Pets Grid element
     const counter = document.getElementById('invCounter');
     
     itemsGrid.innerHTML = "";
     boostsGrid.innerHTML = "";
+    if (petsGrid) petsGrid.innerHTML = "";
     
     let total = 0;
     const keys = Object.keys(_GAME_DATA.inventory);
 
     let hasItems = false;
     let hasBoosts = false;
+    let hasPets = false;
 
     keys.forEach(key => {
         const count = _GAME_DATA.inventory[key];
-        
-        // Check which registry the item belongs to
+        if (count <= 0) return;
+
+        // Determine item category/registry source
         let isBoost = false;
+        let isPet = false;
         let data = specialRegistry[key];
         
         if (!data) {
             data = boostRegistry[key];
             if (data) isBoost = true;
         }
+        
+        // Check if it's a pet item (like cat boxes)
+        if (!data && catShopItems[key]) {
+            data = catShopItems[key];
+            isPet = true;
+        }
 
-        // If it doesn't exist in either, or count is 0, skip
-        if (!data || count <= 0) return;
+        if (!data) return; // Skip if unknown key
 
         total += count;
 
         const tile = document.createElement('div');
         tile.className = "inv-tile";
-        tile.onclick = () => showItemInfo(key); // We will update showItemInfo to handle boosts later when we make them clickable!
+        tile.onclick = () => showItemInfo(key);
 
         tile.innerHTML = `
             <img src="${data.image}">
             ${count > 1 ? `<div class="inv-tile-badge">x${count}</div>` : ''}
         `;
 
-        // Route to correct tab
-        if (isBoost) {
+        // Route to correct tab grid
+        if (isPet) {
+            if (petsGrid) petsGrid.appendChild(tile);
+            hasPets = true;
+        } else if (isBoost) {
             boostsGrid.appendChild(tile);
             hasBoosts = true;
         } else {
@@ -16458,6 +16471,9 @@ function renderInventoryUI() {
     }
     if (!hasBoosts) {
         boostsGrid.innerHTML = `<div class="placeholder-text" style="grid-column: span 5; margin-top: 50px;">Nu ai niciun Boost. Vizitează Piața Neagră!</div>`;
+    }
+    if (petsGrid && !hasPets) {
+        petsGrid.innerHTML = `<div class="placeholder-text" style="grid-column: span 5; margin-top: 50px;">Nu ai niciun pet sau cutie. Vizitează Pet Shop-ul!</div>`;
     }
 }
 
