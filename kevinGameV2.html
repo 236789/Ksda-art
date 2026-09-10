@@ -11552,6 +11552,32 @@ div.inv-tile div.bm-limit-tag {
   </div>
 </div>
 
+<!-- MODAL: POST-PURCHASE BOX ACTION -->
+<div id="postBuyBoxModal" class="modal-overlay" style="z-index: 200020;">
+    <div class="modal-box info-modal-box" style="max-width: 360px !important; border-color: #22c55e !important; background: radial-gradient(circle at top, #13261a 0%, #0a0b16 100%) !important;">
+        
+        <div style="display: inline-block; padding: 6px 25px; background: #22c55e; color: #000; font-family: 'Montserrat', sans-serif; font-weight: 900; text-transform: uppercase; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); margin-bottom: 15px; font-size: 13px;">
+            ACHIZIȚIE REUȘITĂ
+        </div>
+
+        <div style="width: 100%; height: 130px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, transparent 70%); margin-bottom: 15px; position: relative;">
+            <img id="postBuyBoxImg" src="" style="height: 110px; width: auto; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6);">
+        </div>
+
+        <h3 id="postBuyBoxTitle" style="font-family: 'Montserrat'; font-weight: 900; font-size: 20px; color: #fff; margin-bottom: 5px; text-transform: uppercase;"></h3>
+        <p style="font-family: 'Oswald'; color: #94a3b8; font-size: 14px; margin-bottom: 25px;">Ce dorești să faci cu acest obiect?</p>
+
+        <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+            <button class="menu-btn play" style="width: 100%; height: 50px; font-size: 16px; background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%) !important; border-color: #fff !important; color: #fff !important; box-shadow: 0 6px 0 #052e16 !important;" onclick="executeBoxAction('open')">
+                <i class="fa-solid fa-box-open"></i> <span>DESCHIDE ACUM</span>
+            </button>
+            <button class="menu-btn play" style="width: 100%; height: 50px; font-size: 16px; background: linear-gradient(180deg, #555 0%, #222) !important; border-color: #777 !important; color: #aaa !important; box-shadow: 0 6px 0 #111 !important;" onclick="executeBoxAction('inventory')">
+                <i class="fa-solid fa-briefcase"></i> <span>TRIMITE ÎN INVENTAR</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL: INVENTAR V2 -->
 <div id="inventoryModal" class="modal-overlay">
   <div class="modal-box shop-box">
@@ -19899,6 +19925,8 @@ function openCatDetail(offerKey) {
     document.body.appendChild(modal);
 }
 
+let pendingActionBoxKey = null;
+
 async function buyCatItem(offerKey) {
     const offer = petShopOffers.find(o => o.key === offerKey);
     const item = catShopItems[offerKey];
@@ -19913,22 +19941,24 @@ async function buyCatItem(offerKey) {
         return;
     }
 
-    // 1. Update Locally
+    // 1. Deduct Rubies and Increment Buy Count Locally
     rubies -= item.price;
     offer.bought += 1;
-    if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
-    _GAME_DATA.inventory[offerKey] = (_GAME_DATA.inventory[offerKey] || 0) + 1;
     
     updateScoreUI();
     renderPetShop(); 
     
-    // Close the detail modal
+    // Close the detail modal popup
     const detailModal = document.querySelector('.cat-shop-modal').parentElement;
     if (detailModal) detailModal.remove();
-    
-    showNotification("ACHIZIȚIE REUȘITĂ", `${item.name} a fost adăugat în inventar!`, item.img);
 
-    // 2. Sync to Backend
+    // 2. Set pending item and prompt user: Open or Inventory?
+    pendingActionBoxKey = offerKey;
+    document.getElementById('postBuyBoxImg').src = item.img;
+    document.getElementById('postBuyBoxTitle').innerText = item.name;
+    document.getElementById('postBuyBoxModal').style.display = 'flex';
+
+    // 3. Sync to Backend (Persists purchase immediately)
     const petBuysUpdate = {};
     petShopOffers.forEach(o => {
         if (o.bought > 0) petBuysUpdate[o.key] = o.bought;
@@ -19947,12 +19977,34 @@ async function buyCatItem(offerKey) {
                 xp: playerXP,
                 currentStage: currentStageId,
                 inventory: _GAME_DATA.inventory,
-                petBuys: petBuysUpdate // SENDS PET STOCK DATA
+                petBuys: petBuysUpdate 
             }),
         });
     } catch (e) {
-        console.error("Cloud sync failed:", e);
+        console.error("Cloud sync failed during pet purchase:", e);
     }
+}
+
+function executeBoxAction(action) {
+    const modal = document.getElementById('postBuyBoxModal');
+    modal.style.display = 'none';
+
+    if (!pendingActionBoxKey) return;
+    const itemData = catShopItems[pendingActionBoxKey];
+
+    if (action === 'open') {
+        // Placeholder for future box opening sequence
+        showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.img);
+    } else if (action === 'inventory') {
+        // Send item into player's inventory structure
+        if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
+        _GAME_DATA.inventory[pendingActionBoxKey] = (_GAME_DATA.inventory[pendingActionBoxKey] || 0) + 1;
+        
+        syncInventoryToCloud();
+        showNotification("SALVAT", `${itemData.name} a fost trimis în inventar!`, itemData.img);
+    }
+
+    pendingActionBoxKey = null;
 }
 // ==========================================
 // 🔐 WINDOW EXPORTS
@@ -19963,7 +20015,8 @@ window.navEroi = navEroi;
 window.buyHeroAction = buyHeroAction;
 window.executePurchase = executePurchase;
 window.useHeroNow = useHeroNow;
- 
+window.executeBoxAction = executeBoxAction;
+
 
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
