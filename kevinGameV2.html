@@ -10356,6 +10356,39 @@ div.inv-tile div.bm-limit-tag {
     position: absolute !important;
     left: 20px !important; /* Anchors the icon to the left edge */
 }
+
+
+/* Circular Question Mark Button in Modal Corner */
+.modal-corner-help-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--th-border, #facc15);
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--th-accent, #facc15);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 50;
+    outline: none;
+}
+.modal-corner-help-btn:hover {
+    background: var(--th-border, #facc15);
+    color: #000;
+    transform: scale(1.1);
+    box-shadow: 0 0 10px var(--th-glow, rgba(250, 204, 21, 0.5));
+}
+.modal-corner-help-btn:active {
+    transform: scale(0.9);
+}                      
   </style>
 </head>
 <body>
@@ -15156,25 +15189,26 @@ function showMobileEventModal(eventData, isUseable = false, itemKey = null) {
     modalOverlay.style.display = 'flex';
     modalOverlay.style.zIndex = '100000';
     
-    // 1. Determine Label Text and Color based on Type
     let typeLabel = "BUN";
-    let badgeColor = "#4ade80"; // Green
+    let badgeColor = "#4ade80"; 
 
     if (eventData.type === 'bad') {
         typeLabel = "RĂU";
-        badgeColor = "#ef4444"; // Red
+        badgeColor = "#ef4444"; 
     } else if (eventData.type === 'gamble') {
         typeLabel = "RISC";
-        badgeColor = "#a855f7"; // Purple
+        badgeColor = "#a855f7"; 
     }
 
     modalOverlay.innerHTML = `
-        <div class="modal-box info-modal-box" style="padding: 25px 20px; max-width: 320px;">
+        <div class="modal-box info-modal-box" style="padding: 25px 20px; max-width: 320px; position: relative;">
+            <!-- CORNER ? BUTTON -->
+            <button class="modal-corner-help-btn" onclick="showNotification('AJUTOR', 'Detalii suplimentare în curând!', 'fa-circle-question')">?</button>
+
             <img src="${eventData.image}" style="width: 75px; height: 75px; margin-bottom: 12px; object-fit: contain; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));">
             
             <h2 style="font-size: 28px; margin-bottom: 8px; font-family: 'Oswald'; color: var(--th-accent);">${eventData.name}</h2>
             
-            <!-- Themed Status Badge (PRESERVED STYLES) -->
             <div style="
                 color: ${badgeColor}; 
                 border: 2px solid ${badgeColor}; 
@@ -15192,7 +15226,6 @@ function showMobileEventModal(eventData, isUseable = false, itemKey = null) {
             
             <p style="font-size: 16px; line-height: 1.5; margin-bottom: 25px; color: #d1d5db; font-family: 'Oswald';">${eventData.description}</p>
             
-            <!-- BUTTON CONTAINER -->
             <div style="display:flex; flex-direction:column; gap:12px; width:100%;">
                 ${isUseable ? `<button class="menu-btn play" id="useItemBtn" style="width: 100%; height: 55px; font-size: 22px; padding: 0;"><span>FOLOSEȘTE</span></button>` : ''}
                 <button class="menu-btn play" id="mobileEventCloseBtn" style="width: 100%; height: 55px; font-size: 22px; padding: 0; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3);">
@@ -15204,13 +15237,11 @@ function showMobileEventModal(eventData, isUseable = false, itemKey = null) {
 
     document.body.appendChild(modalOverlay);
 
-// Handle USE logic
     if (isUseable) {
         document.getElementById('useItemBtn').onclick = () => {
             modalOverlay.remove();
             
-            if (itemKey.includes('cat_box_')) {
-                // Open the box directly
+            if (itemKey && itemKey.includes('cat_box_')) {
                 if (_GAME_DATA.inventory[itemKey] && _GAME_DATA.inventory[itemKey] > 0) {
                     _GAME_DATA.inventory[itemKey]--;
                     renderInventoryUI();
@@ -20007,10 +20038,9 @@ function renderPetShop() {
             tile.onclick = () => openCatDetail(offer.key);
         }
         
-        // Changed "GATA" to "FĂRĂ STOC"
         tile.innerHTML = `
             <div class="bm-ruby-tag">${item.price} <img src="https://iili.io/CrnXNdG.png"></div>
-            <img src="${item.img}" style="width: 65px; height: 65px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8)); margin-bottom: 8px; position: relative; z-index: 2;">
+            <img src="${item.image}" style="width: 65px; height: 65px; object-fit: contain; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8)); margin-bottom: 8px; position: relative; z-index: 2;">
             <div class="bm-limit-tag" style="background:#064e3b; border-color:#16a34a;">${remaining > 0 ? 'STOC: '+remaining : 'FĂRĂ STOC'}</div>
         `;
         grid.appendChild(tile);
@@ -20028,12 +20058,14 @@ function openCatDetail(offerKey) {
     modal.style.zIndex = '200000';
     
     modal.innerHTML = `
-        <div class="modal-box cat-shop-modal">
-            <img src="${item.img}" style="width: 100px; margin-bottom: 15px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.8));">
+        <div class="modal-box cat-shop-modal" style="position: relative;">
+            <!-- CORNER ? BUTTON -->
+            <button class="modal-corner-help-btn" onclick="showNotification('AJUTOR', 'Conținutul cutiei va fi afișat în curând!', 'fa-circle-question')">?</button>
+
+            <img src="${item.image}" style="width: 100px; margin-bottom: 15px; object-fit: contain; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.8));">
             <h2 style="color: #fff; font-family: 'Montserrat'; font-weight: 900; font-size: 22px; margin-bottom: 5px;">${item.name.toUpperCase()}</h2>
             <p style="color: #94a3b8; font-family: 'Oswald'; font-size: 14px; margin-bottom: 20px;">${item.desc}</p>
             
-            <!-- STATS REZULTATE -->
             <div class="cat-price-box">
                 <div class="cat-stat">
                     <span class="cat-stat-label">PREȚ</span>
