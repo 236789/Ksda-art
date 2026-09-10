@@ -15204,11 +15204,23 @@ function showMobileEventModal(eventData, isUseable = false, itemKey = null) {
 
     document.body.appendChild(modalOverlay);
 
-    // Handle USE logic
+// Handle USE logic
     if (isUseable) {
         document.getElementById('useItemBtn').onclick = () => {
             modalOverlay.remove();
-            activateBoost(itemKey);
+            
+            if (itemKey.includes('cat_box_')) {
+                // Open the box directly
+                if (_GAME_DATA.inventory[itemKey] && _GAME_DATA.inventory[itemKey] > 0) {
+                    _GAME_DATA.inventory[itemKey]--;
+                    renderInventoryUI();
+                    syncInventoryToCloud();
+                }
+                const itemData = catShopItems[itemKey];
+                showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.image);
+            } else {
+                activateBoost(itemKey);
+            }
         };
     }
 
@@ -16478,19 +16490,25 @@ function renderInventoryUI() {
 }
 
 function showItemInfo(key) {
-    // Look up data across all item registries (Specials, Boosts, and Pets)
-    const data = specialRegistry[key] || boostRegistry[key] || catShopItems[key];
+    // 1. Look up data across all item registries (Specials, Boosts, and Pets)
+    let data = specialRegistry[key] || boostRegistry[key] || catShopItems[key];
     if (!data) return;
 
-    // Check if it's a boost OR a pet box that can be opened/used
-    const isActionable = key.includes('boost_') || key.includes('cat_box_');
-    
-    // If it's a cat box, we can trigger the action modal
+    // 2. Ensure pet boxes have the correct properties mapped for the generic modal
     if (key.includes('cat_box_')) {
-        showInventoryBoxModal(key, data);
-    } else {
-        showMobileEventModal(data, isActionable, key); 
+        data = {
+            name: data.name,
+            image: data.image,
+            description: data.desc || "O cutie misterioasă cu o pisică drăgălașă înăuntru.",
+            type: "good" // Gives it a green 'BUN' badge style
+        };
     }
+
+    // 3. Determine if the item is useable/openable right from the modal
+    const isUseable = key.includes('boost_') || key.includes('cat_box_');
+
+    // 4. Use your standard, gorgeous shared modal!
+    showMobileEventModal(data, isUseable, key);
 }
 
 // Special modal when clicking a box inside the inventory
