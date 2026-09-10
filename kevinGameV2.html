@@ -9901,9 +9901,9 @@ div.inv-tile div.bm-limit-tag {
 
 /* BUTON X - Fixat pe colțul ramei (Stil Black Market) */
 .pm-close-v2 {
-    position: absolute;
-    top: 35px;       /* O coboară sub tab-uri, direct pe rama verde */
-    right: -10px;    /* O aliniază la marginea din dreapta */
+    position: absolute !important;
+    top: -10px !important; /* Adjust these values to fine-tune the corner */
+    right: -10px !important;
     width: 45px;
     height: 45px;
     border-radius: 50%;
@@ -10194,6 +10194,28 @@ div.inv-tile div.bm-limit-tag {
 /* DYNAMIC INNER SCREEN BACKGROUND (Optional polish) */
 .pet-modal-box-v2:has(.t-eggs.active) .pm-inner-v2 { border-color: #083344 !important; background: radial-gradient(circle at center, #083344 0%, #020502 100%) !important; }
 .pet-modal-box-v2:has(.t-treats.active) .pm-inner-v2 { border-color: #431407 !important; background: radial-gradient(circle at center, #431407 0%, #020502 100%) !important; }
+
+
+/* Ensure the parent modal box is the anchor */
+.pet-modal-box-v2 {
+    position: relative !important; 
+}
+
+/* Fix the close button to be pinned to the top-right of the modal box */
+.pm-close-v2 {
+    position: absolute !important;
+    top: -15px !important;  /* Adjust if you want it higher/lower */
+    right: -15px !important;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #22c55e, #166534);
+    border: 3px solid #fff;
+    color: #fff;
+    cursor: pointer;
+    z-index: 100; /* Must be higher than the tab-nav */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+}
   </style>
 </head>
 <body>
@@ -11386,15 +11408,16 @@ div.inv-tile div.bm-limit-tag {
   </div>
 </div>
 
-<div id="petShopModal" class="modal-overlay" style="z-index: 100005;">
-  <div class="modal-box pet-modal-box-v2">
+<div id="petShopModal" class="modal-overlay" style="z-index: 200000;">
+  <!-- Add position: relative here to bind the X button -->
+  <div class="modal-box pet-modal-box-v2" style="position: relative;">
     
-    <!-- Button stays here at the top level so it can be absolutely positioned -->
+    <!-- The X is now strictly inside the modal box -->
     <button class="pm-close-v2" onclick="closePetShop()">
         <i class="fa-solid fa-xmark"></i>
     </button>
 
-    <!-- Tab-uri cu Iconițe -->
+    <!-- Tabs -->
     <div class="pm-nav-v2">
       <button class="pm-tab-v2 t-boxes active" onclick="switchPetTab('boxes', this)">
         <i class="fa-solid fa-box-open"></i>
@@ -11407,18 +11430,16 @@ div.inv-tile div.bm-limit-tag {
       </button>
     </div>
 
-    <!-- NEW WRAPPER DIV: This provides the thick green border -->
+    <!-- THIS IS THE WRAPPER THAT PROVIDES THE BORDER -->
     <div class="pm-body-v2">
-        
-        <!-- The original content is now inside the body -->
         <div class="pm-inner-v2" id="pet-content">
             <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
                 <div id="petTimerDisplay" style="color: #4ade80; font-family: 'Orbitron'; font-size: 14px; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px;">REFRESH ÎN: 00:00</div>
                 <div id="petShopGrid" class="inventory-v1-grid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%;"></div>
             </div>
         </div>
-
-    </div> <!-- End pm-body-v2 -->
+    </div>
+    
   </div>
 </div>
 
