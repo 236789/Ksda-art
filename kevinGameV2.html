@@ -19715,9 +19715,17 @@ function switchPetTab(type, btn) {
 
 function closePetShop() {
     document.getElementById('petShopModal').style.display = 'none';
-    isPaused = false;
+    
+    // Dacă am venit dintr-un alt meniu, redeschidem acel meniu
+    if (lastOpenModal) {
+        document.getElementById(lastOpenModal).style.display = 'flex';
+        lastOpenModal = null; // Resetăm
+    } else {
+        // Dacă nu am venit din alt meniu, înseamnă că suntem în joc, deci facem resume
+        isPaused = false;
+        startKevinMovement();
+    }
 }
-
 // Global variable for Pet Stock
 let petShopOffers = [];
 
@@ -19726,15 +19734,28 @@ const catShopItems = {
     "cat_box_1": { name: " Cutia cu Pisici", price: 10, img: "https://i.ibb.co/1Y8tZMFz/cat-boxes.png", desc: "O cutie misterioasă cu o pisică drăgălașă înăuntru." }
 };
 
+let lastOpenModal = null; // Asigură-te că ai această variabilă definită global
+
 async function openPetShop() {
-    document.getElementById('utilitiesModal').style.display = 'none';
+    // Închidem orice modal era deschis anterior și salvăm ID-ul lui
+    const modals = ['utilitiesModal', 'shopModal'];
+    for(let id of modals) {
+        const el = document.getElementById(id);
+        if(el && el.style.display === 'flex') {
+            el.style.display = 'none';
+            lastOpenModal = id; // Salvăm ID-ul pentru a-l redeschide ulterior
+            break;
+        }
+    }
+
     document.getElementById('petShopModal').style.display = 'flex';
     isPaused = true; 
+    clearInterval(moveKevinInterval); // Oprim Kevin când suntem în shop
     
     const firstTab = document.querySelector('.pm-tab-v2');
     if(firstTab) switchPetTab('boxes', firstTab);
 
-    // FETCH STOCK FROM SERVER (Same as Black Market)
+    // FETCH STOCK
     try {
         const idToken = await firebase.auth().currentUser.getIdToken(true);
         const response = await fetch('https://kevin-backend-qodc.onrender.com/sync-black-market', {
@@ -19750,12 +19771,10 @@ async function openPetShop() {
         if (response.ok) {
             const data = await response.json();
             lastMarketRefresh = data.lastRefresh;
-            
-            // Load Pet Data
             petShopOffers = data.petOffers.map(off => ({ ...off, bought: data.playerPetBuys[off.key] || 0 }));
             
             renderPetShop();
-            startBMTimer(); // Start the shared timer
+            startBMTimer();
         }
     } catch (e) {
         console.error("Pet Shop Sync Error:", e);
