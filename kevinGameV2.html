@@ -19987,12 +19987,12 @@ function closePetShop() {
 let petShopOffers = [];
 
 const catShopItems = {
-    "cat_box_1": { name: "Cardboard Box", price: 5, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/carboard%20box.png", desc: "O cutie simplă." },
+    "cat_box_cardboard": { name: "Cardboard Box", price: 5, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/carboard%20box.png", desc: "O cutie simplă." },
     "cat_box_calico": { name: "Calico Box", price: 10, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/calico%20box.png", desc: "Cutie calico." },
-    "cat_box_kitty": { name: "Kitty Box", price: 10, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/kitty%20box%20.png", desc: "Pisicuțe jucăușe." },
-    "cat_box_tabby": { name: "Tabby Box", price: 10, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/tabby%20box%20.png", desc: "Pisici cu dungi." },
+    "cat_box_kitty": { name: "Kitty Box", price: 10, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/kitty%20box.png", desc: "Pisicuțe jucăușe." },
+    "cat_box_tabby": { name: "Tabby Box", price: 10, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/tabby%20box.png", desc: "Pisici cu dungi." },
     "cat_box_night": { name: "Night Box", price: 15, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/night%20box.png", desc: "Pisici de noapte." },
-    "cat_box_orange": { name: "Orange Box", price: 15, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/orange%20box%20.png", desc: "Pisici portocalii." },
+    "cat_box_orange": { name: "Orange Box", price: 15, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/orange%20box.png", desc: "Pisici portocalii." },
     "cat_box_tuxedo": { name: "Tuxedo Box", price: 15, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/tuxedo%20box.png", desc: "Pisici elegante." },
     "cat_box_majestic": { name: "Majestic Box", price: 20, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/majestic%20boxes.png", desc: "Pisici nobile." },
     "cat_box_royal": { name: "Royal Box", price: 50, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/royal%20box.png", desc: "Rare și regale." }
@@ -20049,35 +20049,34 @@ function renderPetShop() {
     if (!grid) return;
     grid.innerHTML = "";
 
-    // Sortăm ofertele primite de la server după preț
-    // Dacă prețul nu e în offer, îl luăm din catShopItems
+    // 1. Sortare sigură
     const sortedOffers = [...petShopOffers].sort((a, b) => {
-        const priceA = catShopItems[a.key]?.price || 0;
-        const priceB = catShopItems[b.key]?.price || 0;
-        return priceA - priceB;
+        const pA = catShopItems[a.key]?.price || 0;
+        const pB = catShopItems[b.key]?.price || 0;
+        return pA - pB;
     });
     
     sortedOffers.forEach((offer) => {
-        // Fix: Verificăm dacă offer există și dacă avem item-ul definit
-        if (!offer || !catShopItems[offer.key]) return;
-
         const item = catShopItems[offer.key];
-        const remaining = offer.limit - offer.bought;
         
+        // 🚨 PROTECȚIE: Dacă item-ul nu există, sărim peste el în loc să dăm crash
+        if (!item) {
+            console.warn("Item not found in catShopItems:", offer.key);
+            return; 
+        }
+
+        const remaining = offer.limit - offer.bought;
         const tile = document.createElement('div');
         
-        if (remaining <= 0) {
-            tile.className = "pet-shop-card bm-sold-out";
-            tile.onclick = () => showKevinutaBubble("Stoc epuizat!");
-        } else {
-            tile.className = "pet-shop-card";
-            tile.onclick = () => openCatDetail(offer.key);
-        }
+        tile.className = "pet-shop-card";
+        if (remaining <= 0) tile.classList.add('bm-sold-out');
+        
+        tile.onclick = () => (remaining > 0) ? openCatDetail(offer.key) : showKevinutaBubble("Stoc epuizat!");
         
         tile.innerHTML = `
             <div class="bm-ruby-tag">${item.price} <img src="https://iili.io/CrnXNdG.png"></div>
-            <img src="${item.image}" style="width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; z-index: 2;">
-            <div class="bm-limit-tag" style="background:#064e3b; border-color:#16a34a;">${remaining > 0 ? 'STOC: '+remaining : 'GATA'}</div>
+            <img src="${item.image || 'https://via.placeholder.com/50'}" style="width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; z-index: 2;">
+            <div class="bm-limit-tag">${remaining > 0 ? 'STOC: '+remaining : 'GATA'}</div>
         `;
         grid.appendChild(tile);
     });
