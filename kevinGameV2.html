@@ -15260,10 +15260,16 @@ function showMobileEventModal(eventData, isUseable = false, itemKey = null) {
         badgeColor = "#a855f7"; 
     }
 
+    // FIXED: Decide dynamically what the "?" button does
+    let helpAction = `showNotification('AJUTOR', 'Detalii suplimentare în curând!', 'fa-circle-question')`;
+    if (itemKey && itemKey.includes('cat_box_')) {
+        helpAction = `openBoxInfoModal('${itemKey}')`;
+    }
+
     modalOverlay.innerHTML = `
         <div class="modal-box info-modal-box" style="padding: 25px 20px; max-width: 320px; position: relative;">
-            <!-- CORNER ? BUTTON -->
-            <button class="modal-corner-help-btn" onclick="showNotification('AJUTOR', 'Detalii suplimentare în curând!', 'fa-circle-question')">?</button>
+            <!-- FIXED BUTTON -->
+            <button class="modal-corner-help-btn" onclick="${helpAction}">?</button>
 
             <img src="${eventData.image}" style="width: 75px; height: 75px; margin-bottom: 12px; object-fit: contain; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));">
             
@@ -15322,6 +15328,7 @@ function showMobileEventModal(eventData, isUseable = false, itemKey = null) {
         }
     };
 }
+
 function activateBoost(key) {
     if (playerLevel < 3) {
         showKevinutaBubble("Boost-urile se pot folosi abia de la Nivelul 3!");
@@ -20814,8 +20821,8 @@ function openCatDetail(offerKey) {
     
     modal.innerHTML = `
         <div class="modal-box cat-shop-modal" style="position: relative;">
-            <!-- CORNER ? BUTTON -->
-            <button class="modal-corner-help-btn" onclick="showNotification('AJUTOR', 'Conținutul cutiei va fi afișat în curând!', 'fa-circle-question')">?</button>
+            <!-- FIXED: ACUM APELEAZĂ openBoxInfoModal() ÎN LOC DE showNotification() -->
+            <button class="modal-corner-help-btn" onclick="openBoxInfoModal('${offerKey}')">?</button>
 
             <img src="${item.image}" style="width: 100px; margin-bottom: 15px; object-fit: contain; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.8));">
             <h2 style="color: #fff; font-family: 'Montserrat'; font-weight: 900; font-size: 22px; margin-bottom: 5px;">${item.name.toUpperCase()}</h2>
