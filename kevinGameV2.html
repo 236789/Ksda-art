@@ -20203,25 +20203,25 @@ function openBoxInfoModal(boxKey) {
             <div style="display: flex; flex-direction: column; align-items: center;">
                 
                 <!-- THE SMALL BOX -->
-                <div style="width: 100%; height: 120px; background: radial-gradient(circle at bottom, ${color}22 0%, rgba(0,0,0,0.8) 80%); border: 2px solid ${color}; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 8px 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 0 15px rgba(0,0,0,0.8);">
+                <div style="width: 100%; height: 125px; background: radial-gradient(circle at bottom, ${color}22 0%, rgba(0,0,0,0.8) 80%); border: 2px solid ${color}; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 8px 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 0 15px rgba(0,0,0,0.8); overflow: hidden;">
                     
                     <!-- NAME (TOP) -->
-                    <div style="font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 11px; color: #fff; text-transform: uppercase; text-align: center; line-height: 1.1; word-break: break-word; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
+                    <div style="font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 11px; color: #fff; text-transform: uppercase; text-align: center; line-height: 1.1; word-break: break-word; text-shadow: 0 2px 4px rgba(0,0,0,0.8); z-index: 2;">
                         ${o.name}
                     </div>
                     
-                    <!-- IMAGE (MIDDLE) -->
-                    <div style="flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; margin: 5px 0;">
-                        <img src="${o.image}" style="max-height: 55px; max-width: 100%; object-fit: contain; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.9));">
+                    <!-- IMAGE (MIDDLE) - INCREASED SIZE & SCALE -->
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; margin: 0;">
+                        <img src="${o.image}" style="max-height: 80px; max-width: 100%; object-fit: contain; transform: scale(1.2); filter: drop-shadow(0 5px 8px rgba(0,0,0,0.9)); z-index: 1;">
                     </div>
                     
                     <!-- RARITY TIER (BOTTOM) -->
-                    <div style="font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 10px; color: ${color}; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 0 5px ${color}; ${isMajestic ? 'animation: cineGlitch 0.2s infinite;' : ''}">
+                    <div style="font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 10px; color: ${color}; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 0 5px ${color}; z-index: 2; ${isMajestic ? 'animation: cineGlitch 0.2s infinite;' : ''}">
                         ${o.rarity}
                     </div>
                 </div>
                 
-                <!-- ✨ FIX 1: PERCENTAGE TAG NOW MATCHES RARITY COLOR -->
+                <!-- DROP CHANCE (OUTSIDE THE BOX) -->
                 <div style="font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 12px; color: ${color}; margin-top: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 8px; border: 1px solid ${color}; box-shadow: 0 4px 6px rgba(0,0,0,0.5);">
                     ${o.chance}
                 </div>
@@ -20245,7 +20245,7 @@ function openBoxInfoModal(boxKey) {
                 ${catsListHtml}
             </div>
 
-            <!-- ✨ FIX 2: PERFECTLY ALIGNED AND SIZED BUTTON -->
+            <!-- BUTTON -->
             <button class="menu-btn play" style="width: 100%; height: 50px; font-size: 16px; font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spacing: 1px; white-space: nowrap; display: flex; align-items: center; justify-content: center; padding: 0;" onclick="this.closest('.modal-overlay').remove()">
                 AM ÎNȚELES
             </button>
@@ -20254,6 +20254,7 @@ function openBoxInfoModal(boxKey) {
 
     document.body.appendChild(modal);
 }
+
 
 window.openBoxInfoModal = openBoxInfoModal;
 
