@@ -19982,62 +19982,72 @@ function closePetShop() {
 // Global variable for Pet Stock
 let petShopOffers = [];
 
+
 const catShopItems = {
-    "cat_box_cardboard": { 
-        name: "Cardboard Box", 
-        price: 5, 
-        image: "https://i.ibb.co/3YLwW5Gq/cat-boxes.png", 
-        desc: "O cutie simplă." 
+    "cat_box_cardboard": {
+        name: "Cardboard Box",
+        price: 5,
+        image: "https://i.ibb.co/3YLwW5Gq/cat-boxes.png",
+        desc: "O cutie simplă. Un clasic atemporal. Cumva, pisica ta tot o va prefera în locul patului scump pe care i l-ai cumpărat."
     },
-    "cat_box_calico": { 
-        name: "Calico Box", 
-        price: 10, 
-        image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/calico%20box.png", 
-        desc: "Cutie calico." 
+
+    "cat_box_calico": {
+        name: "Calico Box",
+        price: 10,
+        image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/calico%20box.png",
+        desc: "Colorată, drăguță și perfectă pentru o pisică ce știe exact cât de adorabilă este."
     },
-    "cat_box_kitty": { 
-        name: "Kitty Box", 
-        price: 10, 
-        image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/kitty%20box%20.png", // Added space before .png
-        desc: "Pisicuțe jucăușe." 
+
+    "cat_box_kitty": {
+        name: "Kitty Box",
+        price: 10,
+        image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/kitty%20box%20.png",
+        desc: "Plină de pisicuțe. Pisica ta probabil va sta mai mult să se uite la ele decât să intre în cutie."
     },
-    "cat_box_tabby": { 
-        name: "Tabby Box", 
-        price: 12, 
-        image: "https://i.ibb.co/CKwcQRCM/tabby-box.png", 
-        desc: "Pisici cu dungi." 
+
+    "cat_box_tabby": {
+        name: "Tabby Box",
+        price: 12,
+        image: "https://i.ibb.co/CKwcQRCM/tabby-box.png",
+        desc: "Dungi pe exterior, haos pe interior. Se potrivește perfect unei pisici care nu știe ce înseamnă liniștea."
     },
-    "cat_box_night": { 
-        name: "Night Box", 
-        price: 15, 
-        image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/night%20box.png", 
-        desc: "Pisici de noapte." 
+
+    "cat_box_night": {
+        name: "Night Box",
+        price: 15,
+        image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/night%20box.png",
+        desc: "Pentru pisicile care consideră că 3 dimineața este momentul ideal pentru alergat prin casă și urlat fără motiv."
     },
-    "cat_box_orange": { 
-        name: "Orange Box", 
-        price: 15, 
-        image: "https://i.ibb.co/d4qWryjq/orange-box.png", 
-        desc: "Pisici portocalii." 
+
+    "cat_box_orange": {
+        name: "Orange Box",
+        price: 15,
+        image: "https://i.ibb.co/d4qWryjq/orange-box.png",
+        desc: "Alimentată de o pisică portocalie și aproximativ trei neuroni funcționali. Zoomies incluse."
     },
-    "cat_box_tuxedo": { 
-        name: "Tuxedo Box", 
-        price: 15, 
-        image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/tuxedo%20box.png", 
-        desc: "Pisici elegante." 
+
+    "cat_box_tuxedo": {
+        name: "Tuxedo Box",
+        price: 15,
+        image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/tuxedo%20box.png",
+        desc: "Pentru pisici elegante, distinse și perfect capabile să dărâme un pahar în timp ce te privesc în ochi."
     },
-    "cat_box_majestic": { 
-        name: "Majestic Box", 
-        price: 20, 
-        image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/majestic%20boxes.png", 
-        desc: "Pisici nobile." 
+
+    "cat_box_majestic": {
+        name: "Majestic Box",
+        price: 20,
+        image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/majestic%20boxes.png",
+        desc: "Un tron demn de o adevărată măreție. Pisica ta va accepta această ofrandă fără urmă de recunoștință."
     },
-    "cat_box_royal": { 
-        name: "Royal Box", 
-        price: 50, 
-        image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/royal%20box.png", 
-        desc: "Rare și regale." 
+
+    "cat_box_royal": {
+        name: "Royal Box",
+        price: 50,
+        image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/royal%20box.png",
+        desc: "O cutie demnă de un rege. Din păcate, regele este o pisică și nu ai voie să te apropii fără o recompensă."
     }
-};
+}; 
+
 let lastOpenModal = null; // Asigură-te că ai această variabilă definită global
 
 async function openPetShop() {
