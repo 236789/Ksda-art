@@ -20074,9 +20074,9 @@ const petCatalog = [
     {
         id: "alpy",
         name: "Alpy",
-        desc: "Mama lui Biggy și Luna. Are o privire hipnotizantă...",
-        personality: "Extrem de agățată de stăpân, jucăușă și foarte gălăgioasă.",
-        stats: { speed: 1, size: 3, rarity: "Rare" },
+        desc: "Mama lui Biggy și Luna...",
+        personality: "Extrem de agățată de stăpân...",
+        stats: { speed: 1, size: 80, rarity: "Rare" }, // <-- SIZE IS HERE (80px)
         ability: { name: "Miaunat Sonor", desc: "Atrage atenția tuturor." },
         assets: {
             presentation: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/alpy/aplySit.png",
@@ -20092,10 +20092,10 @@ const petCatalog = [
     {
         id: "anya",
         name: "Anya",
-        desc: "Fiica lui Dori și soră cu Ghost, Negrii Beznă și Ghost. O pisicuță extrem de jucăușă și atașată.",
+        desc: "Fiica lui Dori și soră cu Ghost...",
         personality: "Jucăușă, foarte lipicioasă (clingy) și micuță.",
-        stats: { speed: 0.7, size: 1.5, rarity: "Epic" }, // Slower & smaller
-        ability: { name: "Energie de Kitten", desc: "Se mișcă constant și îți dă stare de bine." },
+        stats: { speed: 0.7, size: 45, rarity: "Epic" }, // <-- SIZE IS HERE (45px kitten size)
+        ability: { name: "Energie de Kitten", desc: "Se mișcă constant." },
         assets: {
             presentation: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya/anya.png",
             walk: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya/anya%20walk.png",
@@ -20392,13 +20392,13 @@ function spawnPetInstance(petId) {
         top: ${Math.random() * (window.innerHeight - 100)}px;
     `;
 
-    // Anya is a kitten, so she's smaller (45px), Alpy is bigger (80px)
-    const size = petId === 'anya' ? '45px' : '80px';
+    // 🌟 READ SIZE DIRECTLY FROM THE PET'S REGISTRY STATS 🌟
+    const catSize = (petTemplate.stats && petTemplate.stats.size) ? `${petTemplate.stats.size}px` : '60px';
 
     const sprite = document.createElement('div');
     sprite.className = 'pet-sprite-inner';
     sprite.style.cssText = `
-        width: ${size}; height: ${size};
+        width: ${catSize}; height: ${catSize};
         background-size: contain; background-repeat: no-repeat;
         background-position: center;
         background-image: url('${petTemplate.assets.presentation}');
@@ -20408,15 +20408,13 @@ function spawnPetInstance(petId) {
     container.appendChild(sprite);
     document.getElementById('gameArea').appendChild(container);
 
-    // 2. Give this specific instance its own AI state object
     const pet = {
         template: petTemplate,
         container: container,
         sprite: sprite,
-        state: "idle" // 'idle', 'walking', 'following', 'pose', 'sleep'
+        state: "idle"
     };
 
-    // Start independent AI loop for this cat instance
     initPetInstanceAI(pet);
 }
 
