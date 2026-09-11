@@ -10656,6 +10656,11 @@ div.inv-tile div.bm-limit-tag {
 
 <!-- Inside <div id="gameArea"> -->
 <div id="gameArea">
+
+    <!-- ✅ PUNE DIV-UL AICI, IMEDIAT DUPĂ DESCHIDEREA LUI GAMEAREA -->
+    <div id="petContainer" style="position: absolute; pointer-events: none; z-index: 100;">
+        <div id="petSprite" style="width: 80px; height: 80px; background-size: contain; background-repeat: no-repeat; transition: all 0.5s ease;"></div>
+    </div>
 <!-- NOULE SCOREBOARD PREMIUM (ALINIAT PERFECT & REORDONAT) -->
 <div id="scoreBoard" class="hud-premium-container">
     
@@ -10737,6 +10742,9 @@ div.inv-tile div.bm-limit-tag {
 <!-- Butonul de Misiuni (fostul Achievements) -->
 <button class="control-btn sub-btn" title="Misiuni" onclick="event.stopPropagation(); openQuestsMenu()">
   <i class="fa-solid fa-list-check"></i>
+</button> 
+<button class="control-btn sub-btn" onclick="spawnPet('alpy')" title="Summon Alpy">
+  <i class="fa-solid fa-cat"></i>
 </button>
 
 <button class="control-btn sub-btn" style="--i:3" title="Utilități" onclick="openUtilitiesModal()">
@@ -10754,6 +10762,20 @@ div.inv-tile div.bm-limit-tag {
 
   <div id="kevin"></div>
   <!-- OLD BACK BUTTON REMOVED -->
+<!-- Inside <div id="gameArea"> -->
+<div id="gameArea">
+    
+    <!-- ... scoreboard, menus, etc ... -->
+
+
+
+    <!-- Noul scoreboard... -->
+    <div id="scoreBoard" class="hud-premium-container">
+        ...
+    </div>
+
+    <!-- Kevin (Personajul) -->
+    <div id="kevin"></div>
 
 </div>
 
@@ -10992,6 +11014,7 @@ div.inv-tile div.bm-limit-tag {
 
   </div>
 </div>
+
 
 
 <!-- REWORKED SELL MODAL (Fully Themed) -->
@@ -20048,6 +20071,36 @@ const catShopItems = {
     }
 }; 
 
+
+const petCatalog = [
+    {
+        id: "alpy",
+        name: "Alpy",
+        desc: "Mama lui Biggy și Luna. Are o privire hipnotizantă: un ochi verde și unul albastru. O pisică plină de viață care nu te lasă niciodată să te plictisești.",
+        personality: "Extrem de agățată de stăpân, jucăușă și foarte gălăgioasă.",
+        stats: {
+            speed: 1,  // Normal speed
+            size: 3,   // Regular adult size
+            rarity: "Rare"
+        },
+        ability: {
+            name: "Miaunat Sonor",
+            desc: "Alpy miaună atât de tare încât atrage atenția tuturor, crescând șansa de apariție a evenimentelor speciale."
+        },
+        // Am mapat fișierele tale exacte din GitHub
+        assets: {
+            presentation: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/alpy/aplySit.png",
+            walk: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/alpy/apliWalk.png",
+            stretch: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/alpy/aplyStretch.png",
+            back: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/alpy/aply%20back%20.png",
+            layDown: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/alpy/AlpyLayDown.png",
+            sleep: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/alpy/aplySleep.png",
+            mog: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/alpy/allymog.png",
+            play: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/alpy/aplyPlay.png"
+        }
+    }
+];
+
 let lastOpenModal = null; // Asigură-te că ai această variabilă definită global
 
 async function openPetShop() {
@@ -20264,6 +20317,94 @@ function executeBoxAction(action) {
 
     pendingActionBoxKey = null;
 }
+
+
+let currentPet = null;
+let petState = "follow"; // states: follow, pose, sleep
+
+function spawnPet(petId) {
+    currentPet = petCatalog.find(p => p.id === petId);
+    const sprite = document.getElementById('petSprite');
+    sprite.style.backgroundImage = `url('${currentPet.assets.presentation}')`;
+    
+    // START AI LOOP
+    runPetAI();
+}
+
+function runPetAI() {
+    setInterval(() => {
+        if (isPaused) return;
+
+        const rand = Math.random();
+        
+        // 1. CHANCE TO SWITCH POSE (Switching states)
+        if (rand < 0.2) { // 20% chance to do a random animation
+            petState = "pose";
+            playRandomPose();
+            
+            setTimeout(() => {
+                petState = "follow";
+                updatePetSprite('walk');
+            }, 3000); // Stays in pose 3 seconds
+        } 
+        // 2. CHANCE TO SLEEP (Random spot)
+        else if (rand > 0.9) { 
+            petState = "sleep";
+            goToRandomSpotAndSleep();
+        }
+    }, 5000); // AI decisions every 5 seconds
+}
+
+function updatePetSprite(action) {
+    const sprite = document.getElementById('petSprite');
+    sprite.style.backgroundImage = `url('${currentPet.assets[action] || currentPet.assets.presentation}')`;
+}
+
+function playRandomPose() {
+    const poses = ['stretch', 'mog', 'play'];
+    const randomPose = poses[Math.floor(Math.random() * poses.length)];
+    updatePetSprite(randomPose);
+}
+
+function goToRandomSpotAndSleep() {
+    const sprite = document.getElementById('petSprite');
+    const x = Math.random() * (window.innerWidth - 100);
+    const y = Math.random() * (window.innerHeight - 100);
+    
+    sprite.style.left = x + "px";
+    sprite.style.top = y + "px";
+    updatePetSprite('sleep');
+
+    setTimeout(() => {
+        petState = "follow";
+        updatePetSprite('walk');
+    }, 5000);
+}
+
+function followCharacter() {
+    // 1. Oprește tot dacă suntem în Meniu sau Shop
+    const gameArea = document.getElementById('gameArea');
+    if (!gameArea || gameArea.style.display !== 'block') return;
+
+    const pet = document.getElementById('petContainer');
+    const target = document.getElementById('kevin');
+
+    // 2. Verifică existența elementelor
+    if (!pet || !target) return;
+
+    // 3. Verifică dacă Kevin e activ
+    if (target.style.display === 'none') return;
+
+    const targetRect = target.getBoundingClientRect();
+    const petX = parseFloat(pet.style.left || 0);
+    const petY = parseFloat(pet.style.top || 0);
+    
+    // Logica de follow
+    pet.style.left = (petX + (targetRect.left - petX) * 0.05) + "px";
+    pet.style.top = (petY + (targetRect.top - petY) * 0.05) + "px";
+}
+// Connect this to your existing main game loop
+setInterval(followCharacter, 50);
 // ==========================================
 // 🔐 WINDOW EXPORTS
 // ==========================================
