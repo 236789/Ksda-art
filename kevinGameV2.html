@@ -20318,9 +20318,10 @@ function executeBoxAction(action) {
     pendingActionBoxKey = null;
 }
 
-
+// --- ENDERMAN-STYLE PET AI SYSTEM ---
 let currentPet = null;
-let petState = "follow"; // states: follow, pose, sleep
+let petState = "idle"; // states: 'idle', 'walking', 'following', 'pose', 'sleep'
+let petAIInterval = null;
 
 function spawnPet(petId) {
     currentPet = petCatalog.find(p => p.id === petId);
@@ -20329,94 +20330,154 @@ function spawnPet(petId) {
         return;
     }
     
-    // Show notification or activate the pet visually
     showNotification("PET ACTIVAT!", `Ai chemat-o pe ${currentPet.name}!`, currentPet.assets.presentation);
     
-    // Position and display the pet sprite container
     const petContainer = document.getElementById('petContainer');
     const sprite = document.getElementById('petSprite');
     if (petContainer && sprite) {
         petContainer.style.display = 'block';
+        petContainer.style.position = 'absolute';
+        petContainer.style.zIndex = '998'; // Just below Kevin
         sprite.style.backgroundImage = `url('${currentPet.assets.presentation}')`;
+        
+        // Spawn near the center
+        petContainer.style.left = (window.innerWidth / 2) + "px";
+        petContainer.style.top = (window.innerHeight / 2) + "px";
     }
     
-    // Close the floating menu if it's open
     forceCloseMenu();
+    startPetAI();
 }
-function runPetAI() {
-    setInterval(() => {
-        if (isPaused) return;
 
-        const rand = Math.random();
-        
-        // 1. CHANCE TO SWITCH POSE (Switching states)
-        if (rand < 0.2) { // 20% chance to do a random animation
-            petState = "pose";
-            playRandomPose();
+function startPetAI() {
+    if (petAIInterval) clearInterval(petAIInterval);
+
+    // Main AI loop: Decides behavior every 8 to 12 seconds
+    petAIInterval = setInterval(() => {
+        if (isPaused || !currentPet) return;
+
+        const choice = Math.random();
+
+        if (choice < 0.4) {
+            // 1. Follow the player for a while (40% chance)
+            petState = "following";
+            updatePetSprite('walk');
             
             setTimeout(() => {
-                petState = "follow";
-                updatePetSprite('walk');
-            }, 3000); // Stays in pose 3 seconds
-        } 
-        // 2. CHANCE TO SLEEP (Random spot)
-        else if (rand > 0.9) { 
-            petState = "sleep";
-            goToRandomSpotAndSleep();
+                if (petState === "following") {
+                    petState = "idle";
+                    updatePetSprite('presentation');
+                }
+            }, 8000); // Follows for 8 seconds, then stops
+
+        } else if (choice < 0.7) {
+            // 2. Walk to a random spot on screen (30% chance)
+            petState = "walking";
+            updatePetSprite('walk');
+            
+            const randomX = Math.random() * (window.innerWidth - 100);
+            const randomY = Math.random() * (window.innerHeight - 100);
+            movePetSmoothly(randomX, randomY, 3000, () => {
+                // Once arrived, do a random action (sit, stretch, sleep)
+                performRandomIdleAction();
+            });
+
+        } else {
+            // 3. Stay put and do an immediate action (30% chance)
+            performRandomIdleAction();
         }
-    }, 5000); // AI decisions every 5 seconds
+
+    }, 10000); // Makes a new decision every 10 seconds
+}
+
+function performRandomIdleAction() {
+    const actions = ['stretch', 'layDown', 'sleep', 'mog', 'play'];
+    const chosenAction = actions[Math.floor(Math.random() * actions.length)];
+    
+    petState = "pose";
+    updatePetSprite(chosenAction);
+
+    // Stay in this pose/sleep for 6 to 10 seconds, then return to idle/following
+    setTimeout(() => {
+        if (petState === "pose") {
+            petState = "idle";
+            updatePetSprite('presentation');
+        }
+    }, Math.random() * 4000 + 6000);
 }
 
 function updatePetSprite(action) {
     const sprite = document.getElementById('petSprite');
+    if (!sprite || !currentPet) return;
     sprite.style.backgroundImage = `url('${currentPet.assets[action] || currentPet.assets.presentation}')`;
 }
 
-function playRandomPose() {
-    const poses = ['stretch', 'mog', 'play'];
-    const randomPose = poses[Math.floor(Math.random() * poses.length)];
-    updatePetSprite(randomPose);
-}
+function movePetSmoothly(targetX, targetY, duration, callback) {
+    const petContainer = document.getElementById('petContainer');
+    if (!petContainer) return;
 
-function goToRandomSpotAndSleep() {
-    const sprite = document.getElementById('petSprite');
-    const x = Math.random() * (window.innerWidth - 100);
-    const y = Math.random() * (window.innerHeight - 100);
+    const startX = parseFloat(petContainer.style.left) || window.innerWidth / 2;
+    const startY = parseFloat(petContainer.style.top) || window.innerHeight / 2;
     
-    sprite.style.left = x + "px";
-    sprite.style.top = y + "px";
-    updatePetSprite('sleep');
+    // Flip sprite direction based on movement
+    const sprite = document.getElementById('petSprite');
+    if (sprite) {
+        sprite.style.transform = targetX < startX ? "scaleX(-1)" : "scaleX(1)";
+    }
 
-    setTimeout(() => {
-        petState = "follow";
-        updatePetSprite('walk');
-    }, 5000);
+    const startTime = performance.now();
+
+    function step(currentTime) {
+        if (isPaused || petState !== "walking") return;
+
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Ease-out interpolation
+        const currentX = startX + (targetX - startX) * progress;
+        const currentY = startY + (targetY - startY) * progress;
+
+        petContainer.style.left = currentX + "px";
+        petContainer.style.top = currentY + "px";
+
+        if (progress < 1) {
+            requestAnimationFrame(step);
+        } else {
+            if (callback) callback();
+        }
+    }
+
+    requestAnimationFrame(step);
 }
 
-function followCharacter() {
-    // 1. Oprește tot dacă suntem în Meniu sau Shop
-    const gameArea = document.getElementById('gameArea');
-    if (!gameArea || gameArea.style.display !== 'block') return;
+// Continuous frame loop for when the cat is in "following" mode
+function updatePetPhysics() {
+    if (isPaused || !currentPet || petState !== "following") return;
 
-    const pet = document.getElementById('petContainer');
+    const petContainer = document.getElementById('petContainer');
     const target = document.getElementById('kevin');
-
-    // 2. Verifică existența elementelor
-    if (!pet || !target) return;
-
-    // 3. Verifică dacă Kevin e activ
-    if (target.style.display === 'none') return;
+    if (!petContainer || !target || target.style.display === 'none') return;
 
     const targetRect = target.getBoundingClientRect();
-    const petX = parseFloat(pet.style.left || 0);
-    const petY = parseFloat(pet.style.top || 0);
-    
-    // Logica de follow
-    pet.style.left = (petX + (targetRect.left - petX) * 0.05) + "px";
-    pet.style.top = (petY + (targetRect.top - petY) * 0.05) + "px";
+    const petX = parseFloat(petContainer.style.left || 0);
+    const petY = parseFloat(petContainer.style.top || 0);
+
+    // Offset slightly behind Kevin
+    const goalX = targetRect.left - 40;
+    const goalY = targetRect.top;
+
+    const sprite = document.getElementById('petSprite');
+    if (sprite) {
+        sprite.style.transform = goalX < petX ? "scaleX(-1)" : "scaleX(1)";
+    }
+
+    // Smooth lerp follow
+    petContainer.style.left = (petX + (goalX - petX) * 0.04) + "px";
+    petContainer.style.top = (petY + (goalY - petY) * 0.04) + "px";
 }
-// Connect this to your existing main game loop
-setInterval(followCharacter, 50);
+
+// Hook into your existing animation/interval ticks
+setInterval(updatePetPhysics, 50);
 // ==========================================
 // 🔐 WINDOW EXPORTS
 // ==========================================
