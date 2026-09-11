@@ -20116,6 +20116,39 @@ const catBoxRegistry = {
     "cat_box_royal": { name: "Royal Box", cats: ["bambi", "botic", "pufulete"] },
     "cat_box_tabby": { name: "Tabby Box", cats: ["dori", "ghemotoc", "pufulete", "scruci"] }
 };
+
+
+// REGISTRU IMAGINI CUSTOM PENTRU MODALUL DE DROP CHANCES
+const customModalImages = {
+    "anya": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya/anya%20sit.png",
+    "alpy": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/alpy/allymog.png",
+    "bambi": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/bambi/bambi%20play%20.png",
+    "bambucea": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/bambucea%20play.png",
+    "bella": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/bela%20sit%20.png",
+    "bezna": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/bezna%20play%20.png",
+    "biggy": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/biggy%20lay%20down.png",
+    "botic": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/botic%20play.png",
+    "clara": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/Clara%20strech%20.png",
+    "clatita": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/clatita%20play%20.png",
+    "dori": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/dori%20mogs%20.png",
+    "eliot": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/eliot%20sit%20.png",
+    "felix": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/felix%20mogs.png",
+    "ghemotoc": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/ghemotoc%20mogs%20.png",
+    "jerry": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/jerry%20mogging%20png.png",
+    "luna": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/luna%20stretch%20.png",
+    "mircea": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/mircea%20sit.png",
+    "negri": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/negri%20mogs.png",
+    "panda": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/panda%20mogging%20.png",
+    "pufulete": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/pufulete%20walk%202.png",
+    "putin": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/putin%20play.png",
+    "rafy": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/rafy%20sit%20.png",
+    "scruchi": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/scruchi%20play%20.png",
+    "tomy": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tomy%20sit.png",
+    "tonto": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tonto%20mogging%20.png",
+    "versace": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/versace%20mogs%20.png",
+    "zelensky": "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/zelensky%20mogs%20.png"
+};
+
 // Automatically calculates drop odds based on rarity weights, grabs the image, AND SORTS THEM
 function getBoxDropOdds(boxKey) {
     const boxData = catBoxRegistry[boxKey];
@@ -20125,18 +20158,19 @@ function getBoxDropOdds(boxKey) {
     
     let totalWeight = 0;
     const resolvedCats = boxData.cats.map(catId => {
-        const cat = petCatalog.find(p => p.id === catId) || { name: catId, stats: { rarity: "Common" }, assets: {} };
+        const cat = petCatalog.find(p => p.id === catId) || { id: catId, name: catId, stats: { rarity: "Common" }, assets: {} };
         const weight = rarityWeights[cat.stats.rarity] || 10;
         totalWeight += weight;
         return { cat, weight };
     });
 
-    // ✨ FIX 3: SORTING LOGIC (Highest drop chance first)
+    // Sort: Highest drop chance first
     resolvedCats.sort((a, b) => b.weight - a.weight);
 
     return resolvedCats.map(item => {
-        // Try to get the 'sit' image, fallback to 'presentation', or empty string
-        const img = item.cat.assets?.sit || item.cat.assets?.presentation || "";
+        // ✨ CHECKS THE NEW REGISTRY FIRST, THEN FALLS BACK TO 'SIT' ✨
+        const img = customModalImages[item.cat.id] || item.cat.assets?.sit || item.cat.assets?.presentation || "";
+        
         return {
             name: item.cat.name,
             rarity: item.cat.stats.rarity,
