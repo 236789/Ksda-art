@@ -20324,13 +20324,25 @@ let petState = "follow"; // states: follow, pose, sleep
 
 function spawnPet(petId) {
     currentPet = petCatalog.find(p => p.id === petId);
-    const sprite = document.getElementById('petSprite');
-    sprite.style.backgroundImage = `url('${currentPet.assets.presentation}')`;
+    if (!currentPet) {
+        showKevinutaBubble("Pet-ul nu a fost găsit!");
+        return;
+    }
     
-    // START AI LOOP
-    runPetAI();
+    // Show notification or activate the pet visually
+    showNotification("PET ACTIVAT!", `Ai chemat-o pe ${currentPet.name}!`, currentPet.assets.presentation);
+    
+    // Position and display the pet sprite container
+    const petContainer = document.getElementById('petContainer');
+    const sprite = document.getElementById('petSprite');
+    if (petContainer && sprite) {
+        petContainer.style.display = 'block';
+        sprite.style.backgroundImage = `url('${currentPet.assets.presentation}')`;
+    }
+    
+    // Close the floating menu if it's open
+    forceCloseMenu();
 }
-
 function runPetAI() {
     setInterval(() => {
         if (isPaused) return;
@@ -20415,7 +20427,7 @@ window.buyHeroAction = buyHeroAction;
 window.executePurchase = executePurchase;
 window.useHeroNow = useHeroNow;
 window.executeBoxAction = executeBoxAction;
-
+window.spawnPet = spawnPet; // Add this line with your other window exports
 
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
