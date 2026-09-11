@@ -17609,21 +17609,11 @@ async function openBlackMarket() {
     document.getElementById('utilitiesModal').style.display = 'none';
     document.getElementById('blackMarketModal').style.display = 'flex';
 
-    // --- LVL 4 LOCK SETUP ---
+    // Lock setup logic
     const tradeTab = document.getElementById('tabBmTrade');
-    // Remove old badge if it exists to avoid duplicates
-    const oldBadge = tradeTab.querySelector('.tab-lock-badge');
-    if (oldBadge) oldBadge.remove();
-
     if (playerLevel < 4) {
         tradeTab.style.filter = "grayscale(1) brightness(0.3)";
         tradeTab.style.cursor = "not-allowed";
-        
-        // Create and add the LVL 4 Badge
-        const badge = document.createElement('div');
-        badge.className = 'tab-lock-badge';
-        badge.innerText = "LVL 4";
-        tradeTab.appendChild(badge);
     } else {
         tradeTab.style.filter = "none";
         tradeTab.style.cursor = "pointer";
@@ -17636,28 +17626,25 @@ async function openBlackMarket() {
         const response = await fetch('https://kevin-backend-qodc.onrender.com/sync-black-market', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                idToken: idToken,
-                availableKeys: Object.keys(specialRegistry).filter(k => k !== "rubyDrop" && k !== "trivia"),
-                buyKeys: Object.keys(boostRegistry)
-            })
+            body: JSON.stringify({ idToken: idToken }) // Nu mai trimitem chei
         });
 
         if (response.ok) {
             const data = await response.json();
             if (data.playerTradeLimits) playerTradeLimits = data.playerTradeLimits;
             lastMarketRefresh = data.lastRefresh;
-            blackMarketWants = data.offers.map(off => ({ ...off, sold: data.playerSales[off.key] || 0 }));
-            blackMarketOffers = data.buyOffers.map(off => ({ ...off, bought: data.playerBuys[off.key] || 0 }));
+            
+            // Map data safely
+            blackMarketWants = data.offers.map(off => ({ ...off, sold: (data.bmSales && data.bmSales[off.key]) ? data.bmSales[off.key] : 0 }));
+            blackMarketOffers = data.buyOffers.map(off => ({ ...off, bought: (data.bmBuys && data.bmBuys[off.key]) ? data.bmBuys[off.key] : 0 }));
+            petShopOffers = data.petOffers.map(off => ({ ...off, bought: (data.playerPetBuys && data.playerPetBuys[off.key]) ? data.playerPetBuys[off.key] : 0 }));
 
             renderBlackMarketBuyGrid();
             renderBlackMarketGrid();
             renderBlackMarketTradeGrid(); 
             startBMTimer();
         }
-    } catch (e) {
-        console.error("BM Sync Error:", e);
-    }
+    } catch (e) { console.error("BM Sync Error:", e); }
 }
 
 async function processBuy() {
@@ -17779,10 +17766,19 @@ function setBuyQty(qty) {
 // =====================================
 function renderBlackMarketGrid() {
     const grid = document.getElementById('blackMarketGrid');
+    if (!grid) return;
     grid.innerHTML = "";
 
+    // Sortăm doar dacă avem date
     blackMarketWants.forEach((want, index) => {
-        const data = specialRegistry[want.key];
+        const data = specialRegistry[want.key]; // Check registry
+        
+        // --- FIX: Dacă 'data' e undefined (key nu există), nu crăpa! ---
+        if (!data) {
+            console.warn("Skipping unknown BM key:", want.key);
+            return; 
+        }
+
         const stock = _GAME_DATA.inventory[want.key] || 0;
         const remaining = want.limit - want.sold;
 
