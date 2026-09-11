@@ -10657,10 +10657,9 @@ div.inv-tile div.bm-limit-tag {
 <!-- Inside <div id="gameArea"> -->
 <div id="gameArea">
 
-    <!-- ✅ PUNE DIV-UL AICI, IMEDIAT DUPĂ DESCHIDEREA LUI GAMEAREA -->
-    <div id="petContainer" style="position: absolute; pointer-events: none; z-index: 100;">
-        <div id="petSprite" style="width: 80px; height: 80px; background-size: contain; background-repeat: no-repeat; transition: all 0.5s ease;"></div>
-    </div>
+<div id="petContainer" style="position: absolute; pointer-events: none; z-index: 100;">
+    <div id="petSprite" style="width: 80px; height: 80px; background-size: contain; background-repeat: no-repeat; transition: all 0.5s ease;"></div>
+</div>
 <!-- NOULE SCOREBOARD PREMIUM (ALINIAT PERFECT & REORDONAT) -->
 <div id="scoreBoard" class="hud-premium-container">
     
@@ -20326,166 +20325,9 @@ function executeBoxAction(action) {
     pendingActionBoxKey = null;
 }
 
-// --- ENDERMAN-STYLE PET AI SYSTEM ---
-let currentPet = null;
-let petState = "idle"; // states: 'idle', 'walking', 'following', 'pose', 'sleep'
-let petAIInterval = null;
-
-function spawnPet(petId) {
-    currentPet = petCatalog.find(p => p.id === petId);
-    if (!currentPet) {
-        showKevinutaBubble("Pet-ul nu a fost găsit!");
-        return;
-    }
-    
-    showNotification("PET ACTIVAT!", `Ai chemat-o pe ${currentPet.name}!`, currentPet.assets.presentation);
-    
-    const petContainer = document.getElementById('petContainer');
-    const sprite = document.getElementById('petSprite');
-    if (petContainer && sprite) {
-        petContainer.style.display = 'block';
-        petContainer.style.position = 'absolute';
-        petContainer.style.zIndex = '998'; // Just below Kevin
-        sprite.style.backgroundImage = `url('${currentPet.assets.presentation}')`;
-        
-        // Spawn near the center
-        petContainer.style.left = (window.innerWidth / 2) + "px";
-        petContainer.style.top = (window.innerHeight / 2) + "px";
-    }
-    
-    forceCloseMenu();
-    startPetAI();
-}
-
-function startPetAI() {
-    if (petAIInterval) clearInterval(petAIInterval);
-
-    // Main AI loop: Decides behavior every 8 to 12 seconds
-    petAIInterval = setInterval(() => {
-        if (isPaused || !currentPet) return;
-
-        const choice = Math.random();
-
-        if (choice < 0.4) {
-            // 1. Follow the player for a while (40% chance)
-            petState = "following";
-            updatePetSprite('walk');
-            
-            setTimeout(() => {
-                if (petState === "following") {
-                    petState = "idle";
-                    updatePetSprite('presentation');
-                }
-            }, 8000); // Follows for 8 seconds, then stops
-
-        } else if (choice < 0.7) {
-            // 2. Walk to a random spot on screen (30% chance)
-            petState = "walking";
-            updatePetSprite('walk');
-            
-            const randomX = Math.random() * (window.innerWidth - 100);
-            const randomY = Math.random() * (window.innerHeight - 100);
-            movePetSmoothly(randomX, randomY, 3000, () => {
-                // Once arrived, do a random action (sit, stretch, sleep)
-                performRandomIdleAction();
-            });
-
-        } else {
-            // 3. Stay put and do an immediate action (30% chance)
-            performRandomIdleAction();
-        }
-
-    }, 10000); // Makes a new decision every 10 seconds
-}
-
-function performRandomIdleAction() {
-    const actions = ['stretch', 'layDown', 'sleep', 'mog', 'play'];
-    const chosenAction = actions[Math.floor(Math.random() * actions.length)];
-    
-    petState = "pose";
-    updatePetSprite(chosenAction);
-
-    // Stay in this pose/sleep for 6 to 10 seconds, then return to idle/following
-    setTimeout(() => {
-        if (petState === "pose") {
-            petState = "idle";
-            updatePetSprite('presentation');
-        }
-    }, Math.random() * 4000 + 6000);
-}
-
-function updatePetSprite(action) {
-    const sprite = document.getElementById('petSprite');
-    if (!sprite || !currentPet) return;
-    sprite.style.backgroundImage = `url('${currentPet.assets[action] || currentPet.assets.presentation}')`;
-}
-
-function movePetSmoothly(targetX, targetY, duration, callback) {
-    const petContainer = document.getElementById('petContainer');
-    if (!petContainer) return;
-
-    const startX = parseFloat(petContainer.style.left) || window.innerWidth / 2;
-    const startY = parseFloat(petContainer.style.top) || window.innerHeight / 2;
-    
-    // Flip sprite direction based on movement
-    const sprite = document.getElementById('petSprite');
-    if (sprite) {
-        sprite.style.transform = targetX < startX ? "scaleX(-1)" : "scaleX(1)";
-    }
-
-    const startTime = performance.now();
-
-    function step(currentTime) {
-        if (isPaused || petState !== "walking") return;
-
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-
-        // Ease-out interpolation
-        const currentX = startX + (targetX - startX) * progress;
-        const currentY = startY + (targetY - startY) * progress;
-
-        petContainer.style.left = currentX + "px";
-        petContainer.style.top = currentY + "px";
-
-        if (progress < 1) {
-            requestAnimationFrame(step);
-        } else {
-            if (callback) callback();
-        }
-    }
-
-    requestAnimationFrame(step);
-}
-
-// Continuous frame loop for when the cat is in "following" mode
-function updatePetPhysics() {
-    if (isPaused || !currentPet || petState !== "following") return;
-
-    const petContainer = document.getElementById('petContainer');
-    const target = document.getElementById('kevin');
-    if (!petContainer || !target || target.style.display === 'none') return;
-
-    const targetRect = target.getBoundingClientRect();
-    const petX = parseFloat(petContainer.style.left || 0);
-    const petY = parseFloat(petContainer.style.top || 0);
-
-    // Offset slightly behind Kevin
-    const goalX = targetRect.left - 40;
-    const goalY = targetRect.top;
-
-    const sprite = document.getElementById('petSprite');
-    if (sprite) {
-        sprite.style.transform = goalX < petX ? "scaleX(-1)" : "scaleX(1)";
-    }
-
-    // Smooth lerp follow
-    petContainer.style.left = (petX + (goalX - petX) * 0.04) + "px";
-    petContainer.style.top = (petY + (goalY - petY) * 0.04) + "px";
-}
-
-// Hook into your existing animation/interval ticks
-setInterval(updatePetPhysics, 50);
+// ==========================================
+// MULTI-PET SPAWNER & ENDERMAN-STYLE AI SYSTEM
+// ==========================================
 
 function askWhichPetToSpawn() {
     forceCloseMenu();
@@ -20500,20 +20342,20 @@ function askWhichPetToSpawn() {
     modal.innerHTML = `
         <div class="modal-box info-modal-box" style="max-width: 340px !important; border-color: #22c55e !important; background: radial-gradient(circle at top, #13261a 0%, #0a0b16 100%) !important;">
             <div style="display: inline-block; padding: 6px 25px; background: #22c55e; color: #000; font-family: 'Montserrat', sans-serif; font-weight: 900; text-transform: uppercase; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); margin-bottom: 15px; font-size: 13px;">
-                CHEMĂ UN PET
+                SPAWN PET (MULTIPLE)
             </div>
             
-            <p style="font-family: 'Oswald'; color: #94a3b8; font-size: 14px; margin-bottom: 25px;">Ce pisică dorești să chemi alături de tine?</p>
+            <p style="font-family: 'Oswald'; color: #94a3b8; font-size: 14px; margin-bottom: 25px;">Alege ce pisică vrei să adaugi pe ecran:</p>
 
             <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
                 <button class="menu-btn play" style="height: 50px; font-size: 16px;" onclick="triggerPetSpawn('alpy')">
-                    <i class="fa-solid fa-cat"></i> <span>ALPY</span>
+                    <i class="fa-solid fa-cat"></i> <span>SPAWN ALPY</span>
                 </button>
                 <button class="menu-btn play" style="height: 50px; font-size: 16px; background: linear-gradient(180deg, #3b82f6, #1d4ed8) !important; box-shadow: 0 6px 0 #1e3a8a !important;" onclick="triggerPetSpawn('anya')">
-                    <i class="fa-solid fa-paw"></i> <span>ANYA (KITTEN)</span>
+                    <i class="fa-solid fa-paw"></i> <span>SPAWN ANYA (KITTEN)</span>
                 </button>
                 <button class="cancel-btn" style="margin-top: 10px; color: #aaa;" onclick="this.closest('.modal-overlay').remove(); isPaused = false; startKevinMovement();">
-                    ANULEAZĂ
+                    ÎNCHIDE
                 </button>
             </div>
         </div>
@@ -20523,22 +20365,188 @@ function askWhichPetToSpawn() {
 }
 
 function triggerPetSpawn(petId) {
-    // Remove modal
     const modal = document.querySelector('.modal-overlay[style*="z-index: 300000"]');
     if (modal) modal.remove();
 
-    // Call your spawn function
-    spawnPet(petId);
+    spawnPetInstance(petId);
 
-    // Resume game
     isPaused = false;
     startKevinMovement();
 }
 
-// Make sure it works globally
+function spawnPetInstance(petId) {
+    const petTemplate = petCatalog.find(p => p.id === petId);
+    if (!petTemplate) {
+        showKevinutaBubble("Pet-ul nu a fost găsit!");
+        return;
+    }
+    
+    showNotification("PET ACTIVAT!", `Ai chemat-o pe ${petTemplate.name}!`, petTemplate.assets.presentation);
+
+    // 1. Create a unique DOM element for this specific pet instance
+    const container = document.createElement('div');
+    container.className = 'active-spawned-pet';
+    container.style.cssText = `
+        position: absolute; pointer-events: none; z-index: 998;
+        left: ${Math.random() * (window.innerWidth - 100)}px;
+        top: ${Math.random() * (window.innerHeight - 100)}px;
+    `;
+
+    // Anya is a kitten, so she's smaller (45px), Alpy is bigger (80px)
+    const size = petId === 'anya' ? '45px' : '80px';
+
+    const sprite = document.createElement('div');
+    sprite.className = 'pet-sprite-inner';
+    sprite.style.cssText = `
+        width: ${size}; height: ${size};
+        background-size: contain; background-repeat: no-repeat;
+        background-position: center;
+        background-image: url('${petTemplate.assets.presentation}');
+        transition: background-image 0.2s ease;
+    `;
+
+    container.appendChild(sprite);
+    document.getElementById('gameArea').appendChild(container);
+
+    // 2. Give this specific instance its own AI state object
+    const pet = {
+        template: petTemplate,
+        container: container,
+        sprite: sprite,
+        state: "idle" // 'idle', 'walking', 'following', 'pose', 'sleep'
+    };
+
+    // Start independent AI loop for this cat instance
+    initPetInstanceAI(pet);
+}
+
+function initPetInstanceAI(pet) {
+    // Behavior decision loop (Every 7 to 12 seconds)
+    const aiTimer = setInterval(() => {
+        if (isPaused || !pet.container.parentElement) return;
+
+        const choice = Math.random();
+
+        if (choice < 0.4) {
+            // 1. Follow the player for a while (40% chance)
+            pet.state = "following";
+            setPetActionSprite(pet, 'walk');
+            
+            setTimeout(() => {
+                if (pet.state === "following") {
+                    pet.state = "idle";
+                    setPetActionSprite(pet, 'presentation');
+                }
+            }, 8000); // Follows for 8 seconds, then stops
+
+        } else if (choice < 0.75) {
+            // 2. Walk to a random spot on screen (35% chance)
+            pet.state = "walking";
+            setPetActionSprite(pet, 'walk');
+            
+            const randomX = Math.random() * (window.innerWidth - 100);
+            const randomY = Math.random() * (window.innerHeight - 100);
+            
+            movePetInstanceTo(pet, randomX, randomY, 3500, () => {
+                // Once arrived, do a random action
+                triggerPetPose(pet);
+            });
+
+        } else {
+            // 3. Stay put and do an immediate idle action (25% chance)
+            triggerPetPose(pet);
+        }
+
+    }, Math.random() * 5000 + 7000);
+
+    // Physics & Movement tick for "following" mode (50ms)
+    const physicsInterval = setInterval(() => {
+        if (isPaused || !pet.container.parentElement) return;
+
+        if (pet.state === "following") {
+            const target = document.getElementById('kevin');
+            if (!target || target.style.display === 'none') return;
+
+            const tRect = target.getBoundingClientRect();
+            let pX = parseFloat(pet.container.style.left || 0);
+            let pY = parseFloat(pet.container.style.top || 0);
+
+            // Offset slightly behind Kevin
+            const goalX = tRect.left - 50;
+            const goalY = tRect.top;
+
+            pet.sprite.style.transform = goalX < pX ? "scaleX(-1)" : "scaleX(1)";
+
+            // Smooth lerp movement
+            pX += (goalX - pX) * 0.04;
+            pY += (goalY - pY) * 0.04;
+
+            pet.container.style.left = pX + "px";
+            pet.container.style.top = pY + "px";
+        }
+    }, 50);
+}
+
+function setPetActionSprite(pet, action) {
+    const assetUrl = pet.template.assets[action] || pet.template.assets.presentation;
+    pet.sprite.style.backgroundImage = `url('${assetUrl}')`;
+}
+
+function triggerPetPose(pet) {
+    const poses = ['stretch', 'layDown', 'sleep', 'mog', 'play', 'sit'];
+    // Filter available poses based on what the cat actually has in assets
+    const availablePoses = poses.filter(p => pet.template.assets[p]);
+    
+    if (availablePoses.length === 0) return;
+
+    const chosenPose = availablePoses[Math.floor(Math.random() * availablePoses.length)];
+    pet.state = "pose";
+    setPetActionSprite(pet, chosenPose);
+
+    // Stay in this pose/sleep for 6 to 10 seconds, then return to idle
+    setTimeout(() => {
+        if (pet.state === "pose") {
+            pet.state = "idle";
+            setPetActionSprite(pet, 'presentation');
+        }
+    }, Math.random() * 4000 + 6000);
+}
+
+function movePetInstanceTo(pet, targetX, targetY, duration, callback) {
+    const startX = parseFloat(pet.container.style.left) || 0;
+    const startY = parseFloat(pet.container.style.top) || 0;
+    
+    // Flip sprite direction based on movement
+    pet.sprite.style.transform = targetX < startX ? "scaleX(-1)" : "scaleX(1)";
+
+    const startTime = performance.now();
+
+    function step(currentTime) {
+        if (isPaused || pet.state !== "walking") return;
+
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        const currentX = startX + (targetX - startX) * progress;
+        const currentY = startY + (targetY - startY) * progress;
+
+        pet.container.style.left = currentX + "px";
+        pet.container.style.top = currentY + "px";
+
+        if (progress < 1) {
+            requestAnimationFrame(step);
+        } else {
+            if (callback) callback();
+        }
+    }
+
+    requestAnimationFrame(step);
+}
+
+// Global Window Exports
 window.askWhichPetToSpawn = askWhichPetToSpawn;
 window.triggerPetSpawn = triggerPetSpawn;
-// ==========================================
+window.spawnPet = spawnPetInstance;
 // 🔐 WINDOW EXPORTS
 // ==========================================
 window.openHeroModal = openHeroModal;
