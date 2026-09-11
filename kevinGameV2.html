@@ -20116,7 +20116,7 @@ const catBoxRegistry = {
     "cat_box_royal": { name: "Royal Box", cats: ["bambi", "botic", "pufulete"] },
     "cat_box_tabby": { name: "Tabby Box", cats: ["dori", "ghemotoc", "pufulete", "scruci"] }
 };
-// Automatically calculates drop odds based on rarity weights AND grabs the image
+// Automatically calculates drop odds based on rarity weights, grabs the image, AND SORTS THEM
 function getBoxDropOdds(boxKey) {
     const boxData = catBoxRegistry[boxKey];
     if (!boxData) return [];
@@ -20130,6 +20130,9 @@ function getBoxDropOdds(boxKey) {
         totalWeight += weight;
         return { cat, weight };
     });
+
+    // ✨ FIX 3: SORTING LOGIC (Highest drop chance first)
+    resolvedCats.sort((a, b) => b.weight - a.weight);
 
     return resolvedCats.map(item => {
         // Try to get the 'sit' image, fallback to 'presentation', or empty string
@@ -20184,8 +20187,8 @@ function openBoxInfoModal(boxKey) {
                     </div>
                 </div>
                 
-                <!-- DROP CHANCE (OUTSIDE THE BOX) -->
-                <div style="font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 13px; color: #facc15; margin-top: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(250, 204, 21, 0.4); box-shadow: 0 4px 6px rgba(0,0,0,0.5);">
+                <!-- ✨ FIX 1: PERCENTAGE TAG NOW MATCHES RARITY COLOR -->
+                <div style="font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 12px; color: ${color}; margin-top: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 8px; border: 1px solid ${color}; box-shadow: 0 4px 6px rgba(0,0,0,0.5);">
                     ${o.chance}
                 </div>
 
@@ -20208,7 +20211,8 @@ function openBoxInfoModal(boxKey) {
                 ${catsListHtml}
             </div>
 
-            <button class="menu-btn play" style="width: 100%; height: 55px; font-size: 18px; font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spacing: 1px;" onclick="this.closest('.modal-overlay').remove()">
+            <!-- ✨ FIX 2: PERFECTLY ALIGNED AND SIZED BUTTON -->
+            <button class="menu-btn play" style="width: 100%; height: 50px; font-size: 16px; font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spacing: 1px; white-space: nowrap; display: flex; align-items: center; justify-content: center; padding: 0;" onclick="this.closest('.modal-overlay').remove()">
                 AM ÎNȚELES
             </button>
         </div>
