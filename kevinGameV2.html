@@ -20049,20 +20049,32 @@ function renderPetShop() {
     if (!grid) return;
     grid.innerHTML = "";
     
+    // Safety check: ensure _GAME_DATA.playerPetBuys exists
+    if (!_GAME_DATA.playerPetBuys) _GAME_DATA.playerPetBuys = {};
+
+    console.log("Pet Shop Offers:", petShopOffers); // DEBUG: Vezi în consolă dacă sunt date aici
+
     // Sortează cutiile după preț
     const sortedOffers = [...petShopOffers].sort((a, b) => {
-        return (catShopItems[a.key]?.price || 0) - (catShopItems[b.key]?.price || 0);
+        const priceA = catShopItems[a.key]?.price || 0;
+        const priceB = catShopItems[b.key]?.price || 0;
+        return priceA - priceB;
     });
 
     sortedOffers.forEach((offer) => {
         const item = catShopItems[offer.key];
-        if (!item) return;
+        if (!item) {
+            console.warn("Item not found in catShopItems:", offer.key);
+            return;
+        }
 
-        const bought = _GAME_DATA.playerPetBuys ? (_GAME_DATA.playerPetBuys[offer.key] || 0) : 0;
+        const bought = _GAME_DATA.playerPetBuys[offer.key] || 0;
         const remaining = offer.limit - bought;
         
         const tile = document.createElement('div');
         tile.className = "pet-shop-card";
+        
+        // Dacă stocul e epuizat, adăugăm clasa de sold-out
         if (remaining <= 0) tile.classList.add('bm-sold-out');
         
         tile.onclick = () => {
@@ -20073,7 +20085,7 @@ function renderPetShop() {
         tile.innerHTML = `
             <div class="bm-ruby-tag">${item.price} <img src="https://iili.io/CrnXNdG.png"></div>
             <img src="${item.image}" style="width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; z-index: 2;">
-            <div class="bm-limit-tag">${remaining > 0 ? 'STOC: '+remaining : 'GATA'}</div>
+            <div class="bm-limit-tag">${remaining > 0 ? 'STOC: '+remaining : 'VÂNDUT'}</div>
         `;
         grid.appendChild(tile);
     });
