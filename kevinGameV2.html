@@ -19966,7 +19966,14 @@ function closePetShop() {
 let petShopOffers = [];
 
 const catShopItems = {
-    "cat_box_1": { name: "Cutia cu Pisici", price: 10, image: "https://i.ibb.co/1Y8tZMFz/cat-boxes.png", desc: "O cutie misterioasă cu o pisică drăgălașă înăuntru." }
+    "cat_box_calico": { name: "Calico Box", price: 10, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/calico%20box.png", desc: "O cutie cu pisici calico." },
+    "cat_box_kitty": { name: "Kitty Box", price: 10, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/kitty%20box%20.png", desc: "O cutie plină cu pisicuțe jucăușe." },
+    "cat_box_majestic": { name: "Majestic Box", price: 20, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/majestic%20boxes.png", desc: "O cutie pentru pisici nobile." },
+    "cat_box_night": { name: "Night Box", price: 15, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/night%20box.png", desc: "Pisici misterioase de noapte." },
+    "cat_box_orange": { name: "Orange Box", price: 15, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/orange%20box%20.png", desc: "Portocalii, pufoase și faimoase." },
+    "cat_box_royal": { name: "Royal Box", price: 50, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/royal%20box.png", desc: "Pentru cele mai rare pisici din regat." },
+    "cat_box_tabby": { name: "Tabby Box", price: 10, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/tabby%20box%20.png", desc: "Pisici cu dungi clasice." },
+    "cat_box_tuxedo": { name: "Tuxedo Box", price: 15, image: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/boxes/tuxedo%20box.png", desc: "Pisici elegante la costum." }
 };
 
 let lastOpenModal = null; // Asigură-te că ai această variabilă definită global
@@ -20021,25 +20028,20 @@ function renderPetShop() {
     if (!grid) return;
     grid.innerHTML = "";
     
-    petShopOffers.forEach((offer) => {
-        const item = catShopItems[offer.key];
-        if (!item) return;
-
-        const remaining = offer.limit - offer.bought;
-        const tile = document.createElement('div');
+    // Iterăm prin obiectul catShopItems direct
+    Object.keys(catShopItems).forEach((key) => {
+        const item = catShopItems[key];
         
-        if (remaining <= 0) {
-            tile.className = "pet-shop-card bm-sold-out";
-            tile.onclick = () => showKevinutaBubble("Stoc epuizat până la refresh!");
-        } else {
-            tile.className = "pet-shop-card";
-            tile.onclick = () => openCatDetail(offer.key);
-        }
+        const tile = document.createElement('div');
+        tile.className = "pet-shop-card";
+        
+        // Clic pentru detalii
+        tile.onclick = () => openCatDetail(key);
         
         tile.innerHTML = `
             <div class="bm-ruby-tag">${item.price} <img src="https://iili.io/CrnXNdG.png"></div>
-            <img src="${item.image}" style="width: 65px; height: 65px; object-fit: contain; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8)); margin-bottom: 8px; position: relative; z-index: 2;">
-            <div class="bm-limit-tag" style="background:#064e3b; border-color:#16a34a;">${remaining > 0 ? 'STOC: '+remaining : 'FĂRĂ STOC'}</div>
+            <img src="${item.image}" style="width: 60px; height: 60px; object-fit: contain; margin-bottom: 5px;">
+            <div style="font-family: 'Orbitron'; font-size: 10px; color: #4ade80;">${item.name}</div>
         `;
         grid.appendChild(tile);
     });
