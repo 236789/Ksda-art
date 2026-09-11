@@ -10409,7 +10409,27 @@ div.inv-tile div.bm-limit-tag {
 .bm-limit-tag {
     font-size: 8px !important; /* Made text smaller */
     padding: 2px 6px !important;
-}              
+}       
+
+/* ==========================================
+   RESPONSIVE PET SPRITE SIZING (CSS ONLY)
+   ========================================== */
+
+/* Default size scaling / adjustments */
+.pet-sprite-inner {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: background-image 0.2s ease;
+}
+
+/* Automatically shrink pets on mobile phones (screens <= 600px) */
+@media screen and (max-width: 600px) {
+    .active-spawned-pet .pet-sprite-inner {
+        width: 48px !important;  /* Forces a compact size on mobile */
+        height: 48px !important; /* Forces a compact size on mobile */
+    }
+}       
   </style>
 </head>
 <body>
@@ -20383,7 +20403,6 @@ function spawnPetInstance(petId) {
     
     showNotification("PET ACTIVAT!", `Ai chemat-o pe ${petTemplate.name}!`, petTemplate.assets.presentation);
 
-    // 1. Create a unique DOM element for this specific pet instance
     const container = document.createElement('div');
     container.className = 'active-spawned-pet';
     container.style.cssText = `
@@ -20392,32 +20411,25 @@ function spawnPetInstance(petId) {
         top: ${Math.random() * (window.innerHeight - 100)}px;
     `;
 
-    // 🌟 READ SIZE DIRECTLY FROM THE PET'S REGISTRY STATS 🌟
-    const catSize = (petTemplate.stats && petTemplate.stats.size) ? `${petTemplate.stats.size}px` : '60px';
+    // Grabs size directly from registry (handled by CSS on mobile)
+    const catSize = (petTemplate.stats && petTemplate.stats.size) ? `${petTemplate.stats.size}px` : '80px';
 
     const sprite = document.createElement('div');
     sprite.className = 'pet-sprite-inner';
-    sprite.style.cssText = `
-        width: ${catSize}; height: ${catSize};
-        background-size: contain; background-repeat: no-repeat;
-        background-position: center;
-        background-image: url('${petTemplate.assets.presentation}');
-        transition: background-image 0.2s ease;
-    `;
+    sprite.style.width = catSize;
+    sprite.style.height = catSize;
+    sprite.style.backgroundImage = `url('${petTemplate.assets.presentation}')`;
 
     container.appendChild(sprite);
     document.getElementById('gameArea').appendChild(container);
 
-    const pet = {
+    initPetInstanceAI({
         template: petTemplate,
         container: container,
         sprite: sprite,
         state: "idle"
-    };
-
-    initPetInstanceAI(pet);
+    });
 }
-
 function initPetInstanceAI(pet) {
     // Behavior decision loop (Every 7 to 12 seconds)
     const aiTimer = setInterval(() => {
