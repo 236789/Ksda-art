@@ -20125,6 +20125,26 @@ const petCatalog = [
             layDown: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya/anya%20lay%20down.png",
             sleep: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya/anya%20sleep.png"
         }
+    },
+
+{
+        id: "bambi",
+        name: "Bambi",
+        desc: "Cel mai bun prieten al lui Kevin. O prezență caldă care îi aduce aminte de vremurile trecute.",
+        personality: "Drăgălaș, extrem de loial și afectuos.",
+        stats: { speed: 0.9, size: 65, rarity: "Legendary" }, // Size in between Alpy (100) and Anya (85)
+        ability: { name: "Prieten Credincios", desc: "Îi dă lui Kevin o stare de spirit liniștită." },
+        assets: {
+            presentation: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/bambi/bambi%20sit%20.png",
+            walk: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/bambi/bambi%20walk.png",
+            back: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/bambi/bambi%20back.png",
+            sit: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/bambi/bambi%20sit%20.png",
+            stretch: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/bambi/bambi%20stretch.png",
+            layDown: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/bambi/bambi%20lay%20down.png",
+            sleep: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/bambi/bambi%20sleep.png",
+            mog: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/bambi/bambi%20mogs.png",
+            play: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/bambi/bambi%20play%20.png"
+        }
     }
 ];
 
@@ -20353,7 +20373,29 @@ function askWhichPetToSpawn() {
     forceCloseMenu();
     isPaused = true;
 
-    // Create a sleek custom prompt modal
+    // Dynamically generate buttons for every cat in your petCatalog array
+    let petButtonsHtml = "";
+    if (typeof petCatalog !== 'undefined' && petCatalog.length > 0) {
+        petCatalog.forEach((pet, index) => {
+            // Give each cat a slightly different matching color scheme
+            const colors = [
+                "linear-gradient(180deg, #22c55e, #15803d)", // Green (Alpy)
+                "linear-gradient(180deg, #3b82f6, #1d4ed8)", // Blue (Anya)
+                "linear-gradient(180deg, #f59e0b, #b45309)", // Amber (Bambi)
+                "linear-gradient(180deg, #a855f7, #6b21a8)"  // Purple (Future cats)
+            ];
+            const btnBg = colors[index % colors.length];
+
+            petButtonsHtml += `
+                <button class="menu-btn play" style="height: 50px; font-size: 16px; background: ${btnBg} !important;" onclick="triggerPetSpawn('${pet.id}')">
+                    <i class="fa-solid fa-cat"></i> <span>SPAWN ${pet.name.toUpperCase()}</span>
+                </button>
+            `;
+        });
+    } else {
+        petButtonsHtml = `<p style="color: #ef4444; font-family: 'Oswald';">Niciun pet găsit în catalog!</p>`;
+    }
+
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.style.display = 'flex';
@@ -20362,18 +20404,13 @@ function askWhichPetToSpawn() {
     modal.innerHTML = `
         <div class="modal-box info-modal-box" style="max-width: 340px !important; border-color: #22c55e !important; background: radial-gradient(circle at top, #13261a 0%, #0a0b16 100%) !important;">
             <div style="display: inline-block; padding: 6px 25px; background: #22c55e; color: #000; font-family: 'Montserrat', sans-serif; font-weight: 900; text-transform: uppercase; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); margin-bottom: 15px; font-size: 13px;">
-                SPAWN PET (MULTIPLE)
+                SPAWN PET (AUTOMATIC)
             </div>
             
             <p style="font-family: 'Oswald'; color: #94a3b8; font-size: 14px; margin-bottom: 25px;">Alege ce pisică vrei să adaugi pe ecran:</p>
 
-            <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
-                <button class="menu-btn play" style="height: 50px; font-size: 16px;" onclick="triggerPetSpawn('alpy')">
-                    <i class="fa-solid fa-cat"></i> <span>SPAWN ALPY</span>
-                </button>
-                <button class="menu-btn play" style="height: 50px; font-size: 16px; background: linear-gradient(180deg, #3b82f6, #1d4ed8) !important; box-shadow: 0 6px 0 #1e3a8a !important;" onclick="triggerPetSpawn('anya')">
-                    <i class="fa-solid fa-paw"></i> <span>SPAWN ANYA (KITTEN)</span>
-                </button>
+            <div style="display: flex; flex-direction: column; gap: 12px; width: 100%; max-height: 50vh; overflow-y: auto; scrollbar-width: none;">
+                ${petButtonsHtml}
                 <button class="cancel-btn" style="margin-top: 10px; color: #aaa;" onclick="this.closest('.modal-overlay').remove(); isPaused = false; startKevinMovement();">
                     ÎNCHIDE
                 </button>
