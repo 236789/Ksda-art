@@ -10743,10 +10743,9 @@ div.inv-tile div.bm-limit-tag {
 <button class="control-btn sub-btn" title="Misiuni" onclick="event.stopPropagation(); openQuestsMenu()">
   <i class="fa-solid fa-list-check"></i>
 </button> 
-<button class="control-btn sub-btn" onclick="spawnPet('alpy')" title="Summon Alpy">
+<button class="control-btn sub-btn" onclick="askWhichPetToSpawn()" title="Summon Pet">
   <i class="fa-solid fa-cat"></i>
 </button>
-
 <button class="control-btn sub-btn" style="--i:3" title="Utilități" onclick="openUtilitiesModal()">
   <i class="fa-solid fa-layer-group"></i>
 </button>
@@ -20076,18 +20075,10 @@ const petCatalog = [
     {
         id: "alpy",
         name: "Alpy",
-        desc: "Mama lui Biggy și Luna. Are o privire hipnotizantă: un ochi verde și unul albastru. O pisică plină de viață care nu te lasă niciodată să te plictisești.",
+        desc: "Mama lui Biggy și Luna. Are o privire hipnotizantă...",
         personality: "Extrem de agățată de stăpân, jucăușă și foarte gălăgioasă.",
-        stats: {
-            speed: 1,  // Normal speed
-            size: 3,   // Regular adult size
-            rarity: "Rare"
-        },
-        ability: {
-            name: "Miaunat Sonor",
-            desc: "Alpy miaună atât de tare încât atrage atenția tuturor, crescând șansa de apariție a evenimentelor speciale."
-        },
-        // Am mapat fișierele tale exacte din GitHub
+        stats: { speed: 1, size: 3, rarity: "Rare" },
+        ability: { name: "Miaunat Sonor", desc: "Atrage atenția tuturor." },
         assets: {
             presentation: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/alpy/aplySit.png",
             walk: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/alpy/apliWalk.png",
@@ -20097,6 +20088,23 @@ const petCatalog = [
             sleep: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/alpy/aplySleep.png",
             mog: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/alpy/allymog.png",
             play: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/alpy/aplyPlay.png"
+        }
+    },
+    {
+        id: "anya",
+        name: "Anya",
+        desc: "Fiica lui Dori și soră cu Ghost, Negrii Beznă și Ghost. O pisicuță extrem de jucăușă și atașată.",
+        personality: "Jucăușă, foarte lipicioasă (clingy) și micuță.",
+        stats: { speed: 0.7, size: 1.5, rarity: "Epic" }, // Slower & smaller
+        ability: { name: "Energie de Kitten", desc: "Se mișcă constant și îți dă stare de bine." },
+        assets: {
+            presentation: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya/anya.png",
+            walk: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya/anya%20walk.png",
+            walk2: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya/anya%20walk%202.png",
+            sit: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya/anya%20sit.png",
+            stretch: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya/anya%20stretch.png",
+            layDown: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya/anya%20lay%20down.png",
+            sleep: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya/anya%20sleep.png"
         }
     }
 ];
@@ -20478,6 +20486,58 @@ function updatePetPhysics() {
 
 // Hook into your existing animation/interval ticks
 setInterval(updatePetPhysics, 50);
+
+function askWhichPetToSpawn() {
+    forceCloseMenu();
+    isPaused = true;
+
+    // Create a sleek custom prompt modal
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.style.display = 'flex';
+    modal.style.zIndex = '300000';
+
+    modal.innerHTML = `
+        <div class="modal-box info-modal-box" style="max-width: 340px !important; border-color: #22c55e !important; background: radial-gradient(circle at top, #13261a 0%, #0a0b16 100%) !important;">
+            <div style="display: inline-block; padding: 6px 25px; background: #22c55e; color: #000; font-family: 'Montserrat', sans-serif; font-weight: 900; text-transform: uppercase; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); margin-bottom: 15px; font-size: 13px;">
+                CHEMĂ UN PET
+            </div>
+            
+            <p style="font-family: 'Oswald'; color: #94a3b8; font-size: 14px; margin-bottom: 25px;">Ce pisică dorești să chemi alături de tine?</p>
+
+            <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+                <button class="menu-btn play" style="height: 50px; font-size: 16px;" onclick="triggerPetSpawn('alpy')">
+                    <i class="fa-solid fa-cat"></i> <span>ALPY</span>
+                </button>
+                <button class="menu-btn play" style="height: 50px; font-size: 16px; background: linear-gradient(180deg, #3b82f6, #1d4ed8) !important; box-shadow: 0 6px 0 #1e3a8a !important;" onclick="triggerPetSpawn('anya')">
+                    <i class="fa-solid fa-paw"></i> <span>ANYA (KITTEN)</span>
+                </button>
+                <button class="cancel-btn" style="margin-top: 10px; color: #aaa;" onclick="this.closest('.modal-overlay').remove(); isPaused = false; startKevinMovement();">
+                    ANULEAZĂ
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+function triggerPetSpawn(petId) {
+    // Remove modal
+    const modal = document.querySelector('.modal-overlay[style*="z-index: 300000"]');
+    if (modal) modal.remove();
+
+    // Call your spawn function
+    spawnPet(petId);
+
+    // Resume game
+    isPaused = false;
+    startKevinMovement();
+}
+
+// Make sure it works globally
+window.askWhichPetToSpawn = askWhichPetToSpawn;
+window.triggerPetSpawn = triggerPetSpawn;
 // ==========================================
 // 🔐 WINDOW EXPORTS
 // ==========================================
