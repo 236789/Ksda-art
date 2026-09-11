@@ -20090,6 +20090,97 @@ const catShopItems = {
 }; 
 
 
+// --- BOX & DROP RATE REGISTRY ---
+const rarityColors = {
+    Common: "#9ca3af",   // Gray
+    Rare: "#3b82f6",     // Blue
+    Epic: "#a855f7",     // Purple
+    Legendary: "#facc15", // Yellow
+    Majestic: "#ef4444"  // Animated Red
+};
+
+const catBoxRegistry = {
+    "cat_box_calico": { name: "Calico Box", cats: ["anya", "clara", "tonto"] },
+    "cat_box_kitty": { name: "Kitty Box", cats: ["clatita", "bella", "tomy", "bambucea", "rafy"] },
+    "cat_box_majestic": { name: "Majestic Box", cats: ["alpy", "biggy", "luna", "versace"] },
+    "cat_box_night": { name: "Night Box", cats: ["jerry", "negri", "bezna"] },
+    "cat_box_orange": { name: "Orange Box", cats: ["mircea", "zelensky", "putin"] },
+    "cat_box_tuxedo": { name: "Tuxedo Box", cats: ["felix", "panda"] },
+    "cat_box_royal": { name: "Royal Box", cats: ["bambi", "botic", "pufulete"] },
+    "cat_box_tabby": { name: "Tabby Box", cats: ["dori", "ghemotoc", "pufulete", "scruci"] }
+};
+
+// Automatically calculates drop odds based on rarity weights
+function getBoxDropOdds(boxKey) {
+    const boxData = catBoxRegistry[boxKey];
+    if (!boxData) return [];
+
+    const rarityWeights = { Common: 50, Rare: 25, Epic: 15, Legendary: 8, Majestic: 2 };
+    
+    let totalWeight = 0;
+    const resolvedCats = boxData.cats.map(catId => {
+        const cat = petCatalog.find(p => p.id === catId) || { name: catId, stats: { rarity: "Common" } };
+        const weight = rarityWeights[cat.stats.rarity] || 10;
+        totalWeight += weight;
+        return { cat, weight };
+    });
+
+    return resolvedCats.map(item => ({
+        name: item.cat.name,
+        rarity: item.cat.stats.rarity,
+        chance: ((item.weight / totalWeight) * 100).toFixed(1) + "%"
+    }));
+}
+
+// Opens the info modal showing contents and odds when clicking '?'
+function openBoxInfoModal(boxKey) {
+    const boxData = catBoxRegistry[boxKey];
+    if (!boxData) return;
+
+    const odds = getBoxDropOdds(boxKey);
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay';
+    modal.style.display = 'flex';
+    modal.style.zIndex = '300000';
+
+    let catsListHtml = "";
+    odds.forEach(o => {
+        const color = rarityColors[o.rarity] || "#fff";
+        const isMajestic = o.rarity === 'Majestic';
+        
+        catsListHtml += `
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); border: 1px solid ${color}; padding: 10px 15px; border-radius: 10px; margin-bottom: 8px;">
+                <span style="font-family: 'Montserrat'; font-weight: 900; color: #fff; font-size: 14px;">${o.name}</span>
+                <span style="font-family: 'Orbitron'; font-weight: 900; font-size: 12px; color: ${color}; ${isMajestic ? 'animation: cineGlitch 0.2s infinite;' : ''}">${o.rarity} (${o.chance})</span>
+            </div>
+        `;
+    });
+
+    modal.innerHTML = `
+        <div class="modal-box info-modal-box" style="max-width: 380px !important; border-color: #facc15 !important; background: radial-gradient(circle at top, #1a153b 0%, #050510 100%) !important;">
+            <div style="display: inline-block; padding: 6px 25px; background: #facc15; color: #000; font-family: 'Montserrat', sans-serif; font-weight: 900; text-transform: uppercase; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); margin-bottom: 15px; font-size: 13px;">
+                ${boxData.name.toUpperCase()} - ȘANSE
+            </div>
+            
+            <p style="font-family: 'Oswald'; color: #94a3b8; font-size: 13px; margin-bottom: 15px;">Conținutul cutiei și probabilitățile de drop bazate pe raritate:</p>
+
+            <div style="max-height: 45vh; overflow-y: auto; scrollbar-width: none; width: 100%; margin-bottom: 20px;">
+                ${catsListHtml}
+            </div>
+
+            <button class="menu-btn play" style="width: 100%; height: 50px; font-size: 16px;" onclick="this.closest('.modal-overlay').remove()">
+                AM ÎNȚELES
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+
+window.openBoxInfoModal = openBoxInfoModal;
+
+
 const petCatalog = [
     {
         id: "alpy",
@@ -20703,6 +20794,7 @@ function renderPetShop() {
         };
         
         tile.innerHTML = `
+            <button class="modal-corner-help-btn" style="top: 5px; right: 5px; width: 22px; height: 22px; font-size: 10px; z-index: 5;" onclick="event.stopPropagation(); openBoxInfoModal('${offer.key}')">?</button>
             <div class="bm-ruby-tag">${item.price} <img src="https://iili.io/CrnXNdG.png"></div>
             <img src="${item.image}" style="width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; z-index: 2;">
             <div class="bm-limit-tag">${remaining > 0 ? 'STOC: '+remaining : 'VÂNDUT'}</div>
