@@ -20127,7 +20127,7 @@ const catBoxRegistry = {
     "cat_box_orange": { name: "Orange Box", cats: ["mircea", "zelensky", "putin"] },
     "cat_box_tuxedo": { name: "Tuxedo Box", cats: ["felix", "panda"] },
     "cat_box_royal": { name: "Royal Box", cats: ["bambi", "botic", "pufulete"] },
-    "cat_box_tabby": { name: "Tabby Box", cats: ["dori", "ghemotoc"] } // REMOVED PUFULETE & SCRUCHI
+    "cat_box_tabby": { name: "Tabby Box", cats: ["dori", "ghemotoc", "eliot"] } // <-- ELIOT ADDED HERE
 };
 
 
@@ -20204,17 +20204,18 @@ function openBoxInfoModal(boxKey) {
     modal.style.display = 'flex';
     modal.style.zIndex = '300000';
 
-    // Start a 3-column grid
-    let catsListHtml = `<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 5px;">`;
+    // CSS FIX: Changed from "display: grid" to "display: flex; flex-wrap: wrap; justify-content: center;"
+    let catsListHtml = `<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 5px;">`;
     
     odds.forEach(o => {
         const color = rarityColors[o.rarity] || "#fff";
         const isMajestic = o.rarity === 'Majestic';
         
         catsListHtml += `
-            <div style="display: flex; flex-direction: column; align-items: center;">
+            <!-- CSS FIX: Added "width: 105px; flex-shrink: 0;" to keep them uniform and nicely centered -->
+            <div style="display: flex; flex-direction: column; align-items: center; width: 105px; flex-shrink: 0;">
                 
-                <!-- THE SMALL BOX (GLOW ANIMATION ADDED HERE) -->
+                <!-- THE SMALL BOX -->
                 <div class="${isMajestic ? 'majestic-box-anim' : ''}" style="width: 100%; height: 140px; background: radial-gradient(circle at bottom, ${color}22 0%, rgba(0,0,0,0.8) 80%); border: 2px solid ${color}; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 0 15px rgba(0,0,0,0.8); overflow: hidden; position: relative;">
                     
                     <!-- NAME (TOP) -->
@@ -20229,7 +20230,7 @@ function openBoxInfoModal(boxKey) {
                              style="max-height: 70px; max-width: 90%; object-fit: contain; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.9)); z-index: 1;">
                     </div>
                     
-                    <!-- RARITY TIER (BOTTOM) - GLITCH REMOVED -->
+                    <!-- RARITY TIER (BOTTOM) -->
                     <div style="font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 9px; color: ${color}; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 0 5px ${color}; z-index: 2; margin-bottom: 2px;">
                         ${o.rarity}
                     </div>
@@ -20492,7 +20493,7 @@ const petCatalog = [
         name: "Eliot",
         desc: "Fiul lui Ghemotoc. Un tigru gri plin de atitudine.",
         personality: "Se crede alpha male, dar plânge ca un pui de pisică la cea mai mică problemă.",
-        stats: { speed: 1.1, size: 75, rarity: "Epic" },
+        stats: { speed: 1.1, size: 75, rarity: "Legendary" },
         ability: { name: "Vrajeală de Alpha", desc: "Se dă mare șef, dar are nevoie de mângâieri constante." },
         assets: {
             presentation: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/eliot%20sit%20.png",
