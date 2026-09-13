@@ -20995,45 +20995,64 @@ function openCatDetail(offerKey) {
 let pendingActionBoxKey = null;
 
 async function buyCatItem(offerKey) {
-    const offer = petShopOffers.find(o => o.key === offerKey);
-    const item = catShopItems[offerKey];
-    
-    if (offer.limit - offer.bought <= 0) {
-        showKevinutaBubble("Stoc epuizat!");
-        return;
-    }
-
-    if (rubies < item.price) {
-        showKevinutaBubble("Nu ai destule rubine!");
-        return;
-    }
-
-    // 1. Deduct Rubies and Increment Buy Count Locally
-    rubies -= item.price;
-    offer.bought += 1;
-    
-    updateScoreUI();
-    renderPetShop(); 
-    
-    // Close the detail modal popup
-    const detailModal = document.querySelector('.cat-shop-modal').parentElement;
-    if (detailModal) detailModal.remove();
-
-    // 2. Set pending item and prompt user: Open or Inventory?
-    pendingActionBoxKey = offerKey;
-document.getElementById('postBuyBoxImg').src = item.image; 
-document.getElementById('postBuyBoxTitle').innerText = item.name;
-    document.getElementById('postBuyBoxModal').style.display = 'flex';
-
-    // 3. Sync to Backend (Persists purchase immediately)
-    const petBuysUpdate = {};
-    petShopOffers.forEach(o => {
-        if (o.bought > 0) petBuysUpdate[o.key] = o.bought;
-    });
-
     try {
+        console.log("Buying item:", offerKey);
+        
+        const offer = petShopOffers.find(o => o.key === offerKey);
+        const item = catShopItems[offerKey];
+        
+        // ADDED: Bulletproof checks
+        if (!offer) {
+            console.error("Fatal Error: Offer not found in petShopOffers for key:", offerKey);
+            showKevinutaBubble("Eroare: Ofertă invalidă!");
+            return;
+        }
+        if (!item) {
+            console.error("Fatal Error: Item data not found in catShopItems for key:", offerKey);
+            showKevinutaBubble("Eroare: Item inexistent!");
+            return;
+        }
+
+        // Now check constraints safely
+        if (offer.limit - offer.bought <= 0) {
+            showKevinutaBubble("Stoc epuizat!");
+            return;
+        }
+
+        if (rubies < item.price) {
+            showKevinutaBubble("Nu ai destule rubine!");
+            return;
+        }
+
+        // 1. Deduct Rubies and Increment Buy Count Locally
+        rubies -= item.price;
+        offer.bought += 1;
+        
+        // Add to inventory (Crucial fix: add the item to your game data!)
+        if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
+        _GAME_DATA.inventory[offerKey] = (_GAME_DATA.inventory[offerKey] || 0) + 1;
+        
+        updateScoreUI();
+        renderPetShop(); 
+        
+        // Close the detail modal popup
+        const modalToClose = document.querySelector('.cat-shop-modal');
+        if (modalToClose) modalToClose.parentElement.remove();
+
+        // 2. Set pending item and prompt user
+        pendingActionBoxKey = offerKey;
+        document.getElementById('postBuyBoxImg').src = item.image; 
+        document.getElementById('postBuyBoxTitle').innerText = item.name;
+        document.getElementById('postBuyBoxModal').style.display = 'flex';
+
+        // 3. Sync to Backend
+        const petBuysUpdate = {};
+        petShopOffers.forEach(o => {
+            if (o.bought > 0) petBuysUpdate[o.key] = o.bought;
+        });
+
         const idToken = await firebase.auth().currentUser.getIdToken(true);
-        await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
+        const response = await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -21047,8 +21066,12 @@ document.getElementById('postBuyBoxTitle').innerText = item.name;
                 petBuys: petBuysUpdate 
             }),
         });
+
+        if (!response.ok) throw new Error("Server rejected update");
+
     } catch (e) {
-        console.error("Cloud sync failed during pet purchase:", e);
+        console.error("Critical error in buyCatItem:", e);
+        showKevinutaBubble("Eroare la tranzacție!");
     }
 }
 
