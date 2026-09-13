@@ -21520,6 +21520,34 @@ function closeBoxCutscene() {
     }
 }
 
+
+function executeBoxAction(action) {
+    const modal = document.getElementById('postBuyBoxModal');
+    if (modal) modal.style.display = 'none';
+
+    if (!pendingActionBoxKey) return;
+    const itemData = catShopItems[pendingActionBoxKey];
+
+    if (action === 'open') {
+        if (pendingActionBoxKey === 'cat_box_calico') {
+            startBoxCutscene(pendingActionBoxKey);
+        } else {
+            showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.image);
+            if (document.getElementById('inventoryModal').style.display !== 'flex') {
+                isPaused = false; 
+                startKevinMovement();
+            }
+        }
+    } else if (action === 'inventory') {
+        if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
+        _GAME_DATA.inventory[pendingActionBoxKey] = (_GAME_DATA.inventory[pendingActionBoxKey] || 0) + 1;
+        
+        syncInventoryToCloud();
+        showNotification("SALVAT", `${itemData.name} a fost trimis în inventar!`, itemData.image);
+    }
+
+    pendingActionBoxKey = null;
+}
 // Global Window Exports
 window.askWhichPetToSpawn = askWhichPetToSpawn;
 window.triggerPetSpawn = triggerPetSpawn;
@@ -21527,13 +21555,12 @@ window.spawnPet = spawnPetInstance;
 // 🔐 WINDOW EXPORTS
 // ==========================================
 window.openHeroModal = openHeroModal;
-window.closeHeroModal = closeHeroModal;
+window.closeHeroModal = closeHeroModal; 
 window.navEroi = navEroi;
 window.buyHeroAction = buyHeroAction;
 window.executePurchase = executePurchase;
 window.useHeroNow = useHeroNow;
 window.executeBoxAction = executeBoxAction;
-window.spawnPet = spawnPet; // Add this line with your other window exports
 
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
@@ -21641,10 +21668,11 @@ window.buyCatItem = buyCatItem; // <--- ACEASTA LIPSEA ȘI DĂ EROAREA
 window.showInventoryBoxModal = showInventoryBoxModal;
 window.useInventoryBox = useInventoryBox;
 window.openBoxInfoModal = openBoxInfoModal;
+window.openHeroModal = openHeroModal;
 
 })(); // <-- CLOSES THE SECURE VAULT
 
-
+ 
 
 
 </script>
