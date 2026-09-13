@@ -21021,8 +21021,8 @@ async function buyCatItem(offerKey) {
 
     // 2. Set pending item and prompt user: Open or Inventory?
     pendingActionBoxKey = offerKey;
-    document.getElementById('postBuyBoxImg').src = item.img;
-    document.getElementById('postBuyBoxTitle').innerText = item.name;
+document.getElementById('postBuyBoxImg').src = item.image; 
+document.getElementById('postBuyBoxTitle').innerText = item.name;
     document.getElementById('postBuyBoxModal').style.display = 'flex';
 
     // 3. Sync to Backend (Persists purchase immediately)
@@ -21052,27 +21052,7 @@ async function buyCatItem(offerKey) {
     }
 }
 
-function executeBoxAction(action) {
-    const modal = document.getElementById('postBuyBoxModal');
-    modal.style.display = 'none';
 
-    if (!pendingActionBoxKey) return;
-    const itemData = catShopItems[pendingActionBoxKey];
-
-    if (action === 'open') {
-        // Placeholder for future box opening sequence
-        showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.img);
-    } else if (action === 'inventory') {
-        // Send item into player's inventory structure
-        if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
-        _GAME_DATA.inventory[pendingActionBoxKey] = (_GAME_DATA.inventory[pendingActionBoxKey] || 0) + 1;
-        
-        syncInventoryToCloud();
-        showNotification("SALVAT", `${itemData.name} a fost trimis în inventar!`, itemData.img);
-    }
-
-    pendingActionBoxKey = null;
-}
 
 // ==========================================
 // MULTI-PET SPAWNER & ENDERMAN-STYLE AI SYSTEM
@@ -21336,6 +21316,207 @@ function useInventoryBox(key) {
             isPaused = false;
             startKevinMovement();
         }
+    }
+}
+
+// ==========================================
+// CAT BOX OPENING MINIGAME (CINEMATIC)
+// ==========================================
+
+const boxAnimAssets = {
+    // The shaking box loop (1 to 8)
+    loop: [1, 2, 3, 4, 5, 6, 7, 8].map(i => `https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/loop%20${i}.png`),
+    
+    // The very first pop open frame
+    global: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/GLOBAL%20FRAME%201.png",
+    
+    // Individual cat opening frames (Frames 2, 3, 4, Last)
+    anya: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya%20frame%202.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya%20frame%203.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya%20frame%204.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya%20frame%20Last.png"
+    ],
+    clara: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/clara%20frame%202.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/clara%20frame%203.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/clara%20frame%204.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/clara%20last%20frame%20.png"
+    ],
+    tonto: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tonto%20frame%202.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tonto%20frame%203.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tonto%20frame%204.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tonto%20last%20frame%20.png"
+    ]
+};
+
+// Rolls for a cat inside the box based on rarity weights
+function rollCatFromBox(boxKey) {
+    const boxData = catBoxRegistry[boxKey];
+    const rarityWeights = { Common: 50, Rare: 25, Epic: 15, Legendary: 8, Majestic: 2 };
+    let pool = [];
+    
+    boxData.cats.forEach(catId => {
+        const cat = petCatalog.find(p => p.id === catId);
+        if (cat) {
+            const weight = rarityWeights[cat.stats.rarity] || 10;
+            for(let i = 0; i < weight; i++) pool.push(catId);
+        }
+    });
+    
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// Forces the browser to download images into RAM so there is 0 blink/flash
+async function preloadCutsceneAssets(catId) {
+    const urlsToLoad = [
+        ...boxAnimAssets.loop,
+        boxAnimAssets.global,
+        ...(boxAnimAssets[catId] || [])
+    ];
+    
+    const promises = urlsToLoad.map(url => {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.onload = resolve;
+            img.onerror = resolve; // Ignore missing images to prevent freezing
+            img.src = url;
+        });
+    });
+    await Promise.all(promises);
+}
+
+let boxClicks = 0;
+let boxLoopInterval = null;
+let clickOnCooldown = false;
+let cutsceneCatId = null;
+
+async function startBoxCutscene(boxKey) {
+    isPaused = true; // Stops Kevin talking/moving
+    
+    // 1. Roll the cat that will pop out!
+    cutsceneCatId = rollCatFromBox(boxKey);
+    const catData = petCatalog.find(p => p.id === cutsceneCatId);
+
+    // 2. Preload images (Show loading screen briefly)
+    document.getElementById('loadingModal').style.display = 'flex';
+    await preloadCutsceneAssets(cutsceneCatId);
+    document.getElementById('loadingModal').style.display = 'none';
+
+    // 3. Create the dark overlay
+    boxClicks = 0;
+    const overlay = document.createElement('div');
+    overlay.id = 'boxCutsceneOverlay';
+    overlay.className = 'box-cutscene-overlay';
+    
+    overlay.innerHTML = `
+        <div style="font-family: 'Orbitron'; color: #fff; font-size: 24px; margin-bottom: 20px; letter-spacing: 2px;">DESCHIZI: ${catBoxRegistry[boxKey].name.toUpperCase()}</div>
+        <div id="boxClickCounter" style="font-family: 'Montserrat'; font-weight: 900; font-size: 45px; color: #facc15; margin-bottom: 30px; text-shadow: 0 0 15px rgba(250,204,21,0.5);">0 / 10</div>
+        <div id="boxCutsceneImg" class="box-cutscene-img"></div>
+        <p style="color: #94a3b8; font-family: 'Oswald'; font-size: 18px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1px;">Apasă pe cutie pentru a o deschide!</p>
+    `;
+    document.body.appendChild(overlay);
+
+    const imgEl = document.getElementById('boxCutsceneImg');
+
+    // 4. Start the passive shaking loop (Cycles loop 1-8 every 150ms)
+    let loopIdx = 0;
+    boxLoopInterval = setInterval(() => {
+        imgEl.style.backgroundImage = `url('${boxAnimAssets.loop[loopIdx]}')`;
+        loopIdx = (loopIdx + 1) % boxAnimAssets.loop.length;
+    }, 150);
+
+    // 5. Handle Click Logic
+    imgEl.onclick = () => {
+        if (clickOnCooldown || boxClicks >= 10) return;
+        
+        clickOnCooldown = true;
+        boxClicks++;
+        
+        document.getElementById('boxClickCounter').innerText = `${boxClicks} / 10`;
+        
+        // Pop sound and physical shake effect
+        if (typeof playSFX === 'function') playSFX(popSounds[0]);
+        imgEl.classList.remove('box-hit-anim');
+        void imgEl.offsetWidth; // Restart CSS animation
+        imgEl.classList.add('box-hit-anim');
+        imgEl.classList.add('on-cooldown'); // Grays out the box
+
+        // Cooldown timer (1 second)
+        setTimeout(() => { 
+            clickOnCooldown = false; 
+            imgEl.classList.remove('on-cooldown');
+        }, 1000);
+
+        // Progression Logic
+        if (boxClicks === 6) {
+            // Stop the idle shake loop and show the box open!
+            clearInterval(boxLoopInterval);
+            imgEl.style.backgroundImage = `url('${boxAnimAssets.global}')`;
+        } else if (boxClicks >= 7 && boxClicks <= 10) {
+            // Swap frames based on clicks
+            const frameIdx = boxClicks - 7; // Maps click 7 to frame 0, click 10 to frame 3
+            if (boxAnimAssets[catData.id]) {
+                imgEl.style.backgroundImage = `url('${boxAnimAssets[catData.id][frameIdx]}')`;
+            }
+            
+            if (boxClicks === 10) {
+                // Final Reveal! Wait a second, play jackpot sound, and show card
+                if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
+                setTimeout(() => showFinalCatReveal(catData), 800);
+            }
+        }
+    };
+}
+
+// Generates the final reward card
+function showFinalCatReveal(catData) {
+    const overlay = document.getElementById('boxCutsceneOverlay');
+    const color = rarityColors[catData.stats.rarity] || "#fff";
+    const isMajestic = catData.stats.rarity === 'Majestic';
+    
+    // Add pet to player inventory and sync to cloud
+    if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
+    _GAME_DATA.inventory[catData.id] = (_GAME_DATA.inventory[catData.id] || 0) + 1;
+    syncInventoryToCloud();
+
+    overlay.innerHTML = `
+        <div class="modal-box info-modal-box reveal-${catData.stats.rarity}" style="background: radial-gradient(circle at top, #111 0%, #000 100%) !important; padding: 40px 20px !important;">
+            
+            <h2 style="color: ${color}; font-size: 38px; text-shadow: 0 0 20px ${color}; margin-bottom: 5px;">${catData.name.toUpperCase()}</h2>
+            
+            <div style="color: ${color}; border: 2px solid ${color}; padding: 4px 15px; border-radius: 12px; font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px; margin-bottom: 20px; display: inline-block; background: rgba(0,0,0,0.5);">
+                ${catData.stats.rarity.toUpperCase()}
+            </div>
+            
+            <div style="display:flex; justify-content:center; align-items:center; width: 100%; height: 200px; margin-bottom: 20px;">
+                <img src="${catData.assets.presentation}" style="max-height: 180px; max-width: 100%; object-fit: contain; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8)); ${isMajestic ? 'animation: heroFloat 3s infinite ease-in-out;' : ''}">
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border-left: 4px solid ${color}; margin-bottom: 25px; text-align: left;">
+                <p style="color: #cbd5e1; font-size: 13px; margin: 0 0 5px 0; font-family: 'Montserrat';"><b>Personalitate:</b> ${catData.personality}</p>
+                <p style="color: #94a3b8; font-size: 12px; font-style: italic; margin: 0; font-family: 'Oswald';">"${catData.desc}"</p>
+            </div>
+            
+            <button class="menu-btn play" style="width: 100%;" onclick="closeBoxCutscene()">SUPER!</button>
+        </div>
+    `;
+    
+    // Add confetti if it's Majestic or Legendary
+    if (catData.stats.rarity === 'Legendary' || catData.stats.rarity === 'Majestic') {
+        if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins();
+    }
+}
+
+function closeBoxCutscene() {
+    const overlay = document.getElementById('boxCutsceneOverlay');
+    if (overlay) overlay.remove();
+    
+    // Resume game correctly depending on if inventory was open
+    if (document.getElementById('inventoryModal').style.display !== 'flex') {
+        isPaused = false;
+        startKevinMovement();
     }
 }
 
