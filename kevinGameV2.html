@@ -20908,12 +20908,8 @@ function renderPetShop() {
     if (!grid) return;
     grid.innerHTML = "";
     
-    // Safety check: ensure _GAME_DATA.playerPetBuys exists
     if (!_GAME_DATA.playerPetBuys) _GAME_DATA.playerPetBuys = {};
 
-    console.log("Pet Shop Offers:", petShopOffers); // DEBUG: Vezi în consolă dacă sunt date aici
-
-    // Sortează cutiile după preț
     const sortedOffers = [...petShopOffers].sort((a, b) => {
         const priceA = catShopItems[a.key]?.price || 0;
         const priceB = catShopItems[b.key]?.price || 0;
@@ -20922,18 +20918,15 @@ function renderPetShop() {
 
     sortedOffers.forEach((offer) => {
         const item = catShopItems[offer.key];
-        if (!item) {
-            console.warn("Item not found in catShopItems:", offer.key);
-            return;
-        }
+        if (!item) return;
 
+        // Ensure we read from the updated object
         const bought = _GAME_DATA.playerPetBuys[offer.key] || 0;
         const remaining = offer.limit - bought;
         
         const tile = document.createElement('div');
         tile.className = "pet-shop-card";
         
-        // Dacă stocul e epuizat, adăugăm clasa de sold-out
         if (remaining <= 0) tile.classList.add('bm-sold-out');
         
         tile.onclick = () => {
@@ -20942,7 +20935,7 @@ function renderPetShop() {
         };
         
         tile.innerHTML = `
-            <button class="modal-corner-help-btn" style="top: 5px; right: 5px; width: 22px; height: 22px; font-size: 10px; z-index: 5;" onclick="event.stopPropagation(); openBoxInfoModal('${offer.key}')">?</button>
+            <button class="modal-corner-help-btn" onclick="event.stopPropagation(); openBoxInfoModal('${offer.key}')">?</button>
             <div class="bm-ruby-tag">${item.price} <img src="https://iili.io/CrnXNdG.png"></div>
             <img src="${item.image}" style="width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; z-index: 2;">
             <div class="bm-limit-tag">${remaining > 0 ? 'STOC: '+remaining : 'VÂNDUT'}</div>
@@ -20996,24 +20989,15 @@ let pendingActionBoxKey = null;
 
 async function buyCatItem(offerKey) {
     try {
-        console.log("Buying item:", offerKey);
-        
         const offer = petShopOffers.find(o => o.key === offerKey);
         const item = catShopItems[offerKey];
         
-        // ADDED: Bulletproof checks
-        if (!offer) {
-            console.error("Fatal Error: Offer not found in petShopOffers for key:", offerKey);
+        if (!offer || !item) {
             showKevinutaBubble("Eroare: Ofertă invalidă!");
             return;
         }
-        if (!item) {
-            console.error("Fatal Error: Item data not found in catShopItems for key:", offerKey);
-            showKevinutaBubble("Eroare: Item inexistent!");
-            return;
-        }
 
-        // Now check constraints safely
+        // Use the offer object for the limit check
         if (offer.limit - offer.bought <= 0) {
             showKevinutaBubble("Stoc epuizat!");
             return;
@@ -21024,35 +21008,34 @@ async function buyCatItem(offerKey) {
             return;
         }
 
-        // 1. Deduct Rubies and Increment Buy Count Locally
+        // 1. Deduct Rubies
         rubies -= item.price;
-        offer.bought += 1;
         
-        // Add to inventory (Crucial fix: add the item to your game data!)
+        // 2. Update the Buy Count (BOTH in the array AND the _GAME_DATA object)
+        offer.bought += 1;
+        if (!_GAME_DATA.playerPetBuys) _GAME_DATA.playerPetBuys = {};
+        _GAME_DATA.playerPetBuys[offerKey] = (_GAME_DATA.playerPetBuys[offerKey] || 0) + 1;
+        
+        // 3. Add to inventory
         if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
         _GAME_DATA.inventory[offerKey] = (_GAME_DATA.inventory[offerKey] || 0) + 1;
         
         updateScoreUI();
-        renderPetShop(); 
+        renderPetShop(); // This now sees the updated _GAME_DATA.playerPetBuys
         
-        // Close the detail modal popup
+        // Close detail modal
         const modalToClose = document.querySelector('.cat-shop-modal');
         if (modalToClose) modalToClose.parentElement.remove();
 
-        // 2. Set pending item and prompt user
+        // 4. Trigger UI for post-buy action
         pendingActionBoxKey = offerKey;
         document.getElementById('postBuyBoxImg').src = item.image; 
         document.getElementById('postBuyBoxTitle').innerText = item.name;
         document.getElementById('postBuyBoxModal').style.display = 'flex';
 
-        // 3. Sync to Backend
-        const petBuysUpdate = {};
-        petShopOffers.forEach(o => {
-            if (o.bought > 0) petBuysUpdate[o.key] = o.bought;
-        });
-
+        // 5. Sync to Backend
         const idToken = await firebase.auth().currentUser.getIdToken(true);
-        const response = await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
+        await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -21063,11 +21046,9 @@ async function buyCatItem(offerKey) {
                 xp: playerXP,
                 currentStage: currentStageId,
                 inventory: _GAME_DATA.inventory,
-                petBuys: petBuysUpdate 
+                petBuys: _GAME_DATA.playerPetBuys // Send the updated object
             }),
         });
-
-        if (!response.ok) throw new Error("Server rejected update");
 
     } catch (e) {
         console.error("Critical error in buyCatItem:", e);
