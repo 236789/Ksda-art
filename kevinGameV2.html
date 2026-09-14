@@ -20920,7 +20920,6 @@ function renderPetShop() {
         const item = catShopItems[offer.key];
         if (!item) return;
 
-        // Ensure we read from the updated object
         const bought = _GAME_DATA.playerPetBuys[offer.key] || 0;
         const remaining = offer.limit - bought;
         
@@ -20934,8 +20933,9 @@ function renderPetShop() {
             else showKevinutaBubble("Stoc epuizat până la refresh!");
         };
         
+        // REPAIRED HTML: ? button is now absolutely positioned so it never moves your layout
         tile.innerHTML = `
-            <button class="modal-corner-help-btn" onclick="event.stopPropagation(); openBoxInfoModal('${offer.key}')">?</button>
+            <button class="modal-corner-help-btn" style="position: absolute; top: 5px; right: 5px; width: 22px; height: 22px; font-size: 10px; z-index: 5;" onclick="event.stopPropagation(); openBoxInfoModal('${offer.key}')">?</button>
             <div class="bm-ruby-tag">${item.price} <img src="https://iili.io/CrnXNdG.png"></div>
             <img src="${item.image}" style="width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; z-index: 2;">
             <div class="bm-limit-tag">${remaining > 0 ? 'STOC: '+remaining : 'VÂNDUT'}</div>
