@@ -10481,13 +10481,6 @@ div.inv-tile div.bm-limit-tag {
 .reveal-Epic { box-shadow: 0 0 50px #a855f7, inset 0 0 40px #a855f7 !important; border-color: #a855f7 !important; }
 .reveal-Legendary { box-shadow: 0 0 60px #facc15, inset 0 0 50px #facc15 !important; border-color: #facc15 !important; }
 .reveal-Majestic { border-color: #ef4444 !important; animation: majesticBorderGlow 1.5s infinite alternate !important; } 
-
-
-.bm-sold-out {
-    filter: grayscale(1) brightness(0.4);
-    cursor: not-allowed !important;
-    pointer-events: none !important; /* Force block clicks */
-}
   </style>
 </head>
 <body>
@@ -20918,32 +20911,39 @@ function renderPetShop() {
     const grid = document.getElementById('petShopGrid');
     if (!grid) return;
     grid.innerHTML = "";
-    
-    // Ensure we are working with the latest data
-    petShopOffers.forEach((offer) => {
+
+    // 1. Sort based on price
+    const sortedOffers = [...petShopOffers].sort((a, b) => {
+        const priceA = catShopItems[a.key]?.price || 0;
+        const priceB = catShopItems[b.key]?.price || 0;
+        return priceA - priceB;
+    });
+
+    sortedOffers.forEach((offer) => {
         const item = catShopItems[offer.key];
         if (!item) return;
 
-        // Ensure we use the latest 'bought' count from the server response
-        const remaining = offer.limit - offer.bought;
+        // 2. IMPORTANT FIX: Use offer.bought (from server/sync) instead of _GAME_DATA
+        // If offer.bought is undefined, fallback to 0
+        const bought = offer.bought || 0;
+        const remaining = Math.max(0, offer.limit - bought);
         
         const tile = document.createElement('div');
         tile.className = "pet-shop-card";
         
-        // CSS class for visual "Out of stock"
-        if (remaining <= 0) {
-            tile.classList.add('bm-sold-out');
-        }
+        // 3. Apply sold-out class
+        if (remaining <= 0) tile.classList.add('bm-sold-out');
         
         tile.onclick = () => {
             if (remaining > 0) openCatDetail(offer.key);
             else showKevinutaBubble("Stoc epuizat până la refresh!");
         };
         
+        // 4. Render HTML
         tile.innerHTML = `
-            <button class="modal-corner-help-btn" ... >?</button>
+            <button class="modal-corner-help-btn" style="position: absolute; top: 5px; right: 5px; width: 22px; height: 22px; font-size: 10px; z-index: 5;" onclick="event.stopPropagation(); openBoxInfoModal('${offer.key}')">?</button>
             <div class="bm-ruby-tag">${item.price} <img src="https://iili.io/CrnXNdG.png"></div>
-            <img src="${item.image}" ...>
+            <img src="${item.image}" style="width: 50px; height: 50px; object-fit: contain; margin-bottom: 5px; z-index: 2;">
             <div class="bm-limit-tag">${remaining > 0 ? 'STOC: '+remaining : 'VÂNDUT'}</div>
         `;
         grid.appendChild(tile);
@@ -21058,15 +21058,7 @@ async function buyCatItem(offerKey) {
 
     } catch (e) {
         console.error("Critical error in buyCatItem:", e);
-        // REVERT LOCAL STATE IF SYNC FAILS
-        const offer = petShopOffers.find(o => o.key === offerKey);
-        const item = catShopItems[offerKey];
-        if (offer) offer.bought -= 1;
-        if (_GAME_DATA.inventory && _GAME_DATA.inventory[offerKey]) _GAME_DATA.inventory[offerKey] -= 1;
-        rubies += item.price;
-        updateScoreUI();
-        renderPetShop();
-        showKevinutaBubble("Eroare la tranzacție! Reîncearcă.");
+        showKevinutaBubble("Eroare la tranzacție!");
     }
 }
 
