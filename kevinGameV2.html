@@ -20844,12 +20844,9 @@ function renderPetShop() {
     if (!grid) return;
     grid.innerHTML = "";
     
-    // Safety check: ensure _GAME_DATA.playerPetBuys exists
     if (!_GAME_DATA.playerPetBuys) _GAME_DATA.playerPetBuys = {};
 
-    console.log("Pet Shop Offers:", petShopOffers); // DEBUG: Vezi în consolă dacă sunt date aici
-
-    // Sortează cutiile după preț
+    // Sort offers
     const sortedOffers = [...petShopOffers].sort((a, b) => {
         const priceA = catShopItems[a.key]?.price || 0;
         const priceB = catShopItems[b.key]?.price || 0;
@@ -20858,18 +20855,15 @@ function renderPetShop() {
 
     sortedOffers.forEach((offer) => {
         const item = catShopItems[offer.key];
-        if (!item) {
-            console.warn("Item not found in catShopItems:", offer.key);
-            return;
-        }
+        if (!item) return;
 
+        // READ CURRENT STATE FROM _GAME_DATA
         const bought = _GAME_DATA.playerPetBuys[offer.key] || 0;
         const remaining = offer.limit - bought;
         
         const tile = document.createElement('div');
         tile.className = "pet-shop-card";
         
-        // Dacă stocul e epuizat, adăugăm clasa de sold-out
         if (remaining <= 0) tile.classList.add('bm-sold-out');
         
         tile.onclick = () => {
@@ -20934,7 +20928,11 @@ async function buyCatItem(offerKey) {
     const offer = petShopOffers.find(o => o.key === offerKey);
     const item = catShopItems[offerKey];
     
-    if (offer.limit - offer.bought <= 0) {
+    // Use _GAME_DATA for stock tracking consistency
+    if (!_GAME_DATA.playerPetBuys) _GAME_DATA.playerPetBuys = {};
+    const bought = _GAME_DATA.playerPetBuys[offerKey] || 0;
+
+    if (offer.limit - bought <= 0) {
         showKevinutaBubble("Stoc epuizat!");
         return;
     }
@@ -20944,24 +20942,46 @@ async function buyCatItem(offerKey) {
         return;
     }
 
-    // 1. Deduct Rubies and Increment Buy Count Locally
+    // 1. Deduct Rubies and Increment BUY count in the centralized object
     rubies -= item.price;
-    offer.bought += 1;
+    _GAME_DATA.playerPetBuys[offerKey] = bought + 1;
     
     updateScoreUI();
-    renderPetShop(); 
+    renderPetShop(); // Rerenders based on the updated _GAME_DATA
     
-    // Close the detail modal popup
-    const detailModal = document.querySelector('.cat-shop-modal').parentElement;
+    // Close modal
+    const detailModal = document.querySelector('.cat-shop-modal')?.parentElement;
     if (detailModal) detailModal.remove();
 
-    // 2. Set pending item and prompt user: Open or Inventory?
+    // 2. Prepare visual feedback
     pendingActionBoxKey = offerKey;
-    document.getElementById('postBuyBoxImg').src = item.img;
+    document.getElementById('postBuyBoxImg').src = item.image;
     document.getElementById('postBuyBoxTitle').innerText = item.name;
     document.getElementById('postBuyBoxModal').style.display = 'flex';
 
-    // 3. Sync to Backend (Persists purchase immediately)
+    // 3. Sync to Backend
+    try {
+        const idToken = await firebase.auth().currentUser.getIdToken(true);
+        await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                idToken: idToken, 
+                score: score, 
+                rubies: rubies,
+                level: playerLevel,
+                xp: playerXP,
+                currentStage: currentStageId,
+                inventory: _GAME_DATA.inventory,
+                petBuys: _GAME_DATA.playerPetBuys // Send the updated counts
+            }),
+        });
+    } catch (e) {
+        console.error("Cloud sync failed:", e);
+    }
+}
+
+async function syncPetShopData() {
     const petBuysUpdate = {};
     petShopOffers.forEach(o => {
         if (o.bought > 0) petBuysUpdate[o.key] = o.bought;
@@ -20977,14 +20997,12 @@ async function buyCatItem(offerKey) {
                 score: score, 
                 rubies: rubies,
                 level: playerLevel,
-                xp: playerXP,
-                currentStage: currentStageId,
                 inventory: _GAME_DATA.inventory,
                 petBuys: petBuysUpdate 
             }),
         });
     } catch (e) {
-        console.error("Cloud sync failed during pet purchase:", e);
+        console.error("Cloud sync failed:", e);
     }
 }
 
