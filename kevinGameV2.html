@@ -10429,29 +10429,58 @@ div.inv-tile div.bm-limit-tag {
         width: 48px !important;  /* Forces a compact size on mobile */
         height: 48px !important; /* Forces a compact size on mobile */
     }
-}       
+}   
 
 
-
-/* Remove all conflicting transition speeds */
-.pet-shop-card {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+/* ADD THIS ANYWHERE IN YOUR <style> SECTION */
+@keyframes majesticBorderGlow {
+    0% { box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 0 15px rgba(0,0,0,0.8); border-color: #ef4444; }
+    50% { box-shadow: 0 0 20px #ef4444, inset 0 0 20px rgba(239, 68, 68, 0.5); border-color: #ff9999; }
+    100% { box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 0 15px rgba(0,0,0,0.8); border-color: #ef4444; }
 }
 
-/* Make the Modal Reveal smooth */
-.reveal-modal {
-    animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+.majestic-box-anim {
+    animation: majesticBorderGlow 1.5s infinite alternate !important;
+}   
+
+
+/* ==========================================
+   BOX OPENING MINIGAME CSS
+   ========================================== */
+.box-cutscene-overlay {
+    position: fixed; inset: 0; 
+    background: radial-gradient(circle at center, #1b1c3a 0%, #020205 100%); 
+    z-index: 400000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 
-@keyframes zoomIn {
-    0% { transform: scale(0.3); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+.box-cutscene-img {
+    width: 320px; height: 320px; 
+    background-size: contain; background-repeat: no-repeat; background-position: center;
+    cursor: pointer;
+    filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8));
+    transition: transform 0.1s ease, filter 0.2s ease;
 }
 
-/* Slow down the "Squeaky Toy" or "Event" indicators if they are too fast */
-.active-event-box {
-    transition: all 0.5s ease !important;
+/* Hover & click effects */
+.box-cutscene-img:hover { transform: scale(1.05); filter: drop-shadow(0 15px 30px rgba(250, 204, 21, 0.4)); }
+.box-cutscene-img.on-cooldown { filter: brightness(0.6); pointer-events: none; transform: scale(0.95); }
+
+/* Shake Animation when hit */
+.box-hit-anim { animation: boxHitShake 0.3s ease; }
+@keyframes boxHitShake {
+    0% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+    20% { transform: scale(0.9) rotate(-8deg); filter: brightness(1.5); }
+    50% { transform: scale(1.1) rotate(8deg); }
+    100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
 }
+
+/* Rarity Glows for the final reveal screen */
+.reveal-Common { box-shadow: 0 0 30px #9ca3af, inset 0 0 20px #9ca3af !important; border-color: #9ca3af !important; }
+.reveal-Rare { box-shadow: 0 0 40px #3b82f6, inset 0 0 30px #3b82f6 !important; border-color: #3b82f6 !important; }
+.reveal-Epic { box-shadow: 0 0 50px #a855f7, inset 0 0 40px #a855f7 !important; border-color: #a855f7 !important; }
+.reveal-Legendary { box-shadow: 0 0 60px #facc15, inset 0 0 50px #facc15 !important; border-color: #facc15 !important; }
+.reveal-Majestic { border-color: #ef4444 !important; animation: majesticBorderGlow 1.5s infinite alternate !important; } 
   </style>
 </head>
 <body>
@@ -15325,18 +15354,31 @@ function showMobileEventModal(eventData, isUseable = false, itemKey = null) {
 
     document.body.appendChild(modalOverlay);
 
-    if (isUseable) {
+if (isUseable) {
         document.getElementById('useItemBtn').onclick = () => {
             modalOverlay.remove();
             
             if (itemKey && itemKey.includes('cat_box_')) {
+                // Scădem cutia din inventar
                 if (_GAME_DATA.inventory[itemKey] && _GAME_DATA.inventory[itemKey] > 0) {
                     _GAME_DATA.inventory[itemKey]--;
                     renderInventoryUI();
                     syncInventoryToCloud();
                 }
-                const itemData = catShopItems[itemKey];
-                showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.image);
+                
+                // DĂM TRIGGER LA CUTSCENE AICI
+                if (itemKey === 'cat_box_calico') {
+                    startBoxCutscene(itemKey);
+                } else {
+                    // Pentru restul cutiilor (până le adăugăm și pe ele)
+                    const itemData = catShopItems[itemKey];
+                    showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.image || itemData.img);
+                    
+                    if (document.getElementById('inventoryModal').style.display !== 'flex') {
+                        isPaused = false; 
+                        startKevinMovement();
+                    }
+                }
             } else {
                 activateBoost(itemKey);
             }
@@ -20129,6 +20171,7 @@ const rarityColors = {
 };
 
 const catBoxRegistry = {
+    "cat_box_cardboard": { name: "Cardboard Box", cats: ["scruchi"] }, // ADDED CARDBOARD BOX & SCRUCHI
     "cat_box_calico": { name: "Calico Box", cats: ["anya", "clara", "tonto"] },
     "cat_box_kitty": { name: "Kitty Box", cats: ["clatita", "bella", "tomy", "bambucea", "rafy"] },
     "cat_box_majestic": { name: "Majestic Box", cats: ["alpy", "biggy", "luna", "versace"] },
@@ -20136,10 +20179,8 @@ const catBoxRegistry = {
     "cat_box_orange": { name: "Orange Box", cats: ["mircea", "zelensky", "putin"] },
     "cat_box_tuxedo": { name: "Tuxedo Box", cats: ["felix", "panda"] },
     "cat_box_royal": { name: "Royal Box", cats: ["bambi", "botic", "pufulete"] },
-    "cat_box_tabby": { name: "Tabby Box", cats: ["dori", "ghemotoc", "pufulete", "scruci"] }
+    "cat_box_tabby": { name: "Tabby Box", cats: ["dori", "ghemotoc", "eliot"] } // <-- ELIOT ADDED HERE
 };
-
-
 
 
 // REGISTRU IMAGINI CUSTOM PENTRU MODALUL DE DROP CHANCES
@@ -20215,33 +20256,34 @@ function openBoxInfoModal(boxKey) {
     modal.style.display = 'flex';
     modal.style.zIndex = '300000';
 
-    // Start a 3-column grid
-    let catsListHtml = `<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 5px;">`;
+    // CSS FIX: Changed from "display: grid" to "display: flex; flex-wrap: wrap; justify-content: center;"
+    let catsListHtml = `<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 5px;">`;
     
     odds.forEach(o => {
         const color = rarityColors[o.rarity] || "#fff";
         const isMajestic = o.rarity === 'Majestic';
         
         catsListHtml += `
-            <div style="display: flex; flex-direction: column; align-items: center;">
+            <!-- CSS FIX: Added "width: 105px; flex-shrink: 0;" to keep them uniform and nicely centered -->
+            <div style="display: flex; flex-direction: column; align-items: center; width: 105px; flex-shrink: 0;">
                 
                 <!-- THE SMALL BOX -->
-                <div style="width: 100%; height: 140px; background: radial-gradient(circle at bottom, ${color}22 0%, rgba(0,0,0,0.8) 80%); border: 2px solid ${color}; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 0 15px rgba(0,0,0,0.8); overflow: hidden; position: relative;">
+                <div class="${isMajestic ? 'majestic-box-anim' : ''}" style="width: 100%; height: 140px; background: radial-gradient(circle at bottom, ${color}22 0%, rgba(0,0,0,0.8) 80%); border: 2px solid ${color}; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.6), inset 0 0 15px rgba(0,0,0,0.8); overflow: hidden; position: relative;">
                     
-                    <!-- NAME (TOP) - Spațiu fix pentru a nu se atinge de imagine -->
+                    <!-- NAME (TOP) -->
                     <div style="font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 10px; color: #fff; text-transform: uppercase; text-align: center; line-height: 1; margin-top: 2px; text-shadow: 0 2px 2px rgba(0,0,0,0.8); z-index: 2; height: 22px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
                         ${o.name}
                     </div>
                     
-                    <!-- IMAGE (MIDDLE) - Imaginea este ușor micșorată pentru a nu se suprapune -->
+                    <!-- IMAGE (MIDDLE) -->
                     <div style="flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; margin: 2px 0;">
                         <img src="${o.image}" 
                              onerror="this.src='https://i.ibb.co/3YLwW5Gq/cat-boxes.png'" 
                              style="max-height: 70px; max-width: 90%; object-fit: contain; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.9)); z-index: 1;">
                     </div>
                     
-                    <!-- RARITY TIER (BOTTOM) - Mutat mai jos, spațiu dedicat -->
-                    <div style="font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 9px; color: ${color}; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 0 5px ${color}; z-index: 2; margin-bottom: 2px; ${isMajestic ? 'animation: cineGlitch 0.2s infinite;' : ''}">
+                    <!-- RARITY TIER (BOTTOM) -->
+                    <div style="font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 9px; color: ${color}; text-transform: uppercase; letter-spacing: 0.5px; text-shadow: 0 0 5px ${color}; z-index: 2; margin-bottom: 2px;">
                         ${o.rarity}
                     </div>
                 </div>
@@ -20503,7 +20545,7 @@ const petCatalog = [
         name: "Eliot",
         desc: "Fiul lui Ghemotoc. Un tigru gri plin de atitudine.",
         personality: "Se crede alpha male, dar plânge ca un pui de pisică la cea mai mică problemă.",
-        stats: { speed: 1.1, size: 75, rarity: "Epic" },
+        stats: { speed: 1.1, size: 75, rarity: "Legendary" },
         ability: { name: "Vrajeală de Alpha", desc: "Se dă mare șef, dar are nevoie de mângâieri constante." },
         assets: {
             presentation: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/eliot%20sit%20.png",
@@ -20866,9 +20908,12 @@ function renderPetShop() {
     if (!grid) return;
     grid.innerHTML = "";
     
+    // Safety check: ensure _GAME_DATA.playerPetBuys exists
     if (!_GAME_DATA.playerPetBuys) _GAME_DATA.playerPetBuys = {};
 
-    // Sort offers
+    console.log("Pet Shop Offers:", petShopOffers); // DEBUG: Vezi în consolă dacă sunt date aici
+
+    // Sortează cutiile după preț
     const sortedOffers = [...petShopOffers].sort((a, b) => {
         const priceA = catShopItems[a.key]?.price || 0;
         const priceB = catShopItems[b.key]?.price || 0;
@@ -20877,15 +20922,18 @@ function renderPetShop() {
 
     sortedOffers.forEach((offer) => {
         const item = catShopItems[offer.key];
-        if (!item) return;
+        if (!item) {
+            console.warn("Item not found in catShopItems:", offer.key);
+            return;
+        }
 
-        // READ CURRENT STATE FROM _GAME_DATA
         const bought = _GAME_DATA.playerPetBuys[offer.key] || 0;
         const remaining = offer.limit - bought;
         
         const tile = document.createElement('div');
         tile.className = "pet-shop-card";
         
+        // Dacă stocul e epuizat, adăugăm clasa de sold-out
         if (remaining <= 0) tile.classList.add('bm-sold-out');
         
         tile.onclick = () => {
@@ -20947,47 +20995,64 @@ function openCatDetail(offerKey) {
 let pendingActionBoxKey = null;
 
 async function buyCatItem(offerKey) {
-    const offer = petShopOffers.find(o => o.key === offerKey);
-    const item = catShopItems[offerKey];
-    
-    // Safety check
-    if (!offer) return;
-    
-    // Correct way to track stock: update both local object AND the offers array
-    if (!_GAME_DATA.playerPetBuys) _GAME_DATA.playerPetBuys = {};
-    const bought = _GAME_DATA.playerPetBuys[offerKey] || 0;
-
-    if (offer.limit - bought <= 0) {
-        showKevinutaBubble("Stoc epuizat!");
-        return;
-    }
-
-    if (rubies < item.price) {
-        showKevinutaBubble("Nu ai destule rubine!");
-        return;
-    }
-
-    // UPDATE STATE
-    rubies -= item.price;
-    _GAME_DATA.playerPetBuys[offerKey] = bought + 1;
-    
-    // UPDATE OFFERS ARRAY (Fixes the stock visual bug)
-    offer.bought = bought + 1; 
-    
-    updateScoreUI();
-    renderPetShop(); 
-    
-    // Close modal
-    const detailModal = document.querySelector('.cat-shop-modal')?.parentElement;
-    if (detailModal) detailModal.remove();
-
-    // TRIGGER REVEAL instead of the old box action
-    initBoxReveal(offerKey);
-
-    // Sync to Backend
     try {
+        console.log("Buying item:", offerKey);
+        
+        const offer = petShopOffers.find(o => o.key === offerKey);
+        const item = catShopItems[offerKey];
+        
+        // ADDED: Bulletproof checks
+        if (!offer) {
+            console.error("Fatal Error: Offer not found in petShopOffers for key:", offerKey);
+            showKevinutaBubble("Eroare: Ofertă invalidă!");
+            return;
+        }
+        if (!item) {
+            console.error("Fatal Error: Item data not found in catShopItems for key:", offerKey);
+            showKevinutaBubble("Eroare: Item inexistent!");
+            return;
+        }
+
+        // Now check constraints safely
+        if (offer.limit - offer.bought <= 0) {
+            showKevinutaBubble("Stoc epuizat!");
+            return;
+        }
+
+        if (rubies < item.price) {
+            showKevinutaBubble("Nu ai destule rubine!");
+            return;
+        }
+
+        // 1. Deduct Rubies and Increment Buy Count Locally
+        rubies -= item.price;
+        offer.bought += 1;
+        
+        // Add to inventory (Crucial fix: add the item to your game data!)
+        if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
+        _GAME_DATA.inventory[offerKey] = (_GAME_DATA.inventory[offerKey] || 0) + 1;
+        
+        updateScoreUI();
+        renderPetShop(); 
+        
+        // Close the detail modal popup
+        const modalToClose = document.querySelector('.cat-shop-modal');
+        if (modalToClose) modalToClose.parentElement.remove();
+
+        // 2. Set pending item and prompt user
+        pendingActionBoxKey = offerKey;
+        document.getElementById('postBuyBoxImg').src = item.image; 
+        document.getElementById('postBuyBoxTitle').innerText = item.name;
+        document.getElementById('postBuyBoxModal').style.display = 'flex';
+
+        // 3. Sync to Backend
+        const petBuysUpdate = {};
+        petShopOffers.forEach(o => {
+            if (o.bought > 0) petBuysUpdate[o.key] = o.bought;
+        });
+
         const idToken = await firebase.auth().currentUser.getIdToken(true);
-        await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
+        const response = await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -20998,96 +21063,19 @@ async function buyCatItem(offerKey) {
                 xp: playerXP,
                 currentStage: currentStageId,
                 inventory: _GAME_DATA.inventory,
-                petBuys: _GAME_DATA.playerPetBuys 
-            }),
-        });
-    } catch (e) {
-        console.error("Cloud sync failed:", e);
-    }
-}
-
-
-
-function initBoxReveal(boxKey) {
-    const item = catShopItems[boxKey];
-    const petPool = catBoxRegistry[boxKey].cats;
-    const winnerId = petPool[Math.floor(Math.random() * petPool.length)];
-    const winnerData = petCatalog.find(p => p.id === winnerId);
-
-    const modal = document.createElement('div');
-    modal.className = 'modal-overlay';
-    modal.style.display = 'flex';
-    modal.style.zIndex = '300000';
-
-    modal.innerHTML = `
-        <div class="modal-box reveal-modal">
-            <h2 style="color:#facc15;">CONȚINUT CUTIE</h2>
-            <div class="reveal-cat-img" style="background-image:url('${winnerData.assets.presentation}'); background-size:contain; background-repeat:no-repeat; margin: 20px auto;"></div>
-            <h3 style="color:#fff; font-family:'Montserrat';">${winnerData.name.toUpperCase()}</h3>
-            <p style="color:#4ade80;">RARITATE: ${winnerData.stats.rarity}</p>
-            
-            <button class="menu-btn play" style="width:100%; height:50px; font-size:18px;" 
-                onclick="claimPet('${winnerId}', this.closest('.modal-overlay'))">
-                COLECTEAZĂ
-            </button>
-        </div>
-    `;
-    document.body.appendChild(modal);
-}
-
-function claimPet(petId, modalElement) {
-    modalElement.remove();
-    // Add pet to your active pet list logic here
-    showNotification("PET COLECTAT!", "Pisica a fost trimisă în dulapul tău.", "fa-paw");
-}
-
-
-async function syncPetShopData() {
-    const petBuysUpdate = {};
-    petShopOffers.forEach(o => {
-        if (o.bought > 0) petBuysUpdate[o.key] = o.bought;
-    });
-
-    try {
-        const idToken = await firebase.auth().currentUser.getIdToken(true);
-        await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                idToken: idToken, 
-                score: score, 
-                rubies: rubies,
-                level: playerLevel,
-                inventory: _GAME_DATA.inventory,
                 petBuys: petBuysUpdate 
             }),
         });
+
+        if (!response.ok) throw new Error("Server rejected update");
+
     } catch (e) {
-        console.error("Cloud sync failed:", e);
+        console.error("Critical error in buyCatItem:", e);
+        showKevinutaBubble("Eroare la tranzacție!");
     }
 }
 
-function executeBoxAction(action) {
-    const modal = document.getElementById('postBuyBoxModal');
-    modal.style.display = 'none';
 
-    if (!pendingActionBoxKey) return;
-    const itemData = catShopItems[pendingActionBoxKey];
-
-    if (action === 'open') {
-        // Placeholder for future box opening sequence
-        showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.img);
-    } else if (action === 'inventory') {
-        // Send item into player's inventory structure
-        if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
-        _GAME_DATA.inventory[pendingActionBoxKey] = (_GAME_DATA.inventory[pendingActionBoxKey] || 0) + 1;
-        
-        syncInventoryToCloud();
-        showNotification("SALVAT", `${itemData.name} a fost trimis în inventar!`, itemData.img);
-    }
-
-    pendingActionBoxKey = null;
-}
 
 // ==========================================
 // MULTI-PET SPAWNER & ENDERMAN-STYLE AI SYSTEM
@@ -21324,6 +21312,265 @@ function movePetInstanceTo(pet, targetX, targetY, duration, callback) {
     requestAnimationFrame(step);
 }
 
+
+
+
+function useInventoryBox(key) {
+    // Remove one from inventory count
+    if (_GAME_DATA.inventory[key] && _GAME_DATA.inventory[key] > 0) {
+        _GAME_DATA.inventory[key]--;
+        renderInventoryUI();
+        syncInventoryToCloud();
+    }
+
+    // Close the modal
+    const modal = document.getElementById('inventoryBoxActionModal');
+    if (modal) modal.remove();
+
+    // Trigger Cutscene if it's the Calico Box
+    if (key === 'cat_box_calico') {
+        startBoxCutscene(key);
+    } else {
+        const itemData = catShopItems[key];
+        showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.image);
+        
+        // Resume game if not inside inventory menu anymore
+        if (document.getElementById('inventoryModal').style.display !== 'flex') {
+            isPaused = false;
+            startKevinMovement();
+        }
+    }
+}
+
+// ==========================================
+// CAT BOX OPENING MINIGAME (CINEMATIC)
+// ==========================================
+
+const boxAnimAssets = {
+    // The shaking box loop (1 to 8)
+    loop: [1, 2, 3, 4, 5, 6, 7, 8].map(i => `https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/loop%20${i}.png`),
+    
+    // The very first pop open frame
+    global: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/GLOBAL%20FRAME%201.png",
+    
+    // Individual cat opening frames (Frames 2, 3, 4, Last)
+    anya: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya%20frame%202.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya%20frame%203.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya%20frame%204.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya%20frame%20Last.png"
+    ],
+    clara: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/clara%20frame%202.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/clara%20frame%203.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/clara%20frame%204.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/clara%20last%20frame%20.png"
+    ],
+    tonto: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tonto%20frame%202.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tonto%20frame%203.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tonto%20frame%204.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tonto%20last%20frame%20.png"
+    ]
+};
+
+// Rolls for a cat inside the box based on rarity weights
+function rollCatFromBox(boxKey) {
+    const boxData = catBoxRegistry[boxKey];
+    const rarityWeights = { Common: 50, Rare: 25, Epic: 15, Legendary: 8, Majestic: 2 };
+    let pool = [];
+    
+    boxData.cats.forEach(catId => {
+        const cat = petCatalog.find(p => p.id === catId);
+        if (cat) {
+            const weight = rarityWeights[cat.stats.rarity] || 10;
+            for(let i = 0; i < weight; i++) pool.push(catId);
+        }
+    });
+    
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// Forces the browser to download images into RAM so there is 0 blink/flash
+async function preloadCutsceneAssets(catId) {
+    const urlsToLoad = [
+        ...boxAnimAssets.loop,
+        boxAnimAssets.global,
+        ...(boxAnimAssets[catId] || [])
+    ];
+    
+    const promises = urlsToLoad.map(url => {
+        return new Promise(resolve => {
+            const img = new Image();
+            img.onload = resolve;
+            img.onerror = resolve; // Ignore missing images to prevent freezing
+            img.src = url;
+        });
+    });
+    await Promise.all(promises);
+}
+
+let boxClicks = 0;
+let boxLoopInterval = null;
+let clickOnCooldown = false;
+let cutsceneCatId = null;
+
+async function startBoxCutscene(boxKey) {
+    isPaused = true; // Stops Kevin talking/moving
+    
+    // 1. Roll the cat that will pop out!
+    cutsceneCatId = rollCatFromBox(boxKey);
+    const catData = petCatalog.find(p => p.id === cutsceneCatId);
+
+    // 2. Preload images (Show loading screen briefly)
+    document.getElementById('loadingModal').style.display = 'flex';
+    await preloadCutsceneAssets(cutsceneCatId);
+    document.getElementById('loadingModal').style.display = 'none';
+
+    // 3. Create the dark overlay
+    boxClicks = 0;
+    const overlay = document.createElement('div');
+    overlay.id = 'boxCutsceneOverlay';
+    overlay.className = 'box-cutscene-overlay';
+    
+    overlay.innerHTML = `
+        <div style="font-family: 'Orbitron'; color: #fff; font-size: 24px; margin-bottom: 20px; letter-spacing: 2px;">DESCHIZI: ${catBoxRegistry[boxKey].name.toUpperCase()}</div>
+        <div id="boxClickCounter" style="font-family: 'Montserrat'; font-weight: 900; font-size: 45px; color: #facc15; margin-bottom: 30px; text-shadow: 0 0 15px rgba(250,204,21,0.5);">0 / 10</div>
+        <div id="boxCutsceneImg" class="box-cutscene-img"></div>
+        <p style="color: #94a3b8; font-family: 'Oswald'; font-size: 18px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1px;">Apasă pe cutie pentru a o deschide!</p>
+    `;
+    document.body.appendChild(overlay);
+
+    const imgEl = document.getElementById('boxCutsceneImg');
+
+    // 4. Start the passive shaking loop (Cycles loop 1-8 every 150ms)
+    let loopIdx = 0;
+    boxLoopInterval = setInterval(() => {
+        imgEl.style.backgroundImage = `url('${boxAnimAssets.loop[loopIdx]}')`;
+        loopIdx = (loopIdx + 1) % boxAnimAssets.loop.length;
+    }, 150);
+
+    // 5. Handle Click Logic
+    imgEl.onclick = () => {
+        if (clickOnCooldown || boxClicks >= 10) return;
+        
+        clickOnCooldown = true;
+        boxClicks++;
+        
+        document.getElementById('boxClickCounter').innerText = `${boxClicks} / 10`;
+        
+        // Pop sound and physical shake effect
+        if (typeof playSFX === 'function') playSFX(popSounds[0]);
+        imgEl.classList.remove('box-hit-anim');
+        void imgEl.offsetWidth; // Restart CSS animation
+        imgEl.classList.add('box-hit-anim');
+        imgEl.classList.add('on-cooldown'); // Grays out the box
+
+        // Cooldown timer (1 second)
+        setTimeout(() => { 
+            clickOnCooldown = false; 
+            imgEl.classList.remove('on-cooldown');
+        }, 1000);
+
+        // Progression Logic
+        if (boxClicks === 6) {
+            // Stop the idle shake loop and show the box open!
+            clearInterval(boxLoopInterval);
+            imgEl.style.backgroundImage = `url('${boxAnimAssets.global}')`;
+        } else if (boxClicks >= 7 && boxClicks <= 10) {
+            // Swap frames based on clicks
+            const frameIdx = boxClicks - 7; // Maps click 7 to frame 0, click 10 to frame 3
+            if (boxAnimAssets[catData.id]) {
+                imgEl.style.backgroundImage = `url('${boxAnimAssets[catData.id][frameIdx]}')`;
+            }
+            
+            if (boxClicks === 10) {
+                // Final Reveal! Wait a second, play jackpot sound, and show card
+                if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
+                setTimeout(() => showFinalCatReveal(catData), 800);
+            }
+        }
+    };
+}
+
+// Generates the final reward card
+function showFinalCatReveal(catData) {
+    const overlay = document.getElementById('boxCutsceneOverlay');
+    const color = rarityColors[catData.stats.rarity] || "#fff";
+    const isMajestic = catData.stats.rarity === 'Majestic';
+    
+    // Add pet to player inventory and sync to cloud
+    if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
+    _GAME_DATA.inventory[catData.id] = (_GAME_DATA.inventory[catData.id] || 0) + 1;
+    syncInventoryToCloud();
+
+    overlay.innerHTML = `
+        <div class="modal-box info-modal-box reveal-${catData.stats.rarity}" style="background: radial-gradient(circle at top, #111 0%, #000 100%) !important; padding: 40px 20px !important;">
+            
+            <h2 style="color: ${color}; font-size: 38px; text-shadow: 0 0 20px ${color}; margin-bottom: 5px;">${catData.name.toUpperCase()}</h2>
+            
+            <div style="color: ${color}; border: 2px solid ${color}; padding: 4px 15px; border-radius: 12px; font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px; margin-bottom: 20px; display: inline-block; background: rgba(0,0,0,0.5);">
+                ${catData.stats.rarity.toUpperCase()}
+            </div>
+            
+            <div style="display:flex; justify-content:center; align-items:center; width: 100%; height: 200px; margin-bottom: 20px;">
+                <img src="${catData.assets.presentation}" style="max-height: 180px; max-width: 100%; object-fit: contain; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8)); ${isMajestic ? 'animation: heroFloat 3s infinite ease-in-out;' : ''}">
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border-left: 4px solid ${color}; margin-bottom: 25px; text-align: left;">
+                <p style="color: #cbd5e1; font-size: 13px; margin: 0 0 5px 0; font-family: 'Montserrat';"><b>Personalitate:</b> ${catData.personality}</p>
+                <p style="color: #94a3b8; font-size: 12px; font-style: italic; margin: 0; font-family: 'Oswald';">"${catData.desc}"</p>
+            </div>
+            
+            <button class="menu-btn play" style="width: 100%;" onclick="closeBoxCutscene()">SUPER!</button>
+        </div>
+    `;
+    
+    // Add confetti if it's Majestic or Legendary
+    if (catData.stats.rarity === 'Legendary' || catData.stats.rarity === 'Majestic') {
+        if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins();
+    }
+}
+
+function closeBoxCutscene() {
+    const overlay = document.getElementById('boxCutsceneOverlay');
+    if (overlay) overlay.remove();
+    
+    // Resume game correctly depending on if inventory was open
+    if (document.getElementById('inventoryModal').style.display !== 'flex') {
+        isPaused = false;
+        startKevinMovement();
+    }
+}
+
+
+function executeBoxAction(action) {
+    const modal = document.getElementById('postBuyBoxModal');
+    if (modal) modal.style.display = 'none';
+
+    if (!pendingActionBoxKey) return;
+    const itemData = catShopItems[pendingActionBoxKey];
+
+    if (action === 'open') {
+        if (pendingActionBoxKey === 'cat_box_calico') {
+            startBoxCutscene(pendingActionBoxKey);
+        } else {
+            showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.image);
+            if (document.getElementById('inventoryModal').style.display !== 'flex') {
+                isPaused = false; 
+                startKevinMovement();
+            }
+        }
+    } else if (action === 'inventory') {
+        if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
+        _GAME_DATA.inventory[pendingActionBoxKey] = (_GAME_DATA.inventory[pendingActionBoxKey] || 0) + 1;
+        
+        syncInventoryToCloud();
+        showNotification("SALVAT", `${itemData.name} a fost trimis în inventar!`, itemData.image);
+    }
+
+    pendingActionBoxKey = null;
+}
 // Global Window Exports
 window.askWhichPetToSpawn = askWhichPetToSpawn;
 window.triggerPetSpawn = triggerPetSpawn;
@@ -21331,13 +21578,12 @@ window.spawnPet = spawnPetInstance;
 // 🔐 WINDOW EXPORTS
 // ==========================================
 window.openHeroModal = openHeroModal;
-window.closeHeroModal = closeHeroModal;
+window.closeHeroModal = closeHeroModal; 
 window.navEroi = navEroi;
 window.buyHeroAction = buyHeroAction;
 window.executePurchase = executePurchase;
 window.useHeroNow = useHeroNow;
 window.executeBoxAction = executeBoxAction;
-window.spawnPet = spawnPet; // Add this line with your other window exports
 
 // Ensure the ninja icon in Utilities opens the Market
 // (Update the onclick in your utilitiesModal HTML)
@@ -21445,10 +21691,11 @@ window.buyCatItem = buyCatItem; // <--- ACEASTA LIPSEA ȘI DĂ EROAREA
 window.showInventoryBoxModal = showInventoryBoxModal;
 window.useInventoryBox = useInventoryBox;
 window.openBoxInfoModal = openBoxInfoModal;
+window.openHeroModal = openHeroModal;
 
 })(); // <-- CLOSES THE SECURE VAULT
 
-
+ 
 
 
 </script>
