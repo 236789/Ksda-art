@@ -21419,6 +21419,23 @@ const catBoxSounds = {
 };
 
 
+// 🎵 Sistem curat de sunete (Oprește sunetul vechi dacă pui altul)
+function playCatSound(url) {
+    if (currentCatAudio) {
+        currentCatAudio.pause();
+        currentCatAudio.currentTime = 0;
+    }
+    if (!sfxCache[url]) {
+        let a = new Audio(url);
+        a.preload = "auto";
+        sfxCache[url] = a;
+    }
+    currentCatAudio = sfxCache[url];
+    currentCatAudio.volume = sfxVolume;
+    currentCatAudio.play().catch(e => console.warn(e));
+}
+
+
 async function startBoxCutscene(boxKey) {
     isPaused = true; 
     
