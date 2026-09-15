@@ -10481,6 +10481,40 @@ div.inv-tile div.bm-limit-tag {
 .reveal-Epic { box-shadow: 0 0 50px #a855f7, inset 0 0 40px #a855f7 !important; border-color: #a855f7 !important; }
 .reveal-Legendary { box-shadow: 0 0 60px #facc15, inset 0 0 50px #facc15 !important; border-color: #facc15 !important; }
 .reveal-Majestic { border-color: #ef4444 !important; animation: majesticBorderGlow 1.5s infinite alternate !important; } 
+
+
+
+/* Fullscreen cinematic background */
+.reveal-overlay {
+    position: fixed; inset: 0; z-index: 999999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: background 0.5s ease;
+}
+
+/* Backgrounds based on rarity */
+.rarity-Common { background: radial-gradient(circle, #374151 0%, #000 100%); }
+.rarity-Rare { background: radial-gradient(circle, #1e3a8a 0%, #000 100%); }
+.rarity-Epic { background: radial-gradient(circle, #4c1d95 0%, #000 100%); }
+.rarity-Legendary { background: radial-gradient(circle, #78350f 0%, #000 100%); }
+.rarity-Majestic { background: radial-gradient(circle, #7f1d1d 0%, #000 100%); }
+
+/* The Reveal Card */
+.reveal-card {
+    display: flex; flex-direction: column; align-items: center;
+    animation: revealPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes revealPop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.cat-display-img {
+    width: 250px; height: 250px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
+    margin-bottom: 20px;
+}
   </style>
 </head>
 <body>
@@ -21609,42 +21643,33 @@ async function startBoxCutscene(boxKey) {
     };
 }
 
-// Generates the final reward card
 function showFinalCatReveal(catData) {
-    const overlay = document.getElementById('boxCutsceneOverlay');
-    const color = rarityColors[catData.stats.rarity] || "#fff";
-    const isMajestic = catData.stats.rarity === 'Majestic';
-    
-    // Add pet to player inventory and sync to cloud
-    if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
-    _GAME_DATA.inventory[catData.id] = (_GAME_DATA.inventory[catData.id] || 0) + 1;
-    syncInventoryToCloud();
+    // 1. Close any potential old modals
+    const oldModal = document.querySelector('.cat-shop-modal');
+    if (oldModal) oldModal.parentElement.remove();
 
+    // 2. Create the Cinematic Overlay
+    const rarity = catData.stats.rarity;
+    const overlay = document.createElement('div');
+    overlay.className = `reveal-overlay rarity-${rarity}`;
+    
+    // 3. Populate HTML
     overlay.innerHTML = `
-        <div class="modal-box info-modal-box reveal-${catData.stats.rarity}" style="background: radial-gradient(circle at top, #111 0%, #000 100%) !important; padding: 40px 20px !important;">
+        <div class="reveal-card">
+            <div style="font-family: 'Montserrat'; font-weight: 900; color: #fff; font-size: 20px; text-transform: uppercase;">${rarity} UNLOCKED!</div>
+            <img src="${catData.assets.presentation}" class="cat-display-img">
+            <div style="font-family: 'Orbitron'; font-size: 32px; font-weight: 900; color: #fff; margin-bottom: 10px;">${catData.name.toUpperCase()}</div>
+            <div style="font-family: 'Oswald'; color: #94a3b8; font-size: 16px; margin-bottom: 30px;">${catData.ability.name}: ${catData.ability.desc}</div>
             
-            <h2 style="color: ${color}; font-size: 38px; text-shadow: 0 0 20px ${color}; margin-bottom: 5px;">${catData.name.toUpperCase()}</h2>
-            
-            <div style="color: ${color}; border: 2px solid ${color}; padding: 4px 15px; border-radius: 12px; font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px; margin-bottom: 20px; display: inline-block; background: rgba(0,0,0,0.5);">
-                ${catData.stats.rarity.toUpperCase()}
-            </div>
-            
-            <div style="display:flex; justify-content:center; align-items:center; width: 100%; height: 200px; margin-bottom: 20px;">
-                <img src="${catData.assets.presentation}" style="max-height: 180px; max-width: 100%; object-fit: contain; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8)); ${isMajestic ? 'animation: heroFloat 3s infinite ease-in-out;' : ''}">
-            </div>
-            
-            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border-left: 4px solid ${color}; margin-bottom: 25px; text-align: left;">
-                <p style="color: #cbd5e1; font-size: 13px; margin: 0 0 5px 0; font-family: 'Montserrat';"><b>Personalitate:</b> ${catData.personality}</p>
-                <p style="color: #94a3b8; font-size: 12px; font-style: italic; margin: 0; font-family: 'Oswald';">"${catData.desc}"</p>
-            </div>
-            
-            <button class="menu-btn play" style="width: 100%;" onclick="closeBoxCutscene()">SUPER!</button>
+            <button class="menu-btn play" onclick="this.closest('.reveal-overlay').remove(); isPaused=false; startKevinMovement();">CONTINUĂ</button>
         </div>
     `;
+
+    document.body.appendChild(overlay);
     
-    // Add confetti if it's Majestic or Legendary
-    if (catData.stats.rarity === 'Legendary' || catData.stats.rarity === 'Majestic') {
-        if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins();
+    // 4. Add "Majestic" special effects
+    if (rarity === 'Majestic') {
+        overlay.style.animation = "majesticBorderGlow 1.5s infinite alternate";
     }
 }
 
