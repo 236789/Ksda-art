@@ -10515,6 +10515,57 @@ div.inv-tile div.bm-limit-tag {
     filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
     margin-bottom: 20px;
 }
+
+
+/* ===== RARITY CUTSCENE BACKGROUND ===== */
+.box-cutscene-overlay {
+    background: radial-gradient(circle at 50% 40%, var(--rc1) 0%, var(--rc2) 30%, var(--rc3) 55%, var(--rc4) 80%, var(--rc5) 100%) !important;
+    transition: background 0.6s ease;
+}
+
+.box-cutscene-overlay.rarity-Common    { --rc1:#8a8a92; --rc2:#5c5c64; --rc3:#3a3a40; --rc4:#222226; --rc5:#111113; --rglow:rgba(220,220,225,0.45); --rglow2:rgba(160,160,170,0.2); --rstreak:rgba(255,255,255,0.45); --rlabel:#eaeaee; --rlabelGlow:rgba(200,200,210,0.9); --rlabelStroke:#2a2a30; }
+.box-cutscene-overlay.rarity-Rare      { --rc1:#2f7fe0; --rc2:#1a4a9f; --rc3:#0a2a6e; --rc4:#041540; --rc5:#020a20; --rglow:rgba(120,180,255,0.5); --rglow2:rgba(60,120,230,0.22); --rstreak:rgba(180,220,255,0.55); --rlabel:#a8d4ff; --rlabelGlow:rgba(90,160,255,0.9); --rlabelStroke:#0a2a6e; }
+.box-cutscene-overlay.rarity-Epic      { --rc1:#7a2fe0; --rc2:#4a1a8f; --rc3:#2a0a5e; --rc4:#150335; --rc5:#0a021f; --rglow:rgba(200,140,255,0.5); --rglow2:rgba(150,60,230,0.22); --rstreak:rgba(255,255,255,0.5); --rlabel:#e6b8ff; --rlabelGlow:rgba(200,120,255,0.9); --rlabelStroke:#3a0a6e; }
+.box-cutscene-overlay.rarity-Legendary { --rc1:#e0b32f; --rc2:#9f7a1a; --rc3:#6e4a0a; --rc4:#402804; --rc5:#201402; --rglow:rgba(255,220,120,0.55); --rglow2:rgba(230,180,60,0.25); --rstreak:rgba(255,235,180,0.6); --rlabel:#ffe9a8; --rlabelGlow:rgba(255,200,60,0.9); --rlabelStroke:#6e4a0a; }
+.box-cutscene-overlay.rarity-Majestic  { --rc1:#e02f2f; --rc2:#9f1a1a; --rc3:#6e0a0a; --rc4:#400404; --rc5:#200202; --rglow:rgba(255,90,90,0.55); --rglow2:rgba(230,50,50,0.25); --rstreak:rgba(255,160,160,0.6); --rlabel:#ffb3b3; --rlabelGlow:rgba(255,60,60,0.9); --rlabelStroke:#6e0a0a; }
+
+.rc-glow {
+    position: absolute; top: 40%; left: 50%; width: 500px; height: 500px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, var(--rglow) 0%, var(--rglow2) 40%, transparent 70%);
+    border-radius: 50%; filter: blur(4px); z-index: 0;
+    animation: rcPulse 3s ease-in-out infinite;
+}
+@keyframes rcPulse {
+    0%,100% { transform: translate(-50%,-50%) scale(1); opacity:.8; }
+    50% { transform: translate(-50%,-50%) scale(1.15); opacity:1; }
+}
+
+.rc-streak {
+    position: absolute; top: -20%; width: 2px; height: 25%; z-index: 0;
+    background: linear-gradient(to bottom, transparent, var(--rstreak), transparent);
+    animation: rcFall linear infinite;
+}
+@keyframes rcFall {
+    0% { transform: translateY(-100%); opacity:0; }
+    10% { opacity:1; } 90% { opacity:1; }
+    100% { transform: translateY(600%); opacity:0; }
+}
+
+.rc-label {
+    position: absolute; top: 6%; left: 50%; transform: translateX(-50%);
+    font-family: 'Orbitron', sans-serif; font-size: 34px; font-weight: 900;
+    color: var(--rlabel); text-transform: uppercase; letter-spacing: 2px;
+    text-shadow: 0 0 20px var(--rlabelGlow), 3px 3px 0 var(--rlabelStroke);
+    animation: rcLabelPulse 2s ease-in-out infinite; z-index: 1;
+}
+@keyframes rcLabelPulse {
+    0%,100% { text-shadow: 0 0 20px var(--rlabelGlow), 3px 3px 0 var(--rlabelStroke); }
+    50% { text-shadow: 0 0 38px var(--rlabelGlow), 3px 3px 0 var(--rlabelStroke); }
+}
+
+/* keep your click-to-open UI above the background layers */
+.box-cutscene-overlay > *:not(.rc-glow):not(.rc-streak) { position: relative; z-index: 2; }
   </style>
 </head>
 <body>
@@ -21475,7 +21526,7 @@ async function startBoxCutscene(boxKey) {
     
     cutsceneCatId = rollCatFromBox(boxKey);
     const catData = petCatalog.find(p => p.id === cutsceneCatId);
-
+const cutsceneRarity = catData.stats.rarity; // "Common" | "Rare" | "Epic" | "Legendary" | "Majestic"
     document.getElementById('loadingModal').style.display = 'flex';
     
     // Preload doar la Global + Cadrul pisicii
@@ -21496,7 +21547,7 @@ async function startBoxCutscene(boxKey) {
     boxClicks = 0;
     const overlay = document.createElement('div');
     overlay.id = 'boxCutsceneOverlay';
-    overlay.className = 'box-cutscene-overlay';
+overlay.className = `box-cutscene-overlay rarity-${cutsceneRarity}`;
     
     // PRELOADER INVIZIBIL în DOM (Pentru 0 lag)
     let preloaderHtml = '<div style="display:none;">';
@@ -21505,6 +21556,8 @@ async function startBoxCutscene(boxKey) {
 
     // UI DESIGN
     overlay.innerHTML = `
+    <div class="rc-glow"></div>
+    <div class="rc-label">${cutsceneRarity}</div>
         ${preloaderHtml}
         
         <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; text-align: center;">
