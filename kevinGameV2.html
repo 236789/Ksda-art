@@ -21469,16 +21469,17 @@ async function startBoxCutscene(boxKey) {
     
     cutsceneCatId = rollCatFromBox(boxKey);
     const catData = petCatalog.find(p => p.id === cutsceneCatId);
+    
+    // FIX pentru eroarea de undefined
+    const rarity = (catData && catData.stats && catData.stats.rarity) ? catData.stats.rarity : 'Common';
 
     document.getElementById('loadingModal').style.display = 'flex';
     
-    // Preload doar la Global + Cadrul pisicii
     const urlsToLoad = [boxAnimAssets.global, ...(boxAnimAssets[cutsceneCatId] || [])];
     await Promise.all(urlsToLoad.map(url => {
         return new Promise(res => { const img = new Image(); img.onload=res; img.onerror=res; img.src=url; });
     }));
     
-    // Preload Audio
     [...catBoxSounds.meows, catBoxSounds.purr, ...catBoxSounds.scratches].forEach(url => {
         if (!sfxCache[url]) {
             const a = new Audio(); a.src = url; a.preload = "auto"; sfxCache[url] = a;
@@ -21490,14 +21491,9 @@ async function startBoxCutscene(boxKey) {
     boxClicks = 0;
     const overlay = document.createElement('div');
     overlay.id = 'boxCutsceneOverlay';
+    // Aplica clasa de raritate pentru background dinamic
     overlay.className = `box-cutscene-overlay ${rarity}`; 
     
-    // PRELOADER INVIZIBIL în DOM (Pentru 0 lag)
-    let preloaderHtml = '<div style="display:none;">';
-    urlsToLoad.forEach(url => { preloaderHtml += `<img src="${url}">`; });
-    preloaderHtml += '</div>';
-
-    // UI DESIGN
     overlay.innerHTML = `
         <div class="box-floor"></div> 
         
@@ -21526,14 +21522,12 @@ async function startBoxCutscene(boxKey) {
     const autoBtn = document.getElementById('boxAutoOpenBtn');
     const clickNumEl = document.getElementById('boxClickNum');
 
-    // TEXTE DINAMICE LA FIECARE CLICK
     const flavorTexts = [
         "Apasă pe cutie pentru a începe!", "Se aude ceva înăuntru...", "Mai tare! Apasă!", 
         "Cutia începe să tremure...", "Nu te opri acum!", "Ceva zgârie cartonul...", 
         "Se rupe ambalajul!", "Se vede ceva!", "Aproape a ieșit!", "ULTIMUL CLICK!", "BOOOOM!"
     ];
 
-    // --- AUTO OPEN LOGIC (MAI LENT: 1.5 SECUNDE) ---
     let isAutoOpenActive = false;
     autoBtn.onclick = () => {
         isAutoOpenActive = !isAutoOpenActive;
@@ -21548,7 +21542,7 @@ async function startBoxCutscene(boxKey) {
                 if (boxClicks >= 10 || clickOnCooldown) return;
                 imgEl.click(); 
                 if (boxClicks >= 10) clearInterval(autoOpenInterval);
-            }, 1500); // 1.5 SECUNDE
+            }, 1500); 
         } else {
             autoBtn.style.background = "#333";
             autoBtn.style.borderColor = "#555";
@@ -21559,7 +21553,6 @@ async function startBoxCutscene(boxKey) {
         }
     };
 
-    // --- MANUAL CLICK LOGIC ---
     imgEl.onclick = () => {
         if (clickOnCooldown || boxClicks >= 10) return;
         
@@ -21580,29 +21573,23 @@ async function startBoxCutscene(boxKey) {
         if (boxClicks === 10) flavorEl.style.color = "#ef4444"; 
         setTimeout(() => { flavorEl.style.transform = "scale(1)"; }, 150);
 
-        // 🎵 SMART SOUND SYSTEM (Rar și curat)
         if (typeof playSFX === 'function') playSFX(popSounds[Math.floor(Math.random() * popSounds.length)]); 
         
-        // Zgârieturi doar la click 2 și 5
         if (boxClicks === 2 || boxClicks === 5) {
             playCatSound(catBoxSounds.scratches[Math.floor(Math.random() * catBoxSounds.scratches.length)]);
         }
-        // Tors doar la click 4
         else if (boxClicks === 4) {
             playCatSound(catBoxSounds.purr);
         }
-        // Miorlăit abia la click 8
         else if (boxClicks === 8) {
             playCatSound(catBoxSounds.meows[Math.floor(Math.random() * catBoxSounds.meows.length)]);
         }
 
-        // Animație Shake pe Click
         imgEl.classList.remove('box-hit-anim');
         void imgEl.offsetWidth; 
         imgEl.classList.add('box-hit-anim');
         imgEl.classList.add('on-cooldown');
 
-        // Cooldown Dinamic: cu cât te apropii de 10, cu atât poți da click mai repede!
         let currentCooldown = 1000 - (boxClicks * 60); 
         if (currentCooldown < 350) currentCooldown = 350; 
 
@@ -21611,14 +21598,10 @@ async function startBoxCutscene(boxKey) {
             imgEl.classList.remove('on-cooldown');
         }, currentCooldown);
 
-        // --- SCHIMBAREA IMAGINILOR ---
         if (boxClicks <= 5) {
-            // Click 1-5 stă imaginea globală
             imgEl.style.backgroundImage = `url('${boxAnimAssets.global}')`;
         } else if (boxClicks >= 6 && boxClicks <= 10) {
-            // Click 6 -> array index 0, Click 7 -> 1, Click 8 -> 2, Click 9 -> 3, Click 10 -> 3
             const frameIdx = Math.min(boxClicks - 6, 3);
-            
             if (boxAnimAssets[catData.id] && boxAnimAssets[catData.id][frameIdx]) {
                 imgEl.style.backgroundImage = `url('${boxAnimAssets[catData.id][frameIdx]}')`;
             } else if (boxAnimAssets.anya && boxAnimAssets.anya[frameIdx]) {
@@ -21628,7 +21611,6 @@ async function startBoxCutscene(boxKey) {
             if (boxClicks === 10) {
                 clearInterval(autoOpenInterval);
                 autoBtn.style.display = "none"; 
-                
                 if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
                 setTimeout(() => showFinalCatReveal(catData), 800);
             }
