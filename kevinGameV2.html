@@ -10484,88 +10484,31 @@ div.inv-tile div.bm-limit-tag {
 
 
 
-/* Fullscreen cinematic background */
-.reveal-overlay {
-    position: fixed; inset: 0; z-index: 999999;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    transition: background 0.5s ease;
-}
-
-/* Backgrounds based on rarity */
-.rarity-Common { background: radial-gradient(circle, #374151 0%, #000 100%); }
-.rarity-Rare { background: radial-gradient(circle, #1e3a8a 0%, #000 100%); }
-.rarity-Epic { background: radial-gradient(circle, #4c1d95 0%, #000 100%); }
-.rarity-Legendary { background: radial-gradient(circle, #78350f 0%, #000 100%); }
-.rarity-Majestic { background: radial-gradient(circle, #7f1d1d 0%, #000 100%); }
-
-/* The Reveal Card */
-.reveal-card {
-    display: flex; flex-direction: column; align-items: center;
-    animation: revealPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes revealPop {
-    0% { transform: scale(0.5); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-.cat-display-img {
-    width: 250px; height: 250px;
-    object-fit: contain;
-    filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
-    margin-bottom: 20px;
-}
-
-
-/* ===== RARITY CUTSCENE BACKGROUND ===== */
+/* Containerul cutscene-ului devine "The Scene" */
 .box-cutscene-overlay {
-    background: radial-gradient(circle at 50% 40%, var(--rc1) 0%, var(--rc2) 30%, var(--rc3) 55%, var(--rc4) 80%, var(--rc5) 100%) !important;
+    position: fixed; inset: 0; 
+    z-index: 400000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    /* CSS-ul din background-ul Claude */
+    background: radial-gradient(circle at 50% 40%, var(--c1) 0%, var(--c2) 30%, var(--c3) 55%, var(--c4) 80%, var(--c5) 100%);
     transition: background 0.6s ease;
 }
 
-.box-cutscene-overlay.rarity-Common    { --rc1:#8a8a92; --rc2:#5c5c64; --rc3:#3a3a40; --rc4:#222226; --rc5:#111113; --rglow:rgba(220,220,225,0.45); --rglow2:rgba(160,160,170,0.2); --rstreak:rgba(255,255,255,0.45); --rlabel:#eaeaee; --rlabelGlow:rgba(200,200,210,0.9); --rlabelStroke:#2a2a30; }
-.box-cutscene-overlay.rarity-Rare      { --rc1:#2f7fe0; --rc2:#1a4a9f; --rc3:#0a2a6e; --rc4:#041540; --rc5:#020a20; --rglow:rgba(120,180,255,0.5); --rglow2:rgba(60,120,230,0.22); --rstreak:rgba(180,220,255,0.55); --rlabel:#a8d4ff; --rlabelGlow:rgba(90,160,255,0.9); --rlabelStroke:#0a2a6e; }
-.box-cutscene-overlay.rarity-Epic      { --rc1:#7a2fe0; --rc2:#4a1a8f; --rc3:#2a0a5e; --rc4:#150335; --rc5:#0a021f; --rglow:rgba(200,140,255,0.5); --rglow2:rgba(150,60,230,0.22); --rstreak:rgba(255,255,255,0.5); --rlabel:#e6b8ff; --rlabelGlow:rgba(200,120,255,0.9); --rlabelStroke:#3a0a6e; }
-.box-cutscene-overlay.rarity-Legendary { --rc1:#e0b32f; --rc2:#9f7a1a; --rc3:#6e4a0a; --rc4:#402804; --rc5:#201402; --rglow:rgba(255,220,120,0.55); --rglow2:rgba(230,180,60,0.25); --rstreak:rgba(255,235,180,0.6); --rlabel:#ffe9a8; --rlabelGlow:rgba(255,200,60,0.9); --rlabelStroke:#6e4a0a; }
-.box-cutscene-overlay.rarity-Majestic  { --rc1:#e02f2f; --rc2:#9f1a1a; --rc3:#6e0a0a; --rc4:#400404; --rc5:#200202; --rglow:rgba(255,90,90,0.55); --rglow2:rgba(230,50,50,0.25); --rstreak:rgba(255,160,160,0.6); --rlabel:#ffb3b3; --rlabelGlow:rgba(255,60,60,0.9); --rlabelStroke:#6e0a0a; }
+/* Define Rarity Colors (Same as your Claude background) */
+.box-cutscene-overlay { --c1: #7a2fe0; --c2: #4a1a8f; --c3: #2a0a5e; --c4: #150335; --c5: #0a021f; }
+.box-cutscene-overlay.Common { --c1: #8a8a92; --c2: #5c5c64; --c3: #3a3a40; --c4: #222226; --c5: #111113; }
+.box-cutscene-overlay.Rare { --c1: #2f7fe0; --c2: #1a4a9f; --c3: #0a2a6e; --c4: #041540; --c5: #020a20; }
+.box-cutscene-overlay.Epic { --c1: #7a2fe0; --c2: #4a1a8f; --c3: #2a0a5e; --c4: #150335; --c5: #0a021f; }
+.box-cutscene-overlay.Legendary { --c1: #e0b32f; --c2: #9f7a1a; --c3: #6e4a0a; --c4: #402804; --c5: #201402; }
+.box-cutscene-overlay.Majestic { --c1: #e02f2f; --c2: #9f1a1a; --c3: #6e0a0a; --c4: #400404; --c5: #200202; }
 
-.rc-glow {
-    position: absolute; top: 40%; left: 50%; width: 500px; height: 500px;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(circle, var(--rglow) 0%, var(--rglow2) 40%, transparent 70%);
-    border-radius: 50%; filter: blur(4px); z-index: 0;
-    animation: rcPulse 3s ease-in-out infinite;
+/* Adaugă Floor și Streak dacă vrei exactul aspectul */
+.box-floor {
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 45%;
+    background-image: linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.05) 75%);
+    background-size: 80px 80px; transform: perspective(600px) rotateX(60deg);
+    opacity: 0.3; mask-image: linear-gradient(to top, black, transparent);
 }
-@keyframes rcPulse {
-    0%,100% { transform: translate(-50%,-50%) scale(1); opacity:.8; }
-    50% { transform: translate(-50%,-50%) scale(1.15); opacity:1; }
-}
-
-.rc-streak {
-    position: absolute; top: -20%; width: 2px; height: 25%; z-index: 0;
-    background: linear-gradient(to bottom, transparent, var(--rstreak), transparent);
-    animation: rcFall linear infinite;
-}
-@keyframes rcFall {
-    0% { transform: translateY(-100%); opacity:0; }
-    10% { opacity:1; } 90% { opacity:1; }
-    100% { transform: translateY(600%); opacity:0; }
-}
-
-.rc-label {
-    position: absolute; top: 6%; left: 50%; transform: translateX(-50%);
-    font-family: 'Orbitron', sans-serif; font-size: 34px; font-weight: 900;
-    color: var(--rlabel); text-transform: uppercase; letter-spacing: 2px;
-    text-shadow: 0 0 20px var(--rlabelGlow), 3px 3px 0 var(--rlabelStroke);
-    animation: rcLabelPulse 2s ease-in-out infinite; z-index: 1;
-}
-@keyframes rcLabelPulse {
-    0%,100% { text-shadow: 0 0 20px var(--rlabelGlow), 3px 3px 0 var(--rlabelStroke); }
-    50% { text-shadow: 0 0 38px var(--rlabelGlow), 3px 3px 0 var(--rlabelStroke); }
-}
-
-/* keep your click-to-open UI above the background layers */
-.box-cutscene-overlay > *:not(.rc-glow):not(.rc-streak) { position: relative; z-index: 2; }
   </style>
 </head>
 <body>
@@ -21526,7 +21469,7 @@ async function startBoxCutscene(boxKey) {
     
     cutsceneCatId = rollCatFromBox(boxKey);
     const catData = petCatalog.find(p => p.id === cutsceneCatId);
-const cutsceneRarity = catData.stats.rarity; // "Common" | "Rare" | "Epic" | "Legendary" | "Majestic"
+
     document.getElementById('loadingModal').style.display = 'flex';
     
     // Preload doar la Global + Cadrul pisicii
@@ -21547,7 +21490,7 @@ const cutsceneRarity = catData.stats.rarity; // "Common" | "Rare" | "Epic" | "Le
     boxClicks = 0;
     const overlay = document.createElement('div');
     overlay.id = 'boxCutsceneOverlay';
-overlay.className = `box-cutscene-overlay rarity-${cutsceneRarity}`;
+    overlay.className = `box-cutscene-overlay ${rarity}`; 
     
     // PRELOADER INVIZIBIL în DOM (Pentru 0 lag)
     let preloaderHtml = '<div style="display:none;">';
@@ -21556,26 +21499,23 @@ overlay.className = `box-cutscene-overlay rarity-${cutsceneRarity}`;
 
     // UI DESIGN
     overlay.innerHTML = `
-    <div class="rc-glow"></div>
-    <div class="rc-label">${cutsceneRarity}</div>
-        ${preloaderHtml}
+        <div class="box-floor"></div> 
         
-        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; text-align: center;">
+        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; text-align: center; z-index: 2;">
             <div style="font-family: 'Montserrat', sans-serif; color: #cbd5e1; font-size: 14px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase;">DESCHIZI</div>
             <div style="font-family: 'Orbitron', sans-serif; color: #facc15; font-size: 32px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 20px rgba(250, 204, 21, 0.6), 0 5px 10px rgba(0,0,0,0.8); margin-top: 5px;">${catBoxRegistry[boxKey].name}</div>
         </div>
 
-        <div id="boxClickCounter" style="font-family: 'Montserrat'; font-weight: 900; font-size: 50px; color: #fff; margin-bottom: 25px; text-shadow: 0 0 20px rgba(255,255,255,0.4); display: flex; align-items: baseline; gap: 8px;">
+        <div id="boxClickCounter" style="font-family: 'Montserrat'; font-weight: 900; font-size: 50px; color: #fff; margin-bottom: 25px; text-shadow: 0 0 20px rgba(255,255,255,0.4); display: flex; align-items: baseline; gap: 8px; z-index: 2;">
             <span id="boxClickNum" style="font-size: 55px; color: #fff; transition: all 0.2s;">0</span>
             <span style="font-size: 24px; color: #94a3b8;">/ 10</span>
         </div>
         
-        <!-- Începe direct pe imaginea globală nemișcată -->
-        <div id="boxCutsceneImg" class="box-cutscene-img" style="background-image: url('${boxAnimAssets.global}');"></div>
+        <div id="boxCutsceneImg" class="box-cutscene-img" style="background-image: url('${boxAnimAssets.global}'); z-index: 2;"></div>
         
-        <p id="boxFlavorText" style="color: #4ade80; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 0 0 10px rgba(74,222,128,0.4); transition: all 0.2s ease;">Apasă pe cutie pentru a începe!</p>
+        <p id="boxFlavorText" style="color: #4ade80; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 0 0 10px rgba(74,222,128,0.4); transition: all 0.2s ease; z-index: 2;">Apasă pe cutie pentru a începe!</p>
         
-        <button id="boxAutoOpenBtn" style="margin-top: 20px; padding: 12px 25px; border-radius: 12px; border: 3px solid #555; background: #333; color: #aaa; font-family: 'Orbitron'; font-weight: 900; font-size: 16px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 0 #111; display: flex; align-items: center; gap: 10px;">
+        <button id="boxAutoOpenBtn" style="margin-top: 20px; padding: 12px 25px; border-radius: 12px; border: 3px solid #555; background: #333; color: #aaa; font-family: 'Orbitron'; font-weight: 900; font-size: 16px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 0 #111; display: flex; align-items: center; gap: 10px; z-index: 2;">
             <i class="fa-solid fa-robot"></i> AUTO OPEN: OFF
         </button>
     `;
@@ -21696,33 +21636,42 @@ overlay.className = `box-cutscene-overlay rarity-${cutsceneRarity}`;
     };
 }
 
+// Generates the final reward card
 function showFinalCatReveal(catData) {
-    // 1. Close any potential old modals
-    const oldModal = document.querySelector('.cat-shop-modal');
-    if (oldModal) oldModal.parentElement.remove();
-
-    // 2. Create the Cinematic Overlay
-    const rarity = catData.stats.rarity;
-    const overlay = document.createElement('div');
-    overlay.className = `reveal-overlay rarity-${rarity}`;
+    const overlay = document.getElementById('boxCutsceneOverlay');
+    const color = rarityColors[catData.stats.rarity] || "#fff";
+    const isMajestic = catData.stats.rarity === 'Majestic';
     
-    // 3. Populate HTML
+    // Add pet to player inventory and sync to cloud
+    if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
+    _GAME_DATA.inventory[catData.id] = (_GAME_DATA.inventory[catData.id] || 0) + 1;
+    syncInventoryToCloud();
+
     overlay.innerHTML = `
-        <div class="reveal-card">
-            <div style="font-family: 'Montserrat'; font-weight: 900; color: #fff; font-size: 20px; text-transform: uppercase;">${rarity} UNLOCKED!</div>
-            <img src="${catData.assets.presentation}" class="cat-display-img">
-            <div style="font-family: 'Orbitron'; font-size: 32px; font-weight: 900; color: #fff; margin-bottom: 10px;">${catData.name.toUpperCase()}</div>
-            <div style="font-family: 'Oswald'; color: #94a3b8; font-size: 16px; margin-bottom: 30px;">${catData.ability.name}: ${catData.ability.desc}</div>
+        <div class="modal-box info-modal-box reveal-${catData.stats.rarity}" style="background: radial-gradient(circle at top, #111 0%, #000 100%) !important; padding: 40px 20px !important;">
             
-            <button class="menu-btn play" onclick="this.closest('.reveal-overlay').remove(); isPaused=false; startKevinMovement();">CONTINUĂ</button>
+            <h2 style="color: ${color}; font-size: 38px; text-shadow: 0 0 20px ${color}; margin-bottom: 5px;">${catData.name.toUpperCase()}</h2>
+            
+            <div style="color: ${color}; border: 2px solid ${color}; padding: 4px 15px; border-radius: 12px; font-family: 'Orbitron'; font-weight: 900; letter-spacing: 2px; margin-bottom: 20px; display: inline-block; background: rgba(0,0,0,0.5);">
+                ${catData.stats.rarity.toUpperCase()}
+            </div>
+            
+            <div style="display:flex; justify-content:center; align-items:center; width: 100%; height: 200px; margin-bottom: 20px;">
+                <img src="${catData.assets.presentation}" style="max-height: 180px; max-width: 100%; object-fit: contain; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8)); ${isMajestic ? 'animation: heroFloat 3s infinite ease-in-out;' : ''}">
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border-left: 4px solid ${color}; margin-bottom: 25px; text-align: left;">
+                <p style="color: #cbd5e1; font-size: 13px; margin: 0 0 5px 0; font-family: 'Montserrat';"><b>Personalitate:</b> ${catData.personality}</p>
+                <p style="color: #94a3b8; font-size: 12px; font-style: italic; margin: 0; font-family: 'Oswald';">"${catData.desc}"</p>
+            </div>
+            
+            <button class="menu-btn play" style="width: 100%;" onclick="closeBoxCutscene()">SUPER!</button>
         </div>
     `;
-
-    document.body.appendChild(overlay);
     
-    // 4. Add "Majestic" special effects
-    if (rarity === 'Majestic') {
-        overlay.style.animation = "majesticBorderGlow 1.5s infinite alternate";
+    // Add confetti if it's Majestic or Legendary
+    if (catData.stats.rarity === 'Legendary' || catData.stats.rarity === 'Majestic') {
+        if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins();
     }
 }
 
