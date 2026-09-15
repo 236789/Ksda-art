@@ -10509,6 +10509,43 @@ div.inv-tile div.bm-limit-tag {
     background-size: 80px 80px; transform: perspective(600px) rotateX(60deg);
     opacity: 0.3; mask-image: linear-gradient(to top, black, transparent);
 }
+
+
+/* Streak-uri care cad */
+.streak {
+    position: absolute; top: -20%; width: 2px; height: 25%;
+    background: linear-gradient(to bottom, transparent, var(--streak), transparent);
+    animation: fall linear infinite;
+    pointer-events: none;
+}
+@keyframes fall {
+    0% { transform: translateY(-100%); opacity: 0; }
+    10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(600%); opacity: 0; }
+}
+
+/* Sparkle-uri (Twinkle) */
+.sparkle {
+    position: absolute; width: 4px; height: 4px; background: var(--sparkle);
+    border-radius: 50%; box-shadow: 0 0 8px 2px var(--sparkle);
+    animation: twinkle ease-in-out infinite; pointer-events: none;
+}
+@keyframes twinkle {
+    0%, 100% { opacity: 0.1; transform: scale(0.6); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Glow Pulsing (Centrul ecranului) */
+.glow {
+    position: absolute; top: 45%; left: 50%; width: 500px; height: 500px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, var(--glow) 0%, var(--glow2) 40%, transparent 70%);
+    border-radius: 50%; animation: pulse 3s ease-in-out infinite; filter: blur(4px);
+    pointer-events: none;
+}
+@keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+}
   </style>
 </head>
 <body>
@@ -21463,14 +21500,11 @@ function playCatSound(url) {
     currentCatAudio.play().catch(e => console.warn(e));
 }
 
-
 async function startBoxCutscene(boxKey) {
     isPaused = true; 
     
     cutsceneCatId = rollCatFromBox(boxKey);
     const catData = petCatalog.find(p => p.id === cutsceneCatId);
-    
-    // FIX pentru eroarea de undefined
     const rarity = (catData && catData.stats && catData.stats.rarity) ? catData.stats.rarity : 'Common';
 
     document.getElementById('loadingModal').style.display = 'flex';
@@ -21491,42 +21525,59 @@ async function startBoxCutscene(boxKey) {
     boxClicks = 0;
     const overlay = document.createElement('div');
     overlay.id = 'boxCutsceneOverlay';
-    // Aplica clasa de raritate pentru background dinamic
     overlay.className = `box-cutscene-overlay ${rarity}`; 
     
     overlay.innerHTML = `
-        <div class="box-floor"></div> 
+        <div class="box-floor"></div>
+        <div class="glow"></div>
+        <div class="particles-wrapper"></div>
         
-        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; text-align: center; z-index: 2;">
+        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; text-align: center; z-index: 10;">
             <div style="font-family: 'Montserrat', sans-serif; color: #cbd5e1; font-size: 14px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase;">DESCHIZI</div>
             <div style="font-family: 'Orbitron', sans-serif; color: #facc15; font-size: 32px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 20px rgba(250, 204, 21, 0.6), 0 5px 10px rgba(0,0,0,0.8); margin-top: 5px;">${catBoxRegistry[boxKey].name}</div>
         </div>
 
-        <div id="boxClickCounter" style="font-family: 'Montserrat'; font-weight: 900; font-size: 50px; color: #fff; margin-bottom: 25px; text-shadow: 0 0 20px rgba(255,255,255,0.4); display: flex; align-items: baseline; gap: 8px; z-index: 2;">
+        <div id="boxClickCounter" style="z-index: 10; font-family: 'Montserrat'; font-weight: 900; font-size: 50px; color: #fff; margin-bottom: 25px; text-shadow: 0 0 20px rgba(255,255,255,0.4); display: flex; align-items: baseline; gap: 8px;">
             <span id="boxClickNum" style="font-size: 55px; color: #fff; transition: all 0.2s;">0</span>
             <span style="font-size: 24px; color: #94a3b8;">/ 10</span>
         </div>
         
-        <div id="boxCutsceneImg" class="box-cutscene-img" style="background-image: url('${boxAnimAssets.global}'); z-index: 2;"></div>
+        <div id="boxCutsceneImg" class="box-cutscene-img" style="background-image: url('${boxAnimAssets.global}'); z-index: 10;"></div>
         
-        <p id="boxFlavorText" style="color: #4ade80; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 0 0 10px rgba(74,222,128,0.4); transition: all 0.2s ease; z-index: 2;">Apasă pe cutie pentru a începe!</p>
+        <p id="boxFlavorText" style="z-index: 10; color: #4ade80; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 0 0 10px rgba(74,222,128,0.4); transition: all 0.2s ease;">Apasă pe cutie pentru a începe!</p>
         
-        <button id="boxAutoOpenBtn" style="margin-top: 20px; padding: 12px 25px; border-radius: 12px; border: 3px solid #555; background: #333; color: #aaa; font-family: 'Orbitron'; font-weight: 900; font-size: 16px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 0 #111; display: flex; align-items: center; gap: 10px; z-index: 2;">
+        <button id="boxAutoOpenBtn" style="z-index: 10; margin-top: 20px; padding: 12px 25px; border-radius: 12px; border: 3px solid #555; background: #333; color: #aaa; font-family: 'Orbitron'; font-weight: 900; font-size: 16px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 0 #111; display: flex; align-items: center; gap: 10px;">
             <i class="fa-solid fa-robot"></i> AUTO OPEN: OFF
         </button>
     `;
     document.body.appendChild(overlay);
+
+    // Adăugare particule
+    const wrapper = overlay.querySelector('.particles-wrapper');
+    for (let i = 0; i < 15; i++) {
+        const s = document.createElement('div');
+        s.className = 'streak';
+        s.style.left = Math.random() * 100 + '%';
+        s.style.animationDuration = (2 + Math.random() * 3) + 's';
+        s.style.animationDelay = (Math.random() * 5) + 's';
+        wrapper.appendChild(s);
+    }
+    for (let i = 0; i < 25; i++) {
+        const p = document.createElement('div');
+        p.className = 'sparkle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.top = Math.random() * 90 + '%';
+        p.style.animationDuration = (1.5 + Math.random() * 2.5) + 's';
+        p.style.animationDelay = (Math.random() * 3) + 's';
+        wrapper.appendChild(p);
+    }
 
     const imgEl = document.getElementById('boxCutsceneImg');
     const flavorEl = document.getElementById('boxFlavorText');
     const autoBtn = document.getElementById('boxAutoOpenBtn');
     const clickNumEl = document.getElementById('boxClickNum');
 
-    const flavorTexts = [
-        "Apasă pe cutie pentru a începe!", "Se aude ceva înăuntru...", "Mai tare! Apasă!", 
-        "Cutia începe să tremure...", "Nu te opri acum!", "Ceva zgârie cartonul...", 
-        "Se rupe ambalajul!", "Se vede ceva!", "Aproape a ieșit!", "ULTIMUL CLICK!", "BOOOOM!"
-    ];
+    const flavorTexts = ["Apasă pe cutie pentru a începe!", "Se aude ceva înăuntru...", "Mai tare! Apasă!", "Cutia începe să tremure...", "Nu te opri acum!", "Ceva zgârie cartonul...", "Se rupe ambalajul!", "Se vede ceva!", "Aproape a ieșit!", "ULTIMUL CLICK!", "BOOOOM!"];
 
     let isAutoOpenActive = false;
     autoBtn.onclick = () => {
@@ -21537,12 +21588,11 @@ async function startBoxCutscene(boxKey) {
             autoBtn.style.color = "#fff";
             autoBtn.style.boxShadow = "0 4px 0 #064e3b, 0 0 15px rgba(74, 222, 128, 0.4)";
             autoBtn.innerHTML = `<i class="fa-solid fa-robot"></i> AUTO OPEN: ON`;
-            
             autoOpenInterval = setInterval(() => {
                 if (boxClicks >= 10 || clickOnCooldown) return;
                 imgEl.click(); 
                 if (boxClicks >= 10) clearInterval(autoOpenInterval);
-            }, 1500); 
+            }, 1500);
         } else {
             autoBtn.style.background = "#333";
             autoBtn.style.borderColor = "#555";
@@ -21555,59 +21605,32 @@ async function startBoxCutscene(boxKey) {
 
     imgEl.onclick = () => {
         if (clickOnCooldown || boxClicks >= 10) return;
-        
         clickOnCooldown = true;
         boxClicks++;
-        
         clickNumEl.innerText = boxClicks;
         clickNumEl.style.color = "#facc15";
         clickNumEl.style.transform = "scale(1.3)";
-        setTimeout(() => { 
-            clickNumEl.style.transform = "scale(1)"; 
-            clickNumEl.style.color = "#fff"; 
-        }, 150);
-        
+        setTimeout(() => { clickNumEl.style.transform = "scale(1)"; clickNumEl.style.color = "#fff"; }, 150);
         flavorEl.innerText = flavorTexts[boxClicks];
         flavorEl.style.transform = "scale(1.2)";
         if (boxClicks >= 7) flavorEl.style.color = "#facc15"; 
         if (boxClicks === 10) flavorEl.style.color = "#ef4444"; 
         setTimeout(() => { flavorEl.style.transform = "scale(1)"; }, 150);
-
         if (typeof playSFX === 'function') playSFX(popSounds[Math.floor(Math.random() * popSounds.length)]); 
-        
-        if (boxClicks === 2 || boxClicks === 5) {
-            playCatSound(catBoxSounds.scratches[Math.floor(Math.random() * catBoxSounds.scratches.length)]);
-        }
-        else if (boxClicks === 4) {
-            playCatSound(catBoxSounds.purr);
-        }
-        else if (boxClicks === 8) {
-            playCatSound(catBoxSounds.meows[Math.floor(Math.random() * catBoxSounds.meows.length)]);
-        }
-
+        if (boxClicks === 2 || boxClicks === 5) playCatSound(catBoxSounds.scratches[Math.floor(Math.random() * catBoxSounds.scratches.length)]);
+        else if (boxClicks === 4) playCatSound(catBoxSounds.purr);
+        else if (boxClicks === 8) playCatSound(catBoxSounds.meows[Math.floor(Math.random() * catBoxSounds.meows.length)]);
         imgEl.classList.remove('box-hit-anim');
         void imgEl.offsetWidth; 
         imgEl.classList.add('box-hit-anim');
         imgEl.classList.add('on-cooldown');
-
-        let currentCooldown = 1000 - (boxClicks * 60); 
-        if (currentCooldown < 350) currentCooldown = 350; 
-
-        setTimeout(() => { 
-            clickOnCooldown = false; 
-            imgEl.classList.remove('on-cooldown');
-        }, currentCooldown);
-
-        if (boxClicks <= 5) {
-            imgEl.style.backgroundImage = `url('${boxAnimAssets.global}')`;
-        } else if (boxClicks >= 6 && boxClicks <= 10) {
+        let currentCooldown = Math.max(350, 1000 - (boxClicks * 60)); 
+        setTimeout(() => { clickOnCooldown = false; imgEl.classList.remove('on-cooldown'); }, currentCooldown);
+        if (boxClicks <= 5) imgEl.style.backgroundImage = `url('${boxAnimAssets.global}')`;
+        else if (boxClicks >= 6 && boxClicks <= 10) {
             const frameIdx = Math.min(boxClicks - 6, 3);
-            if (boxAnimAssets[catData.id] && boxAnimAssets[catData.id][frameIdx]) {
-                imgEl.style.backgroundImage = `url('${boxAnimAssets[catData.id][frameIdx]}')`;
-            } else if (boxAnimAssets.anya && boxAnimAssets.anya[frameIdx]) {
-                imgEl.style.backgroundImage = `url('${boxAnimAssets.anya[frameIdx]}')`; 
-            }
-            
+            if (boxAnimAssets[catData.id] && boxAnimAssets[catData.id][frameIdx]) imgEl.style.backgroundImage = `url('${boxAnimAssets[catData.id][frameIdx]}')`;
+            else if (boxAnimAssets.anya && boxAnimAssets.anya[frameIdx]) imgEl.style.backgroundImage = `url('${boxAnimAssets.anya[frameIdx]}')`; 
             if (boxClicks === 10) {
                 clearInterval(autoOpenInterval);
                 autoBtn.style.display = "none"; 
