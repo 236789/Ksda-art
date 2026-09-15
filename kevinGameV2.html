@@ -10448,12 +10448,22 @@ div.inv-tile div.bm-limit-tag {
    BOX OPENING MINIGAME CSS
    ========================================== */
 .box-cutscene-overlay {
-    position: fixed; inset: 0; 
-    background: radial-gradient(circle at center, #1b1c3a 0%, #020205 100%); 
-    z-index: 400000;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: fixed !important; /* Force fixed to cover the entire browser */
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 999999 !important; /* Ensure it's on top of everything */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Hide anything that spills out */
+    
+    /* Keep your existing gradients and themes */
+    background: radial-gradient(circle at 50% 40%, var(--rc1) 0%, var(--rc2) 30%, var(--rc3) 55%, var(--rc4) 80%, var(--rc5) 100%) !important;
+    transition: background 0.6s ease;
 }
-
 .box-cutscene-img {
     width: 320px; height: 320px; 
     background-size: contain; background-repeat: no-repeat; background-position: center;
@@ -10502,12 +10512,20 @@ div.inv-tile div.bm-limit-tag {
 .box-cutscene-overlay.Legendary { --c1: #e0b32f; --c2: #9f7a1a; --c3: #6e4a0a; --c4: #402804; --c5: #201402; }
 .box-cutscene-overlay.Majestic { --c1: #e02f2f; --c2: #9f1a1a; --c3: #6e0a0a; --c4: #400404; --c5: #200202; }
 
-/* Adaugă Floor și Streak dacă vrei exactul aspectul */
 .box-floor {
-    position: absolute; bottom: 0; left: 0; width: 100%; height: 45%;
-    background-image: linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.05) 75%);
-    background-size: 80px 80px; transform: perspective(600px) rotateX(60deg);
-    opacity: 0.3; mask-image: linear-gradient(to top, black, transparent);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 45%;
+    /* Added display properties to ensure it spans full width */
+    display: block; 
+    background-image: linear-gradient(45deg, rgba(255,255,255,0.05) 25%, transparent 25%), ...;
+    background-size: 80px 80px;
+    transform: perspective(600px) rotateX(60deg);
+    transform-origin: bottom center; /* Important: makes it expand from the bottom */
+    opacity: 0.3;
+    pointer-events: none;
 }
 
 
@@ -10582,7 +10600,7 @@ div.inv-tile div.bm-limit-tag {
     background-size: 80px 80px;
     background-position: 0 0, 40px 40px;
     transform: perspective(600px) rotateX(60deg);
-    transform-origin: bottom;
+    transform-origin: bottom center; /* Important: makes it expand from the bottom */
     opacity: 0.6; z-index: 0;
     mask-image: linear-gradient(to top, black, transparent);
     -webkit-mask-image: linear-gradient(to top, black, transparent);
