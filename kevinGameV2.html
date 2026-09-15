@@ -10633,55 +10633,84 @@ div.inv-tile div.bm-limit-tag {
 }
 
 
-.reveal-content-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+/* ===== REVEAL MODE (cat replaces box in-place) ===== */
+.box-cutscene-img.reveal-img {
+    width: 200px; height: 200px;
+    animation: revealPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    filter: drop-shadow(0 0 30px var(--rlabelGlow, rgba(255,255,255,0.6)));
+}
+@keyframes revealPop {
+    0%   { transform: scale(0.3) rotate(-15deg); opacity: 0; filter: blur(10px); }
+    60%  { transform: scale(1.15) rotate(5deg); opacity: 1; filter: blur(0); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+.cat-reveal-panel {
+    z-index: 10; display: flex; flex-direction: column; align-items: center;
+    text-align: center; margin-top: 22px;
+    animation: revealFadeUp 0.5s ease 0.3s both;
+    max-width: 340px; padding: 0 20px;
+}
+@keyframes revealFadeUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.cat-reveal-name {
+    font-family: 'Orbitron', sans-serif; font-weight: 900;
+    font-size: 28px; color: #fff;
+    text-shadow: 0 0 20px var(--rlabelGlow, rgba(255,255,255,0.5)), 0 4px 10px rgba(0,0,0,0.8);
+    letter-spacing: 1px; margin-bottom: 8px;
+}
+
+.cat-reveal-rarity {
+    font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 12px;
+    letter-spacing: 2px; padding: 4px 16px; border-radius: 20px;
+    border: 2px solid var(--rlabel, #fff);
+    color: var(--rlabel, #fff);
+    background: rgba(0,0,0,0.4);
+    text-shadow: 0 0 8px var(--rlabelGlow, transparent);
+    margin-bottom: 16px;
+}
+
+.cat-reveal-desc-box {
+    background: rgba(0,0,0,0.35);
+    border-left: 3px solid var(--rlabel, #fff);
+    border-radius: 8px;
+    padding: 12px 16px;
+    text-align: left;
+    margin-bottom: 20px;
     width: 100%;
-    animation: cineTextReveal 0.8s ease-out;
+    box-sizing: border-box;
 }
-
-.reveal-name {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 42px;
-    color: #fff;
-    text-shadow: 0 0 20px rgba(255,255,255,0.5);
-    margin: 0;
+.cat-reveal-desc-box p {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0 0 6px 0;
+    color: #d1d5db;
+    font-size: 12.5px;
+    line-height: 1.4;
 }
+.cat-reveal-desc-box p:last-child { margin-bottom: 0; }
+.cat-reveal-desc-box b { color: #fff; }
 
-.reveal-rarity {
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900;
-    padding: 5px 20px;
-    border-radius: 50px;
-    margin: 10px 0;
-    letter-spacing: 2px;
+.cat-reveal-continue-btn {
+    width: 100%; max-width: 240px; height: 52px;
+    border-radius: 14px; border: 3px solid #fff;
+    background: linear-gradient(180deg, #ffdc43 0%, #ffaa00 50%, #e67300 100%);
+    color: #1a1c33; font-family: 'Montserrat', sans-serif; font-weight: 900;
+    font-size: 16px; text-transform: uppercase; letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #4d2600, 0 10px 20px rgba(0,0,0,0.4);
+    transition: all 0.1s ease;
 }
+.cat-reveal-continue-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #4d2600; }
 
-.reveal-hero-img {
-    height: 250px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 20px 0;
+/* Hide-out transitions for the box UI pieces we no longer need */
+.fade-out-piece {
+    animation: fadeOutPiece 0.3s ease forwards;
 }
-
-.reveal-img-anim {
-    max-height: 100%;
-    filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8));
-    animation: heroFloat 3s infinite ease-in-out;
-}
-
-.reveal-desc-box {
-    background: rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 15px;
-    border-radius: 16px;
-    max-width: 350px;
-    text-align: center;
-    margin-bottom: 25px;
-    font-family: 'Oswald', sans-serif;
-    color: #cbd5e1;
+@keyframes fadeOutPiece {
+    to { opacity: 0; transform: scale(0.9); pointer-events: none; }
 }
   </style>
 </head>
@@ -21781,30 +21810,54 @@ async function startBoxCutscene(boxKey) {
 function showFinalCatReveal(catData) {
     const overlay = document.getElementById('boxCutsceneOverlay');
     const color = rarityColors[catData.stats.rarity] || "#fff";
-    
-    // Add to inventory
+
+    // Add pet to player inventory and sync to cloud
     if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
     _GAME_DATA.inventory[catData.id] = (_GAME_DATA.inventory[catData.id] || 0) + 1;
     syncInventoryToCloud();
 
-    // Transform the existing cutscene overlay into the Result Screen
-    overlay.innerHTML = `
-        <div class="reveal-content-wrapper">
-            <h2 class="reveal-name">${catData.name.toUpperCase()}</h2>
-            <div class="reveal-rarity" style="color: ${color}; border: 2px solid ${color};">${catData.stats.rarity.toUpperCase()}</div>
-            
-            <div class="reveal-hero-img">
-                <img src="${catData.assets.presentation}" class="reveal-img-anim">
-            </div>
-            
-            <div class="reveal-desc-box">
+    const imgEl = document.getElementById('boxCutsceneImg');
+    const flavorEl = document.getElementById('boxFlavorText');
+    const clickCounterEl = document.getElementById('boxClickCounter');
+    const autoBtn = document.getElementById('boxAutoOpenBtn');
+    const titleBlock = overlay.querySelector('div[style*="margin-bottom: 20px"]'); // the "DESCHIZI / box name" header
+
+    // 1. Fade out pieces we no longer need
+    [clickCounterEl, autoBtn, titleBlock].forEach(el => {
+        if (el) el.classList.add('fade-out-piece');
+    });
+    if (flavorEl) flavorEl.style.display = 'none';
+
+    // 2. Morph the box image into the cat image
+    setTimeout(() => {
+        [clickCounterEl, autoBtn, titleBlock].forEach(el => { if (el) el.style.display = 'none'; });
+
+        imgEl.classList.remove('box-hit-anim', 'on-cooldown');
+        imgEl.classList.add('reveal-img');
+        imgEl.style.backgroundImage = `url('${catData.assets.presentation}')`;
+        imgEl.style.cursor = 'default';
+        imgEl.onclick = null;
+
+        // 3. Build the info panel below the cat
+        const panel = document.createElement('div');
+        panel.className = 'cat-reveal-panel';
+        panel.style.setProperty('--rlabel', color);
+        panel.style.setProperty('--rlabelGlow', color);
+        panel.innerHTML = `
+            <div class="cat-reveal-name">${catData.name.toUpperCase()}</div>
+            <div class="cat-reveal-rarity">${catData.stats.rarity.toUpperCase()}</div>
+            <div class="cat-reveal-desc-box">
                 <p><b>Personalitate:</b> ${catData.personality}</p>
-                <p><i>"${catData.desc}"</i></p>
+                <p>"${catData.desc}"</p>
             </div>
-            
-            <button class="menu-btn play" style="width: 280px; height: 65px; font-size: 24px;" onclick="closeBoxCutscene()">SUPER!</button>
-        </div>
-    `;
+            <button class="cat-reveal-continue-btn" onclick="closeBoxCutscene()">SUPER!</button>
+        `;
+        overlay.appendChild(panel);
+
+        if (catData.stats.rarity === 'Legendary' || catData.stats.rarity === 'Majestic') {
+            if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins();
+        }
+    }, 300);
 }
 
 function closeBoxCutscene() {
