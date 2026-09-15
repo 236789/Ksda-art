@@ -21397,79 +21397,132 @@ async function preloadCutsceneAssets(catId) {
     await Promise.all(promises);
 }
 
+// Global states for the Box Minigame
 let boxClicks = 0;
 let boxLoopInterval = null;
 let clickOnCooldown = false;
 let cutsceneCatId = null;
+let autoOpenInterval = null; // New global timer for Auto Open
+
+// --- NEW CAT BOX AUDIO ASSETS ---
+const catBoxSounds = {
+    meows: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/meow%201.mp3",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/meow%202.mp3",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/meow%203.mp3",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/meow%204.mp3"
+    ],
+    purr: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/purr.mp3",
+    scratches: [
+        // Upload "scratch1.mp3" and "scratch2.mp3" to your GitHub folder!
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/scratch1.mp3",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/scratch2.mp3"
+    ]
+};
+
+
 
 async function startBoxCutscene(boxKey) {
-    isPaused = true; // Stops Kevin talking/moving
+    isPaused = true; 
     
-    // 1. Roll the cat that will pop out!
     cutsceneCatId = rollCatFromBox(boxKey);
     const catData = petCatalog.find(p => p.id === cutsceneCatId);
 
-    // 2. Preload images (Show loading screen briefly)
     document.getElementById('loadingModal').style.display = 'flex';
     await preloadCutsceneAssets(cutsceneCatId);
+    
+    // Preload Audio so there's no delay
+    [...catBoxSounds.meows, catBoxSounds.purr, ...catBoxSounds.scratches].forEach(url => {
+        if (!sfxCache[url]) {
+            const a = new Audio(); a.src = url; a.preload = "auto"; sfxCache[url] = a;
+        }
+    });
+    
     document.getElementById('loadingModal').style.display = 'none';
 
-    // 3. Create the dark overlay
     boxClicks = 0;
     const overlay = document.createElement('div');
     overlay.id = 'boxCutsceneOverlay';
     overlay.className = 'box-cutscene-overlay';
     
-    // 🛠️ THE FLICKER FIX: Inject hidden <img> tags into the DOM. 
-    // This forces the browser to keep the images in active GPU memory, making background swaps instant!
+    // PRELOADER INVIZIBIL: Elimină 100% orice flicker al imaginilor
     let preloaderHtml = '<div style="display:none;">';
     boxAnimAssets.loop.forEach(url => { preloaderHtml += `<img src="${url}">`; });
     preloaderHtml += '</div>';
 
-    // 🎨 THE NEW LAYOUT: Stacked title, new fonts, glowing elements
+    // UI DESIGN: Exactly like your mockup!
     overlay.innerHTML = `
         ${preloaderHtml}
         
-        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; text-align: center;">
-            <div style="font-family: 'Montserrat', sans-serif; color: #94a3b8; font-size: 16px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase;">DESCHIZI</div>
-            <div style="font-family: 'Orbitron', sans-serif; color: #facc15; font-size: 32px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 20px rgba(250, 204, 21, 0.6), 0 5px 10px rgba(0,0,0,0.8); margin-top: 5px;">${catBoxRegistry[boxKey].name}</div>
+        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+            <div style="font-family: 'Montserrat', sans-serif; color: #cbd5e1; font-size: 14px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase;">DESCHIZI</div>
+            <div style="font-family: 'Orbitron', sans-serif; color: #facc15; font-size: 32px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 15px rgba(250, 204, 21, 0.8), 0 0 5px #facc15; margin-top: 5px;">${catBoxRegistry[boxKey].name}</div>
         </div>
 
-        <div id="boxClickCounter" style="font-family: 'Montserrat'; font-weight: 900; font-size: 50px; color: #fff; margin-bottom: 25px; text-shadow: 0 0 20px rgba(255,255,255,0.4);">0 <span style="font-size:24px; color:#94a3b8;">/ 10</span></div>
+        <div id="boxClickCounter" style="font-family: 'Montserrat'; font-weight: 900; margin-bottom: 25px; display: flex; align-items: baseline; gap: 8px;">
+            <span id="boxClickNum" style="font-size: 55px; color: #fff; text-shadow: 0 0 20px #facc15, 0 0 10px #facc15; transition: all 0.2s;">0</span>
+            <span style="font-size: 24px; color: #94a3b8;">/ 10</span>
+        </div>
         
         <div id="boxCutsceneImg" class="box-cutscene-img" style="background-image: url('${boxAnimAssets.loop[0]}');"></div>
         
-        <p id="boxFlavorText" style="color: #4ade80; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 16px; margin-top: 35px; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 0 0 10px rgba(74,222,128,0.4); transition: all 0.2s ease;">Apasă pe cutie pentru a începe!</p>
+        <p id="boxFlavorText" style="color: #4ade80; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 10px rgba(74,222,128,0.4); transition: all 0.2s ease;">Apasă pe cutie pentru a începe!</p>
+        
+        <!-- THE NEW AUTO OPEN BUTTON -->
+        <button id="boxAutoOpenBtn" style="margin-top: 15px; padding: 10px 25px; border-radius: 12px; border: 3px solid #555; background: #333; color: #aaa; font-family: 'Orbitron'; font-weight: 900; font-size: 15px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 0 #111; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-robot"></i> AUTO OPEN: OFF
+        </button>
     `;
     document.body.appendChild(overlay);
 
     const imgEl = document.getElementById('boxCutsceneImg');
     const flavorEl = document.getElementById('boxFlavorText');
+    const autoBtn = document.getElementById('boxAutoOpenBtn');
+    const clickNumEl = document.getElementById('boxClickNum');
 
-    // 🚀 SMOOTHER ANIMATION: Reduced from 150ms to 90ms. 
-    // This makes the shaking look like a real continuous vibration instead of a laggy slideshow.
+    // SMOOTHER LOOP (Scăzut la 90ms pentru vibrație naturală)
     let loopIdx = 0;
     boxLoopInterval = setInterval(() => {
         imgEl.style.backgroundImage = `url('${boxAnimAssets.loop[loopIdx]}')`;
         loopIdx = (loopIdx + 1) % boxAnimAssets.loop.length;
     }, 90); 
 
-    // 💬 DYNAMIC TEXTS FOR EVERY CLICK
+    // TEXTE DINAMICE LA FIECARE CLICK
     const flavorTexts = [
-        "Apasă pe cutie pentru a începe!", // 0
-        "Se aude ceva înăuntru...", // 1
-        "Mai tare! Apasă!", // 2
-        "Cutia începe să tremure...", // 3
-        "Nu te opri acum!", // 4
-        "Ceva zgârie cartonul...", // 5
-        "Se rupe ambalajul!", // 6
-        "Se vede ceva!", // 7
-        "Aproape a ieșit!", // 8
-        "ULTIMUL CLICK!", // 9
-        "BOOOOM!" // 10
+        "Apasă pe cutie pentru a începe!", "Se aude ceva înăuntru...", "Mai tare! Apasă!", 
+        "Cutia începe să tremure...", "Ceva zgârie cartonul...", "Nu te opri acum!", 
+        "Se rupe ambalajul!", "Se vede ceva!", "Aproape a ieșit!", "ULTIMUL CLICK!", "BOOOOM!"
     ];
 
-    // 5. Handle Click Logic
+    // --- AUTO OPEN LOGIC ---
+    let isAutoOpenActive = false;
+    autoBtn.onclick = () => {
+        isAutoOpenActive = !isAutoOpenActive;
+        if (isAutoOpenActive) {
+            // GREEN / ON STATE
+            autoBtn.style.background = "linear-gradient(180deg, #22c55e, #16a34a)";
+            autoBtn.style.borderColor = "#4ade80";
+            autoBtn.style.color = "#fff";
+            autoBtn.style.boxShadow = "0 4px 0 #064e3b, 0 0 15px rgba(74, 222, 128, 0.4)";
+            autoBtn.innerHTML = `<i class="fa-solid fa-robot"></i> AUTO OPEN: ON`;
+            
+            autoOpenInterval = setInterval(() => {
+                if (boxClicks >= 10 || clickOnCooldown) return;
+                imgEl.click(); // Trigger a manual click
+                if (boxClicks >= 10) clearInterval(autoOpenInterval);
+            }, 750); // Clicks every 0.75 seconds
+        } else {
+            // GRAY / OFF STATE
+            autoBtn.style.background = "#333";
+            autoBtn.style.borderColor = "#555";
+            autoBtn.style.color = "#aaa";
+            autoBtn.style.boxShadow = "0 4px 0 #111";
+            autoBtn.innerHTML = `<i class="fa-solid fa-robot"></i> AUTO OPEN: OFF`;
+            clearInterval(autoOpenInterval);
+        }
+    };
+
+    // --- MANUAL CLICK LOGIC & SOUNDS ---
     imgEl.onclick = () => {
         if (clickOnCooldown || boxClicks >= 10) return;
         
@@ -21477,25 +21530,40 @@ async function startBoxCutscene(boxKey) {
         boxClicks++;
         
         // Update Counter
-        document.getElementById('boxClickCounter').innerHTML = `<span style="color:#facc15;">${boxClicks}</span> <span style="font-size:24px; color:#94a3b8;">/ 10</span>`;
+        clickNumEl.innerText = boxClicks;
+        clickNumEl.style.transform = "scale(1.3)";
+        setTimeout(() => clickNumEl.style.transform = "scale(1)", 150);
         
-        // Update Flavor Text & animate it slightly
+        // Update Flavor Text
         flavorEl.innerText = flavorTexts[boxClicks];
-        flavorEl.style.transform = "scale(1.2)";
-        if (boxClicks >= 7) flavorEl.style.color = "#facc15"; // Turns gold at the end
-        if (boxClicks === 10) flavorEl.style.color = "#ef4444"; // Turns red on Boom
-        setTimeout(() => { flavorEl.style.transform = "scale(1)"; }, 150);
+        if (boxClicks >= 7) flavorEl.style.color = "#facc15"; 
+        if (boxClicks === 10) flavorEl.style.color = "#ef4444"; 
 
-        // Pop sound and physical shake effect
-        if (typeof playSFX === 'function') playSFX(popSounds[Math.floor(Math.random() * popSounds.length)]);
+        // 🎵 SMART SOUND SYSTEM (Nu face spam!)
+        if (typeof playSFX === 'function') playSFX(popSounds[Math.floor(Math.random() * popSounds.length)]); // Standard click
+        
+        // Meow at clicks 3, 6, 9
+        if (boxClicks === 3 || boxClicks === 6 || boxClicks === 9) {
+            playSFX(catBoxSounds.meows[Math.floor(Math.random() * catBoxSounds.meows.length)]);
+        }
+        // Purr at clicks 2 and 8
+        if (boxClicks === 2 || boxClicks === 8) {
+            playSFX(catBoxSounds.purr);
+        }
+        // Cardboard Scratch at clicks 1, 4, 7
+        if (boxClicks === 1 || boxClicks === 4 || boxClicks === 7) {
+            playSFX(catBoxSounds.scratches[Math.floor(Math.random() * catBoxSounds.scratches.length)]);
+        }
+
+        // Shake Animation
         imgEl.classList.remove('box-hit-anim');
-        void imgEl.offsetWidth; // Restart CSS animation
+        void imgEl.offsetWidth; 
         imgEl.classList.add('box-hit-anim');
-        imgEl.classList.add('on-cooldown'); // Grays out the box
+        imgEl.classList.add('on-cooldown');
 
-        // ⏱️ DYNAMIC COOLDOWN: It gets faster to click as you get closer to 10!
+        // Dynamic Cooldown (Gets faster as you get closer to 10!)
         let currentCooldown = 1000 - (boxClicks * 60); 
-        if (currentCooldown < 350) currentCooldown = 350; // Cap at 350ms
+        if (currentCooldown < 350) currentCooldown = 350; 
 
         setTimeout(() => { 
             clickOnCooldown = false; 
@@ -21504,28 +21572,26 @@ async function startBoxCutscene(boxKey) {
 
         // Progression Logic
         if (boxClicks === 6) {
-            // Stop the idle shake loop and show the box open!
             clearInterval(boxLoopInterval);
             imgEl.style.backgroundImage = `url('${boxAnimAssets.global}')`;
         } else if (boxClicks >= 7 && boxClicks <= 10) {
-            // Swap frames based on clicks
             const frameIdx = boxClicks - 7; 
             if (boxAnimAssets[catData.id] && boxAnimAssets[catData.id][frameIdx]) {
                 imgEl.style.backgroundImage = `url('${boxAnimAssets[catData.id][frameIdx]}')`;
             } else if (boxAnimAssets.anya && boxAnimAssets.anya[frameIdx]) {
-                // Safe Fallback if cat lacks images
                 imgEl.style.backgroundImage = `url('${boxAnimAssets.anya[frameIdx]}')`; 
             }
             
             if (boxClicks === 10) {
-                // Final Reveal! Wait a second, play jackpot sound, and show card
+                clearInterval(autoOpenInterval); // Stop auto clicker
+                autoBtn.style.display = "none"; // Hide button
+                
                 if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
                 setTimeout(() => showFinalCatReveal(catData), 800);
             }
         }
     };
 }
-
 // Generates the final reward card
 function showFinalCatReveal(catData) {
     const overlay = document.getElementById('boxCutsceneOverlay');
@@ -21566,10 +21632,13 @@ function showFinalCatReveal(catData) {
 }
 
 function closeBoxCutscene() {
+    // Clear the auto-opener loop just in case
+    if (autoOpenInterval) clearInterval(autoOpenInterval);
+    if (boxLoopInterval) clearInterval(boxLoopInterval);
+
     const overlay = document.getElementById('boxCutsceneOverlay');
     if (overlay) overlay.remove();
     
-    // Resume game correctly depending on if inventory was open
     if (document.getElementById('inventoryModal').style.display !== 'flex') {
         isPaused = false;
         startKevinMovement();
