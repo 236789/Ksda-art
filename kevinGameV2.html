@@ -21420,22 +21420,54 @@ async function startBoxCutscene(boxKey) {
     overlay.id = 'boxCutsceneOverlay';
     overlay.className = 'box-cutscene-overlay';
     
+    // 🛠️ THE FLICKER FIX: Inject hidden <img> tags into the DOM. 
+    // This forces the browser to keep the images in active GPU memory, making background swaps instant!
+    let preloaderHtml = '<div style="display:none;">';
+    boxAnimAssets.loop.forEach(url => { preloaderHtml += `<img src="${url}">`; });
+    preloaderHtml += '</div>';
+
+    // 🎨 THE NEW LAYOUT: Stacked title, new fonts, glowing elements
     overlay.innerHTML = `
-        <div style="font-family: 'Orbitron'; color: #fff; font-size: 24px; margin-bottom: 20px; letter-spacing: 2px;">DESCHIZI: ${catBoxRegistry[boxKey].name.toUpperCase()}</div>
-        <div id="boxClickCounter" style="font-family: 'Montserrat'; font-weight: 900; font-size: 45px; color: #facc15; margin-bottom: 30px; text-shadow: 0 0 15px rgba(250,204,21,0.5);">0 / 10</div>
-        <div id="boxCutsceneImg" class="box-cutscene-img"></div>
-        <p style="color: #94a3b8; font-family: 'Oswald'; font-size: 18px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1px;">Apasă pe cutie pentru a o deschide!</p>
+        ${preloaderHtml}
+        
+        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; text-align: center;">
+            <div style="font-family: 'Montserrat', sans-serif; color: #94a3b8; font-size: 16px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase;">DESCHIZI</div>
+            <div style="font-family: 'Orbitron', sans-serif; color: #facc15; font-size: 32px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 20px rgba(250, 204, 21, 0.6), 0 5px 10px rgba(0,0,0,0.8); margin-top: 5px;">${catBoxRegistry[boxKey].name}</div>
+        </div>
+
+        <div id="boxClickCounter" style="font-family: 'Montserrat'; font-weight: 900; font-size: 50px; color: #fff; margin-bottom: 25px; text-shadow: 0 0 20px rgba(255,255,255,0.4);">0 <span style="font-size:24px; color:#94a3b8;">/ 10</span></div>
+        
+        <div id="boxCutsceneImg" class="box-cutscene-img" style="background-image: url('${boxAnimAssets.loop[0]}');"></div>
+        
+        <p id="boxFlavorText" style="color: #4ade80; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 16px; margin-top: 35px; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 0 0 10px rgba(74,222,128,0.4); transition: all 0.2s ease;">Apasă pe cutie pentru a începe!</p>
     `;
     document.body.appendChild(overlay);
 
     const imgEl = document.getElementById('boxCutsceneImg');
+    const flavorEl = document.getElementById('boxFlavorText');
 
-    // 4. Start the passive shaking loop (Cycles loop 1-8 every 150ms)
+    // 🚀 SMOOTHER ANIMATION: Reduced from 150ms to 90ms. 
+    // This makes the shaking look like a real continuous vibration instead of a laggy slideshow.
     let loopIdx = 0;
     boxLoopInterval = setInterval(() => {
         imgEl.style.backgroundImage = `url('${boxAnimAssets.loop[loopIdx]}')`;
         loopIdx = (loopIdx + 1) % boxAnimAssets.loop.length;
-    }, 150);
+    }, 90); 
+
+    // 💬 DYNAMIC TEXTS FOR EVERY CLICK
+    const flavorTexts = [
+        "Apasă pe cutie pentru a începe!", // 0
+        "Se aude ceva înăuntru...", // 1
+        "Mai tare! Apasă!", // 2
+        "Cutia începe să tremure...", // 3
+        "Nu te opri acum!", // 4
+        "Ceva zgârie cartonul...", // 5
+        "Se rupe ambalajul!", // 6
+        "Se vede ceva!", // 7
+        "Aproape a ieșit!", // 8
+        "ULTIMUL CLICK!", // 9
+        "BOOOOM!" // 10
+    ];
 
     // 5. Handle Click Logic
     imgEl.onclick = () => {
@@ -21444,20 +21476,31 @@ async function startBoxCutscene(boxKey) {
         clickOnCooldown = true;
         boxClicks++;
         
-        document.getElementById('boxClickCounter').innerText = `${boxClicks} / 10`;
+        // Update Counter
+        document.getElementById('boxClickCounter').innerHTML = `<span style="color:#facc15;">${boxClicks}</span> <span style="font-size:24px; color:#94a3b8;">/ 10</span>`;
         
+        // Update Flavor Text & animate it slightly
+        flavorEl.innerText = flavorTexts[boxClicks];
+        flavorEl.style.transform = "scale(1.2)";
+        if (boxClicks >= 7) flavorEl.style.color = "#facc15"; // Turns gold at the end
+        if (boxClicks === 10) flavorEl.style.color = "#ef4444"; // Turns red on Boom
+        setTimeout(() => { flavorEl.style.transform = "scale(1)"; }, 150);
+
         // Pop sound and physical shake effect
-        if (typeof playSFX === 'function') playSFX(popSounds[0]);
+        if (typeof playSFX === 'function') playSFX(popSounds[Math.floor(Math.random() * popSounds.length)]);
         imgEl.classList.remove('box-hit-anim');
         void imgEl.offsetWidth; // Restart CSS animation
         imgEl.classList.add('box-hit-anim');
         imgEl.classList.add('on-cooldown'); // Grays out the box
 
-        // Cooldown timer (1 second)
+        // ⏱️ DYNAMIC COOLDOWN: It gets faster to click as you get closer to 10!
+        let currentCooldown = 1000 - (boxClicks * 60); 
+        if (currentCooldown < 350) currentCooldown = 350; // Cap at 350ms
+
         setTimeout(() => { 
             clickOnCooldown = false; 
             imgEl.classList.remove('on-cooldown');
-        }, 1000);
+        }, currentCooldown);
 
         // Progression Logic
         if (boxClicks === 6) {
@@ -21466,9 +21509,12 @@ async function startBoxCutscene(boxKey) {
             imgEl.style.backgroundImage = `url('${boxAnimAssets.global}')`;
         } else if (boxClicks >= 7 && boxClicks <= 10) {
             // Swap frames based on clicks
-            const frameIdx = boxClicks - 7; // Maps click 7 to frame 0, click 10 to frame 3
-            if (boxAnimAssets[catData.id]) {
+            const frameIdx = boxClicks - 7; 
+            if (boxAnimAssets[catData.id] && boxAnimAssets[catData.id][frameIdx]) {
                 imgEl.style.backgroundImage = `url('${boxAnimAssets[catData.id][frameIdx]}')`;
+            } else if (boxAnimAssets.anya && boxAnimAssets.anya[frameIdx]) {
+                // Safe Fallback if cat lacks images
+                imgEl.style.backgroundImage = `url('${boxAnimAssets.anya[frameIdx]}')`; 
             }
             
             if (boxClicks === 10) {
