@@ -21565,6 +21565,19 @@ function useInventoryBox(key) {
 const boxAnimAssets = {
     global: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/GLOBAL%20FRAME%201.png",
     
+
+    // NOU: Cutia de carton închisă
+    global_cardboard: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/Scruci%20Global%20frame%201.png",
+    
+    // NOU: Cadrele pentru Scruchi
+    scruchi: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/scruci%20frame%201.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/scruci%20frame%202.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/scruci%20frame%203.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/scruci%20frame%204.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/scruci%20last%20frame%20.png"
+    ],
+
     anya: [
         "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya%20frame%202.png",
         "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/anya%20frame%203.png",
@@ -21671,9 +21684,16 @@ async function startBoxCutscene(boxKey) {
     const catData = petCatalog.find(p => p.id === cutsceneCatId);
     const rarity = (catData && catData.stats && catData.stats.rarity) ? catData.stats.rarity : 'Common';
 
+    // 🛠️ NOU: SETĂM IMAGINEA CUTIEI ÎNCHISE ÎN FUNCȚIE DE TIPUL EI
+    let startingFrame = boxAnimAssets.global; // Cutia calico (default)
+    if (boxKey === 'cat_box_cardboard') {
+        startingFrame = boxAnimAssets.global_cardboard; // Cutia de carton
+    }
+
     document.getElementById('loadingModal').style.display = 'flex';
     
-    const urlsToLoad = [boxAnimAssets.global, ...(boxAnimAssets[cutsceneCatId] || [])];
+    // Încărcăm imaginea corectă de start
+    const urlsToLoad = [startingFrame, ...(boxAnimAssets[cutsceneCatId] || [])];
     await Promise.all(urlsToLoad.map(url => {
         return new Promise(res => { const img = new Image(); img.onload=res; img.onerror=res; img.src=url; });
     }));
@@ -21691,6 +21711,7 @@ async function startBoxCutscene(boxKey) {
     overlay.id = 'boxCutsceneOverlay';
     overlay.className = `box-cutscene-overlay ${rarity}`; 
     
+    // 🛠️ NOU: Folosim ${startingFrame} în interiorul HTML-ului generat
     overlay.innerHTML = `
         <div class="box-floor"></div>
         <div class="glow"></div>
@@ -21706,7 +21727,7 @@ async function startBoxCutscene(boxKey) {
             <span style="font-size: 24px; color: #94a3b8;">/ 10</span>
         </div>
         
-        <div id="boxCutsceneImg" class="box-cutscene-img" style="background-image: url('${boxAnimAssets.global}'); z-index: 10;"></div>
+        <div id="boxCutsceneImg" class="box-cutscene-img" style="background-image: url('${startingFrame}'); z-index: 10;"></div>
         
         <p id="boxFlavorText" style="z-index: 10; color: #4ade80; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 0 0 10px rgba(74,222,128,0.4); transition: all 0.2s ease;">Apasă pe cutie pentru a începe!</p>
         
@@ -21811,11 +21832,11 @@ imgEl.onclick = () => {
         // Calculăm la al câtelea click trebuie să începem să arătăm animația unică
         const startClick = 10 - numFrames + 1; 
 
-        if (boxClicks < startClick) {
-            // Cât timp suntem la click-uri mici (ex: 1-6), arătăm cutia GLOBALĂ (închisă)
-            imgEl.style.backgroundImage = `url('${boxAnimAssets.global}')`;
+if (boxClicks < startClick) {
+            // Folosim cutia corectă și aici pe durata primelor click-uri
+            imgEl.style.backgroundImage = `url('${startingFrame}')`;
         } else {
-            // Când ajungem la click-urile finale, extragem progresiv cadrele 0, 1, 2...
+            // ... extragem progresiv cadrele 0, 1, 2...
             const frameIdx = boxClicks - startClick;
             if (catFrames[frameIdx]) {
                 imgEl.style.backgroundImage = `url('${catFrames[frameIdx]}')`;
@@ -21919,7 +21940,7 @@ function executeBoxAction(action) {
         }
 
         // Declanșăm cutscene-ul sau notificarea
-        if (pendingActionBoxKey === 'cat_box_calico') {
+        if (pendingActionBoxKey === 'cat_box_calico' || pendingActionBoxKey === 'cat_box_cardboard') {
             startBoxCutscene(pendingActionBoxKey);
         } else {
             showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.image);
