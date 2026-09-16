@@ -20402,7 +20402,7 @@ const rarityColors = {
 };
 
 const catBoxRegistry = {
-    "cat_box_cardboard": { name: "Cardboard Box", cats: ["scruchi"] }, // ADDED CARDBOARD BOX & SCRUCHI
+    "cat_box_cardboard": { name: "Cardboard Box", cats: ["scruchi"] },
     "cat_box_calico": { name: "Calico Box", cats: ["anya", "clara", "tonto"] },
     "cat_box_kitty": { name: "Kitty Box", cats: ["clatita", "bella", "tomy", "bambucea", "rafy"] },
     "cat_box_majestic": { name: "Majestic Box", cats: ["alpy", "biggy", "luna", "versace"] },
@@ -21535,25 +21535,26 @@ function movePetInstanceTo(pet, targetX, targetY, duration, callback) {
 
 
 function useInventoryBox(key) {
-    // Remove one from inventory count
+    // 1. Scădem cutia din inventar
     if (_GAME_DATA.inventory[key] && _GAME_DATA.inventory[key] > 0) {
         _GAME_DATA.inventory[key]--;
         renderInventoryUI();
         syncInventoryToCloud();
     }
 
-    // Close the modal
+    // 2. Închidem modalul de acțiune
     const modal = document.getElementById('inventoryBoxActionModal');
     if (modal) modal.remove();
 
-    // Trigger Cutscene if it's the Calico Box
-    if (key === 'cat_box_calico') {
-        startBoxCutscene(key);
+    // 3. LOGICA REPARATĂ: Declanșăm cutscene-ul pentru orice cheie de tip "cat_box_"
+    if (key.startsWith('cat_box_')) {
+        startBoxCutscene(key); // Aceasta este funcția care pornește animația
     } else {
-        const itemData = catShopItems[key];
+        // Fallback pentru boost-uri
+        const itemData = catShopItems[key] || boostRegistry[key];
         showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.image);
         
-        // Resume game if not inside inventory menu anymore
+        // Reluăm jocul
         if (document.getElementById('inventoryModal').style.display !== 'flex') {
             isPaused = false;
             startKevinMovement();
