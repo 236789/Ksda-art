@@ -10712,6 +10712,166 @@ div.inv-tile div.bm-limit-tag {
 @keyframes fadeOutPiece {
     to { opacity: 0; transform: scale(0.9); pointer-events: none; }
 }
+
+
+
+/* ==========================================
+   BOX OPENING MINIGAME CSS (ULTIMATE V2)
+   ========================================== */
+.box-cutscene-overlay {
+    position: fixed !important;
+    top: 0; left: 0; width: 100vw !important; height: 100vh !important;
+    z-index: 999999 !important;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 40%, var(--rc1) 0%, var(--rc2) 30%, var(--rc3) 55%, var(--rc4) 80%, var(--rc5) 100%) !important;
+    transition: background 0.6s ease;
+}
+
+/* RARITY COLOR VARIABLES (Includes 3D text styling) */
+.box-cutscene-overlay.Common    { --rc1:#8a8a92; --rc2:#5c5c64; --rc3:#3a3a40; --rc4:#222226; --rc5:#111113; --rglow:rgba(220,220,225,0.45); --rglow2:rgba(160,160,170,0.2); --rstreak:rgba(255,255,255,0.45); --rsparkle:rgba(255,255,255,0.85); --rlabel:#eaeaee; --rlabelGlow:rgba(200,200,210,0.8); --rlabelStroke:#2a2a30; }
+.box-cutscene-overlay.Rare      { --rc1:#2f7fe0; --rc2:#1a4a9f; --rc3:#0a2a6e; --rc4:#041540; --rc5:#020a20; --rglow:rgba(120,180,255,0.5); --rglow2:rgba(60,120,230,0.22); --rstreak:rgba(180,220,255,0.55); --rsparkle:rgba(200,230,255,0.9); --rlabel:#a8d4ff; --rlabelGlow:rgba(90,160,255,0.9); --rlabelStroke:#0a2a6e; }
+.box-cutscene-overlay.Epic      { --rc1:#7a2fe0; --rc2:#4a1a8f; --rc3:#2a0a5e; --rc4:#150335; --rc5:#0a021f; --rglow:rgba(200,140,255,0.5); --rglow2:rgba(150,60,230,0.22); --rstreak:rgba(255,255,255,0.5); --rsparkle:rgba(255,255,255,0.9); --rlabel:#e6b8ff; --rlabelGlow:rgba(200,120,255,0.9); --rlabelStroke:#3a0a6e; }
+.box-cutscene-overlay.Legendary { --rc1:#e0b32f; --rc2:#9f7a1a; --rc3:#6e4a0a; --rc4:#402804; --rc5:#201402; --rglow:rgba(255,220,120,0.55); --rglow2:rgba(230,180,60,0.25); --rstreak:rgba(255,235,180,0.6); --rsparkle:rgba(255,240,200,0.95); --rlabel:#ffe9a8; --rlabelGlow:rgba(255,200,60,0.9); --rlabelStroke:#6e4a0a; }
+.box-cutscene-overlay.Majestic  { --rc1:#e02f2f; --rc2:#9f1a1a; --rc3:#6e0a0a; --rc4:#400404; --rc5:#200202; --rglow:rgba(255,90,90,0.55); --rglow2:rgba(230,50,50,0.25); --rstreak:rgba(255,160,160,0.6); --rsparkle:rgba(255,190,190,0.95); --rlabel:#ffb3b3; --rlabelGlow:rgba(255,60,60,0.9); --rlabelStroke:#4a0505; }
+
+/* ------------------- DYNAMIC 3D FLOOR ------------------- */
+.floor-wrapper {
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 45%;
+    perspective: 1000px; overflow: hidden; z-index: 1; pointer-events: none;
+    mask-image: linear-gradient(to top, black, transparent);
+    -webkit-mask-image: linear-gradient(to top, black, transparent);
+}
+.floor-grid {
+    position: absolute; bottom: -1500px; left: 50%;
+    width: 3000px; height: 3000px; margin-left: -1500px;
+    transform-origin: center center;
+    transform: rotateX(60deg) rotateZ(45deg); 
+    display: grid;
+    grid-template-columns: repeat(31, 1fr); grid-template-rows: repeat(31, 1fr);
+}
+.bc-tile {
+    border: 1px solid rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.01);
+    transition: background 0.8s ease-out, box-shadow 0.8s ease-out, border-color 0.8s ease-out;
+}
+.bc-tile:nth-child(even) { background: rgba(255, 255, 255, 0.04); }
+.bc-tile.active {
+    background: var(--rlabelGlow);
+    box-shadow: 0 0 30px var(--rsparkle), inset 0 0 15px var(--rsparkle);
+    border-color: var(--rsparkle);
+    z-index: 2; position: relative;
+    transition: background 0.05s ease-in, box-shadow 0.05s ease-in, border-color 0.05s ease-in;
+}
+
+/* Ambience */
+.box-cutscene-overlay .glow {
+    position: absolute; top: 42%; left: 50%; width: 500px; height: 500px;
+    transform: translate(-50%, -50%); border-radius: 50%; filter: blur(4px); z-index: 0;
+    background: radial-gradient(circle, var(--rglow) 0%, var(--rglow2) 40%, transparent 70%);
+    animation: bcPulse 3s ease-in-out infinite; pointer-events: none;
+}
+@keyframes bcPulse { 0%,100%{ transform:translate(-50%,-50%) scale(1); opacity:.8;} 50%{ transform:translate(-50%,-50%) scale(1.15); opacity:1;} }
+
+.box-cutscene-overlay .particles-wrapper { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.box-cutscene-overlay .streak {
+    position: absolute; top: -20%; width: 2px; height: 25%;
+    background: linear-gradient(to bottom, transparent, var(--rstreak), transparent);
+    animation: bcFall linear infinite;
+}
+@keyframes bcFall { 0% { transform: translateY(-100%); opacity:0; } 10% { opacity:1; } 90% { opacity:1; } 100% { transform: translateY(600%); opacity:0; } }
+.box-cutscene-overlay .sparkle {
+    position: absolute; width: 4px; height: 4px; border-radius: 50%;
+    background: var(--rsparkle); box-shadow: 0 0 8px 2px var(--rsparkle);
+    animation: bcTwinkle ease-in-out infinite;
+}
+@keyframes bcTwinkle { 0%,100% { opacity:0.1; transform: scale(0.6); } 50% { opacity:1; transform: scale(1.2); } }
+
+/* The Box */
+.box-cutscene-img {
+    width: 320px; height: 320px; z-index: 10;
+    background-size: contain; background-repeat: no-repeat; background-position: center;
+    cursor: pointer; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.8));
+    transition: transform 0.1s ease, filter 0.2s ease;
+}
+.box-cutscene-img:hover { transform: scale(1.05); filter: drop-shadow(0 15px 30px rgba(250, 204, 21, 0.4)); }
+.box-cutscene-img.on-cooldown { filter: brightness(0.6); pointer-events: none; transform: scale(0.95); }
+
+.box-hit-anim { animation: boxHitShake 0.3s ease; }
+@keyframes boxHitShake {
+    0% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+    20% { transform: scale(0.9) rotate(-8deg); filter: brightness(1.5); }
+    50% { transform: scale(1.1) rotate(8deg); }
+    100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+}
+
+/* ------------------- NEW REVEAL LAYOUT ------------------- */
+.reveal-img {
+    width: 260px; height: 260px;
+    animation: revealPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    filter: drop-shadow(0 0 30px var(--rlabelGlow)); z-index: 10;
+}
+@keyframes revealPop {
+    0%   { transform: scale(0.3) rotate(-15deg); opacity: 0; filter: blur(10px); }
+    60%  { transform: scale(1.15) rotate(5deg); opacity: 1; filter: blur(0); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+.reveal-top {
+    position: absolute; top: 8%; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; width: 100%; z-index: 20;
+    animation: revealFadeUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+.reveal-bottom {
+    position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; width: 90%; max-width: 400px;
+    animation: revealFadeUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both; z-index: 20;
+}
+@keyframes revealFadeUp { from { opacity: 0; transform: translate(-50%, 15px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* Rarity 3D Label & Stars */
+.bc-rarity-label {
+    font-family: 'Orbitron', sans-serif; font-size: clamp(36px, 8vw, 55px); font-weight: 900;
+    text-transform: uppercase; color: var(--rlabel); letter-spacing: 4px;
+    text-shadow: 0 0 15px var(--rlabelGlow), 1px 1px 0 var(--rlabelStroke), 2px 2px 0 var(--rlabelStroke), 3px 3px 0 var(--rlabelStroke), 4px 4px 0 var(--rlabelStroke), 10px 10px 15px rgba(0,0,0,0.8);
+}
+.bc-stars { display: flex; gap: 8px; margin-top: 5px; height: 40px; align-items: center; }
+.bc-star { font-size: 32px; color: var(--rlabel); text-shadow: 2px 2px 0 var(--rlabelStroke); display: inline-block; }
+
+@keyframes bcStarPop { 0% { transform: scale(0) rotate(-90deg); opacity: 0; } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+@keyframes bcStarShine {
+    0%, 35%, 100% { transform: translateY(0) scale(1); color: var(--rlabel); text-shadow: 2px 2px 0 var(--rlabelStroke); }
+    15% { transform: translateY(-10px) scale(1.3); color: #ffffff; text-shadow: 0 0 15px #fff, 0 0 25px var(--rlabelGlow), 2px 2px 0 var(--rlabelStroke); }
+}
+
+.cat-reveal-name {
+    font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 28px;
+    color: #fff; letter-spacing: 2px; margin-top: 15px;
+    text-shadow: 0 0 20px var(--rlabelGlow), 0 4px 10px rgba(0,0,0,0.8);
+}
+
+.cat-reveal-desc-box {
+    background: rgba(0,0,0,0.5); border-left: 4px solid var(--rlabel);
+    border-radius: 8px; padding: 15px 20px; text-align: left;
+    margin-bottom: 20px; width: 100%; box-sizing: border-box;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 0 15px rgba(255,255,255,0.05);
+}
+.cat-reveal-desc-box p { font-family: 'Montserrat', sans-serif; margin: 0 0 6px 0; color: #d1d5db; font-size: 13px; line-height: 1.4; }
+.cat-reveal-desc-box p:last-child { margin-bottom: 0; }
+.cat-reveal-desc-box b { color: #fff; }
+
+.cat-reveal-continue-btn {
+    width: 100%; height: 55px; border-radius: 14px; border: 3px solid #fff;
+    background: linear-gradient(180deg, #ffdc43 0%, #ffaa00 50%, #e67300 100%);
+    color: #1a1c33; font-family: 'Montserrat', sans-serif; font-weight: 900;
+    font-size: 18px; text-transform: uppercase; letter-spacing: 2px;
+    cursor: pointer; box-shadow: 0 6px 0 #4d2600, 0 10px 20px rgba(0,0,0,0.5);
+    transition: all 0.1s ease;
+}
+.cat-reveal-continue-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #4d2600; }
+
+.fade-out-piece { animation: fadeOutPiece 0.3s ease forwards; }
+@keyframes fadeOutPiece { to { opacity: 0; transform: scale(0.9); pointer-events: none; } }
   </style>
 </head>
 <body>
@@ -21685,15 +21845,13 @@ async function startBoxCutscene(boxKey) {
     const catData = petCatalog.find(p => p.id === cutsceneCatId);
     const rarity = (catData && catData.stats && catData.stats.rarity) ? catData.stats.rarity : 'Common';
 
-    // 🛠️ NOU: SETĂM IMAGINEA CUTIEI ÎNCHISE ÎN FUNCȚIE DE TIPUL EI
-    let startingFrame = boxAnimAssets.global; // Cutia calico (default)
+    let startingFrame = boxAnimAssets.global; 
     if (boxKey === 'cat_box_cardboard') {
-        startingFrame = boxAnimAssets.global_cardboard; // Cutia de carton
+        startingFrame = boxAnimAssets.global_cardboard; 
     }
 
     document.getElementById('loadingModal').style.display = 'flex';
     
-    // Încărcăm imaginea corectă de start
     const urlsToLoad = [startingFrame, ...(boxAnimAssets[cutsceneCatId] || [])];
     await Promise.all(urlsToLoad.map(url => {
         return new Promise(res => { const img = new Image(); img.onload=res; img.onerror=res; img.src=url; });
@@ -21712,13 +21870,12 @@ async function startBoxCutscene(boxKey) {
     overlay.id = 'boxCutsceneOverlay';
     overlay.className = `box-cutscene-overlay ${rarity}`; 
     
-    // 🛠️ NOU: Folosim ${startingFrame} în interiorul HTML-ului generat
     overlay.innerHTML = `
-        <div class="box-floor"></div>
+        <div class="floor-wrapper"><div class="floor-grid" id="bcFloorGrid"></div></div>
         <div class="glow"></div>
         <div class="particles-wrapper"></div>
         
-        <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; text-align: center; z-index: 10;">
+        <div id="boxHeader" style="display: flex; flex-direction: column; align-items: center; margin-top: 10%; text-align: center; z-index: 10;">
             <div style="font-family: 'Montserrat', sans-serif; color: #cbd5e1; font-size: 14px; font-weight: 900; letter-spacing: 4px; text-transform: uppercase;">DESCHIZI</div>
             <div style="font-family: 'Orbitron', sans-serif; color: #facc15; font-size: 32px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 20px rgba(250, 204, 21, 0.6), 0 5px 10px rgba(0,0,0,0.8); margin-top: 5px;">${catBoxRegistry[boxKey].name}</div>
         </div>
@@ -21738,7 +21895,32 @@ async function startBoxCutscene(boxKey) {
     `;
     document.body.appendChild(overlay);
 
-    // Adăugare particule
+    // --- 3D FLOOR GENERATION ---
+    const floorGrid = document.getElementById('bcFloorGrid');
+    const tileElements = [];
+    for(let i = 0; i < 961; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'bc-tile';
+        floorGrid.appendChild(tile);
+        tileElements.push(tile);
+    }
+
+    window.bcFloorActive = true;
+    function lightUpRandomTile() {
+        if (!window.bcFloorActive) return;
+        const randomIndex = Math.floor(Math.random() * tileElements.length);
+        const selectedTile = tileElements[randomIndex];
+
+        if (!selectedTile.classList.contains('active')) {
+            selectedTile.classList.add('active');
+            setTimeout(() => { if (window.bcFloorActive) selectedTile.classList.remove('active'); }, 600 + Math.random() * 600);
+        }
+        setTimeout(lightUpRandomTile, 10 + Math.random() * 50);
+    }
+    lightUpRandomTile();
+    lightUpRandomTile();
+    // ---------------------------
+
     const wrapper = overlay.querySelector('.particles-wrapper');
     for (let i = 0; i < 15; i++) {
         const s = document.createElement('div');
@@ -21762,6 +21944,7 @@ async function startBoxCutscene(boxKey) {
     const flavorEl = document.getElementById('boxFlavorText');
     const autoBtn = document.getElementById('boxAutoOpenBtn');
     const clickNumEl = document.getElementById('boxClickNum');
+    const headerEl = document.getElementById('boxHeader');
 
     const flavorTexts = ["Apasă pe cutie pentru a începe!", "Se aude ceva înăuntru...", "Mai tare! Apasă!", "Cutia începe să tremure...", "Nu te opri acum!", "Ceva zgârie cartonul...", "Se rupe ambalajul!", "Se vede ceva!", "Aproape a ieșit!", "ULTIMUL CLICK!", "BOOOOM!"];
 
@@ -21789,12 +21972,11 @@ async function startBoxCutscene(boxKey) {
         }
     };
 
-imgEl.onclick = () => {
+    imgEl.onclick = () => {
         if (clickOnCooldown || boxClicks >= 10) return;
         clickOnCooldown = true;
         boxClicks++;
         
-        // Efecte text & cifre
         clickNumEl.innerText = boxClicks;
         clickNumEl.style.color = "#facc15";
         clickNumEl.style.transform = "scale(1.3)";
@@ -21806,13 +21988,11 @@ imgEl.onclick = () => {
         if (boxClicks === 10) flavorEl.style.color = "#ef4444"; 
         setTimeout(() => { flavorEl.style.transform = "scale(1)"; }, 150);
         
-        // Sunete
         if (typeof playSFX === 'function') playSFX(popSounds[Math.floor(Math.random() * popSounds.length)]); 
         if (boxClicks === 2 || boxClicks === 5) playCatSound(catBoxSounds.scratches[Math.floor(Math.random() * catBoxSounds.scratches.length)]);
         else if (boxClicks === 4) playCatSound(catBoxSounds.purr);
         else if (boxClicks === 8) playCatSound(catBoxSounds.meows[Math.floor(Math.random() * catBoxSounds.meows.length)]);
         
-        // Animație shake
         imgEl.classList.remove('box-hit-anim');
         void imgEl.offsetWidth; 
         imgEl.classList.add('box-hit-anim');
@@ -21821,34 +22001,31 @@ imgEl.onclick = () => {
         let currentCooldown = Math.max(350, 1000 - (boxClicks * 60)); 
         setTimeout(() => { clickOnCooldown = false; imgEl.classList.remove('on-cooldown'); }, currentCooldown);
 
-        // ==========================================
-        // LOGICA NOUĂ PENTRU CADRE FĂRĂ REPETARE
-        // ==========================================
         let catFrames = boxAnimAssets[catData.id];
-        if (!catFrames || catFrames.length === 0) {
-            catFrames = boxAnimAssets.anya; // Fallback dacă pisica nu are încă poze
-        }
+        if (!catFrames || catFrames.length === 0) catFrames = boxAnimAssets.anya; 
 
         const numFrames = catFrames.length;
-        // Calculăm la al câtelea click trebuie să începem să arătăm animația unică
         const startClick = 10 - numFrames + 1; 
 
-if (boxClicks < startClick) {
-            // Folosim cutia corectă și aici pe durata primelor click-uri
+        if (boxClicks < startClick) {
             imgEl.style.backgroundImage = `url('${startingFrame}')`;
         } else {
-            // ... extragem progresiv cadrele 0, 1, 2...
             const frameIdx = boxClicks - startClick;
             if (catFrames[frameIdx]) {
                 imgEl.style.backgroundImage = `url('${catFrames[frameIdx]}')`;
             }
         }
 
-        // Când se ajunge la click 10
         if (boxClicks === 10) {
             clearInterval(autoOpenInterval);
             autoBtn.style.display = "none"; 
             if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
+            
+            // Fade out everything else
+            headerEl.classList.add('fade-out-piece');
+            clickCounterEl.classList.add('fade-out-piece');
+            flavorEl.style.display = 'none';
+
             setTimeout(() => showFinalCatReveal(catData), 800);
         }
     };
@@ -21856,61 +22033,65 @@ if (boxClicks < startClick) {
 
 function showFinalCatReveal(catData) {
     const overlay = document.getElementById('boxCutsceneOverlay');
-    const color = rarityColors[catData.stats.rarity] || "#fff";
 
-    // Add pet to player inventory and sync to cloud
     if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
     _GAME_DATA.inventory[catData.id] = (_GAME_DATA.inventory[catData.id] || 0) + 1;
     syncInventoryToCloud();
 
     const imgEl = document.getElementById('boxCutsceneImg');
-    const flavorEl = document.getElementById('boxFlavorText');
-    const clickCounterEl = document.getElementById('boxClickCounter');
-    const autoBtn = document.getElementById('boxAutoOpenBtn');
-    const titleBlock = overlay.querySelector('div[style*="margin-bottom: 20px"]'); // the "DESCHIZI / box name" header
 
-    // 1. Fade out pieces we no longer need
-    [clickCounterEl, autoBtn, titleBlock].forEach(el => {
-        if (el) el.classList.add('fade-out-piece');
-    });
-    if (flavorEl) flavorEl.style.display = 'none';
+    // Remove old pieces completely from flow
+    const elementsToRemove = overlay.querySelectorAll('.fade-out-piece');
+    elementsToRemove.forEach(el => el.style.display = 'none');
 
-    // 2. Morph the box image into the cat image
-    setTimeout(() => {
-        [clickCounterEl, autoBtn, titleBlock].forEach(el => { if (el) el.style.display = 'none'; });
+    imgEl.classList.remove('box-hit-anim', 'on-cooldown');
+    imgEl.classList.add('reveal-img');
+    imgEl.style.backgroundImage = `url('${catData.assets.presentation}')`;
+    imgEl.style.cursor = 'default';
+    imgEl.onclick = null;
 
-        imgEl.classList.remove('box-hit-anim', 'on-cooldown');
-        imgEl.classList.add('reveal-img');
-        imgEl.style.backgroundImage = `url('${catData.assets.presentation}')`;
-        imgEl.style.cursor = 'default';
-        imgEl.onclick = null;
+    // Build Stars HTML
+    const starCounts = { 'Common': 1, 'Rare': 2, 'Epic': 3, 'Legendary': 4, 'Majestic': 5 };
+    const sCount = starCounts[catData.stats.rarity] || 1;
+    let starsHtml = '';
+    for(let i=0; i<sCount; i++) {
+        const popDelay = i * 0.15;
+        const shineDelay = popDelay + 0.6;
+        starsHtml += `<span class="bc-star" style="animation: bcStarPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${popDelay}s backwards, bcStarShine 2.5s ease-in-out ${shineDelay}s infinite;">&#9733;</span>`;
+    }
 
-        // 3. Build the info panel below the cat
-        const panel = document.createElement('div');
-        panel.className = 'cat-reveal-panel';
-        panel.style.setProperty('--rlabel', color);
-        panel.style.setProperty('--rlabelGlow', color);
-        panel.innerHTML = `
-            <div class="cat-reveal-name">${catData.name.toUpperCase()}</div>
-            <div class="cat-reveal-rarity">${catData.stats.rarity.toUpperCase()}</div>
-            <div class="cat-reveal-desc-box">
-                <p><b>Personalitate:</b> ${catData.personality}</p>
-                <p>"${catData.desc}"</p>
-            </div>
-            <button class="cat-reveal-continue-btn" onclick="closeBoxCutscene()">SUPER!</button>
-        `;
-        overlay.appendChild(panel);
+    // Top Panel: Rarity, Stars, Name
+    const topPanel = document.createElement('div');
+    topPanel.className = 'reveal-top';
+    topPanel.innerHTML = `
+        <div class="bc-rarity-label">${catData.stats.rarity}</div>
+        <div class="bc-stars">${starsHtml}</div>
+        <div class="cat-reveal-name">${catData.name.toUpperCase()}</div>
+    `;
 
-        if (catData.stats.rarity === 'Legendary' || catData.stats.rarity === 'Majestic') {
-            if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins();
-        }
-    }, 300);
+    // Bottom Panel: Description, Button
+    const bottomPanel = document.createElement('div');
+    bottomPanel.className = 'reveal-bottom';
+    bottomPanel.innerHTML = `
+        <div class="cat-reveal-desc-box">
+            <p><b>Personalitate:</b> ${catData.personality}</p>
+            <p>"${catData.desc}"</p>
+        </div>
+        <button class="cat-reveal-continue-btn" onclick="closeBoxCutscene()">SUPER!</button>
+    `;
+
+    overlay.appendChild(topPanel);
+    overlay.appendChild(bottomPanel);
+
+    if (catData.stats.rarity === 'Legendary' || catData.stats.rarity === 'Majestic') {
+        if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins();
+    }
 }
 
 function closeBoxCutscene() {
+    window.bcFloorActive = false; // Stop the floor grid animation
     if (autoOpenInterval) clearInterval(autoOpenInterval);
     
-    // Oprim sunetul pisicii dacă rula ceva
     if (currentCatAudio) {
         currentCatAudio.pause();
         currentCatAudio.currentTime = 0;
