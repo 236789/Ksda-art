@@ -15598,7 +15598,7 @@ if (isUseable) {
                 }
                 
                 // DĂM TRIGGER LA CUTSCENE AICI
-                if (itemKey === 'cat_box_calico') {
+            if (itemKey && itemKey.startsWith('cat_box_')) {
                     startBoxCutscene(itemKey);
                 } else {
                     // Pentru restul cutiilor (până le adăugăm și pe ele)
@@ -21941,7 +21941,7 @@ function executeBoxAction(action) {
         }
 
         // Declanșăm cutscene-ul sau notificarea
-            if (pendingActionBoxKey.startsWith('cat_box_')) {
+        if (pendingActionBoxKey === 'cat_box_calico' || pendingActionBoxKey === 'cat_box_cardboard') {
             startBoxCutscene(pendingActionBoxKey);
         } else {
             showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.image);
