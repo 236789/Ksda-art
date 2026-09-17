@@ -21940,11 +21940,12 @@ async function startBoxCutscene(boxKey) {
         wrapper.appendChild(p);
     }
 
-    const imgEl = document.getElementById('boxCutsceneImg');
+const imgEl = document.getElementById('boxCutsceneImg');
     const flavorEl = document.getElementById('boxFlavorText');
     const autoBtn = document.getElementById('boxAutoOpenBtn');
     const clickNumEl = document.getElementById('boxClickNum');
     const headerEl = document.getElementById('boxHeader');
+    const clickCounterEl = document.getElementById('boxClickCounter'); // 🛠️ L-AM ADĂUGAT AICI!
 
     const flavorTexts = ["Apasă pe cutie pentru a începe!", "Se aude ceva înăuntru...", "Mai tare! Apasă!", "Cutia începe să tremure...", "Nu te opri acum!", "Ceva zgârie cartonul...", "Se rupe ambalajul!", "Se vede ceva!", "Aproape a ieșit!", "ULTIMUL CLICK!", "BOOOOM!"];
 
@@ -22016,7 +22017,7 @@ async function startBoxCutscene(boxKey) {
             }
         }
 
-        if (boxClicks === 10) {
+if (boxClicks === 10) {
             clearInterval(autoOpenInterval);
             autoBtn.style.display = "none"; 
             if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
