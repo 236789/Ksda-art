@@ -15589,7 +15589,7 @@ if (isUseable) {
         document.getElementById('useItemBtn').onclick = () => {
             modalOverlay.remove();
             
-            if (itemKey && itemKey.includes('cat_box_')) {
+                    if (itemKey.startsWith('cat_box_')) {
                 // Scădem cutia din inventar
                 if (_GAME_DATA.inventory[itemKey] && _GAME_DATA.inventory[itemKey] > 0) {
                     _GAME_DATA.inventory[itemKey]--;
@@ -21941,7 +21941,7 @@ function executeBoxAction(action) {
         }
 
         // Declanșăm cutscene-ul sau notificarea
-        if (pendingActionBoxKey === 'cat_box_calico' || pendingActionBoxKey === 'cat_box_cardboard') {
+            if (pendingActionBoxKey.startsWith('cat_box_')) {
             startBoxCutscene(pendingActionBoxKey);
         } else {
             showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.image);
