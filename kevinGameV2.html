@@ -21884,9 +21884,11 @@ async function startBoxCutscene(boxKey) {
     const catData = petCatalog.find(p => p.id === cutsceneCatId);
     const rarity = (catData && catData.stats && catData.stats.rarity) ? catData.stats.rarity : 'Common';
 
-    let startingFrame = boxAnimAssets.global; 
+let startingFrame = boxAnimAssets.global; 
     if (boxKey === 'cat_box_cardboard') {
         startingFrame = boxAnimAssets.global_cardboard; 
+    } else if (boxKey === 'cat_box_kitty') {
+        startingFrame = boxAnimAssets.global_kitty;
     }
 
     document.getElementById('loadingModal').style.display = 'flex';
