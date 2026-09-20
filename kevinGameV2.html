@@ -10872,6 +10872,53 @@ div.inv-tile div.bm-limit-tag {
 
 .fade-out-piece { animation: fadeOutPiece 0.3s ease forwards; }
 @keyframes fadeOutPiece { to { opacity: 0; transform: scale(0.9); pointer-events: none; } }
+
+
+/* ==========================================
+   OPTIMIZED BOX OPENING CSS (MOBILE FRIENDLY)
+   ========================================== */
+
+/* 1. Make the box and revealed cat smaller */
+.box-cutscene-img {
+    width: 240px !important; 
+    height: 240px !important; 
+}
+.reveal-img {
+    width: 220px !important; 
+    height: 220px !important; 
+}
+
+/* 2. Mobile Specific Sizing */
+@media (max-width: 600px) {
+    .box-cutscene-img { width: 180px !important; height: 180px !important; }
+    .reveal-img { width: 160px !important; height: 160px !important; }
+    .box-cutscene-overlay .glow { width: 300px !important; height: 300px !important; }
+    #boxClickCounter { font-size: 35px !important; }
+    #boxClickNum { font-size: 45px !important; }
+}
+
+/* 3. KILL THE BLUR! (Massive performance boost) */
+.box-cutscene-overlay .glow {
+    filter: none !important; /* Removed blur(4px) */
+    background: radial-gradient(circle, var(--rglow) 0%, var(--rglow2) 35%, transparent 65%) !important;
+}
+
+/* 4. Reduce Grid size to match the new JS */
+.floor-grid {
+    grid-template-columns: repeat(15, 1fr) !important; /* Reduced from 31 */
+    grid-template-rows: repeat(15, 1fr) !important;    /* Reduced from 31 */
+}
+
+/* 5. Cheaper Box Shadows for the Floor */
+.bc-tile {
+    transition: background 0.3s ease-out, box-shadow 0.3s ease-out !important;
+}
+.bc-tile.active {
+    background: var(--rlabelGlow) !important;
+    box-shadow: 0 0 15px var(--rsparkle) !important; /* Removed heavy inset shadow */
+    border-color: var(--rsparkle) !important;
+    transition: background 0.05s ease-in, box-shadow 0.05s ease-in !important;
+}
   </style>
 </head>
 <body>
@@ -21937,9 +21984,12 @@ let startingFrame = boxAnimAssets.global;
     document.body.appendChild(overlay);
 
     // --- 3D FLOOR GENERATION ---
+// --- 3D FLOOR GENERATION (OPTIMIZED) ---
     const floorGrid = document.getElementById('bcFloorGrid');
     const tileElements = [];
-    for(let i = 0; i < 961; i++) {
+    
+    // REDUCED FROM 961 to 225 DOM elements!
+    for(let i = 0; i < 225; i++) {
         const tile = document.createElement('div');
         tile.className = 'bc-tile';
         floorGrid.appendChild(tile);
@@ -21947,36 +21997,45 @@ let startingFrame = boxAnimAssets.global;
     }
 
     window.bcFloorActive = true;
+    let currentlyActiveTile = null; // Keeps track so we only have 1 active tile
+
     function lightUpRandomTile() {
         if (!window.bcFloorActive) return;
-        const randomIndex = Math.floor(Math.random() * tileElements.length);
-        const selectedTile = tileElements[randomIndex];
-
-        if (!selectedTile.classList.contains('active')) {
-            selectedTile.classList.add('active');
-            setTimeout(() => { if (window.bcFloorActive) selectedTile.classList.remove('active'); }, 600 + Math.random() * 600);
+        
+        // Turn off the previously lit tile
+        if (currentlyActiveTile) {
+            currentlyActiveTile.classList.remove('active');
         }
-        setTimeout(lightUpRandomTile, 10 + Math.random() * 50);
+
+        // Pick a new random tile and turn it on
+        const randomIndex = Math.floor(Math.random() * tileElements.length);
+        currentlyActiveTile = tileElements[randomIndex];
+        currentlyActiveTile.classList.add('active');
+
+        // Loop slower (every 600ms) so the phone doesn't melt calculating shadows
+        setTimeout(lightUpRandomTile, 600);
     }
-    lightUpRandomTile();
+    // Call it exactly ONCE (You used to call this twice, which caused stacking timers)
     lightUpRandomTile();
     // ---------------------------
 
     const wrapper = overlay.querySelector('.particles-wrapper');
-    for (let i = 0; i < 15; i++) {
+    
+    // REDUCED PARTICLES (Less DOM elements floating around)
+    for (let i = 0; i < 6; i++) { // Reduced from 15 to 6
         const s = document.createElement('div');
         s.className = 'streak';
         s.style.left = Math.random() * 100 + '%';
-        s.style.animationDuration = (2 + Math.random() * 3) + 's';
+        s.style.animationDuration = (3 + Math.random() * 2) + 's';
         s.style.animationDelay = (Math.random() * 5) + 's';
         wrapper.appendChild(s);
     }
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < 10; i++) { // Reduced from 25 to 10
         const p = document.createElement('div');
         p.className = 'sparkle';
         p.style.left = Math.random() * 100 + '%';
         p.style.top = Math.random() * 90 + '%';
-        p.style.animationDuration = (1.5 + Math.random() * 2.5) + 's';
+        p.style.animationDuration = (2 + Math.random() * 2) + 's';
         p.style.animationDelay = (Math.random() * 3) + 's';
         wrapper.appendChild(p);
     }
