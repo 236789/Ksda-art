@@ -10875,49 +10875,38 @@ div.inv-tile div.bm-limit-tag {
 
 
 /* ==========================================
-   OPTIMIZED BOX OPENING CSS (MOBILE FRIENDLY)
+   BOX OPENING OPTIMIZATIONS (MOBILE ONLY)
    ========================================== */
-
-/* 1. Make the box and revealed cat smaller */
-.box-cutscene-img {
-    width: 240px !important; 
-    height: 240px !important; 
-}
-.reveal-img {
-    width: 220px !important; 
-    height: 220px !important; 
-}
-
-/* 2. Mobile Specific Sizing */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+    /* Dimensiuni mai mici pentru cutie și pisică */
     .box-cutscene-img { width: 180px !important; height: 180px !important; }
     .reveal-img { width: 160px !important; height: 160px !important; }
-    .box-cutscene-overlay .glow { width: 300px !important; height: 300px !important; }
+    
+    /* Eliminăm blur-ul super-costisitor de pe background glow */
+    .box-cutscene-overlay .glow {
+        width: 300px !important; 
+        height: 300px !important;
+        filter: none !important; 
+        background: radial-gradient(circle, var(--rglow) 0%, var(--rglow2) 35%, transparent 65%) !important;
+    }
+
+    /* Redimensionăm textul */
     #boxClickCounter { font-size: 35px !important; }
     #boxClickNum { font-size: 45px !important; }
-}
-
-/* 3. KILL THE BLUR! (Massive performance boost) */
-.box-cutscene-overlay .glow {
-    filter: none !important; /* Removed blur(4px) */
-    background: radial-gradient(circle, var(--rglow) 0%, var(--rglow2) 35%, transparent 65%) !important;
-}
-
-/* 4. Reduce Grid size to match the new JS */
-.floor-grid {
-    grid-template-columns: repeat(15, 1fr) !important; /* Reduced from 31 */
-    grid-template-rows: repeat(15, 1fr) !important;    /* Reduced from 31 */
-}
-
-/* 5. Cheaper Box Shadows for the Floor */
-.bc-tile {
-    transition: background 0.3s ease-out, box-shadow 0.3s ease-out !important;
-}
-.bc-tile.active {
-    background: var(--rlabelGlow) !important;
-    box-shadow: 0 0 15px var(--rsparkle) !important; /* Removed heavy inset shadow */
-    border-color: var(--rsparkle) !important;
-    transition: background 0.05s ease-in, box-shadow 0.05s ease-in !important;
+    
+    /* Grid mai mic pentru podeaua 3D */
+    .floor-grid {
+        grid-template-columns: repeat(15, 1fr) !important;
+        grid-template-rows: repeat(15, 1fr) !important;
+    }
+    
+    /* Umbre mai ieftine pentru plăcile de pe jos */
+    .bc-tile {
+        transition: background 0.3s ease-out, box-shadow 0.3s ease-out !important;
+    }
+    .bc-tile.active {
+        box-shadow: 0 0 15px var(--rsparkle) !important; /* Eliminat umbra interioară */
+    }
 }
   </style>
 </head>
@@ -21983,13 +21972,17 @@ let startingFrame = boxAnimAssets.global;
     `;
     document.body.appendChild(overlay);
 
-    // --- 3D FLOOR GENERATION ---
-// --- 3D FLOOR GENERATION (OPTIMIZED) ---
+// --- 3D FLOOR GENERATION (HIBRID PC/MOBILE) ---
     const floorGrid = document.getElementById('bcFloorGrid');
     const tileElements = [];
     
-    // REDUCED FROM 961 to 225 DOM elements!
-    for(let i = 0; i < 225; i++) {
+    // Detectăm dacă ecranul este mic (telefon/tabletă mică)
+    const isMobileDevice = window.innerWidth <= 768;
+
+    // PC: 961 plăci (31x31) | MOBILE: 225 plăci (15x15)
+    const totalTiles = isMobileDevice ? 225 : 961;
+
+    for(let i = 0; i < totalTiles; i++) {
         const tile = document.createElement('div');
         tile.className = 'bc-tile';
         floorGrid.appendChild(tile);
@@ -21997,45 +21990,59 @@ let startingFrame = boxAnimAssets.global;
     }
 
     window.bcFloorActive = true;
-    let currentlyActiveTile = null; // Keeps track so we only have 1 active tile
+    let currentlyActiveTile = null;
 
     function lightUpRandomTile() {
         if (!window.bcFloorActive) return;
         
-        // Turn off the previously lit tile
-        if (currentlyActiveTile) {
-            currentlyActiveTile.classList.remove('active');
-        }
-
-        // Pick a new random tile and turn it on
         const randomIndex = Math.floor(Math.random() * tileElements.length);
-        currentlyActiveTile = tileElements[randomIndex];
-        currentlyActiveTile.classList.add('active');
+        const selectedTile = tileElements[randomIndex];
 
-        // Loop slower (every 600ms) so the phone doesn't melt calculating shadows
-        setTimeout(lightUpRandomTile, 600);
+        if (isMobileDevice) {
+            // LOGICĂ MOBILE: 1 singură placă aprinsă odată, viteză mai mică
+            if (currentlyActiveTile) {
+                currentlyActiveTile.classList.remove('active');
+            }
+            currentlyActiveTile = selectedTile;
+            currentlyActiveTile.classList.add('active');
+            
+            setTimeout(lightUpRandomTile, 600); // Rulare rară pentru salvarea bateriei
+        } else {
+            // LOGICĂ PC: Efectul tău original intens (mai multe plăci suprapuse)
+            if (!selectedTile.classList.contains('active')) {
+                selectedTile.classList.add('active');
+                setTimeout(() => { if (window.bcFloorActive) selectedTile.classList.remove('active'); }, 600 + Math.random() * 600);
+            }
+            setTimeout(lightUpRandomTile, 10 + Math.random() * 50); // Rulare extrem de rapidă
+        }
     }
-    // Call it exactly ONCE (You used to call this twice, which caused stacking timers)
+
     lightUpRandomTile();
+    if (!isMobileDevice) {
+        lightUpRandomTile(); // PC-ul suportă al doilea ciclu de aprindere simultană
+    }
     // ---------------------------
 
     const wrapper = overlay.querySelector('.particles-wrapper');
     
-    // REDUCED PARTICLES (Less DOM elements floating around)
-    for (let i = 0; i < 6; i++) { // Reduced from 15 to 6
+    // PC: 15 dungi, 25 steluțe | MOBILE: 6 dungi, 10 steluțe
+    const streakCount = isMobileDevice ? 6 : 15;
+    const sparkleCount = isMobileDevice ? 10 : 25;
+
+    for (let i = 0; i < streakCount; i++) {
         const s = document.createElement('div');
         s.className = 'streak';
         s.style.left = Math.random() * 100 + '%';
-        s.style.animationDuration = (3 + Math.random() * 2) + 's';
+        s.style.animationDuration = (isMobileDevice ? (3 + Math.random() * 2) : (2 + Math.random() * 3)) + 's';
         s.style.animationDelay = (Math.random() * 5) + 's';
         wrapper.appendChild(s);
     }
-    for (let i = 0; i < 10; i++) { // Reduced from 25 to 10
+    for (let i = 0; i < sparkleCount; i++) {
         const p = document.createElement('div');
         p.className = 'sparkle';
         p.style.left = Math.random() * 100 + '%';
         p.style.top = Math.random() * 90 + '%';
-        p.style.animationDuration = (2 + Math.random() * 2) + 's';
+        p.style.animationDuration = (isMobileDevice ? (2 + Math.random() * 2) : (1.5 + Math.random() * 2.5)) + 's';
         p.style.animationDelay = (Math.random() * 3) + 's';
         wrapper.appendChild(p);
     }
