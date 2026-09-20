@@ -13133,7 +13133,6 @@ async function saveNewUsername() {
   
   if (errorEl) errorEl.style.display = 'none';
 
-  // 1. Verificare Lungime Frontend (5 - 20 caractere)
   if (input.length < 5 || input.length > 20) {
     if (errorEl) {
         errorEl.innerText = "Numele trebuie să aibă între 5 și 20 de caractere!";
@@ -13142,7 +13141,6 @@ async function saveNewUsername() {
     return;
   }
 
-  // 2. Verificare Simboluri Frontend (Litere, cifre, spațiu, underscore, și diacritice RO inclusiv â/Â)
   const regex = /^[a-zA-Z0-9 _ăîșțâĂÎȘȚÂ]+$/;
   if (!regex.test(input)) {
     if (errorEl) {
@@ -13152,27 +13150,13 @@ async function saveNewUsername() {
     return;
   }
 
-  // Punem pe loading
   document.getElementById('usernameModal').style.display = 'none';
   document.getElementById('loadingModal').style.display = 'flex';
 
   try {
-    // 3. Verificare unicitate înainte de a trimite la backend
-    const snapshot = await db.collection('players').where('username', '==', input).get();
-    
-    if (!snapshot.empty) {
-        document.getElementById('loadingModal').style.display = 'none';
-        document.getElementById('usernameModal').style.display = 'flex';
-        if (errorEl) {
-            errorEl.innerText = "Numele este deja folosit! Alege altul.";
-            errorEl.style.display = 'block';
-        }
-        return;
-    }
-
     const idToken = await firebase.auth().currentUser.getIdToken(true);
     
-    // 4. Trimitem la backend (unde este filtrul de înjurături și NPC-uri)
+    // Trimitem doar la backend. Backend-ul face verificarea de unicitate.
     const response = await fetch('https://kevin-backend-qodc.onrender.com/create-user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -13185,7 +13169,6 @@ async function saveNewUsername() {
       score = 0;
       lastSavedScore = 0;
       
-      // Oferim caracterele de bază mereu
       const dbHeroes = data.ownedHeros || [];
       ownedHeros = [...new Set(['kevin', 'emmanuel', 'antonio', ...dbHeroes])];
       
@@ -13194,12 +13177,11 @@ async function saveNewUsername() {
       handlePlayClick(); 
       
     } else {
-      // 5. Dacă backend-ul a respins numele (ex: conține "pula" sau "kevin")
+      // Backend-ul ne spune dacă numele e deja luat sau conține înjurături
       const errorMsg = await response.text();
       document.getElementById('loadingModal').style.display = 'none';
       document.getElementById('usernameModal').style.display = 'flex';
       if (errorEl) {
-          // Afișează mesajul exact venit de la server
           errorEl.innerText = errorMsg; 
           errorEl.style.display = 'block';
       }
@@ -13298,55 +13280,70 @@ function startGameUI() {
   };
 }
 
+// Add this variable at the top of your script alongside other globals
+let isSyncing = false; 
+
 async function syncScoreToFirestore() {
-  if (currentUID) {
-    try {
-      const idToken = await firebase.auth().currentUser.getIdToken(true);
+    // 1. Lock: Prevent multiple syncs happening at the same time
+    if (isSyncing) return;
+    isSyncing = true;
 
-      const response = await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            idToken: idToken, 
-            score: score,
-            rubies: rubies,
-            level: playerLevel,
-            xp: playerXP,
-            hasSeenRubyTutorial: hasSeenRubyTutorial,
-            claimedLevelRewards: _GAME_DATA.claimedLevelRewards, // Trimitem ce avem local
-            claimedRewards: _GAME_DATA.claimedRewards,
-            claimedStageRewards: _GAME_DATA.claimedStageRewards,
-            currentStage: currentStageId, // <--- NOU
+    if (currentUID) {
+        try {
+            const idToken = await firebase.auth().currentUser.getIdToken(true);
 
-        }),
-      }); 
+            const response = await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    idToken: idToken, 
+                    score: score,
+                    rubies: rubies,
+                    level: playerLevel,
+                    xp: playerXP,
+                    hasSeenRubyTutorial: hasSeenRubyTutorial,
+                    claimedLevelRewards: _GAME_DATA.claimedLevelRewards,
+                    claimedRewards: _GAME_DATA.claimedRewards,
+                    claimedStageRewards: _GAME_DATA.claimedStageRewards,
+                    currentStage: currentStageId,
+                    // Ensure these are sent to the backend as well so they are sanitized
+                    bmBuys: _GAME_DATA.playerPetBuys || {}, 
+                    bmSales: {} 
+                }),
+            }); 
 
-      if (response.ok) {
-        const result = await response.json();
-        
-        // 1. Sincronizăm funcțiile deblocate (Slot, Rubine etc.)
-        if (result.unlockedFeatures) {
-            backendUnlockedFeatures = result.unlockedFeatures;
+            if (response.ok) {
+                const result = await response.json();
+                
+                if (result.unlockedFeatures) {
+                    backendUnlockedFeatures = result.unlockedFeatures;
+                }
+
+                if (result.claimedLevelRewards) {
+                    _GAME_DATA.claimedLevelRewards = result.claimedLevelRewards.map(Number);
+                    updateGiftButtonState(); 
+                }
+
+                lastSavedScore = score;
+                lastSavedRubies = rubies;
+                lastSavedXP = playerXP;
+                console.log("✅ Cloud Sync Complete: Progres salvat.");
+            } else if (response.status === 429) {
+                console.warn("⚠️ Sync too fast! Backend rejected request.");
+            } else {
+                console.error("❌ Sync failed with status:", response.status);
+            }
+        } catch (e) {
+            console.error("Connection error during sync:", e);
+        } finally {
+            // 2. Unlock: Wait 3 seconds before allowing the next sync to avoid 429 errors
+            setTimeout(() => {
+                isSyncing = false;
+            }, 3000);
         }
-
-        // 2. REPARARE BUG VIBRAȚIE: Sincronizăm premiile revendicate cu realitatea din DB
-        if (result.claimedLevelRewards) {
-            // Actualizăm lista locală cu cea confirmată de server (forțăm numere)
-            _GAME_DATA.claimedLevelRewards = result.claimedLevelRewards.map(Number);
-            
-            // Verificăm imediat dacă butonul mai trebuie să vibreze
-            updateGiftButtonState(); 
-        }
-
-        lastSavedScore = score;
-        lastSavedRubies = rubies;
-        lastSavedXP = playerXP;
-        console.log("✅ Cloud Sync Complete: Progres și Recompense salvate.");
-      }
-    } catch (e) {
-      console.error("Connection error during sync:", e);
+    } else {
+        isSyncing = false;
     }
-  }
 }
 
 // Logic for opening/closing the tutorial
