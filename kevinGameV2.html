@@ -21431,6 +21431,25 @@ async function buyCatItem(offerKey) {
             return;
         }
 
+        // --- NOU: VERIFICARE RUBINE CU NOTIFICARE ---
+        if (rubies < item.price) {
+            // Notificare vizuală de tip Toast (poți alege și showKevinutaBubble)
+            showNotification(
+                "RUBINE INSUFICIENTE", 
+                `Ai nevoie de ${item.price} ♦️! Mai adună rubine.`, 
+                "https://iili.io/CrnXNdG.png"
+            );
+            
+            // Opțional: Sunet de eroare (Miss)
+            if (typeof playMissSFX === 'function') playMissSFX();
+            return;
+        }
+
+        if (offer.limit - offer.bought <= 0) {
+            showKevinutaBubble("Stoc epuizat!");
+            return;
+        }
+
         // Use the offer object for the limit check
         if (offer.limit - offer.bought <= 0) {
             showKevinutaBubble("Stoc epuizat!");
@@ -22243,31 +22262,31 @@ function executeBoxAction(action) {
     const itemData = catShopItems[pendingActionBoxKey];
 
     if (action === 'open') {
-        // AM ALES: DESCHIDE ACUM
-        // 🛠️ FIX: Scădem cutia din inventar, deoarece a fost adăugată când am cumpărat-o!
+        // Scădem cutia din inventar
         if (_GAME_DATA.inventory[pendingActionBoxKey] && _GAME_DATA.inventory[pendingActionBoxKey] > 0) {
             _GAME_DATA.inventory[pendingActionBoxKey]--;
-            syncInventoryToCloud(); // Salvăm faptul că am consumat cutia
+            syncInventoryToCloud(); 
         }
 
-        // Declanșăm cutscene-ul sau notificarea
-        if (pendingActionBoxKey === 'cat_box_calico' || pendingActionBoxKey === 'cat_box_cardboard') {
+        // --- FIX: Am adăugat 'cat_box_tabby' în listă ---
+        if (pendingActionBoxKey === 'cat_box_calico' || 
+            pendingActionBoxKey === 'cat_box_cardboard' || 
+            pendingActionBoxKey === 'cat_box_tabby') {
+            
             startBoxCutscene(pendingActionBoxKey);
         } else {
+            // Fallback pentru restul cutiilor (sau notificarea default)
             showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.image);
+            
             if (document.getElementById('inventoryModal').style.display !== 'flex') {
                 isPaused = false; 
                 startKevinMovement();
             }
         }
     } else if (action === 'inventory') {
-        // AM ALES: TRIMITE ÎN INVENTAR
-        // 🛠️ FIX: Nu mai adăugăm +1 aici, a fost deja adăugată de funcția buyCatItem()!
-        // Doar afișăm mesajul de confirmare:
         showNotification("SALVAT", `${itemData.name} a fost trimis în inventar!`, itemData.image);
     }
 
-    // Curățăm variabila pentru viitoarele achiziții
     pendingActionBoxKey = null;
 }
 // Global Window Exports
