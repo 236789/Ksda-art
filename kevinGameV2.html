@@ -10872,42 +10872,6 @@ div.inv-tile div.bm-limit-tag {
 
 .fade-out-piece { animation: fadeOutPiece 0.3s ease forwards; }
 @keyframes fadeOutPiece { to { opacity: 0; transform: scale(0.9); pointer-events: none; } }
-
-
-/* ==========================================
-   BOX OPENING OPTIMIZATIONS (MOBILE ONLY)
-   ========================================== */
-@media (max-width: 768px) {
-    /* Dimensiuni mai mici pentru cutie și pisică */
-    .box-cutscene-img { width: 180px !important; height: 180px !important; }
-    .reveal-img { width: 160px !important; height: 160px !important; }
-    
-    /* Eliminăm blur-ul super-costisitor de pe background glow */
-    .box-cutscene-overlay .glow {
-        width: 300px !important; 
-        height: 300px !important;
-        filter: none !important; 
-        background: radial-gradient(circle, var(--rglow) 0%, var(--rglow2) 35%, transparent 65%) !important;
-    }
-
-    /* Redimensionăm textul */
-    #boxClickCounter { font-size: 35px !important; }
-    #boxClickNum { font-size: 45px !important; }
-    
-    /* Grid mai mic pentru podeaua 3D */
-    .floor-grid {
-        grid-template-columns: repeat(15, 1fr) !important;
-        grid-template-rows: repeat(15, 1fr) !important;
-    }
-    
-    /* Umbre mai ieftine pentru plăcile de pe jos */
-    .bc-tile {
-        transition: background 0.3s ease-out, box-shadow 0.3s ease-out !important;
-    }
-    .bc-tile.active {
-        box-shadow: 0 0 15px var(--rsparkle) !important; /* Eliminat umbra interioară */
-    }
-}
   </style>
 </head>
 <body>
@@ -13133,6 +13097,7 @@ async function saveNewUsername() {
   
   if (errorEl) errorEl.style.display = 'none';
 
+  // 1. Verificare Lungime Frontend (5 - 20 caractere)
   if (input.length < 5 || input.length > 20) {
     if (errorEl) {
         errorEl.innerText = "Numele trebuie să aibă între 5 și 20 de caractere!";
@@ -13141,6 +13106,7 @@ async function saveNewUsername() {
     return;
   }
 
+  // 2. Verificare Simboluri Frontend (Litere, cifre, spațiu, underscore, și diacritice RO inclusiv â/Â)
   const regex = /^[a-zA-Z0-9 _ăîșțâĂÎȘȚÂ]+$/;
   if (!regex.test(input)) {
     if (errorEl) {
@@ -13150,13 +13116,27 @@ async function saveNewUsername() {
     return;
   }
 
+  // Punem pe loading
   document.getElementById('usernameModal').style.display = 'none';
   document.getElementById('loadingModal').style.display = 'flex';
 
   try {
+    // 3. Verificare unicitate înainte de a trimite la backend
+    const snapshot = await db.collection('players').where('username', '==', input).get();
+    
+    if (!snapshot.empty) {
+        document.getElementById('loadingModal').style.display = 'none';
+        document.getElementById('usernameModal').style.display = 'flex';
+        if (errorEl) {
+            errorEl.innerText = "Numele este deja folosit! Alege altul.";
+            errorEl.style.display = 'block';
+        }
+        return;
+    }
+
     const idToken = await firebase.auth().currentUser.getIdToken(true);
     
-    // Trimitem doar la backend. Backend-ul face verificarea de unicitate.
+    // 4. Trimitem la backend (unde este filtrul de înjurături și NPC-uri)
     const response = await fetch('https://kevin-backend-qodc.onrender.com/create-user', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -13169,6 +13149,7 @@ async function saveNewUsername() {
       score = 0;
       lastSavedScore = 0;
       
+      // Oferim caracterele de bază mereu
       const dbHeroes = data.ownedHeros || [];
       ownedHeros = [...new Set(['kevin', 'emmanuel', 'antonio', ...dbHeroes])];
       
@@ -13177,11 +13158,12 @@ async function saveNewUsername() {
       handlePlayClick(); 
       
     } else {
-      // Backend-ul ne spune dacă numele e deja luat sau conține înjurături
+      // 5. Dacă backend-ul a respins numele (ex: conține "pula" sau "kevin")
       const errorMsg = await response.text();
       document.getElementById('loadingModal').style.display = 'none';
       document.getElementById('usernameModal').style.display = 'flex';
       if (errorEl) {
+          // Afișează mesajul exact venit de la server
           errorEl.innerText = errorMsg; 
           errorEl.style.display = 'block';
       }
@@ -13280,70 +13262,55 @@ function startGameUI() {
   };
 }
 
-// Add this variable at the top of your script alongside other globals
-let isSyncing = false; 
-
 async function syncScoreToFirestore() {
-    // 1. Lock: Prevent multiple syncs happening at the same time
-    if (isSyncing) return;
-    isSyncing = true;
+  if (currentUID) {
+    try {
+      const idToken = await firebase.auth().currentUser.getIdToken(true);
 
-    if (currentUID) {
-        try {
-            const idToken = await firebase.auth().currentUser.getIdToken(true);
+      const response = await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+            idToken: idToken, 
+            score: score,
+            rubies: rubies,
+            level: playerLevel,
+            xp: playerXP,
+            hasSeenRubyTutorial: hasSeenRubyTutorial,
+            claimedLevelRewards: _GAME_DATA.claimedLevelRewards, // Trimitem ce avem local
+            claimedRewards: _GAME_DATA.claimedRewards,
+            claimedStageRewards: _GAME_DATA.claimedStageRewards,
+            currentStage: currentStageId, // <--- NOU
 
-            const response = await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    idToken: idToken, 
-                    score: score,
-                    rubies: rubies,
-                    level: playerLevel,
-                    xp: playerXP,
-                    hasSeenRubyTutorial: hasSeenRubyTutorial,
-                    claimedLevelRewards: _GAME_DATA.claimedLevelRewards,
-                    claimedRewards: _GAME_DATA.claimedRewards,
-                    claimedStageRewards: _GAME_DATA.claimedStageRewards,
-                    currentStage: currentStageId,
-                    // Ensure these are sent to the backend as well so they are sanitized
-                    bmBuys: _GAME_DATA.playerPetBuys || {}, 
-                    bmSales: {} 
-                }),
-            }); 
+        }),
+      }); 
 
-            if (response.ok) {
-                const result = await response.json();
-                
-                if (result.unlockedFeatures) {
-                    backendUnlockedFeatures = result.unlockedFeatures;
-                }
-
-                if (result.claimedLevelRewards) {
-                    _GAME_DATA.claimedLevelRewards = result.claimedLevelRewards.map(Number);
-                    updateGiftButtonState(); 
-                }
-
-                lastSavedScore = score;
-                lastSavedRubies = rubies;
-                lastSavedXP = playerXP;
-                console.log("✅ Cloud Sync Complete: Progres salvat.");
-            } else if (response.status === 429) {
-                console.warn("⚠️ Sync too fast! Backend rejected request.");
-            } else {
-                console.error("❌ Sync failed with status:", response.status);
-            }
-        } catch (e) {
-            console.error("Connection error during sync:", e);
-        } finally {
-            // 2. Unlock: Wait 3 seconds before allowing the next sync to avoid 429 errors
-            setTimeout(() => {
-                isSyncing = false;
-            }, 3000);
+      if (response.ok) {
+        const result = await response.json();
+        
+        // 1. Sincronizăm funcțiile deblocate (Slot, Rubine etc.)
+        if (result.unlockedFeatures) {
+            backendUnlockedFeatures = result.unlockedFeatures;
         }
-    } else {
-        isSyncing = false;
+
+        // 2. REPARARE BUG VIBRAȚIE: Sincronizăm premiile revendicate cu realitatea din DB
+        if (result.claimedLevelRewards) {
+            // Actualizăm lista locală cu cea confirmată de server (forțăm numere)
+            _GAME_DATA.claimedLevelRewards = result.claimedLevelRewards.map(Number);
+            
+            // Verificăm imediat dacă butonul mai trebuie să vibreze
+            updateGiftButtonState(); 
+        }
+
+        lastSavedScore = score;
+        lastSavedRubies = rubies;
+        lastSavedXP = playerXP;
+        console.log("✅ Cloud Sync Complete: Progres și Recompense salvate.");
+      }
+    } catch (e) {
+      console.error("Connection error during sync:", e);
     }
+  }
 }
 
 // Logic for opening/closing the tutorial
@@ -13532,7 +13499,7 @@ document.getElementById('kevin').addEventListener('click', (e) => {
 
     // Apply Multiplier to Score
     score += (1 * activeScoreMultiplier);
-    let xpToGain = (2 * activeClickXPMultiplier); // 2 de bază, sau 4 dacă boost-ul e activ
+    let xpToGain = (2000 * activeClickXPMultiplier); // 2 de bază, sau 4 dacă boost-ul e activ
     gainXP(xpToGain);
 
     // --- SALVĂM STATISTICILE ---
@@ -21428,25 +21395,6 @@ async function buyCatItem(offerKey) {
             return;
         }
 
-        // --- NOU: VERIFICARE RUBINE CU NOTIFICARE ---
-        if (rubies < item.price) {
-            // Notificare vizuală de tip Toast (poți alege și showKevinutaBubble)
-            showNotification(
-                "RUBINE INSUFICIENTE", 
-                `Ai nevoie de ${item.price} ♦️! Mai adună rubine.`, 
-                "https://iili.io/CrnXNdG.png"
-            );
-            
-            // Opțional: Sunet de eroare (Miss)
-            if (typeof playMissSFX === 'function') playMissSFX();
-            return;
-        }
-
-        if (offer.limit - offer.bought <= 0) {
-            showKevinutaBubble("Stoc epuizat!");
-            return;
-        }
-
         // Use the offer object for the limit check
         if (offer.limit - offer.bought <= 0) {
             showKevinutaBubble("Stoc epuizat!");
@@ -21777,8 +21725,10 @@ function useInventoryBox(key) {
 // --- BOX ANIMATION ASSETS (FĂRĂ LOOP) ---
 const boxAnimAssets = {
     global: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/GLOBAL%20FRAME%201.png",
-    global_tabby: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tabby%20global.png",
+    
     global_kitty: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/kitty%20box%20global%201.png",
+
+    // NOU: Cutia de carton închisă
     global_cardboard: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/Scruci%20Global%20frame%201.png",
     
     // NOU: Cadrele pentru Scruchi
@@ -21846,27 +21796,6 @@ clara: [
         "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tomy%203.png",
         "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tomy%204.png",
         "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tomy%20last%20.png"
-    ],
-  // Cadrele pentru pisicile din Tabby Box
-    dori: [
-        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/dori%201.png",
-        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/dori%202.png",
-        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/dori%203%20.png",
-        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/dori%20last%20.png"
-    ],
-    eliot: [
-        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/eliot%201.png",
-        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/eliot%202.png",
-        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/eliot%203.png",
-        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/eliot%204.png",
-        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/eliot%20last%20.png"
-    ],
-    ghemotoc: [
-        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/ghemotoc%201%20.png",
-        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/ghemotoc%202.png",
-        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/ghemotoc%203.png",
-        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/ghemotoc%204.png",
-        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/ghemotoc%20last%20.png"
     ],
 };
 
@@ -21960,8 +21889,6 @@ let startingFrame = boxAnimAssets.global;
         startingFrame = boxAnimAssets.global_cardboard; 
     } else if (boxKey === 'cat_box_kitty') {
         startingFrame = boxAnimAssets.global_kitty;
-    } else if (boxKey === 'cat_box_tabby') {
-        startingFrame = boxAnimAssets.global_tabby; // Setăm cutia Tabby
     }
 
     document.getElementById('loadingModal').style.display = 'flex';
@@ -22009,17 +21936,10 @@ let startingFrame = boxAnimAssets.global;
     `;
     document.body.appendChild(overlay);
 
-// --- 3D FLOOR GENERATION (HIBRID PC/MOBILE) ---
+    // --- 3D FLOOR GENERATION ---
     const floorGrid = document.getElementById('bcFloorGrid');
     const tileElements = [];
-    
-    // Detectăm dacă ecranul este mic (telefon/tabletă mică)
-    const isMobileDevice = window.innerWidth <= 768;
-
-    // PC: 961 plăci (31x31) | MOBILE: 225 plăci (15x15)
-    const totalTiles = isMobileDevice ? 225 : 961;
-
-    for(let i = 0; i < totalTiles; i++) {
+    for(let i = 0; i < 961; i++) {
         const tile = document.createElement('div');
         tile.className = 'bc-tile';
         floorGrid.appendChild(tile);
@@ -22027,59 +21947,36 @@ let startingFrame = boxAnimAssets.global;
     }
 
     window.bcFloorActive = true;
-    let currentlyActiveTile = null;
-
     function lightUpRandomTile() {
         if (!window.bcFloorActive) return;
-        
         const randomIndex = Math.floor(Math.random() * tileElements.length);
         const selectedTile = tileElements[randomIndex];
 
-        if (isMobileDevice) {
-            // LOGICĂ MOBILE: 1 singură placă aprinsă odată, viteză mai mică
-            if (currentlyActiveTile) {
-                currentlyActiveTile.classList.remove('active');
-            }
-            currentlyActiveTile = selectedTile;
-            currentlyActiveTile.classList.add('active');
-            
-            setTimeout(lightUpRandomTile, 600); // Rulare rară pentru salvarea bateriei
-        } else {
-            // LOGICĂ PC: Efectul tău original intens (mai multe plăci suprapuse)
-            if (!selectedTile.classList.contains('active')) {
-                selectedTile.classList.add('active');
-                setTimeout(() => { if (window.bcFloorActive) selectedTile.classList.remove('active'); }, 600 + Math.random() * 600);
-            }
-            setTimeout(lightUpRandomTile, 10 + Math.random() * 50); // Rulare extrem de rapidă
+        if (!selectedTile.classList.contains('active')) {
+            selectedTile.classList.add('active');
+            setTimeout(() => { if (window.bcFloorActive) selectedTile.classList.remove('active'); }, 600 + Math.random() * 600);
         }
+        setTimeout(lightUpRandomTile, 10 + Math.random() * 50);
     }
-
     lightUpRandomTile();
-    if (!isMobileDevice) {
-        lightUpRandomTile(); // PC-ul suportă al doilea ciclu de aprindere simultană
-    }
+    lightUpRandomTile();
     // ---------------------------
 
     const wrapper = overlay.querySelector('.particles-wrapper');
-    
-    // PC: 15 dungi, 25 steluțe | MOBILE: 6 dungi, 10 steluțe
-    const streakCount = isMobileDevice ? 6 : 15;
-    const sparkleCount = isMobileDevice ? 10 : 25;
-
-    for (let i = 0; i < streakCount; i++) {
+    for (let i = 0; i < 15; i++) {
         const s = document.createElement('div');
         s.className = 'streak';
         s.style.left = Math.random() * 100 + '%';
-        s.style.animationDuration = (isMobileDevice ? (3 + Math.random() * 2) : (2 + Math.random() * 3)) + 's';
+        s.style.animationDuration = (2 + Math.random() * 3) + 's';
         s.style.animationDelay = (Math.random() * 5) + 's';
         wrapper.appendChild(s);
     }
-    for (let i = 0; i < sparkleCount; i++) {
+    for (let i = 0; i < 25; i++) {
         const p = document.createElement('div');
         p.className = 'sparkle';
         p.style.left = Math.random() * 100 + '%';
         p.style.top = Math.random() * 90 + '%';
-        p.style.animationDuration = (isMobileDevice ? (2 + Math.random() * 2) : (1.5 + Math.random() * 2.5)) + 's';
+        p.style.animationDuration = (1.5 + Math.random() * 2.5) + 's';
         p.style.animationDelay = (Math.random() * 3) + 's';
         wrapper.appendChild(p);
     }
@@ -22259,31 +22156,31 @@ function executeBoxAction(action) {
     const itemData = catShopItems[pendingActionBoxKey];
 
     if (action === 'open') {
-        // Scădem cutia din inventar
+        // AM ALES: DESCHIDE ACUM
+        // 🛠️ FIX: Scădem cutia din inventar, deoarece a fost adăugată când am cumpărat-o!
         if (_GAME_DATA.inventory[pendingActionBoxKey] && _GAME_DATA.inventory[pendingActionBoxKey] > 0) {
             _GAME_DATA.inventory[pendingActionBoxKey]--;
-            syncInventoryToCloud(); 
+            syncInventoryToCloud(); // Salvăm faptul că am consumat cutia
         }
 
-        // --- FIX: Am adăugat 'cat_box_tabby' în listă ---
-        if (pendingActionBoxKey === 'cat_box_calico' || 
-            pendingActionBoxKey === 'cat_box_cardboard' || 
-            pendingActionBoxKey === 'cat_box_tabby') {
-            
+        // Declanșăm cutscene-ul sau notificarea
+        if (pendingActionBoxKey === 'cat_box_calico' || pendingActionBoxKey === 'cat_box_cardboard') {
             startBoxCutscene(pendingActionBoxKey);
         } else {
-            // Fallback pentru restul cutiilor (sau notificarea default)
             showNotification("CUTIE DESCHISĂ", "Conținutul va fi disponibil în curând!", itemData.image);
-            
             if (document.getElementById('inventoryModal').style.display !== 'flex') {
                 isPaused = false; 
                 startKevinMovement();
             }
         }
     } else if (action === 'inventory') {
+        // AM ALES: TRIMITE ÎN INVENTAR
+        // 🛠️ FIX: Nu mai adăugăm +1 aici, a fost deja adăugată de funcția buyCatItem()!
+        // Doar afișăm mesajul de confirmare:
         showNotification("SALVAT", `${itemData.name} a fost trimis în inventar!`, itemData.image);
     }
 
+    // Curățăm variabila pentru viitoarele achiziții
     pendingActionBoxKey = null;
 }
 // Global Window Exports
