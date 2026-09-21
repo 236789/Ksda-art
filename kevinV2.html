@@ -21845,6 +21845,8 @@ const boxAnimAssets = {
 
     // NOU: Cutia de carton închisă
     global_cardboard: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/Scruci%20Global%20frame%201.png",
+global_tuxedo: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tuxedo%20global.png",
+    global_orange: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/orange%20global%201.png",
     
     // NOU: Cadrele pentru Scruchi
     scruchi: [
@@ -21933,6 +21935,39 @@ clara: [
         "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/ghemotoc%204.png",
         "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/ghemotoc%20last%20.png"
     ],
+
+ // --- CAT ANIMATION FRAMES ---
+    panda: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/panda%201.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/panda%202.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/panda%203.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/panda%20last.png"
+    ],
+    felix: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/felix%201.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/felix%202.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/felix%203.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/felix%20last.png"
+    ],
+    mircea: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/mircea%201.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/mircea%202.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/mircea%203.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/mircea%20last.png"
+    ],
+    putin: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/putin%201.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/putin%202.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/putin%203.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/putin%20last.png"
+    ],
+    zelensky: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/zelensky%201.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/zelensky%202.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/zelensky%203.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/zelensky%20last.png"
+    ]
+
 };
 
 let currentCatAudio = null; // Controlează sunetele să nu se suprapună
@@ -21993,7 +22028,7 @@ const catBoxSounds = {
         // Când o să ai și sunetele de zgârieturi pe Dropbox, pune-le aici (nu uita de dl=1 la final)
         "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/scratch1.mp3",
         "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/VoiceLines/scratch2.mp3"
-    ]
+    ],
 };
 
 
@@ -22021,13 +22056,18 @@ async function startBoxCutscene(boxKey) {
     const rarity = (catData && catData.stats && catData.stats.rarity) ? catData.stats.rarity : 'Common';
 
 let startingFrame = boxAnimAssets.global; 
-    if (boxKey === 'cat_box_cardboard') {
-        startingFrame = boxAnimAssets.global_cardboard; 
-    } else if (boxKey === 'cat_box_kitty') {
-        startingFrame = boxAnimAssets.global_kitty;
-    } else if (boxKey === 'cat_box_tabby') {
-        startingFrame = boxAnimAssets.global_tabby; // Setăm cutia Tabby
-    }
+
+if (boxKey === 'cat_box_cardboard') {
+    startingFrame = boxAnimAssets.global_cardboard; 
+} else if (boxKey === 'cat_box_kitty') {
+    startingFrame = boxAnimAssets.global_kitty;
+} else if (boxKey === 'cat_box_tabby') {
+    startingFrame = boxAnimAssets.global_tabby;
+} else if (boxKey === 'cat_box_tuxedo') {
+    startingFrame = boxAnimAssets.global_tuxedo; // Added Tuxedo
+} else if (boxKey === 'cat_box_orange') {
+    startingFrame = boxAnimAssets.global_orange; // Added Orange
+}
     document.getElementById('loadingModal').style.display = 'flex';
     
     const urlsToLoad = [startingFrame, ...(boxAnimAssets[cutsceneCatId] || [])];
