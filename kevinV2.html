@@ -10919,6 +10919,42 @@ div.inv-tile div.bm-limit-tag {
     border-color: var(--rsparkle) !important;
     transition: background 0.05s ease-in, box-shadow 0.05s ease-in !important;
 }
+
+
+/* ==========================================
+   BOX OPENING OPTIMIZATIONS (MOBILE ONLY)
+   ========================================== */
+@media (max-width: 768px) {
+    /* Dimensiuni mai mici pentru cutie și pisică */
+    .box-cutscene-img { width: 180px !important; height: 180px !important; }
+    .reveal-img { width: 160px !important; height: 160px !important; }
+    
+    /* Eliminăm blur-ul super-costisitor de pe background glow */
+    .box-cutscene-overlay .glow {
+        width: 300px !important; 
+        height: 300px !important;
+        filter: none !important; 
+        background: radial-gradient(circle, var(--rglow) 0%, var(--rglow2) 35%, transparent 65%) !important;
+    }
+
+    /* Redimensionăm textul */
+    #boxClickCounter { font-size: 35px !important; }
+    #boxClickNum { font-size: 45px !important; }
+    
+    /* Grid mai mic pentru podeaua 3D */
+    .floor-grid {
+        grid-template-columns: repeat(15, 1fr) !important;
+        grid-template-rows: repeat(15, 1fr) !important;
+    }
+    
+    /* Umbre mai ieftine pentru plăcile de pe jos */
+    .bc-tile {
+        transition: background 0.3s ease-out, box-shadow 0.3s ease-out !important;
+    }
+    .bc-tile.active {
+        box-shadow: 0 0 15px var(--rsparkle) !important; /* Eliminat umbra interioară */
+    }
+}
   </style>
 </head>
 <body>
@@ -21772,7 +21808,8 @@ function useInventoryBox(key) {
 // --- BOX ANIMATION ASSETS (FĂRĂ LOOP) ---
 const boxAnimAssets = {
     global: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/GLOBAL%20FRAME%201.png",
-    
+        global_tabby: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tabby%20global.png",
+
     global_kitty: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/kitty%20box%20global%201.png",
 
     // NOU: Cutia de carton închisă
@@ -21843,6 +21880,27 @@ clara: [
         "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tomy%203.png",
         "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tomy%204.png",
         "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/tomy%20last%20.png"
+    ],
+ // Cadrele pentru pisicile din Tabby Box
+    dori: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/dori%201.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/dori%202.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/dori%203%20.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/dori%20last%20.png"
+    ],
+    eliot: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/eliot%201.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/eliot%202.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/eliot%203.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/eliot%204.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/eliot%20last%20.png"
+    ],
+    ghemotoc: [
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/ghemotoc%201%20.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/ghemotoc%202.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/ghemotoc%203.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/ghemotoc%204.png",
+        "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/ghemotoc%20last%20.png"
     ],
 };
 
@@ -21936,8 +21994,9 @@ let startingFrame = boxAnimAssets.global;
         startingFrame = boxAnimAssets.global_cardboard; 
     } else if (boxKey === 'cat_box_kitty') {
         startingFrame = boxAnimAssets.global_kitty;
+    } else if (boxKey === 'cat_box_tabby') {
+        startingFrame = boxAnimAssets.global_tabby; // Setăm cutia Tabby
     }
-
     document.getElementById('loadingModal').style.display = 'flex';
     
     const urlsToLoad = [startingFrame, ...(boxAnimAssets[cutsceneCatId] || [])];
