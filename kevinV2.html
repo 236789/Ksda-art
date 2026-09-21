@@ -10955,6 +10955,36 @@ div.inv-tile div.bm-limit-tag {
         box-shadow: 0 0 15px var(--rsparkle) !important; /* Eliminat umbra interioară */
     }
 }
+
+
+/* 1. Ensure the overlay is a proper Flex container */
+.box-cutscene-overlay {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important; /* This centers everything vertically */
+    height: 100vh !important;
+    width: 100vw !important;
+    position: fixed !important;
+    top: 0; left: 0;
+}
+
+/* 2. Push the box/cat section to the center */
+.box-cutscene-img {
+    margin: auto !important; /* This acts as a spring, pushing the element to the center */
+    flex-shrink: 0;
+}
+
+/* 3. If you want to keep the title at the top and the button at the bottom: */
+#boxHeader {
+    margin-top: 20px !important;
+    margin-bottom: auto !important; /* Pushes everything below this down */
+}
+
+#boxAutoOpenBtn {
+    margin-top: auto !important; /* Pushes everything above this up */
+    margin-bottom: 20px !important;
+}
   </style>
 </head>
 <body>
@@ -22042,13 +22072,17 @@ let startingFrame = boxAnimAssets.global;
     `;
     document.body.appendChild(overlay);
 
-    // --- 3D FLOOR GENERATION ---
-// --- 3D FLOOR GENERATION (OPTIMIZED) ---
+// --- 3D FLOOR GENERATION (HIBRID PC/MOBILE) ---
     const floorGrid = document.getElementById('bcFloorGrid');
     const tileElements = [];
     
-    // REDUCED FROM 961 to 225 DOM elements!
-    for(let i = 0; i < 225; i++) {
+    // Detectăm dacă ecranul este mic (telefon/tabletă mică)
+    const isMobileDevice = window.innerWidth <= 768;
+
+    // PC: 961 plăci (31x31) | MOBILE: 225 plăci (15x15)
+    const totalTiles = isMobileDevice ? 225 : 961;
+
+    for(let i = 0; i < totalTiles; i++) {
         const tile = document.createElement('div');
         tile.className = 'bc-tile';
         floorGrid.appendChild(tile);
@@ -22056,49 +22090,62 @@ let startingFrame = boxAnimAssets.global;
     }
 
     window.bcFloorActive = true;
-    let currentlyActiveTile = null; // Keeps track so we only have 1 active tile
+    let currentlyActiveTile = null;
 
     function lightUpRandomTile() {
         if (!window.bcFloorActive) return;
         
-        // Turn off the previously lit tile
-        if (currentlyActiveTile) {
-            currentlyActiveTile.classList.remove('active');
-        }
-
-        // Pick a new random tile and turn it on
         const randomIndex = Math.floor(Math.random() * tileElements.length);
-        currentlyActiveTile = tileElements[randomIndex];
-        currentlyActiveTile.classList.add('active');
+        const selectedTile = tileElements[randomIndex];
 
-        // Loop slower (every 600ms) so the phone doesn't melt calculating shadows
-        setTimeout(lightUpRandomTile, 600);
+        if (isMobileDevice) {
+            // LOGICĂ MOBILE: 1 singură placă aprinsă odată, viteză mai mică
+            if (currentlyActiveTile) {
+                currentlyActiveTile.classList.remove('active');
+            }
+            currentlyActiveTile = selectedTile;
+            currentlyActiveTile.classList.add('active');
+            
+            setTimeout(lightUpRandomTile, 600); // Rulare rară pentru salvarea bateriei
+        } else {
+            // LOGICĂ PC: Efectul tău original intens (mai multe plăci suprapuse)
+            if (!selectedTile.classList.contains('active')) {
+                selectedTile.classList.add('active');
+                setTimeout(() => { if (window.bcFloorActive) selectedTile.classList.remove('active'); }, 600 + Math.random() * 600);
+            }
+            setTimeout(lightUpRandomTile, 10 + Math.random() * 50); // Rulare extrem de rapidă
+        }
     }
-    // Call it exactly ONCE (You used to call this twice, which caused stacking timers)
+
     lightUpRandomTile();
+    if (!isMobileDevice) {
+        lightUpRandomTile(); // PC-ul suportă al doilea ciclu de aprindere simultană
+    }
     // ---------------------------
 
     const wrapper = overlay.querySelector('.particles-wrapper');
     
-    // REDUCED PARTICLES (Less DOM elements floating around)
-    for (let i = 0; i < 6; i++) { // Reduced from 15 to 6
+    // PC: 15 dungi, 25 steluțe | MOBILE: 6 dungi, 10 steluțe
+    const streakCount = isMobileDevice ? 6 : 15;
+    const sparkleCount = isMobileDevice ? 10 : 25;
+
+    for (let i = 0; i < streakCount; i++) {
         const s = document.createElement('div');
         s.className = 'streak';
         s.style.left = Math.random() * 100 + '%';
-        s.style.animationDuration = (3 + Math.random() * 2) + 's';
+        s.style.animationDuration = (isMobileDevice ? (3 + Math.random() * 2) : (2 + Math.random() * 3)) + 's';
         s.style.animationDelay = (Math.random() * 5) + 's';
         wrapper.appendChild(s);
     }
-    for (let i = 0; i < 10; i++) { // Reduced from 25 to 10
+    for (let i = 0; i < sparkleCount; i++) {
         const p = document.createElement('div');
         p.className = 'sparkle';
         p.style.left = Math.random() * 100 + '%';
         p.style.top = Math.random() * 90 + '%';
-        p.style.animationDuration = (2 + Math.random() * 2) + 's';
+        p.style.animationDuration = (isMobileDevice ? (2 + Math.random() * 2) : (1.5 + Math.random() * 2.5)) + 's';
         p.style.animationDelay = (Math.random() * 3) + 's';
         wrapper.appendChild(p);
     }
-
 const imgEl = document.getElementById('boxCutsceneImg');
     const flavorEl = document.getElementById('boxFlavorText');
     const autoBtn = document.getElementById('boxAutoOpenBtn');
