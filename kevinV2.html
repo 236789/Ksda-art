@@ -22024,10 +22024,18 @@ alpy: [
 let currentCatAudio = null; // Controlează sunetele să nu se suprapună
 
 
-// Rolls for a cat inside the box based on rarity weights
 function rollCatFromBox(boxKey) {
     const boxData = catBoxRegistry[boxKey];
-    const rarityWeights = { Common: 50, Rare: 25, Epic: 15, Legendary: 8, Majestic: 8 };
+    
+    // To get ~8%, we set Majestic to 8 and keep the total pool sum around 100
+    const rarityWeights = { 
+        Common: 40,    // Reduced to make room for Majestic
+        Rare: 25, 
+        Epic: 15, 
+        Legendary: 10, 
+        Majestic: 8    // INCREASED to 8
+    };
+    
     let pool = [];
     
     boxData.cats.forEach(catId => {
