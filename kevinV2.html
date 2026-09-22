@@ -12190,9 +12190,10 @@ div.inv-tile div.bm-limit-tag {
 </button>
     </div>
 
-    <button class="menu-btn play close-shop-btn" onclick="closeShop()">
-      <span>ÎNAPOI</span>
-    </button>
+<!-- Change it to this -->
+<button class="menu-btn play close-shop-btn" onclick="backToUtilities()">
+  <span>ÎNAPOI</span>
+</button>
   </div>
 </div>
 
@@ -18301,7 +18302,7 @@ body: JSON.stringify({
     level: playerLevel,      // <--- Lipsea!
     xp: playerXP,            // <--- Lipsea!
     currentStage: currentStageId, // <--- NOU
-    inventory: _GAME_DATA.inventory,
+        inventory: _GAME_DATA.inventory, // This sends the updated inventory
     bmBuys: buysUpdate 
 }),
         });
@@ -22510,6 +22511,17 @@ function executeBoxAction(action) {
 
     // Curățăm variabila pentru viitoarele achiziții
     pendingActionBoxKey = null;
+}
+function backToUtilities() {
+    // 1. Hide the shop
+    document.getElementById('shopModal').style.display = 'none';
+    
+    // 2. Show the utilities modal again
+    document.getElementById('utilitiesModal').style.display = 'flex';
+    
+    // 3. Optional: If you have logic to check for "Locked" states (like Lvl 3/4 req), 
+    // you might want to re-run your openUtilitiesModal logic here
+    openUtilitiesModal(); 
 }
 // Global Window Exports
 window.askWhichPetToSpawn = askWhichPetToSpawn;
