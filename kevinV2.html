@@ -22107,9 +22107,15 @@ if (boxKey === 'cat_box_cardboard') {
         
         <p id="boxFlavorText" style="z-index: 10; color: #4ade80; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 15px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1.5px; text-shadow: 0 0 10px rgba(74,222,128,0.4); transition: all 0.2s ease;">Apasă pe cutie pentru a începe!</p>
         
-        <button id="boxAutoOpenBtn" style="z-index: 10; margin-top: 20px; padding: 12px 25px; border-radius: 12px; border: 3px solid #555; background: #333; color: #aaa; font-family: 'Orbitron'; font-weight: 900; font-size: 16px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 0 #111; display: flex; align-items: center; gap: 10px;">
-            <i class="fa-solid fa-robot"></i> AUTO OPEN: OFF
-        </button>
+<!-- Container pentru Auto Open și Skip -->
+        <div id="boxButtonsContainer" style="z-index: 10; display: flex; gap: 15px; margin-top: 20px;">
+            <button id="boxAutoOpenBtn" style="padding: 12px 25px; border-radius: 12px; border: 3px solid #555; background: #333; color: #aaa; font-family: 'Orbitron'; font-weight: 900; font-size: 16px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 0 #111; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-robot"></i> AUTO OPEN
+            </button>
+            <button id="boxSkipBtn" style="padding: 12px 25px; border-radius: 12px; border: 3px solid #ff3366; background: linear-gradient(180deg, #ff3366, #990033); color: #fff; font-family: 'Orbitron'; font-weight: 900; font-size: 16px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 0 #660022; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-forward-fast"></i> SKIP
+            </button>
+        </div>
     `;
     document.body.appendChild(overlay);
 
@@ -22190,9 +22196,32 @@ if (boxKey === 'cat_box_cardboard') {
 const imgEl = document.getElementById('boxCutsceneImg');
     const flavorEl = document.getElementById('boxFlavorText');
     const autoBtn = document.getElementById('boxAutoOpenBtn');
+    const skipBtn = document.getElementById('boxSkipBtn'); // NOU: Butonul Skip
+    const buttonsContainer = document.getElementById('boxButtonsContainer'); // NOU: Containerul butoanelor
     const clickNumEl = document.getElementById('boxClickNum');
     const headerEl = document.getElementById('boxHeader');
-    const clickCounterEl = document.getElementById('boxClickCounter'); // 🛠️ L-AM ADĂUGAT AICI!
+    const clickCounterEl = document.getElementById('boxClickCounter'); 
+
+    // --- NOU: LOGICA PENTRU BUTONUL SKIP ---
+    skipBtn.onclick = () => {
+        if (boxClicks >= 10 || clickOnCooldown) return; // Prevenim spam-ul
+        
+        boxClicks = 10; // Forțăm cutia să fie considerată deschisă complet
+        
+        if (autoOpenInterval) clearInterval(autoOpenInterval);
+        
+        if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
+        
+        // Ascundem interfața la fel ca la finalul normal
+        headerEl.classList.add('fade-out-piece');
+        clickCounterEl.classList.add('fade-out-piece');
+        buttonsContainer.classList.add('fade-out-piece');
+        flavorEl.style.display = 'none';
+
+        // Trecem direct la ecranul de reveal după o foarte scurtă pauză
+        setTimeout(() => showFinalCatReveal(catData), 200);
+    };
+    // ----------------------------------------
 
     const flavorTexts = ["Apasă pe cutie pentru a începe!", "Se aude ceva înăuntru...", "Mai tare! Apasă!", "Cutia începe să tremure...", "Nu te opri acum!", "Ceva zgârie cartonul...", "Se rupe ambalajul!", "Se vede ceva!", "Aproape a ieșit!", "ULTIMUL CLICK!", "BOOOOM!"];
 
@@ -22266,7 +22295,7 @@ const imgEl = document.getElementById('boxCutsceneImg');
 
 if (boxClicks === 10) {
             clearInterval(autoOpenInterval);
-            autoBtn.style.display = "none"; 
+            buttonsContainer.classList.add('fade-out-piece'); // Ascunde ambele butoane elegant
             if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
             
             // Fade out everything else
