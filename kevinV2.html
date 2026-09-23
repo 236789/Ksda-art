@@ -15754,37 +15754,36 @@ item.onclick = (e) => {
     e.stopPropagation();
     if (!e.isTrusted) return;
 
-    // --- 🆕 NEW: DYNAMIC XP LOGIC ---
-    // Pulls from registry. If not set, defaults to 5.
+    // 1. CHECK LIMIT FIRST
+    if (isInventoryFull()) {
+        showNotification("INVENTAR PLIN", "Nu mai ai loc pentru obiecte noi!", "fa-briefcase");
+        playMissSFX();
+        return; // Stop the event
+    }
+
+    // 2. XP & Quest logic (stays the same)
     let xpGained = eventData.xpValue || 5; 
     gainXP(xpGained);
     showXPFlyer(e.clientX, e.clientY, xpGained);
-
-
     updateQuestProgress('catch_' + chosenKey, 1);
 
-
-    // --- INDEX DISCOVERY LOGIC ---
+    // 3. Index & Inventory Logic
     if (!_GAME_DATA.index.includes(chosenKey)) {
         _GAME_DATA.index.push(chosenKey);
-        showNotification("DESCOPERIRE!", `Ai deblocat elementul: ${eventData.name}`, "fa-book-open");
-        console.log(`📖 NOUĂ DESCOPERIRE: [${eventData.name}] adăugat în Index!`);
+        showNotification("DESCOPERIRE!", `Ai deblocat: ${eventData.name}`, "fa-book-open");
         syncInventoryToCloud(); 
     }
 
     item.remove();
-    console.log(`🖱️ EVENT PRINS: [${eventData.name}]`);
-
-    // --- NEW INVENTORY DROP LOGIC (50% CHANCE) ---
+    
+    // 4. Inventory Drop
     if (Math.random() > 0.5) {
         addToInventory(chosenKey);
     }
 
-    // Trigger the actual event action
+    // 5. Trigger event
     eventData.action(e);
-    if (eventData.duration) {
-        showEventIndicator(chosenKey, eventData.duration);
-    }
+    if (eventData.duration) showEventIndicator(chosenKey, eventData.duration);
 };
 
     // EMOJI DISPARE DUPĂ 10 SECUNDE (Dacă nu e prins)
@@ -17021,7 +17020,7 @@ function finishTrivia(win, reason = "") {
 // ==========================================
 // SECURE INVENTORY SYSTEM V2 (UNIFIED)
 // ==========================================
-const INV_LIMIT = 500;
+const INV_LIMIT = 1000;
 
 function openInventory() {
     // 1. Force close the floating menu first
@@ -17068,24 +17067,32 @@ function switchInvTab(tabId, btn) {
 }
 
 function addToInventory(itemKey) {
-    // Safety check for the object
+    // 1. Safety check for the object
     if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
 
-    // 1. Calculate current total
-    let totalItems = Object.values(_GAME_DATA.inventory).reduce((a, b) => a + b, 0);
-
-    if (totalItems >= INV_LIMIT) {
+    // 2. Use the helper check function to calculate total current items
+    // (Ensure isInventoryFull() is defined elsewhere in your script)
+    if (isInventoryFull()) {
         showKevinutaBubble("Inventar plin! 🎒");
-        return;
+        console.warn(`🎒 Inventar plin! Nu s-a putut adăuga: ${itemKey}`);
+        return false; // Returnează false pentru a semnala că nu s-a adăugat
     }
 
-    // 2. Add to local object
+    // 3. Add to local object
     _GAME_DATA.inventory[itemKey] = (_GAME_DATA.inventory[itemKey] || 0) + 1;
-    console.log(`🎒 Obiect prins: ${itemKey}. Total stack: ${_GAME_DATA.inventory[itemKey]}`);
+    console.log(`🎒 Obiect adăugat: ${itemKey}. Total stack: ${_GAME_DATA.inventory[itemKey]}`);
     
-    // 3. Sync to Cloud
+    // 4. Update the visual UI if the modal is open
+    if (document.getElementById('inventoryModal').style.display === 'flex') {
+        renderInventoryUI();
+    }
+    
+    // 5. Sync to Cloud
     syncInventoryToCloud(); 
+    
+    return true; // Returnează true pentru succes
 }
+
 
 function renderInventoryUI() {
     const itemsGrid = document.getElementById('inventoryGrid');
@@ -17162,6 +17169,11 @@ function renderInventoryUI() {
     if (petsGrid && !hasPets) {
         petsGrid.innerHTML = `<div class="placeholder-text" style="grid-column: span 5; margin-top: 50px;">Nu ai niciun pet sau cutie. Vizitează Pet Shop-ul!</div>`;
     }
+}
+
+function isInventoryFull() {
+    const totalItems = Object.values(_GAME_DATA.inventory).reduce((a, b) => a + b, 0);
+    return totalItems >= 1000; // Your new limit
 }
 
 function showItemInfo(key) {
@@ -18274,6 +18286,11 @@ async function openBlackMarket() {
 
 async function processBuy() {
     const offer = blackMarketOffers[currentBuyIdx];
+   // THE CHECK
+    if (isInventoryFull()) {
+        showKevinutaBubble("Inventar plin! Nu mai ai loc.");
+        return;
+    }
     const totalCost = currentBuyQty * offer.price;
 
     if (rubies < totalCost || currentBuyQty <= 0) {
@@ -21512,7 +21529,12 @@ async function buyCatItem(offerKey) {
     try {
         const offer = petShopOffers.find(o => o.key === offerKey);
         const item = catShopItems[offerKey];
-        
+
+    if (isInventoryFull()) {
+        showKevinutaBubble("Inventar plin! Nu mai ai loc.");
+        return;
+    }
+      
         if (!offer || !item) {
             showKevinutaBubble("Eroare: Ofertă invalidă!");
             return;
