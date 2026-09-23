@@ -18291,12 +18291,6 @@ async function processBuy() {
         showKevinutaBubble("Inventar plin! Nu mai ai loc.");
         return;
     }
-
-    // APLICĂ CHECK-UL
-    // (Aici prețul e în rubine, deci punem 'rubies')
-    if (!canPurchaseItem(offer.price * currentBuyQty, remaining, 'rubies')) {
-        return; 
-    }
     const totalCost = currentBuyQty * offer.price;
 
     if (rubies < totalCost || currentBuyQty <= 0) {
@@ -21536,9 +21530,9 @@ async function buyCatItem(offerKey) {
         const offer = petShopOffers.find(o => o.key === offerKey);
         const item = catShopItems[offerKey];
 
-    // APLICĂ CHECK-UL
-    if (!canPurchaseItem(item.price, remaining, 'rubies')) {
-        return; // Notificarea este trimisă automat de funcția de mai sus
+    if (isInventoryFull()) {
+        showKevinutaBubble("Inventar plin! Nu mai ai loc.");
+        return;
     }
       
         if (!offer || !item) {
