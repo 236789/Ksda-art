@@ -13376,57 +13376,65 @@ function startGameUI() {
   };
 }
 
+// Add this flag to prevent "Sync Overlap"
+let isSyncing = false; 
+
 async function syncScoreToFirestore() {
-  if (currentUID) {
-    try {
-      const idToken = await firebase.auth().currentUser.getIdToken(true);
+  if (!currentUID || isSyncing) return; // Prevent concurrent requests
+  
+  const user = firebase.auth().currentUser;
+  if (!user) return;
 
-      const response = await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-            idToken: idToken, 
-            score: score,
-            rubies: rubies,
-            level: playerLevel,
-            xp: playerXP,
-            hasSeenRubyTutorial: hasSeenRubyTutorial,
-            claimedLevelRewards: _GAME_DATA.claimedLevelRewards, // Trimitem ce avem local
-            claimedRewards: _GAME_DATA.claimedRewards,
-            claimedStageRewards: _GAME_DATA.claimedStageRewards,
-            currentStage: currentStageId, // <--- NOU
+  isSyncing = true; // Lock sync
 
-        }),
-      }); 
+  try {
+    // 1. Get token without forcing a refresh (much faster, handles auto-refresh internally)
+    const idToken = await user.getIdToken(false); 
 
-      if (response.ok) {
+    const response = await fetch('https://kevin-backend-qodc.onrender.com/update-score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+          idToken: idToken, 
+          score: score,
+          rubies: rubies,
+          level: playerLevel,
+          xp: playerXP,
+          hasSeenRubyTutorial: hasSeenRubyTutorial,
+          claimedLevelRewards: _GAME_DATA.claimedLevelRewards,
+          claimedRewards: _GAME_DATA.claimedRewards,
+          claimedStageRewards: _GAME_DATA.claimedStageRewards,
+          currentStage: currentStageId,
+          inventory: _GAME_DATA.inventory // Ensure inventory is synced
+      }),
+    }); 
+
+    // 2. Handle Token Expiration (401)
+    if (response.status === 401) {
+        console.warn("⚠️ Token expired. Refreshing...");
+        const freshToken = await user.getIdToken(true); // Now we force refresh
+        // Optionally: retry the fetch here with the freshToken
+    }
+
+    if (response.ok) {
         const result = await response.json();
-        
-        // 1. Sincronizăm funcțiile deblocate (Slot, Rubine etc.)
-        if (result.unlockedFeatures) {
-            backendUnlockedFeatures = result.unlockedFeatures;
-        }
-
-        // 2. REPARARE BUG VIBRAȚIE: Sincronizăm premiile revendicate cu realitatea din DB
+        if (result.unlockedFeatures) backendUnlockedFeatures = result.unlockedFeatures;
         if (result.claimedLevelRewards) {
-            // Actualizăm lista locală cu cea confirmată de server (forțăm numere)
             _GAME_DATA.claimedLevelRewards = result.claimedLevelRewards.map(Number);
-            
-            // Verificăm imediat dacă butonul mai trebuie să vibreze
             updateGiftButtonState(); 
         }
-
         lastSavedScore = score;
         lastSavedRubies = rubies;
         lastSavedXP = playerXP;
-        console.log("✅ Cloud Sync Complete: Progres și Recompense salvate.");
-      }
-    } catch (e) {
-      console.error("Connection error during sync:", e);
+    } else {
+        console.error("❌ Sync Error:", response.status);
     }
+  } catch (e) {
+    console.error("Connection error during sync:", e);
+  } finally {
+    isSyncing = false; // Always unlock
   }
 }
-
 // Logic for opening/closing the tutorial
 function openRubyDiscovery() {
     isPaused = true;
@@ -22313,7 +22321,7 @@ const imgEl = document.getElementById('boxCutsceneImg');
         flavorEl.style.display = 'none';
 
         // Trecem direct la ecranul de reveal după o foarte scurtă pauză
-setTimeout(() => showFinalCatReveal(catData, boxKey), 200);
+        setTimeout(() => showFinalCatReveal(catData), 200);
     };
     // ----------------------------------------
 
@@ -22397,40 +22405,17 @@ if (boxClicks === 10) {
             clickCounterEl.classList.add('fade-out-piece');
             flavorEl.style.display = 'none';
 
-            setTimeout(() => showFinalCatReveal(catData, boxKey), 800);
+            setTimeout(() => showFinalCatReveal(catData), 800);
         }
     };
 }
 
-function showFinalCatReveal(catData, boxKey) {
+function showFinalCatReveal(catData) {
     const overlay = document.getElementById('boxCutsceneOverlay');
 
     if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
-    
-    // 1. Verificăm dacă o deține deja
-    const alreadyOwned = (_GAME_DATA.inventory[catData.id] || 0) > 0;
-    let refundAmount = 0;
-
-    if (alreadyOwned) {
-        // 2. Logică de COMPENSAȚIE (Duplicate)
-        const boxData = catShopItems[boxKey];
-        const boxPrice = boxData ? boxData.price : 10; // Fallback to 10 if unknown
-        refundAmount = Math.floor(boxPrice * 0.8);
-        if (refundAmount < 1) refundAmount = 1; // Nu dăm mai puțin de 1 rubin
-        
-        rubies += refundAmount;
-        updateScoreUI();
-        syncScoreToFirestore(); // Salvăm noile rubine în baza de date
-        
-        // Spawnăm vizual niște rubine pe ecran!
-        if (typeof playSFX === 'function') playSFX(slotJackpotUrl);
-        if (typeof spawnJackpotRubies === 'function') spawnJackpotRubies();
-        
-    } else {
-        // 3. Logică NOUĂ: Adăugăm în inventar doar dacă nu o are
-        _GAME_DATA.inventory[catData.id] = 1;
-        syncInventoryToCloud();
-    }
+    _GAME_DATA.inventory[catData.id] = (_GAME_DATA.inventory[catData.id] || 0) + 1;
+    syncInventoryToCloud();
 
     const imgEl = document.getElementById('boxCutsceneImg');
 
@@ -22440,19 +22425,7 @@ function showFinalCatReveal(catData, boxKey) {
 
     imgEl.classList.remove('box-hit-anim', 'on-cooldown');
     imgEl.classList.add('reveal-img');
-    
-    // 4. APLICĂM VIZUALUL (Filtru cu X Roșu dacă e duplicat)
     imgEl.style.backgroundImage = `url('${catData.assets.presentation}')`;
-    
-    if (alreadyOwned) {
-        // Suprapunem un overlay gri și un X mare roșu
-        imgEl.style.filter = "grayscale(1) brightness(0.5) drop-shadow(0 0 30px #ff4444)";
-        imgEl.innerHTML = `<i class="fa-solid fa-xmark" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:120px; color:#ff4444; text-shadow:0 0 30px #000, 0 0 15px #ff0000; z-index: 20;"></i>`;
-    } else {
-        imgEl.style.filter = `drop-shadow(0 0 30px var(--rlabelGlow))`;
-        imgEl.innerHTML = ""; // Ne asigurăm că e curat
-    }
-    
     imgEl.style.cursor = 'default';
     imgEl.onclick = null;
 
@@ -22469,46 +22442,27 @@ function showFinalCatReveal(catData, boxKey) {
     // Top Panel: Rarity, Stars, Name
     const topPanel = document.createElement('div');
     topPanel.className = 'reveal-top';
-    
-    let titleText = alreadyOwned ? "DEJA DEȚINUTĂ" : catData.name.toUpperCase();
-    let nameColor = alreadyOwned ? "#ef4444" : "#fff";
-    let textShadow = alreadyOwned ? "0 0 20px #ef4444, 0 4px 10px rgba(0,0,0,0.8)" : "0 0 20px var(--rlabelGlow), 0 4px 10px rgba(0,0,0,0.8)";
-
     topPanel.innerHTML = `
         <div class="bc-rarity-label">${catData.stats.rarity}</div>
         <div class="bc-stars">${starsHtml}</div>
-        <div class="cat-reveal-name" style="color: ${nameColor}; text-shadow: ${textShadow};">${titleText}</div>
+        <div class="cat-reveal-name">${catData.name.toUpperCase()}</div>
     `;
 
-    // Bottom Panel: Description vs Refund UI
+    // Bottom Panel: Description, Button
     const bottomPanel = document.createElement('div');
     bottomPanel.className = 'reveal-bottom';
-    
-    if (alreadyOwned) {
-        bottomPanel.innerHTML = `
-            <div class="cat-reveal-desc-box" style="border-left-color: #ef4444; text-align: center; background: rgba(0,0,0,0.7);">
-                <p style="font-size:15px; color:#fff; font-weight:900; margin-bottom: 5px;">AI DEJA ACEST PET!</p>
-                <p style="color:#d1d5db; font-size:12px;">Nu poți deține duplicate. Câștigi o compensație de 80% din valoarea cutiei.</p>
-                <p style="color:#ffcc00; font-family:'Orbitron'; font-size:24px; font-weight:900; margin-top:10px;">
-                    +${refundAmount} <img src="https://iili.io/CrnXNdG.png" style="width:20px; vertical-align:middle; filter:drop-shadow(0 0 5px #ff3366);">
-                </p>
-            </div>
-            <button class="cat-reveal-continue-btn" style="background: linear-gradient(180deg, #ef4444, #991b1b); border-color:#ffb3b3; color:#fff;" onclick="closeBoxCutscene()">ÎNCASEAZĂ</button>
-        `;
-    } else {
-        bottomPanel.innerHTML = `
-            <div class="cat-reveal-desc-box">
-                <p><b>Personalitate:</b> ${catData.personality}</p>
-                <p>"${catData.desc}"</p>
-            </div>
-            <button class="cat-reveal-continue-btn" onclick="closeBoxCutscene()">SUPER!</button>
-        `;
-    }
+    bottomPanel.innerHTML = `
+        <div class="cat-reveal-desc-box">
+            <p><b>Personalitate:</b> ${catData.personality}</p>
+            <p>"${catData.desc}"</p>
+        </div>
+        <button class="cat-reveal-continue-btn" onclick="closeBoxCutscene()">SUPER!</button>
+    `;
 
     overlay.appendChild(topPanel);
     overlay.appendChild(bottomPanel);
 
-    if (!alreadyOwned && (catData.stats.rarity === 'Legendary' || catData.stats.rarity === 'Majestic')) {
+    if (catData.stats.rarity === 'Legendary' || catData.stats.rarity === 'Majestic') {
         if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins();
     }
 }
@@ -22699,7 +22653,7 @@ window.useInventoryBox = useInventoryBox;
 window.openBoxInfoModal = openBoxInfoModal;
 window.openHeroModal = openHeroModal;
 window.closeBoxCutscene = closeBoxCutscene;
-window.backToUtilities = backToUtilities; // ADD THIS LINE
+
 })(); // <-- CLOSES THE SECURE VAULT
 
  
