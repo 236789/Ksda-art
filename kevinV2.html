@@ -22553,35 +22553,6 @@ function backToUtilities() {
     // you might want to re-run your openUtilitiesModal logic here
     openUtilitiesModal(); 
 }
-
-/**
- * Verifică dacă poți cumpăra un obiect
- * @param {number} cost - Cât costă (Rubine sau Scor)
- * @param {number} remainingStock - Câte mai sunt în magazin
- * @returns {boolean} - True dacă poți cumpăra, False dacă e o problemă
- */
-function canPurchaseItem(cost, remainingStock, currencyType = 'rubies') {
-    // 1. Verificăm inventarul (limita de 1000)
-    if (isInventoryFull()) {
-        showNotification("INVENTAR PLIN", "Nu mai ai loc pentru obiecte noi!", "fa-briefcase");
-        return false;
-    }
-
-    // 2. Verificăm stocul
-    if (remainingStock <= 0) {
-        showNotification("STOC EPUIZAT", "Revino după refresh!", "fa-box-open");
-        return false;
-    }
-
-    // 3. Verificăm banii
-    const playerHasEnough = (currencyType === 'rubies') ? (rubies >= cost) : (score >= cost);
-    if (!playerHasEnough) {
-        showNotification("FONDURI INSUFICIENTE", `Ai nevoie de ${cost} ${currencyType === 'rubies' ? 'Rubine' : 'Scor'}!`, "fa-gem");
-        return false;
-    }
-
-    return true;
-}
 // Global Window Exports
 window.askWhichPetToSpawn = askWhichPetToSpawn;
 window.triggerPetSpawn = triggerPetSpawn;
