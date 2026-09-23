@@ -18291,6 +18291,12 @@ async function processBuy() {
         showKevinutaBubble("Inventar plin! Nu mai ai loc.");
         return;
     }
+
+    // APLICĂ CHECK-UL
+    // (Aici prețul e în rubine, deci punem 'rubies')
+    if (!canPurchaseItem(offer.price * currentBuyQty, remaining, 'rubies')) {
+        return; 
+    }
     const totalCost = currentBuyQty * offer.price;
 
     if (rubies < totalCost || currentBuyQty <= 0) {
@@ -21530,9 +21536,9 @@ async function buyCatItem(offerKey) {
         const offer = petShopOffers.find(o => o.key === offerKey);
         const item = catShopItems[offerKey];
 
-    if (isInventoryFull()) {
-        showKevinutaBubble("Inventar plin! Nu mai ai loc.");
-        return;
+    // APLICĂ CHECK-UL
+    if (!canPurchaseItem(item.price, remaining, 'rubies')) {
+        return; // Notificarea este trimisă automat de funcția de mai sus
     }
       
         if (!offer || !item) {
@@ -22553,6 +22559,35 @@ function backToUtilities() {
     // you might want to re-run your openUtilitiesModal logic here
     openUtilitiesModal(); 
 }
+
+/**
+ * Verifică dacă poți cumpăra un obiect
+ * @param {number} cost - Cât costă (Rubine sau Scor)
+ * @param {number} remainingStock - Câte mai sunt în magazin
+ * @returns {boolean} - True dacă poți cumpăra, False dacă e o problemă
+ */
+function canPurchaseItem(cost, remainingStock, currencyType = 'rubies') {
+    // 1. Verificăm inventarul (limita de 1000)
+    if (isInventoryFull()) {
+        showNotification("INVENTAR PLIN", "Nu mai ai loc pentru obiecte noi!", "fa-briefcase");
+        return false;
+    }
+
+    // 2. Verificăm stocul
+    if (remainingStock <= 0) {
+        showNotification("STOC EPUIZAT", "Revino după refresh!", "fa-box-open");
+        return false;
+    }
+
+    // 3. Verificăm banii
+    const playerHasEnough = (currencyType === 'rubies') ? (rubies >= cost) : (score >= cost);
+    if (!playerHasEnough) {
+        showNotification("FONDURI INSUFICIENTE", `Ai nevoie de ${cost} ${currencyType === 'rubies' ? 'Rubine' : 'Scor'}!`, "fa-gem");
+        return false;
+    }
+
+    return true;
+}
 // Global Window Exports
 window.askWhichPetToSpawn = askWhichPetToSpawn;
 window.triggerPetSpawn = triggerPetSpawn;
@@ -22675,7 +22710,8 @@ window.useInventoryBox = useInventoryBox;
 window.openBoxInfoModal = openBoxInfoModal;
 window.openHeroModal = openHeroModal;
 window.closeBoxCutscene = closeBoxCutscene;
-
+// Add this to your list of window exports:
+window.backToUtilities = backToUtilities;
 })(); // <-- CLOSES THE SECURE VAULT
 
  
