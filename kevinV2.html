@@ -311,6 +311,15 @@ body, html {
     transition: left 0.3s ease-out, top 0.3s ease-out;
     -webkit-tap-highlight-color: transparent; /* Elimină sclipirea albastră pe mobil */
     outline: none;
+    /* ... existing styles ... */
+    image-rendering: -webkit-optimize-contrast; /* Keeps sharpness */
+    image-rendering: high-quality;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    /* Added to ensure image doesn't blur during movement */
+    backface-visibility: hidden;
+    will-change: background-image; 
 }
 
 /* Dimensiune mărită special pentru calculatoare (PC / Laptop) - Ajustată */
@@ -10985,6 +10994,14 @@ div.inv-tile div.bm-limit-tag {
     margin-top: auto !important; /* Pushes everything above this up */
     margin-bottom: 20px !important;
 }
+
+
+
+@keyframes smokeDrift {
+    0% { transform: scale(0.5) translateY(0); opacity: 0; }
+    50% { opacity: 0.5; }
+    100% { transform: scale(2) translateY(-100px); opacity: 0; }
+}
   </style>
 </head>
 <body>
@@ -11307,8 +11324,9 @@ div.inv-tile div.bm-limit-tag {
 </div> <!-- Închide hud-premium-container -->
 
 
-<!-- Put this inside <div id="gameArea"> -->
-<div id="smokeOverlay" style="position: fixed; inset: 0; z-index: 9999; background: rgba(255,255,255,0.2); backdrop-filter: blur(20px); opacity: 0; pointer-events: none; transition: opacity 1s ease;"></div>
+<div id="smokeEffectContainer" style="position: fixed; inset: 0; z-index: 1000; pointer-events: none; opacity: 0; transition: opacity 1s ease;">
+    <!-- We inject smoke particles here via JS -->
+</div>
 
 
 <div class="menu-container" id="menuWrapper">
@@ -13692,37 +13710,50 @@ function startSmokingCycle() {
 
     smokingInterval = setInterval(() => {
         const activeHero = characterList.find(c => c.id === window.currentPlayingCharId) || characterList[0];
-        
-        // Check if hero has the smoke image
         if (isPaused || isKevinTired || isSlowMoActive || !activeHero.smokeImg) return;
 
         const kevin = document.getElementById('kevin');
-        const smokeOverlay = document.getElementById('smokeOverlay');
+        const smokeContainer = document.getElementById('smokeEffectContainer');
         const originalBg = kevin.style.backgroundImage;
 
-        // 1. FREEZE & BLUR
+        // 1. FREEZE (BUT KEEP CLICKABLE)
         kevin.style.backgroundImage = `url('${activeHero.smokeImg}')`;
-        kevin.style.pointerEvents = 'none'; // Nu poate fi prins
-        
-        // Oprim mișcarea lui Kevin
         clearInterval(moveKevinInterval); 
         
-        // Activăm blur-ul
-        smokeOverlay.style.opacity = "1";
-        
-        console.log("🚬 " + activeHero.name + " fumează. Ecranul se încețoșează...");
+        // 2. TRIGGER SMOKE EFFECT
+        smokeContainer.style.opacity = "1";
+        spawnSmokeParticles(smokeContainer);
 
         setTimeout(() => {
-            // 2. REVENIRE LA NORMAL
+            // 3. REVENIRE
             kevin.style.backgroundImage = originalBg;
-            kevin.style.pointerEvents = 'auto';
-            smokeOverlay.style.opacity = "0";
+            smokeContainer.style.opacity = "0";
+            smokeContainer.innerHTML = ""; // Clear particles
             
-            // Repornim mișcarea
-            startKevinMovement(); 
-        }, 10000); // 10 secunde de "pauză de țigară"
+            if (!isPaused) {
+                moveKevinAway();
+                startKevinMovement(); 
+            }
+        }, 10000); // 10 secunde
 
-    }, 60000); // Se întâmplă la fiecare minut
+    }, 60000);
+}
+
+// Function to generate CSS-based smoke puffs
+function spawnSmokeParticles(container) {
+    for (let i = 0; i < 20; i++) {
+        const puff = document.createElement('div');
+        puff.style.cssText = `
+            position: absolute;
+            width: 100px; height: 100px;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            left: ${Math.random() * 100}vw;
+            top: ${Math.random() * 100}vh;
+            animation: smokeDrift ${3 + Math.random() * 4}s linear infinite;
+        `;
+        container.appendChild(puff);
+    }
 }
 
 const comboMilestones = {
