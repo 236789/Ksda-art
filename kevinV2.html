@@ -11044,6 +11044,26 @@ div.inv-tile div.bm-limit-tag {
     from { transform: scale(1); opacity: 0.8; }
     to { transform: scale(1.1); opacity: 1; }
 }
+
+
+.duplicate-x {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ff3333;
+    font-size: 140px; /* Mare și vizibil */
+    z-index: 20;
+    pointer-events: none;
+    text-shadow: 0 0 20px rgba(0,0,0,1);
+    opacity: 0.9;
+    animation: pulseX 1.5s infinite alternate;
+}
+
+@keyframes pulseX {
+    from { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
+    to { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+}
   </style>
 </head>
 <body>
@@ -22340,75 +22360,80 @@ function showFinalCatReveal(catData) {
     const overlay = document.getElementById('boxCutsceneOverlay');
     const imgEl = document.getElementById('boxCutsceneImg');
     
-    // 🐾 1. DUPLICATE LOGIC
-    // Verificăm dacă pisica a fost deja deținută (count > 0)
+    // 1. DUPLICATE LOGIC
     const isDuplicate = (_GAME_DATA.ownedPets && _GAME_DATA.ownedPets[catData.id] > 0);
-    
-    // Găsim prețul cutiei (boxKey trebuie să fie disponibil aici, 
-    // dacă nu e, asigură-te că e stocat global sau trece-l ca argument)
-    // Presupunem că ai o variabilă globală 'currentBoxKey' care reține cutia deschisă
     const boxPrice = catShopItems[currentBoxKey] ? catShopItems[currentBoxKey].price : 0;
     const rubyRefund = Math.floor(boxPrice * 0.8);
 
     if (isDuplicate) {
-        // Nu creștem numărul de pisici, dăm refund
         rubies += rubyRefund;
-        syncScoreToFirestore(); // Trimite noul număr de rubine la server
-        showNotification("DUPLICAT!", `Ai deja această pisică. Ai primit ${rubyRefund} rubine înapoi!`, "https://iili.io/CrnXNdG.png");
+        syncScoreToFirestore();
+        showNotification("DUPLICAT!", `Ai primit ${rubyRefund} rubine înapoi!`, "https://iili.io/CrnXNdG.png");
     } else {
-        // Pisică nouă: o salvăm
         if (!_GAME_DATA.ownedPets) _GAME_DATA.ownedPets = {};
         _GAME_DATA.ownedPets[catData.id] = (_GAME_DATA.ownedPets[catData.id] || 0) + 1;
         syncInventoryToCloud();
     }
 
     // 2. UI Updates
-    const elementsToRemove = overlay.querySelectorAll('.fade-out-piece');
-    elementsToRemove.forEach(el => el.style.display = 'none');
-
+    overlay.querySelectorAll('.fade-out-piece').forEach(el => el.style.display = 'none');
     imgEl.classList.remove('box-hit-anim', 'on-cooldown');
     imgEl.classList.add('reveal-img');
     imgEl.style.backgroundImage = `url('${catData.assets.presentation}')`;
     
-    // 3. APPLY GREY OVERLAY + RED X IF DUPLICATE
+    // 3. APPLY GREY OVERLAY + RED X (Visual Fix)
     if (isDuplicate) {
-        imgEl.style.filter = "grayscale(1) brightness(0.5) drop-shadow(0 0 20px #ff4444)";
+        imgEl.style.filter = "grayscale(1) brightness(0.4)";
         const redX = document.createElement('div');
+        redX.className = "duplicate-x"; // Folosim clasa din CSS-ul de mai jos
         redX.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-        redX.style.cssText = "position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#ff4444; font-size:120px; text-shadow:0 0 20px #000; z-index:20;";
         imgEl.appendChild(redX);
     }
 
-    // Build Stars HTML
-    const starCounts = { 'Common': 1, 'Rare': 2, 'Epic': 3, 'Legendary': 4, 'Majestic': 5 };
-    const sCount = starCounts[catData.stats.rarity] || 1;
-    let starsHtml = '';
-    for(let i=0; i<sCount; i++) {
-        const popDelay = i * 0.15;
-        const shineDelay = popDelay + 0.6;
-        starsHtml += `<span class="bc-star" style="animation: bcStarPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${popDelay}s backwards, bcStarShine 2.5s ease-in-out ${shineDelay}s infinite;">&#9733;</span>`;
-    }
-
-    // Top Panel: Rarity, Stars, Name
+    // 4. GENERATE CONTENT
     const topPanel = document.createElement('div');
     topPanel.className = 'reveal-top';
-    topPanel.innerHTML = `
-        <div class="bc-rarity-label">${catData.stats.rarity}</div>
-        <div class="bc-stars">${starsHtml}</div>
-        <div class="cat-reveal-name">${catData.name.toUpperCase()}</div>
-        ${isDuplicate ? `<div style="color:#ff4444; font-family:'Orbitron'; font-weight:900; margin-top:5px;">RAMBURSARE: ${rubyRefund} RUBINE</div>` : ''}
-    `;
+
+    if (isDuplicate) {
+        // --- DESIGN NOU: Centrat, curat, roșu aprins ---
+        topPanel.innerHTML = `
+            <div style="font-family:'Montserrat'; font-weight:900; font-size: 32px; color:#ff4444; text-shadow:0 0 20px #000; text-transform:uppercase; margin-bottom: 10px;">AI DEJA ACEST PET</div>
+            <div style="font-family:'Orbitron'; font-weight:900; font-size: 24px; color:#fff; margin-bottom: 5px;">RAMBURSARE</div>
+            <div style="display:flex; align-items:center; gap:10px; font-family:'Orbitron'; font-size: 50px; font-weight:900; color:#ff3366;">
+                +${rubyRefund} <img src="https://iili.io/CrnXNdG.png" style="width:40px; height:40px;">
+            </div>
+        `;
+    } else {
+        // --- DESIGN ORIGINAL (PENTRU PET NOU) ---
+        const starCounts = { 'Common': 1, 'Rare': 2, 'Epic': 3, 'Legendary': 4, 'Majestic': 5 };
+        const sCount = starCounts[catData.stats.rarity] || 1;
+        let starsHtml = '';
+        for(let i=0; i<sCount; i++) {
+            starsHtml += `<span class="bc-star">&#9733;</span>`;
+        }
+        topPanel.innerHTML = `
+            <div class="bc-rarity-label">${catData.stats.rarity}</div>
+            <div class="bc-stars">${starsHtml}</div>
+            <div class="cat-reveal-name">${catData.name.toUpperCase()}</div>
+        `;
+    }
 
     // Bottom Panel
     const bottomPanel = document.createElement('div');
     bottomPanel.className = 'reveal-bottom';
-    bottomPanel.innerHTML = `
-        <div class="cat-reveal-desc-box" style="${isDuplicate ? 'border-left-color: #ff4444;' : ''}">
-            <p><b>Personalitate:</b> ${catData.personality}</p>
-            <p>"${catData.desc}"</p>
-        </div>
-        <button class="cat-reveal-continue-btn" onclick="closeBoxCutscene()">SUPER!</button>
-    `;
+    
+    // Dacă e duplicat, scoatem descrierea, lăsăm doar butonul
+    if (!isDuplicate) {
+        bottomPanel.innerHTML = `
+            <div class="cat-reveal-desc-box">
+                <p><b>Personalitate:</b> ${catData.personality}</p>
+                <p>"${catData.desc}"</p>
+            </div>
+            <button class="cat-reveal-continue-btn" onclick="closeBoxCutscene()">SUPER!</button>
+        `;
+    } else {
+        bottomPanel.innerHTML = `<button class="cat-reveal-continue-btn" style="background: linear-gradient(180deg, #ff4444, #7f1d1d);" onclick="closeBoxCutscene()">ÎNCHIDE</button>`;
+    }
 
     overlay.appendChild(topPanel);
     overlay.appendChild(bottomPanel);
