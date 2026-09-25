@@ -11028,6 +11028,22 @@ div.inv-tile div.bm-limit-tag {
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
 }
+
+
+.reveal-img {
+    position: relative; /* Necesar pentru a ancora X-ul */
+}
+
+/* Stilul X-ului pentru Duplicate */
+.reveal-img i.fa-xmark {
+    filter: drop-shadow(0 0 10px #ff0000);
+    animation: pulseX 1s infinite alternate;
+}
+
+@keyframes pulseX {
+    from { transform: scale(1); opacity: 0.8; }
+    to { transform: scale(1.1); opacity: 1; }
+}
   </style>
 </head>
 <body>
@@ -22043,12 +22059,13 @@ function playCatSound(url) {
         a.preload = "auto";
         sfxCache[url] = a;
     }
-    currentCatAudio = sfxCache[url];
+    currentCatAudio = sfxCache[url]; 
     currentCatAudio.volume = sfxVolume;
     currentCatAudio.play().catch(e => console.warn(e));
 }
-
+let currentBoxKey = null;
 async function startBoxCutscene(boxKey) {
+    currentBoxKey = boxKey; // Save the key globally
     isPaused = true; 
     
     cutsceneCatId = rollCatFromBox(boxKey);
@@ -22321,24 +22338,46 @@ if (boxClicks === 10) {
 
 function showFinalCatReveal(catData) {
     const overlay = document.getElementById('boxCutsceneOverlay');
-
-    // 🐾 NOU: Salvăm pisica în colecția ownedPets, NU în inventory
-    if (!_GAME_DATA.ownedPets) _GAME_DATA.ownedPets = {};
-    _GAME_DATA.ownedPets[catData.id] = (_GAME_DATA.ownedPets[catData.id] || 0) + 1;
-    
-    syncInventoryToCloud();
-
     const imgEl = document.getElementById('boxCutsceneImg');
+    
+    // 🐾 1. DUPLICATE LOGIC
+    // Verificăm dacă pisica a fost deja deținută (count > 0)
+    const isDuplicate = (_GAME_DATA.ownedPets && _GAME_DATA.ownedPets[catData.id] > 0);
+    
+    // Găsim prețul cutiei (boxKey trebuie să fie disponibil aici, 
+    // dacă nu e, asigură-te că e stocat global sau trece-l ca argument)
+    // Presupunem că ai o variabilă globală 'currentBoxKey' care reține cutia deschisă
+    const boxPrice = catShopItems[currentBoxKey] ? catShopItems[currentBoxKey].price : 0;
+    const rubyRefund = Math.floor(boxPrice * 0.8);
 
-    // Remove old pieces completely from flow
+    if (isDuplicate) {
+        // Nu creștem numărul de pisici, dăm refund
+        rubies += rubyRefund;
+        syncScoreToFirestore(); // Trimite noul număr de rubine la server
+        showNotification("DUPLICAT!", `Ai deja această pisică. Ai primit ${rubyRefund} rubine înapoi!`, "https://iili.io/CrnXNdG.png");
+    } else {
+        // Pisică nouă: o salvăm
+        if (!_GAME_DATA.ownedPets) _GAME_DATA.ownedPets = {};
+        _GAME_DATA.ownedPets[catData.id] = (_GAME_DATA.ownedPets[catData.id] || 0) + 1;
+        syncInventoryToCloud();
+    }
+
+    // 2. UI Updates
     const elementsToRemove = overlay.querySelectorAll('.fade-out-piece');
     elementsToRemove.forEach(el => el.style.display = 'none');
 
     imgEl.classList.remove('box-hit-anim', 'on-cooldown');
     imgEl.classList.add('reveal-img');
     imgEl.style.backgroundImage = `url('${catData.assets.presentation}')`;
-    imgEl.style.cursor = 'default';
-    imgEl.onclick = null;
+    
+    // 3. APPLY GREY OVERLAY + RED X IF DUPLICATE
+    if (isDuplicate) {
+        imgEl.style.filter = "grayscale(1) brightness(0.5) drop-shadow(0 0 20px #ff4444)";
+        const redX = document.createElement('div');
+        redX.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+        redX.style.cssText = "position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#ff4444; font-size:120px; text-shadow:0 0 20px #000; z-index:20;";
+        imgEl.appendChild(redX);
+    }
 
     // Build Stars HTML
     const starCounts = { 'Common': 1, 'Rare': 2, 'Epic': 3, 'Legendary': 4, 'Majestic': 5 };
@@ -22357,13 +22396,14 @@ function showFinalCatReveal(catData) {
         <div class="bc-rarity-label">${catData.stats.rarity}</div>
         <div class="bc-stars">${starsHtml}</div>
         <div class="cat-reveal-name">${catData.name.toUpperCase()}</div>
+        ${isDuplicate ? `<div style="color:#ff4444; font-family:'Orbitron'; font-weight:900; margin-top:5px;">RAMBURSARE: ${rubyRefund} RUBINE</div>` : ''}
     `;
 
-    // Bottom Panel: Description, Button
+    // Bottom Panel
     const bottomPanel = document.createElement('div');
     bottomPanel.className = 'reveal-bottom';
     bottomPanel.innerHTML = `
-        <div class="cat-reveal-desc-box">
+        <div class="cat-reveal-desc-box" style="${isDuplicate ? 'border-left-color: #ff4444;' : ''}">
             <p><b>Personalitate:</b> ${catData.personality}</p>
             <p>"${catData.desc}"</p>
         </div>
@@ -22372,10 +22412,6 @@ function showFinalCatReveal(catData) {
 
     overlay.appendChild(topPanel);
     overlay.appendChild(bottomPanel);
-
-    if (catData.stats.rarity === 'Legendary' || catData.stats.rarity === 'Majestic') {
-        if (typeof spawnJackpotCoins === 'function') spawnJackpotCoins();
-    }
 }
 
 function closeBoxCutscene() {
