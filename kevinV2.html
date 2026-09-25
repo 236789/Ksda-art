@@ -11002,6 +11002,37 @@ div.inv-tile div.bm-limit-tag {
     50% { opacity: 0.5; }
     100% { transform: scale(2) translateY(-100px); opacity: 0; }
 }
+
+
+/* Dense Fog Container */
+#smokeEffectContainer {
+    position: fixed; inset: 0; z-index: 10000; pointer-events: none;
+    background: radial-gradient(circle at center, rgba(200,200,200,0.3) 0%, rgba(50,50,50,0.6) 100%);
+    opacity: 0; transition: opacity 0.5s ease;
+}
+
+/* The "Intense" Smoke Particles */
+.intense-smoke {
+    position: absolute; width: 250px; height: 250px;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: chaoticDrift 2s linear infinite;
+}
+
+@keyframes chaoticDrift {
+    0% { transform: scale(0.5) translate(0, 0); }
+    100% { transform: scale(3) translate(var(--x), var(--y)); }
+}
+
+/* Screen Shake Effect */
+.smoke-shake {
+    animation: shakeEffect 0.2s infinite;
+}
+@keyframes shakeEffect {
+    0% { transform: translate(1px, 1px); }
+    50% { transform: translate(-1px, -2px); }
+    100% { transform: translate(1px, 1px); }
+}
   </style>
 </head>
 <body>
@@ -13714,46 +13745,50 @@ function startSmokingCycle() {
 
         const kevin = document.getElementById('kevin');
         const smokeContainer = document.getElementById('smokeEffectContainer');
+        const gameArea = document.getElementById('gameArea');
         const originalBg = kevin.style.backgroundImage;
 
-        // 1. FREEZE (BUT KEEP CLICKABLE)
+        // 1. Freeze & Apply Smoke Look
         kevin.style.backgroundImage = `url('${activeHero.smokeImg}')`;
         clearInterval(moveKevinInterval); 
         
-        // 2. TRIGGER SMOKE EFFECT
+        // 2. Visual Intensity
         smokeContainer.style.opacity = "1";
-        spawnSmokeParticles(smokeContainer);
+        gameArea.classList.add('smoke-shake'); // SHAKE THE WHOLE GAME
+        spawnIntenseSmoke(smokeContainer);
 
         setTimeout(() => {
-            // 3. REVENIRE
+            // 3. Reset
             kevin.style.backgroundImage = originalBg;
             smokeContainer.style.opacity = "0";
-            smokeContainer.innerHTML = ""; // Clear particles
+            smokeContainer.innerHTML = ""; 
+            gameArea.classList.remove('smoke-shake');
             
             if (!isPaused) {
                 moveKevinAway();
                 startKevinMovement(); 
             }
-        }, 10000); // 10 secunde
+        }, 10000); 
 
-    }, 60000);
+    }, 60000); 
 }
 
-// Function to generate CSS-based smoke puffs
-function spawnSmokeParticles(container) {
-    for (let i = 0; i < 20; i++) {
+function spawnIntenseSmoke(container) {
+    // Spawn 40 particles instead of 20, and keep spawning them
+    const spawnPuffs = setInterval(() => {
+        if (container.style.opacity === "0") { clearInterval(spawnPuffs); return; }
+        
         const puff = document.createElement('div');
-        puff.style.cssText = `
-            position: absolute;
-            width: 100px; height: 100px;
-            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
-            border-radius: 50%;
-            left: ${Math.random() * 100}vw;
-            top: ${Math.random() * 100}vh;
-            animation: smokeDrift ${3 + Math.random() * 4}s linear infinite;
-        `;
+        puff.className = 'intense-smoke';
+        // Random directions
+        puff.style.setProperty('--x', (Math.random() * 400 - 200) + 'px');
+        puff.style.setProperty('--y', (Math.random() * 400 - 200) + 'px');
+        puff.style.left = (Math.random() * 80 + 10) + 'vw';
+        puff.style.top = (Math.random() * 80 + 10) + 'vh';
+        
         container.appendChild(puff);
-    }
+        setTimeout(() => puff.remove(), 2000);
+    }, 100);
 }
 
 const comboMilestones = {
