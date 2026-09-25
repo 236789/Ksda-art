@@ -12938,6 +12938,7 @@ function getQuestIcon(action) {
     let comboTimer = null;
     let moveKevinInterval = null;
     let tiredTimeout = null;
+    let smokingInterval = null;
     let saveScoreInterval = null;
     let isKevinTired = false;
     let canClickKevin = true; 
@@ -13350,7 +13351,8 @@ function startGameUI() {
   moveKevinAway(); 
   startKevinMovement();
   startTiredCycle();
-  
+  startSmokingCycle();
+
   if (saveScoreInterval) clearInterval(saveScoreInterval);
   saveScoreInterval = setInterval(syncScoreToFirestore, 5000);
 
@@ -13606,6 +13608,9 @@ function startTiredCycle() {
         }, 5000); // Stationary for 5 seconds
     }, 60000); // Happens every 60 seconds
 }
+
+
+
 document.getElementById('kevin').addEventListener('click', (e) => {
     e.stopPropagation(); 
 
@@ -13675,6 +13680,31 @@ document.getElementById('kevin').addEventListener('click', (e) => {
       startKevinMovement(); 
     }
 });
+
+
+// ✅ PUNE-L AICI:
+function startSmokingCycle() {
+    if (smokingInterval) clearInterval(smokingInterval);
+
+    smokingInterval = setInterval(() => {
+        const activeHero = characterList.find(c => c.id === window.currentPlayingCharId) || characterList[0];
+
+        if (isPaused || isKevinTired || isSlowMoActive || !activeHero.smokeImg) {
+            return;
+        }
+
+        const kevin = document.getElementById('kevin');
+        const originalBg = kevin.style.backgroundImage;
+
+        kevin.style.backgroundImage = `url('${activeHero.smokeImg}')`;
+        kevin.style.pointerEvents = 'none';
+        
+        setTimeout(() => {
+            kevin.style.backgroundImage = originalBg;
+            kevin.style.pointerEvents = 'auto';
+        }, 5000); 
+    }, 60000); 
+}
 
 const comboMilestones = {
     5:   { word: "BINE TICĂ!", tier: "tier-verde" },
@@ -13867,8 +13897,17 @@ bgMusic.onerror = (e) => {
 const eroiPath = "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/";
 
 const characterList = [
-    // STARTERS (Price 0)
-    { id: "kevin", name: "KEVINUȚĂ", price: 0, desc: "Un puști plin de energie. Viteza este aliatul lui!", displayImg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w", playImg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/192e30da-bdaa-47cc-9de6-472d696fa466/KEVINUTA+13-Photoroom.png?format=500w", tiredImg: "https://images.squarespace-cdn.com/content/v1/68026d02ef3401024739f55f/0b5ac0f4-618a-4346-9684-8c1f3c0a5fcb/20716c49-4365-417d-97e9-fc8601ae5403_removalai_preview.png?format=500w" },
+    { 
+        id: "kevin", 
+        name: "KEVINUȚĂ", 
+        price: 0, 
+        desc: "Kevin s-a schimbat! E mai fresh și mai pregătit ca niciodată.", 
+        displayImg: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/kevin%20standing%201.png", 
+        playImg: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/kevin%20running%201.png", 
+        tiredImg: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/kevin%20tired%201.png",
+        smokeImg: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/kevin%20smoking%201.png"
+    },
+
     { id: "emmanuel", name: "EMMANUEL", price: 0, desc: "Artistul cartierului. Politicos, dar iute la mânie!", displayImg: "https://iili.io/CNUBdIj.png", playImg: "https://iili.io/CNURdSR.png", tiredImg: "https://iili.io/CNURciu.png" },
     { id: "antonio", name: "ANTONIO", price: 0, desc: "Vorbește doar engleză. Good luck catching him!", displayImg: "https://iili.io/CNUnzsR.png", playImg: "https://iili.io/CNURvUv.png", tiredImg: "https://iili.io/CNU5Fgj.png" },
     
@@ -14007,16 +14046,16 @@ let charIndex = 0; // Adaugă această linie dacă nu există
 
 
 const characterDialogues = {
-  kevin: [
-    "Asta e tot ce poți? 😂",
-    "Click mai repede, bunicule!",
-    "Ce-i asta, un gameplay sau un eșec live?",
-    "💀 Rușine scorului tău.",
-    "Mă doare RAM-ul când te văd jucând.",
-    "Sunt prea rapid pentru degetele tale de unt!",
-    "Zici că dai click cu mămăligă...",
-    "Ești praf, lasă-te de meserie!"
-  ],
+    kevin: [
+        {text: "BAAA asta e vlad tepes ia stai ma  EL E BAAA", 
+      audio: "https://www.dropbox.com/scl/fi/ayxwajbvxejsevk2qk0g0/BAAA-asta-e-vlad-tepes-ia-stai-ma-EL-E-BAAA.mp3?rlkey=gstm0pjbkebfoxzt8na7t969g&st=ewq2hn60&dl=1" 
+    },
+        { text: "DA SA MOR EU", audio: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/da%20sa%20mor%20eu.mp3" },
+        { text: "INGHITEAM AER IN CUR CUM DRACU?", audio: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/inghiteam%20aer%20in%20cur%20cum%20dracu.mp3" },
+        { text: "KEVIN KEVIN KEVIN!", audio: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/KEVIN%20KEVIN%20KEVIN!.mp3" },
+        { text: " LA MUNCA LA MUNCA IA UN BLOCK DUTE IN PULA MEA", audio: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/LA%20MUNCA%20LA%20MUNCA%20ia%20un%20block%20dute%20in%20pula%20mea.mp3" },
+        { text: "UNDE TEAI DUS TU TELEVZORU MEU", audio: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/unde%20teai%20dus%20tu%20televzoru%20meu%20ce%20ma%20fac%20eu%20fara%20tine%20futu.mp3" }
+    ],
   antonio: [
     "Git gud, scrub! 🎮",
     "Is that your best? Pathetic.",
@@ -16179,8 +16218,8 @@ function playRandomSqueak() {
 
 const hotSauceAssets = {
     kevin: {
-        play: "https://iili.io/CvuYXLb.png",
-        tired: "https://iili.io/CvuYjBj.png",
+        play: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/kevin%20hot%20running%201.png",
+        tired: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/MemoryAssets/RandomAssets/heros/kevin%20hot%20tired%201.png",
         lines: ["MĂ ARDEEE!", "APA, VREAU APA!", "STINGEȚI FOCUL!", "FRIGE!", "SOSUL ĂLA A FOST O GREȘEALĂ!"]
     },
     emmanuel: {
