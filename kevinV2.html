@@ -10995,43 +10995,26 @@ div.inv-tile div.bm-limit-tag {
     margin-bottom: 20px !important;
 }
 
-
-
-@keyframes smokeDrift {
-    0% { transform: scale(0.5) translateY(0); opacity: 0; }
-    50% { opacity: 0.5; }
-    100% { transform: scale(2) translateY(-100px); opacity: 0; }
+#smokeVideoOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    pointer-events: none; /* Click through to Kevin */
+    opacity: 0;
+    transition: opacity 1s ease;
+    overflow: hidden;
 }
 
-
-/* Dense Fog Container */
-#smokeEffectContainer {
-    position: fixed; inset: 0; z-index: 10000; pointer-events: none;
-    background: radial-gradient(circle at center, rgba(200,200,200,0.3) 0%, rgba(50,50,50,0.6) 100%);
-    opacity: 0; transition: opacity 0.5s ease;
-}
-
-/* The "Intense" Smoke Particles */
-.intense-smoke {
-    position: absolute; width: 250px; height: 250px;
-    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
-    border-radius: 50%;
-    animation: chaoticDrift 2s linear infinite;
-}
-
-@keyframes chaoticDrift {
-    0% { transform: scale(0.5) translate(0, 0); }
-    100% { transform: scale(3) translate(var(--x), var(--y)); }
-}
-
-/* Screen Shake Effect */
-.smoke-shake {
-    animation: shakeEffect 0.2s infinite;
-}
-@keyframes shakeEffect {
-    0% { transform: translate(1px, 1px); }
-    50% { transform: translate(-1px, -2px); }
-    100% { transform: translate(1px, 1px); }
+#smokeVideoOverlay video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* This makes the black parts of the video transparent */
+    mix-blend-mode: screen; 
+    filter: brightness(1.2) contrast(1.2);
 }
   </style>
 </head>
@@ -11355,8 +11338,8 @@ div.inv-tile div.bm-limit-tag {
 </div> <!-- Închide hud-premium-container -->
 
 
-<div id="smokeEffectContainer" style="position: fixed; inset: 0; z-index: 1000; pointer-events: none; opacity: 0; transition: opacity 1s ease;">
-    <!-- We inject smoke particles here via JS -->
+<div id="smokeVideoOverlay">
+    <video id="smokeVideo" src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" loop muted playsinline></video>
 </div>
 
 
@@ -13735,61 +13718,50 @@ document.getElementById('kevin').addEventListener('click', (e) => {
     }
 });
 
-
 function startSmokingCycle() {
     if (smokingInterval) clearInterval(smokingInterval);
 
     smokingInterval = setInterval(() => {
         const activeHero = characterList.find(c => c.id === window.currentPlayingCharId) || characterList[0];
+        
+        // Safety: only if not paused, not tired, not frozen, and smoke file exists
         if (isPaused || isKevinTired || isSlowMoActive || !activeHero.smokeImg) return;
 
         const kevin = document.getElementById('kevin');
-        const smokeContainer = document.getElementById('smokeEffectContainer');
-        const gameArea = document.getElementById('gameArea');
+        const overlay = document.getElementById('smokeVideoOverlay');
+        const video = document.getElementById('smokeVideo');
         const originalBg = kevin.style.backgroundImage;
 
-        // 1. Freeze & Apply Smoke Look
+        // 1. Trigger Smoke
         kevin.style.backgroundImage = `url('${activeHero.smokeImg}')`;
+        overlay.style.opacity = "1";
+        video.play(); // Start the video
+        
+        // 2. Freeze movement (but keep clickable)
         clearInterval(moveKevinInterval); 
         
-        // 2. Visual Intensity
-        smokeContainer.style.opacity = "1";
-        gameArea.classList.add('smoke-shake'); // SHAKE THE WHOLE GAME
-        spawnIntenseSmoke(smokeContainer);
+        // 3. Shake the game area for intensity
+        const gameArea = document.getElementById('gameArea');
+        gameArea.classList.add('smoke-shake');
 
         setTimeout(() => {
-            // 3. Reset
+            // 4. Reset
             kevin.style.backgroundImage = originalBg;
-            smokeContainer.style.opacity = "0";
-            smokeContainer.innerHTML = ""; 
+            overlay.style.opacity = "0";
+            video.pause();
+            video.currentTime = 0; // Reset video to start for next time
             gameArea.classList.remove('smoke-shake');
             
             if (!isPaused) {
                 moveKevinAway();
                 startKevinMovement(); 
             }
-        }, 10000); 
+        }, 10000); // 10 seconds of smoke
 
-    }, 60000); 
+    }, 60000); // Once per minute
 }
 
-function spawnIntenseSmoke(container) {
-    // Spawn 40 particles instead of 20, and keep spawning them
-    const spawnPuffs = setInterval(() => {
-        if (container.style.opacity === "0") { clearInterval(spawnPuffs); return; }
-        
-        const puff = document.createElement('div');
-        puff.className = 'intense-smoke';
-        // Random directions
-        puff.style.setProperty('--x', (Math.random() * 400 - 200) + 'px');
-        puff.style.setProperty('--y', (Math.random() * 400 - 200) + 'px');
-        puff.style.left = (Math.random() * 80 + 10) + 'vw';
-        puff.style.top = (Math.random() * 80 + 10) + 'vh';
-        
-        container.appendChild(puff);
-        setTimeout(() => puff.remove(), 2000);
-    }, 100);
-}
+
 
 const comboMilestones = {
     5:   { word: "BINE TICĂ!", tier: "tier-verde" },
