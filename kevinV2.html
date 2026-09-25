@@ -11306,6 +11306,11 @@ div.inv-tile div.bm-limit-tag {
     </div>
 </div> <!-- Închide hud-premium-container -->
 
+
+<!-- Put this inside <div id="gameArea"> -->
+<div id="smokeOverlay" style="position: fixed; inset: 0; z-index: 9999; background: rgba(255,255,255,0.2); backdrop-filter: blur(20px); opacity: 0; pointer-events: none; transition: opacity 1s ease;"></div>
+
+
 <div class="menu-container" id="menuWrapper">
   <!-- The sub-buttons (Hidden by default) -->
   <div class="menu-options" id="menuOptions">
@@ -13682,28 +13687,42 @@ document.getElementById('kevin').addEventListener('click', (e) => {
 });
 
 
-// ✅ PUNE-L AICI:
 function startSmokingCycle() {
     if (smokingInterval) clearInterval(smokingInterval);
 
     smokingInterval = setInterval(() => {
         const activeHero = characterList.find(c => c.id === window.currentPlayingCharId) || characterList[0];
-
-        if (isPaused || isKevinTired || isSlowMoActive || !activeHero.smokeImg) {
-            return;
-        }
+        
+        // Check if hero has the smoke image
+        if (isPaused || isKevinTired || isSlowMoActive || !activeHero.smokeImg) return;
 
         const kevin = document.getElementById('kevin');
+        const smokeOverlay = document.getElementById('smokeOverlay');
         const originalBg = kevin.style.backgroundImage;
 
+        // 1. FREEZE & BLUR
         kevin.style.backgroundImage = `url('${activeHero.smokeImg}')`;
-        kevin.style.pointerEvents = 'none';
+        kevin.style.pointerEvents = 'none'; // Nu poate fi prins
         
+        // Oprim mișcarea lui Kevin
+        clearInterval(moveKevinInterval); 
+        
+        // Activăm blur-ul
+        smokeOverlay.style.opacity = "1";
+        
+        console.log("🚬 " + activeHero.name + " fumează. Ecranul se încețoșează...");
+
         setTimeout(() => {
+            // 2. REVENIRE LA NORMAL
             kevin.style.backgroundImage = originalBg;
             kevin.style.pointerEvents = 'auto';
-        }, 5000); 
-    }, 60000); 
+            smokeOverlay.style.opacity = "0";
+            
+            // Repornim mișcarea
+            startKevinMovement(); 
+        }, 10000); // 10 secunde de "pauză de țigară"
+
+    }, 60000); // Se întâmplă la fiecare minut
 }
 
 const comboMilestones = {
