@@ -15697,15 +15697,15 @@ if (isUnlocked("memoryCards") && specialRegistry["memoryCards"].stages.includes(
     }
 }
 
-    // --- LOGICA DE RARITATE (5% Șansă pentru Slot) ---
-    if (chosenKey === "slotMachine") {
-        if (Math.random() > 0.10) { // Dacă NU avem noroc de 5%
-            // Forțăm alegerea unui obiect de Nivel 1 (Axe, Sos, etc)
-            const basicKeys = availableKeys.filter(k => k !== "slotMachine");
-            if (basicKeys.length > 0) {
-                chosenKey = basicKeys[Math.floor(Math.random() * basicKeys.length)];
-            }
+// --- LOGICA DE RARITATE PENTRU SLOT MACHINE ---
+    // 15% fixed chance to spawn the Slot Machine (if unlocked)
+    if (isUnlocked("slotMachine") && specialRegistry["slotMachine"].stages.includes(currentStageId)) {
+        if (Math.random() < 0.15) { // Change 0.15 to a higher number if you want it even more often
+            chosenKey = "slotMachine";
+            console.log("🎰 SLOT MACHINE: A apărut pe hartă!");
         }
+    }
+    // --------------------------------------------------
     }
     // --------------------------------------------------
 
