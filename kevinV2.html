@@ -11028,31 +11028,22 @@ div.inv-tile div.bm-limit-tag {
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
 }
-
-
-.reveal-img {
-    position: relative; /* Necesar pentru a ancora X-ul */
+/* Containerul care ține și pisica și X-ul */
+.reveal-img-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 200px;
+    height: 200px;
 }
 
-/* Stilul X-ului pentru Duplicate */
-.reveal-img i.fa-xmark {
-    filter: drop-shadow(0 0 10px #ff0000);
-    animation: pulseX 1s infinite alternate;
-}
-
-@keyframes pulseX {
-    from { transform: scale(1); opacity: 0.8; }
-    to { transform: scale(1.1); opacity: 1; }
-}
-
-
+/* X-ul centrat perfect */
 .duplicate-x {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     color: #ff3333;
-    font-size: 140px; /* Mare și vizibil */
+    font-size: 140px;
     z-index: 20;
     pointer-events: none;
     text-shadow: 0 0 20px rgba(0,0,0,1);
@@ -11060,9 +11051,13 @@ div.inv-tile div.bm-limit-tag {
     animation: pulseX 1.5s infinite alternate;
 }
 
-@keyframes pulseX {
-    from { transform: translate(-50%, -50%) scale(1); opacity: 0.7; }
-    to { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+/* Textul cu rambursare */
+.duplicate-info-box {
+    margin-top: 15px;
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    color: #ff3333;
+    font-weight: 900;
 }
   </style>
 </head>
@@ -22360,7 +22355,7 @@ function showFinalCatReveal(catData) {
     const overlay = document.getElementById('boxCutsceneOverlay');
     const imgEl = document.getElementById('boxCutsceneImg');
     
-    // 1. DUPLICATE LOGIC
+    // 1. LOGIC
     const isDuplicate = (_GAME_DATA.ownedPets && _GAME_DATA.ownedPets[catData.id] > 0);
     const boxPrice = catShopItems[currentBoxKey] ? catShopItems[currentBoxKey].price : 0;
     const rubyRefund = Math.floor(boxPrice * 0.8);
@@ -22377,40 +22372,43 @@ function showFinalCatReveal(catData) {
 
     // 2. UI Updates
     overlay.querySelectorAll('.fade-out-piece').forEach(el => el.style.display = 'none');
+    
+    // --- REPARAREA VIZUALĂ: CREĂM WRAPPER-UL ---
+    const wrapper = document.createElement('div');
+    wrapper.className = "reveal-img-wrapper";
+    imgEl.parentNode.replaceChild(wrapper, imgEl); // Înlocuim div-ul vechi cu wrapper-ul
+    
     imgEl.classList.remove('box-hit-anim', 'on-cooldown');
     imgEl.classList.add('reveal-img');
     imgEl.style.backgroundImage = `url('${catData.assets.presentation}')`;
+    wrapper.appendChild(imgEl); // Punem pisica în wrapper
     
-    // 3. APPLY GREY OVERLAY + RED X (Visual Fix)
+    // 3. APPLY DUPLICATE EFFECTS PE WRAPPER
     if (isDuplicate) {
         imgEl.style.filter = "grayscale(1) brightness(0.4)";
         const redX = document.createElement('div');
-        redX.className = "duplicate-x"; // Folosim clasa din CSS-ul de mai jos
+        redX.className = "duplicate-x";
         redX.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-        imgEl.appendChild(redX);
+        wrapper.appendChild(redX); // X-ul stă peste pisică în interiorul wrapper-ului
     }
 
-    // 4. GENERATE CONTENT
+    // 4. GENERATE CONTENT (Textul)
     const topPanel = document.createElement('div');
     topPanel.className = 'reveal-top';
 
     if (isDuplicate) {
-        // --- DESIGN NOU: Centrat, curat, roșu aprins ---
         topPanel.innerHTML = `
-            <div style="font-family:'Montserrat'; font-weight:900; font-size: 32px; color:#ff4444; text-shadow:0 0 20px #000; text-transform:uppercase; margin-bottom: 10px;">AI DEJA ACEST PET</div>
+            <div style="font-family:'Montserrat'; font-weight:900; font-size: 32px; color:#ff4444; text-transform:uppercase; margin-bottom: 10px;">AI DEJA ACEST PET</div>
             <div style="font-family:'Orbitron'; font-weight:900; font-size: 24px; color:#fff; margin-bottom: 5px;">RAMBURSARE</div>
             <div style="display:flex; align-items:center; gap:10px; font-family:'Orbitron'; font-size: 50px; font-weight:900; color:#ff3366;">
                 +${rubyRefund} <img src="https://iili.io/CrnXNdG.png" style="width:40px; height:40px;">
             </div>
         `;
     } else {
-        // --- DESIGN ORIGINAL (PENTRU PET NOU) ---
         const starCounts = { 'Common': 1, 'Rare': 2, 'Epic': 3, 'Legendary': 4, 'Majestic': 5 };
         const sCount = starCounts[catData.stats.rarity] || 1;
-        let starsHtml = '';
-        for(let i=0; i<sCount; i++) {
-            starsHtml += `<span class="bc-star">&#9733;</span>`;
-        }
+        let starsHtml = Array(sCount).fill('<span class="bc-star">&#9733;</span>').join('');
+        
         topPanel.innerHTML = `
             <div class="bc-rarity-label">${catData.stats.rarity}</div>
             <div class="bc-stars">${starsHtml}</div>
@@ -22418,22 +22416,16 @@ function showFinalCatReveal(catData) {
         `;
     }
 
-    // Bottom Panel
+    // 5. BOTTOM PANEL
     const bottomPanel = document.createElement('div');
     bottomPanel.className = 'reveal-bottom';
-    
-    // Dacă e duplicat, scoatem descrierea, lăsăm doar butonul
-    if (!isDuplicate) {
-        bottomPanel.innerHTML = `
-            <div class="cat-reveal-desc-box">
-                <p><b>Personalitate:</b> ${catData.personality}</p>
-                <p>"${catData.desc}"</p>
-            </div>
-            <button class="cat-reveal-continue-btn" onclick="closeBoxCutscene()">SUPER!</button>
-        `;
-    } else {
-        bottomPanel.innerHTML = `<button class="cat-reveal-continue-btn" style="background: linear-gradient(180deg, #ff4444, #7f1d1d);" onclick="closeBoxCutscene()">ÎNCHIDE</button>`;
-    }
+    bottomPanel.innerHTML = !isDuplicate ? `
+        <div class="cat-reveal-desc-box">
+            <p><b>Personalitate:</b> ${catData.personality}</p>
+            <p>"${catData.desc}"</p>
+        </div>
+        <button class="cat-reveal-continue-btn" onclick="closeBoxCutscene()">SUPER!</button>
+    ` : `<button class="cat-reveal-continue-btn" style="background: linear-gradient(180deg, #ff4444, #7f1d1d);" onclick="closeBoxCutscene()">ÎNCHIDE</button>`;
 
     overlay.appendChild(topPanel);
     overlay.appendChild(bottomPanel);
