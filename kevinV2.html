@@ -17,7 +17,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PRINDEL PE KEVINUȚĂ V2</title>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r94/three.min.js"></script>
     <link rel="icon" type="image/png" href="https://iili.io/CNVgL7a.png">
 
 
@@ -11337,8 +11337,9 @@ div.inv-tile div.bm-limit-tag {
 </div> <!-- Închide hud-premium-container -->
 
 
-<div id="smokeVideoOverlay">
-    <video id="smokeVideo" src="https://video.wixstatic.com/video/d47472_58cce06729c54ccb935886c4b3647274/1080p/mp4/file.mp4" loop muted playsinline></video>
+<!-- Put this in your gameArea -->
+<div id="smokeOverlay" style="position: fixed; inset: 0; z-index: 999; pointer-events: none; opacity: 0; transition: opacity 1s;">
+    <canvas id="smokeCanvas"></canvas>
 </div>
 
 
@@ -13722,42 +13723,29 @@ function startSmokingCycle() {
 
     smokingInterval = setInterval(() => {
         const activeHero = characterList.find(c => c.id === window.currentPlayingCharId) || characterList[0];
-        
-        // Safety: only if not paused, not tired, not frozen, and smoke file exists
         if (isPaused || isKevinTired || isSlowMoActive || !activeHero.smokeImg) return;
 
         const kevin = document.getElementById('kevin');
-        const overlay = document.getElementById('smokeVideoOverlay');
-        const video = document.getElementById('smokeVideo');
+        const overlay = document.getElementById('smokeOverlay'); // The DIV container
         const originalBg = kevin.style.backgroundImage;
 
-        // 1. Trigger Smoke
+        // Start smoke
         kevin.style.backgroundImage = `url('${activeHero.smokeImg}')`;
         overlay.style.opacity = "1";
-        video.play(); // Start the video
         
-        // 2. Freeze movement (but keep clickable)
-        clearInterval(moveKevinInterval); 
-        
-        // 3. Shake the game area for intensity
-        const gameArea = document.getElementById('gameArea');
-        gameArea.classList.add('smoke-shake');
+        clearInterval(moveKevinInterval);
 
         setTimeout(() => {
-            // 4. Reset
+            // Stop smoke
             kevin.style.backgroundImage = originalBg;
             overlay.style.opacity = "0";
-            video.pause();
-            video.currentTime = 0; // Reset video to start for next time
-            gameArea.classList.remove('smoke-shake');
             
             if (!isPaused) {
                 moveKevinAway();
                 startKevinMovement(); 
             }
-        }, 10000); // 10 seconds of smoke
-
-    }, 60000); // Once per minute
+        }, 10000); 
+    }, 60000);
 }
 
 
@@ -22579,6 +22567,65 @@ window.openHeroModal = openHeroModal;
 window.closeBoxCutscene = closeBoxCutscene;
 // Add this to your list of window exports:
 window.backToUtilities = backToUtilities;
+
+
+
+class Smoke {
+    constructor() {
+        this.canvas = document.getElementById('smokeCanvas');
+        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, alpha: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setClearColor(0x000000, 0); // Transparent background
+        
+        this.scene = new THREE.Scene();
+        this.clock = new THREE.Clock();
+        this.smokeParticles = [];
+
+        this.addCamera();
+        this.addLights();
+        this.addParticles();
+        this.update();
+    }
+
+    addCamera() {
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 1, 10000);
+        this.camera.position.z = 1000;
+        this.scene.add(this.camera);
+    }
+
+    addLights() {
+        const light = new THREE.DirectionalLight(0xffffff, 0.75);
+        light.position.set(-1, 0, 1);
+        this.scene.add(light);
+    }
+
+    addParticles() {
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.load("https://raw.githubusercontent.com/marcobiedermann/playground/master/three.js/smoke-particles/dist/assets/images/clouds.png", (texture) => {
+            const smokeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, map: texture, transparent: true });
+            smokeMaterial.map.minFilter = THREE.LinearFilter;
+            const smokeGeometry = new THREE.PlaneBufferGeometry(300, 300);
+
+            for (let i = 0; i < 150; i++) {
+                let mesh = new THREE.Mesh(smokeGeometry, smokeMaterial);
+                mesh.position.set(Math.random()*500-250, Math.random()*500-250, Math.random()*1000-100);
+                mesh.rotation.z = Math.random() * 360;
+                this.smokeParticles.push(mesh);
+                this.scene.add(mesh);
+            }
+        });
+    }
+
+    update() {
+        const delta = this.clock.getDelta();
+        this.smokeParticles.forEach(p => p.rotation.z += delta * 0.2);
+        this.renderer.render(this.scene, this.camera);
+        requestAnimationFrame(this.update.bind(this));
+    }
+}
+
+// Inițializare
+const smoke = new Smoke();
 })(); // <-- CLOSES THE SECURE VAULT
 
  
