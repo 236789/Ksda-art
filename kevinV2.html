@@ -11015,6 +11015,13 @@ div.inv-tile div.bm-limit-tag {
     /* THE MAGIC FIX: Crushes the darks to pure black so they disappear */
     filter: contrast(5) brightness(1.2); 
 }
+
+#smokeOverlay {
+    /* ... existing styles ... */
+    backdrop-filter: blur(8px); /* Aici e blur-ul subtil */
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.02); /* O nuanță foarte fină de alb */
+}
   </style>
 </head>
 <body>
@@ -22593,28 +22600,46 @@ class Smoke {
         this.scene.add(this.camera);
     }
 
-    addLights() {
-        const light = new THREE.DirectionalLight(0xffffff, 0.75);
-        light.position.set(-1, 0, 1);
-        this.scene.add(light);
-    }
+addLights() {
+    const { scene } = this;
+    // Lumina albă intensă
+    const light = new THREE.DirectionalLight(0xffffff, 1.2); 
+    light.position.set(0, 0, 1);
+    scene.add(light);
+    
+    // Adaugă lumină ambientală ca să nu fie umbre negre pe fum
+    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+}
 
-    addParticles() {
-        const textureLoader = new THREE.TextureLoader();
-        textureLoader.load("https://raw.githubusercontent.com/marcobiedermann/playground/master/three.js/smoke-particles/dist/assets/images/clouds.png", (texture) => {
-            const smokeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff, map: texture, transparent: true });
-            smokeMaterial.map.minFilter = THREE.LinearFilter;
-            const smokeGeometry = new THREE.PlaneBufferGeometry(300, 300);
+addParticles() {
+    const { scene } = this;
+    const textureLoader = new THREE.TextureLoader();
+    this.smokeParticles = [];
 
-            for (let i = 0; i < 150; i++) {
-                let mesh = new THREE.Mesh(smokeGeometry, smokeMaterial);
-                mesh.position.set(Math.random()*500-250, Math.random()*500-250, Math.random()*1000-100);
-                mesh.rotation.z = Math.random() * 360;
-                this.smokeParticles.push(mesh);
-                this.scene.add(mesh);
-            }
+    textureLoader.load("https://raw.githubusercontent.com/marcobiedermann/playground/master/three.js/smoke-particles/dist/assets/images/clouds.png", (texture) => {
+        const smokeMaterial = new THREE.MeshLambertMaterial({ 
+            color: 0xffffff, // ALB pur
+            map: texture, 
+            transparent: true,
+            opacity: 0.6 // Subtil
         });
-    }
+        
+        const smokeGeometry = new THREE.PlaneBufferGeometry(500, 500); // Mai mari
+
+        for (let i = 0; i < 150; i++) {
+            let mesh = new THREE.Mesh(smokeGeometry, smokeMaterial);
+            // SPREAD: A crescut aria de la 500 la 2000 pentru a umple tot ecranul
+            mesh.position.set(
+                Math.random() * 2000 - 1000, 
+                Math.random() * 2000 - 1000, 
+                Math.random() * 1000 - 500 
+            );
+            mesh.rotation.z = Math.random() * 360;
+            this.smokeParticles.push(mesh);
+            scene.add(mesh);
+        }
+    });
+}
 
     update() {
         const delta = this.clock.getDelta();
