@@ -12426,21 +12426,21 @@ div.inv-tile div.bm-limit-tag {
     <!-- =========================
          TAB 1: SUNETE (Your current audio settings)
          ========================= -->
-    <div id="tab-sunete" class="tab-content active-content">
+   <div id="tab-sunete" class="tab-content active-content">
       <div class="settings-group">
         <div class="s-label-row">
           <span>MUZICĂ</span>
-          <span id="musicVolValue" class="s-percent">8%</span>
+          <span id="musicVolValue" class="s-percent">1%</span>
         </div>
-        <input type="range" min="0" max="100" value="8" class="s-range" id="musicRange" oninput="updateMusicVolume(this.value)">
+        <input type="range" min="0" max="100" value="1" class="s-range" id="musicRange" oninput="updateMusicVolume(this.value)">
       </div>
 
       <div class="settings-group">
         <div class="s-label-row">
           <span>EFECTE (SFX)</span>
-          <span id="sfxVolValue" class="s-percent">50%</span>
+          <span id="sfxVolValue" class="s-percent">75%</span>
         </div>
-        <input type="range" min="0" max="100" value="50" class="s-range" id="sfxRange" oninput="updateSFXVolume(this.value)">
+        <input type="range" min="0" max="100" value="75" class="s-range" id="sfxRange" oninput="updateSFXVolume(this.value)">
       </div>
 
       <div class="settings-group">
@@ -13022,7 +13022,7 @@ let sessionStartTime = Date.now();
 let statTimerInterval = null;
 let sessionMisses = 0;
 // --- SETTINGS GLOBALS --- 
-let musicVolume = 1.0;  // 1 = 100%
+let musicVolume = 0.01;  // 1% Default
 let sfxVolume = 0.75;   // 0.75 = 75%
 // lastTrackIndex is already declared below in your code
 
@@ -22456,6 +22456,21 @@ function backToUtilities() {
     // you might want to re-run your openUtilitiesModal logic here
     openUtilitiesModal(); 
 }
+
+// --- AUTO-INIT SETTINGS ---
+document.addEventListener("DOMContentLoaded", () => {
+    const musicRange = document.getElementById('musicRange');
+    const sfxRange = document.getElementById('sfxRange');
+    
+    if (musicRange) {
+        musicRange.value = musicVolume * 100;
+        document.getElementById('musicVolValue').innerText = Math.round(musicVolume * 100) + "%";
+    }
+    if (sfxRange) {
+        sfxRange.value = sfxVolume * 100;
+        document.getElementById('sfxVolValue').innerText = Math.round(sfxVolume * 100) + "%";
+    }
+});
 
 // 🔐 WINDOW EXPORTS
 // ==========================================
