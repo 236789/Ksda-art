@@ -11059,6 +11059,185 @@ div.inv-tile div.bm-limit-tag {
     color: #ff3333;
     font-weight: 900;
 }
+
+
+/* ==========================================
+   PET SHOWCASE MODAL (CINEMATIC)
+   ========================================== */
+.showcase-modal-box {
+    position: relative;
+    width: 95vw;
+    max-width: 450px;
+    height: 85vh;
+    max-height: 800px;
+    border-radius: 24px;
+    padding: 4px; 
+    display: flex;
+    overflow: hidden; 
+    box-shadow: 0 0 50px rgba(0,0,0,0.9), 0 0 30px var(--rglow);
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: box-shadow 0.8s ease;
+}
+
+/* TIER COLORS (Variables) */
+.showcase-modal-box.Common    { --rc1:#8a8a92; --rc2:#5c5c64; --rc3:#3a3a40; --rc4:#222226; --rc5:#111113; --rglow:rgba(220,220,225,0.45); --rglow2:rgba(160,160,170,0.2); --rstreak:rgba(255,255,255,0.45); --rsparkle:rgba(255,255,255,0.85); --rlabel:#eaeaee; --rlabelGlow:rgba(200,200,210,0.8); --rlabelStroke:#2a2a30; }
+.showcase-modal-box.Rare      { --rc1:#2f7fe0; --rc2:#1a4a9f; --rc3:#0a2a6e; --rc4:#041540; --rc5:#020a20; --rglow:rgba(120,180,255,0.5); --rglow2:rgba(60,120,230,0.22); --rstreak:rgba(180,220,255,0.55); --rsparkle:rgba(200,230,255,0.9); --rlabel:#a8d4ff; --rlabelGlow:rgba(90,160,255,0.9); --rlabelStroke:#0a2a6e; }
+.showcase-modal-box.Epic      { --rc1:#7a2fe0; --rc2:#4a1a8f; --rc3:#2a0a5e; --rc4:#150335; --rc5:#0a021f; --rglow:rgba(200,140,255,0.5); --rglow2:rgba(150,60,230,0.22); --rstreak:rgba(255,255,255,0.5); --rsparkle:rgba(255,255,255,0.9); --rlabel:#e6b8ff; --rlabelGlow:rgba(200,120,255,0.9); --rlabelStroke:#3a0a6e; }
+.showcase-modal-box.Legendary { --rc1:#e0b32f; --rc2:#9f7a1a; --rc3:#6e4a0a; --rc4:#402804; --rc5:#201402; --rglow:rgba(255,220,120,0.55); --rglow2:rgba(230,180,60,0.25); --rstreak:rgba(255,235,180,0.6); --rsparkle:rgba(255,240,200,0.95); --rlabel:#ffe9a8; --rlabelGlow:rgba(255,200,60,0.9); --rlabelStroke:#6e4a0a; }
+.showcase-modal-box.Majestic  { --rc1:#e02f2f; --rc2:#9f1a1a; --rc3:#6e0a0a; --rc4:#400404; --rc5:#200202; --rglow:rgba(255,90,90,0.55); --rglow2:rgba(230,50,50,0.25); --rstreak:rgba(255,160,160,0.6); --rsparkle:rgba(255,190,190,0.95); --rlabel:#ffb3b3; --rlabelGlow:rgba(255,60,60,0.9); --rlabelStroke:#4a0505; }
+
+/* Efectul Rotativ */
+.showcase-modal-box::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: conic-gradient(transparent, var(--rlabel) 20%, transparent 40%, var(--rlabel) 70%, transparent 90%);
+    animation: spinBorder 4s linear infinite; z-index: 0; transition: opacity 0.8s ease;
+}
+
+/* Containerul Interior */
+.sc-modal-inner {
+    position: relative; width: 100%; height: 100%; border-radius: 20px;
+    background: radial-gradient(circle at 50% 30%, var(--rc1) 0%, var(--rc2) 30%, var(--rc3) 55%, var(--rc4) 80%, var(--rc5) 100%);
+    overflow: hidden; z-index: 1; display: flex; flex-direction: column; align-items: center;
+    transition: background 0.8s ease;
+}
+
+.sc-glow {
+    position: absolute; top: 35%; left: 50%; width: 300px; height: 300px; transform: translate(-50%, -50%);
+    background: radial-gradient(circle, var(--rglow) 0%, var(--rglow2) 40%, transparent 70%);
+    border-radius: 50%; z-index: 1; animation: bcPulse 3s ease-in-out infinite; pointer-events: none;
+    transition: background 0.8s ease;
+}
+
+.sc-floor-wrapper {
+    position: absolute; bottom: 0; left: 0; width: 100%; height: 40%;
+    perspective: 400px; overflow: hidden; z-index: 1; pointer-events: none;
+    mask-image: linear-gradient(to top, black, transparent);
+    -webkit-mask-image: linear-gradient(to top, black, transparent);
+}
+
+.sc-floor-grid {
+    position: absolute; bottom: -400px; left: 50%; width: 1000px; height: 1000px; margin-left: -500px;
+    transform-origin: center center; transform: rotateX(60deg) rotateZ(45deg); 
+    display: grid; grid-template-columns: repeat(12, 1fr); grid-template-rows: repeat(12, 1fr);
+}
+
+.sc-tile {
+    border: 1px solid rgba(255, 255, 255, 0.03); background: rgba(255, 255, 255, 0.01);
+    transition: background 0.5s ease-out, box-shadow 0.5s ease-out;
+}
+.sc-tile.active {
+    background: var(--rlabelGlow); box-shadow: 0 0 15px var(--rsparkle);
+    z-index: 2; position: relative; transition: background 0.05s ease-in, box-shadow 0.05s ease-in;
+}
+
+.sc-ui-layer {
+    position: relative; z-index: 10; width: 100%; height: 100%;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 15px; overflow-y: auto; scrollbar-width: none;
+}
+.sc-ui-layer::-webkit-scrollbar { display: none; }
+
+.sc-pet-title {
+    font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 32px;
+    text-transform: uppercase; color: #fff; letter-spacing: 2px;
+    text-shadow: 0 0 20px var(--rlabelGlow), 0 5px 10px rgba(0,0,0,0.8);
+    margin-bottom: 5px; text-align: center; line-height: 1; transition: text-shadow 0.3s ease;
+}
+
+.sc-viewer-stage {
+    width: 100%; height: 180px; display: flex; align-items: center; justify-content: center;
+    position: relative; margin-bottom: 10px;
+}
+        
+.sc-pet-img {
+    max-height: 160px; max-width: 80%; object-fit: contain;
+    filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
+    animation: heroFloat 3.5s ease-in-out infinite;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+    z-index: 5;
+}
+
+.sc-nav-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.6); border: 2px solid var(--rlabel); color: #fff;
+    width: 40px; height: 50px; border-radius: 10px; font-size: 20px;
+    cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(5px); box-shadow: 0 5px 10px rgba(0,0,0,0.5); transition: all 0.2s ease;
+}
+.sc-nav-arrow.left { left: 0; }
+.sc-nav-arrow.right { right: 0; }
+.sc-nav-arrow:hover { background: var(--rlabelGlow); border-color: #fff; transform: translateY(-50%) scale(1.1); color: #000; }
+.sc-nav-arrow:active { transform: translateY(-50%) scale(0.9); }
+
+.sc-pet-rarity-badge {
+    font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900;
+    text-transform: uppercase; letter-spacing: 4px; color: var(--rlabel);
+    background: rgba(0,0,0,0.7); padding: 5px 20px; border-radius: 30px;
+    border: 2px solid var(--rlabel); text-shadow: 0 0 8px var(--rlabelGlow);
+    margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+    backdrop-filter: blur(5px); transition: all 0.3s ease; z-index: 10;
+}
+
+.sc-info-container { width: 100%; display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+.sc-data-pad {
+    background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1); border-left: 5px solid var(--rlabel);
+    padding: 10px 12px; border-radius: 8px; text-align: left;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.6); transition: border-left-color 0.3s ease;
+}
+.sc-pad-label {
+    font-size: 10px; font-family: 'Orbitron', sans-serif; font-weight: 900;
+    color: var(--rlabel); letter-spacing: 2px; margin-bottom: 4px; text-transform: uppercase;
+    transition: color 0.3s ease; text-shadow: 0 0 5px rgba(0,0,0,0.8);
+}
+.sc-pad-content { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 12px; color: #cbd5e1; line-height: 1.4; }
+
+.sc-action-buttons { display: flex; gap: 10px; width: 100%; margin-top: 5px; }
+.sc-action-btn {
+    flex: 1; height: 50px; border-radius: 12px;
+    font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 14px;
+    text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    border: 3px solid #fff; color: #fff; transition: all 0.1s ease;
+}
+
+.sc-spawn-btn { background: linear-gradient(180deg, #22c55e 0%, #166534 100%); box-shadow: 0 6px 0 #052e16, 0 10px 20px rgba(0,0,0,0.5); }
+.sc-spawn-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #052e16; }
+
+.sc-unequip-btn { background: linear-gradient(180deg, #ef4444 0%, #991b1b 100%) !important; box-shadow: 0 6px 0 #450a0a, 0 10px 20px rgba(0,0,0,0.5) !important; border-color: #ffb3b3 !important; }
+.sc-unequip-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #450a0a !important; }
+
+.sc-feed-btn { background: linear-gradient(180deg, #f97316 0%, #9a3412 100%); box-shadow: 0 6px 0 #431407, 0 10px 20px rgba(0,0,0,0.5); }
+.sc-feed-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #431407; }
+
+/* SLOTS UI */
+.sc-slots-separator { display: flex; align-items: center; width: 100%; margin: 20px 0 10px 0; }
+.sc-slots-line { flex: 1; height: 2px; background: linear-gradient(90deg, transparent, var(--rlabel), transparent); transition: background 0.3s ease; }
+.sc-slots-icon { color: var(--rlabel); font-size: 16px; margin: 0 10px; filter: drop-shadow(0 0 5px var(--rlabelGlow)); transition: all 0.3s ease; }
+.sc-slots-container { display: flex; gap: 10px; width: 100%; padding-bottom: 10px; }
+
+.sc-slot-box {
+    flex: 1; height: 75px; border-radius: 12px;
+    border: 2px dashed rgba(255,255,255,0.2);
+    background: radial-gradient(circle at top, #111 0%, #020202 100%);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.3s ease;
+    position: relative; overflow: hidden; box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+}
+.sc-slot-box::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 10px 10px; pointer-events: none; opacity: 0.5;
+}
+.sc-slot-box:hover { border-style: solid; border-color: rgba(255,255,255,0.6); transform: translateY(-3px); box-shadow: 0 5px 10px rgba(0,0,0,0.6); }
+.sc-slot-box:active { transform: scale(0.95); }
+.sc-slot-box img { max-width: 80%; max-height: 80%; object-fit: contain; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.9)); z-index: 2; transition: transform 0.3s ease; }
+.sc-slot-box.occupied:hover img { transform: scale(1.15); }
+.sc-slot-box.locked {
+    background: repeating-linear-gradient(45deg, #0a0a0a, #0a0a0a 10px, #111 10px, #111 20px);
+    border: 2px solid #222; cursor: not-allowed; box-shadow: inset 0 0 25px rgba(0,0,0,1);
+}
+.sc-slot-box.locked i { color: #333; font-size: 20px; z-index: 2; }
   </style>
 </head>
 <body>
@@ -11395,7 +11574,7 @@ div.inv-tile div.bm-limit-tag {
 <button class="control-btn sub-btn" title="Misiuni" onclick="event.stopPropagation(); openQuestsMenu()">
   <i class="fa-solid fa-list-check"></i>
 </button> 
-<button class="control-btn sub-btn" onclick="askWhichPetToSpawn()" title="Summon Pet">
+<button class="control-btn sub-btn" onclick="event.stopPropagation(); openPetShowcase()" title="Colecția Pets">
   <i class="fa-solid fa-cat"></i>
 </button>
 <button class="control-btn sub-btn" style="--i:3" title="Utilități" onclick="openUtilitiesModal()">
@@ -11943,6 +12122,77 @@ div.inv-tile div.bm-limit-tag {
     
   </div> <!-- Sfârșit modal-box -->
 </div> <!-- Sfârșit modal-overlay -->
+
+<!-- MODAL: PET SHOWCASE (COLECȚIA DE PETS) -->
+<div id="petShowcaseModal" class="modal-overlay" style="z-index: 200020;">
+    <div id="scModalBox" class="showcase-modal-box Epic">
+        <div class="sc-modal-inner">
+            <div class="sc-glow"></div>
+            <div class="sc-floor-wrapper"><div class="sc-floor-grid" id="scFloorGrid"></div></div>
+            <div class="particles-wrapper" id="scParticlesWrapper"></div>
+
+            <button class="close-btn" style="position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); color: #fff; border: 2px solid rgba(255,255,255,0.3); width: 35px; height: 35px; border-radius: 10px; cursor: pointer; z-index: 100;" onclick="closePetShowcase()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- EMPTY STATE (Dacă nu are pets) -->
+            <div id="scEmptyState" style="display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; padding: 20px;">
+                <i class="fa-solid fa-cat" style="font-size: 60px; color: #5a6288; margin-bottom: 20px;"></i>
+                <h2 style="color: #fff; font-family: 'Montserrat', sans-serif; font-size: 24px;">NU AI NICIUN PET</h2>
+                <p style="color: #94a3b8; font-family: 'Oswald', sans-serif; font-size: 16px; margin-top: 10px;">Deschide cutii din Pet Shop pentru a-ți găsi un companion!</p>
+            </div>
+
+            <!-- UI CONTENT -->
+            <div class="sc-ui-layer" id="scUiContent">
+                <h2 id="scPetName" class="sc-pet-title">NUME PET</h2>
+
+                <div class="sc-viewer-stage">
+                    <button class="sc-nav-arrow left" onclick="changeShowcasePet(-1)"><i class="fa-solid fa-angle-left"></i></button>
+                    <img id="scPetImg" class="sc-pet-img" src="" alt="Pet">
+                    <button class="sc-nav-arrow right" onclick="changeShowcasePet(1)"><i class="fa-solid fa-angle-right"></i></button>
+                </div>
+
+                <div id="scPetRarity" class="sc-pet-rarity-badge">EPIC</div>
+
+                <div class="sc-info-container">
+                    <div class="sc-data-pad">
+                        <div class="sc-pad-label"><i class="fa-solid fa-book"></i> POVESTE & DESCRIERE</div>
+                        <div id="scPetDesc" class="sc-pad-content">Se încarcă...</div>
+                    </div>
+                    <div class="sc-data-pad">
+                        <div class="sc-pad-label"><i class="fa-solid fa-masks-theater"></i> PERSONALITATE</div>
+                        <div id="scPetPersonality" class="sc-pad-content">Se încarcă...</div>
+                    </div>
+                </div>
+
+                <!-- BUTOANE ACȚIUNI -->
+                <div class="sc-action-buttons">
+                    <button id="scSpawnBtn" class="sc-action-btn sc-spawn-btn" onclick="toggleSpawnCurrentPet()">
+                        <i class="fa-solid fa-paw"></i> SPAWN
+                    </button>
+                    <button class="sc-action-btn sc-feed-btn" onclick="feedCurrentPet()">
+                        <i class="fa-solid fa-cookie-bite"></i> HRĂNEȘTE
+                    </button>
+                </div>
+
+                <!-- SEPARATOR SLOTS -->
+                <div class="sc-slots-separator">
+                    <div class="sc-slots-line"></div>
+                    <i class="fa-solid fa-paw sc-slots-icon"></i>
+                    <div class="sc-slots-line"></div>
+                </div>
+
+                <!-- ACTIVE SLOTS (4 BOXES ACROSS FULL WIDTH) -->
+                <div class="sc-slots-container">
+                    <div class="sc-slot-box" id="sc-slot-0" onclick="jumpToPet(0)"></div>
+                    <div class="sc-slot-box" id="sc-slot-1" onclick="jumpToPet(1)"></div>
+                    <div class="sc-slot-box locked" title="Deblochează la Nivelul 15"><i class="fa-solid fa-lock"></i></div>
+                    <div class="sc-slot-box locked" title="Deblochează la Nivelul 25"><i class="fa-solid fa-lock"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- OVERLAY ANIMATIE TELEPORTARE (V3 CLEAN) -->
 <div id="teleportOverlay" class="teleport-overlay">
@@ -22525,8 +22775,376 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+
+// ==========================================
+// PET SHOWCASE & SPAWNING SYSTEM
+// ==========================================
+
+let showcaseIndex = 0;
+let scOwnedList = [];
+let isShowcaseActive = false;
+
+// Ne amintim ce pisici a selectat jucătorul (până la 2 pisici)
+let activePetSlots = [null, null];
+
+const rarityThemes = {
+    "Common": { color: "#9ca3af", glow: "rgba(156, 163, 175, 0.5)" },
+    "Rare": { color: "#3b82f6", glow: "rgba(59, 130, 246, 0.5)" },
+    "Epic": { color: "#a855f7", glow: "rgba(168, 85, 247, 0.5)" },
+    "Legendary": { color: "#facc15", glow: "rgba(250, 204, 21, 0.5)" },
+    "Majestic": { color: "#ef4444", glow: "rgba(239, 68, 68, 0.7)" }
+};
+
+// Generăm background-ul 3D
+function initShowcaseEnvironment() {
+    const floorGrid = document.getElementById('scFloorGrid');
+    const particlesWrapper = document.getElementById('scParticlesWrapper');
+    if (!floorGrid || !particlesWrapper) return;
+    
+    floorGrid.innerHTML = "";
+    particlesWrapper.innerHTML = "";
+
+    for(let i = 0; i < 144; i++) { 
+        const tile = document.createElement('div');
+        tile.className = 'sc-tile';
+        floorGrid.appendChild(tile);
+    }
+
+    for (let i = 0; i < 10; i++) {
+        const s = document.createElement('div');
+        s.className = 'streak';
+        s.style.left = Math.random() * 100 + '%';
+        s.style.animationDuration = (2 + Math.random() * 3) + 's';
+        s.style.animationDelay = (Math.random() * 5) + 's';
+        particlesWrapper.appendChild(s);
+    }
+    for (let i = 0; i < 15; i++) {
+        const p = document.createElement('div');
+        p.className = 'sparkle';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.top = Math.random() * 90 + '%';
+        p.style.animationDuration = (1.5 + Math.random() * 2.5) + 's';
+        p.style.animationDelay = (Math.random() * 3) + 's';
+        particlesWrapper.appendChild(p);
+    }
+
+    lightUpScFloor();
+}
+
+function lightUpScFloor() {
+    if (!isShowcaseActive) return;
+    const floorGrid = document.getElementById('scFloorGrid');
+    if(!floorGrid) return;
+    
+    const tiles = floorGrid.children;
+    if(tiles.length === 0) return;
+
+    const randomTile = tiles[Math.floor(Math.random() * tiles.length)];
+    if (!randomTile.classList.contains('active')) {
+        randomTile.classList.add('active');
+        setTimeout(() => { if(isShowcaseActive) randomTile.classList.remove('active'); }, 600);
+    }
+    setTimeout(lightUpScFloor, 100);
+}
+
+// 1. Deschiderea Modalului
+function openPetShowcase() {
+    forceCloseMenu(); // Închidem meniul mic
+    isPaused = true;  // Punem jocul pe pauză
+    clearInterval(moveKevinInterval);
+    clearTimeout(tiredTimeout);
+
+    // Creăm lista doar cu pisicile pe care jucătorul le deține
+    scOwnedList = [];
+    if (_GAME_DATA.ownedPets) {
+        Object.keys(_GAME_DATA.ownedPets).forEach(catId => {
+            if (_GAME_DATA.ownedPets[catId] > 0) {
+                const catInfo = petCatalog.find(p => p.id === catId);
+                if (catInfo) scOwnedList.push(catInfo);
+            }
+        });
+    }
+
+    isShowcaseActive = true;
+    initShowcaseEnvironment();
+    
+    document.getElementById('petShowcaseModal').style.display = 'flex';
+
+    if (scOwnedList.length === 0) {
+        document.getElementById('scUiContent').style.display = 'none';
+        document.getElementById('scEmptyState').style.display = 'flex';
+        document.getElementById('scModalBox').className = "showcase-modal-box Common";
+    } else {
+        document.getElementById('scUiContent').style.display = 'flex';
+        document.getElementById('scEmptyState').style.display = 'none';
+        showcaseIndex = 0;
+        updateShowcaseView(true);
+    }
+    renderShowcaseSlots();
+}
+
+// 2. Închiderea Modalului
+function closePetShowcase() {
+    isShowcaseActive = false;
+    document.getElementById('petShowcaseModal').style.display = 'none';
+    
+    if (document.getElementById('gameArea').style.display === 'block') {
+        isPaused = false;
+        startKevinMovement();
+        startTiredCycle();
+    }
+}
+
+// 3. Navigare Stânga-Dreapta
+function changeShowcasePet(dir) {
+    if (scOwnedList.length === 0) return;
+    showcaseIndex += dir;
+    if (showcaseIndex < 0) showcaseIndex = scOwnedList.length - 1;
+    if (showcaseIndex >= scOwnedList.length) showcaseIndex = 0;
+    
+    if (typeof playSFX === 'function') playSFX(slotWooshUrl);
+    updateShowcaseView(false);
+}
+
+// 4. Actualizarea UI-ului
+function updateShowcaseView(isFirstLoad) {
+    if (scOwnedList.length === 0) return;
+    const pet = scOwnedList[showcaseIndex];
+    const imgEl = document.getElementById('scPetImg');
+    const boxEl = document.getElementById('scModalBox');
+    const nameEl = document.getElementById('scPetName');
+
+    boxEl.className = `showcase-modal-box ${pet.stats.rarity}`;
+
+    if (!isFirstLoad) {
+        imgEl.style.opacity = 0;
+        imgEl.style.transform = "scale(0.8) rotate(-10deg)";
+    }
+
+    setTimeout(() => {
+        nameEl.innerText = pet.name.toUpperCase();
+        document.getElementById('scPetDesc').innerText = pet.desc;
+        document.getElementById('scPetPersonality').innerText = pet.personality;
+        document.getElementById('scPetRarity').innerText = pet.stats.rarity.toUpperCase();
+        imgEl.src = pet.assets.presentation;
+
+        if(pet.stats.rarity === 'Majestic') nameEl.style.color = "#ffb3b3";
+        else if(pet.stats.rarity === 'Legendary') nameEl.style.color = "#ffe9a8";
+        else nameEl.style.color = "#ffffff";
+
+        updateShowcaseSpawnButtonState();
+
+        if (!isFirstLoad) {
+            imgEl.style.opacity = 1;
+            imgEl.style.transform = "scale(1) rotate(0deg)";
+        }
+    }, isFirstLoad ? 0 : 250);
+}
+
+// 5. Toggle Spawn / Unequip
+function updateShowcaseSpawnButtonState() {
+    const currentPet = scOwnedList[showcaseIndex];
+    const isEquipped = activePetSlots.some(p => p && p.id === currentPet.id);
+    const spawnBtn = document.getElementById('scSpawnBtn');
+    
+    if (isEquipped) {
+        spawnBtn.className = "sc-action-btn sc-unequip-btn";
+        spawnBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> RETRAGE';
+    } else {
+        spawnBtn.className = "sc-action-btn sc-spawn-btn";
+        spawnBtn.innerHTML = '<i class="fa-solid fa-paw"></i> SPAWN';
+    }
+}
+
+function toggleSpawnCurrentPet() {
+    if (scOwnedList.length === 0) return;
+    const currentPet = scOwnedList[showcaseIndex];
+    const slotIndex = activePetSlots.findIndex(p => p && p.id === currentPet.id);
+    
+    if (slotIndex !== -1) {
+        // Dacă e echipat, îl retragem
+        activePetSlots[slotIndex] = null;
+        showNotification("PET RETRAS", `${currentPet.name} se întoarce la somn!`, currentPet.assets.presentation);
+    } else {
+        // Dacă nu e echipat, căutăm un slot gol
+        const emptyIdx = activePetSlots.indexOf(null);
+        if (emptyIdx === -1) {
+            showNotification("SLOTURI PLINE", "Apasă RETRAGE pe o pisică echipată pentru a face loc.", "fa-lock");
+            if (typeof playMissSFX === 'function') playMissSFX();
+            return;
+        }
+        activePetSlots[emptyIdx] = currentPet;
+        showNotification("PET ECHIPAT!", `${currentPet.name} te va urma peste tot!`, currentPet.assets.presentation);
+        if (typeof playSFX === 'function') playSFX(popSounds[0]);
+    }
+    
+    renderShowcaseSlots();
+    updateShowcaseSpawnButtonState();
+    
+    // 🔥 ACTUALIZĂM FIZIC PISICILE PE ECRAN
+    updateActivePetsInGame();
+}
+
+function feedCurrentPet() {
+    if (typeof playSFX === 'function') playSFX(popSounds[1]);
+    showNotification("DELICIU!", `I-ai dat de mâncare lui ${scOwnedList[showcaseIndex].name}. +10 Fericire!`, "fa-cookie-bite");
+}
+
+function jumpToPet(idx) {
+    const petInSlot = activePetSlots[idx];
+    if (!petInSlot) return; 
+
+    const targetIndex = scOwnedList.findIndex(p => p.id === petInSlot.id);
+    if (targetIndex !== -1 && targetIndex !== showcaseIndex) {
+        showcaseIndex = targetIndex;
+        updateShowcaseView(false); 
+    }
+}
+
+function renderShowcaseSlots() {
+    for (let i = 0; i < 2; i++) {
+        const slotEl = document.getElementById(`sc-slot-${i}`);
+        if(!slotEl) continue;
+        const pet = activePetSlots[i];
+
+        if (pet) {
+            const theme = rarityThemes[pet.stats.rarity] || rarityThemes["Common"];
+            slotEl.innerHTML = `<img src="${pet.assets.presentation}" alt="${pet.name}">`;
+            slotEl.classList.add('occupied');
+            slotEl.style.borderColor = theme.color;
+            slotEl.style.background = `radial-gradient(circle at center, ${theme.color}44 0%, #000 80%)`;
+            slotEl.style.boxShadow = `0 5px 15px rgba(0,0,0,0.5), inset 0 0 15px ${theme.color}66`;
+        } else {
+            slotEl.innerHTML = `<i class="fa-solid fa-plus" style="color: rgba(255,255,255,0.1); font-size: 24px; z-index: 2;"></i>`;
+            slotEl.classList.remove('occupied');
+            slotEl.style.borderColor = "rgba(255,255,255,0.2)";
+            slotEl.style.background = "radial-gradient(circle at top, #111 0%, #020202 100%)";
+            slotEl.style.boxShadow = "inset 0 0 15px rgba(0,0,0,0.8)";
+        }
+    }
+}
+
+// ==========================================
+// 🐈 THE ACTUAL IN-GAME PET FOLLOWING LOGIC
+// ==========================================
+let activePetDOMNodes = [];
+let petFollowInterval = null;
+
+function updateActivePetsInGame() {
+    const gameArea = document.getElementById('gameArea');
+    if (!gameArea) return;
+
+    // 1. Curățăm pisicile vechi din DOM și oprim loop-ul
+    activePetDOMNodes.forEach(nodeObj => nodeObj.el.remove());
+    activePetDOMNodes = [];
+    clearInterval(petFollowInterval);
+
+    // 2. Creăm elementele pentru pisicile din activePetSlots care nu sunt nule
+    activePetSlots.forEach((pet, index) => {
+        if (!pet) return;
+
+        const size = pet.stats.size || 60; // Daca n-are dimensiune, punem 60px by default
+        
+        const petWrapper = document.createElement('div');
+        petWrapper.className = 'active-spawned-pet';
+        petWrapper.style.position = 'absolute';
+        petWrapper.style.width = size + 'px';
+        petWrapper.style.height = size + 'px';
+        petWrapper.style.zIndex = '990'; // Sub Kevin (Kevin e 999)
+        petWrapper.style.pointerEvents = 'none'; // Să nu blocheze click-urile spre alte obiecte
+        
+        const petInner = document.createElement('div');
+        petInner.className = 'pet-sprite-inner';
+        petInner.style.width = '100%';
+        petInner.style.height = '100%';
+        // Folosim animația de walk/run. Dacă nu are, luăm prezentarea.
+        petInner.style.backgroundImage = `url('${pet.assets.walk || pet.assets.play || pet.assets.presentation}')`;
+        petInner.style.transform = 'scaleX(1)';
+        
+        petWrapper.appendChild(petInner);
+        
+        // Spawnăm inițial pisica exact lângă Kevin
+        const kevinRect = document.getElementById('kevin').getBoundingClientRect();
+        let startX = kevinRect.left || (window.innerWidth / 2);
+        let startY = kevinRect.top || (window.innerHeight / 2);
+        
+        petWrapper.style.left = startX + 'px';
+        petWrapper.style.top = startY + 'px';
+        
+        gameArea.appendChild(petWrapper);
+
+        // Adăugăm la trackerele noastre interne
+        activePetDOMNodes.push({
+            el: petWrapper,
+            inner: petInner,
+            petData: pet,
+            x: startX,
+            y: startY,
+            slotIndex: index // Ne ajută să facem offset-ul diferit pe ecran
+        });
+    });
+
+    // 3. Dacă avem măcar o pisică echipată, pornim funcția de urmărire (intervalul de 30ms)
+    if (activePetDOMNodes.length > 0) {
+        petFollowInterval = setInterval(animatePetsFollowingKevin, 30);
+    }
+}
+
+function animatePetsFollowingKevin() {
+    if (isPaused) return; // Se opresc când e pauză
+
+    const kevin = document.getElementById('kevin');
+    const kRect = kevin.getBoundingClientRect();
+    
+    // Vrem ca pisicile să vină spre centrul lui Kevin
+    const targetX = kRect.left + (kRect.width / 2);
+    const targetY = kRect.top + (kRect.height / 2);
+
+    activePetDOMNodes.forEach(nodeObj => {
+        // Offset: Prima pisică stă în stânga, a doua în dreapta (față de Kevin)
+        const offsetX = (nodeObj.slotIndex === 0) ? -70 : 70;
+        const offsetY = (nodeObj.slotIndex === 0) ? 30 : 50;
+
+        // Aici e punctul final unde ar trebui să stea pisica
+        const finalTargetX = targetX + offsetX - (nodeObj.petData.stats.size / 2);
+        const finalTargetY = targetY + offsetY - (nodeObj.petData.stats.size / 2);
+
+        // Calculăm distanța
+        const dx = finalTargetX - nodeObj.x;
+        const dy = finalTargetY - nodeObj.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        // Dacă e mai departe de 10px, o facem să alerge spre Kevin
+        if (dist > 10) {
+            // Extragem viteza pisicii (din stats, dacă n-are punem un default)
+            const speedMultiplier = nodeObj.petData.stats.speed || 1;
+            const moveSpeed = 5 * speedMultiplier; 
+
+            nodeObj.x += (dx / dist) * moveSpeed;
+            nodeObj.y += (dy / dist) * moveSpeed;
+
+            // Orientăm pisica spre direcția de mers
+            if (dx > 0) {
+                nodeObj.inner.style.transform = 'scaleX(1)';
+            } else {
+                nodeObj.inner.style.transform = 'scaleX(-1)';
+            }
+        }
+
+        // Aplicăm poziția nouă în CSS
+        nodeObj.el.style.left = nodeObj.x + 'px';
+        nodeObj.el.style.top = nodeObj.y + 'px';
+    });
+}
+// ==========================================
 // 🔐 WINDOW EXPORTS
 // ==========================================
+window.openPetShowcase = openPetShowcase;
+window.closePetShowcase = closePetShowcase;
+window.changeShowcasePet = changeShowcasePet;
+window.toggleSpawnCurrentPet = toggleSpawnCurrentPet;
+window.feedCurrentPet = feedCurrentPet;
+window.jumpToPet = jumpToPet;
 window.openHeroModal = openHeroModal;
 window.closeHeroModal = closeHeroModal; 
 window.navEroi = navEroi;
