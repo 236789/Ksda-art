@@ -23095,110 +23095,104 @@ function renderShowcaseSlots() {
 let activePetDOMNodes = [];
 let petFollowInterval = null;
 
+
+
+// Add this to your existing Pet Manager logic
+const PET_STATES = {
+    WANDER: 'wander',
+    FOLLOW: 'follow',
+    IDLE: 'idle', // Sit/Lay/Sleep
+    STRETCH: 'stretch',
+    PLAY: 'play'
+};
+
 function updateActivePetsInGame() {
     const gameArea = document.getElementById('gameArea');
     if (!gameArea) return;
 
-    // 1. Curățăm pisicile vechi din DOM și oprim loop-ul
     activePetDOMNodes.forEach(nodeObj => nodeObj.el.remove());
     activePetDOMNodes = [];
-    clearInterval(petFollowInterval);
 
-    // 2. Creăm elementele pentru pisicile din activePetSlots care nu sunt nule
     activePetSlots.forEach((pet, index) => {
         if (!pet) return;
 
-        const size = pet.stats.size || 60; // Daca n-are dimensiune, punem 60px by default
+        const wrapper = document.createElement('div');
+        wrapper.className = 'pet-wrapper';
+        wrapper.style.position = 'absolute';
         
-        const petWrapper = document.createElement('div');
-        petWrapper.className = 'active-spawned-pet';
-        petWrapper.style.position = 'absolute';
-        petWrapper.style.width = size + 'px';
-        petWrapper.style.height = size + 'px';
-        petWrapper.style.zIndex = '990'; // Sub Kevin (Kevin e 999)
-        petWrapper.style.pointerEvents = 'none'; // Să nu blocheze click-urile spre alte obiecte
+        const sprite = document.createElement('div');
+        sprite.className = 'pet-sprite-inner';
+        sprite.style.width = pet.stats.size + 'px';
+        sprite.style.height = pet.stats.size + 'px';
         
-        const petInner = document.createElement('div');
-        petInner.className = 'pet-sprite-inner';
-        petInner.style.width = '100%';
-        petInner.style.height = '100%';
-        // Folosim animația de walk/run. Dacă nu are, luăm prezentarea.
-        petInner.style.backgroundImage = `url('${pet.assets.walk || pet.assets.play || pet.assets.presentation}')`;
-        petInner.style.transform = 'scaleX(1)';
-        
-        petWrapper.appendChild(petInner);
-        
-        // Spawnăm inițial pisica exact lângă Kevin
-        const kevinRect = document.getElementById('kevin').getBoundingClientRect();
-        let startX = kevinRect.left || (window.innerWidth / 2);
-        let startY = kevinRect.top || (window.innerHeight / 2);
-        
-        petWrapper.style.left = startX + 'px';
-        petWrapper.style.top = startY + 'px';
-        
-        gameArea.appendChild(petWrapper);
+        wrapper.appendChild(sprite);
+        gameArea.appendChild(wrapper);
 
-        // Adăugăm la trackerele noastre interne
         activePetDOMNodes.push({
-            el: petWrapper,
-            inner: petInner,
+            el: wrapper,
+            sprite: sprite,
             petData: pet,
-            x: startX,
-            y: startY,
-            slotIndex: index // Ne ajută să facem offset-ul diferit pe ecran
+            state: PET_STATES.FOLLOW,
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            targetX: window.innerWidth / 2,
+            targetY: window.innerHeight / 2,
+            facing: 1, // 1 for right, -1 for left
+            timer: 0
         });
     });
 
-    // 3. Dacă avem măcar o pisică echipată, pornim funcția de urmărire (intervalul de 30ms)
-    if (activePetDOMNodes.length > 0) {
-        petFollowInterval = setInterval(animatePetsFollowingKevin, 30);
-    }
+    if (petFollowInterval) clearInterval(petFollowInterval);
+    petFollowInterval = setInterval(petBrainLoop, 50);
 }
 
-function animatePetsFollowingKevin() {
-    if (isPaused) return; // Se opresc când e pauză
+function petBrainLoop() {
+    const kevin = document.getElementById('kevin').getBoundingClientRect();
+    const kX = kevin.left + kevin.width / 2;
+    const kY = kevin.top + kevin.height / 2;
 
-    const kevin = document.getElementById('kevin');
-    const kRect = kevin.getBoundingClientRect();
-    
-    // Vrem ca pisicile să vină spre centrul lui Kevin
-    const targetX = kRect.left + (kRect.width / 2);
-    const targetY = kRect.top + (kRect.height / 2);
+    activePetDOMNodes.forEach(node => {
+        node.timer++;
 
-    activePetDOMNodes.forEach(nodeObj => {
-        // Offset: Prima pisică stă în stânga, a doua în dreapta (față de Kevin)
-        const offsetX = (nodeObj.slotIndex === 0) ? -70 : 70;
-        const offsetY = (nodeObj.slotIndex === 0) ? 30 : 50;
-
-        // Aici e punctul final unde ar trebui să stea pisica
-        const finalTargetX = targetX + offsetX - (nodeObj.petData.stats.size / 2);
-        const finalTargetY = targetY + offsetY - (nodeObj.petData.stats.size / 2);
-
-        // Calculăm distanța
-        const dx = finalTargetX - nodeObj.x;
-        const dy = finalTargetY - nodeObj.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        // Dacă e mai departe de 10px, o facem să alerge spre Kevin
-        if (dist > 10) {
-            // Extragem viteza pisicii (din stats, dacă n-are punem un default)
-            const speedMultiplier = nodeObj.petData.stats.speed || 1;
-            const moveSpeed = 5 * speedMultiplier; 
-
-            nodeObj.x += (dx / dist) * moveSpeed;
-            nodeObj.y += (dy / dist) * moveSpeed;
-
-            // Orientăm pisica spre direcția de mers
-            if (dx > 0) {
-                nodeObj.inner.style.transform = 'scaleX(1)';
-            } else {
-                nodeObj.inner.style.transform = 'scaleX(-1)';
-            }
+        // 1. BRAIN: Randomly switch state every ~5 seconds
+        if (node.timer > 100) {
+            const rand = Math.random();
+            if (rand < 0.4) node.state = PET_STATES.FOLLOW;
+            else if (rand < 0.7) node.state = PET_STATES.WANDER;
+            else node.state = PET_STATES.IDLE;
+            node.timer = 0;
         }
 
-        // Aplicăm poziția nouă în CSS
-        nodeObj.el.style.left = nodeObj.x + 'px';
-        nodeObj.el.style.top = nodeObj.y + 'px';
+        // 2. MOVEMENT LOGIC
+        if (node.state === PET_STATES.FOLLOW) {
+            node.targetX = kX + (Math.random() * 100 - 50);
+            node.targetY = kY + 50;
+        } else if (node.state === PET_STATES.WANDER && node.timer % 50 === 0) {
+            node.targetX = Math.random() * window.innerWidth;
+            node.targetY = Math.random() * window.innerHeight;
+        }
+
+        // Move towards target
+        const dx = node.targetX - node.x;
+        const dy = node.targetY - node.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (dist > 5 && node.state !== PET_STATES.IDLE) {
+            const speed = 3;
+            node.x += (dx / dist) * speed;
+            node.y += (dy / dist) * speed;
+            
+            // FLIP LOGIC (Fixes moonwalking)
+            node.facing = dx > 0 ? 1 : -1;
+            node.sprite.style.transform = `scaleX(${node.facing})`;
+            node.sprite.style.backgroundImage = `url('${node.petData.assets.walk}')`;
+        } else {
+            // IDLE LOGIC
+            node.sprite.style.backgroundImage = `url('${node.petData.assets.sit}')`;
+        }
+
+        node.el.style.left = node.x + 'px';
+        node.el.style.top = node.y + 'px';
     });
 }
 // ==========================================
