@@ -17483,7 +17483,6 @@ function addToInventory(itemKey) {
     return true; // Returnează true pentru succes
 }
 
-
 function renderInventoryUI() {
     const itemsGrid = document.getElementById('inventoryGrid');
     const boostsGrid = document.getElementById('inventoryBoostsGrid');
@@ -17497,9 +17496,9 @@ function renderInventoryUI() {
     let total = 0;
     let hasItems = false;
     let hasBoosts = false;
-    let hasPets = false;
+    let hasPets = false; // We use this for Pet-related items now (like boxes)
 
-    // 1. RENDER INVENTORY (ONLY Boosts, Specials, Boxes)
+    // RENDER INVENTORY (ONLY Items, Boosts, and Boxes)
     Object.keys(_GAME_DATA.inventory).forEach(key => {
         const count = _GAME_DATA.inventory[key];
         if (count <= 0) return;
@@ -17525,9 +17524,9 @@ function renderInventoryUI() {
         `;
 
         if (isPetBox) {
-            // Boxes go to the main Items grid (or you can create a specific Boxes tab)
-            itemsGrid.appendChild(tile); 
-            hasItems = true;
+            // Put Pet Boxes inside the "PETS" tab so they don't clutter normal items
+            if (petsGrid) petsGrid.appendChild(tile); 
+            hasPets = true;
         } else if (isBoost) {
             boostsGrid.appendChild(tile);
             hasBoosts = true;
@@ -17537,36 +17536,13 @@ function renderInventoryUI() {
         }
     });
 
-    // 2. RENDER ACTUAL CATS (ONLY from ownedPets)
-    if (_GAME_DATA.ownedPets) {
-        Object.keys(_GAME_DATA.ownedPets).forEach(catId => {
-            const count = _GAME_DATA.ownedPets[catId];
-            if (count <= 0) return;
-
-            const catData = petCatalog.find(p => p.id === catId);
-            if (!catData) return;
-
-            total += count;
-            hasPets = true;
-
-            const tile = document.createElement('div');
-            tile.className = "inv-tile";
-            tile.style.borderColor = rarityColors[catData.stats.rarity] || "#fff";
-            tile.onclick = () => showPetInfo(catId);
-
-            tile.innerHTML = `
-                <img src="${catData.assets.presentation}" style="filter: drop-shadow(0 2px 5px rgba(0,0,0,0.8));">
-                ${count > 1 ? `<div class="inv-tile-badge">x${count}</div>` : ''}
-            `;
-            if (petsGrid) petsGrid.appendChild(tile);
-        });
-    }
-
+    // Update Counter (Live pets no longer count towards your inventory capacity!)
     counter.innerText = `${total} / ${INV_LIMIT}`;
 
+    // Empty state placeholders
     if (!hasItems) itemsGrid.innerHTML = `<div class="placeholder-text" style="grid-column: span 5; margin-top: 50px;">Niciun obiect.</div>`;
     if (!hasBoosts) boostsGrid.innerHTML = `<div class="placeholder-text" style="grid-column: span 5; margin-top: 50px;">Nu ai niciun Boost.</div>`;
-    if (petsGrid && !hasPets) petsGrid.innerHTML = `<div class="placeholder-text" style="grid-column: span 5; margin-top: 50px;">Nu ai nicio pisică.</div>`;
+    if (petsGrid && !hasPets) petsGrid.innerHTML = `<div class="placeholder-text" style="grid-column: span 5; margin-top: 50px;">Nu ai nicio cutie pentru pets.</div>`;
 }
 
 // 🐾 FUNCȚIE NOUĂ: Afișează informațiile pisicii când apeși pe ea în inventar
