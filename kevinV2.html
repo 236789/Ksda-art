@@ -23106,6 +23106,26 @@ const PET_STATES = {
     PLAY: 'play'
 };
 
+// --- HELPER: Action Manager ---
+function setPetAction(node, action) {
+    if (node.currentAction === action) return; // KILL THE FLICKER: Don't re-apply if already set
+    node.currentAction = action;
+    const assets = node.petData.assets;
+
+    // Mapping your asset names to actions
+    const imgMap = {
+        'walk': assets.walk || assets.presentation,
+        'sit': assets.sit || assets.presentation,
+        'stretch': assets.stretch || assets.presentation,
+        'sleep': assets.sleep || assets.presentation,
+        'play': assets.play || assets.presentation,
+        'layDown': assets.layDown || assets.sit,
+        'back': assets.back || assets.sit
+    };
+    
+    node.sprite.style.backgroundImage = `url('${imgMap[action] || assets.presentation}')`;
+}
+
 function updateActivePetsInGame() {
     const gameArea = document.getElementById('gameArea');
     if (!gameArea) return;
@@ -23133,12 +23153,14 @@ function updateActivePetsInGame() {
             sprite: sprite,
             petData: pet,
             state: PET_STATES.FOLLOW,
-            x: window.innerWidth / 2,
-            y: window.innerHeight / 2,
-            targetX: window.innerWidth / 2,
-            targetY: window.innerHeight / 2,
-            facing: 1, // 1 for right, -1 for left
-            timer: 0
+            // OFFSET SPAWN: Index * 80px ensures they don't spawn on top of each other
+            x: (window.innerWidth / 2) + (index * 80),
+            y: (window.innerHeight / 2) + (index * 50),
+            targetX: 0,
+            targetY: 0,
+            facing: 1,
+            timer: 0,
+            currentAction: null
         });
     });
 
@@ -23147,52 +23169,72 @@ function updateActivePetsInGame() {
 }
 
 function petBrainLoop() {
+    if (isPaused) return;
     const kevin = document.getElementById('kevin').getBoundingClientRect();
     const kX = kevin.left + kevin.width / 2;
     const kY = kevin.top + kevin.height / 2;
 
-    activePetDOMNodes.forEach(node => {
+    activePetDOMNodes.forEach((node, index) => {
         node.timer++;
 
-        // 1. BRAIN: Randomly switch state every ~5 seconds
-        if (node.timer > 100) {
-            const rand = Math.random();
-            if (rand < 0.4) node.state = PET_STATES.FOLLOW;
-            else if (rand < 0.7) node.state = PET_STATES.WANDER;
-            else node.state = PET_STATES.IDLE;
+        // 1. BRAIN: Pick state less often (every ~5-7 seconds)
+        if (node.timer > 120) {
+            const states = Object.values(PET_STATES);
+            node.state = states[Math.floor(Math.random() * states.length)];
             node.timer = 0;
-        }
-
-        // 2. MOVEMENT LOGIC
-        if (node.state === PET_STATES.FOLLOW) {
-            node.targetX = kX + (Math.random() * 100 - 50);
-            node.targetY = kY + 50;
-        } else if (node.state === PET_STATES.WANDER && node.timer % 50 === 0) {
-            node.targetX = Math.random() * window.innerWidth;
-            node.targetY = Math.random() * window.innerHeight;
-        }
-
-        // Move towards target
-        const dx = node.targetX - node.x;
-        const dy = node.targetY - node.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-
-        if (dist > 5 && node.state !== PET_STATES.IDLE) {
-            const speed = 3;
-            node.x += (dx / dist) * speed;
-            node.y += (dy / dist) * speed;
             
-            // FLIP LOGIC (Fixes moonwalking)
-            node.facing = dx > 0 ? 1 : -1;
-            node.sprite.style.transform = `scaleX(${node.facing})`;
-            node.sprite.style.backgroundImage = `url('${node.petData.assets.walk}')`;
+            // Set targets based on new state
+            if (node.state === PET_STATES.WANDER) {
+                node.targetX = Math.random() * (window.innerWidth - 100);
+                node.targetY = Math.random() * (window.innerHeight - 100);
+            }
+        }
+
+        // 2. MOVEMENT TARGETS
+        let isMoving = false;
+        if (node.state === PET_STATES.FOLLOW) {
+            // Index offset prevents stacking on Kevin
+            node.targetX = kX + (index * 60) - 60; 
+            node.targetY = kY + 60;
+            isMoving = true;
+        } else if (node.state === PET_STATES.WANDER) {
+            isMoving = true;
+        }
+
+        // 3. APPLY MOVEMENT
+        if (isMoving) {
+            const dx = node.targetX - node.x;
+            const dy = node.targetY - node.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist > 5) {
+                const speed = 2.5;
+                node.x += (dx / dist) * speed;
+                node.y += (dy / dist) * speed;
+                
+                // FLIP LOGIC (Only flips when turning)
+                const newFacing = dx > 0 ? 1 : -1;
+                if (node.facing !== newFacing) {
+                    node.facing = newFacing;
+                    node.sprite.style.transform = `scaleX(${node.facing})`;
+                }
+                setPetAction(node, 'walk');
+            } else {
+                setPetAction(node, 'sit');
+            }
         } else {
-            // IDLE LOGIC
-            node.sprite.style.backgroundImage = `url('${node.petData.assets.sit}')`;
+            // MAP STATES TO ACTIONS
+            const actionMap = {
+                'idle': 'sit',
+                'stretch': 'stretch',
+                'play': 'play'
+            };
+            setPetAction(node, actionMap[node.state] || 'sit');
         }
 
         node.el.style.left = node.x + 'px';
         node.el.style.top = node.y + 'px';
+        node.el.style.zIndex = Math.floor(node.y);
     });
 }
 // ==========================================
