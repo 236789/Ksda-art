@@ -12591,14 +12591,17 @@ div.inv-tile div.bm-limit-tag {
         <h3 id="postBuyBoxTitle" style="font-family: 'Montserrat'; font-weight: 900; font-size: 20px; color: #fff; margin-bottom: 5px; text-transform: uppercase;"></h3>
         <p style="font-family: 'Oswald'; color: #94a3b8; font-size: 14px; margin-bottom: 25px;">Ce dorești să faci cu acest obiect?</p>
 
-        <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
-            <button class="menu-btn play" onclick="executeBoxAction('open')">
-                <i class="fa-solid fa-box-open"></i> <span>DESCHIDE ACUM</span>
-            </button>
-            <button class="menu-btn play" style="background: linear-gradient(180deg, #555 0%, #222) !important; border-color: #777 !important; color: #aaa !important; box-shadow: 0 6px 0 #111 !important;" onclick="executeBoxAction('inventory')">
-                <i class="fa-solid fa-briefcase"></i> <span>TRIMITE ÎN INVENTAR</span>
-            </button>
-        </div>
+<div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+    <!-- Butonul Mov (Deschide Acum) -->
+    <button class="menu-btn play" style="background: linear-gradient(180deg, #bf00ff 0%, #7000ff 50%, #4b00b0 100%) !important; border-color: #fff !important; color: #fff !important; box-shadow: 0 6px 0 #2d0047, 0 10px 20px rgba(0,0,0,0.4) !important; letter-spacing: 2px;" onclick="executeBoxAction('open')">
+        <i class="fa-solid fa-box-open"></i> <span>DESCHIDE ACUM</span>
+    </button>
+    
+    <!-- Butonul Gri (Trimite în inventar) -->
+    <button class="menu-btn play" style="background: linear-gradient(180deg, #555 0%, #333 100%) !important; border-color: #777 !important; color: #ccc !important; box-shadow: 0 6px 0 #111, 0 10px 20px rgba(0,0,0,0.4) !important; letter-spacing: 2px;" onclick="executeBoxAction('inventory')">
+        <i class="fa-solid fa-briefcase"></i> <span>TRIMITE ÎN INVENTAR</span>
+    </button>
+</div>
     </div>
 </div>
 
@@ -21909,7 +21912,12 @@ function openCatDetail(offerKey) {
                 </div>
             </div>
 
-            <button class="cat-buy-btn" onclick="buyCatItem('${offerKey}')">CUMPĂRĂ ACUM</button>
+<!-- Înlocuim butonul mare cu două mai mici -->
+            <div style="display: flex; gap: 10px; width: 100%;">
+                <button class="cat-buy-btn" style="flex: 1; font-size: 18px;" onclick="buyCatItem('${offerKey}', 1)">CUMPĂRĂ 1</button>
+                <button class="cat-buy-btn" style="flex: 1; font-size: 18px;" onclick="buyCatItem('${offerKey}', 'all')">CUMPĂRĂ TOT</button>
+            </div>
+            
             <button class="cancel-btn" style="margin-top:15px; color: #666;" onclick="this.closest('.modal-overlay').remove()">ÎNCHIDE</button>
         </div>
     `;
@@ -21918,52 +21926,62 @@ function openCatDetail(offerKey) {
 
 let pendingActionBoxKey = null;
 
-async function buyCatItem(offerKey) {
+async function buyCatItem(offerKey, requestedQty = 1) {
     try {
         const offer = petShopOffers.find(o => o.key === offerKey);
         const item = catShopItems[offerKey];
 
-    if (isInventoryFull()) {
-        showKevinutaBubble("Inventar plin! Nu mai ai loc.");
-        return;
-    }
+        if (isInventoryFull()) {
+            showKevinutaBubble("Inventar plin! Nu mai ai loc.");
+            return;
+        }
       
         if (!offer || !item) {
             showKevinutaBubble("Eroare: Ofertă invalidă!");
             return;
         }
 
-        // Use the offer object for the limit check
-        if (offer.limit - offer.bought <= 0) {
+        const remainingStock = offer.limit - offer.bought;
+        if (remainingStock <= 0) {
             showKevinutaBubble("Stoc epuizat!");
             return;
         }
 
-        if (rubies < item.price) {
+        const maxCanAfford = Math.floor(rubies / item.price);
+        
+        let qtyToBuy = 1;
+        if (requestedQty === 'all') {
+            qtyToBuy = Math.min(remainingStock, maxCanAfford);
+        } else {
+            qtyToBuy = Math.min(requestedQty, remainingStock, maxCanAfford);
+        }
+
+        // Dacă nu își permite nici măcar o cutie
+        if (qtyToBuy <= 0) {
             showKevinutaBubble("Nu ai destule rubine!");
             return;
         }
 
-        // 1. Deduct Rubies
-        rubies -= item.price;
+        // 1. Deduct Rubies (Preț x Cantitate)
+        rubies -= (item.price * qtyToBuy);
         
-        // 2. Update the Buy Count (BOTH in the array AND the _GAME_DATA object)
-        offer.bought += 1;
+        // 2. Update the Buy Count în memorie
+        offer.bought += qtyToBuy;
         if (!_GAME_DATA.playerPetBuys) _GAME_DATA.playerPetBuys = {};
-        _GAME_DATA.playerPetBuys[offerKey] = (_GAME_DATA.playerPetBuys[offerKey] || 0) + 1;
+        _GAME_DATA.playerPetBuys[offerKey] = (_GAME_DATA.playerPetBuys[offerKey] || 0) + qtyToBuy;
         
-        // 3. Add to inventory
+        // 3. Adăugăm cantitatea în inventar
         if (!_GAME_DATA.inventory) _GAME_DATA.inventory = {};
-        _GAME_DATA.inventory[offerKey] = (_GAME_DATA.inventory[offerKey] || 0) + 1;
+        _GAME_DATA.inventory[offerKey] = (_GAME_DATA.inventory[offerKey] || 0) + qtyToBuy;
         
         updateScoreUI();
-        renderPetShop(); // This now sees the updated _GAME_DATA.playerPetBuys
+        renderPetShop(); 
         
-        // Close detail modal
+        // Închidem modalul de cumpărare
         const modalToClose = document.querySelector('.cat-shop-modal');
         if (modalToClose) modalToClose.parentElement.remove();
 
-        // 4. Trigger UI for post-buy action
+        // 4. Afișăm fereastra "Ce dorești să faci cu acest obiect?"
         pendingActionBoxKey = offerKey;
         document.getElementById('postBuyBoxImg').src = item.image; 
         document.getElementById('postBuyBoxTitle').innerText = item.name;
@@ -21982,7 +22000,7 @@ async function buyCatItem(offerKey) {
                 xp: playerXP,
                 currentStage: currentStageId,
                 inventory: _GAME_DATA.inventory,
-                petBuys: _GAME_DATA.playerPetBuys // Send the updated object
+                petBuys: _GAME_DATA.playerPetBuys 
             }),
         });
 
