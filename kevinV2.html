@@ -21457,7 +21457,7 @@ const petCatalog = [
         name: "Clara",
         desc: "Bătrâna cu un ochi bătut (așa a rămas de când s-a apropiat de voi prima dată).",
         personality: "Destul de gălăgioasă, dar și extrem de lipicioasă și iubitoare.",
-        stats: { speed: 0.8, size: 85, rarity: "Rare" },
+        stats: { speed: 0.8, size: 70, rarity: "Rare" },
         ability: { name: "Înțelepciunea Străzii", desc: "Miorlăie constant și cere atenție din plin." },
         assets: {
             presentation: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/Clara%20sit.png",
@@ -21655,7 +21655,7 @@ const petCatalog = [
         name: "Panda",
         desc: "O pisică tuxedo adorabilă. Porecla ei este 'Super Glue' — cred că îți dai seama de ce!",
         personality: "Are nevoie de atenție constantă și se lipește de tine ca super glue.",
-        stats: { speed: 1.0, size: 66, rarity: "Legendary" },
+        stats: { speed: 1.0, size: 75, rarity: "Legendary" },
         ability: { name: "Lipici Total", desc: "Odată ce s-a așezat pe tine, nu mai poți pleca nicăieri." },
         assets: {
             presentation: "https://raw.githubusercontent.com/236789/Ksda-art/main/backgrounds/catsAssets/panda%20sit%20.png",
@@ -23106,26 +23106,26 @@ const PET_STATES = {
     PLAY: 'play'
 };
 
-// --- HELPER: Action Manager ---
 function setPetAction(node, action) {
-    if (node.currentAction === action) return; // KILL THE FLICKER: Don't re-apply if already set
+    if (node.currentAction === action) return;
     node.currentAction = action;
     const assets = node.petData.assets;
 
-    // Mapping your asset names to actions
-    const imgMap = {
+    // This handles cases where the state name doesn't match asset name
+    const actionMap = {
         'walk': assets.walk || assets.presentation,
-        'sit': assets.sit || assets.presentation,
+        'idle': assets.sit || assets.presentation,
         'stretch': assets.stretch || assets.presentation,
         'sleep': assets.sleep || assets.presentation,
         'play': assets.play || assets.presentation,
-        'layDown': assets.layDown || assets.sit,
-        'back': assets.back || assets.sit
+        'follow': assets.walk || assets.presentation,
+        'wander': assets.walk || assets.presentation
     };
     
-    node.sprite.style.backgroundImage = `url('${imgMap[action] || assets.presentation}')`;
+    // Default to presentation if action is missing
+    const img = actionMap[action] || assets.presentation;
+    node.sprite.style.backgroundImage = `url('${img}')`;
 }
-
 function updateActivePetsInGame() {
     const gameArea = document.getElementById('gameArea');
     if (!gameArea) return;
@@ -23175,47 +23175,42 @@ function petBrainLoop() {
     const kY = kevin.top + kevin.height / 2;
 
     activePetDOMNodes.forEach((node, index) => {
-        node.timer++;
-
-        // 1. BRAIN: Pick state less often (every ~5-7 seconds)
-        if (node.timer > 120) {
+        // --- 1. THE BRAIN: DECISION COOLDOWN ---
+        if (node.timer > 0) {
+            node.timer--;
+        } else {
+            // Pick a state and commit to it for at least 100-300 frames
             const states = Object.values(PET_STATES);
             node.state = states[Math.floor(Math.random() * states.length)];
-            node.timer = 0;
+            node.timer = 150 + Math.random() * 150; 
             
-            // Set targets based on new state
             if (node.state === PET_STATES.WANDER) {
                 node.targetX = Math.random() * (window.innerWidth - 100);
                 node.targetY = Math.random() * (window.innerHeight - 100);
             }
         }
 
-        // 2. MOVEMENT TARGETS
-        let isMoving = false;
-        if (node.state === PET_STATES.FOLLOW) {
-            // Index offset prevents stacking on Kevin
-            node.targetX = kX + (index * 60) - 60; 
-            node.targetY = kY + 60;
-            isMoving = true;
-        } else if (node.state === PET_STATES.WANDER) {
-            isMoving = true;
-        }
+        // --- 2. MOVEMENT vs ACTION ---
+        const isMovingState = (node.state === PET_STATES.FOLLOW || node.state === PET_STATES.WANDER);
+        
+        if (isMovingState) {
+            if (node.state === PET_STATES.FOLLOW) {
+                node.targetX = kX + (index * 70) - 70;
+                node.targetY = kY + 60;
+            }
 
-        // 3. APPLY MOVEMENT
-        if (isMoving) {
             const dx = node.targetX - node.x;
             const dy = node.targetY - node.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist > 5) {
-                const speed = 2.5;
+            if (dist > 10) {
+                const speed = 2.8;
                 node.x += (dx / dist) * speed;
                 node.y += (dy / dist) * speed;
                 
-                // FLIP LOGIC (Only flips when turning)
-                const newFacing = dx > 0 ? 1 : -1;
-                if (node.facing !== newFacing) {
-                    node.facing = newFacing;
+                // FLIP LOGIC: Flip only if movement is significant (> 1px)
+                if (Math.abs(dx) > 1) {
+                    node.facing = dx > 0 ? 1 : -1;
                     node.sprite.style.transform = `scaleX(${node.facing})`;
                 }
                 setPetAction(node, 'walk');
@@ -23223,7 +23218,9 @@ function petBrainLoop() {
                 setPetAction(node, 'sit');
             }
         } else {
-            // MAP STATES TO ACTIONS
+            // MAP STATES TO IMAGES
+            // States: IDLE, STRETCH, PLAY
+            // Convert to action names matching setPetAction
             const actionMap = {
                 'idle': 'sit',
                 'stretch': 'stretch',
@@ -23232,6 +23229,7 @@ function petBrainLoop() {
             setPetAction(node, actionMap[node.state] || 'sit');
         }
 
+        // Update Position
         node.el.style.left = node.x + 'px';
         node.el.style.top = node.y + 'px';
         node.el.style.zIndex = Math.floor(node.y);
