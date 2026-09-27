@@ -22613,7 +22613,7 @@ function showFinalCatReveal(catData) {
     const overlay = document.getElementById('boxCutsceneOverlay');
     const imgEl = document.getElementById('boxCutsceneImg');
     
-    // 1. LOGIC
+    // 1. LOGICA DE DUPLICAT ȘI RAMBURSARE
     const isDuplicate = (_GAME_DATA.ownedPets && _GAME_DATA.ownedPets[catData.id] > 0);
     const boxPrice = catShopItems[currentBoxKey] ? catShopItems[currentBoxKey].price : 0;
     const rubyRefund = Math.floor(boxPrice * 0.8);
@@ -22628,29 +22628,24 @@ function showFinalCatReveal(catData) {
         syncInventoryToCloud();
     }
 
-    // 2. UI Updates
+    // 2. ASCUNDEM UI-ul CUTIEI
     overlay.querySelectorAll('.fade-out-piece').forEach(el => el.style.display = 'none');
     
-    // --- CREĂM WRAPPER-UL ---
-    const wrapper = document.createElement('div');
-    wrapper.className = "reveal-img-wrapper";
-    imgEl.parentNode.replaceChild(wrapper, imgEl); // Înlocuim div-ul vechi cu wrapper-ul
-    
+    // 3. TRANSFORMĂM CUTIA ÎN PISICĂ
     imgEl.classList.remove('box-hit-anim', 'on-cooldown');
     imgEl.classList.add('reveal-img');
     imgEl.style.backgroundImage = `url('${catData.assets.presentation}')`;
-    wrapper.appendChild(imgEl); // Punem pisica în wrapper
     
-    // 3. APPLY DUPLICATE EFFECTS PE WRAPPER
+    // 🚨 SECRETUL PENTRU X-UL CENTRAT: Îl punem DIRECT în interiorul div-ului care se animă!
     if (isDuplicate) {
         imgEl.style.filter = "grayscale(1) brightness(0.5) drop-shadow(0 0 30px rgba(255, 68, 68, 0.5))";
         const redX = document.createElement('div');
         redX.className = "duplicate-x";
         redX.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-        wrapper.appendChild(redX); // X-ul stă peste pisică în interiorul wrapper-ului
+        imgEl.appendChild(redX); // Acum X-ul va face "pop" și va sări odată cu pisica!
     }
 
-    // 4. GENERATE TOP CONTENT (Același pentru ambele cazuri: Raritate, Stele, Nume)
+    // 4. TOP PANEL (IDENTIC PENTRU AMBELE CAZURI: Stele, Raritate, Nume)
     const topPanel = document.createElement('div');
     topPanel.className = 'reveal-top';
 
@@ -22664,30 +22659,30 @@ function showFinalCatReveal(catData) {
         <div class="cat-reveal-name">${catData.name.toUpperCase()}</div>
     `;
 
-    // 5. BOTTOM PANEL (Diferă în funcție de duplicat)
+    // 5. BOTTOM PANEL (Diferă în funcție de Duplicat vs Nou)
     const bottomPanel = document.createElement('div');
     bottomPanel.className = 'reveal-bottom';
     
-    if (!isDuplicate) {
-        // PISICĂ NOUĂ
+    if (isDuplicate) {
+        // DESIGN-UL PENTRU DUPLICAT (Casetă roșie + Buton de închidere)
+        bottomPanel.innerHTML = `
+            <div style="background: rgba(0,0,0,0.6); border: 2px solid #ef4444; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 20px; width: 100%; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.2);">
+                <div style="font-family:'Montserrat'; font-weight:900; font-size: 15px; color:#ef4444; text-transform:uppercase; margin-bottom: 5px;">AI DEJA PE ${catData.name.toUpperCase()}</div>
+                <div style="font-family:'Orbitron'; font-weight:900; font-size: 11px; color:#94a3b8; margin-bottom: 10px; letter-spacing: 1px;">RAMBURSARE 80%</div>
+                <div style="display:flex; align-items:center; justify-content:center; gap:8px; font-family:'Orbitron'; font-size: 32px; font-weight:900; color:#ff3366; text-shadow: 0 0 15px rgba(255, 51, 102, 0.4);">
+                    +${rubyRefund} <img src="https://iili.io/CrnXNdG.png" style="width:26px; height:26px;">
+                </div>
+            </div>
+            <button class="cat-reveal-continue-btn" style="background: linear-gradient(180deg, #ef4444 0%, #991b1b 100%); border-color: #ffb3b3; color: #fff; box-shadow: 0 6px 0 #450a0a, 0 10px 20px rgba(0,0,0,0.5);" onclick="closeBoxCutscene()">ÎNCHIDE</button>
+        `;
+    } else {
+        // DESIGN-UL PENTRU PISICĂ NOUĂ
         bottomPanel.innerHTML = `
             <div class="cat-reveal-desc-box">
                 <p><b>Personalitate:</b> ${catData.personality}</p>
                 <p>"${catData.desc}"</p>
             </div>
             <button class="cat-reveal-continue-btn" onclick="closeBoxCutscene()">SUPER!</button>
-        `;
-    } else {
-        // DUPLICAT (Refund Box + Close Button)
-        bottomPanel.innerHTML = `
-            <div style="background: rgba(0,0,0,0.6); border: 2px solid #ef4444; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 20px; width: 100%; box-shadow: 0 5px 15px rgba(239, 68, 68, 0.2);">
-                <div style="font-family:'Montserrat'; font-weight:900; font-size: 16px; color:#ef4444; text-transform:uppercase; margin-bottom: 5px;">AI DEJA ACEST PET</div>
-                <div style="font-family:'Orbitron'; font-weight:900; font-size: 13px; color:#94a3b8; margin-bottom: 10px;">RAMBURSARE (80%)</div>
-                <div style="display:flex; align-items:center; justify-content:center; gap:8px; font-family:'Orbitron'; font-size: 32px; font-weight:900; color:#ff3366; text-shadow: 0 0 15px rgba(255, 51, 102, 0.4);">
-                    +${rubyRefund} <img src="https://iili.io/CrnXNdG.png" style="width:26px; height:26px;">
-                </div>
-            </div>
-            <button class="cat-reveal-continue-btn" style="background: linear-gradient(180deg, #ef4444 0%, #991b1b 100%); border-color: #ffb3b3; color: #fff; box-shadow: 0 6px 0 #450a0a, 0 10px 20px rgba(0,0,0,0.5);" onclick="closeBoxCutscene()">ÎNCHIDE</button>
         `;
     }
 
