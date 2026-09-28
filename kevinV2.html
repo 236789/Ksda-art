@@ -23098,147 +23098,191 @@ function renderShowcaseSlots() {
 }
 
 // ==========================================
-// 🐈 THE ACTUAL IN-GAME PET FOLLOWING LOGIC (REFACTORED)
+// 🐈 PET AI V2 (wander + rest states only)
 // ==========================================
-let activePetDOMNodes = [];
-let petFollowInterval = null;
+const PET_ART_FACES = 'left';   // direction your sprite art faces by default. If pets look backwards, change to 'right'
+const PET_WALK_SPEED = 150;     // px/sec at stats.speed = 1
 
-const PET_STATES = {
-    WANDER: 'wander',
-    FOLLOW: 'follow',
-    IDLE: 'idle',
-    STRETCH: 'stretch',
-    PLAY: 'play',
-    SLEEP: 'sleep',
-    LAY: 'lay'
+// min/max seconds, w = pick weight
+const PET_STATE_DEFS = {
+    walk:    { w: 34 },
+    sit:     { min: 3, max: 6,  w: 14 },
+    back:    { min: 2.5, max: 5, w: 8 },
+    stretch: { min: 2, max: 3.5, w: 9 },
+    lay:     { min: 4, max: 8,  w: 9 },
+    sleep:   { min: 7, max: 13, w: 6 },
+    play:    { min: 3, max: 5,  w: 11 },
+    mog:     { min: 2.5, max: 4, w: 9 }
 };
 
-function setPetAction(node, action) {
-    if (node.currentAction === action) return;
-    node.currentAction = action;
-    const assets = node.petData.assets;
+let activePetDOMNodes = [];
+let petRAF = null;
+let petLastTime = 0;
 
-    // Direct mapping to the keys in your 'assets' objects
-    const actionMap = {
-        'walk': assets.walk || assets.presentation,
-        'idle': assets.sit || assets.presentation,
-        'stretch': assets.stretch || assets.presentation,
-        'sleep': assets.sleep || assets.presentation,
-        'play': assets.play || assets.presentation,
-        'lay': assets.layDown || assets.presentation,
-        'wander': assets.walk || assets.presentation,
-        'follow': assets.walk || assets.presentation
+const petRand = (a, b) => a + Math.random() * (b - a);
+
+function petAsset(pet, key) {
+    const a = pet.assets || {};
+    const chain = {
+        walk:    [a.walk, a.presentation],
+        walk2:   [a.walk2],
+        sit:     [a.sit, a.presentation],
+        back:    [a.back, a.sit, a.presentation],
+        stretch: [a.stretch, a.sit, a.presentation],
+        lay:     [a.layDown, a.sit, a.presentation],
+        sleep:   [a.sleep, a.layDown, a.sit, a.presentation],
+        play:    [a.play, a.walk, a.presentation],
+        mog:     [a.mog, a.presentation]
     };
-    
-    const img = actionMap[action] || assets.presentation;
-    node.sprite.style.backgroundImage = `url('${img}')`;
+    return (chain[key] || []).find(Boolean) || a.presentation;
+}
+
+function petSetImage(node, key) {
+    const url = petAsset(node.petData, key);
+    if (node.img === url) return;
+    node.img = url;
+    node.sprite.style.backgroundImage = `url('${url}')`;
+}
+
+function petPickNext(node) {
+    if (node.chain) { const c = node.chain; node.chain = null; return c; }
+    const entries = Object.keys(PET_STATE_DEFS).filter(k => k !== node.state);
+    const total = entries.reduce((s, k) => s + PET_STATE_DEFS[k].w, 0);
+    let r = Math.random() * total;
+    for (const k of entries) { r -= PET_STATE_DEFS[k].w; if (r <= 0) return k; }
+    return 'sit';
+}
+
+function petEnterState(node, state) {
+    node.state = state;
+    node.elapsed = 0;
+    node.anim = 0;
+    const def = PET_STATE_DEFS[state];
+
+    if (state === 'walk') {
+        node.targetX = petRand(0, window.innerWidth - node.size);
+        node.targetY = petRand(0, window.innerHeight - node.size);
+        node.stepT = 0;
+        node.stepFrame = false;
+        petSetImage(node, 'walk');
+    } else {
+        node.duration = petRand(def.min, def.max);
+        petSetImage(node, state);
+        if (state === 'lay' && Math.random() < 0.5) node.chain = 'sleep';
+        // sometimes turn around while resting so they don't always face one way
+        if (Math.random() < 0.3) node.facing *= -1;
+    }
 }
 
 function updateActivePetsInGame() {
     const gameArea = document.getElementById('gameArea');
     if (!gameArea) return;
 
-    activePetDOMNodes.forEach(nodeObj => nodeObj.el.remove());
-    activePetDOMNodes = [];
+    // remove pets that are no longer equipped
+    activePetDOMNodes = activePetDOMNodes.filter(n => {
+        if (activePetSlots.some(p => p && p.id === n.petData.id)) return true;
+        n.el.remove();
+        return false;
+    });
 
-    activePetSlots.forEach((pet, index) => {
+    // add newly equipped pets (existing ones are left alone, no teleporting)
+    activePetSlots.forEach(pet => {
         if (!pet) return;
+        if (activePetDOMNodes.some(n => n.petData.id === pet.id)) return;
+
+        Object.values(pet.assets || {}).forEach(u => { const i = new Image(); i.src = u; }); // preload
+
+        const size = (pet.stats.size || 60) * (window.innerWidth < 600 ? 0.75 : 1);
 
         const wrapper = document.createElement('div');
         wrapper.className = 'pet-wrapper';
-        wrapper.style.position = 'absolute';
-        wrapper.style.pointerEvents = 'none'; // Ensure they don't block clicks
-        
+        wrapper.style.cssText = `position:absolute;left:0;top:0;pointer-events:none;will-change:transform;width:${size}px;height:${size}px;`;
+
         const sprite = document.createElement('div');
         sprite.className = 'pet-sprite-inner';
-        sprite.style.width = (pet.stats.size || 60) + 'px';
-        sprite.style.height = (pet.stats.size || 60) + 'px';
-        sprite.style.backgroundSize = 'contain';
-        sprite.style.backgroundRepeat = 'no-repeat';
-        sprite.style.backgroundPosition = 'center';
-        
+        sprite.style.cssText = `width:${size}px;height:${size}px;background-size:contain;background-repeat:no-repeat;background-position:center;transform-origin:50% 100%;`;
         wrapper.appendChild(sprite);
         gameArea.appendChild(wrapper);
 
-        activePetDOMNodes.push({
-            el: wrapper,
-            sprite: sprite,
-            petData: pet,
-            state: PET_STATES.IDLE,
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
-            targetX: Math.random() * window.innerWidth,
-            targetY: Math.random() * window.innerHeight,
-            facing: 1, // 1 = right, -1 = left
-            timer: 0,
-            currentAction: null
-        });
+        const node = {
+            el: wrapper, sprite, petData: pet, size,
+            x: petRand(0, window.innerWidth - size),
+            y: petRand(80, window.innerHeight - size),
+            facing: Math.random() < 0.5 ? 1 : -1, // 1 = looking right, -1 = looking left
+            state: 'sit', elapsed: 0, duration: 2, anim: 0,
+            targetX: 0, targetY: 0, stepT: 0, stepFrame: false,
+            chain: null, img: null,
+            hasWalk2: !!(pet.assets && pet.assets.walk2),
+            speedMult: pet.stats.speed || 1
+        };
+        petEnterState(node, 'sit');
+        activePetDOMNodes.push(node);
     });
 
-    if (petFollowInterval) clearInterval(petFollowInterval);
-    petFollowInterval = setInterval(petBrainLoop, 50);
+    if (activePetDOMNodes.length > 0 && !petRAF) {
+        petLastTime = performance.now();
+        petRAF = requestAnimationFrame(petBrainLoop);
+    } else if (activePetDOMNodes.length === 0 && petRAF) {
+        cancelAnimationFrame(petRAF);
+        petRAF = null;
+    }
 }
 
-function petBrainLoop() {
-    if (isPaused) return;
-    
-    // Get player center
-    const kevinRect = document.getElementById('kevin').getBoundingClientRect();
-    const kX = kevinRect.left + kevinRect.width / 2;
-    const kY = kevinRect.top + kevinRect.height / 2;
+function petBrainLoop(now) {
+    petRAF = requestAnimationFrame(petBrainLoop);
+    const dt = Math.min((now - petLastTime) / 1000, 0.1);
+    petLastTime = now;
 
-    activePetDOMNodes.forEach((node, index) => {
-        // --- 1. THE BRAIN ---
-        if (node.timer > 0) {
-            node.timer--;
-        } else {
-            // New state logic: More idle time for realism
-            const rand = Math.random();
-            if (rand < 0.3) {
-                node.state = PET_STATES.WANDER;
-                node.targetX = Math.random() * (window.innerWidth - 100);
-                node.targetY = Math.random() * (window.innerHeight - 100);
-            } else if (rand < 0.6) {
-                node.state = PET_STATES.FOLLOW;
+    const gameArea = document.getElementById('gameArea');
+    if (isPaused || !gameArea || gameArea.style.display !== 'block') return;
+
+    const flipBase = (PET_ART_FACES === 'right') ? 1 : -1;
+
+    activePetDOMNodes.forEach(node => {
+        node.elapsed += dt;
+        node.anim += dt;
+        let bob = 0, scale = 1;
+
+        if (node.state === 'walk') {
+            const dx = node.targetX - node.x;
+            const dy = node.targetY - node.y;
+            const dist = Math.hypot(dx, dy);
+            const step = PET_WALK_SPEED * node.speedMult * dt;
+
+            if (dist <= step || node.elapsed > 20) {
+                petEnterState(node, petPickNext(node));
             } else {
-                const idleStates = [PET_STATES.IDLE, PET_STATES.STRETCH, PET_STATES.PLAY, PET_STATES.SLEEP, PET_STATES.LAY];
-                node.state = idleStates[Math.floor(Math.random() * idleStates.length)];
-            }
-            node.timer = 100 + Math.random() * 200; 
-        }
+                node.x += (dx / dist) * step;
+                node.y += (dy / dist) * step;
+                if (Math.abs(dx) > 2) node.facing = dx > 0 ? 1 : -1;
 
-        // --- 2. MOVEMENT ---
-        if (node.state === PET_STATES.WANDER || node.state === PET_STATES.FOLLOW) {
-            const tx = (node.state === PET_STATES.FOLLOW) ? kX + (index * 70) : node.targetX;
-            const ty = (node.state === PET_STATES.FOLLOW) ? kY : node.targetY;
-
-            const dx = tx - node.x;
-            const dy = ty - node.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (dist > 20) {
-                const speed = 3.2;
-                node.x += (dx / dist) * speed;
-                node.y += (dy / dist) * speed;
-                
-                // FLIP FIX: Look at the delta (dx) to determine orientation
-                if (Math.abs(dx) > 5) {
-                    node.facing = dx > 0 ? 1 : -1;
-                    node.sprite.style.transform = `scaleX(${node.facing})`;
+                node.stepT += dt;
+                if (node.hasWalk2 && node.stepT > 0.25) {
+                    node.stepT = 0;
+                    node.stepFrame = !node.stepFrame;
+                    petSetImage(node, node.stepFrame ? 'walk2' : 'walk');
                 }
-                setPetAction(node, 'walk');
-            } else {
-                setPetAction(node, 'idle');
+                bob = -Math.abs(Math.sin(node.anim * 10)) * 4;
             }
         } else {
-            // Stationary states
-            setPetAction(node, node.state);
+            if (node.elapsed >= node.duration) {
+                petEnterState(node, petPickNext(node));
+            } else if (node.state === 'play') {
+                bob = -Math.abs(Math.sin(node.anim * 8)) * 12;
+            } else if (node.state === 'mog') {
+                scale = 1 + Math.sin(node.anim * 4) * 0.04;
+            } else if (node.state === 'sleep' || node.state === 'lay') {
+                scale = 1 + Math.sin(node.anim * 1.6) * 0.02; // slow breathing
+            }
         }
 
-        // --- 3. RENDER ---
-        node.el.style.left = node.x + 'px';
-        node.el.style.top = node.y + 'px';
-        node.el.style.zIndex = Math.floor(node.y);
+        // keep on screen (also handles window resize)
+        node.x = Math.max(0, Math.min(node.x, window.innerWidth - node.size));
+        node.y = Math.max(0, Math.min(node.y, window.innerHeight - node.size));
+
+        node.el.style.transform = `translate3d(${node.x}px, ${node.y}px, 0)`;
+        node.el.style.zIndex = 10 + Math.floor(node.y / 10); // stays below Kevin (999) and the HUD
+        node.sprite.style.transform = `translateY(${bob}px) scale(${scale}) scaleX(${node.facing * flipBase})`;
     });
 }
 // ==========================================
