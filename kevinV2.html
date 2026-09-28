@@ -23096,41 +23096,43 @@ let activePetDOMNodes = [];
 let petFollowInterval = null;
 
 
-
-// Add this to your existing Pet Manager logic
 const PET_STATES = {
-    WANDER: 'wander',
-    FOLLOW: 'follow',
-    IDLE: 'idle', // Sit/Lay/Sleep
-    STRETCH: 'stretch',
-    PLAY: 'play'
+    WANDER: 'wander', FOLLOW: 'follow', IDLE: 'idle',
+    STRETCH: 'stretch', PLAY: 'play', SLEEP: 'sleep'
 };
 
-function setPetAction(node, action) {
-    if (node.currentAction === action) return;
-    node.currentAction = action;
-    const assets = node.petData.assets;
+// state -> asset key (one place to fix mismatches)
+const STATE_ASSET = {
+    wander: 'walk', follow: 'walk', idle: 'sit',
+    stretch: 'stretch', play: 'play', sleep: 'sleep'
+};
 
-    // This handles cases where the state name doesn't match asset name
-    const actionMap = {
-        'walk': assets.walk || assets.presentation,
-        'idle': assets.sit || assets.presentation,
-        'stretch': assets.stretch || assets.presentation,
-        'sleep': assets.sleep || assets.presentation,
-        'play': assets.play || assets.presentation,
-        'follow': assets.walk || assets.presentation,
-        'wander': assets.walk || assets.presentation
-    };
-    
-    // Default to presentation if action is missing
-    const img = actionMap[action] || assets.presentation;
-    node.sprite.style.backgroundImage = `url('${img}')`;
+// weighted picks so pets mostly stay with you
+const STATE_WEIGHTS = [
+    [PET_STATES.FOLLOW, 40], [PET_STATES.IDLE, 25], [PET_STATES.WANDER, 15],
+    [PET_STATES.SLEEP, 10], [PET_STATES.STRETCH, 5], [PET_STATES.PLAY, 5]
+];
+
+function pickState() {
+    let r = Math.random() * 100;
+    for (const [state, w] of STATE_WEIGHTS) {
+        if ((r -= w) < 0) return state;
+    }
+    return PET_STATES.FOLLOW;
 }
+
+function setPetAsset(node, key) {
+    if (node.currentAsset === key) return;
+    node.currentAsset = key;
+    const a = node.petData.assets;
+    node.sprite.style.backgroundImage = `url('${a[key] || a.presentation}')`;
+}
+
 function updateActivePetsInGame() {
     const gameArea = document.getElementById('gameArea');
     if (!gameArea) return;
 
-    activePetDOMNodes.forEach(nodeObj => nodeObj.el.remove());
+    activePetDOMNodes.forEach(n => n.el.remove());
     activePetDOMNodes = [];
 
     activePetSlots.forEach((pet, index) => {
@@ -23139,97 +23141,111 @@ function updateActivePetsInGame() {
         const wrapper = document.createElement('div');
         wrapper.className = 'pet-wrapper';
         wrapper.style.position = 'absolute';
-        
+        wrapper.style.transform = 'translate(-50%, -50%)'; // x/y = pet CENTER
+
         const sprite = document.createElement('div');
         sprite.className = 'pet-sprite-inner';
         sprite.style.width = pet.stats.size + 'px';
         sprite.style.height = pet.stats.size + 'px';
-        
+
         wrapper.appendChild(sprite);
         gameArea.appendChild(wrapper);
 
         activePetDOMNodes.push({
-            el: wrapper,
-            sprite: sprite,
-            petData: pet,
+            el: wrapper, sprite, petData: pet,
             state: PET_STATES.FOLLOW,
-            // OFFSET SPAWN: Index * 80px ensures they don't spawn on top of each other
-            x: (window.innerWidth / 2) + (index * 80),
-            y: (window.innerHeight / 2) + (index * 50),
-            targetX: 0,
-            targetY: 0,
-            facing: 1,
-            timer: 0,
-            currentAction: null
+            x: gameArea.clientWidth / 2 + index * 80,
+            y: gameArea.clientHeight / 2 + index * 50,
+            targetX: 0, targetY: 0,
+            facing: 1, timer: 0, currentAsset: null
         });
     });
 
     if (petFollowInterval) clearInterval(petFollowInterval);
-    petFollowInterval = setInterval(petBrainLoop, 50);
+    if (activePetDOMNodes.length) petFollowInterval = setInterval(petBrainLoop, 50);
 }
 
 function petBrainLoop() {
     if (isPaused) return;
-    const kevin = document.getElementById('kevin').getBoundingClientRect();
-    const kX = kevin.left + kevin.width / 2;
-    const kY = kevin.top + kevin.height / 2;
+    const gameArea = document.getElementById('gameArea');
+    const g = gameArea.getBoundingClientRect();
+    const k = document.getElementById('kevin').getBoundingClientRect();
+    // Kevin's position in gameArea coordinates
+    const kX = k.left + k.width / 2 - g.left;
+    const kY = k.top + k.height / 2 - g.top;
+    const count = activePetDOMNodes.length;
 
     activePetDOMNodes.forEach((node, index) => {
-        // --- 1. THE BRAIN: DECISION COOLDOWN ---
-        if (node.timer > 0) {
-            node.timer--;
-        } else {
-            // Pick a state and commit to it for at least 100-300 frames
-            const states = Object.values(PET_STATES);
-            node.state = states[Math.floor(Math.random() * states.length)];
-            node.timer = 150 + Math.random() * 150; 
-            
+        const distToKevin = Math.hypot(kX - node.x, kY - node.y);
+
+        // --- BRAIN ---
+        if (distToKevin > 300 && node.state !== PET_STATES.FOLLOW) {
+            // leash: too far away, drop what you're doing and come back
+            node.state = PET_STATES.FOLLOW;
+            node.timer = 60;
+        } else if (--node.timer <= 0) {
+            node.state = pickState();
+            node.timer = 100 + Math.random() * 150;
             if (node.state === PET_STATES.WANDER) {
-                node.targetX = Math.random() * (window.innerWidth - 100);
-                node.targetY = Math.random() * (window.innerHeight - 100);
+                // wander NEAR Kevin, not anywhere on screen
+                node.targetX = kX + (Math.random() - 0.5) * 400;
+                node.targetY = kY + (Math.random() - 0.5) * 300;
             }
         }
 
-        // --- 2. MOVEMENT vs ACTION ---
-        const isMovingState = (node.state === PET_STATES.FOLLOW || node.state === PET_STATES.WANDER);
-        
-        if (isMovingState) {
-            if (node.state === PET_STATES.FOLLOW) {
-                node.targetX = kX + (index * 70) - 70;
-                node.targetY = kY + 60;
-            }
+        // --- MOVEMENT ---
+        let vx = 0, vy = 0;
+        const moving = node.state === PET_STATES.FOLLOW || node.state === PET_STATES.WANDER;
 
+        if (node.state === PET_STATES.FOLLOW) {
+            // spread pets in a row behind Kevin, centered
+            node.targetX = kX + (index - (count - 1) / 2) * 70;
+            node.targetY = kY + 60;
+        }
+
+        if (moving) {
             const dx = node.targetX - node.x;
             const dy = node.targetY - node.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-
+            const dist = Math.hypot(dx, dy);
             if (dist > 10) {
-                const speed = 2.8;
-                node.x += (dx / dist) * speed;
-                node.y += (dy / dist) * speed;
-                
-                // FLIP LOGIC: Flip only if movement is significant (> 1px)
-                if (Math.abs(dx) > 1) {
-                    node.facing = dx > 0 ? 1 : -1;
-                    node.sprite.style.transform = `scaleX(${node.facing})`;
-                }
-                setPetAction(node, 'walk');
-            } else {
-                setPetAction(node, 'sit');
+                vx = (dx / dist) * 2.8;
+                vy = (dy / dist) * 2.8;
+            } else if (node.state === PET_STATES.WANDER) {
+                node.timer = Math.min(node.timer, 1); // arrived, pick something new
             }
-        } else {
-            // MAP STATES TO IMAGES
-            // States: IDLE, STRETCH, PLAY
-            // Convert to action names matching setPetAction
-            const actionMap = {
-                'idle': 'sit',
-                'stretch': 'stretch',
-                'play': 'play'
-            };
-            setPetAction(node, actionMap[node.state] || 'sit');
         }
 
-        // Update Position
+        // --- SEPARATION (stops stacking) ---
+        const minDist = 50;
+        activePetDOMNodes.forEach(other => {
+            if (other === node) return;
+            const ox = node.x - other.x, oy = node.y - other.y;
+            const d = Math.hypot(ox, oy) || 0.01;
+            if (d < minDist) {
+                const push = (minDist - d) / minDist * 1.5;
+                vx += (ox / d) * push;
+                vy += (oy / d) * push;
+            }
+        });
+
+        node.x += vx;
+        node.y += vy;
+
+        // --- FACING: based on actual velocity, with a deadzone ---
+        if (Math.abs(vx) > 0.4) {
+            const newFacing = vx > 0 ? 1 : -1;
+            if (newFacing !== node.facing) {
+                node.facing = newFacing;
+                // set petData.facesLeft = true if a sprite is drawn facing left
+                const flip = node.petData.facesLeft ? -1 : 1;
+                node.sprite.style.transform = `scaleX(${node.facing * flip})`;
+            }
+        }
+
+        // --- ANIMATION ---
+        const isWalking = Math.hypot(vx, vy) > 0.5 && moving;
+        setPetAsset(node, isWalking ? 'walk' : (moving ? 'sit' : STATE_ASSET[node.state]));
+
         node.el.style.left = node.x + 'px';
         node.el.style.top = node.y + 'px';
         node.el.style.zIndex = Math.floor(node.y);
