@@ -11312,7 +11312,8 @@ div.inv-tile div.bm-limit-tag {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    transition: transform 0.2s ease; /* Smooth flip, snappy movement */
+    transition: none !important;
+    will-change: transform;
 }
   </style>
 </head>
@@ -23098,21 +23099,22 @@ function renderShowcaseSlots() {
 }
 
 // ==========================================
-// 🐈 PET AI V2 (wander + rest states only)
+// 🐈 PET AI V3 (wander + rest states)
 // ==========================================
-const PET_ART_FACES = 'left';   // direction your sprite art faces by default. If pets look backwards, change to 'right'
-const PET_WALK_SPEED = 150;     // px/sec at stats.speed = 1
+const PET_ART_FACES = 'left';   // if pets look backwards, change to 'right'
+const PET_WALK_SPEED = 100;     // px/sec at stats.speed = 1 (was 150)
+const PET_MIN_MOVE = 200;       // min distance of each relocation walk
 
-// min/max seconds, w = pick weight
+// min/max seconds, w = pick weight (walk is no longer picked directly,
+// it always happens automatically before an action)
 const PET_STATE_DEFS = {
-    walk:    { w: 34 },
-    sit:     { min: 3, max: 6,  w: 14 },
-    back:    { min: 2.5, max: 5, w: 8 },
-    stretch: { min: 2, max: 3.5, w: 9 },
-    lay:     { min: 4, max: 8,  w: 9 },
-    sleep:   { min: 7, max: 13, w: 6 },
-    play:    { min: 3, max: 5,  w: 11 },
-    mog:     { min: 2.5, max: 4, w: 9 }
+    sit:     { min: 6,  max: 12, w: 14 },
+    back:    { min: 5,  max: 9,  w: 8 },
+    stretch: { min: 4,  max: 7,  w: 9 },
+    lay:     { min: 8,  max: 14, w: 9 },
+    sleep:   { min: 20, max: 35, w: 6 },
+    play:    { min: 6,  max: 10, w: 11 },
+    mog:     { min: 5,  max: 8,  w: 9 }
 };
 
 let activePetDOMNodes = [];
@@ -23144,33 +23146,61 @@ function petSetImage(node, key) {
     node.sprite.style.backgroundImage = `url('${url}')`;
 }
 
-function petPickNext(node) {
-    if (node.chain) { const c = node.chain; node.chain = null; return c; }
-    const entries = Object.keys(PET_STATE_DEFS).filter(k => k !== node.state);
+// picks the next ACTION (never 'walk')
+function petPickAction(node) {
+    const entries = Object.keys(PET_STATE_DEFS).filter(k => k !== node.lastAction);
     const total = entries.reduce((s, k) => s + PET_STATE_DEFS[k].w, 0);
     let r = Math.random() * total;
     for (const k of entries) { r -= PET_STATE_DEFS[k].w; if (r <= 0) return k; }
     return 'sit';
 }
 
-function petEnterState(node, state) {
+function petEnterState(node, state, pending = null) {
     node.state = state;
     node.elapsed = 0;
     node.anim = 0;
-    const def = PET_STATE_DEFS[state];
 
     if (state === 'walk') {
-        node.targetX = petRand(0, window.innerWidth - node.size);
-        node.targetY = petRand(0, window.innerHeight - node.size);
+        // pick a NEW place, far enough from the current one
+        let tx, ty, tries = 0;
+        do {
+            tx = petRand(0, Math.max(0, window.innerWidth - node.size));
+            ty = petRand(0, Math.max(0, window.innerHeight - node.size));
+            tries++;
+        } while (Math.hypot(tx - node.x, ty - node.y) < PET_MIN_MOVE && tries < 15);
+
+        node.targetX = tx;
+        node.targetY = ty;
+        node.pending = pending;          // action to do once we arrive
         node.stepT = 0;
         node.stepFrame = false;
+        // face the walking direction ONCE (no per-frame flipping = no flicker)
+        if (Math.abs(tx - node.x) > 10) node.facing = tx > node.x ? 1 : -1;
         petSetImage(node, 'walk');
     } else {
+        const def = PET_STATE_DEFS[state];
         node.duration = petRand(def.min, def.max);
+        node.lastAction = state;
+        node.pending = null;
         petSetImage(node, state);
-        if (state === 'lay' && Math.random() < 0.5) node.chain = 'sleep';
-        // sometimes turn around while resting so they don't always face one way
-        if (Math.random() < 0.3) node.facing *= -1;
+        if (state === 'lay' && Math.random() < 0.6) node.chain = 'sleep';
+    }
+}
+
+// the ONLY place where a state can end -> pets can't switch mid-state
+function petFinishState(node) {
+    if (node.state === 'walk') {
+        // arrived: start the action we walked here for
+        petEnterState(node, node.pending || petPickAction(node));
+    } else if (node.chain) {
+        // e.g. lay -> sleep, stays in the same spot
+        const c = node.chain;
+        node.chain = null;
+        petEnterState(node, c);
+    } else {
+        // action finished: walk to a new place, then do the next action
+        petEnterState(node, 'walk', petPickAction(node));
+        // small chance to just wander a bit without doing anything after
     }
 }
 
@@ -23178,19 +23208,17 @@ function updateActivePetsInGame() {
     const gameArea = document.getElementById('gameArea');
     if (!gameArea) return;
 
-    // remove pets that are no longer equipped
     activePetDOMNodes = activePetDOMNodes.filter(n => {
         if (activePetSlots.some(p => p && p.id === n.petData.id)) return true;
         n.el.remove();
         return false;
     });
 
-    // add newly equipped pets (existing ones are left alone, no teleporting)
     activePetSlots.forEach(pet => {
         if (!pet) return;
         if (activePetDOMNodes.some(n => n.petData.id === pet.id)) return;
 
-        Object.values(pet.assets || {}).forEach(u => { const i = new Image(); i.src = u; }); // preload
+        Object.values(pet.assets || {}).forEach(u => { const i = new Image(); i.src = u; });
 
         const size = (pet.stats.size || 60) * (window.innerWidth < 600 ? 0.75 : 1);
 
@@ -23208,10 +23236,10 @@ function updateActivePetsInGame() {
             el: wrapper, sprite, petData: pet, size,
             x: petRand(0, window.innerWidth - size),
             y: petRand(80, window.innerHeight - size),
-            facing: Math.random() < 0.5 ? 1 : -1, // 1 = looking right, -1 = looking left
-            state: 'sit', elapsed: 0, duration: 2, anim: 0,
+            facing: Math.random() < 0.5 ? 1 : -1,
+            state: 'sit', lastAction: 'sit', elapsed: 0, duration: 2, anim: 0,
             targetX: 0, targetY: 0, stepT: 0, stepFrame: false,
-            chain: null, img: null,
+            pending: null, chain: null, img: null,
             hasWalk2: !!(pet.assets && pet.assets.walk2),
             speedMult: pet.stats.speed || 1
         };
@@ -23249,12 +23277,14 @@ function petBrainLoop(now) {
             const dist = Math.hypot(dx, dy);
             const step = PET_WALK_SPEED * node.speedMult * dt;
 
-            if (dist <= step || node.elapsed > 20) {
-                petEnterState(node, petPickNext(node));
+            if (dist <= step || node.elapsed > 30) {
+                node.x = node.targetX;
+                node.y = node.targetY;
+                petFinishState(node);
             } else {
                 node.x += (dx / dist) * step;
                 node.y += (dy / dist) * step;
-                if (Math.abs(dx) > 2) node.facing = dx > 0 ? 1 : -1;
+                // NOTE: facing is NOT changed here anymore
 
                 node.stepT += dt;
                 if (node.hasWalk2 && node.stepT > 0.25) {
@@ -23266,13 +23296,13 @@ function petBrainLoop(now) {
             }
         } else {
             if (node.elapsed >= node.duration) {
-                petEnterState(node, petPickNext(node));
+                petFinishState(node);
             } else if (node.state === 'play') {
                 bob = -Math.abs(Math.sin(node.anim * 8)) * 12;
             } else if (node.state === 'mog') {
                 scale = 1 + Math.sin(node.anim * 4) * 0.04;
             } else if (node.state === 'sleep' || node.state === 'lay') {
-                scale = 1 + Math.sin(node.anim * 1.6) * 0.02; // slow breathing
+                scale = 1 + Math.sin(node.anim * 1.6) * 0.02;
             }
         }
 
@@ -23281,7 +23311,7 @@ function petBrainLoop(now) {
         node.y = Math.max(0, Math.min(node.y, window.innerHeight - node.size));
 
         node.el.style.transform = `translate3d(${node.x}px, ${node.y}px, 0)`;
-        node.el.style.zIndex = 10 + Math.floor(node.y / 10); // stays below Kevin (999) and the HUD
+        node.el.style.zIndex = 10 + Math.floor(node.y / 10);
         node.sprite.style.transform = `translateY(${bob}px) scale(${scale}) scaleX(${node.facing * flipBase})`;
     });
 }
