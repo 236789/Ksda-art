@@ -23166,28 +23166,11 @@ function renderShowcaseSlots() {
 }
 
 // ==========================================
-// 🐈 PET AI V4 (ground limit, no float, works on any screen size)
+// 🐈 PET AI V5 (no ground limit, no float)
 // ==========================================
 const PET_ART_FACES = 'left';   // if pets look backwards, change to 'right'
 const PET_WALK_SPEED = 100;     // px/sec at stats.speed = 1
 const PET_MIN_MOVE = 200;       // min distance of each relocation walk
-
-// Ground line: 0.62 = ground starts 62% down the game area.
-// Pets look too high -> raise it (0.65). Pets can't go high enough -> lower it (0.58).
-const PET_GROUND_TOP = 0.62;
-
-// Sizes come from the game area itself, NOT the window (fixes invisible cats on big screens)
-const petAreaW = () => {
-    const g = document.getElementById('gameArea');
-    return (g && g.clientWidth) || window.innerWidth;
-};
-const petAreaH = () => {
-    const g = document.getElementById('gameArea');
-    return (g && g.clientHeight) || window.innerHeight;
-};
-const petMinY = (size) => Math.max(0, petAreaH() * PET_GROUND_TOP - size);
-const petMaxY = (size) => Math.max(petMinY(size), petAreaH() - size);
-const petMaxX = (size) => Math.max(0, petAreaW() - size);
 
 const PET_STATE_DEFS = {
     sit:     { min: 6,  max: 12, w: 14 },
@@ -23244,8 +23227,8 @@ function petEnterState(node, state, pending = null) {
     if (state === 'walk') {
         let tx, ty, tries = 0;
         do {
-            tx = petRand(0, petMaxX(node.size));
-            ty = petRand(petMinY(node.size), petMaxY(node.size));
+            tx = petRand(0, Math.max(0, window.innerWidth - node.size));
+            ty = petRand(0, Math.max(0, window.innerHeight - node.size));
             tries++;
         } while (Math.hypot(tx - node.x, ty - node.y) < PET_MIN_MOVE && tries < 15);
 
@@ -23294,7 +23277,7 @@ function updateActivePetsInGame() {
 
         Object.values(pet.assets || {}).forEach(u => { const i = new Image(); i.src = u; });
 
-        const size = (pet.stats.size || 60) * (petAreaW() < 600 ? 0.75 : 1);
+        const size = (pet.stats.size || 60) * (window.innerWidth < 600 ? 0.75 : 1);
 
         const wrapper = document.createElement('div');
         wrapper.className = 'pet-wrapper';
@@ -23308,8 +23291,8 @@ function updateActivePetsInGame() {
 
         const node = {
             el: wrapper, sprite, petData: pet, size,
-            x: petRand(0, petMaxX(size)),
-            y: petRand(petMinY(size), petMaxY(size)),
+            x: petRand(0, window.innerWidth - size),
+            y: petRand(80, window.innerHeight - size),
             facing: Math.random() < 0.5 ? 1 : -1,
             state: 'sit', lastAction: 'sit', elapsed: 0, duration: 2, anim: 0,
             targetX: 0, targetY: 0, stepT: 0, stepFrame: false,
@@ -23369,9 +23352,9 @@ function petBrainLoop(now) {
             petFinishState(node);
         }
 
-        // keep inside the game area and on the ground
-        node.x = Math.max(0, Math.min(node.x, petMaxX(node.size)));
-        node.y = Math.max(petMinY(node.size), Math.min(node.y, petMaxY(node.size)));
+        // keep on screen
+        node.x = Math.max(0, Math.min(node.x, window.innerWidth - node.size));
+        node.y = Math.max(0, Math.min(node.y, window.innerHeight - node.size));
 
         node.el.style.transform = `translate3d(${node.x}px, ${node.y}px, 0)`;
         node.el.style.zIndex = 10 + Math.floor(node.y / 10);
