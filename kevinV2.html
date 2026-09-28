@@ -11343,18 +11343,39 @@ div.inv-tile div.bm-limit-tag {
     }
 }
 
-/* ==========================================
-   ULTRA-WIDE SCALING (For 4K or very large monitors)
-   ========================================== */
-@media screen and (min-width: 1920px) {
-    #kevin {
-        width: 220px !important;
-        height: 220px !important;
+/* Base size for mobile (Small) */
+.pet-sprite-inner {
+    width: 60px !important;
+    height: 60px !important;
+}
+
+/* PC Size (Medium-Large) */
+@media screen and (min-width: 1024px) {
+    .pet-sprite-inner {
+        width: 90px !important; /* Adjust this to whatever feels right */
+        height: 90px !important;
     }
+}
+
+/* Apply this to Kevin and all Pet Sprites */
+#kevin, .pet-sprite-inner {
+    /* 1. Eliminate Browser Blurring */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges; 
+    image-rendering: pixelated; /* Essential if they look blurry when scaled */
     
-    .pet-wrapper {
-        transform: scale(2.0); /* Even larger for 4K setups */
-    }
+    /* 2. Hardware Acceleration for Sharpness */
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+
+    /* 3. High-Quality Scaling */
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+#kevin, .pet-sprite-inner {
+    /* Subtle contrast boost and soft shadow to separate from background */
+    filter: contrast(1.05) brightness(1.02) drop-shadow(0px 8px 10px rgba(0,0,0,0.5));
 }
   </style>
 </head>
