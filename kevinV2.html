@@ -11348,23 +11348,17 @@ div.inv-tile div.bm-limit-tag {
    DESKTOP SCALING (Screens wider than 1024px)
    ========================================== */
 @media screen and (min-width: 1024px) {
-    
-    /* 1. Kevin: Increased slightly to 155px for a noticeable boost */
+    /* 1. Make Kevin Bigger on PC */
     #kevin {
         width: 155px !important; 
         height: 155px !important;
         background-size: contain !important;
     }
 
-    /* 2. Pets: Kept at 80px (Standard 'Large' size) */
+    /* 2. Make the Pets Bigger on PC */
     .pet-sprite-inner {
         width: 80px !important; 
         height: 80px !important;
-    }
-
-    /* 3. Removed transform: scale(1.5) to keep images crisp */
-    .pet-wrapper {
-        transform: none !important;
     }
 }
 
@@ -23166,12 +23160,16 @@ function renderShowcaseSlots() {
 }
 
 // ==========================================
-// 🐈 PET AI V5 (no ground limit, no float)
+// 🐈 PET AI V3 (wander + rest states)
 // ==========================================
 const PET_ART_FACES = 'left';   // if pets look backwards, change to 'right'
-const PET_WALK_SPEED = 100;     // px/sec at stats.speed = 1
+const PET_WALK_SPEED = 100;     // px/sec at stats.speed = 1 (was 150)
 const PET_MIN_MOVE = 200;       // min distance of each relocation walk
 
+
+
+// min/max seconds, w = pick weight (walk is no longer picked directly,
+// it always happens automatically before an action)
 const PET_STATE_DEFS = {
     sit:     { min: 6,  max: 12, w: 14 },
     back:    { min: 5,  max: 9,  w: 8 },
@@ -23211,6 +23209,7 @@ function petSetImage(node, key) {
     node.sprite.style.backgroundImage = `url('${url}')`;
 }
 
+// picks the next ACTION (never 'walk')
 function petPickAction(node) {
     const entries = Object.keys(PET_STATE_DEFS).filter(k => k !== node.lastAction);
     const total = entries.reduce((s, k) => s + PET_STATE_DEFS[k].w, 0);
@@ -23225,18 +23224,24 @@ function petEnterState(node, state, pending = null) {
     node.anim = 0;
 
     if (state === 'walk') {
+        // 🛠 FIX: Keep them on the dynamic floor when choosing a new destination
+        const groundTop = window.innerHeight - node.size - (window.innerHeight * 0.25);
+        const groundBottom = window.innerHeight - node.size - 20;
+        const safeTop = Math.min(groundTop, groundBottom);
+
         let tx, ty, tries = 0;
         do {
             tx = petRand(0, Math.max(0, window.innerWidth - node.size));
-            ty = petRand(0, Math.max(0, window.innerHeight - node.size));
+            ty = petRand(safeTop, groundBottom); // 🛠 FIX: Walk only on the floor
             tries++;
         } while (Math.hypot(tx - node.x, ty - node.y) < PET_MIN_MOVE && tries < 15);
 
         node.targetX = tx;
         node.targetY = ty;
-        node.pending = pending;
+        node.pending = pending;          
         node.stepT = 0;
         node.stepFrame = false;
+        
         if (Math.abs(tx - node.x) > 10) node.facing = tx > node.x ? 1 : -1;
         petSetImage(node, 'walk');
     } else {
@@ -23249,15 +23254,20 @@ function petEnterState(node, state, pending = null) {
     }
 }
 
+// the ONLY place where a state can end -> pets can't switch mid-state
 function petFinishState(node) {
     if (node.state === 'walk') {
+        // arrived: start the action we walked here for
         petEnterState(node, node.pending || petPickAction(node));
     } else if (node.chain) {
+        // e.g. lay -> sleep, stays in the same spot
         const c = node.chain;
         node.chain = null;
         petEnterState(node, c);
     } else {
+        // action finished: walk to a new place, then do the next action
         petEnterState(node, 'walk', petPickAction(node));
+        // small chance to just wander a bit without doing anything after
     }
 }
 
@@ -23289,10 +23299,15 @@ function updateActivePetsInGame() {
         wrapper.appendChild(sprite);
         gameArea.appendChild(wrapper);
 
+        // 🛠 FIX: Calculate the Dynamic Floor (Bottom 25% of the screen)
+        const groundTop = window.innerHeight - size - (window.innerHeight * 0.25); 
+        const groundBottom = window.innerHeight - size - 20; 
+        const safeTop = Math.min(groundTop, groundBottom); // Failsafe for tiny screens
+
         const node = {
             el: wrapper, sprite, petData: pet, size,
             x: petRand(0, window.innerWidth - size),
-            y: petRand(80, window.innerHeight - size),
+            y: petRand(safeTop, groundBottom), // 🛠 FIX: Spawn only on the floor
             facing: Math.random() < 0.5 ? 1 : -1,
             state: 'sit', lastAction: 'sit', elapsed: 0, duration: 2, anim: 0,
             targetX: 0, targetY: 0, stepT: 0, stepFrame: false,
@@ -23326,6 +23341,8 @@ function petBrainLoop(now) {
     activePetDOMNodes.forEach(node => {
         node.elapsed += dt;
         node.anim += dt;
+        
+        // 🛠 FIX: Removed the 'bob' and 'scale' math completely to stop the weird bouncing
 
         if (node.state === 'walk') {
             const dx = node.targetX - node.x;
@@ -23348,17 +23365,24 @@ function petBrainLoop(now) {
                     petSetImage(node, node.stepFrame ? 'walk2' : 'walk');
                 }
             }
-        } else if (node.elapsed >= node.duration) {
-            petFinishState(node);
+        } else {
+            if (node.elapsed >= node.duration) {
+                petFinishState(node);
+            }
         }
 
-        // keep on screen
+        // 🛠 FIX: Absolute boundary enforcement (Never fly, never go invisible)
+        const groundTop = window.innerHeight - node.size - (window.innerHeight * 0.25);
+        const groundBottom = window.innerHeight - node.size - 20;
+        const safeTop = Math.min(groundTop, groundBottom);
+
         node.x = Math.max(0, Math.min(node.x, window.innerWidth - node.size));
-        node.y = Math.max(0, Math.min(node.y, window.innerHeight - node.size));
+        node.y = Math.max(safeTop, Math.min(node.y, groundBottom));
 
         node.el.style.transform = `translate3d(${node.x}px, ${node.y}px, 0)`;
         node.el.style.zIndex = 10 + Math.floor(node.y / 10);
-        // no bob, no scale: only the left/right flip remains
+        
+        // 🛠 FIX: Apply ONLY the left/right facing direction. No more floating!
         node.sprite.style.transform = `scaleX(${node.facing * flipBase})`;
     });
 }
