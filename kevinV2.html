@@ -23287,7 +23287,13 @@ function updateActivePetsInGame() {
 
         Object.values(pet.assets || {}).forEach(u => { const i = new Image(); i.src = u; });
 
-        const size = (pet.stats.size || 60) * (window.innerWidth < 600 ? 0.75 : 1);
+        // 🛠 FIX: Smart Dynamic Scaling!
+        let scaleMult = 1.2; // 20% bigger on standard laptops/tablets
+        if (window.innerWidth < 600) scaleMult = 0.9; // Slightly bigger on mobile than before
+        else if (window.innerWidth >= 1920) scaleMult = 1.8; // 80% bigger on 4K/Ultrawide monitors
+        else if (window.innerWidth >= 1024) scaleMult = 1.5; // 50% bigger on standard Desktop PCs
+
+        const size = (pet.stats.size || 60) * scaleMult;
 
         const wrapper = document.createElement('div');
         wrapper.className = 'pet-wrapper';
@@ -23299,15 +23305,15 @@ function updateActivePetsInGame() {
         wrapper.appendChild(sprite);
         gameArea.appendChild(wrapper);
 
-        // 🛠 FIX: Calculate the Dynamic Floor (Bottom 25% of the screen)
+        // Keep them safely on the dynamic floor
         const groundTop = window.innerHeight - size - (window.innerHeight * 0.25); 
         const groundBottom = window.innerHeight - size - 20; 
-        const safeTop = Math.min(groundTop, groundBottom); // Failsafe for tiny screens
+        const safeTop = Math.min(groundTop, groundBottom); 
 
         const node = {
             el: wrapper, sprite, petData: pet, size,
             x: petRand(0, window.innerWidth - size),
-            y: petRand(safeTop, groundBottom), // 🛠 FIX: Spawn only on the floor
+            y: petRand(safeTop, groundBottom), 
             facing: Math.random() < 0.5 ? 1 : -1,
             state: 'sit', lastAction: 'sit', elapsed: 0, duration: 2, anim: 0,
             targetX: 0, targetY: 0, stepT: 0, stepFrame: false,
