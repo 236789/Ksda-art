@@ -11343,21 +11343,45 @@ div.inv-tile div.bm-limit-tag {
     }
 }
 
-/* Base size for mobile (Small) */
-.pet-sprite-inner {
-    width: 60px !important;
-    height: 60px !important;
-}
 
-/* PC Size (Medium-Large) */
+/* ==========================================
+   DESKTOP SCALING (Screens wider than 1024px)
+   ========================================== */
 @media screen and (min-width: 1024px) {
+    
+    /* 1. Kevin: Increased slightly to 155px for a noticeable boost */
+    #kevin {
+        width: 155px !important; 
+        height: 155px !important;
+        background-size: contain !important;
+    }
+
+    /* 2. Pets: Kept at 80px (Standard 'Large' size) */
     .pet-sprite-inner {
-        width: 60px !important; /* Adjust this to whatever feels right */
-        height: 60px !important;
+        width: 80px !important; 
+        height: 80px !important;
+    }
+
+    /* 3. Removed transform: scale(1.5) to keep images crisp */
+    .pet-wrapper {
+        transform: none !important;
     }
 }
 
-
+/* ==========================================
+   ULTRA-WIDE SCALING (For 4K setups)
+   ========================================== */
+@media screen and (min-width: 1920px) {
+    #kevin {
+        width: 180px !important;
+        height: 180px !important;
+    }
+    
+    .pet-sprite-inner {
+        width: 100px !important; 
+        height: 100px !important;
+    }
+}
   </style>
 </head>
 <body>
@@ -23148,6 +23172,13 @@ const PET_ART_FACES = 'left';   // if pets look backwards, change to 'right'
 const PET_WALK_SPEED = 100;     // px/sec at stats.speed = 1 (was 150)
 const PET_MIN_MOVE = 200;       // min distance of each relocation walk
 
+// Pets can only stand on the ground (green zone).
+// 0.62 = the ground starts 62% down the screen. Raise it to push pets lower, lower it to let them go higher.
+const PET_GROUND_TOP = 0.62;
+
+const petMinY = (size) => window.innerHeight * PET_GROUND_TOP - size; // sprite top when feet touch the line
+const petMaxY = (size) => window.innerHeight - size;
+
 // min/max seconds, w = pick weight (walk is no longer picked directly,
 // it always happens automatically before an action)
 const PET_STATE_DEFS = {
@@ -23208,7 +23239,7 @@ function petEnterState(node, state, pending = null) {
         let tx, ty, tries = 0;
         do {
             tx = petRand(0, Math.max(0, window.innerWidth - node.size));
-            ty = petRand(0, Math.max(0, window.innerHeight - node.size));
+            ty = petRand(petMinY(node.size), petMaxY(node.size));
             tries++;
         } while (Math.hypot(tx - node.x, ty - node.y) < PET_MIN_MOVE && tries < 15);
 
@@ -23278,7 +23309,7 @@ function updateActivePetsInGame() {
         const node = {
             el: wrapper, sprite, petData: pet, size,
             x: petRand(0, window.innerWidth - size),
-            y: petRand(80, window.innerHeight - size),
+            y: petRand(petMinY(size), petMaxY(size)),
             facing: Math.random() < 0.5 ? 1 : -1,
             state: 'sit', lastAction: 'sit', elapsed: 0, duration: 2, anim: 0,
             targetX: 0, targetY: 0, stepT: 0, stepFrame: false,
@@ -23350,7 +23381,7 @@ function petBrainLoop(now) {
 
         // keep on screen (also handles window resize)
         node.x = Math.max(0, Math.min(node.x, window.innerWidth - node.size));
-        node.y = Math.max(0, Math.min(node.y, window.innerHeight - node.size));
+        node.y = Math.max(petMinY(node.size), Math.min(node.y, petMaxY(node.size)));
 
         node.el.style.transform = `translate3d(${node.x}px, ${node.y}px, 0)`;
         node.el.style.zIndex = 10 + Math.floor(node.y / 10);
