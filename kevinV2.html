@@ -23166,16 +23166,29 @@ function renderShowcaseSlots() {
 }
 
 // ==========================================
-// 🐈 PET AI V3 (wander + rest states)
+// 🐈 PET AI V4 (ground limit, no float, works on any screen size)
 // ==========================================
 const PET_ART_FACES = 'left';   // if pets look backwards, change to 'right'
-const PET_WALK_SPEED = 100;     // px/sec at stats.speed = 1 (was 150)
+const PET_WALK_SPEED = 100;     // px/sec at stats.speed = 1
 const PET_MIN_MOVE = 200;       // min distance of each relocation walk
 
+// Ground line: 0.62 = ground starts 62% down the game area.
+// Pets look too high -> raise it (0.65). Pets can't go high enough -> lower it (0.58).
+const PET_GROUND_TOP = 0.62;
 
+// Sizes come from the game area itself, NOT the window (fixes invisible cats on big screens)
+const petAreaW = () => {
+    const g = document.getElementById('gameArea');
+    return (g && g.clientWidth) || window.innerWidth;
+};
+const petAreaH = () => {
+    const g = document.getElementById('gameArea');
+    return (g && g.clientHeight) || window.innerHeight;
+};
+const petMinY = (size) => Math.max(0, petAreaH() * PET_GROUND_TOP - size);
+const petMaxY = (size) => Math.max(petMinY(size), petAreaH() - size);
+const petMaxX = (size) => Math.max(0, petAreaW() - size);
 
-// min/max seconds, w = pick weight (walk is no longer picked directly,
-// it always happens automatically before an action)
 const PET_STATE_DEFS = {
     sit:     { min: 6,  max: 12, w: 14 },
     back:    { min: 5,  max: 9,  w: 8 },
@@ -23215,7 +23228,6 @@ function petSetImage(node, key) {
     node.sprite.style.backgroundImage = `url('${url}')`;
 }
 
-// picks the next ACTION (never 'walk')
 function petPickAction(node) {
     const entries = Object.keys(PET_STATE_DEFS).filter(k => k !== node.lastAction);
     const total = entries.reduce((s, k) => s + PET_STATE_DEFS[k].w, 0);
@@ -23230,20 +23242,18 @@ function petEnterState(node, state, pending = null) {
     node.anim = 0;
 
     if (state === 'walk') {
-        // pick a NEW place, far enough from the current one
         let tx, ty, tries = 0;
         do {
-            tx = petRand(0, Math.max(0, window.innerWidth - node.size));
-            ty = petRand(0, Math.max(0, window.innerHeight - node.size));
+            tx = petRand(0, petMaxX(node.size));
+            ty = petRand(petMinY(node.size), petMaxY(node.size));
             tries++;
         } while (Math.hypot(tx - node.x, ty - node.y) < PET_MIN_MOVE && tries < 15);
 
         node.targetX = tx;
         node.targetY = ty;
-        node.pending = pending;          // action to do once we arrive
+        node.pending = pending;
         node.stepT = 0;
         node.stepFrame = false;
-        // face the walking direction ONCE (no per-frame flipping = no flicker)
         if (Math.abs(tx - node.x) > 10) node.facing = tx > node.x ? 1 : -1;
         petSetImage(node, 'walk');
     } else {
@@ -23256,20 +23266,15 @@ function petEnterState(node, state, pending = null) {
     }
 }
 
-// the ONLY place where a state can end -> pets can't switch mid-state
 function petFinishState(node) {
     if (node.state === 'walk') {
-        // arrived: start the action we walked here for
         petEnterState(node, node.pending || petPickAction(node));
     } else if (node.chain) {
-        // e.g. lay -> sleep, stays in the same spot
         const c = node.chain;
         node.chain = null;
         petEnterState(node, c);
     } else {
-        // action finished: walk to a new place, then do the next action
         petEnterState(node, 'walk', petPickAction(node));
-        // small chance to just wander a bit without doing anything after
     }
 }
 
@@ -23289,7 +23294,7 @@ function updateActivePetsInGame() {
 
         Object.values(pet.assets || {}).forEach(u => { const i = new Image(); i.src = u; });
 
-        const size = (pet.stats.size || 60) * (window.innerWidth < 600 ? 0.75 : 1);
+        const size = (pet.stats.size || 60) * (petAreaW() < 600 ? 0.75 : 1);
 
         const wrapper = document.createElement('div');
         wrapper.className = 'pet-wrapper';
@@ -23303,8 +23308,8 @@ function updateActivePetsInGame() {
 
         const node = {
             el: wrapper, sprite, petData: pet, size,
-            x: petRand(0, window.innerWidth - size),
-            y: petRand(80, window.innerHeight - size),
+            x: petRand(0, petMaxX(size)),
+            y: petRand(petMinY(size), petMaxY(size)),
             facing: Math.random() < 0.5 ? 1 : -1,
             state: 'sit', lastAction: 'sit', elapsed: 0, duration: 2, anim: 0,
             targetX: 0, targetY: 0, stepT: 0, stepFrame: false,
@@ -23338,7 +23343,6 @@ function petBrainLoop(now) {
     activePetDOMNodes.forEach(node => {
         node.elapsed += dt;
         node.anim += dt;
-        let bob = 0, scale = 1;
 
         if (node.state === 'walk') {
             const dx = node.targetX - node.x;
@@ -23353,7 +23357,6 @@ function petBrainLoop(now) {
             } else {
                 node.x += (dx / dist) * step;
                 node.y += (dy / dist) * step;
-                // NOTE: facing is NOT changed here anymore
 
                 node.stepT += dt;
                 if (node.hasWalk2 && node.stepT > 0.25) {
@@ -23362,25 +23365,18 @@ function petBrainLoop(now) {
                     petSetImage(node, node.stepFrame ? 'walk2' : 'walk');
                 }
             }
-        } else {
-            if (node.elapsed >= node.duration) {
-                petFinishState(node);
-            } else if (node.state === 'play') {
-                bob = -Math.abs(Math.sin(node.anim * 8)) * 12;
-            } else if (node.state === 'mog') {
-                scale = 1 + Math.sin(node.anim * 4) * 0.04;
-            } else if (node.state === 'sleep' || node.state === 'lay') {
-                scale = 1 + Math.sin(node.anim * 1.6) * 0.02;
-            }
+        } else if (node.elapsed >= node.duration) {
+            petFinishState(node);
         }
 
-        // keep on screen (also handles window resize)
-        node.x = Math.max(0, Math.min(node.x, window.innerWidth - node.size));
-        node.y = Math.max(0, Math.min(node.y, window.innerHeight - node.size));
+        // keep inside the game area and on the ground
+        node.x = Math.max(0, Math.min(node.x, petMaxX(node.size)));
+        node.y = Math.max(petMinY(node.size), Math.min(node.y, petMaxY(node.size)));
 
         node.el.style.transform = `translate3d(${node.x}px, ${node.y}px, 0)`;
         node.el.style.zIndex = 10 + Math.floor(node.y / 10);
-        node.sprite.style.transform = `translateY(${bob}px) scale(${scale}) scaleX(${node.facing * flipBase})`;
+        // no bob, no scale: only the left/right flip remains
+        node.sprite.style.transform = `scaleX(${node.facing * flipBase})`;
     });
 }
 // ==========================================
