@@ -11315,6 +11315,47 @@ div.inv-tile div.bm-limit-tag {
     transition: none !important;
     will-change: transform;
 }
+
+
+/* ==========================================
+   DESKTOP SCALING (Screens wider than 1024px)
+   ========================================== */
+@media screen and (min-width: 1024px) {
+    
+    /* 1. Make the Character (Kevin) Bigger */
+    #kevin {
+        width: 180px !important;  /* Increased from 120/155 */
+        height: 180px !important;
+        background-size: contain !important;
+    }
+
+    /* 2. Make the Pets Bigger */
+    .pet-sprite-inner {
+        /* We scale up the container, petBrainLoop will maintain the ratio */
+        width: 120px !important;  /* Original was ~60-80px */
+        height: 120px !important;
+    }
+
+    /* 3. Optional: If you want the container box to be larger on PC */
+    .pet-wrapper {
+        transform: scale(1.5); /* This makes them 50% larger than their base size */
+        transform-origin: center center;
+    }
+}
+
+/* ==========================================
+   ULTRA-WIDE SCALING (For 4K or very large monitors)
+   ========================================== */
+@media screen and (min-width: 1920px) {
+    #kevin {
+        width: 220px !important;
+        height: 220px !important;
+    }
+    
+    .pet-wrapper {
+        transform: scale(2.0); /* Even larger for 4K setups */
+    }
+}
   </style>
 </head>
 <body>
@@ -23292,7 +23333,6 @@ function petBrainLoop(now) {
                     node.stepFrame = !node.stepFrame;
                     petSetImage(node, node.stepFrame ? 'walk2' : 'walk');
                 }
-                bob = -Math.abs(Math.sin(node.anim * 10)) * 4;
             }
         } else {
             if (node.elapsed >= node.duration) {
