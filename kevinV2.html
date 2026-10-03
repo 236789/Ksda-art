@@ -15044,7 +15044,7 @@ setInterval(() => {
   // Afișăm bula pe ecran
   showKevinutaBubble(msgText, newAudioObj);
 
-}, 12000); // Apare o replică la fiecare 12 secunde
+}, 25000); // Apare o replică la fiecare 12 secunde
 
 
 // --- FUNCȚIA CARE CREEAZĂ BULA DE TEXT ---
@@ -16777,9 +16777,10 @@ const hotImages = [
     "https://iili.io/CvuYcrl.png", "https://iili.io/CvuY17S.png"
 ];
 
-// Această funcție trebuie să ruleze la început
+// --- PRELOADER ÎMBUNĂTĂȚIT (Forțează descărcarea imediată a TUTUROR resurselor) ---
 function forcePreload() {
-    [
+    // 1. Colectăm resursele deja existente
+    let allUrls = [
         ...popSounds,
         missSoundUrl,
         ...squeakSounds,
@@ -16787,25 +16788,69 @@ function forcePreload() {
         slotWompUrl,
         slotJackpotUrl,
         ...hotImages,
-
-        // Seagull images
         seagullAssets.up,
         seagullAssets.middle,
         seagullAssets.down,
         seagullAssets.icon
-    ].forEach(url => {
+    ];
 
-        if (url.includes(".mp3")) {
+    // 2. Colectăm TOATE imaginile pisicilor (din petCatalog)
+    if (typeof petCatalog !== 'undefined') {
+        petCatalog.forEach(cat => {
+            if (cat.assets) {
+                Object.values(cat.assets).forEach(url => {
+                    if (url && typeof url === 'string') allUrls.push(url);
+                });
+            }
+        });
+    }
+
+    // 3. Colectăm TOATE animațiile pentru cutii (din boxAnimAssets)
+    if (typeof boxAnimAssets !== 'undefined') {
+        Object.values(boxAnimAssets).forEach(item => {
+            if (Array.isArray(item)) {
+                allUrls.push(...item); // Adaugă array-urile cu frame-uri
+            } else if (typeof item === 'string') {
+                allUrls.push(item); // Adaugă imaginile globale
+            }
+        });
+    }
+
+    // 4. Colectăm imaginile custom din modal (din customModalImages)
+    if (typeof customModalImages !== 'undefined') {
+        Object.values(customModalImages).forEach(url => {
+            if (url && typeof url === 'string') allUrls.push(url);
+        });
+    }
+
+    // 5. Colectăm EROII (să nu aibă delay când îi schimbi în shop/joc)
+    if (typeof characterList !== 'undefined') {
+        characterList.forEach(hero => {
+            if(hero.displayImg) allUrls.push(hero.displayImg);
+            if(hero.playImg) allUrls.push(hero.playImg);
+            if(hero.tiredImg) allUrls.push(hero.tiredImg);
+            if(hero.smokeImg) allUrls.push(hero.smokeImg);
+        });
+    }
+
+    // Eliminăm duplicatele ca să nu descărcăm aceeași poză de 2 ori
+    allUrls = [...new Set(allUrls)];
+
+    // 6. Descărcăm și salvăm totul în RAM-ul browserului
+    allUrls.forEach(url => {
+        if (url.includes(".mp3") || url.includes(".ogg")) {
             const a = new Audio();
             a.src = url;
             a.preload = "auto";
-            sfxCache[url] = a;
+            sfxCache[url] = a; // Cache audio
         } else {
             const img = new Image();
             img.src = url;
-            sfxCache[url] = img;
+            sfxCache[url] = img; // Păstrăm obiectul în cache să nu fie șters de browser
         }
     });
+
+    console.log(`✅ S-au preîncărcat cu succes ${allUrls.length} resurse (Cats, Heroes, Sounds)!`);
 }
 
 forcePreload(); // Apelăm imediat
